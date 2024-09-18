@@ -12,7 +12,7 @@ export function Collaborators() {
     <>
       <Helmet title="collaborators" />
       <section className="mx-20">
-        <div className="flex h-[244px] w-full flex-row justify-between p-[48px] shadow-custom-blue">
+        <div className="mt-10 flex h-[244px] w-full flex-row justify-between bg-white p-[48px] shadow-custom-blue">
           <div className="flex flex-col gap-[60px]">
             <div className="flex flex-row">
               <h1>Meus colaboradores -</h1>
@@ -40,8 +40,7 @@ export function Collaborators() {
             <Button variant="realiza">Ver tabela de monitoramento</Button>
           </div>
         </div>
-        {/* When clicking to deactivate, update the database and deactivate the collaborator */}
-        <div className="mt-[26px] flex w-full flex-col items-center justify-center gap-[80px] px-[53px] py-[76px] shadow-custom-blue">
+        <div className="mt-[26px] flex w-full flex-col items-center justify-center gap-[80px] bg-white px-[53px] py-[76px] shadow-custom-blue">
           <div className="flex gap-[80px]">
             <CardCollaborator />
             <CardCollaborator />
