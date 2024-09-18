@@ -38,7 +38,7 @@ export function MonittoringTable() {
             <span>09/08/2024</span>
           </div>
         </div>
-        <div className=''>
+        <div>
           <PieChartProjects />
         </div>
       </div>
