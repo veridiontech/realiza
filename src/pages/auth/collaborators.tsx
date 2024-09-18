@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
+import { NavLink } from 'react-router-dom'
 
 import CardCollaborator from '@/components/cardCollaborator/cardCollaborator'
 import { Button } from '@/components/ui/button'
@@ -37,7 +38,9 @@ export function Collaborators() {
                 Adicionar contato
               </span>
             </div>
-            <Button variant="realiza">Ver tabela de monitoramento</Button>
+            <NavLink to="/monittoring">
+              <Button variant="realiza">Ver tabela de monitoramento</Button>
+            </NavLink>
           </div>
         </div>
         <div className="mt-[26px] flex w-full flex-col items-center justify-center gap-[80px] bg-white px-[53px] py-[76px] shadow-custom-blue">

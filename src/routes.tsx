@@ -3,8 +3,9 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from './pages/_layouts/app'
 import { AuthLayout } from './pages/_layouts/auth'
 import { Dashboard } from './pages/app/dashboard'
-import MonitoringTable from './pages/auth/bis'
+import MonittoringBis from './pages/auth/bis'
 import { Collaborators } from './pages/auth/collaborators'
+import { MonittoringTable } from './pages/auth/monittoringTable'
 import { ProfileUser } from './pages/auth/profileUser'
 import { SignIn } from './pages/auth/sign-in'
 
@@ -32,7 +33,12 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
-    children: [{ path: '/Bis', element: <MonitoringTable /> }],
+    children: [{ path: '/bis', element: <MonittoringBis /> }],
+  },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [{ path: '/monittoring', element: <MonittoringTable /> }],
   },
   // {
   // { path: '/', element: <Dashboard /> },
