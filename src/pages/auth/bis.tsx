@@ -2,10 +2,10 @@ import { CircleDollarSign } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 
 import { BarChartMonitoring } from '@/components/BI´s/barChartRecive'
+import { BarChartTotalSale } from '@/components/BI´s/barChartTotalSale'
 import { PieChartDespesas } from '@/components/BI´s/pieChartDespesas'
 import { PrejudiceChart } from '@/components/BI´s/prejudiceChart'
 import { ProfitChart } from '@/components/BI´s/profitChart'
-import { BarChartTotalSale } from '@/components/BI´s/barChartTotalSale'
 
 const MonitoringTable = () => {
   return (
