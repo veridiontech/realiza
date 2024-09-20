@@ -1,11 +1,11 @@
 import { CircleDollarSign } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 
-import { BarChartMonitoring } from '@/components/BIs/BisPage/barChartRecive'
-import { BarChartTotalSale } from '@/components/BIs/BisPage/barChartTotalSale'
-import { PieChartDespesas } from '@/components/BIs/BisPage/pieChartDespesas'
-import { PrejudiceChart } from '@/components/BIs/BisPage/prejudiceChart'
-import { ProfitChart } from '@/components/BIs/BisPage/profitChart'
+import { BarChartMonitoring } from '@/components/BIs/BisPageComponents/barChartRecive'
+import { BarChartTotalSale } from '@/components/BIs/BisPageComponents/barChartTotalSale'
+import { PieChartDespesas } from '@/components/BIs/BisPageComponents/pieChartDespesas'
+import { PrejudiceChart } from '@/components/BIs/BisPageComponents/prejudiceChart'
+import { ProfitChart } from '@/components/BIs/BisPageComponents/profitChart'
 
 const MonittoringBis = () => {
   return (
