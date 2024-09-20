@@ -12,7 +12,7 @@ export function ProfileUser() {
     <>
       <Helmet title="profile" />
       <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
-        <div className="mb-10">
+        <div className="mb-10 bg-white">
           <div className="min-h-[220px] w-full rounded-t-xl bg-blue-800" />
           <div className="relative flex w-full flex-col px-4 pb-10 shadow-custom-blue sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
@@ -55,7 +55,7 @@ export function ProfileUser() {
           </div>
         </div>
         <div className="flex flex-col gap-8 lg:flex-row">
-          <div className="mb-10 flex flex-1 flex-col gap-6 px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
+          <div className="mb-10 flex flex-1 flex-col gap-6 bg-white px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
             <h2 className="text-lg font-medium">Formas de contato</h2>
             <div className="flex flex-col gap-4">
               <div className="flex flex-row items-center gap-2">
@@ -69,7 +69,7 @@ export function ProfileUser() {
             </div>
             <span>Outras formas de contato</span>
           </div>
-          <div className="mb-10 flex flex-1 flex-col gap-6 px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
+          <div className="mb-10 flex flex-1 flex-col gap-6 bg-white px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
             <h2 className="text-lg font-medium">Serviços oferecidos</h2>
             <div className="flex flex-col gap-6 md:flex-row md:gap-8">
               <div className="flex flex-col gap-4">
@@ -115,7 +115,7 @@ export function ProfileUser() {
           </div>
         </div>
         <div className="flex flex-col gap-8 lg:flex-row">
-          <div className="mb-10 flex flex-1 flex-col gap-6 px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
+          <div className="mb-10 flex flex-1 flex-col gap-6 bg-white px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
             <div className="flex flex-row items-center gap-2">
               <MapPin />
               <h2 className="text-lg font-medium">
@@ -189,7 +189,7 @@ export function ProfileUser() {
               </div>
             </div>
           </div>
-          <div className="mb-10 flex flex-1 flex-col gap-6 px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
+          <div className="mb-10 flex flex-1 flex-col gap-6 bg-white px-4 py-5 shadow-custom-blue md:px-6 md:py-6">
             <h2 className="text-lg font-medium">Redes sociais</h2>
             <div className="flex flex-col gap-4">
               <div className="flex flex-row items-center gap-2">

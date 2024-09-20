@@ -4,9 +4,9 @@ import { Header } from '@/components/header/header'
 
 export function AppLayout() {
   return (
-    <div>
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <div>
+      <div className="flex-grow bg-[#F4F4F5]">
         <Outlet />
       </div>
     </div>

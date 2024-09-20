@@ -12,6 +12,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
+import { NavLink } from 'react-router-dom'
 
 import { EnterpriseResume } from '@/components/home/enterpriseResume'
 import { GraphicHomeLeft } from '@/components/home/graphicHomeLeft'
@@ -30,9 +31,11 @@ export function Dashboard() {
             <GraphicHomeRight />
           </div>
           <div className="mt-5 w-full text-right">
-            <Button className="bg-blue-600 hover:bg-blue-500">
-              Ver mais <ChevronRight />
-            </Button>
+            <NavLink to="/BIs">
+              <Button className="bg-blue-600 hover:bg-blue-500">
+                Ver mais <ChevronRight />
+              </Button>
+            </NavLink>
           </div>
           <div className="pt-20">
             <h2 className="pb-6 text-xl font-medium">Ações rápidas</h2>

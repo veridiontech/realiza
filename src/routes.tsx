@@ -3,10 +3,11 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from './pages/_layouts/app'
 import { AuthLayout } from './pages/_layouts/auth'
 import { Dashboard } from './pages/app/dashboard'
-import { SignIn } from './pages/auth/sign-in'
-import { ProfileUser } from './pages/auth/profileUser'
+import MonittoringBis from './pages/auth/bis'
 import { Collaborators } from './pages/auth/collaborators'
-import { TableMonitoring } from './pages/auth/tableMonitoring'
+import { MonittoringTable } from './pages/auth/monittoringTable'
+import { ProfileUser } from './pages/auth/profileUser'
+import { SignIn } from './pages/auth/sign-in'
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,17 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [{ path: '/monitoring', element: <TableMonitoring /> }],
   },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [{ path: '/bis', element: <MonittoringBis /> }],
+  },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [{ path: '/monittoring', element: <MonittoringTable /> }],
+  },
+  // {
   // { path: '/', element: <Dashboard /> },
   // { path: '/sign-in', element: <SignIn /> },
 ])

@@ -20,19 +20,19 @@ module.exports = {
       },
     },
     extend: {
-      boxShadow: { 
+      boxShadow: {
         'custom-blue': '0px 2px 4px 0px rgba(37, 99, 235, 0.25)',
       },
-      width :{
-        '965': '965px',
-        '453': '453px',
-        '870': '870px',
-        '696': '696px',
-        '488': '488px',
-        '500': '500px'
+      width: {
+        965: '965px',
+        453: '453px',
+        870: '870px',
+        696: '696px',
+        488: '488px',
+        500: '500px',
       },
       heigh: {
-        '400': '400px'
+        400: '400px',
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -90,5 +90,6 @@ module.exports = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   plugins: [require('tailwindcss-animate')],
 }

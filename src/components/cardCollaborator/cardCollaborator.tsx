@@ -28,7 +28,7 @@ const CardCollaborator = () => {
           </div>
         </header>
         <div
-          className={`flex h-[241px] w-[220px] items-center rounded-b-xl border border-sky-700 justify-center${
+          className={`flex h-[241px] w-[220px] items-center rounded-b-xl border justify-center${
             active === 'ativo'
               ? 'border border-sky-700'
               : 'border border-red-500'
