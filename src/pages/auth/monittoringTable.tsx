@@ -31,8 +31,8 @@ export function MonittoringTable() {
         </div>
       </div>
       <div className="flex h-[280px] items-center justify-center gap-5 rounded-md bg-white shadow-custom-blue">
-        <div className="flex flex-row border border-gray-200">
-          <img src={calendar}></img>
+        <div className="flex flex-row items-center justify-center gap-4 border rounded-md border-gray-200 w-[460px] h-[250px]">
+          <img src={calendar} className='w-[108px] h-[108px]'></img>
           <div>
             <h3>Atualização do Mês 08</h3>
             <span>09/08/2024</span>

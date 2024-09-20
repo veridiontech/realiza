@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 
 import collaboratorsIcon from '../../assets/collaborators.svg'
 import plusRed from '../../assets/plusRed.svg'
-import { Link } from 'react-router-dom'
 
 export function Collaborators() {
   return (

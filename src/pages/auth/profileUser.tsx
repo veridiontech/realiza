@@ -1,6 +1,6 @@
 import { Instagram, Mail, MapPin, Pencil, Phone } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 
@@ -33,7 +33,9 @@ export function ProfileUser() {
                 </div>
               </div>
               <div>
-                <Button className="bg-blue-700">Editar perfil</Button>
+                <NavLink to='/editProfile'>
+                  <Button className="bg-blue-700">Editar perfil</Button>
+                </NavLink>
               </div>
             </div>
             <div className="flex flex-col gap-6 md:gap-10">

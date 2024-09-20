@@ -8,7 +8,7 @@ import { Collaborators } from './pages/auth/collaborators'
 import { MonittoringTable } from './pages/auth/monittoringTable'
 import { ProfileUser } from './pages/auth/profileUser'
 import { SignIn } from './pages/auth/sign-in'
-import { TableMonitoring } from './pages/auth/tableMonitoring'
+import { EditProfile } from './pages/auth/profileEdit'
 
 export const router = createBrowserRouter([
   {
@@ -30,10 +30,6 @@ export const router = createBrowserRouter([
     path: '/',
     element: <AppLayout />,
     children: [{ path: '/collaborators', element: <Collaborators /> }],
-  },{
-    path: '/',
-    element: <AppLayout />,
-    children: [{ path: '/monitoring', element: <TableMonitoring /> }],
   },
   {
     path: '/',
@@ -44,6 +40,11 @@ export const router = createBrowserRouter([
     path: '/',
     element: <AppLayout />,
     children: [{ path: '/monittoring', element: <MonittoringTable /> }],
+  },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [{ path: '/editProfile', element: <EditProfile /> }],
   },
   // {
   // { path: '/', element: <Dashboard /> },
