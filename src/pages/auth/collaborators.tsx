@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 
 import collaboratorsIcon from '../../assets/collaborators.svg'
 import plusRed from '../../assets/plusRed.svg'
+import { Link } from 'react-router-dom'
 
 export function Collaborators() {
   return (
@@ -37,7 +38,9 @@ export function Collaborators() {
                 Adicionar contato
               </span>
             </div>
-            <Button variant="realiza">Ver tabela de monitoramento</Button>
+            <Link to="/monitoring">
+              <Button variant="realiza">Ver tabela de monitoramento</Button>
+            </Link>
           </div>
         </div>
         {/* When clicking to deactivate, update the database and deactivate the collaborator */}
