@@ -8,6 +8,7 @@ import { Collaborators } from './pages/auth/collaborators'
 import { MonittoringTable } from './pages/auth/monittoringTable'
 import { ProfileUser } from './pages/auth/profileUser'
 import { SignIn } from './pages/auth/sign-in'
+import { TableMonitoring } from './pages/auth/tableMonitoring'
 
 export const router = createBrowserRouter([
   {
