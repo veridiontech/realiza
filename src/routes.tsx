@@ -14,39 +14,20 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
-    children: [{ path: '/', element: <Dashboard /> }],
+    children: [
+      { path: '/', element: <Dashboard /> },
+      { path: '/profile', element: <ProfileUser /> },
+      { path: '/collaborators', element: <Collaborators /> },
+      { path: '/bis', element: <MonittoringBis /> },
+      { path: '/monittoring', element: <MonittoringTable /> },
+      { path: '/editProfile', element: <EditProfile /> },
+    ],
   },
   {
-    path: '/',
+    path: '/auth',
     element: <AuthLayout />,
-    children: [{ path: '/sign-in', element: <SignIn /> }],
+    children: [
+      { path: 'sign-in', element: <SignIn /> },
+    ],
   },
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [{ path: '/profile', element: <ProfileUser /> }],
-  },
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [{ path: '/collaborators', element: <Collaborators /> }],
-  },
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [{ path: '/bis', element: <MonittoringBis /> }],
-  },
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [{ path: '/monittoring', element: <MonittoringTable /> }],
-  },
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [{ path: '/editProfile', element: <EditProfile /> }],
-  },
-  // {
-  // { path: '/', element: <Dashboard /> },
-  // { path: '/sign-in', element: <SignIn /> },
-])
+]);
