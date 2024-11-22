@@ -1,8 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 
-import { AppLayout } from './pages/_layouts/app'
-import { AuthLayout } from './pages/_layouts/auth'
-import { Dashboard } from './pages/app/dashboard'
+import { AppLayout } from './_layouts/app'
+import { AuthLayout } from './_layouts/auth'
 import MonittoringBis from './pages/auth/bis'
 import { Collaborators } from './pages/auth/collaborators'
 import { MonittoringTable } from './pages/auth/monittoringTable'
@@ -10,6 +9,8 @@ import { ProfileUser } from './pages/auth/profileUser'
 import { SignIn } from './pages/app/sign-in'
 import { ForgotPassword } from './pages/app/forgot-password'
 import { EditProfile } from './pages/auth/profileEdit'
+import { Dashboard } from './pages/app/dashboard'
+import { NewPassword } from './pages/app/new-password'
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
     children: [
       { path: 'sign-in', element: <SignIn /> },
       { path: 'forgot-password', element: <ForgotPassword /> },
+      { path: 'new-password', element: <NewPassword /> },
     ],
   },
 ]);

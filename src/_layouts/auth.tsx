@@ -9,6 +9,7 @@ export function AuthLayout() {
   const imageMap: Record<string, string> = {
     "/sign-in": imageLogin,
     "/forgot-password": imageForgotPassword,
+    "/new-password": imageForgotPassword,
   };
 
   const dynamicImage = imageMap[location.pathname]
@@ -24,7 +25,7 @@ export function AuthLayout() {
       >
         <Outlet />
       </div>
-      <div className='w-6/12 h-screen '>
+      <div className='w-6/12 h-screen md:flex hidden '>
           <img src={dynamicImage} alt="imagem" className="w-full object-cover" />
       </div>
     </div>
