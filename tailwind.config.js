@@ -35,6 +35,7 @@ module.exports = {
         400: '400px',
       },
       colors: {
+        realizaBlue: '#34495D',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
