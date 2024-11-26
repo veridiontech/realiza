@@ -10,6 +10,7 @@ export function AuthLayout() {
     "/sign-in": imageLogin,
     "/forgot-password": imageForgotPassword,
     "/new-password": imageForgotPassword,
+    "/new-password2": imageForgotPassword,
   };
 
   const dynamicImage = imageMap[location.pathname]

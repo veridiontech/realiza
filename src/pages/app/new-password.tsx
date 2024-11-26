@@ -33,7 +33,7 @@ const newPasswordFormSchema = z.object({
     return (
         <>
       <div className="flex h-screen items-center justify-center">
-        <div className="flex h-3/6 flex-col justify-center">
+        <div className="w-full max-w-md flex h-3/6 flex-col justify-center">
           <h1 className="text-center text-3xl font-bold">Crie uma Nova Senha</h1>
           <span className="text-center">
           Por favor, escolha uma senha que não tenha sido usada antes. Deve ter pelo menos 8 caracteres
