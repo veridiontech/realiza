@@ -12,7 +12,7 @@ import { Dashboard } from './pages/app/dashboard'
 import { NewPassword } from './pages/app/new-password'
 import { NewPassword2 } from './pages/app/new-password2'
 import { ConfigurationLayout } from './_layouts/configurantion'
-import { ProfileUser } from './pages/auth/profileUser'
+import { ProfileUser } from './pages/auth/profileUser/__profileUser'
 
 export const router = createBrowserRouter([
   {

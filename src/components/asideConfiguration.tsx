@@ -8,7 +8,7 @@ import {
 
 export function LateralMenu() {
   return (
-    <aside className="h-screen w-full p-4 shadow-md">
+    <aside className=" w-full p-4 shadow-md">
       <button className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-200">
         <Home className="w-5 h-5 text-blue-600" />
         <span className="text-sm font-medium">Configurações</span>
