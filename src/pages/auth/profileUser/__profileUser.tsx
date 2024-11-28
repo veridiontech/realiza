@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { PersonStanding, LockKeyhole } from 'lucide-react';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, "O nome completo é obrigatório"),
@@ -34,8 +35,8 @@ export function ProfileUser() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full p-6 bg-gray-100">
-      <h1 className="text-2xl font-semibold mb-6">Meu Perfil</h1>
+    <div className="flex flex-col w-full h-full p-6 bg-white">
+      <h1 className="text-2xl font-semibold mb-6 text-blue-600">Meu Perfil</h1>
       <div className="flex flex-col md:flex-row items-center justify-between bg-white shadow rounded-lg p-6 mb-6">
         <div className="flex items-center">
           <Avatar className="w-24 h-24">
@@ -44,7 +45,7 @@ export function ProfileUser() {
           <div className="ml-6">
             <h2 className="text-lg font-bold">Jean de Castro</h2>
             <span>email@email.com</span>
-            <p className="text-gray-600">Usuário Comum</p>
+            <p className="text-blue-600">Usuário Comum</p>
           </div>
         </div>
         <button className="mt-4 md:mt-0 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
@@ -55,7 +56,10 @@ export function ProfileUser() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-6 bg-white shadow rounded-lg p-6"
       >
-        <h2 className="mb-4 ml-8 text-blue-600">Informações Pessoais</h2>
+        <div className="flex flex-row gap-2">
+          <PersonStanding className="w-7 h-7 text-blue-600"/>
+          <h2 className="mb-4 text-lg text-blue-600" >Informações Pessoais</h2>
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -152,7 +156,10 @@ export function ProfileUser() {
         </div>
       </form>
       <div className="flex flex-col bg-white shadow rounded-lg p-6 mt-6">
-        <h2 className="mb-8 ml-8 text-blue-600">Segurança</h2>
+        <div className="flex flex-row gap-2">
+          <LockKeyhole className="w-7 h-7 text-blue-600" />
+          <h2 className="mb-8 text-lg text-blue-600">Segurança</h2>
+        </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full"
