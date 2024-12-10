@@ -8,11 +8,12 @@ import { ProfileClient } from './pages/auth/profileClient'
 import { SignIn } from './pages/app/sign-in'
 import { ForgotPassword } from './pages/app/forgot-password'
 import { EditProfile } from './pages/auth/profileEdit'
-import { Dashboard } from './pages/app/dashboard'
+import { Dashboard } from './pages/auth/dashboard'
 import { NewPassword } from './pages/app/new-password'
 import { NewPassword2 } from './pages/app/new-password2'
 import { ConfigurationLayout } from './_layouts/configurantion'
 import { ProfileUser } from './pages/auth/profileUser/__profileUser'
+import { RealizaHome } from './pages/auth/userRealiza/realizaHome'
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: '/bis', element: <MonittoringBis /> },
       { path: '/monittoring', element: <MonittoringTable /> },
       { path: '/editProfile', element: <EditProfile /> },
+      { path: '/realizaHome', element: <RealizaHome /> },
     ],
   },
   {
