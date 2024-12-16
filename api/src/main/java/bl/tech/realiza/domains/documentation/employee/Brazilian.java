@@ -1,4 +1,22 @@
 package bl.tech.realiza.domains.documentation.employee;
 
-public class Brazilian {
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import lombok.*;
+
+import java.util.Date;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorValue("BRAZILIAN")
+public class Brazilian extends Employee {
+    private String rg;
+    private Date admission_date;
 }
