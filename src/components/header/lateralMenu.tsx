@@ -65,6 +65,24 @@ export function LateralMenu() {
       <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
         <MessageSquare className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
+          Empresa
+        </span>
+      </Button>
+      <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
+        <MessageSquare className="size-4 text-zinc-800" />
+        <span className="ml-2 text-sm font-medium text-zinc-900">
+          Filiais
+        </span>
+      </Button>
+      <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
+        <MessageSquare className="size-4 text-zinc-800" />
+        <span className="ml-2 text-sm font-medium text-zinc-900">
+          Funcionários
+        </span>
+      </Button>
+      <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
+        <MessageSquare className="size-4 text-zinc-800" />
+        <span className="ml-2 text-sm font-medium text-zinc-900">
           Mensagens
         </span>
       </Button>
