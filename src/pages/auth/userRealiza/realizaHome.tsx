@@ -8,7 +8,6 @@ export function RealizaHome (){
             <div className="flex w-[20rem] bg-black my-10 mx-5">
                 <h1>ola mundo</h1>
             </div>
-        </div>
-        
+        </div>   
     )
 }

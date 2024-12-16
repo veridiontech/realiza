@@ -14,6 +14,7 @@ import { NewPassword2 } from './pages/app/new-password2'
 import { ConfigurationLayout } from './_layouts/configurantion'
 import { ProfileUser } from './pages/auth/profileUser/__profileUser'
 import { RealizaHome } from './pages/auth/userRealiza/realizaHome'
+import { SelectClient } from './pages/auth/selectClient'
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: '/monittoring', element: <MonittoringTable /> },
       { path: '/editProfile', element: <EditProfile /> },
       { path: '/realizaHome', element: <RealizaHome /> },
+      {path: "/selectClient", element: <SelectClient/>}
     ],
   },
   {
