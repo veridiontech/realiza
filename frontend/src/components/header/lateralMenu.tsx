@@ -12,6 +12,9 @@ import {
   MessageSquare,
   Users2,
   UserSquare,
+  Building2,
+  Factory,
+  PersonStanding , 
 } from 'lucide-react'
 
 import { Button } from '../ui/button'
@@ -63,19 +66,19 @@ export function LateralMenu() {
       </Button>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
       <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
-        <MessageSquare className="size-4 text-zinc-800" />
+        <Building2 className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Empresa
         </span>
       </Button>
       <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
-        <MessageSquare className="size-4 text-zinc-800" />
+        <Factory  className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Filiais
         </span>
       </Button>
       <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
-        <MessageSquare className="size-4 text-zinc-800" />
+        <PersonStanding  className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Funcionários
         </span>

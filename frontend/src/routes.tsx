@@ -15,6 +15,8 @@ import { ConfigurationLayout } from './_layouts/configurantion'
 import { ProfileUser } from './pages/auth/profileUser/__profileUser'
 import { RealizaHome } from './pages/auth/userRealiza/realizaHome'
 import { SelectClient } from './pages/auth/selectClient'
+import { Enterprise } from './pages/auth/enterprises/enterprise'
+import { EnterpriseLayout } from './_layouts/enterprise'
 
 export const router = createBrowserRouter([
   {
@@ -28,7 +30,7 @@ export const router = createBrowserRouter([
       { path: '/monittoring', element: <MonittoringTable /> },
       { path: '/editProfile', element: <EditProfile /> },
       { path: '/realizaHome', element: <RealizaHome /> },
-      {path: "/selectClient", element: <SelectClient/>}
+      {path: "/selectClient", element: <SelectClient/>},
     ],
   },
   {
@@ -46,6 +48,14 @@ export const router = createBrowserRouter([
     element: <ConfigurationLayout />,
     children: [
       {path: 'profile-user', element: <ProfileUser />},
+    ]
+  },
+  
+  {
+    path:"/",
+    element: <EnterpriseLayout />,
+    children: [
+      {path: 'enterprise', element: <Enterprise />},
     ]
   }
 ]);
