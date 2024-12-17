@@ -1,4 +1,4 @@
-package bl.tech.realiza.domains.documentation.employee;
+package bl.tech.realiza.domains.employees;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -14,10 +14,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorValue("FOREIGNER")
-public class Foreigner extends Employee {
-    private String rneRnmFederalPoliceProtocol;
-    private Date brazilEntryDate;
-    private String passport;
+@DiscriminatorValue("BRAZILIAN")
+public class Brazilian extends Employee {
+    private String rg;
+    private Date admission_date;
 }

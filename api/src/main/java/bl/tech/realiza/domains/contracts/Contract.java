@@ -1,4 +1,4 @@
-package bl.tech.realiza.domains.contract;
+package bl.tech.realiza.domains.contracts;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

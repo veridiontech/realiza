@@ -1,12 +1,10 @@
-package bl.tech.realiza.domains.documentation.employee;
+package bl.tech.realiza.domains.contracts;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import lombok.*;
-
-import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -15,8 +13,6 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorValue("BRAZILIAN")
-public class Brazilian extends Employee {
-    private String rg;
-    private Date admission_date;
+@DiscriminatorValue("SUPPLIER")
+public class ContractSupplier extends Contract {
 }

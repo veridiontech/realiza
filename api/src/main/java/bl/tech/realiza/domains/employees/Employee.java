@@ -1,10 +1,7 @@
-package bl.tech.realiza.domains.documentation.employee;
+package bl.tech.realiza.domains.employees;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
@@ -35,7 +32,7 @@ public abstract class Employee {
     private String gender;
     private String position;
     private String registration;
-    private String salary;
+    private Double salary;
     private String cellphone;
     private String platform_access;
     private String telephone;
