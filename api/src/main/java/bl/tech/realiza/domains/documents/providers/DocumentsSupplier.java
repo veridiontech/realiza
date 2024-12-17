@@ -1,7 +1,7 @@
 package bl.tech.realiza.domains.documents.providers;
 
 import bl.tech.realiza.domains.documents.Documents;
-import bl.tech.realiza.domains.providers.Supplier;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -18,5 +18,5 @@ import lombok.NoArgsConstructor;
 @DiscriminatorValue("SUPPLIER")
 public class DocumentsSupplier extends Documents {
     @ManyToOne
-    private Supplier supplier;
+    private ProviderSupplier providerSupplier;
 }

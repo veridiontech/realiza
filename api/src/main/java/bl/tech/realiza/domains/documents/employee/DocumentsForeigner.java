@@ -1,11 +1,9 @@
 package bl.tech.realiza.domains.documents.employee;
 
 import bl.tech.realiza.domains.documents.Documents;
-import bl.tech.realiza.domains.employees.Foreigner;
+import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
 
 @Data
 @Builder
@@ -15,5 +13,5 @@ import java.util.Date;
 @DiscriminatorValue("FOREIGNER")
 public class DocumentsForeigner extends Documents {
     @ManyToOne
-    private Foreigner foreigner;
+    private EmployeeForeigner employeeForeigner;
 }

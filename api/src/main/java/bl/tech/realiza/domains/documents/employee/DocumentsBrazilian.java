@@ -1,11 +1,9 @@
 package bl.tech.realiza.domains.documents.employee;
 
 import bl.tech.realiza.domains.documents.Documents;
-import bl.tech.realiza.domains.employees.Brazilian;
+import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
 
 @Data
 @Builder
@@ -15,5 +13,5 @@ import java.util.Date;
 @DiscriminatorValue("BRAZILIAN")
 public class DocumentsBrazilian extends Documents {
     @ManyToOne
-    private Brazilian brazilian;
+    private EmployeeBrazilian employeeBrazilian;
 }

@@ -1,7 +1,7 @@
 package bl.tech.realiza.domains.documents.providers;
 
 import bl.tech.realiza.domains.documents.Documents;
-import bl.tech.realiza.domains.providers.Subcontractor;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -18,5 +18,5 @@ import lombok.NoArgsConstructor;
 @DiscriminatorValue("SUBCONTRACTOR")
 public class DocumentsSubcontractor extends Documents {
     @ManyToOne
-    private Subcontractor subcontractor;
+    private ProviderSubcontractor providerSubcontractor;
 }

@@ -1,11 +1,26 @@
 package bl.tech.realiza.domains.users;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.TimeZone;
 
-public class User {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "company")
+public abstract class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String idUser;
     private String cpf;
     private String description;
-    private String idUser;
     private String password;
     private String position;
     private String role;
