@@ -1,5 +1,8 @@
 package bl.tech.realiza.domains.employees;
 
+import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,4 +43,11 @@ public abstract class Employee {
     private String email;
     private String level_of_education;
     private String cbo;
+
+    @ManyToOne
+    private Client client;
+    @ManyToOne
+    private ProviderSupplier supplier;
+    @ManyToOne
+    private ProviderSubcontractor subcontract;
 }

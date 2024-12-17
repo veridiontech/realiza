@@ -1,4 +1,4 @@
-package bl.tech.realiza.domains;
+package bl.tech.realiza.domains.clients;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,13 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Contact {
+public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String idContact;
-    private String department;
+    private String idClient;
+    private String cnpj;
+    private String tradeName;
+    private String companyName;
     private String email;
-    private String country;
     private String telephone;
-    private Boolean mainContact;
+    private String staff;
+    private String customers;
 }

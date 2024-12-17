@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contracts;
 
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,4 +14,6 @@ import lombok.*;
 @DiscriminatorValue("SUBCONTRACTOR")
 public class ContractSubcontractor extends Contract {
     private String contract_reference;
+    @ManyToOne
+    private ProviderSubcontractor providerSubcontractor;
 }

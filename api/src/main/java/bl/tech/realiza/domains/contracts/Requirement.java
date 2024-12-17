@@ -1,22 +1,24 @@
-package bl.tech.realiza.domains;
+package bl.tech.realiza.domains.contracts;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Activity {
+public class Requirement {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String idActivity;
+    private String idRequirement;
     private String title;
+
+    @ManyToMany
+    private List<Requirement> requirements;
 }

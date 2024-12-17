@@ -1,6 +1,5 @@
-package bl.tech.realiza.domains.providers;
+package bl.tech.realiza.domains.clients;
 
-import bl.tech.realiza.domains.clients.Client;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,13 +11,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "contract_type")
-public abstract class Provider {
+public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id_provider;
-    private String cnpj;
+    private String idContact;
+    private String department;
+    private String email;
+    private String country;
+    private String telephone;
+    private Boolean mainContact;
 
     @ManyToOne
     private Client client;

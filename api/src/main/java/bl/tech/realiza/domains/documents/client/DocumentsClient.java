@@ -1,11 +1,11 @@
 package bl.tech.realiza.domains.documents.client;
 
-import bl.tech.realiza.domains.Client;
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.Documents;
 import jakarta.persistence.*;
 import lombok.*;
 
-
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
