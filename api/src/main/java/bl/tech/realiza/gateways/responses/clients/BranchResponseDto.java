@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class BranchResponseDto {
+    private String idBranch;
     private String name;
     private String client;
 }

@@ -19,7 +19,4 @@ public abstract class Provider {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id_provider;
     private String cnpj;
-
-    @ManyToOne
-    private Client client;
 }
