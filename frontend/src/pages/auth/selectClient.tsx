@@ -25,10 +25,10 @@ export function SelectClient() {
   return (
     <div className="flex justify-center min-h-full m-10">
       <div className="flex justify-between bg-white w-[80rem] h-[30rem] rounded-lg">
-        <div className="m-8">
+        <div className="ml-10 mt-4">
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 
-          <div className="w-[40rem] h-[23rem] mt-10 outline outline-offset-2 outline-1 outline-slate-400 rounded-lg p-6">
+          <div className="w-[40rem] h-[23rem] my-10  outline outline-offset-2 outline-1 outline-slate-300 rounded-lg p-6">
             <h2 className="text-xl font-medium mb-4">Selecione um Cliente</h2>
 
             <div className="relative mb-4">
@@ -46,7 +46,7 @@ export function SelectClient() {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-full p-3 bg-blue-100 text-blue-600 font-medium rounded-lg flex justify-between items-center focus:outline-none"
               >
-                {selectedClient || "Selecionar Cliente"}
+                {selectedClient || "Escolha o Cliente"}
                 <span>{isDropdownOpen ? "▲" : "▼"}</span>
               </button>
 

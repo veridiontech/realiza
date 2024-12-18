@@ -19,6 +19,7 @@ import {
 
 import { Button } from '../ui/button'
 import { SheetContent } from '../ui/sheet'
+import { Link } from 'react-router-dom'
 
 export function LateralMenu() {
   return (
@@ -65,12 +66,14 @@ export function LateralMenu() {
         </span>
       </Button>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
-      <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
-        <Building2 className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">
-          Empresa
-        </span>
-      </Button>
+      <Link to={'/enterprise'}>
+        <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
+          <Building2 className="size-4 text-zinc-800" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">
+            Empresa
+          </span>
+        </Button>
+      </Link>
       <Button variant={'ghost'} className="mt-2 w-full justify-start px-4 py-2">
         <Factory  className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
