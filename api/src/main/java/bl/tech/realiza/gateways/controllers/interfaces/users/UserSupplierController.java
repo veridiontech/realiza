@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface UserSupplierController {
-    ResponseEntity<UserSupplierResponseDto> createUserSupplier(UserSupplierRequestDto branchRequestDto);
+    ResponseEntity<UserSupplierResponseDto> createUserSupplier(UserSupplierRequestDto userSupplierRequestDto);
     ResponseEntity<Optional<UserSupplierResponseDto>> getOneUserSupplier(String id);
     ResponseEntity<Page<UserSupplierResponseDto>> getAllUserSuppliers(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<UserSupplierResponseDto>> updateUserSupplier(UserSupplierRequestDto branchRequestDto);
+    ResponseEntity<Optional<UserSupplierResponseDto>> updateUserSupplier(UserSupplierRequestDto userSupplierRequestDto);
     ResponseEntity<Void> deleteUserSupplier(String id);
 }

@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface EmployeeForeignerController {
-    ResponseEntity<EmployeeForeignerResponseDto> createEmployeeForeigner(EmployeeForeignerRequestDto branchRequestDto);
+    ResponseEntity<EmployeeForeignerResponseDto> createEmployeeForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     ResponseEntity<Optional<EmployeeForeignerResponseDto>> getOneEmployeeForeigner(String id);
     ResponseEntity<Page<EmployeeForeignerResponseDto>> getAllEmployeesForeigner(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<EmployeeForeignerResponseDto>> updateEmployeeForeigner(EmployeeForeignerRequestDto branchRequestDto);
+    ResponseEntity<Optional<EmployeeForeignerResponseDto>> updateEmployeeForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     ResponseEntity<Void> deleteEmployeeForeigner(String id);
 }

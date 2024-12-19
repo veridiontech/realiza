@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface UserClientController {
-    ResponseEntity<UserClientResponseDto> createUserClient(UserClientRequestDto branchRequestDto);
+    ResponseEntity<UserClientResponseDto> createUserClient(UserClientRequestDto userClientRequestDto);
     ResponseEntity<Optional<UserClientResponseDto>> getOneUserClient(String id);
     ResponseEntity<Page<UserClientResponseDto>> getAllUserClients(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<UserClientResponseDto>> updateUserClient(UserClientRequestDto branchRequestDto);
+    ResponseEntity<Optional<UserClientResponseDto>> updateUserClient(UserClientRequestDto userClientRequestDto);
     ResponseEntity<Void> deleteUserClient(String id);
 }

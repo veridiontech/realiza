@@ -3,8 +3,12 @@ package bl.tech.realiza.gateways.controllers.impl.clients;
 import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchController;
 import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.usecases.impl.clients.CrudBranchImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,38 +20,56 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/branch")
 public class BranchControllerImpl implements BranchController {
+
+    private final CrudBranchImpl crudBranch;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<BranchResponseDto> createBranch(BranchRequestDto branchRequestDto) {
-        return null;
+    public ResponseEntity<BranchResponseDto> createBranch(@RequestBody @Valid BranchRequestDto branchRequestDto) {
+        BranchResponseDto branch = crudBranch.save(branchRequestDto);
+
+        return ResponseEntity.of(Optional.of(branch));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<BranchResponseDto>> getOneBranch(String id) {
-        return null;
+    public ResponseEntity<Optional<BranchResponseDto>> getOneBranch(@PathVariable String id) {
+        Optional<BranchResponseDto> branch = crudBranch.findOne(id);
+
+        return ResponseEntity.of(Optional.of(branch));
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<BranchResponseDto>> getAllBranches(int page, int size, String sort, Sort.Direction direction) {
-        return null;
+    public ResponseEntity<Page<BranchResponseDto>> getAllBranches(@RequestParam(defaultValue = "0") int page,
+                                                                  @RequestParam(defaultValue = "5") int size,
+                                                                  @RequestParam(defaultValue = "id") String sort,
+                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<BranchResponseDto> pageBranch = crudBranch.findAll(pageable);
+
+        return ResponseEntity.ok(pageBranch);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<BranchResponseDto>> updateBranch(BranchRequestDto branchRequestDto) {
-        return null;
+    public ResponseEntity<Optional<BranchResponseDto>> updateBranch(@RequestBody @Valid BranchRequestDto branchRequestDto) {
+        Optional<BranchResponseDto> branch = crudBranch.update(branchRequestDto);
+
+        return ResponseEntity.of(Optional.of(branch));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Void> deleteBranch(String id) {
+    public ResponseEntity<Void> deleteBranch(@PathVariable String id) {
+        crudBranch.delete(id);
+
         return null;
     }
 }

@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface EmployeeBrazilianController {
-    ResponseEntity<EmployeeBrazilianResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto branchRequestDto);
+    ResponseEntity<EmployeeBrazilianResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     ResponseEntity<Optional<EmployeeBrazilianResponseDto>> getOneEmployeeBrazilian(String id);
     ResponseEntity<Page<EmployeeBrazilianResponseDto>> getAllEmployeesBrazilian(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<EmployeeBrazilianResponseDto>> updateEmployeeBrazilian(EmployeeBrazilianRequestDto branchRequestDto);
+    ResponseEntity<Optional<EmployeeBrazilianResponseDto>> updateEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     ResponseEntity<Void> deleteEmployeeBrazilian(String id);
 }
