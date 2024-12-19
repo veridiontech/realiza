@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.employees;
 
-import bl.tech.realiza.gateways.requests.documents.providers.DocumentsSubcontractorRequestDto;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
-import bl.tech.realiza.gateways.responses.documents.providers.DocumentsSubcontractorResponseDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeBrazilianResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
