@@ -3,7 +3,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.SupplierController;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudSupplierImpl;
+import bl.tech.realiza.usecases.impl.contracts.CrudContractSupplierImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequestMapping("/supplier")
 public class SupplierControllerImpl implements SupplierController {
 
-    private final CrudSupplierImpl crudSupplier;
+    private final CrudContractSupplierImpl crudSupplier;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

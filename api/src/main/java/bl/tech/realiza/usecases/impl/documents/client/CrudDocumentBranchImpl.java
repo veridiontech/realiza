@@ -1,8 +1,10 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.client.DocumentBranchResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,11 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CrudDocumentBranchImpl implements CrudDocumentBranch {
+
+    private final DocumentBranchRepository documentBranchRepository;
+
     @Override
     public DocumentBranchResponseDto save(DocumentBranchRequestDto documentBranchRequestDto) {
         return null;

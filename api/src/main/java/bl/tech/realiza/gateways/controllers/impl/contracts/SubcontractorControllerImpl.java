@@ -3,7 +3,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.SubcontractorController;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudSubcontractorImpl;
+import bl.tech.realiza.usecases.impl.contracts.CrudContractSubcontractorImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequestMapping("/subcontractor")
 public class SubcontractorControllerImpl implements SubcontractorController {
 
-    private final CrudSubcontractorImpl crudSubcontractor;
+    private final CrudContractSubcontractorImpl crudSubcontractor;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -1,8 +1,10 @@
 package bl.tech.realiza.usecases.impl.employees;
 
+import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeForeignerResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeForeigner;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,11 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
+
+    private final EmployeeForeignerRepository employeeForeignerRepository;
+
     @Override
     public EmployeeForeignerResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         return null;

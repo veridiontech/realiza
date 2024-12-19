@@ -1,8 +1,13 @@
 package bl.tech.realiza.usecases.impl.clients;
 
+import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Contact;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.clients.ContactRepository;
 import bl.tech.realiza.gateways.requests.clients.ContactRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ContactResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudContact;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,10 +15,41 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CrudContactImpl implements CrudContact {
+
+    private final ContactRepository contactRepository;
+    private final ClientRepository clientRepository;
+
     @Override
     public ContactResponseDto save(ContactRequestDto contactRequestDto) {
-        return null;
+
+        Optional<Client> clientOptional = clientRepository.findById(contactRequestDto.getClient());
+
+        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+
+        Contact newContact = Contact.builder()
+                .department(contactRequestDto.getDepartment())
+                .email(contactRequestDto.getEmail())
+                .country(contactRequestDto.getCountry())
+                .telephone(contactRequestDto.getTelephone())
+                .mainContact(contactRequestDto.getMainContact())
+                .client(client)
+                .build();
+
+        Contact savedContact = contactRepository.save(newContact);
+
+        ContactResponseDto contactResponse = ContactResponseDto.builder()
+                .idContact(savedContact.getIdContact())
+                .department(savedContact.getDepartment())
+                .email(savedContact.getEmail())
+                .country(savedContact.getCountry())
+                .telephone(savedContact.getTelephone())
+                .mainContact(savedContact.getMainContact())
+                .client(client.getIdClient())
+                .build();
+
+        return contactResponse;
     }
 
     @Override

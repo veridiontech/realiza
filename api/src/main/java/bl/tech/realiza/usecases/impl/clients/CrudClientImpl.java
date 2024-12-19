@@ -1,8 +1,11 @@
 package bl.tech.realiza.usecases.impl.clients;
 
+import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,10 +13,37 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CrudClientImpl implements CrudClient {
+
+    private final ClientRepository clientRepository;
+
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
-        return null;
+
+        Client newClient = Client.builder()
+                .cnpj(clientRequestDto.getCnpj())
+                .tradeName(clientRequestDto.getTradeName())
+                .companyName(clientRequestDto.getCompanyName())
+                .email(clientRequestDto.getEmail())
+                .telephone(clientRequestDto.getTelephone())
+                .staff(clientRequestDto.getStaff())
+                .customers(clientRequestDto.getCustomers())
+                .build();
+
+        Client savedClient = clientRepository.save(newClient);
+
+        ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .cnpj(savedClient.getCnpj())
+                .tradeName(savedClient.getTradeName())
+                .companyName(savedClient.getCompanyName())
+                .email(savedClient.getEmail())
+                .telephone(savedClient.getTelephone())
+                .staff(savedClient.getStaff())
+                .customers(savedClient.getCustomers())
+                .build();
+
+        return clientResponse;
     }
 
     @Override

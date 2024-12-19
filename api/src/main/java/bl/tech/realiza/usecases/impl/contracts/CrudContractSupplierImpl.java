@@ -1,8 +1,10 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
+import bl.tech.realiza.gateways.repositories.contracts.ContractSupplierRepository;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudSupplier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,11 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class CrudSupplierImpl implements CrudSupplier {
+@RequiredArgsConstructor
+public class CrudContractSupplierImpl implements CrudSupplier {
+
+    private final ContractSupplierRepository contractSupplierRepository;
+
     @Override
     public ContractSupplierResponseDto save(ContractSupplierRequestDto contractSupplierRequestDto) {
         return null;
