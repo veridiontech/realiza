@@ -27,7 +27,7 @@ public class CrudSubcontractorImpl implements CrudSubcontractor {
     }
 
     @Override
-    public Optional<ContractSubcontractorResponseDto> update(String id, ContractSubcontractorRequestDto contractSubcontractorRequestDto) {
+    public Optional<ContractSubcontractorResponseDto> update(ContractSubcontractorRequestDto contractSubcontractorRequestDto) {
         return Optional.empty();
     }
 

@@ -27,7 +27,7 @@ public class CrudRequirementImpl implements CrudRequirement {
     }
 
     @Override
-    public Optional<RequirementResponseDto> update(String id, RequirementRequestDto requirementRequestDto) {
+    public Optional<RequirementResponseDto> update(RequirementRequestDto requirementRequestDto) {
         return Optional.empty();
     }
 

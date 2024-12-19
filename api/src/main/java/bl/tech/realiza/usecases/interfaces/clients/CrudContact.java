@@ -11,6 +11,6 @@ public interface CrudContact {
     ContactResponseDto save(ContactRequestDto contactRequestDto);
     Optional<ContactResponseDto> findOne(String id);
     Page<ContactResponseDto> findAll(Pageable pageable);
-    Optional<ContactResponseDto> update(String id, ContactRequestDto contactRequestDto);
+    Optional<ContactResponseDto> update(ContactRequestDto contactRequestDto);
     void delete(String id);
 }

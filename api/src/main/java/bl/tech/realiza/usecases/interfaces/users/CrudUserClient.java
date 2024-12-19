@@ -11,6 +11,6 @@ public interface CrudUserClient {
     UserClientResponseDto save(UserClientRequestDto userClientRequestDto);
     Optional<UserClientResponseDto> findOne(String id);
     Page<UserClientResponseDto> findAll(Pageable pageable);
-    Optional<UserClientResponseDto> update(String id, UserClientRequestDto userClientRequestDto);
+    Optional<UserClientResponseDto> update(UserClientRequestDto userClientRequestDto);
     void delete(String id);
 }

@@ -11,6 +11,6 @@ public interface CrudNotification {
     NotificationResponseDto save(NotificationRequestDto notificationRequestDto);
     Optional<NotificationResponseDto> findOne(String id);
     Page<NotificationResponseDto> findAll(Pageable pageable);
-    Optional<NotificationResponseDto> update(String id, NotificationRequestDto notificationRequestDto);
+    Optional<NotificationResponseDto> update(NotificationRequestDto notificationRequestDto);
     void delete(String id);
 }

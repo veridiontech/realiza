@@ -27,7 +27,7 @@ public class CrudClientImpl implements CrudClient {
     }
 
     @Override
-    public Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto) {
+    public Optional<ClientResponseDto> update(ClientRequestDto clientRequestDto) {
         return Optional.empty();
     }
 

@@ -27,7 +27,7 @@ public class CrudDocumentsClientImpl implements CrudDocumentsClient {
     }
 
     @Override
-    public Optional<DocumentsClientResponseDto> update(String id, DocumentsClientRequestDto documentsClientRequestDto) {
+    public Optional<DocumentsClientResponseDto> update(DocumentsClientRequestDto documentsClientRequestDto) {
         return Optional.empty();
     }
 

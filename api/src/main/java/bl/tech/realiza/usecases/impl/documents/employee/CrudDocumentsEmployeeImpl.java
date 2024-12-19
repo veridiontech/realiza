@@ -27,7 +27,7 @@ public class CrudDocumentsEmployeeImpl implements CrudDocumentsEmployee {
     }
 
     @Override
-    public Optional<DocumentsEmployeeResponseDto> update(String id, DocumentsEmployeeRequestDto documentsEmployeeRequestDto) {
+    public Optional<DocumentsEmployeeResponseDto> update(DocumentsEmployeeRequestDto documentsEmployeeRequestDto) {
         return Optional.empty();
     }
 

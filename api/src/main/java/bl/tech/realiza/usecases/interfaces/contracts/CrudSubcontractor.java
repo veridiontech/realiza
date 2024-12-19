@@ -11,6 +11,6 @@ public interface CrudSubcontractor {
     ContractSubcontractorResponseDto save(ContractSubcontractorRequestDto contractSubcontractorRequestDto);
     Optional<ContractSubcontractorResponseDto> findOne(String id);
     Page<ContractSubcontractorResponseDto> findAll(Pageable pageable);
-    Optional<ContractSubcontractorResponseDto> update(String id, ContractSubcontractorRequestDto contractSubcontractorRequestDto);
+    Optional<ContractSubcontractorResponseDto> update(ContractSubcontractorRequestDto contractSubcontractorRequestDto);
     void delete(String id);
 }

@@ -27,7 +27,7 @@ public class CrudDocumentsBranchImpl implements CrudDocumentsBranch {
     }
 
     @Override
-    public Optional<DocumentsBranchResponseDto> update(String id, DocumentsBranchRequestDto documentsBranchRequestDto) {
+    public Optional<DocumentsBranchResponseDto> update(DocumentsBranchRequestDto documentsBranchRequestDto) {
         return Optional.empty();
     }
 

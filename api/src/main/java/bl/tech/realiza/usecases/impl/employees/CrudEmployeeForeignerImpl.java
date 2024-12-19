@@ -27,7 +27,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     }
 
     @Override
-    public Optional<EmployeeForeignerResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto) {
+    public Optional<EmployeeForeignerResponseDto> update(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         return Optional.empty();
     }
 

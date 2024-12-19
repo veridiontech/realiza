@@ -27,7 +27,7 @@ public class CrudDocumentsSupplierImpl implements CrudDocumentsSupplier {
     }
 
     @Override
-    public Optional<DocumentsSupplierResponseDto> update(String id, DocumentsSupplierRequestDto documentsSupplierRequestDto) {
+    public Optional<DocumentsSupplierResponseDto> update(DocumentsSupplierRequestDto documentsSupplierRequestDto) {
         return Optional.empty();
     }
 

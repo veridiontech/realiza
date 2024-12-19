@@ -13,6 +13,6 @@ public interface CrudDocumentsSubcontractor {
     DocumentsSubcontractorResponseDto save(DocumentsSubcontractorRequestDto documentsSubcontractorRequestDto);
     Optional<DocumentsSubcontractorResponseDto> findOne(String id);
     Page<DocumentsSubcontractorResponseDto> findAll(Pageable pageable);
-    Optional<DocumentsSubcontractorResponseDto> update(String id, DocumentsSubcontractorRequestDto documentsSubcontractorRequestDto);
+    Optional<DocumentsSubcontractorResponseDto> update(DocumentsSubcontractorRequestDto documentsSubcontractorRequestDto);
     void delete(String id);
 }

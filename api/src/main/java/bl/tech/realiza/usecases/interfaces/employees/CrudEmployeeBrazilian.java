@@ -13,6 +13,6 @@ public interface CrudEmployeeBrazilian {
     EmployeeBrazilianResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     Optional<EmployeeBrazilianResponseDto> findOne(String id);
     Page<EmployeeBrazilianResponseDto> findAll(Pageable pageable);
-    Optional<EmployeeBrazilianResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
+    Optional<EmployeeBrazilianResponseDto> update(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     void delete(String id);
 }

@@ -27,7 +27,7 @@ public class CrudUserSupplierImpl implements CrudUserSupplier {
     }
 
     @Override
-    public Optional<UserSupplierResponseDto> update(String id, UserSupplierRequestDto userSupplierRequestDto) {
+    public Optional<UserSupplierResponseDto> update(UserSupplierRequestDto userSupplierRequestDto) {
         return Optional.empty();
     }
 

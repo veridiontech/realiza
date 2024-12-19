@@ -27,7 +27,7 @@ public class CrudContactImpl implements CrudContact {
     }
 
     @Override
-    public Optional<ContactResponseDto> update(String id, ContactRequestDto contactRequestDto) {
+    public Optional<ContactResponseDto> update(ContactRequestDto contactRequestDto) {
         return Optional.empty();
     }
 

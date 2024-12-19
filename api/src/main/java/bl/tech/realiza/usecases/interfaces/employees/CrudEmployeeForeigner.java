@@ -11,6 +11,6 @@ public interface CrudEmployeeForeigner {
     EmployeeForeignerResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     Optional<EmployeeForeignerResponseDto> findOne(String id);
     Page<EmployeeForeignerResponseDto> findAll(Pageable pageable);
-    Optional<EmployeeForeignerResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto);
+    Optional<EmployeeForeignerResponseDto> update(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     void delete(String id);
 }

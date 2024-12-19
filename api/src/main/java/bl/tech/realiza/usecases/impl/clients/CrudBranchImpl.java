@@ -27,7 +27,7 @@ public class CrudBranchImpl implements CrudBranch {
     }
 
     @Override
-    public Optional<BranchResponseDto> update(String id, BranchRequestDto branchRequestDto) {
+    public Optional<BranchResponseDto> update(BranchRequestDto branchRequestDto) {
         return Optional.empty();
     }
 

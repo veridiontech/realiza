@@ -27,7 +27,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     }
 
     @Override
-    public Optional<EmployeeBrazilianResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
+    public Optional<EmployeeBrazilianResponseDto> update(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         return Optional.empty();
     }
 

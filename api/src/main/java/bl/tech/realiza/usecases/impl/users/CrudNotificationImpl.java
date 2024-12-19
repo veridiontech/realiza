@@ -27,7 +27,7 @@ public class CrudNotificationImpl implements CrudNotification {
     }
 
     @Override
-    public Optional<NotificationResponseDto> update(String id, NotificationRequestDto notificationRequestDto) {
+    public Optional<NotificationResponseDto> update(NotificationRequestDto notificationRequestDto) {
         return Optional.empty();
     }
 

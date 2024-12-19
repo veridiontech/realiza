@@ -27,7 +27,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto) {
+    public Optional<ActivityResponseDto> update(ActivityRequestDto activityRequestDto) {
         return Optional.empty();
     }
 
