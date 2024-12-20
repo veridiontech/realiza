@@ -38,7 +38,7 @@ public class CrudBranchImpl implements CrudBranch {
         BranchResponseDto branchResponse = BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
                 .name(savedBranch.getName())
-                .client(client.getIdClient())
+                .client(savedBranch.getClient().getIdClient())
                 .build();
 
         return branchResponse;

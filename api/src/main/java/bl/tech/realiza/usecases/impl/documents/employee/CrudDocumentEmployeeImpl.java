@@ -16,6 +16,7 @@ import java.util.Optional;
 public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final DocumentEmployeeRepository employeeRepository;
 
     @Override
     public DocumentEmployeeResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto) {

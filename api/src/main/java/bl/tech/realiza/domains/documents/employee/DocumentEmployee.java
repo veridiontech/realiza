@@ -4,10 +4,11 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.employees.Employee;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

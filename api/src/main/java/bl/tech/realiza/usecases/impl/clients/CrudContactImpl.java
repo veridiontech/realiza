@@ -46,7 +46,7 @@ public class CrudContactImpl implements CrudContact {
                 .country(savedContact.getCountry())
                 .telephone(savedContact.getTelephone())
                 .mainContact(savedContact.getMainContact())
-                .client(client.getIdClient())
+                .client(savedContact.getClient().getIdClient())
                 .build();
 
         return contactResponse;

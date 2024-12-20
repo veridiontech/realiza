@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
+import bl.tech.realiza.domains.contracts.Requirement;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.requests.contracts.RequirementRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.RequirementResponseDto;
@@ -19,7 +20,19 @@ public class CrudRequirementImpl implements CrudRequirement {
 
     @Override
     public RequirementResponseDto save(RequirementRequestDto requirementRequestDto) {
-        return null;
+
+        Requirement requirement = Requirement.builder()
+                .title(requirementRequestDto.getTitle())
+                .build();
+
+        Requirement savedRequirement = requirementRepository.save(requirement);
+
+        RequirementResponseDto requirementResponse = RequirementResponseDto.builder()
+                .idRequirement(savedRequirement.getIdRequirement())
+                .title(savedRequirement.getTitle())
+                .build();
+
+        return requirementResponse;
     }
 
     @Override

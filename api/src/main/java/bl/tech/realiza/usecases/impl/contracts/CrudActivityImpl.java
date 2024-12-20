@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
+import bl.tech.realiza.domains.contracts.Activity;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
@@ -19,7 +20,19 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public ActivityResponseDto save(ActivityRequestDto activityRequestDto) {
-        return null;
+
+        Activity activity = Activity.builder()
+                .title(activityRequestDto.getTitle())
+                .build();
+
+        Activity savedActivity = activityRepository.save(activity);
+
+        ActivityResponseDto activityResponse = ActivityResponseDto.builder()
+                .idActivity(savedActivity.getIdActivity())
+                .title(savedActivity.getTitle())
+                .build();
+
+        return activityResponse;
     }
 
     @Override

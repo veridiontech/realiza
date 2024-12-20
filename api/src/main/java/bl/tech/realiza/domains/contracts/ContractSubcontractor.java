@@ -3,10 +3,11 @@ package bl.tech.realiza.domains.contracts;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
