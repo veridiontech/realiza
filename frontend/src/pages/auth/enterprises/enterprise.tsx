@@ -1,46 +1,44 @@
 import ultraIcon from "@/assets/ultraIcon.png";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { LabelWithInput } from "@/components/ui/labelWithInput";
 
-import { z } from 'zod'
+const EnterpriseSchema = z.object({
+  enterpriseName: z.string().min(1, "Nome da empresa é obrigatório"),
+  unitName: z.string(),
+  cep: z.string(),
+  state: z.string(),
+  city: z.string(),
+  addres: z.string(),
+  responsibleForUnity: z.string(),
+  category: z.string(),
+  telephone: z.number().min(1, "Número de telefone inválido"),
+});
 
-const EnterpriseSchema = z.object ({
-    enterpriseName: z.string(),
-    unitName: z.string(),
-    cep: z.string(),
-    state: z.string(),
-    city: z.string(),
-    addres: z.string(),
-    responsibleForUnity: z.string(),
-    category: z.string(),
-    telephone: z.number()
-})
-
-type EnterpriseFormData = z.infer<typeof EnterpriseSchema>
+type EnterpriseFormData = z.infer<typeof EnterpriseSchema>;
 
 export function Enterprise() {
+  const [isOpen, setIsOpen] = useState(false);
 
-    const [isOpen, setIsOpen] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<EnterpriseFormData>({
+    resolver: zodResolver(EnterpriseSchema),
+  });
 
-    const {
-        register,
-        handleSubmit,
-        formState: {errors}
-    } = useForm <EnterpriseFormData> ({
-        resolver: zodResolver(EnterpriseSchema),
-    })
-
-    const onSubmit = (data: EnterpriseFormData) => {
-        console.log("Dados do formulário:", data);
-      };
+  const onSubmit = (data: EnterpriseFormData) => {
+    console.log("Dados do formulário:", data);
+  };
 
   return (
     <>
@@ -68,7 +66,10 @@ export function Enterprise() {
               <span>email@email.com.br</span>
             </div>
             <div className="flex h-auto w-1/3 items-center justify-center">
-              <button onClick={ () => setIsOpen(true)} className="rounded-md border-2 border-blue-300 px-10 py-2 text-black hover:border-blue-600 hover:bg-blue-300 hover:text-white">
+              <button
+                onClick={() => setIsOpen(true)}
+                className="rounded-md border-2 border-blue-300 px-10 py-2 text-black hover:border-blue-600 hover:bg-blue-300 hover:text-white"
+              >
                 Editar ✏️
               </button>
             </div>
@@ -76,87 +77,84 @@ export function Enterprise() {
         </div>
       </div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger className="bg-greenThird flex w-[5vw] items-center justify-center rounded-md border px-1 shadow-md">
-        </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex justify-center"><h1>Empresa</h1></DialogTitle>
+            <DialogTitle className="flex justify-center">
+              <h1>Empresa</h1>
+            </DialogTitle>
           </DialogHeader>
           <div className="mt-4">
-           <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)} action="">
-                <label htmlFor="">
-                    Nome da Empresa
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("enterpriseName")}
-                />
-                <label htmlFor="">
-                    Nome da Unidade
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("unitName")}
-                />
-                <label htmlFor="">
-                    CEP
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("cep")}
-                />
-                <label htmlFor="">
-                    Estado
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("state")}
-                />
-                <label htmlFor="">
-                    Cidade
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("city")}
-                />
-                <label htmlFor="">
-                    Endereço
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("addres")}
-                />
-                <label htmlFor="">
-                    Responsável da Unidade
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("responsibleForUnity")}
-                />
-                <label htmlFor="">
-                    Categoria
-                </label>
-                <input
-                className=""
-                 type="text" 
-                {...register("category")}
-                />
-                <label htmlFor="">
-                    Telefone
-                </label>
-                <input
-                className=""
-                 type="number" 
-                {...register("telephone")}
-                />
-           </form>
+            <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+              <LabelWithInput
+                label="Nome da Empresa"
+                type="text"
+                register={register}
+                name="enterpriseName"
+                error={errors.enterpriseName?.message}
+              />
+              <LabelWithInput
+                label="Nome da Unidade"
+                type="text"
+                register={register}
+                name="unitName"
+                error={errors.unitName?.message}
+              />
+              <LabelWithInput
+                label="CEP"
+                type="text"
+                register={register}
+                name="cep"
+                error={errors.cep?.message}
+              />
+              <LabelWithInput
+                label="Estado"
+                type="text"
+                register={register}
+                name="state"
+                error={errors.state?.message}
+              />
+              <LabelWithInput
+                label="Cidade"
+                type="text"
+                register={register}
+                name="city"
+                error={errors.city?.message}
+              />
+              <LabelWithInput
+                label="Endereço"
+                type="text"
+                register={register}
+                name="addres"
+                error={errors.addres?.message}
+              />
+              <LabelWithInput
+                label="Responsável da Unidade"
+                type="text"
+                register={register}
+                name="responsibleForUnity"
+                error={errors.responsibleForUnity?.message}
+              />
+              <LabelWithInput
+                label="Categoria"
+                type="text"
+                register={register}
+                name="category"
+                error={errors.category?.message}
+              />
+              <LabelWithInput
+                label="Telefone"
+                type="number"
+                register={register}
+                name="telephone"
+                error={errors.telephone?.message}
+              />
+              <button
+                type="submit"
+                className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                Salvar
+              </button>
+            </form>
           </div>
         </DialogContent>
       </Dialog>
