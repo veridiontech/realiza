@@ -1,22 +1,23 @@
 import { createBrowserRouter } from "react-router-dom";
+
 import { AppLayout } from "./_layouts/app";
 import { AuthLayout } from "./_layouts/auth";
-import MonittoringBis from "./pages/auth/bis";
-import { Collaborators } from "./pages/auth/collaborators";
-import { MonittoringTable } from "./pages/auth/monittoringTable";
-import { ProfileClient } from "./pages/auth/profileClient";
-import { SignIn } from "./pages/app/sign-in";
+import { ConfigurationLayout } from "./_layouts/configurantion";
+import { EnterpriseLayout } from "./_layouts/enterprise";
 import { ForgotPassword } from "./pages/app/forgot-password";
-import { EditProfile } from "./pages/auth/profileEdit";
-import { Dashboard } from "./pages/auth/dashboard";
 import { NewPassword } from "./pages/app/new-password";
 import { NewPassword2 } from "./pages/app/new-password2";
-import { ConfigurationLayout } from "./_layouts/configurantion";
-import { ProfileUser } from "./pages/auth/profileUser/__profileUser";
-import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
-import { SelectClient } from "./pages/auth/selectClient";
+import { SignIn } from "./pages/app/sign-in";
+import MonittoringBis from "./pages/auth/bis";
+import { Collaborators } from "./pages/auth/collaborators";
+import { Dashboard } from "./pages/auth/dashboard";
 import { Enterprise } from "./pages/auth/enterprises/enterprise";
-import { EnterpriseLayout } from "./_layouts/enterprise";
+import { MonittoringTable } from "./pages/auth/monittoringTable";
+import { ProfileClient } from "./pages/auth/profileClient";
+import { EditProfile } from "./pages/auth/profileEdit";
+import { ProfileUser } from "./pages/auth/profileUser/__profileUser";
+import { SelectClient } from "./pages/auth/selectClient";
+import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
 
 export const router = createBrowserRouter([
   {
