@@ -1,7 +1,11 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.users.UserProvider;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.users.UserSupplierRepository;
 import bl.tech.realiza.gateways.requests.users.UserSupplierRequestDto;
+import bl.tech.realiza.gateways.responses.users.UserSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserSupplierResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserSupplier;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +20,49 @@ import java.util.Optional;
 public class CrudUserSupplierImpl implements CrudUserSupplier {
 
     private final UserSupplierRepository userSupplierRepository;
+    private final ProviderSupplierRepository providerSupplierRepository;
 
     @Override
     public UserSupplierResponseDto save(UserSupplierRequestDto userSupplierRequestDto) {
-        return null;
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(userSupplierRequestDto.getSupplier());
+
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+
+        UserProvider newUserSupplier = UserProvider.builder()
+                .cpf(userSupplierRequestDto.getCpf())
+                .description(userSupplierRequestDto.getDescription())
+                .password(userSupplierRequestDto.getPassword())
+                .position(userSupplierRequestDto.getPosition())
+                .role(userSupplierRequestDto.getRole())
+                .firstName(userSupplierRequestDto.getFirstName())
+                .timeZone(userSupplierRequestDto.getTimeZone())
+                .surname(userSupplierRequestDto.getSurname())
+                .email(userSupplierRequestDto.getEmail())
+                .profilePicture(userSupplierRequestDto.getProfilePicture())
+                .telephone(userSupplierRequestDto.getTelephone())
+                .cellphone(userSupplierRequestDto.getCellphone())
+                .providerSupplier(providerSupplier)
+                .build();
+
+        UserProvider savedUserSupplier = userSupplierRepository.save(newUserSupplier);
+
+        UserSupplierResponseDto userSupplierResponse = UserSupplierResponseDto.builder()
+                .cpf(savedUserSupplier.getCpf())
+                .description(savedUserSupplier.getDescription())
+                .password(savedUserSupplier.getPassword())
+                .position(savedUserSupplier.getPosition())
+                .role(savedUserSupplier.getRole())
+                .firstName(savedUserSupplier.getFirstName())
+                .timeZone(savedUserSupplier.getTimeZone())
+                .surname(savedUserSupplier.getSurname())
+                .email(savedUserSupplier.getEmail())
+                .profilePicture(savedUserSupplier.getProfilePicture())
+                .telephone(savedUserSupplier.getTelephone())
+                .cellphone(savedUserSupplier.getCellphone())
+                .supplier(savedUserSupplier.getProviderSupplier().getId_provider())
+                .build();
+
+        return userSupplierResponse;
     }
 
     @Override

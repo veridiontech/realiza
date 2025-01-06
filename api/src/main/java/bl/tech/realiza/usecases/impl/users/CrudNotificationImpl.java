@@ -1,6 +1,9 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.users.Notification;
+import bl.tech.realiza.domains.users.User;
 import bl.tech.realiza.gateways.repositories.users.NotificationRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
@@ -16,10 +19,33 @@ import java.util.Optional;
 public class CrudNotificationImpl implements CrudNotification {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     @Override
     public NotificationResponseDto save(NotificationRequestDto notificationRequestDto) {
-        return null;
+
+        Optional<User> userOptional = userRepository.findById(notificationRequestDto.getUser());
+
+        User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        Notification newNotification = Notification.builder()
+                .title(notificationRequestDto.getTitle())
+                .description(notificationRequestDto.getDescription())
+                .read(notificationRequestDto.getRead())
+                .user(user)
+                .build();
+
+        Notification savedNotification = notificationRepository.save(newNotification);
+
+        NotificationResponseDto notificationResponse = NotificationResponseDto.builder()
+                .idNotification(savedNotification.getIdNotification())
+                .title(savedNotification.getTitle())
+                .description(savedNotification.getDescription())
+                .read(savedNotification.getRead())
+                .user(savedNotification.getUser().getIdUser())
+                .build();
+
+        return notificationResponse;
     }
 
     @Override
