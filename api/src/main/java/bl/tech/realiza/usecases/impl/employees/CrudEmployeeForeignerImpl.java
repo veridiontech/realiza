@@ -129,12 +129,88 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
     @Override
     public Optional<EmployeeForeignerResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
+
+        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new RuntimeException("Employee Foreigner not found"));
+
+        EmployeeForeignerResponseDto employeeForeignerResponse = EmployeeForeignerResponseDto.builder()
+                .pis(employeeForeigner.getPis())
+                .marital_status(employeeForeigner.getMarital_status())
+                .contract(employeeForeigner.getContract())
+                .cep(employeeForeigner.getCep())
+                .name(employeeForeigner.getName())
+                .surname(employeeForeigner.getSurname())
+                .address(employeeForeigner.getAddress())
+                .country(employeeForeigner.getCountry())
+                .acronym(employeeForeigner.getAcronym())
+                .state(employeeForeigner.getState())
+                .birth_date(employeeForeigner.getBirth_date())
+                .city(employeeForeigner.getCity())
+                .postal_code(employeeForeigner.getPostal_code())
+                .gender(employeeForeigner.getGender())
+                .position(employeeForeigner.getPosition())
+                .registration(employeeForeigner.getRegistration())
+                .salary(employeeForeigner.getSalary())
+                .cellphone(employeeForeigner.getCellphone())
+                .platform_access(employeeForeigner.getPlatform_access())
+                .telephone(employeeForeigner.getTelephone())
+                .directory(employeeForeigner.getDirectory())
+                .email(employeeForeigner.getEmail())
+                .level_of_education(employeeForeigner.getLevel_of_education())
+                .cbo(employeeForeigner.getCbo())
+                .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
+                .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
+                .passport(employeeForeigner.getPassport())
+                .client(employeeForeigner.getClient().getIdClient())
+                .supplier(employeeForeigner.getSupplier().getId_provider())
+                .subcontract(employeeForeigner.getSubcontract().getId_provider())
+                .build();
+
+        return Optional.of(employeeForeignerResponse);
     }
 
     @Override
     public Page<EmployeeForeignerResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<EmployeeForeigner> employeeForeignerPage = employeeForeignerRepository.findAll(pageable);
+
+        Page<EmployeeForeignerResponseDto> employeeForeignerResponseDtoPage = employeeForeignerPage.map(
+                employeeForeigner -> EmployeeForeignerResponseDto.builder()
+                        .pis(employeeForeigner.getPis())
+                        .marital_status(employeeForeigner.getMarital_status())
+                        .contract(employeeForeigner.getContract())
+                        .cep(employeeForeigner.getCep())
+                        .name(employeeForeigner.getName())
+                        .surname(employeeForeigner.getSurname())
+                        .address(employeeForeigner.getAddress())
+                        .country(employeeForeigner.getCountry())
+                        .acronym(employeeForeigner.getAcronym())
+                        .state(employeeForeigner.getState())
+                        .birth_date(employeeForeigner.getBirth_date())
+                        .city(employeeForeigner.getCity())
+                        .postal_code(employeeForeigner.getPostal_code())
+                        .gender(employeeForeigner.getGender())
+                        .position(employeeForeigner.getPosition())
+                        .registration(employeeForeigner.getRegistration())
+                        .salary(employeeForeigner.getSalary())
+                        .cellphone(employeeForeigner.getCellphone())
+                        .platform_access(employeeForeigner.getPlatform_access())
+                        .telephone(employeeForeigner.getTelephone())
+                        .directory(employeeForeigner.getDirectory())
+                        .email(employeeForeigner.getEmail())
+                        .level_of_education(employeeForeigner.getLevel_of_education())
+                        .cbo(employeeForeigner.getCbo())
+                        .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
+                        .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
+                        .passport(employeeForeigner.getPassport())
+                        .client(employeeForeigner.getClient().getIdClient())
+                        .supplier(employeeForeigner.getSupplier().getId_provider())
+                        .subcontract(employeeForeigner.getSubcontract().getId_provider())
+                        .build()
+        );
+
+        return employeeForeignerResponseDtoPage;
     }
 
     @Override
@@ -144,6 +220,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
     @Override
     public void delete(String id) {
-
+        employeeForeignerRepository.deleteById(id);
     }
 }

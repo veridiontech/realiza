@@ -68,12 +68,54 @@ public class CrudUserSubcontractorImpl implements CrudUserSubcontractor {
 
     @Override
     public Optional<UserSubcontractorResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<UserSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
+
+        UserSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserSubcontractorResponseDto userSubcontractorResponse = UserSubcontractorResponseDto.builder()
+                .cpf(userSubcontractor.getCpf())
+                .description(userSubcontractor.getDescription())
+                .password(userSubcontractor.getPassword())
+                .position(userSubcontractor.getPosition())
+                .role(userSubcontractor.getRole())
+                .firstName(userSubcontractor.getFirstName())
+                .timeZone(userSubcontractor.getTimeZone())
+                .surname(userSubcontractor.getSurname())
+                .email(userSubcontractor.getEmail())
+                .profilePicture(userSubcontractor.getProfilePicture())
+                .telephone(userSubcontractor.getTelephone())
+                .cellphone(userSubcontractor.getCellphone())
+                .subcontractor(userSubcontractor.getProviderSubcontractor().getId_provider())
+                .build();
+
+        return Optional.of(userSubcontractorResponse);
     }
 
     @Override
     public Page<UserSubcontractorResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<UserSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAll(pageable);
+
+        Page<UserSubcontractorResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
+                userSubcontractor -> UserSubcontractorResponseDto.builder()
+                        .cpf(userSubcontractor.getCpf())
+                        .description(userSubcontractor.getDescription())
+                        .password(userSubcontractor.getPassword())
+                        .position(userSubcontractor.getPosition())
+                        .role(userSubcontractor.getRole())
+                        .firstName(userSubcontractor.getFirstName())
+                        .timeZone(userSubcontractor.getTimeZone())
+                        .surname(userSubcontractor.getSurname())
+                        .email(userSubcontractor.getEmail())
+                        .profilePicture(userSubcontractor.getProfilePicture())
+                        .telephone(userSubcontractor.getTelephone())
+                        .cellphone(userSubcontractor.getCellphone())
+                        .subcontractor(userSubcontractor.getProviderSubcontractor().getId_provider())
+                        .build()
+        );
+
+        return userSubcontractorResponseDtoPage;
     }
 
     @Override
@@ -83,6 +125,6 @@ public class CrudUserSubcontractorImpl implements CrudUserSubcontractor {
 
     @Override
     public void delete(String id) {
-
+        userSubcontractorRepository.deleteById(id);
     }
 }

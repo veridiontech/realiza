@@ -67,12 +67,54 @@ public class CrudUserSupplierImpl implements CrudUserSupplier {
 
     @Override
     public Optional<UserSupplierResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<UserProvider> userProviderOptional = userSupplierRepository.findById(id);
+
+        UserProvider userProvider = userProviderOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserSupplierResponseDto userSupplierResponse = UserSupplierResponseDto.builder()
+                .cpf(userProvider.getCpf())
+                .description(userProvider.getDescription())
+                .password(userProvider.getPassword())
+                .position(userProvider.getPosition())
+                .role(userProvider.getRole())
+                .firstName(userProvider.getFirstName())
+                .timeZone(userProvider.getTimeZone())
+                .surname(userProvider.getSurname())
+                .email(userProvider.getEmail())
+                .profilePicture(userProvider.getProfilePicture())
+                .telephone(userProvider.getTelephone())
+                .cellphone(userProvider.getCellphone())
+                .supplier(userProvider.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(userSupplierResponse);
     }
 
     @Override
     public Page<UserSupplierResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<UserProvider> userProviderPage = userSupplierRepository.findAll(pageable);
+
+        Page<UserSupplierResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
+                userProvider -> UserSupplierResponseDto.builder()
+                        .cpf(userProvider.getCpf())
+                        .description(userProvider.getDescription())
+                        .password(userProvider.getPassword())
+                        .position(userProvider.getPosition())
+                        .role(userProvider.getRole())
+                        .firstName(userProvider.getFirstName())
+                        .timeZone(userProvider.getTimeZone())
+                        .surname(userProvider.getSurname())
+                        .email(userProvider.getEmail())
+                        .profilePicture(userProvider.getProfilePicture())
+                        .telephone(userProvider.getTelephone())
+                        .cellphone(userProvider.getCellphone())
+                        .supplier(userProvider.getProviderSupplier().getId_provider())
+                        .build()
+        );
+
+        return userSupplierResponseDtoPage;
     }
 
     @Override
@@ -82,6 +124,6 @@ public class CrudUserSupplierImpl implements CrudUserSupplier {
 
     @Override
     public void delete(String id) {
-
+        providerSupplierRepository.deleteById(id);
     }
 }

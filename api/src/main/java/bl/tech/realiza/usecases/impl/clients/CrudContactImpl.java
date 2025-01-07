@@ -54,7 +54,22 @@ public class CrudContactImpl implements CrudContact {
 
     @Override
     public Optional<ContactResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<Contact> contactOptional = contactRepository.findById(id);
+
+        Contact contact = contactOptional.orElseThrow(() -> new RuntimeException("Contact not found"));
+
+        ContactResponseDto contactResponse = ContactResponseDto.builder()
+                .idContact(contact.getIdContact())
+                .department(contact.getDepartment())
+                .email(contact.getEmail())
+                .country(contact.getCountry())
+                .telephone(contact.getTelephone())
+                .mainContact(contact.getMainContact())
+                .client(contact.getClient().getIdClient())
+                .build();
+
+        return Optional.of(contactResponse);
     }
 
     @Override

@@ -129,12 +129,86 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public Optional<EmployeeBrazilianResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
+
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        EmployeeBrazilianResponseDto employeeBrazilianResponse = EmployeeBrazilianResponseDto.builder()
+                .pis(employeeBrazilian.getPis())
+                .marital_status(employeeBrazilian.getMarital_status())
+                .contract(employeeBrazilian.getContract())
+                .cep(employeeBrazilian.getCep())
+                .name(employeeBrazilian.getName())
+                .surname(employeeBrazilian.getSurname())
+                .address(employeeBrazilian.getAddress())
+                .country(employeeBrazilian.getCountry())
+                .acronym(employeeBrazilian.getAcronym())
+                .state(employeeBrazilian.getState())
+                .birth_date(employeeBrazilian.getBirth_date())
+                .city(employeeBrazilian.getCity())
+                .postal_code(employeeBrazilian.getPostal_code())
+                .gender(employeeBrazilian.getGender())
+                .position(employeeBrazilian.getPosition())
+                .registration(employeeBrazilian.getRegistration())
+                .salary(employeeBrazilian.getSalary())
+                .cellphone(employeeBrazilian.getCellphone())
+                .platform_access(employeeBrazilian.getPlatform_access())
+                .telephone(employeeBrazilian.getTelephone())
+                .directory(employeeBrazilian.getDirectory())
+                .email(employeeBrazilian.getEmail())
+                .level_of_education(employeeBrazilian.getLevel_of_education())
+                .cbo(employeeBrazilian.getCbo())
+                .rg(employeeBrazilian.getRg())
+                .admission_date(employeeBrazilian.getAdmission_date())
+                .client(employeeBrazilian.getClient().getIdClient())
+                .supplier(employeeBrazilian.getSupplier().getId_provider())
+                .subcontract(employeeBrazilian.getSubcontract().getId_provider())
+                .build();
+        
+        return Optional.of(employeeBrazilianResponse);
     }
 
     @Override
     public Page<EmployeeBrazilianResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<EmployeeBrazilian> employeeBrazilianPage = employeeBrazilianRepository.findAll(pageable);
+
+        Page<EmployeeBrazilianResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
+                employeeBrazilian -> EmployeeBrazilianResponseDto.builder()
+                        .pis(employeeBrazilian.getPis())
+                        .marital_status(employeeBrazilian.getMarital_status())
+                        .contract(employeeBrazilian.getContract())
+                        .cep(employeeBrazilian.getCep())
+                        .name(employeeBrazilian.getName())
+                        .surname(employeeBrazilian.getSurname())
+                        .address(employeeBrazilian.getAddress())
+                        .country(employeeBrazilian.getCountry())
+                        .acronym(employeeBrazilian.getAcronym())
+                        .state(employeeBrazilian.getState())
+                        .birth_date(employeeBrazilian.getBirth_date())
+                        .city(employeeBrazilian.getCity())
+                        .postal_code(employeeBrazilian.getPostal_code())
+                        .gender(employeeBrazilian.getGender())
+                        .position(employeeBrazilian.getPosition())
+                        .registration(employeeBrazilian.getRegistration())
+                        .salary(employeeBrazilian.getSalary())
+                        .cellphone(employeeBrazilian.getCellphone())
+                        .platform_access(employeeBrazilian.getPlatform_access())
+                        .telephone(employeeBrazilian.getTelephone())
+                        .directory(employeeBrazilian.getDirectory())
+                        .email(employeeBrazilian.getEmail())
+                        .level_of_education(employeeBrazilian.getLevel_of_education())
+                        .cbo(employeeBrazilian.getCbo())
+                        .rg(employeeBrazilian.getRg())
+                        .admission_date(employeeBrazilian.getAdmission_date())
+                        .client(employeeBrazilian.getClient().getIdClient())
+                        .supplier(employeeBrazilian.getSupplier().getId_provider())
+                        .subcontract(employeeBrazilian.getSubcontract().getId_provider())
+                        .build()
+        );
+
+        return employeeBrazilianResponseDtoPage;
     }
 
     @Override
@@ -144,6 +218,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public void delete(String id) {
-
+        employeeBrazilianRepository.deleteById(id);
     }
 }

@@ -54,12 +54,42 @@ public class CrudDocumentSubcontractorImpl implements CrudDocumentSubcontractor 
 
     @Override
     public Optional<DocumentSubcontractorResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<DocumentSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
+
+        DocumentSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+
+        DocumentSubcontractorResponseDto documentSubcontractorResponse = DocumentSubcontractorResponseDto.builder()
+                .id_documentation(documentSubcontractor.getDocumentation())
+                .title(documentSubcontractor.getTitle())
+                .risk(documentSubcontractor.getRisk())
+                .status(documentSubcontractor.getStatus())
+                .documentation(documentSubcontractor.getDocumentation())
+                .creation_date(documentSubcontractor.getCreation_date())
+                .subcontractor(documentSubcontractor.getProviderSubcontractor().getId_provider())
+                .build();
+
+        return Optional.of(documentSubcontractorResponse);
     }
 
     @Override
     public Page<DocumentSubcontractorResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<DocumentSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAll(pageable);
+
+        Page<DocumentSubcontractorResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
+                documentSubcontractor -> DocumentSubcontractorResponseDto.builder()
+                        .id_documentation(documentSubcontractor.getDocumentation())
+                        .title(documentSubcontractor.getTitle())
+                        .risk(documentSubcontractor.getRisk())
+                        .status(documentSubcontractor.getStatus())
+                        .documentation(documentSubcontractor.getDocumentation())
+                        .creation_date(documentSubcontractor.getCreation_date())
+                        .subcontractor(documentSubcontractor.getProviderSubcontractor().getId_provider())
+                        .build()
+        );
+
+        return documentSubcontractorResponseDtoPage;
     }
 
     @Override
@@ -69,6 +99,6 @@ public class CrudDocumentSubcontractorImpl implements CrudDocumentSubcontractor 
 
     @Override
     public void delete(String id) {
-
+        documentSubcontractorRepository.deleteById(id);
     }
 }

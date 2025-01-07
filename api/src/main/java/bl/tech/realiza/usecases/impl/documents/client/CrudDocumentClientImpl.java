@@ -54,12 +54,42 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public Optional<DocumentClientResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(id);
+
+        DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
+
+        DocumentClientResponseDto documentClientResponseDto = DocumentClientResponseDto.builder()
+                .id_documentation(documentClient.getId_documentation())
+                .title(documentClient.getTitle())
+                .risk(documentClient.getRisk())
+                .status(documentClient.getStatus())
+                .documentation(documentClient.getDocumentation())
+                .creation_date(documentClient.getCreation_date())
+                .client(documentClient.getClient().getIdClient())
+                .build();
+
+        return Optional.of(documentClientResponseDto);
     }
 
     @Override
     public Page<DocumentClientResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<DocumentClient> documentClientPage = documentClientRepository.findAll(pageable);
+
+        Page<DocumentClientResponseDto> documentClientResponseDtoPage = documentClientPage.map(
+                documentClient -> DocumentClientResponseDto.builder()
+                        .id_documentation(documentClient.getId_documentation())
+                        .title(documentClient.getTitle())
+                        .risk(documentClient.getRisk())
+                        .status(documentClient.getStatus())
+                        .documentation(documentClient.getDocumentation())
+                        .creation_date(documentClient.getCreation_date())
+                        .client(documentClient.getClient().getIdClient())
+                        .build()
+        );
+
+        return documentClientResponseDtoPage;
     }
 
     @Override
@@ -69,6 +99,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public void delete(String id) {
-
+        documentClientRepository.deleteById(id);
     }
 }

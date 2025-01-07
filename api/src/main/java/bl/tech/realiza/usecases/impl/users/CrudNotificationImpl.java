@@ -50,12 +50,38 @@ public class CrudNotificationImpl implements CrudNotification {
 
     @Override
     public Optional<NotificationResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<Notification> notificationOptional = notificationRepository.findById(id);
+
+        Notification notification = notificationOptional.orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        NotificationResponseDto notificationResponse = NotificationResponseDto.builder()
+                .idNotification(notification.getIdNotification())
+                .title(notification.getTitle())
+                .description(notification.getDescription())
+                .read(notification.getRead())
+                .user(notification.getUser().getIdUser())
+                .build();
+
+        return Optional.of(notificationResponse);
     }
 
     @Override
     public Page<NotificationResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<Notification> notificationPage = notificationRepository.findAll(pageable);
+
+        Page<NotificationResponseDto> notificationResponseDtoPage = notificationPage.map(
+                notification -> NotificationResponseDto.builder()
+                        .idNotification(notification.getIdNotification())
+                        .title(notification.getTitle())
+                        .description(notification.getDescription())
+                        .read(notification.getRead())
+                        .user(notification.getUser().getIdUser())
+                        .build()
+        );
+
+        return notificationResponseDtoPage;
     }
 
     @Override
@@ -65,6 +91,6 @@ public class CrudNotificationImpl implements CrudNotification {
 
     @Override
     public void delete(String id) {
-
+        notificationRepository.deleteById(id);
     }
 }

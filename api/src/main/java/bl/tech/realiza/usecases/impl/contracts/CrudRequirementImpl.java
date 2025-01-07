@@ -37,12 +37,32 @@ public class CrudRequirementImpl implements CrudRequirement {
 
     @Override
     public Optional<RequirementResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<Requirement> requirementOptional = requirementRepository.findById(id);
+
+        Requirement requirement = requirementOptional.orElseThrow(() -> new RuntimeException("Requirement not found"));
+
+        RequirementResponseDto requirementResponse = RequirementResponseDto.builder()
+                .idRequirement(requirement.getIdRequirement())
+                .title(requirement.getTitle())
+                .build();
+
+        return Optional.of(requirementResponse);
     }
 
     @Override
     public Page<RequirementResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<Requirement> requirementPage = requirementRepository.findAll(pageable);
+
+        Page<RequirementResponseDto> requirementResponseDtoPage = requirementPage.map(
+                requirement -> RequirementResponseDto.builder()
+                        .idRequirement(requirement.getIdRequirement())
+                        .title(requirement.getTitle())
+                        .build()
+        );
+
+        return requirementResponseDtoPage;
     }
 
     @Override
@@ -52,6 +72,6 @@ public class CrudRequirementImpl implements CrudRequirement {
 
     @Override
     public void delete(String id) {
-
+        requirementRepository.deleteById(id);
     }
 }

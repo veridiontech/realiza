@@ -54,12 +54,42 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentBranchResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
+
+        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
+
+        DocumentBranchResponseDto documentBranchResponse = DocumentBranchResponseDto.builder()
+                .id_documentation(documentBranch.getId_documentation())
+                .title(documentBranch.getTitle())
+                .risk(documentBranch.getRisk())
+                .status(documentBranch.getStatus())
+                .documentation(documentBranch.getDocumentation())
+                .creation_date(documentBranch.getCreation_date())
+                .branch(documentBranch.getBranch().getIdBranch())
+                .build();
+
+        return Optional.of(documentBranchResponse);
     }
 
     @Override
     public Page<DocumentBranchResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAll(pageable);
+
+        Page<DocumentBranchResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
+                documentBranch -> DocumentBranchResponseDto.builder()
+                        .id_documentation(documentBranch.getId_documentation())
+                        .title(documentBranch.getTitle())
+                        .risk(documentBranch.getRisk())
+                        .status(documentBranch.getStatus())
+                        .documentation(documentBranch.getDocumentation())
+                        .creation_date(documentBranch.getCreation_date())
+                        .branch(documentBranch.getBranch().getIdBranch())
+                        .build()
+        );
+
+        return documentBranchResponseDtoPage;
     }
 
     @Override

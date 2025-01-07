@@ -37,12 +37,32 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public Optional<ActivityResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<Activity> activityOptional = activityRepository.findById(id);
+
+        Activity activity = activityOptional.orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        ActivityResponseDto activityResponse = ActivityResponseDto.builder()
+                .idActivity(activity.getIdActivity())
+                .title(activity.getTitle())
+                .build();
+
+        return Optional.of(activityResponse);
     }
 
     @Override
     public Page<ActivityResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<Activity> activityPage = activityRepository.findAll(pageable);
+
+        Page<ActivityResponseDto> activities = activityPage.map(
+                activity -> ActivityResponseDto.builder()
+                        .idActivity(activity.getIdActivity())
+                        .title(activity.getTitle())
+                        .build()
+        );
+
+        return activities;
     }
 
     @Override
@@ -52,6 +72,6 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public void delete(String id) {
-
+        activityRepository.deleteById(id);
     }
 }

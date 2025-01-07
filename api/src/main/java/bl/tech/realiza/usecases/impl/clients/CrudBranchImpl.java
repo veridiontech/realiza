@@ -46,12 +46,34 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public Optional<BranchResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<Branch> branchOptional = branchRepository.findById(id);
+
+        Branch branch = branchOptional.orElseThrow(() -> new RuntimeException("Branch not found"));
+
+        BranchResponseDto branchResponse = BranchResponseDto.builder()
+                .idBranch(branch.getIdBranch())
+                .name(branch.getName())
+                .client(branch.getClient().getIdClient())
+                .build();
+
+        return Optional.of(branchResponse);
     }
 
     @Override
     public Page<BranchResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<Branch> pageBranch = branchRepository.findAll(pageable);
+
+        Page<BranchResponseDto> pageBranchResponse = pageBranch.map(
+                branch -> BranchResponseDto.builder()
+                        .idBranch(branch.getIdBranch())
+                        .name(branch.getName())
+                        .client(branch.getClient().getIdClient())
+                        .build()
+        );
+
+        return pageBranchResponse;
     }
 
     @Override
@@ -61,6 +83,6 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public void delete(String id) {
-
+        branchRepository.deleteById(id);
     }
 }

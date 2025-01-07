@@ -55,12 +55,42 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public Optional<DocumentEmployeeResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
+
+        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
+
+        DocumentEmployeeResponseDto documentEmployeeResponseDto = DocumentEmployeeResponseDto.builder()
+                .id_documentation(documentEmployee.getId_documentation())
+                .title(documentEmployee.getTitle())
+                .risk(documentEmployee.getRisk())
+                .status(documentEmployee.getStatus())
+                .documentation(documentEmployee.getDocumentation())
+                .creation_date(documentEmployee.getCreation_date())
+                .employee(documentEmployee.getEmployee().getId_employee())
+                .build();
+
+        return Optional.of(documentEmployeeResponseDto);
     }
 
     @Override
     public Page<DocumentEmployeeResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<DocumentEmployee> documentEmployeePage = documentEmployeeRepository.findAll(pageable);
+
+        Page<DocumentEmployeeResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
+                documentEmployee -> DocumentEmployeeResponseDto.builder()
+                        .id_documentation(documentEmployee.getId_documentation())
+                        .title(documentEmployee.getTitle())
+                        .risk(documentEmployee.getRisk())
+                        .status(documentEmployee.getStatus())
+                        .documentation(documentEmployee.getDocumentation())
+                        .creation_date(documentEmployee.getCreation_date())
+                        .employee(documentEmployee.getEmployee().getId_employee())
+                        .build()
+        );
+
+        return documentEmployeeResponseDtoPage;
     }
 
     @Override
@@ -70,6 +100,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public void delete(String id) {
-
+        documentEmployeeRepository.deleteById(id);
     }
 }

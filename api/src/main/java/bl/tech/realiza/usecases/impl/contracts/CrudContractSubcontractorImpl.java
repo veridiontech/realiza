@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorRequestD
 import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudSubcontractor;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,12 +65,52 @@ public class CrudContractSubcontractorImpl implements CrudSubcontractor {
 
     @Override
     public Optional<ContractSubcontractorResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<ContractSubcontractor> contractSubcontractorOptional = contractSubcontractorRepository.findById(id);
+
+        ContractSubcontractor contractSubcontractor = contractSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
+
+        ContractSubcontractorResponseDto contractSubcontractorResponse = ContractSubcontractorResponseDto.builder()
+                .id_contract(contractSubcontractor.getId_contract())
+                .service_type(contractSubcontractor.getService_type())
+                .service_duration(contractSubcontractor.getService_duration())
+                .service_name(contractSubcontractor.getService_name())
+                .description(contractSubcontractor.getDescription())
+                .allocated_limit(contractSubcontractor.getAllocated_limit())
+                .start_date(contractSubcontractor.getStart_date())
+                .end_date(contractSubcontractor.getEnd_date())
+                // activity
+                // requirements
+                .contract_reference(contractSubcontractor.getContract_reference())
+                .providerSubcontractor(contractSubcontractor.getProviderSubcontractor().getId_provider())
+                .build();
+
+        return Optional.of(contractSubcontractorResponse);
     }
 
     @Override
     public Page<ContractSubcontractorResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<ContractSubcontractor> contractSubcontractorPage = contractSubcontractorRepository.findAll(pageable);
+
+        Page<ContractSubcontractorResponseDto> contractSubcontractorResponsePage = contractSubcontractorPage.map(
+                contractSubcontractor -> ContractSubcontractorResponseDto.builder()
+                        .id_contract(contractSubcontractor.getId_contract())
+                        .service_type(contractSubcontractor.getService_type())
+                        .service_duration(contractSubcontractor.getService_duration())
+                        .service_name(contractSubcontractor.getService_name())
+                        .description(contractSubcontractor.getDescription())
+                        .allocated_limit(contractSubcontractor.getAllocated_limit())
+                        .start_date(contractSubcontractor.getStart_date())
+                        .end_date(contractSubcontractor.getEnd_date())
+                        // activity
+                        // requirements
+                        .contract_reference(contractSubcontractor.getContract_reference())
+                        .providerSubcontractor(contractSubcontractor.getProviderSubcontractor().getId_provider())
+                        .build()
+        );
+
+        return contractSubcontractorResponsePage;
     }
 
     @Override
@@ -79,6 +120,6 @@ public class CrudContractSubcontractorImpl implements CrudSubcontractor {
 
     @Override
     public void delete(String id) {
-
+        contractSubcontractorRepository.deleteById(id);
     }
 }

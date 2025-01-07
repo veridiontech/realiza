@@ -69,12 +69,54 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Optional<UserClientResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserClientResponseDto userClientResponse = UserClientResponseDto.builder()
+                .cpf(userClient.getCpf())
+                .description(userClient.getDescription())
+                .password(userClient.getPassword())
+                .position(userClient.getPosition())
+                .role(userClient.getRole())
+                .firstName(userClient.getFirstName())
+                .timeZone(userClient.getTimeZone())
+                .surname(userClient.getSurname())
+                .email(userClient.getEmail())
+                .profilePicture(userClient.getProfilePicture())
+                .telephone(userClient.getTelephone())
+                .cellphone(userClient.getCellphone())
+                .client(userClient.getClient().getIdClient())
+                .build();
+
+        return Optional.of(userClientResponse);
     }
 
     @Override
     public Page<UserClientResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<UserClient> userClientPage = userClientRepository.findAll(pageable);
+
+        Page<UserClientResponseDto> userClientResponseDtoPage = userClientPage.map(
+                userClient -> UserClientResponseDto.builder()
+                        .cpf(userClient.getCpf())
+                        .description(userClient.getDescription())
+                        .password(userClient.getPassword())
+                        .position(userClient.getPosition())
+                        .role(userClient.getRole())
+                        .firstName(userClient.getFirstName())
+                        .timeZone(userClient.getTimeZone())
+                        .surname(userClient.getSurname())
+                        .email(userClient.getEmail())
+                        .profilePicture(userClient.getProfilePicture())
+                        .telephone(userClient.getTelephone())
+                        .cellphone(userClient.getCellphone())
+                        .client(userClient.getClient().getIdClient())
+                        .build()
+        );
+
+        return userClientResponseDtoPage;
     }
 
     @Override
@@ -84,6 +126,6 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public void delete(String id) {
-
+        userClientRepository.deleteById(id);
     }
 }

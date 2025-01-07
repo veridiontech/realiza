@@ -48,7 +48,22 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public Optional<ClientResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<Client> clientOptional = clientRepository.findById(id);
+
+        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+
+        ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .cnpj(client.getCnpj())
+                .tradeName(client.getTradeName())
+                .companyName(client.getCompanyName())
+                .email(client.getEmail())
+                .telephone(client.getTelephone())
+                .staff(client.getStaff())
+                .customers(client.getCustomers())
+                .build();
+
+        return Optional.of(clientResponse);
     }
 
     @Override

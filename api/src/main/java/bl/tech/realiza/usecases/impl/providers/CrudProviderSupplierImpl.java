@@ -48,12 +48,34 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public Optional<ProviderSupplierResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
+
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider not found"));
+
+        ProviderSupplierResponseDto providerSupplierResponse = ProviderSupplierResponseDto.builder()
+                .id_provider(providerSupplier.getId_provider())
+                .cnpj(providerSupplier.getCnpj())
+                .client(providerSupplier.getClient().getIdClient())
+                .build();
+
+        return Optional.of(providerSupplierResponse);
     }
 
     @Override
     public Page<ProviderSupplierResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAll(pageable);
+
+        Page<ProviderSupplierResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
+                providerSupplier -> ProviderSupplierResponseDto.builder()
+                        .id_provider(providerSupplier.getId_provider())
+                        .cnpj(providerSupplier.getCnpj())
+                        .client(providerSupplier.getClient().getIdClient())
+                        .build()
+        );
+
+        return providerSupplierResponseDtoPage;
     }
 
     @Override
@@ -63,6 +85,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public void delete(String id) {
-
+        providerSupplierRepository.deleteById(id);
     }
 }

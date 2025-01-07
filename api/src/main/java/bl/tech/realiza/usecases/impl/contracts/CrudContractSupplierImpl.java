@@ -57,17 +57,55 @@ public class CrudContractSupplierImpl implements CrudSupplier {
                 .providerSupplier(savedContractSupplier.getProviderSupplier().getId_provider())
                 .build();
 
-        return null;
+        return contractSupplierResponse;
     }
 
     @Override
     public Optional<ContractSupplierResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<ContractSupplier> contractSupplierOptional = contractSupplierRepository.findById(id);
+
+        ContractSupplier contractSupplier = contractSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+
+        ContractSupplierResponseDto contractSupplierResponse = ContractSupplierResponseDto.builder()
+                .id_contract(contractSupplier.getId_contract())
+                .service_type(contractSupplier.getService_type())
+                .service_duration(contractSupplier.getService_duration())
+                .service_name(contractSupplier.getService_name())
+                .description(contractSupplier.getDescription())
+                .allocated_limit(contractSupplier.getAllocated_limit())
+                .start_date(contractSupplier.getStart_date())
+                .end_date(contractSupplier.getEnd_date())
+                // activity
+                // requirements
+                .providerSupplier(contractSupplier.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(contractSupplierResponse);
     }
 
     @Override
     public Page<ContractSupplierResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<ContractSupplier> contractSupplierPage = contractSupplierRepository.findAll(pageable);
+
+        Page<ContractSupplierResponseDto> contractSupplierResponseDtoPage = contractSupplierPage.map(
+                contractSupplier -> ContractSupplierResponseDto.builder()
+                        .id_contract(contractSupplier.getId_contract())
+                        .service_type(contractSupplier.getService_type())
+                        .service_duration(contractSupplier.getService_duration())
+                        .service_name(contractSupplier.getService_name())
+                        .description(contractSupplier.getDescription())
+                        .allocated_limit(contractSupplier.getAllocated_limit())
+                        .start_date(contractSupplier.getStart_date())
+                        .end_date(contractSupplier.getEnd_date())
+                        // activity
+                        // requirements
+                        .providerSupplier(contractSupplier.getProviderSupplier().getId_provider())
+                        .build()
+        );
+
+        return contractSupplierResponseDtoPage;
     }
 
     @Override
@@ -77,6 +115,6 @@ public class CrudContractSupplierImpl implements CrudSupplier {
 
     @Override
     public void delete(String id) {
-
+        contractSupplierRepository.deleteById(id);
     }
 }

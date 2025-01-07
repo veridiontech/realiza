@@ -53,12 +53,40 @@ public class CrudDocumentSupplierImpl implements CrudDocumentSupplier {
 
     @Override
     public Optional<DocumentSupplierResponseDto> findOne(String id) {
-        return Optional.empty();
+
+        Optional<DocumentSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
+
+        DocumentSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
+
+        DocumentSupplierResponseDto documentSupplierResponse = DocumentSupplierResponseDto.builder()
+                .id_documentation(documentSupplier.getDocumentation())
+                .risk(documentSupplier.getRisk())
+                .status(documentSupplier.getStatus())
+                .documentation(documentSupplier.getDocumentation())
+                .creation_date(documentSupplier.getCreation_date())
+                .supplier(documentSupplier.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(documentSupplierResponse);
     }
 
     @Override
     public Page<DocumentSupplierResponseDto> findAll(Pageable pageable) {
-        return null;
+
+        Page<DocumentSupplier> documentSupplierPage = documentSupplierRepository.findAll(pageable);
+
+        Page<DocumentSupplierResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
+                documentSupplier -> DocumentSupplierResponseDto.builder()
+                        .id_documentation(documentSupplier.getDocumentation())
+                        .risk(documentSupplier.getRisk())
+                        .status(documentSupplier.getStatus())
+                        .documentation(documentSupplier.getDocumentation())
+                        .creation_date(documentSupplier.getCreation_date())
+                        .supplier(documentSupplier.getProviderSupplier().getId_provider())
+                        .build()
+        );
+
+        return documentSupplierResponseDtoPage;
     }
 
     @Override
@@ -68,6 +96,6 @@ public class CrudDocumentSupplierImpl implements CrudDocumentSupplier {
 
     @Override
     public void delete(String id) {
-
+        documentSupplierRepository.deleteById(id);
     }
 }
