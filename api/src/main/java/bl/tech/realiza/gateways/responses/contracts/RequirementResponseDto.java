@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class RequirementsResponseDto {
+public class RequirementResponseDto {
     private String idRequirement;
     private String title;
 }

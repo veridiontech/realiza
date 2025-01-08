@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.user;
 
-import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -16,8 +16,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@DiscriminatorValue("SUPPLIER")
-public class UserSupplier extends User {
+@DiscriminatorValue("SUBCONTRACTOR")
+public class UserProviderSubcontractor extends User {
     @ManyToOne
-    private ProviderSupplier providerSupplier;
+    private ProviderSubcontractor providerSubcontractor;
 }

@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.contract;
 
-import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,9 +15,8 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorValue("SUBCONTRACTOR")
-public class ContractSubcontractor extends Contract {
-    private String contract_reference;
+@DiscriminatorValue("SUPPLIER")
+public class ContractProviderSupplier extends Contract {
     @ManyToOne
-    private ProviderSubcontractor providerSubcontractor;
+    private ProviderSupplier providerSupplier;
 }
