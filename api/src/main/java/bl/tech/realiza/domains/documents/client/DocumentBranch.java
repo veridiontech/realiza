@@ -1,6 +1,7 @@
-package bl.tech.realiza.domains.user;
+package bl.tech.realiza.domains.documents.client;
 
-import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.documents.Document;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -10,14 +11,15 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@DiscriminatorValue("SUPPLIER")
-public class UserSupplier extends User {
+@DiscriminatorValue("BRANCH")
+public class DocumentBranch extends Document {
     @ManyToOne
-    private ProviderSupplier providerSupplier;
+    private Branch branch;
 }

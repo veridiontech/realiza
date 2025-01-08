@@ -1,14 +1,14 @@
-package bl.tech.realiza.domains.user;
+package bl.tech.realiza.domains.employees;
 
-import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.sql.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,8 +16,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@DiscriminatorValue("SUPPLIER")
-public class UserSupplier extends User {
-    @ManyToOne
-    private ProviderSupplier providerSupplier;
+@DiscriminatorValue("BRAZILIAN")
+public class EmployeeBrazilian extends Employee {
+    private String rg;
+    private Date admission_date;
 }
