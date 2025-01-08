@@ -18,7 +18,4 @@ public class Requirement {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idRequirement;
     private String title;
-
-    @ManyToMany
-    private List<Requirement> requirements;
 }

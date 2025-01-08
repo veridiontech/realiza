@@ -8,12 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
-public interface CrudEmployee {
-    EmployeeResponseDto saveBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
-    EmployeeResponseDto saveForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
+public interface CrudEmployeeForeigner {
+    EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     Optional<EmployeeResponseDto> findOne(String id);
     Page<EmployeeResponseDto> findAll(Pageable pageable);
-    Optional<EmployeeResponseDto> updateBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
-    Optional<EmployeeResponseDto> updateForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
+    Optional<EmployeeResponseDto> update(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     void delete(String id);
 }

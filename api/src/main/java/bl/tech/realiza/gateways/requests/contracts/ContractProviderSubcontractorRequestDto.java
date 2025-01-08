@@ -32,7 +32,7 @@ public class ContractProviderSubcontractorRequestDto {
     @NotEmpty
     private String providerSubcontractor;
     @NotEmpty
-    private List<Activity> activities;
+    private List<String> activities;
     @NotEmpty
-    private List<Requirement> requirements;
+    private List<String> requirements;
 }

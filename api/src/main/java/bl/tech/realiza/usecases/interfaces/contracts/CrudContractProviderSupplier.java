@@ -8,12 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
-public interface CrudContractProvider {
-    ContractProviderResponseDto saveSubcontractor(ContractProviderSubcontractorRequestDto contractProviderSubcontractorRequestDto);
-    ContractProviderResponseDto saveSupplier(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto);
+public interface CrudContractProviderSupplier {
+    ContractProviderResponseDto save(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto);
     Optional<ContractProviderResponseDto> findOne(String id);
     Page<ContractProviderResponseDto> findAll(Pageable pageable);
-    Optional<ContractProviderResponseDto> updateSubcontractor(ContractProviderSubcontractorRequestDto contractProviderSubcontractorRequestDto);
-    Optional<ContractProviderResponseDto> updateSupplier(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto);
+    Optional<ContractProviderResponseDto> update(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto);
     void delete(String id);
 }

@@ -28,7 +28,7 @@ public class ContractProviderSupplierRequestDto {
     @NotEmpty
     private String providerSupplier;
     @NotEmpty
-    private List<Activity> activities;
+    private List<String> activities;
     @NotEmpty
-    private List<Requirement> requirements;
+    private List<String> requirements;
 }
