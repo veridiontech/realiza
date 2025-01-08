@@ -1,0 +1,17 @@
+package bl.tech.realiza.gateways.controllers.interfaces.providers;
+
+import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
+import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Optional;
+
+public interface ProviderSupplierController {
+    ResponseEntity<ProviderResponseDto> createProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto);
+    ResponseEntity<Optional<ProviderResponseDto>> getOneProviderSupplier(String id);
+    ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplier(int page, int size, String sort, Sort.Direction direction);
+    ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto);
+    ResponseEntity<Void> deleteProviderSupplier(String id);
+}
