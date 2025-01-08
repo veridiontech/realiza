@@ -18,6 +18,7 @@ import { EditProfile } from "./pages/auth/profileEdit";
 import { ProfileUser } from "./pages/auth/profileUser/__profileUser";
 import { SelectClient } from "./pages/auth/selectClient";
 import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
+import { ServiceProvider } from "./pages/auth/ServiceProviders";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: "/", element: <SelectClient /> },
+      { path: "/dashboard", element: <Dashboard /> },
       { path: "/profileClient", element: <ProfileClient /> },
       { path: "/collaborators", element: <Collaborators /> },
       { path: "/bis", element: <MonittoringBis /> },
@@ -32,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "/editProfile", element: <EditProfile /> },
       { path: "/realizaHome", element: <RealizaHome /> },
       { path: "/selectClient", element: <SelectClient /> },
+      { path: "/serviceProviders", element: <ServiceProvider /> },
     ],
   },
   {
