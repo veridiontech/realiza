@@ -1,1 +1,18 @@
-spring.application.name=realiza
+# spring.application.name=realiza
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    # url: jdbc:h2:file:./data/testdb
+    # Banco de dados H2 em memória (mude para 'jdbc:h2:file:./data/testdb' para persistência em arquivo)
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true  # Habilita o console H2 para acessar a interface gráfica do banco
+      path: /h2-console  # Caminho padrão do console H2
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Cria e destrói o esquema do banco ao iniciar/parar a aplicação
+    show-sql: true  # Exibe as queries SQL no console
+    database-platform: org.hibernate.dialect.H2Dialect  # Dialeto do H2
