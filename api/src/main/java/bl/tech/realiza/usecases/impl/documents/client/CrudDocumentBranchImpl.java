@@ -32,19 +32,19 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .risk(documentBranchRequestDto.getRisk())
                 .status(documentBranchRequestDto.getStatus())
                 .documentation(documentBranchRequestDto.getDocumentation())
-                .creation_date(documentBranchRequestDto.getCreation_date())
+                .creationDate(documentBranchRequestDto.getCreationDate())
                 .branch(branch)
                 .build();
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(newDocumentBranch);
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentBranch.getId_documentation())
+                .idDocumentation(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
                 .risk(savedDocumentBranch.getRisk())
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
-                .creation_date(savedDocumentBranch.getCreation_date())
+                .creationDate(savedDocumentBranch.getCreationDate())
                 .branch(savedDocumentBranch.getBranch().getIdBranch())
                 .build();
 
@@ -58,12 +58,12 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .id_documentation(documentBranch.getId_documentation())
+                .idDocumentation(documentBranch.getIdDocumentation())
                 .title(documentBranch.getTitle())
                 .risk(documentBranch.getRisk())
                 .status(documentBranch.getStatus())
                 .documentation(documentBranch.getDocumentation())
-                .creation_date(documentBranch.getCreation_date())
+                .creationDate(documentBranch.getCreationDate())
                 .branch(documentBranch.getBranch().getIdBranch())
                 .build();
 
@@ -76,12 +76,12 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
                 documentBranch -> DocumentResponseDto.builder()
-                        .id_documentation(documentBranch.getId_documentation())
+                        .idDocumentation(documentBranch.getIdDocumentation())
                         .title(documentBranch.getTitle())
                         .risk(documentBranch.getRisk())
                         .status(documentBranch.getStatus())
                         .documentation(documentBranch.getDocumentation())
-                        .creation_date(documentBranch.getCreation_date())
+                        .creationDate(documentBranch.getCreationDate())
                         .branch(documentBranch.getBranch().getIdBranch())
                         .build()
         );
@@ -91,7 +91,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto) {
-        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(documentBranchRequestDto.getId_documentation());
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(documentBranchRequestDto.getIdDocumentation());
 
         DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
 
@@ -99,17 +99,17 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         documentBranch.setRisk(documentBranchRequestDto.getRisk() != null ? documentBranchRequestDto.getRisk() : documentBranch.getRisk());
         documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
         documentBranch.setDocumentation(documentBranchRequestDto.getDocumentation() != null ? documentBranchRequestDto.getDocumentation() : documentBranch.getDocumentation());
-        documentBranch.setCreation_date(documentBranchRequestDto.getCreation_date() != null ? documentBranchRequestDto.getCreation_date() : documentBranch.getCreation_date());
+        documentBranch.setCreationDate(documentBranchRequestDto.getCreationDate() != null ? documentBranchRequestDto.getCreationDate() : documentBranch.getCreationDate());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentBranch.getId_documentation())
+                .idDocumentation(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
                 .risk(savedDocumentBranch.getRisk())
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
-                .creation_date(savedDocumentBranch.getCreation_date())
+                .creationDate(savedDocumentBranch.getCreationDate())
                 .branch(savedDocumentBranch.getBranch().getIdBranch())
                 .build();
 

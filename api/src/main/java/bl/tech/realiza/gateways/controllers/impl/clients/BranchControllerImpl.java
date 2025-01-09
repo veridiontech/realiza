@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchControlller
 import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudBranchImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/branch")
+@Tag(name = "Branch")
 public class BranchControllerImpl implements BranchControlller {
 
     private final CrudBranchImpl crudBranch;
@@ -46,7 +48,7 @@ public class BranchControllerImpl implements BranchControlller {
     @Override
     public ResponseEntity<Page<BranchResponseDto>> getAllBranches(@RequestParam(defaultValue = "0") int page,
                                                                   @RequestParam(defaultValue = "5") int size,
-                                                                  @RequestParam(defaultValue = "id") String sort,
+                                                                  @RequestParam(defaultValue = "idBranch") String sort,
                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

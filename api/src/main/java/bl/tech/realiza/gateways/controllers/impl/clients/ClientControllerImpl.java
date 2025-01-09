@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/client")
+@Tag(name = "Client")
 public class ClientControllerImpl implements ClientControlller {
 
     private final CrudClientImpl crudClient;
@@ -47,7 +49,7 @@ public class ClientControllerImpl implements ClientControlller {
     @Override
     public ResponseEntity<Page<ClientResponseDto>> getAllClients(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "5") int size,
-                                                                 @RequestParam(defaultValue = "id") String sort,
+                                                                 @RequestParam(defaultValue = "idClient") String sort,
                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

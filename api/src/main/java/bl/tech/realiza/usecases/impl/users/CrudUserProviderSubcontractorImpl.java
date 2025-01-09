@@ -57,7 +57,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .profilePicture(savedUserSubcontractor.getProfilePicture())
                 .telephone(savedUserSubcontractor.getTelephone())
                 .cellphone(savedUserSubcontractor.getCellphone())
-                .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getId_provider())
+                .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return userSubcontractorResponse;
@@ -82,7 +82,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .profilePicture(userSubcontractor.getProfilePicture())
                 .telephone(userSubcontractor.getTelephone())
                 .cellphone(userSubcontractor.getCellphone())
-                .subcontractor(userSubcontractor.getProviderSubcontractor().getId_provider())
+                .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return Optional.of(userSubcontractorResponse);
@@ -106,7 +106,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                         .profilePicture(userSubcontractor.getProfilePicture())
                         .telephone(userSubcontractor.getTelephone())
                         .cellphone(userSubcontractor.getCellphone())
-                        .subcontractor(userSubcontractor.getProviderSubcontractor().getId_provider())
+                        .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
                         .build()
         );
 
@@ -147,7 +147,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .profilePicture(savedUserSubcontractor.getProfilePicture())
                 .telephone(savedUserSubcontractor.getTelephone())
                 .cellphone(savedUserSubcontractor.getCellphone())
-                .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getId_provider())
+                .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return Optional.of(userSubcontractorResponse);

@@ -58,7 +58,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .profilePicture(savedUserSupplier.getProfilePicture())
                 .telephone(savedUserSupplier.getTelephone())
                 .cellphone(savedUserSupplier.getCellphone())
-                .supplier(savedUserSupplier.getProviderSupplier().getId_provider())
+                .supplier(savedUserSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return userSupplierResponse;
@@ -83,7 +83,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .profilePicture(userProvider.getProfilePicture())
                 .telephone(userProvider.getTelephone())
                 .cellphone(userProvider.getCellphone())
-                .supplier(userProvider.getProviderSupplier().getId_provider())
+                .supplier(userProvider.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(userSupplierResponse);
@@ -107,7 +107,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                         .profilePicture(userProvider.getProfilePicture())
                         .telephone(userProvider.getTelephone())
                         .cellphone(userProvider.getCellphone())
-                        .supplier(userProvider.getProviderSupplier().getId_provider())
+                        .supplier(userProvider.getProviderSupplier().getIdProvider())
                         .build()
         );
 
@@ -148,7 +148,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .profilePicture(savedUserSupplier.getProfilePicture())
                 .telephone(savedUserSupplier.getTelephone())
                 .cellphone(savedUserSupplier.getCellphone())
-                .supplier(savedUserSupplier.getProviderSupplier().getId_provider())
+                .supplier(savedUserSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(userSupplierResponse);

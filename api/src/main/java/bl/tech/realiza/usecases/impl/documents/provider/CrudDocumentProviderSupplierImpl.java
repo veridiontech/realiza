@@ -32,20 +32,20 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .risk(documentProviderSupplierRequestDto.getRisk())
                 .status(documentProviderSupplierRequestDto.getStatus())
                 .documentation(documentProviderSupplierRequestDto.getDocumentation())
-                .creation_date(documentProviderSupplierRequestDto.getCreation_date())
+                .creationDate(documentProviderSupplierRequestDto.getCreationDate())
                 .providerSupplier(providerSupplier)
                 .build();
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(newDocumentSupplier);
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentSupplier.getDocumentation())
+                .idDocumentation(savedDocumentSupplier.getDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .risk(savedDocumentSupplier.getRisk())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
-                .creation_date(savedDocumentSupplier.getCreation_date())
-                .supplier(savedDocumentSupplier.getProviderSupplier().getId_provider())
+                .creationDate(savedDocumentSupplier.getCreationDate())
+                .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return documentSupplierResponse;
@@ -58,13 +58,13 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .id_documentation(documentSupplier.getDocumentation())
+                .idDocumentation(documentSupplier.getDocumentation())
                 .title(documentSupplier.getTitle())
                 .risk(documentSupplier.getRisk())
                 .status(documentSupplier.getStatus())
                 .documentation(documentSupplier.getDocumentation())
-                .creation_date(documentSupplier.getCreation_date())
-                .supplier(documentSupplier.getProviderSupplier().getId_provider())
+                .creationDate(documentSupplier.getCreationDate())
+                .supplier(documentSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(documentSupplierResponse);
@@ -76,13 +76,13 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> DocumentResponseDto.builder()
-                        .id_documentation(documentSupplier.getDocumentation())
+                        .idDocumentation(documentSupplier.getDocumentation())
                         .title(documentSupplier.getTitle())
                         .risk(documentSupplier.getRisk())
                         .status(documentSupplier.getStatus())
                         .documentation(documentSupplier.getDocumentation())
-                        .creation_date(documentSupplier.getCreation_date())
-                        .supplier(documentSupplier.getProviderSupplier().getId_provider())
+                        .creationDate(documentSupplier.getCreationDate())
+                        .supplier(documentSupplier.getProviderSupplier().getIdProvider())
                         .build()
         );
 
@@ -91,7 +91,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto) {
-        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(documentProviderSupplierRequestDto.getId_documentation());
+        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(documentProviderSupplierRequestDto.getIdDocumentation());
 
         DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
 
@@ -99,18 +99,18 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         documentSupplier.setRisk(documentProviderSupplierRequestDto.getRisk() != null ? documentProviderSupplierRequestDto.getRisk() : documentSupplier.getRisk());
         documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
         documentSupplier.setDocumentation(documentProviderSupplierRequestDto.getDocumentation() != null ? documentProviderSupplierRequestDto.getDocumentation() : documentSupplier.getDocumentation());
-        documentSupplier.setCreation_date(documentProviderSupplierRequestDto.getCreation_date() != null ? documentProviderSupplierRequestDto.getCreation_date() : documentSupplier.getCreation_date());
+        documentSupplier.setCreationDate(documentProviderSupplierRequestDto.getCreationDate() != null ? documentProviderSupplierRequestDto.getCreationDate() : documentSupplier.getCreationDate());
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentSupplier.getDocumentation())
+                .idDocumentation(savedDocumentSupplier.getDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .risk(savedDocumentSupplier.getRisk())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
-                .creation_date(savedDocumentSupplier.getCreation_date())
-                .supplier(savedDocumentSupplier.getProviderSupplier().getId_provider())
+                .creationDate(savedDocumentSupplier.getCreationDate())
+                .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(documentSupplierResponse);

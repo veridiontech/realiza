@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.clients.ContactControllle
 import bl.tech.realiza.gateways.requests.clients.ContactRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ContactResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudContactImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/contact")
+@Tag(name = "Contact")
 public class ContactControllerImpl implements ContactControlller {
 
     private final CrudContactImpl crudContact;
@@ -46,7 +48,7 @@ public class ContactControllerImpl implements ContactControlller {
     @Override
     public ResponseEntity<Page<ContactResponseDto>> getAllContacts(@RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "5") int size,
-                                                                   @RequestParam(defaultValue = "id") String sort,
+                                                                   @RequestParam(defaultValue = "idContact") String sort,
                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.users.NotificationControl
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudNotificationImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user/notification")
+@Tag(name = "Notification")
 public class NotificationControllerImpl implements NotificationController {
 
     private final CrudNotificationImpl crudNotification;
@@ -46,7 +48,7 @@ public class NotificationControllerImpl implements NotificationController {
     @Override
     public ResponseEntity<Page<NotificationResponseDto>> getAllNotifications(@RequestParam(defaultValue = "0") int page,
                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                             @RequestParam(defaultValue = "id") String sort,
+                                                                             @RequestParam(defaultValue = "idNotification") String sort,
                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

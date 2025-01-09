@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.client.Document
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentBranchImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/document/branch")
+@Tag(name = "Document Branch")
 public class DocumentBranchControllerImpl implements DocumentBranchControlller {
 
     private final CrudDocumentBranchImpl crudDocumentBranch;
@@ -46,7 +48,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranch(@RequestParam(defaultValue = "0") int page,
                                                                            @RequestParam(defaultValue = "5") int size,
-                                                                           @RequestParam(defaultValue = "id") String sort,
+                                                                           @RequestParam(defaultValue = "idDocumentation") String sort,
                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

@@ -32,19 +32,19 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 .risk(documentClientRequestDto.getRisk())
                 .status(documentClientRequestDto.getStatus())
                 .documentation(documentClientRequestDto.getDocumentation())
-                .creation_date(documentClientRequestDto.getCreation_date())
+                .creationDate(documentClientRequestDto.getCreationDate())
                 .client(client)
                 .build();
 
         DocumentClient savedDocumentClient = documentClientRepository.save(newDocumentClient);
 
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentClient.getId_documentation())
+                .idDocumentation(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
                 .risk(savedDocumentClient.getRisk())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
-                .creation_date(savedDocumentClient.getCreation_date())
+                .creationDate(savedDocumentClient.getCreationDate())
                 .client(savedDocumentClient.getClient().getIdClient())
                 .build();
 
@@ -58,12 +58,12 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
 
         DocumentResponseDto documentClientResponseDto = DocumentResponseDto.builder()
-                .id_documentation(documentClient.getId_documentation())
+                .idDocumentation(documentClient.getIdDocumentation())
                 .title(documentClient.getTitle())
                 .risk(documentClient.getRisk())
                 .status(documentClient.getStatus())
                 .documentation(documentClient.getDocumentation())
-                .creation_date(documentClient.getCreation_date())
+                .creationDate(documentClient.getCreationDate())
                 .client(documentClient.getClient().getIdClient())
                 .build();
 
@@ -76,12 +76,12 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         Page<DocumentResponseDto> documentClientResponseDtoPage = documentClientPage.map(
                 documentClient -> DocumentResponseDto.builder()
-                        .id_documentation(documentClient.getId_documentation())
+                        .idDocumentation(documentClient.getIdDocumentation())
                         .title(documentClient.getTitle())
                         .risk(documentClient.getRisk())
                         .status(documentClient.getStatus())
                         .documentation(documentClient.getDocumentation())
-                        .creation_date(documentClient.getCreation_date())
+                        .creationDate(documentClient.getCreationDate())
                         .client(documentClient.getClient().getIdClient())
                         .build()
         );
@@ -91,7 +91,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto) {
-        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(documentClientRequestDto.getId_documentation());
+        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(documentClientRequestDto.getIdDocumentation());
 
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
 
@@ -99,17 +99,17 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         documentClient.setRisk(documentClientRequestDto.getRisk() != null ? documentClientRequestDto.getRisk() : documentClient.getRisk());
         documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
         documentClient.setDocumentation(documentClientRequestDto.getDocumentation() != null ? documentClientRequestDto.getDocumentation() : documentClient.getDocumentation());
-        documentClient.setCreation_date(documentClientRequestDto.getCreation_date() != null ? documentClientRequestDto.getCreation_date() : documentClient.getCreation_date());
+        documentClient.setCreationDate(documentClientRequestDto.getCreationDate() != null ? documentClientRequestDto.getCreationDate() : documentClient.getCreationDate());
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentClient.getId_documentation())
+                .idDocumentation(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
                 .risk(savedDocumentClient.getRisk())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
-                .creation_date(savedDocumentClient.getCreation_date())
+                .creationDate(savedDocumentClient.getCreationDate())
                 .client(savedDocumentClient.getClient().getIdClient())
                 .build();
 

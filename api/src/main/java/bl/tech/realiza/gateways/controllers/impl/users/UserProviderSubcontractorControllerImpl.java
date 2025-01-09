@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.users.UserProviderSubcont
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserProviderSubcontractorImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user/subcontractor")
+@Tag(name = "User Subcontractor")
 public class UserProviderSubcontractorControllerImpl implements UserProviderSubcontractorController {
 
     private final CrudUserProviderSubcontractorImpl crudUserSubcontractor;
@@ -46,7 +48,7 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
     @Override
     public ResponseEntity<Page<UserResponseDto>> getAllUsersProviderSubcontractor(@RequestParam(defaultValue = "0") int page,
                                                                                   @RequestParam(defaultValue = "5") int size,
-                                                                                  @RequestParam(defaultValue = "id") String sort,
+                                                                                  @RequestParam(defaultValue = "idUser") String sort,
                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

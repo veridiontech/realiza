@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubc
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.provider.CrudDocumentProviderSubcontractorImpl;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/document/subcontractor")
+@Tag(name = "Document Subcontractor")
 public class DocumentProviderSubcontractorControllerImpl implements DocumentProviderSubcontractorControlller {
 
     private final CrudDocumentProviderSubcontractorImpl crudDocumentSubcontractor;
@@ -47,7 +49,7 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractor(@RequestParam(defaultValue = "0") int page,
                                                                                           @RequestParam(defaultValue = "5") int size,
-                                                                                          @RequestParam(defaultValue = "id") String sort,
+                                                                                          @RequestParam(defaultValue = "idDocumentation") String sort,
                                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

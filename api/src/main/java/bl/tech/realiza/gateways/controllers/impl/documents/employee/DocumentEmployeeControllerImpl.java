@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.employee.Docume
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.employee.CrudDocumentEmployeeImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/document/employee")
+@Tag(name = "Document Employee")
 public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlller {
 
     private final CrudDocumentEmployeeImpl crudDocumentEmployeeImpl;
@@ -46,7 +48,7 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployee(@RequestParam(defaultValue = "0") int page,
                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                             @RequestParam(defaultValue = "id") String sort,
+                                                                             @RequestParam(defaultValue = "idDocumentation") String sort,
                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

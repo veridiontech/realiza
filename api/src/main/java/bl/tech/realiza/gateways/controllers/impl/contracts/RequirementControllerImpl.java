@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.RequirementCont
 import bl.tech.realiza.gateways.requests.contracts.RequirementRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.RequirementResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudRequirementImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/contract/requirement")
+@Tag(name = "Requirement")
 public class RequirementControllerImpl implements RequirementControlller {
 
     private final CrudRequirementImpl crudRequirement;
@@ -46,7 +48,7 @@ public class RequirementControllerImpl implements RequirementControlller {
     @Override
     public ResponseEntity<Page<RequirementResponseDto>> getAllRequirements(@RequestParam(defaultValue = "0") int page,
                                                                            @RequestParam(defaultValue = "5") int size,
-                                                                           @RequestParam(defaultValue = "id") String sort,
+                                                                           @RequestParam(defaultValue = "idRequirement") String sort,
                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

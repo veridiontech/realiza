@@ -31,7 +31,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         EmployeeBrazilian newEmployeeBrazilian = EmployeeBrazilian.builder()
                 .pis(employeeBrazilianRequestDto.getPis())
-                .marital_status(employeeBrazilianRequestDto.getMarital_status())
+                .maritalStatus(employeeBrazilianRequestDto.getMaritalStatus())
                 .contract(employeeBrazilianRequestDto.getContract())
                 .cep(employeeBrazilianRequestDto.getCep())
                 .name(employeeBrazilianRequestDto.getName())
@@ -40,22 +40,22 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .country(employeeBrazilianRequestDto.getCountry())
                 .acronym(employeeBrazilianRequestDto.getAcronym())
                 .state(employeeBrazilianRequestDto.getState())
-                .birth_date(employeeBrazilianRequestDto.getBirth_date())
+                .birthDate(employeeBrazilianRequestDto.getBirthDate())
                 .city(employeeBrazilianRequestDto.getCity())
-                .postal_code(employeeBrazilianRequestDto.getPostal_code())
+                .postalCode(employeeBrazilianRequestDto.getPostalCode())
                 .gender(employeeBrazilianRequestDto.getGender())
                 .position(employeeBrazilianRequestDto.getPosition())
                 .registration(employeeBrazilianRequestDto.getRegistration())
                 .salary(employeeBrazilianRequestDto.getSalary())
                 .cellphone(employeeBrazilianRequestDto.getCellphone())
-                .platform_access(employeeBrazilianRequestDto.getPlatform_access())
+                .platformAccess(employeeBrazilianRequestDto.getPlatformAccess())
                 .telephone(employeeBrazilianRequestDto.getTelephone())
                 .directory(employeeBrazilianRequestDto.getDirectory())
                 .email(employeeBrazilianRequestDto.getEmail())
-                .level_of_education(employeeBrazilianRequestDto.getLevel_of_education())
+                .levelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation())
                 .cbo(employeeBrazilianRequestDto.getCbo())
                 .rg(employeeBrazilianRequestDto.getRg())
-                .admission_date(employeeBrazilianRequestDto.getAdmission_date())
+                .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
                 .build();
 
 
@@ -90,7 +90,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
                 .pis(savedEmployeeBrazilian.getPis())
-                .marital_status(savedEmployeeBrazilian.getMarital_status())
+                .maritalStatus(savedEmployeeBrazilian.getMaritalStatus())
                 .contract(savedEmployeeBrazilian.getContract())
                 .cep(savedEmployeeBrazilian.getCep())
                 .name(savedEmployeeBrazilian.getName())
@@ -99,25 +99,25 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())
                 .state(savedEmployeeBrazilian.getState())
-                .birth_date(savedEmployeeBrazilian.getBirth_date())
+                .birthDate(savedEmployeeBrazilian.getBirthDate())
                 .city(savedEmployeeBrazilian.getCity())
-                .postal_code(savedEmployeeBrazilian.getPostal_code())
+                .postalCode(savedEmployeeBrazilian.getPostalCode())
                 .gender(savedEmployeeBrazilian.getGender())
                 .position(savedEmployeeBrazilian.getPosition())
                 .registration(savedEmployeeBrazilian.getRegistration())
                 .salary(savedEmployeeBrazilian.getSalary())
                 .cellphone(savedEmployeeBrazilian.getCellphone())
-                .platform_access(savedEmployeeBrazilian.getPlatform_access())
+                .platformAccess(savedEmployeeBrazilian.getPlatformAccess())
                 .telephone(savedEmployeeBrazilian.getTelephone())
                 .directory(savedEmployeeBrazilian.getDirectory())
                 .email(savedEmployeeBrazilian.getEmail())
-                .level_of_education(savedEmployeeBrazilian.getLevel_of_education())
+                .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
                 .cbo(savedEmployeeBrazilian.getCbo())
                 .rg(savedEmployeeBrazilian.getRg())
-                .admission_date(savedEmployeeBrazilian.getAdmission_date())
+                .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .client(savedEmployeeBrazilian.getClient().getIdClient())
-                .supplier(savedEmployeeBrazilian.getSupplier().getId_provider())
-                .subcontract(savedEmployeeBrazilian.getSubcontract().getId_provider())
+                .supplier(savedEmployeeBrazilian.getSupplier().getIdProvider())
+                .subcontract(savedEmployeeBrazilian.getSubcontract().getIdProvider())
                 .build();
 
         return employeeBrazilianResponse;
@@ -131,7 +131,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
                 .pis(employeeBrazilian.getPis())
-                .marital_status(employeeBrazilian.getMarital_status())
+                .maritalStatus(employeeBrazilian.getMaritalStatus())
                 .contract(employeeBrazilian.getContract())
                 .cep(employeeBrazilian.getCep())
                 .name(employeeBrazilian.getName())
@@ -140,25 +140,25 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .country(employeeBrazilian.getCountry())
                 .acronym(employeeBrazilian.getAcronym())
                 .state(employeeBrazilian.getState())
-                .birth_date(employeeBrazilian.getBirth_date())
+                .birthDate(employeeBrazilian.getBirthDate())
                 .city(employeeBrazilian.getCity())
-                .postal_code(employeeBrazilian.getPostal_code())
+                .postalCode(employeeBrazilian.getPostalCode())
                 .gender(employeeBrazilian.getGender())
                 .position(employeeBrazilian.getPosition())
                 .registration(employeeBrazilian.getRegistration())
                 .salary(employeeBrazilian.getSalary())
                 .cellphone(employeeBrazilian.getCellphone())
-                .platform_access(employeeBrazilian.getPlatform_access())
+                .platformAccess(employeeBrazilian.getPlatformAccess())
                 .telephone(employeeBrazilian.getTelephone())
                 .directory(employeeBrazilian.getDirectory())
                 .email(employeeBrazilian.getEmail())
-                .level_of_education(employeeBrazilian.getLevel_of_education())
+                .levelOfEducation(employeeBrazilian.getLevelOfEducation())
                 .cbo(employeeBrazilian.getCbo())
                 .rg(employeeBrazilian.getRg())
-                .admission_date(employeeBrazilian.getAdmission_date())
+                .admissionDate(employeeBrazilian.getAdmissionDate())
                 .client(employeeBrazilian.getClient().getIdClient())
-                .supplier(employeeBrazilian.getSupplier().getId_provider())
-                .subcontract(employeeBrazilian.getSubcontract().getId_provider())
+                .supplier(employeeBrazilian.getSupplier().getIdProvider())
+                .subcontract(employeeBrazilian.getSubcontract().getIdProvider())
                 .build();
 
         return Optional.of(employeeBrazilianResponse);
@@ -171,7 +171,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         Page<EmployeeResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
                 employeeBrazilian -> EmployeeResponseDto.builder()
                         .pis(employeeBrazilian.getPis())
-                        .marital_status(employeeBrazilian.getMarital_status())
+                        .maritalStatus(employeeBrazilian.getMaritalStatus())
                         .contract(employeeBrazilian.getContract())
                         .cep(employeeBrazilian.getCep())
                         .name(employeeBrazilian.getName())
@@ -180,25 +180,25 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                         .country(employeeBrazilian.getCountry())
                         .acronym(employeeBrazilian.getAcronym())
                         .state(employeeBrazilian.getState())
-                        .birth_date(employeeBrazilian.getBirth_date())
+                        .birthDate(employeeBrazilian.getBirthDate())
                         .city(employeeBrazilian.getCity())
-                        .postal_code(employeeBrazilian.getPostal_code())
+                        .postalCode(employeeBrazilian.getPostalCode())
                         .gender(employeeBrazilian.getGender())
                         .position(employeeBrazilian.getPosition())
                         .registration(employeeBrazilian.getRegistration())
                         .salary(employeeBrazilian.getSalary())
                         .cellphone(employeeBrazilian.getCellphone())
-                        .platform_access(employeeBrazilian.getPlatform_access())
+                        .platformAccess(employeeBrazilian.getPlatformAccess())
                         .telephone(employeeBrazilian.getTelephone())
                         .directory(employeeBrazilian.getDirectory())
                         .email(employeeBrazilian.getEmail())
-                        .level_of_education(employeeBrazilian.getLevel_of_education())
+                        .levelOfEducation(employeeBrazilian.getLevelOfEducation())
                         .cbo(employeeBrazilian.getCbo())
                         .rg(employeeBrazilian.getRg())
-                        .admission_date(employeeBrazilian.getAdmission_date())
+                        .admissionDate(employeeBrazilian.getAdmissionDate())
                         .client(employeeBrazilian.getClient().getIdClient())
-                        .supplier(employeeBrazilian.getSupplier().getId_provider())
-                        .subcontract(employeeBrazilian.getSubcontract().getId_provider())
+                        .supplier(employeeBrazilian.getSupplier().getIdProvider())
+                        .subcontract(employeeBrazilian.getSubcontract().getIdProvider())
                         .build()
         );
 
@@ -207,12 +207,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public Optional<EmployeeResponseDto> update(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
-        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(employeeBrazilianRequestDto.getId_employee());
+        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(employeeBrazilianRequestDto.getIdEmployee());
 
         EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
 
         employeeBrazilian.setPis(employeeBrazilianRequestDto.getPis() != null ? employeeBrazilianRequestDto.getPis() : employeeBrazilian.getPis());
-        employeeBrazilian.setMarital_status(employeeBrazilianRequestDto.getMarital_status() != null ? employeeBrazilianRequestDto.getMarital_status() : employeeBrazilian.getMarital_status());
+        employeeBrazilian.setMaritalStatus(employeeBrazilianRequestDto.getMaritalStatus() != null ? employeeBrazilianRequestDto.getMaritalStatus() : employeeBrazilian.getMaritalStatus());
         employeeBrazilian.setContract(employeeBrazilianRequestDto.getContract() != null ? employeeBrazilianRequestDto.getContract() : employeeBrazilian.getContract());
         employeeBrazilian.setCep(employeeBrazilianRequestDto.getCep() != null ? employeeBrazilianRequestDto.getCep() : employeeBrazilian.getCep());
         employeeBrazilian.setName(employeeBrazilianRequestDto.getName() != null ? employeeBrazilianRequestDto.getName() : employeeBrazilian.getName());
@@ -221,28 +221,28 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setCountry(employeeBrazilianRequestDto.getCountry() != null ? employeeBrazilianRequestDto.getCountry() : employeeBrazilian.getCountry());
         employeeBrazilian.setAcronym(employeeBrazilianRequestDto.getAcronym() != null ? employeeBrazilianRequestDto.getAcronym() : employeeBrazilian.getAcronym());
         employeeBrazilian.setState(employeeBrazilianRequestDto.getState() != null ? employeeBrazilianRequestDto.getState() : employeeBrazilian.getState());
-        employeeBrazilian.setBirth_date(employeeBrazilianRequestDto.getBirth_date() != null ? employeeBrazilianRequestDto.getBirth_date() : employeeBrazilian.getBirth_date());
+        employeeBrazilian.setBirthDate(employeeBrazilianRequestDto.getBirthDate() != null ? employeeBrazilianRequestDto.getBirthDate() : employeeBrazilian.getBirthDate());
         employeeBrazilian.setCity(employeeBrazilianRequestDto.getCity() != null ? employeeBrazilianRequestDto.getCity() : employeeBrazilian.getCity());
-        employeeBrazilian.setPostal_code(employeeBrazilianRequestDto.getPostal_code() != null ? employeeBrazilianRequestDto.getPostal_code() : employeeBrazilian.getPostal_code());
+        employeeBrazilian.setPostalCode(employeeBrazilianRequestDto.getPostalCode() != null ? employeeBrazilianRequestDto.getPostalCode() : employeeBrazilian.getPostalCode());
         employeeBrazilian.setGender(employeeBrazilianRequestDto.getGender() != null ? employeeBrazilianRequestDto.getGender() : employeeBrazilian.getGender());
         employeeBrazilian.setPosition(employeeBrazilianRequestDto.getPosition() != null ? employeeBrazilianRequestDto.getPosition() : employeeBrazilian.getPosition());
         employeeBrazilian.setRegistration(employeeBrazilianRequestDto.getRegistration() != null ? employeeBrazilianRequestDto.getRegistration() : employeeBrazilian.getRegistration());
         employeeBrazilian.setSalary(employeeBrazilianRequestDto.getSalary() != null ? employeeBrazilianRequestDto.getSalary() : employeeBrazilian.getSalary());
         employeeBrazilian.setCellphone(employeeBrazilianRequestDto.getCellphone() != null ? employeeBrazilianRequestDto.getCellphone() : employeeBrazilian.getCellphone());
-        employeeBrazilian.setPlatform_access(employeeBrazilianRequestDto.getPlatform_access() != null ? employeeBrazilianRequestDto.getPlatform_access() : employeeBrazilian.getPlatform_access());
+        employeeBrazilian.setPlatformAccess(employeeBrazilianRequestDto.getPlatformAccess() != null ? employeeBrazilianRequestDto.getPlatformAccess() : employeeBrazilian.getPlatformAccess());
         employeeBrazilian.setTelephone(employeeBrazilianRequestDto.getTelephone() != null ? employeeBrazilianRequestDto.getTelephone() : employeeBrazilian.getTelephone());
         employeeBrazilian.setDirectory(employeeBrazilianRequestDto.getDirectory() != null ? employeeBrazilianRequestDto.getDirectory() : employeeBrazilian.getDirectory());
         employeeBrazilian.setEmail(employeeBrazilianRequestDto.getEmail() != null ? employeeBrazilianRequestDto.getEmail() : employeeBrazilian.getEmail());
-        employeeBrazilian.setLevel_of_education(employeeBrazilianRequestDto.getLevel_of_education() != null ? employeeBrazilianRequestDto.getLevel_of_education() : employeeBrazilian.getLevel_of_education());
+        employeeBrazilian.setLevelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation() != null ? employeeBrazilianRequestDto.getLevelOfEducation() : employeeBrazilian.getLevelOfEducation());
         employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCbo() != null ? employeeBrazilianRequestDto.getCbo() : employeeBrazilian.getCbo());
         employeeBrazilian.setRg(employeeBrazilianRequestDto.getRg() != null ? employeeBrazilianRequestDto.getRg() : employeeBrazilian.getRg());
-        employeeBrazilian.setAdmission_date(employeeBrazilianRequestDto.getAdmission_date() != null ? employeeBrazilianRequestDto.getAdmission_date() : employeeBrazilian.getAdmission_date());
+        employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
 
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(employeeBrazilian);
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
                 .pis(savedEmployeeBrazilian.getPis())
-                .marital_status(savedEmployeeBrazilian.getMarital_status())
+                .maritalStatus(savedEmployeeBrazilian.getMaritalStatus())
                 .contract(savedEmployeeBrazilian.getContract())
                 .cep(savedEmployeeBrazilian.getCep())
                 .name(savedEmployeeBrazilian.getName())
@@ -251,25 +251,25 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())
                 .state(savedEmployeeBrazilian.getState())
-                .birth_date(savedEmployeeBrazilian.getBirth_date())
+                .birthDate(savedEmployeeBrazilian.getBirthDate())
                 .city(savedEmployeeBrazilian.getCity())
-                .postal_code(savedEmployeeBrazilian.getPostal_code())
+                .postalCode(savedEmployeeBrazilian.getPostalCode())
                 .gender(savedEmployeeBrazilian.getGender())
                 .position(savedEmployeeBrazilian.getPosition())
                 .registration(savedEmployeeBrazilian.getRegistration())
                 .salary(savedEmployeeBrazilian.getSalary())
                 .cellphone(savedEmployeeBrazilian.getCellphone())
-                .platform_access(savedEmployeeBrazilian.getPlatform_access())
+                .platformAccess(savedEmployeeBrazilian.getPlatformAccess())
                 .telephone(savedEmployeeBrazilian.getTelephone())
                 .directory(savedEmployeeBrazilian.getDirectory())
                 .email(savedEmployeeBrazilian.getEmail())
-                .level_of_education(savedEmployeeBrazilian.getLevel_of_education())
+                .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
                 .cbo(savedEmployeeBrazilian.getCbo())
                 .rg(savedEmployeeBrazilian.getRg())
-                .admission_date(savedEmployeeBrazilian.getAdmission_date())
+                .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .client(savedEmployeeBrazilian.getClient().getIdClient())
-                .supplier(savedEmployeeBrazilian.getSupplier().getId_provider())
-                .subcontract(savedEmployeeBrazilian.getSubcontract().getId_provider())
+                .supplier(savedEmployeeBrazilian.getSupplier().getIdProvider())
+                .subcontract(savedEmployeeBrazilian.getSubcontract().getIdProvider())
                 .build();
 
         return Optional.of(employeeBrazilianResponse);

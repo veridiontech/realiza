@@ -32,20 +32,20 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .risk(documentProviderSubcontractorRequestDto.getRisk())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
                 .documentation(documentProviderSubcontractorRequestDto.getDocumentation())
-                .creation_date(documentProviderSubcontractorRequestDto.getCreation_date())
+                .creationDate(documentProviderSubcontractorRequestDto.getCreationDate())
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(newDocumentSubcontractor);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentSubcontractor.getDocumentation())
+                .idDocumentation(savedDocumentSubcontractor.getDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .risk(savedDocumentSubcontractor.getRisk())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
-                .creation_date(savedDocumentSubcontractor.getCreation_date())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getId_provider())
+                .creationDate(savedDocumentSubcontractor.getCreationDate())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return documentSubcontractorResponse;
@@ -58,13 +58,13 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .id_documentation(documentSubcontractor.getDocumentation())
+                .idDocumentation(documentSubcontractor.getDocumentation())
                 .title(documentSubcontractor.getTitle())
                 .risk(documentSubcontractor.getRisk())
                 .status(documentSubcontractor.getStatus())
                 .documentation(documentSubcontractor.getDocumentation())
-                .creation_date(documentSubcontractor.getCreation_date())
-                .subcontractor(documentSubcontractor.getProviderSubcontractor().getId_provider())
+                .creationDate(documentSubcontractor.getCreationDate())
+                .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return Optional.of(documentSubcontractorResponse);
@@ -76,13 +76,13 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
                 documentSubcontractor -> DocumentResponseDto.builder()
-                        .id_documentation(documentSubcontractor.getDocumentation())
+                        .idDocumentation(documentSubcontractor.getDocumentation())
                         .title(documentSubcontractor.getTitle())
                         .risk(documentSubcontractor.getRisk())
                         .status(documentSubcontractor.getStatus())
                         .documentation(documentSubcontractor.getDocumentation())
-                        .creation_date(documentSubcontractor.getCreation_date())
-                        .subcontractor(documentSubcontractor.getProviderSubcontractor().getId_provider())
+                        .creationDate(documentSubcontractor.getCreationDate())
+                        .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
                         .build()
         );
 
@@ -91,7 +91,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto) {
-        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getId_documentation());
+        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getIdDocumentation());
 
         DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
 
@@ -99,18 +99,18 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         documentSubcontractor.setRisk(documentProviderSubcontractorRequestDto.getRisk() != null ? documentProviderSubcontractorRequestDto.getRisk() : documentSubcontractor.getRisk());
         documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
         documentSubcontractor.setDocumentation(documentProviderSubcontractorRequestDto.getDocumentation() != null ? documentProviderSubcontractorRequestDto.getDocumentation() : documentSubcontractor.getDocumentation());
-        documentSubcontractor.setCreation_date(documentProviderSubcontractorRequestDto.getCreation_date() != null ? documentProviderSubcontractorRequestDto.getCreation_date() : documentSubcontractor.getCreation_date());
+        documentSubcontractor.setCreationDate(documentProviderSubcontractorRequestDto.getCreationDate() != null ? documentProviderSubcontractorRequestDto.getCreationDate() : documentSubcontractor.getCreationDate());
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentSubcontractor.getDocumentation())
+                .idDocumentation(savedDocumentSubcontractor.getDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .risk(savedDocumentSubcontractor.getRisk())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
-                .creation_date(savedDocumentSubcontractor.getCreation_date())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getId_provider())
+                .creationDate(savedDocumentSubcontractor.getCreationDate())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return Optional.of(documentSubcontractorResponse);

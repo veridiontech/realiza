@@ -5,10 +5,8 @@ import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
-import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.contracts.ContractProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractProviderResponseDto;
@@ -47,13 +45,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         }
 
         ContractProviderSupplier newContractSupplier = ContractProviderSupplier.builder()
-                .service_type(contractProviderSupplierRequestDto.getService_type())
-                .service_duration(contractProviderSupplierRequestDto.getService_duration())
-                .service_name(contractProviderSupplierRequestDto.getService_name())
+                .serviceType(contractProviderSupplierRequestDto.getServiceType())
+                .serviceDuration(contractProviderSupplierRequestDto.getServiceDuration())
+                .serviceName(contractProviderSupplierRequestDto.getServiceName())
                 .description(contractProviderSupplierRequestDto.getDescription())
-                .allocated_limit(contractProviderSupplierRequestDto.getAllocated_limit())
-                .start_date(contractProviderSupplierRequestDto.getStart_date())
-                .end_date(contractProviderSupplierRequestDto.getEnd_date())
+                .allocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit())
+                .startDate(contractProviderSupplierRequestDto.getStartDate())
+                .endDate(contractProviderSupplierRequestDto.getEndDate())
                 .activities(activities)
                 .requirements(requirements)
                 .providerSupplier(providerSupplier)
@@ -62,17 +60,17 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(newContractSupplier);
 
         ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
-                .id_contract(savedContractProviderSupplier.getId_contract())
-                .service_type(savedContractProviderSupplier.getService_type())
-                .service_duration(savedContractProviderSupplier.getService_duration())
-                .service_name(savedContractProviderSupplier.getService_name())
+                .idContract(savedContractProviderSupplier.getIdContract())
+                .serviceType(savedContractProviderSupplier.getServiceType())
+                .serviceDuration(savedContractProviderSupplier.getServiceDuration())
+                .serviceName(savedContractProviderSupplier.getServiceName())
                 .description(savedContractProviderSupplier.getDescription())
-                .allocated_limit(savedContractProviderSupplier.getAllocated_limit())
-                .start_date(savedContractProviderSupplier.getStart_date())
-                .end_date(savedContractProviderSupplier.getEnd_date())
+                .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
+                .startDate(savedContractProviderSupplier.getStartDate())
+                .endDate(savedContractProviderSupplier.getEndDate())
                 .activities(savedContractProviderSupplier.getActivities())
                 .requirements(savedContractProviderSupplier.getRequirements())
-                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getId_provider())
+                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return contractProviderResponseDto;
@@ -85,17 +83,17 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
 
         ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
-                .id_contract(contractProviderSupplier.getId_contract())
-                .service_type(contractProviderSupplier.getService_type())
-                .service_duration(contractProviderSupplier.getService_duration())
-                .service_name(contractProviderSupplier.getService_name())
+                .idContract(contractProviderSupplier.getIdContract())
+                .serviceType(contractProviderSupplier.getServiceType())
+                .serviceDuration(contractProviderSupplier.getServiceDuration())
+                .serviceName(contractProviderSupplier.getServiceName())
                 .description(contractProviderSupplier.getDescription())
-                .allocated_limit(contractProviderSupplier.getAllocated_limit())
-                .start_date(contractProviderSupplier.getStart_date())
-                .end_date(contractProviderSupplier.getEnd_date())
+                .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                .startDate(contractProviderSupplier.getStartDate())
+                .endDate(contractProviderSupplier.getEndDate())
                 .activities(contractProviderSupplier.getActivities())
                 .requirements(contractProviderSupplier.getRequirements())
-                .providerSupplier(contractProviderSupplier.getProviderSupplier().getId_provider())
+                .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(contractProviderResponseDto);
@@ -107,17 +105,17 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         Page<ContractProviderResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractProviderResponseDto.builder()
-                        .id_contract(contractProviderSupplier.getId_contract())
-                        .service_type(contractProviderSupplier.getService_type())
-                        .service_duration(contractProviderSupplier.getService_duration())
-                        .service_name(contractProviderSupplier.getService_name())
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceDuration(contractProviderSupplier.getServiceDuration())
+                        .serviceName(contractProviderSupplier.getServiceName())
                         .description(contractProviderSupplier.getDescription())
-                        .allocated_limit(contractProviderSupplier.getAllocated_limit())
-                        .start_date(contractProviderSupplier.getStart_date())
-                        .end_date(contractProviderSupplier.getEnd_date())
+                        .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .startDate(contractProviderSupplier.getStartDate())
+                        .endDate(contractProviderSupplier.getEndDate())
                         .activities(contractProviderSupplier.getActivities())
                         .requirements(contractProviderSupplier.getRequirements())
-                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getId_provider())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
                         .build()
         );
 
@@ -126,7 +124,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Optional<ContractProviderResponseDto> update(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto) {
-        Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getId_contract());
+        Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getIdContract());
 
         ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
 
@@ -147,30 +145,30 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             }
         }
 
-        contractProviderSupplier.setService_type(contractProviderSupplierRequestDto.getService_type() != null ? contractProviderSupplierRequestDto.getService_type() : contractProviderSupplier.getService_type());
-        contractProviderSupplier.setService_duration(contractProviderSupplierRequestDto.getService_duration() != null ? contractProviderSupplierRequestDto.getService_duration() : contractProviderSupplier.getService_duration());
-        contractProviderSupplier.setService_name(contractProviderSupplierRequestDto.getService_name() != null ? contractProviderSupplierRequestDto.getService_name() : contractProviderSupplier.getService_name());
+        contractProviderSupplier.setServiceType(contractProviderSupplierRequestDto.getServiceType() != null ? contractProviderSupplierRequestDto.getServiceType() : contractProviderSupplier.getServiceType());
+        contractProviderSupplier.setServiceDuration(contractProviderSupplierRequestDto.getServiceDuration() != null ? contractProviderSupplierRequestDto.getServiceDuration() : contractProviderSupplier.getServiceDuration());
+        contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());
         contractProviderSupplier.setDescription(contractProviderSupplierRequestDto.getDescription() != null ? contractProviderSupplierRequestDto.getDescription() : contractProviderSupplier.getDescription());
-        contractProviderSupplier.setAllocated_limit(contractProviderSupplierRequestDto.getAllocated_limit() != null ? contractProviderSupplierRequestDto.getAllocated_limit() : contractProviderSupplier.getAllocated_limit());
-        contractProviderSupplier.setStart_date(contractProviderSupplierRequestDto.getStart_date() != null ? contractProviderSupplierRequestDto.getStart_date() : contractProviderSupplier.getStart_date());
-        contractProviderSupplier.setEnd_date(contractProviderSupplierRequestDto.getEnd_date() != null ? contractProviderSupplierRequestDto.getEnd_date() : contractProviderSupplier.getEnd_date());
+        contractProviderSupplier.setAllocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit() != null ? contractProviderSupplierRequestDto.getAllocatedLimit() : contractProviderSupplier.getAllocatedLimit());
+        contractProviderSupplier.setStartDate(contractProviderSupplierRequestDto.getStartDate() != null ? contractProviderSupplierRequestDto.getStartDate() : contractProviderSupplier.getStartDate());
+        contractProviderSupplier.setEndDate(contractProviderSupplierRequestDto.getEndDate() != null ? contractProviderSupplierRequestDto.getEndDate() : contractProviderSupplier.getEndDate());
         contractProviderSupplier.setActivities(contractProviderSupplierRequestDto.getActivities() != null ? activities : contractProviderSupplier.getActivities());
         contractProviderSupplier.setRequirements(contractProviderSupplierRequestDto.getRequirements() != null ? requirements : contractProviderSupplier.getRequirements());
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(contractProviderSupplier);
 
         ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
-                .id_contract(savedContractProviderSupplier.getId_contract())
-                .service_type(savedContractProviderSupplier.getService_type())
-                .service_duration(savedContractProviderSupplier.getService_duration())
-                .service_name(savedContractProviderSupplier.getService_name())
+                .idContract(savedContractProviderSupplier.getIdContract())
+                .serviceType(savedContractProviderSupplier.getServiceType())
+                .serviceDuration(savedContractProviderSupplier.getServiceDuration())
+                .serviceName(savedContractProviderSupplier.getServiceName())
                 .description(savedContractProviderSupplier.getDescription())
-                .allocated_limit(savedContractProviderSupplier.getAllocated_limit())
-                .start_date(savedContractProviderSupplier.getStart_date())
-                .end_date(savedContractProviderSupplier.getEnd_date())
+                .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
+                .startDate(savedContractProviderSupplier.getStartDate())
+                .endDate(savedContractProviderSupplier.getEndDate())
                 .activities(savedContractProviderSupplier.getActivities())
                 .requirements(savedContractProviderSupplier.getRequirements())
-                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getId_provider())
+                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(contractProviderResponseDto);

@@ -19,28 +19,28 @@ import java.util.List;
 public abstract class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id_contract;
-    private String service_type;
-    private String service_duration;
-    private String service_name;
+    private String idContract;
+    private String serviceType;
+    private String serviceDuration;
+    private String serviceName;
     private String description;
-    private String allocated_limit;
-    private Date start_date;
-    private Date end_date;
+    private String allocatedLimit;
+    private Date startDate;
+    private Date endDate;
 
     @ManyToMany
     @JoinTable(
             name = "CONTRACT_ACTIVITIES",
-            joinColumns = @JoinColumn(name = "contract_id"),
-            inverseJoinColumns = @JoinColumn(name = "activity_id")
+            joinColumns = @JoinColumn(name = "idContract"),
+            inverseJoinColumns = @JoinColumn(name = "idActivity")
     )
     private List<Activity> activities;
 
     @ManyToMany
     @JoinTable(
             name = "CONTRACT_REQUIREMENTS",
-            joinColumns = @JoinColumn(name = "contract_id"),
-            inverseJoinColumns = @JoinColumn(name = "requirement_id")
+            joinColumns = @JoinColumn(name = "idContract"),
+            inverseJoinColumns = @JoinColumn(name = "idRequirement")
     )
     private List<Requirement> requirements;
 }

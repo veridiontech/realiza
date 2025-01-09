@@ -19,5 +19,5 @@ import java.sql.Date;
 @DiscriminatorValue("BRAZILIAN")
 public class EmployeeBrazilian extends Employee {
     private String rg;
-    private Date admission_date;
+    private Date admissionDate;
 }

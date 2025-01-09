@@ -11,12 +11,12 @@ import java.sql.Date;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DocumentResponseDto {
     // document
-    private String id_documentation;
+    private String idDocumentation;
     private String title;
     private String risk;
     private String status;
     private String documentation;
-    private Date creation_date;
+    private Date creationDate;
 
     // branch
     private String branch;

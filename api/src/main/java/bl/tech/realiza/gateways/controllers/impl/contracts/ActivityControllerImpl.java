@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityControl
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/contract/activity")
+@Tag(name = "Activity")
 public class ActivityControllerImpl implements ActivityControlller {
 
     private final CrudActivityImpl crudActivity;
@@ -46,7 +48,7 @@ public class ActivityControllerImpl implements ActivityControlller {
     @Override
     public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(@RequestParam(defaultValue = "0") int page,
                                                                       @RequestParam(defaultValue = "5") int size,
-                                                                      @RequestParam(defaultValue = "id") String sort,
+                                                                      @RequestParam(defaultValue = "idActivity") String sort,
                                                                       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.employees.EmployeeBrazili
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeBrazilianImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/employee/brazilian")
+@Tag(name = "Brazilian")
 public class EmpolyeeBrazilianControllerImpl implements EmployeeBrazilianControlller {
 
     private final CrudEmployeeBrazilianImpl crudEmployeeBrazilian;
@@ -46,7 +48,7 @@ public class EmpolyeeBrazilianControllerImpl implements EmployeeBrazilianControl
     @Override
     public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesBrazilian(@RequestParam(defaultValue = "0") int page,
                                                                               @RequestParam(defaultValue = "5") int size,
-                                                                              @RequestParam(defaultValue = "id") String sort,
+                                                                              @RequestParam(defaultValue = "idEmployee") String sort,
                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

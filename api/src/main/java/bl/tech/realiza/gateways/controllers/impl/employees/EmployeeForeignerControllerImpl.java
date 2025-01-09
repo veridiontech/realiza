@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeForeignerImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/employee/foreigner")
+@Tag(name = "Foreigner")
 public class EmployeeForeignerControllerImpl implements EmployeeForeignerController {
 
     private final CrudEmployeeForeignerImpl crudEmployeeForeigner;
@@ -47,7 +49,7 @@ public class EmployeeForeignerControllerImpl implements EmployeeForeignerControl
     @Override
     public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesForeigner(@RequestParam(defaultValue = "0") int page,
                                                                               @RequestParam(defaultValue = "5") int size,
-                                                                              @RequestParam(defaultValue = "id") String sort,
+                                                                              @RequestParam(defaultValue = "idEmployee") String sort,
                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

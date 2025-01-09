@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProvide
 import bl.tech.realiza.gateways.requests.contracts.ContractProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractProviderResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudContractProviderSupplierImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/contract/supplier")
+@Tag(name = "Contract Supplier")
 public class ContractProviderSupplierControllerImpl implements ContractProviderSupplierControlller {
 
     private final CrudContractProviderSupplierImpl crudSupplier;
@@ -47,7 +49,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Override
     public ResponseEntity<Page<ContractProviderResponseDto>> getAllContractsProviderSupplier(@RequestParam(defaultValue = "0") int page,
                                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                                             @RequestParam(defaultValue = "id") String sort,
+                                                                                             @RequestParam(defaultValue = "idContract") String sort,
                                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

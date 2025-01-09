@@ -1,7 +1,5 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
-import bl.tech.realiza.domains.contract.Activity;
-import bl.tech.realiza.domains.contract.Requirement;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,21 +9,21 @@ import java.util.List;
 
 @Data
 public class ContractProviderSupplierRequestDto {
-    private String id_contract;
+    private String idContract;
     @NotEmpty
-    private String service_type;
+    private String serviceType;
     @NotEmpty
-    private String service_duration;
+    private String serviceDuration;
     @NotEmpty
-    private String service_name;
+    private String serviceName;
     @NotEmpty
     private String description;
     @NotEmpty
-    private String allocated_limit;
+    private String allocatedLimit;
     @NotNull
-    private Date start_date;
+    private Date startDate;
     @NotNull
-    private Date end_date;
+    private Date endDate;
     @NotEmpty
     private String providerSupplier;
     @NotEmpty
