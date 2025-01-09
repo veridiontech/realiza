@@ -11,7 +11,6 @@ import java.util.List;
 
 @Data
 public class ContractProviderSubcontractorRequestDto {
-    @NotEmpty
     private String id_contract;
     @NotEmpty
     private String service_type;
@@ -32,7 +31,7 @@ public class ContractProviderSubcontractorRequestDto {
     @NotEmpty
     private String providerSubcontractor;
     @NotEmpty
-    private List<Activity> activities;
+    private List<String> activities;
     @NotEmpty
-    private List<Requirement> requirements;
+    private List<String> requirements;
 }

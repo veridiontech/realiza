@@ -8,7 +8,6 @@ import java.sql.Date;
 
 @Data
 public class EmployeeForeignerRequestDto {
-    @NotEmpty
     private String id_employee;
     @NotEmpty
     private String pis;

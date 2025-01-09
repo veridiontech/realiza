@@ -7,6 +7,7 @@ import java.util.TimeZone;
 
 @Data
 public class UserProviderSubcontractorRequestDto {
+    private String idUser;
     @NotEmpty
     private String cpf;
     @NotEmpty

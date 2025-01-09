@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class BranchRequestDto {
+    private String idBranch;
     @NotEmpty
     private String name;
     @NotEmpty

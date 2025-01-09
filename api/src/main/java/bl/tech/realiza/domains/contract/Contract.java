@@ -29,7 +29,18 @@ public abstract class Contract {
     private Date end_date;
 
     @ManyToMany
+    @JoinTable(
+            name = "CONTRACT_ACTIVITIES",
+            joinColumns = @JoinColumn(name = "contract_id"),
+            inverseJoinColumns = @JoinColumn(name = "activity_id")
+    )
     private List<Activity> activities;
+
     @ManyToMany
+    @JoinTable(
+            name = "CONTRACT_REQUIREMENTS",
+            joinColumns = @JoinColumn(name = "contract_id"),
+            inverseJoinColumns = @JoinColumn(name = "requirement_id")
+    )
     private List<Requirement> requirements;
 }

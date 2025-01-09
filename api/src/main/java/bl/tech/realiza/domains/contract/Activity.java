@@ -18,7 +18,4 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idActivity;
     private String title;
-
-    @ManyToMany
-    private List<Activity> activities;
 }

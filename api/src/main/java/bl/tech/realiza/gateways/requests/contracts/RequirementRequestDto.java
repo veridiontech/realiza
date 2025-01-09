@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class RequirementRequestDto {
+    private String idRequirement;
     @NotEmpty
     private String title;
 }
