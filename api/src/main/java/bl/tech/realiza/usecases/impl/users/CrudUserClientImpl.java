@@ -116,7 +116,42 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Optional<UserResponseDto> update(UserClientRequestDto userClientRequestDto) {
-        return Optional.empty();
+        Optional<UserClient> userClientOptional = userClientRepository.findById(userClientRequestDto.getIdUser());
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
+        userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());
+        userClient.setPassword(userClientRequestDto.getPassword() != null ? userClientRequestDto.getPassword() : userClient.getPassword());
+        userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
+        userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
+        userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());
+        userClient.setTimeZone(userClientRequestDto.getTimeZone() != null ? userClientRequestDto.getTimeZone() : userClient.getTimeZone());
+        userClient.setSurname(userClientRequestDto.getSurname() != null ? userClientRequestDto.getSurname() : userClient.getSurname());
+        userClient.setEmail(userClientRequestDto.getEmail() != null ? userClientRequestDto.getEmail() : userClient.getEmail());
+        userClient.setProfilePicture(userClientRequestDto.getProfilePicture() != null ? userClientRequestDto.getProfilePicture() : userClient.getProfilePicture());
+        userClient.setTelephone(userClientRequestDto.getTelephone() != null ? userClientRequestDto.getTelephone() : userClient.getTelephone());
+        userClient.setCellphone(userClientRequestDto.getCellphone() != null ? userClientRequestDto.getCellphone() : userClient.getCellphone());
+
+        UserClient savedUserClient = userClientRepository.save(userClient);
+
+        UserResponseDto userClientResponse = UserResponseDto.builder()
+                .cpf(savedUserClient.getCpf())
+                .description(savedUserClient.getDescription())
+                .password(savedUserClient.getPassword())
+                .position(savedUserClient.getPosition())
+                .role(savedUserClient.getRole())
+                .firstName(savedUserClient.getFirstName())
+                .timeZone(savedUserClient.getTimeZone())
+                .surname(savedUserClient.getSurname())
+                .email(savedUserClient.getEmail())
+                .profilePicture(savedUserClient.getProfilePicture())
+                .telephone(savedUserClient.getTelephone())
+                .cellphone(savedUserClient.getCellphone())
+                .client(savedUserClient.getClient().getIdClient())
+                .build();
+
+        return Optional.of(userClientResponse);
     }
 
     @Override

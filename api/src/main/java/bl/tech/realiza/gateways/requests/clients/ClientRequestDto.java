@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class ClientRequestDto {
+    private String idClient;
     @NotEmpty
     private String cnpj;
     @NotEmpty

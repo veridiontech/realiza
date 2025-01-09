@@ -64,7 +64,20 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public Optional<ActivityResponseDto> update(ActivityRequestDto activityRequestDto) {
-        return Optional.empty();
+        Optional<Activity> activityOptional = activityRepository.findById(activityRequestDto.getIdActivity());
+
+        Activity activity = activityOptional.orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        activity.setTitle(activityRequestDto.getTitle() != null ? activityRequestDto.getTitle() : activity.getTitle());
+
+        Activity savedActivity = activityRepository.save(activity);
+
+        ActivityResponseDto activityResponse = ActivityResponseDto.builder()
+                .idActivity(savedActivity.getIdActivity())
+                .title(savedActivity.getTitle())
+                .build();
+
+        return Optional.of(activityResponse);
     }
 
     @Override

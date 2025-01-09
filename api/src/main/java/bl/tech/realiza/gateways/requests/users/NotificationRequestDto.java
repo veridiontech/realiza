@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class NotificationRequestDto {
+    private String idNotification;
     @NotEmpty
     private String title;
     @NotEmpty

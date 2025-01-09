@@ -211,7 +211,74 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
     @Override
     public Optional<EmployeeResponseDto> update(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
-        return Optional.empty();
+        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(employeeForeignerRequestDto.getId_employee());
+
+        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new RuntimeException("Employee Foreigner not found"));
+
+        employeeForeigner.setPis(employeeForeignerRequestDto.getPis() != null ? employeeForeignerRequestDto.getPis() : employeeForeigner.getPis());
+        employeeForeigner.setMarital_status(employeeForeignerRequestDto.getMarital_status() != null ? employeeForeignerRequestDto.getMarital_status() : employeeForeigner.getMarital_status());
+        employeeForeigner.setContract(employeeForeignerRequestDto.getContract() != null ? employeeForeignerRequestDto.getContract() : employeeForeigner.getContract());
+        employeeForeigner.setCep(employeeForeignerRequestDto.getCep() != null ? employeeForeignerRequestDto.getCep() : employeeForeigner.getCep());
+        employeeForeigner.setName(employeeForeignerRequestDto.getName() != null ? employeeForeignerRequestDto.getName() : employeeForeigner.getName());
+        employeeForeigner.setSurname(employeeForeignerRequestDto.getSurname() != null ? employeeForeignerRequestDto.getSurname() : employeeForeigner.getSurname());
+        employeeForeigner.setAddress(employeeForeignerRequestDto.getAddress() != null ? employeeForeignerRequestDto.getAddress() : employeeForeigner.getAddress());
+        employeeForeigner.setCountry(employeeForeignerRequestDto.getCountry() != null ? employeeForeignerRequestDto.getCountry() : employeeForeigner.getCountry());
+        employeeForeigner.setAcronym(employeeForeignerRequestDto.getAcronym() != null ? employeeForeignerRequestDto.getAcronym() : employeeForeigner.getAcronym());
+        employeeForeigner.setState(employeeForeignerRequestDto.getState() != null ? employeeForeignerRequestDto.getState() : employeeForeigner.getState());
+        employeeForeigner.setBirth_date(employeeForeignerRequestDto.getBirth_date() != null ? employeeForeignerRequestDto.getBirth_date() : employeeForeigner.getBirth_date());
+        employeeForeigner.setCity(employeeForeignerRequestDto.getCity() != null ? employeeForeignerRequestDto.getCity() : employeeForeigner.getCity());
+        employeeForeigner.setPostal_code(employeeForeignerRequestDto.getPostal_code() != null ? employeeForeignerRequestDto.getPostal_code() : employeeForeigner.getPostal_code());
+        employeeForeigner.setGender(employeeForeignerRequestDto.getGender() != null ? employeeForeignerRequestDto.getGender() : employeeForeigner.getGender());
+        employeeForeigner.setPosition(employeeForeignerRequestDto.getPosition() != null ? employeeForeignerRequestDto.getPosition() : employeeForeigner.getPosition());
+        employeeForeigner.setRegistration(employeeForeignerRequestDto.getRegistration() != null ? employeeForeignerRequestDto.getRegistration() : employeeForeigner.getRegistration());
+        employeeForeigner.setSalary(employeeForeignerRequestDto.getSalary() != null ? employeeForeignerRequestDto.getSalary() : employeeForeigner.getSalary());
+        employeeForeigner.setCellphone(employeeForeignerRequestDto.getCellphone() != null ? employeeForeignerRequestDto.getCellphone() : employeeForeigner.getCellphone());
+        employeeForeigner.setPlatform_access(employeeForeignerRequestDto.getPlatform_access() != null ? employeeForeignerRequestDto.getPlatform_access() : employeeForeigner.getPlatform_access());
+        employeeForeigner.setTelephone(employeeForeignerRequestDto.getTelephone() != null ? employeeForeignerRequestDto.getTelephone() : employeeForeigner.getTelephone());
+        employeeForeigner.setDirectory(employeeForeignerRequestDto.getDirectory() != null ? employeeForeignerRequestDto.getDirectory() : employeeForeigner.getDirectory());
+        employeeForeigner.setEmail(employeeForeignerRequestDto.getEmail() != null ? employeeForeignerRequestDto.getEmail() : employeeForeigner.getEmail());
+        employeeForeigner.setLevel_of_education(employeeForeignerRequestDto.getLevel_of_education() != null ? employeeForeignerRequestDto.getLevel_of_education() : employeeForeigner.getLevel_of_education());
+        employeeForeigner.setCbo(employeeForeignerRequestDto.getCbo() != null ? employeeForeignerRequestDto.getCbo() : employeeForeigner.getCbo());
+        employeeForeigner.setRneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() != null ? employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() : employeeForeigner.getRneRnmFederalPoliceProtocol());
+        employeeForeigner.setPassport(employeeForeignerRequestDto.getPassport() != null ? employeeForeignerRequestDto.getPassport() : employeeForeigner.getPassport());
+        employeeForeigner.setBrazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate() != null ? employeeForeignerRequestDto.getBrazilEntryDate() : employeeForeigner.getBrazilEntryDate());
+
+        EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(employeeForeigner);
+
+        EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
+                .pis(savedEmployeeForeigner.getPis())
+                .marital_status(savedEmployeeForeigner.getMarital_status())
+                .contract(savedEmployeeForeigner.getContract())
+                .cep(savedEmployeeForeigner.getCep())
+                .name(savedEmployeeForeigner.getName())
+                .surname(savedEmployeeForeigner.getSurname())
+                .address(savedEmployeeForeigner.getAddress())
+                .country(savedEmployeeForeigner.getCountry())
+                .acronym(savedEmployeeForeigner.getAcronym())
+                .state(savedEmployeeForeigner.getState())
+                .birth_date(savedEmployeeForeigner.getBirth_date())
+                .city(savedEmployeeForeigner.getCity())
+                .postal_code(savedEmployeeForeigner.getPostal_code())
+                .gender(savedEmployeeForeigner.getGender())
+                .position(savedEmployeeForeigner.getPosition())
+                .registration(savedEmployeeForeigner.getRegistration())
+                .salary(savedEmployeeForeigner.getSalary())
+                .cellphone(savedEmployeeForeigner.getCellphone())
+                .platform_access(savedEmployeeForeigner.getPlatform_access())
+                .telephone(savedEmployeeForeigner.getTelephone())
+                .directory(savedEmployeeForeigner.getDirectory())
+                .email(savedEmployeeForeigner.getEmail())
+                .level_of_education(savedEmployeeForeigner.getLevel_of_education())
+                .cbo(savedEmployeeForeigner.getCbo())
+                .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
+                .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
+                .passport(savedEmployeeForeigner.getPassport())
+                .client(savedEmployeeForeigner.getClient().getIdClient())
+                .supplier(savedEmployeeForeigner.getSupplier().getId_provider())
+                .subcontract(savedEmployeeForeigner.getSubcontract().getId_provider())
+                .build();
+        
+        return Optional.of(employeeForeignerResponse);
     }
 
     @Override

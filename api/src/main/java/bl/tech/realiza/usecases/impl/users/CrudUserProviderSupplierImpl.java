@@ -116,7 +116,42 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public Optional<UserResponseDto> update(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
-        return Optional.empty();
+        Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(userProviderSupplierRequestDto.getIdUser());
+
+        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
+        userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());
+        userProvider.setPassword(userProviderSupplierRequestDto.getPassword() != null ? userProviderSupplierRequestDto.getPassword() : userProvider.getPassword());
+        userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null ? userProviderSupplierRequestDto.getPosition() : userProvider.getPosition());
+        userProvider.setRole(userProviderSupplierRequestDto.getRole() != null ? userProviderSupplierRequestDto.getRole() : userProvider.getRole());
+        userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null ? userProviderSupplierRequestDto.getFirstName() : userProvider.getFirstName());
+        userProvider.setTimeZone(userProviderSupplierRequestDto.getTimeZone() != null ? userProviderSupplierRequestDto.getTimeZone() : userProvider.getTimeZone());
+        userProvider.setSurname(userProviderSupplierRequestDto.getSurname() != null ? userProviderSupplierRequestDto.getSurname() : userProvider.getSurname());
+        userProvider.setEmail(userProviderSupplierRequestDto.getEmail() != null ? userProviderSupplierRequestDto.getEmail() : userProvider.getEmail());
+        userProvider.setProfilePicture(userProviderSupplierRequestDto.getProfilePicture() != null ? userProviderSupplierRequestDto.getProfilePicture() : userProvider.getProfilePicture());
+        userProvider.setTelephone(userProviderSupplierRequestDto.getTelephone() != null ? userProviderSupplierRequestDto.getTelephone() : userProvider.getTelephone());
+        userProvider.setCellphone(userProviderSupplierRequestDto.getCellphone() != null ? userProviderSupplierRequestDto.getCellphone() : userProvider.getCellphone());
+
+        UserProviderSupplier savedUserSupplier = userSupplierRepository.save(userProvider);
+
+        UserResponseDto userSupplierResponse = UserResponseDto.builder()
+                .cpf(savedUserSupplier.getCpf())
+                .description(savedUserSupplier.getDescription())
+                .password(savedUserSupplier.getPassword())
+                .position(savedUserSupplier.getPosition())
+                .role(savedUserSupplier.getRole())
+                .firstName(savedUserSupplier.getFirstName())
+                .timeZone(savedUserSupplier.getTimeZone())
+                .surname(savedUserSupplier.getSurname())
+                .email(savedUserSupplier.getEmail())
+                .profilePicture(savedUserSupplier.getProfilePicture())
+                .telephone(savedUserSupplier.getTelephone())
+                .cellphone(savedUserSupplier.getCellphone())
+                .supplier(savedUserSupplier.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(userSupplierResponse);
     }
 
     @Override

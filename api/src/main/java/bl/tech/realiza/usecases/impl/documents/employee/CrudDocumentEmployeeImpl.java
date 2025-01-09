@@ -91,7 +91,29 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentEmployeeRequestDto documentEmployeeRequestDto) {
-        return Optional.empty();
+        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(documentEmployeeRequestDto.getId_documentation());
+
+        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
+
+        documentEmployee.setTitle(documentEmployeeRequestDto.getTitle() != null ? documentEmployeeRequestDto.getTitle() : documentEmployee.getTitle());
+        documentEmployee.setRisk(documentEmployeeRequestDto.getRisk() != null ? documentEmployeeRequestDto.getRisk() : documentEmployee.getRisk());
+        documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
+        documentEmployee.setDocumentation(documentEmployeeRequestDto.getDocumentation() != null ? documentEmployeeRequestDto.getDocumentation() : documentEmployee.getDocumentation());
+        documentEmployee.setCreation_date(documentEmployeeRequestDto.getCreation_date() != null ? documentEmployeeRequestDto.getCreation_date() : documentEmployee.getCreation_date());
+
+        DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
+
+        DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
+                .id_documentation(savedDocumentEmployee.getId_documentation())
+                .title(savedDocumentEmployee.getTitle())
+                .risk(savedDocumentEmployee.getRisk())
+                .status(savedDocumentEmployee.getStatus())
+                .documentation(savedDocumentEmployee.getDocumentation())
+                .creation_date(savedDocumentEmployee.getCreation_date())
+                .employee(savedDocumentEmployee.getEmployee().getId_employee())
+                .build();
+
+        return Optional.of(documentEmployeeResponseDto);
     }
 
     @Override

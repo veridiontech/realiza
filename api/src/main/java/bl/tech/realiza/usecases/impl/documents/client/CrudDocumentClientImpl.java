@@ -91,7 +91,29 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto) {
-        return Optional.empty();
+        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(documentClientRequestDto.getId_documentation());
+
+        DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
+
+        documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
+        documentClient.setRisk(documentClientRequestDto.getRisk() != null ? documentClientRequestDto.getRisk() : documentClient.getRisk());
+        documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
+        documentClient.setDocumentation(documentClientRequestDto.getDocumentation() != null ? documentClientRequestDto.getDocumentation() : documentClient.getDocumentation());
+        documentClient.setCreation_date(documentClientRequestDto.getCreation_date() != null ? documentClientRequestDto.getCreation_date() : documentClient.getCreation_date());
+
+        DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
+
+        DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
+                .id_documentation(savedDocumentClient.getId_documentation())
+                .title(savedDocumentClient.getTitle())
+                .risk(savedDocumentClient.getRisk())
+                .status(savedDocumentClient.getStatus())
+                .documentation(savedDocumentClient.getDocumentation())
+                .creation_date(savedDocumentClient.getCreation_date())
+                .client(savedDocumentClient.getClient().getIdClient())
+                .build();
+
+        return Optional.of(documentClientResponse);
     }
 
     @Override

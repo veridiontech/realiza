@@ -40,6 +40,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .id_documentation(savedDocumentSupplier.getDocumentation())
+                .title(savedDocumentSupplier.getTitle())
                 .risk(savedDocumentSupplier.getRisk())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
@@ -58,6 +59,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .id_documentation(documentSupplier.getDocumentation())
+                .title(documentSupplier.getTitle())
                 .risk(documentSupplier.getRisk())
                 .status(documentSupplier.getStatus())
                 .documentation(documentSupplier.getDocumentation())
@@ -75,6 +77,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> DocumentResponseDto.builder()
                         .id_documentation(documentSupplier.getDocumentation())
+                        .title(documentSupplier.getTitle())
                         .risk(documentSupplier.getRisk())
                         .status(documentSupplier.getStatus())
                         .documentation(documentSupplier.getDocumentation())
@@ -88,7 +91,29 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto) {
-        return Optional.empty();
+        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(documentProviderSupplierRequestDto.getId_documentation());
+
+        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
+
+        documentSupplier.setTitle(documentProviderSupplierRequestDto.getTitle() != null ? documentProviderSupplierRequestDto.getTitle() : documentSupplier.getTitle());
+        documentSupplier.setRisk(documentProviderSupplierRequestDto.getRisk() != null ? documentProviderSupplierRequestDto.getRisk() : documentSupplier.getRisk());
+        documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
+        documentSupplier.setDocumentation(documentProviderSupplierRequestDto.getDocumentation() != null ? documentProviderSupplierRequestDto.getDocumentation() : documentSupplier.getDocumentation());
+        documentSupplier.setCreation_date(documentProviderSupplierRequestDto.getCreation_date() != null ? documentProviderSupplierRequestDto.getCreation_date() : documentSupplier.getCreation_date());
+
+        DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
+
+        DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
+                .id_documentation(savedDocumentSupplier.getDocumentation())
+                .title(savedDocumentSupplier.getTitle())
+                .risk(savedDocumentSupplier.getRisk())
+                .status(savedDocumentSupplier.getStatus())
+                .documentation(savedDocumentSupplier.getDocumentation())
+                .creation_date(savedDocumentSupplier.getCreation_date())
+                .supplier(savedDocumentSupplier.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(documentSupplierResponse);
     }
 
     @Override

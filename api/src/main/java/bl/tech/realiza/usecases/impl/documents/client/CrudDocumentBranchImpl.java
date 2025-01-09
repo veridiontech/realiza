@@ -91,7 +91,29 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto) {
-        return Optional.empty();
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(documentBranchRequestDto.getId_documentation());
+
+        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
+
+        documentBranch.setTitle(documentBranchRequestDto.getTitle() != null ? documentBranchRequestDto.getTitle() : documentBranch.getTitle());
+        documentBranch.setRisk(documentBranchRequestDto.getRisk() != null ? documentBranchRequestDto.getRisk() : documentBranch.getRisk());
+        documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
+        documentBranch.setDocumentation(documentBranchRequestDto.getDocumentation() != null ? documentBranchRequestDto.getDocumentation() : documentBranch.getDocumentation());
+        documentBranch.setCreation_date(documentBranchRequestDto.getCreation_date() != null ? documentBranchRequestDto.getCreation_date() : documentBranch.getCreation_date());
+
+        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
+
+        DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
+                .id_documentation(savedDocumentBranch.getId_documentation())
+                .title(savedDocumentBranch.getTitle())
+                .risk(savedDocumentBranch.getRisk())
+                .status(savedDocumentBranch.getStatus())
+                .documentation(savedDocumentBranch.getDocumentation())
+                .creation_date(savedDocumentBranch.getCreation_date())
+                .branch(savedDocumentBranch.getBranch().getIdBranch())
+                .build();
+
+        return Optional.of(documentBranchResponse);
     }
 
     @Override

@@ -75,7 +75,21 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public Optional<ProviderResponseDto> update(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        return Optional.empty();
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(providerSubcontractorRequestDto.getId_provider());
+
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
+
+        providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
+
+        ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(providerSubcontractor);
+
+        ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
+                .id_provider(savedProviderSubcontractor.getId_provider())
+                .cnpj(savedProviderSubcontractor.getCnpj())
+                .supplier(savedProviderSubcontractor.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(providerSubcontractorResponse);
     }
 
     @Override

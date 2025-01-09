@@ -84,7 +84,31 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public Optional<ClientResponseDto> update(ClientRequestDto clientRequestDto) {
-        return Optional.empty();
+        Optional<Client> clientOptional = clientRepository.findById(clientRequestDto.getIdClient());
+
+        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+
+        client.setCnpj(clientRequestDto.getCnpj() != null ? clientRequestDto.getCnpj() : client.getCnpj());
+        client.setTradeName(clientRequestDto.getTradeName() != null ? clientRequestDto.getTradeName() : client.getTradeName());
+        client.setCompanyName(clientRequestDto.getCompanyName() != null ? clientRequestDto.getCompanyName() : client.getCompanyName());
+        client.setEmail(clientRequestDto.getEmail() != null ? clientRequestDto.getEmail() : client.getEmail());
+        client.setTelephone(clientRequestDto.getTelephone() != null ? clientRequestDto.getTelephone() : client.getTelephone());
+        client.setStaff(clientRequestDto.getStaff() != null ? clientRequestDto.getStaff() : client.getStaff());
+        client.setCustomers(clientRequestDto.getCustomers() != null ? clientRequestDto.getCustomers() : client.getCustomers());
+
+        Client savedClient = clientRepository.save(client);
+
+        ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .cnpj(savedClient.getCnpj())
+                .tradeName(savedClient.getTradeName())
+                .companyName(savedClient.getCompanyName())
+                .email(savedClient.getEmail())
+                .telephone(savedClient.getTelephone())
+                .staff(savedClient.getStaff())
+                .customers(savedClient.getCustomers())
+                .build();
+
+        return Optional.of(clientResponse);
     }
 
     @Override

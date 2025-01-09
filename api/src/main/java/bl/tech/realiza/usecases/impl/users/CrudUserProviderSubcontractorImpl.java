@@ -115,7 +115,42 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public Optional<UserResponseDto> update(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
-        return Optional.empty();
+        Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getIdUser());
+
+        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new RuntimeException("User not found"));
+
+        userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
+        userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());
+        userSubcontractor.setPassword(userProviderSubcontractorRequestDto.getPassword() != null ? userProviderSubcontractorRequestDto.getPassword() : userSubcontractor.getPassword());
+        userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null ? userProviderSubcontractorRequestDto.getPosition() : userSubcontractor.getPosition());
+        userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null ? userProviderSubcontractorRequestDto.getRole() : userSubcontractor.getRole());
+        userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null ? userProviderSubcontractorRequestDto.getFirstName() : userSubcontractor.getFirstName());
+        userSubcontractor.setTimeZone(userProviderSubcontractorRequestDto.getTimeZone() != null ? userProviderSubcontractorRequestDto.getTimeZone() : userSubcontractor.getTimeZone());
+        userSubcontractor.setSurname(userProviderSubcontractorRequestDto.getSurname() != null ? userProviderSubcontractorRequestDto.getSurname() : userSubcontractor.getSurname());
+        userSubcontractor.setEmail(userProviderSubcontractorRequestDto.getEmail() != null ? userProviderSubcontractorRequestDto.getEmail() : userSubcontractor.getEmail());
+        userSubcontractor.setProfilePicture(userProviderSubcontractorRequestDto.getProfilePicture() != null ? userProviderSubcontractorRequestDto.getProfilePicture() : userSubcontractor.getProfilePicture());
+        userSubcontractor.setTelephone(userProviderSubcontractorRequestDto.getTelephone() != null ? userProviderSubcontractorRequestDto.getTelephone() : userSubcontractor.getTelephone());
+        userSubcontractor.setCellphone(userProviderSubcontractorRequestDto.getCellphone() != null ? userProviderSubcontractorRequestDto.getCellphone() : userSubcontractor.getCellphone());
+
+        UserProviderSubcontractor savedUserSubcontractor = userSubcontractorRepository.save(userSubcontractor);
+
+        UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
+                .cpf(savedUserSubcontractor.getCpf())
+                .description(savedUserSubcontractor.getDescription())
+                .password(savedUserSubcontractor.getPassword())
+                .position(savedUserSubcontractor.getPosition())
+                .role(savedUserSubcontractor.getRole())
+                .firstName(savedUserSubcontractor.getFirstName())
+                .timeZone(savedUserSubcontractor.getTimeZone())
+                .surname(savedUserSubcontractor.getSurname())
+                .email(savedUserSubcontractor.getEmail())
+                .profilePicture(savedUserSubcontractor.getProfilePicture())
+                .telephone(savedUserSubcontractor.getTelephone())
+                .cellphone(savedUserSubcontractor.getCellphone())
+                .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getId_provider())
+                .build();
+
+        return Optional.of(userSubcontractorResponse);
     }
 
     @Override

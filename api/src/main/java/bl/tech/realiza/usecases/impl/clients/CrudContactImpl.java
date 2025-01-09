@@ -91,7 +91,29 @@ public class CrudContactImpl implements CrudContact {
 
     @Override
     public Optional<ContactResponseDto> update(ContactRequestDto contactRequestDto) {
-        return Optional.empty();
+        Optional<Contact> contactOptional = contactRepository.findById(contactRequestDto.getIdContact());
+
+        Contact contact = contactOptional.orElseThrow(() -> new RuntimeException("Contact not found"));
+
+        contact.setDepartment(contactRequestDto.getDepartment() != null ? contactRequestDto.getDepartment() : contact.getDepartment());
+        contact.setEmail(contactRequestDto.getEmail() != null ? contactRequestDto.getEmail() : contact.getEmail());
+        contact.setCountry(contactRequestDto.getCountry() != null ? contactRequestDto.getCountry() : contact.getCountry());
+        contact.setTelephone(contactRequestDto.getTelephone() != null ? contactRequestDto.getTelephone() : contact.getTelephone());
+        contact.setMainContact(contactRequestDto.getMainContact() != null ? contactRequestDto.getMainContact() : contact.getMainContact());
+
+        Contact savedContact = contactRepository.save(contact);
+
+        ContactResponseDto contactResponse = ContactResponseDto.builder()
+                .idContact(savedContact.getIdContact())
+                .department(savedContact.getDepartment())
+                .email(savedContact.getEmail())
+                .country(savedContact.getCountry())
+                .telephone(savedContact.getTelephone())
+                .mainContact(savedContact.getMainContact())
+                .client(savedContact.getClient().getIdClient())
+                .build();
+
+        return Optional.of(contactResponse);
     }
 
     @Override

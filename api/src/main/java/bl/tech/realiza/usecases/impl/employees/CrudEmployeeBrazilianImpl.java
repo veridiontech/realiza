@@ -207,7 +207,72 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public Optional<EmployeeResponseDto> update(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
-        return Optional.empty();
+        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(employeeBrazilianRequestDto.getId_employee());
+
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        employeeBrazilian.setPis(employeeBrazilianRequestDto.getPis() != null ? employeeBrazilianRequestDto.getPis() : employeeBrazilian.getPis());
+        employeeBrazilian.setMarital_status(employeeBrazilianRequestDto.getMarital_status() != null ? employeeBrazilianRequestDto.getMarital_status() : employeeBrazilian.getMarital_status());
+        employeeBrazilian.setContract(employeeBrazilianRequestDto.getContract() != null ? employeeBrazilianRequestDto.getContract() : employeeBrazilian.getContract());
+        employeeBrazilian.setCep(employeeBrazilianRequestDto.getCep() != null ? employeeBrazilianRequestDto.getCep() : employeeBrazilian.getCep());
+        employeeBrazilian.setName(employeeBrazilianRequestDto.getName() != null ? employeeBrazilianRequestDto.getName() : employeeBrazilian.getName());
+        employeeBrazilian.setSurname(employeeBrazilianRequestDto.getSurname() != null ? employeeBrazilianRequestDto.getSurname() : employeeBrazilian.getSurname());
+        employeeBrazilian.setAddress(employeeBrazilianRequestDto.getAddress() != null ? employeeBrazilianRequestDto.getAddress() : employeeBrazilian.getAddress());
+        employeeBrazilian.setCountry(employeeBrazilianRequestDto.getCountry() != null ? employeeBrazilianRequestDto.getCountry() : employeeBrazilian.getCountry());
+        employeeBrazilian.setAcronym(employeeBrazilianRequestDto.getAcronym() != null ? employeeBrazilianRequestDto.getAcronym() : employeeBrazilian.getAcronym());
+        employeeBrazilian.setState(employeeBrazilianRequestDto.getState() != null ? employeeBrazilianRequestDto.getState() : employeeBrazilian.getState());
+        employeeBrazilian.setBirth_date(employeeBrazilianRequestDto.getBirth_date() != null ? employeeBrazilianRequestDto.getBirth_date() : employeeBrazilian.getBirth_date());
+        employeeBrazilian.setCity(employeeBrazilianRequestDto.getCity() != null ? employeeBrazilianRequestDto.getCity() : employeeBrazilian.getCity());
+        employeeBrazilian.setPostal_code(employeeBrazilianRequestDto.getPostal_code() != null ? employeeBrazilianRequestDto.getPostal_code() : employeeBrazilian.getPostal_code());
+        employeeBrazilian.setGender(employeeBrazilianRequestDto.getGender() != null ? employeeBrazilianRequestDto.getGender() : employeeBrazilian.getGender());
+        employeeBrazilian.setPosition(employeeBrazilianRequestDto.getPosition() != null ? employeeBrazilianRequestDto.getPosition() : employeeBrazilian.getPosition());
+        employeeBrazilian.setRegistration(employeeBrazilianRequestDto.getRegistration() != null ? employeeBrazilianRequestDto.getRegistration() : employeeBrazilian.getRegistration());
+        employeeBrazilian.setSalary(employeeBrazilianRequestDto.getSalary() != null ? employeeBrazilianRequestDto.getSalary() : employeeBrazilian.getSalary());
+        employeeBrazilian.setCellphone(employeeBrazilianRequestDto.getCellphone() != null ? employeeBrazilianRequestDto.getCellphone() : employeeBrazilian.getCellphone());
+        employeeBrazilian.setPlatform_access(employeeBrazilianRequestDto.getPlatform_access() != null ? employeeBrazilianRequestDto.getPlatform_access() : employeeBrazilian.getPlatform_access());
+        employeeBrazilian.setTelephone(employeeBrazilianRequestDto.getTelephone() != null ? employeeBrazilianRequestDto.getTelephone() : employeeBrazilian.getTelephone());
+        employeeBrazilian.setDirectory(employeeBrazilianRequestDto.getDirectory() != null ? employeeBrazilianRequestDto.getDirectory() : employeeBrazilian.getDirectory());
+        employeeBrazilian.setEmail(employeeBrazilianRequestDto.getEmail() != null ? employeeBrazilianRequestDto.getEmail() : employeeBrazilian.getEmail());
+        employeeBrazilian.setLevel_of_education(employeeBrazilianRequestDto.getLevel_of_education() != null ? employeeBrazilianRequestDto.getLevel_of_education() : employeeBrazilian.getLevel_of_education());
+        employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCbo() != null ? employeeBrazilianRequestDto.getCbo() : employeeBrazilian.getCbo());
+        employeeBrazilian.setRg(employeeBrazilianRequestDto.getRg() != null ? employeeBrazilianRequestDto.getRg() : employeeBrazilian.getRg());
+        employeeBrazilian.setAdmission_date(employeeBrazilianRequestDto.getAdmission_date() != null ? employeeBrazilianRequestDto.getAdmission_date() : employeeBrazilian.getAdmission_date());
+
+        EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(employeeBrazilian);
+
+        EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
+                .pis(savedEmployeeBrazilian.getPis())
+                .marital_status(savedEmployeeBrazilian.getMarital_status())
+                .contract(savedEmployeeBrazilian.getContract())
+                .cep(savedEmployeeBrazilian.getCep())
+                .name(savedEmployeeBrazilian.getName())
+                .surname(savedEmployeeBrazilian.getSurname())
+                .address(savedEmployeeBrazilian.getAddress())
+                .country(savedEmployeeBrazilian.getCountry())
+                .acronym(savedEmployeeBrazilian.getAcronym())
+                .state(savedEmployeeBrazilian.getState())
+                .birth_date(savedEmployeeBrazilian.getBirth_date())
+                .city(savedEmployeeBrazilian.getCity())
+                .postal_code(savedEmployeeBrazilian.getPostal_code())
+                .gender(savedEmployeeBrazilian.getGender())
+                .position(savedEmployeeBrazilian.getPosition())
+                .registration(savedEmployeeBrazilian.getRegistration())
+                .salary(savedEmployeeBrazilian.getSalary())
+                .cellphone(savedEmployeeBrazilian.getCellphone())
+                .platform_access(savedEmployeeBrazilian.getPlatform_access())
+                .telephone(savedEmployeeBrazilian.getTelephone())
+                .directory(savedEmployeeBrazilian.getDirectory())
+                .email(savedEmployeeBrazilian.getEmail())
+                .level_of_education(savedEmployeeBrazilian.getLevel_of_education())
+                .cbo(savedEmployeeBrazilian.getCbo())
+                .rg(savedEmployeeBrazilian.getRg())
+                .admission_date(savedEmployeeBrazilian.getAdmission_date())
+                .client(savedEmployeeBrazilian.getClient().getIdClient())
+                .supplier(savedEmployeeBrazilian.getSupplier().getId_provider())
+                .subcontract(savedEmployeeBrazilian.getSubcontract().getId_provider())
+                .build();
+
+        return Optional.of(employeeBrazilianResponse);
     }
 
     @Override

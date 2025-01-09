@@ -91,7 +91,29 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto) {
-        return Optional.empty();
+        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getId_documentation());
+
+        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+
+        documentSubcontractor.setTitle(documentProviderSubcontractorRequestDto.getTitle() != null ? documentProviderSubcontractorRequestDto.getTitle() : documentSubcontractor.getTitle());
+        documentSubcontractor.setRisk(documentProviderSubcontractorRequestDto.getRisk() != null ? documentProviderSubcontractorRequestDto.getRisk() : documentSubcontractor.getRisk());
+        documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
+        documentSubcontractor.setDocumentation(documentProviderSubcontractorRequestDto.getDocumentation() != null ? documentProviderSubcontractorRequestDto.getDocumentation() : documentSubcontractor.getDocumentation());
+        documentSubcontractor.setCreation_date(documentProviderSubcontractorRequestDto.getCreation_date() != null ? documentProviderSubcontractorRequestDto.getCreation_date() : documentSubcontractor.getCreation_date());
+
+        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
+
+        DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
+                .id_documentation(savedDocumentSubcontractor.getDocumentation())
+                .title(savedDocumentSubcontractor.getTitle())
+                .risk(savedDocumentSubcontractor.getRisk())
+                .status(savedDocumentSubcontractor.getStatus())
+                .documentation(savedDocumentSubcontractor.getDocumentation())
+                .creation_date(savedDocumentSubcontractor.getCreation_date())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getId_provider())
+                .build();
+
+        return Optional.of(documentSubcontractorResponse);
     }
 
     @Override

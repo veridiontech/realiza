@@ -82,10 +82,9 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
     @Override
     public Optional<ContractProviderResponseDto> findOne(String id) {
-
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(id);
 
-        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("ContractProvider not found"));
+        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
 
         ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
                 .id_contract(contractProviderSubcontractor.getId_contract())
@@ -131,7 +130,55 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
     @Override
     public Optional<ContractProviderResponseDto> update(ContractProviderSubcontractorRequestDto contractProviderSubcontractorRequestDto) {
-        return Optional.empty();
+        Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getId_contract());
+
+        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
+
+        List<Activity> activities = List.of();
+        List<Requirement> requirements = List.of();
+
+        if (contractProviderSubcontractorRequestDto.getActivities() != null) {
+            activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getActivities());
+            if (activities.isEmpty()) {
+                throw new RuntimeException("Activities not found");
+            }
+        }
+
+        if (contractProviderSubcontractorRequestDto.getRequirements() != null) {
+            requirements = requirementRepository.findAllById(contractProviderSubcontractorRequestDto.getRequirements());
+            if (requirements.isEmpty()) {
+                throw new RuntimeException("Requirements not found");
+            }
+        }
+
+        contractProviderSubcontractor.setService_type(contractProviderSubcontractorRequestDto.getService_type() != null ? contractProviderSubcontractorRequestDto.getService_type() : contractProviderSubcontractor.getService_type());
+        contractProviderSubcontractor.setService_duration(contractProviderSubcontractorRequestDto.getService_duration() != null ? contractProviderSubcontractorRequestDto.getService_duration() : contractProviderSubcontractor.getService_duration());
+        contractProviderSubcontractor.setService_name(contractProviderSubcontractorRequestDto.getService_name() != null ? contractProviderSubcontractorRequestDto.getService_name() : contractProviderSubcontractor.getService_name());
+        contractProviderSubcontractor.setDescription(contractProviderSubcontractorRequestDto.getDescription() != null ? contractProviderSubcontractorRequestDto.getDescription() : contractProviderSubcontractor.getDescription());
+        contractProviderSubcontractor.setAllocated_limit(contractProviderSubcontractorRequestDto.getAllocated_limit() != null ? contractProviderSubcontractorRequestDto.getAllocated_limit() : contractProviderSubcontractor.getAllocated_limit());
+        contractProviderSubcontractor.setStart_date(contractProviderSubcontractorRequestDto.getStart_date() != null ? contractProviderSubcontractorRequestDto.getStart_date() : contractProviderSubcontractor.getStart_date());
+        contractProviderSubcontractor.setEnd_date(contractProviderSubcontractorRequestDto.getEnd_date() != null ? contractProviderSubcontractorRequestDto.getEnd_date() : contractProviderSubcontractor.getEnd_date());
+        contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getActivities() != null ? activities : contractProviderSubcontractor.getActivities());
+        contractProviderSubcontractor.setRequirements(contractProviderSubcontractorRequestDto.getRequirements() != null ? requirements : contractProviderSubcontractor.getRequirements());
+
+        ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
+
+        ContractProviderResponseDto contractSubcontractorResponse = ContractProviderResponseDto.builder()
+                .id_contract(savedContractSubcontractor.getId_contract())
+                .service_type(savedContractSubcontractor.getService_type())
+                .service_duration(savedContractSubcontractor.getService_duration())
+                .service_name(savedContractSubcontractor.getService_name())
+                .description(savedContractSubcontractor.getDescription())
+                .allocated_limit(savedContractSubcontractor.getAllocated_limit())
+                .start_date(savedContractSubcontractor.getStart_date())
+                .end_date(savedContractSubcontractor.getEnd_date())
+                .activities(savedContractSubcontractor.getActivities())
+                .requirements(savedContractSubcontractor.getRequirements())
+                .contract_reference(savedContractSubcontractor.getContract_reference())
+                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getId_provider())
+                .build();
+
+        return Optional.of(contractSubcontractorResponse);
     }
 
     @Override

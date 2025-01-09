@@ -8,6 +8,7 @@ import java.sql.Date;
 
 @Data
 public class DocumentProviderSupplierRequestDto {
+    private String id_documentation;
     @NotEmpty
     private String title;
     @NotEmpty

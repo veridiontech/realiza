@@ -126,7 +126,54 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Optional<ContractProviderResponseDto> update(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto) {
-        return Optional.empty();
+        Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getId_contract());
+
+        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+
+        List<Activity> activities = List.of();
+        List<Requirement> requirements = List.of();
+
+        if (contractProviderSupplierRequestDto.getActivities() != null) {
+            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
+            if (activities.isEmpty()) {
+                throw new RuntimeException("Activities not found");
+            }
+        }
+
+        if (contractProviderSupplierRequestDto.getRequirements() != null) {
+            requirements = requirementRepository.findAllById(contractProviderSupplierRequestDto.getRequirements());
+            if (requirements.isEmpty()) {
+                throw new RuntimeException("Requirements not found");
+            }
+        }
+
+        contractProviderSupplier.setService_type(contractProviderSupplierRequestDto.getService_type() != null ? contractProviderSupplierRequestDto.getService_type() : contractProviderSupplier.getService_type());
+        contractProviderSupplier.setService_duration(contractProviderSupplierRequestDto.getService_duration() != null ? contractProviderSupplierRequestDto.getService_duration() : contractProviderSupplier.getService_duration());
+        contractProviderSupplier.setService_name(contractProviderSupplierRequestDto.getService_name() != null ? contractProviderSupplierRequestDto.getService_name() : contractProviderSupplier.getService_name());
+        contractProviderSupplier.setDescription(contractProviderSupplierRequestDto.getDescription() != null ? contractProviderSupplierRequestDto.getDescription() : contractProviderSupplier.getDescription());
+        contractProviderSupplier.setAllocated_limit(contractProviderSupplierRequestDto.getAllocated_limit() != null ? contractProviderSupplierRequestDto.getAllocated_limit() : contractProviderSupplier.getAllocated_limit());
+        contractProviderSupplier.setStart_date(contractProviderSupplierRequestDto.getStart_date() != null ? contractProviderSupplierRequestDto.getStart_date() : contractProviderSupplier.getStart_date());
+        contractProviderSupplier.setEnd_date(contractProviderSupplierRequestDto.getEnd_date() != null ? contractProviderSupplierRequestDto.getEnd_date() : contractProviderSupplier.getEnd_date());
+        contractProviderSupplier.setActivities(contractProviderSupplierRequestDto.getActivities() != null ? activities : contractProviderSupplier.getActivities());
+        contractProviderSupplier.setRequirements(contractProviderSupplierRequestDto.getRequirements() != null ? requirements : contractProviderSupplier.getRequirements());
+
+        ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(contractProviderSupplier);
+
+        ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
+                .id_contract(savedContractProviderSupplier.getId_contract())
+                .service_type(savedContractProviderSupplier.getService_type())
+                .service_duration(savedContractProviderSupplier.getService_duration())
+                .service_name(savedContractProviderSupplier.getService_name())
+                .description(savedContractProviderSupplier.getDescription())
+                .allocated_limit(savedContractProviderSupplier.getAllocated_limit())
+                .start_date(savedContractProviderSupplier.getStart_date())
+                .end_date(savedContractProviderSupplier.getEnd_date())
+                .activities(savedContractProviderSupplier.getActivities())
+                .requirements(savedContractProviderSupplier.getRequirements())
+                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getId_provider())
+                .build();
+
+        return Optional.of(contractProviderResponseDto);
     }
 
     @Override

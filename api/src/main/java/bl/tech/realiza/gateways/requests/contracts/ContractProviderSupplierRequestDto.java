@@ -11,6 +11,7 @@ import java.util.List;
 
 @Data
 public class ContractProviderSupplierRequestDto {
+    private String id_contract;
     @NotEmpty
     private String service_type;
     @NotEmpty

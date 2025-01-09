@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class ContactRequestDto {
+    private String idContact;
     @NotEmpty
     private String department;
     @NotEmpty

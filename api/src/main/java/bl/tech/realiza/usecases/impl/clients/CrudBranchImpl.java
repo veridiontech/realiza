@@ -75,7 +75,21 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public Optional<BranchResponseDto> update(BranchRequestDto branchRequestDto) {
-        return Optional.empty();
+        Optional<Branch> branchOptional = branchRepository.findById(branchRequestDto.getIdBranch());
+
+        Branch branch = branchOptional.orElseThrow(() -> new RuntimeException("Branch not found"));
+
+        branch.setName(branchRequestDto.getName() != null ? branchRequestDto.getName() : branch.getName());
+
+        Branch savedBranch = branchRepository.save(branch);
+
+        BranchResponseDto branchResponseDto = BranchResponseDto.builder()
+                .idBranch(savedBranch.getIdBranch())
+                .name(savedBranch.getName())
+                .client(savedBranch.getClient().getIdClient())
+                .build();
+
+        return Optional.of(branchResponseDto);
     }
 
     @Override
