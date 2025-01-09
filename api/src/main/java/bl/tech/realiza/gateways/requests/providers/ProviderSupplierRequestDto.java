@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class ProviderSupplierRequestDto {
-    private String id_provider;
+    private String idProvider;
     @NotEmpty
     private String cnpj;
     @NotEmpty

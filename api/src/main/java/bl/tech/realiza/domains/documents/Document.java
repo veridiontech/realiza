@@ -18,10 +18,10 @@ import java.sql.Date;
 public abstract class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id_documentation;
+    private String idDocumentation;
     private String title;
     private String risk;
     private String status;
     private String documentation;
-    private Date creation_date;
+    private Date creationDate;
 }

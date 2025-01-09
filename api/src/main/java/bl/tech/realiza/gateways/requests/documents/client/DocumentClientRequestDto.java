@@ -8,7 +8,7 @@ import java.sql.Date;
 
 @Data
 public class DocumentClientRequestDto {
-    private String id_documentation;
+    private String idDocumentation;
     @NotEmpty
     private String title;
     @NotEmpty
@@ -18,7 +18,7 @@ public class DocumentClientRequestDto {
     @NotEmpty
     private String documentation;
     @NotNull
-    private Date creation_date;
+    private Date creationDate;
     @NotEmpty
     private String client;
 }

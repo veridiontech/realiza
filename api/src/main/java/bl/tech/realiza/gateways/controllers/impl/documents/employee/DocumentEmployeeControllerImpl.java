@@ -3,8 +3,13 @@ package bl.tech.realiza.gateways.controllers.impl.documents.employee;
 import bl.tech.realiza.gateways.controllers.interfaces.documents.employee.DocumentEmployeeControlller;
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.usecases.impl.documents.employee.CrudDocumentEmployeeImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,39 +20,58 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/document/employee")
+@Tag(name = "Document Employee")
 public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlller {
+
+    private final CrudDocumentEmployeeImpl crudDocumentEmployeeImpl;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentEmployee(DocumentEmployeeRequestDto documentEmployeeRequestDto) {
-        return null;
+    public ResponseEntity<DocumentResponseDto> createDocumentEmployee(@RequestBody @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto) {
+        DocumentResponseDto documentEmployee = crudDocumentEmployeeImpl.save(documentEmployeeRequestDto);
+
+        return ResponseEntity.of(Optional.of(documentEmployee));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentEmployee(String id) {
-        return null;
+    public ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentEmployee(@PathVariable String id) {
+        Optional<DocumentResponseDto> documentEmployee = crudDocumentEmployeeImpl.findOne(id);
+
+        return ResponseEntity.of(Optional.of(documentEmployee));
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployee(int page, int size, String sort, Sort.Direction direction) {
-        return null;
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployee(@RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "5") int size,
+                                                                             @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentResponseDto> pageEmployee = crudDocumentEmployeeImpl.findAll(pageable);
+
+        return ResponseEntity.ok(pageEmployee);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(DocumentEmployeeRequestDto documentEmployeeRequestDto) {
-        return null;
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(@RequestBody @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto) {
+        Optional<DocumentResponseDto> documentEmployee = crudDocumentEmployeeImpl.update(documentEmployeeRequestDto);
+
+        return ResponseEntity.of(Optional.of(documentEmployee));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
-    public ResponseEntity<Void> deleteDocumentEmployee(String id) {
-        return null;
+    public ResponseEntity<Void> deleteDocumentEmployee(@PathVariable String id) {
+        crudDocumentEmployeeImpl.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

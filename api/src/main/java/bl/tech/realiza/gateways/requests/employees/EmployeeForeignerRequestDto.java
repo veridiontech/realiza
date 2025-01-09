@@ -8,11 +8,11 @@ import java.sql.Date;
 
 @Data
 public class EmployeeForeignerRequestDto {
-    private String id_employee;
+    private String idEmployee;
     @NotEmpty
     private String pis;
     @NotEmpty
-    private String marital_status;
+    private String maritalStatus;
     @NotEmpty
     private String contract;
     @NotEmpty
@@ -30,11 +30,11 @@ public class EmployeeForeignerRequestDto {
     @NotEmpty
     private String state;
     @NotNull
-    private Date birth_date;
+    private Date birthDate;
     @NotEmpty
     private String city;
     @NotEmpty
-    private String postal_code;
+    private String postalCode;
     @NotEmpty
     private String gender;
     @NotEmpty
@@ -46,7 +46,7 @@ public class EmployeeForeignerRequestDto {
     @NotEmpty
     private String cellphone;
     @NotEmpty
-    private String platform_access;
+    private String platformAccess;
     @NotEmpty
     private String telephone;
     @NotEmpty
@@ -54,7 +54,7 @@ public class EmployeeForeignerRequestDto {
     @NotEmpty
     private String email;
     @NotEmpty
-    private String level_of_education;
+    private String levelOfEducation;
     @NotEmpty
     private String cbo;
     @NotEmpty

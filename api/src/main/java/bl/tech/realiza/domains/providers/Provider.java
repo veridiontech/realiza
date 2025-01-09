@@ -16,6 +16,6 @@ import lombok.experimental.SuperBuilder;
 public abstract class Provider {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id_provider;
+    private String idProvider;
     private String cnpj;
 }

@@ -14,14 +14,14 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ContractProviderResponseDto {
     // provider
-    private String id_contract;
-    private String service_type;
-    private String service_duration;
-    private String service_name;
+    private String idContract;
+    private String serviceType;
+    private String serviceDuration;
+    private String serviceName;
     private String description;
-    private String allocated_limit;
-    private Date start_date;
-    private Date end_date;
+    private String allocatedLimit;
+    private Date startDate;
+    private Date endDate;
     private List<Activity> activities;
     private List<Requirement> requirements;
 
@@ -29,6 +29,6 @@ public class ContractProviderResponseDto {
     private String providerSupplier;
 
     // subcontractor
-    private String contract_reference;
+    private String contractReference;
     private String providerSubcontractor;
 }

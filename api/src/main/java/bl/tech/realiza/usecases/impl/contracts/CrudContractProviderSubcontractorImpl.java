@@ -6,10 +6,8 @@ import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.contracts.ContractProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractProviderResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSubcontractor;
@@ -47,34 +45,34 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         }
 
         ContractProviderSubcontractor newContractSubcontractor = ContractProviderSubcontractor.builder()
-                .service_type(contractProviderSubcontractorRequestDto.getService_type())
-                .service_duration(contractProviderSubcontractorRequestDto.getService_duration())
-                .service_name(contractProviderSubcontractorRequestDto.getService_name())
+                .serviceType(contractProviderSubcontractorRequestDto.getServiceType())
+                .serviceDuration(contractProviderSubcontractorRequestDto.getServiceDuration())
+                .serviceName(contractProviderSubcontractorRequestDto.getServiceName())
                 .description(contractProviderSubcontractorRequestDto.getDescription())
-                .allocated_limit(contractProviderSubcontractorRequestDto.getAllocated_limit())
-                .start_date(contractProviderSubcontractorRequestDto.getStart_date())
-                .end_date(contractProviderSubcontractorRequestDto.getEnd_date())
+                .allocatedLimit(contractProviderSubcontractorRequestDto.getAllocatedLimit())
+                .startDate(contractProviderSubcontractorRequestDto.getStartDate())
+                .endDate(contractProviderSubcontractorRequestDto.getEndDate())
                 .activities(activities)
                 .requirements(requirements)
-                .contract_reference(contractProviderSubcontractorRequestDto.getContract_reference())
+                .contractReference(contractProviderSubcontractorRequestDto.getContractReference())
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(newContractSubcontractor);
 
         ContractProviderResponseDto contractSubcontractorResponse = ContractProviderResponseDto.builder()
-                .id_contract(savedContractSubcontractor.getId_contract())
-                .service_type(savedContractSubcontractor.getService_type())
-                .service_duration(savedContractSubcontractor.getService_duration())
-                .service_name(savedContractSubcontractor.getService_name())
+                .idContract(savedContractSubcontractor.getIdContract())
+                .serviceType(savedContractSubcontractor.getServiceType())
+                .serviceDuration(savedContractSubcontractor.getServiceDuration())
+                .serviceName(savedContractSubcontractor.getServiceName())
                 .description(savedContractSubcontractor.getDescription())
-                .allocated_limit(savedContractSubcontractor.getAllocated_limit())
-                .start_date(savedContractSubcontractor.getStart_date())
-                .end_date(savedContractSubcontractor.getEnd_date())
+                .allocatedLimit(savedContractSubcontractor.getAllocatedLimit())
+                .startDate(savedContractSubcontractor.getStartDate())
+                .endDate(savedContractSubcontractor.getEndDate())
                 .activities(savedContractSubcontractor.getActivities())
                 .requirements(savedContractSubcontractor.getRequirements())
-                .contract_reference(savedContractSubcontractor.getContract_reference())
-                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getId_provider())
+                .contractReference(savedContractSubcontractor.getContractReference())
+                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return contractSubcontractorResponse;
@@ -87,18 +85,18 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
 
         ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
-                .id_contract(contractProviderSubcontractor.getId_contract())
-                .service_type(contractProviderSubcontractor.getService_type())
-                .service_duration(contractProviderSubcontractor.getService_duration())
-                .service_name(contractProviderSubcontractor.getService_name())
+                .idContract(contractProviderSubcontractor.getIdContract())
+                .serviceType(contractProviderSubcontractor.getServiceType())
+                .serviceDuration(contractProviderSubcontractor.getServiceDuration())
+                .serviceName(contractProviderSubcontractor.getServiceName())
                 .description(contractProviderSubcontractor.getDescription())
-                .allocated_limit(contractProviderSubcontractor.getAllocated_limit())
-                .start_date(contractProviderSubcontractor.getStart_date())
-                .end_date(contractProviderSubcontractor.getEnd_date())
+                .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                .startDate(contractProviderSubcontractor.getStartDate())
+                .endDate(contractProviderSubcontractor.getEndDate())
                 .activities(contractProviderSubcontractor.getActivities())
                 .requirements(contractProviderSubcontractor.getRequirements())
-                .contract_reference(contractProviderSubcontractor.getContract_reference())
-                .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getId_provider())
+                .contractReference(contractProviderSubcontractor.getContractReference())
+                .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return Optional.of(contractProviderResponseDto);
@@ -110,18 +108,18 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         Page<ContractProviderResponseDto> contractProviderResponseDtoPage = contractProviderSubcontractorPage.map(
                 contractProviderSubcontractor -> ContractProviderResponseDto.builder()
-                        .id_contract(contractProviderSubcontractor.getId_contract())
-                        .service_type(contractProviderSubcontractor.getService_type())
-                        .service_duration(contractProviderSubcontractor.getService_duration())
-                        .service_name(contractProviderSubcontractor.getService_name())
+                        .idContract(contractProviderSubcontractor.getIdContract())
+                        .serviceType(contractProviderSubcontractor.getServiceType())
+                        .serviceDuration(contractProviderSubcontractor.getServiceDuration())
+                        .serviceName(contractProviderSubcontractor.getServiceName())
                         .description(contractProviderSubcontractor.getDescription())
-                        .allocated_limit(contractProviderSubcontractor.getAllocated_limit())
-                        .start_date(contractProviderSubcontractor.getStart_date())
-                        .end_date(contractProviderSubcontractor.getEnd_date())
+                        .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                        .startDate(contractProviderSubcontractor.getStartDate())
+                        .endDate(contractProviderSubcontractor.getEndDate())
                         .activities(contractProviderSubcontractor.getActivities())
                         .requirements(contractProviderSubcontractor.getRequirements())
-                        .contract_reference(contractProviderSubcontractor.getContract_reference())
-                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getId_provider())
+                        .contractReference(contractProviderSubcontractor.getContractReference())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                         .build()
         );
 
@@ -130,7 +128,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
     @Override
     public Optional<ContractProviderResponseDto> update(ContractProviderSubcontractorRequestDto contractProviderSubcontractorRequestDto) {
-        Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getId_contract());
+        Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getIdContract());
 
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
 
@@ -151,31 +149,31 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             }
         }
 
-        contractProviderSubcontractor.setService_type(contractProviderSubcontractorRequestDto.getService_type() != null ? contractProviderSubcontractorRequestDto.getService_type() : contractProviderSubcontractor.getService_type());
-        contractProviderSubcontractor.setService_duration(contractProviderSubcontractorRequestDto.getService_duration() != null ? contractProviderSubcontractorRequestDto.getService_duration() : contractProviderSubcontractor.getService_duration());
-        contractProviderSubcontractor.setService_name(contractProviderSubcontractorRequestDto.getService_name() != null ? contractProviderSubcontractorRequestDto.getService_name() : contractProviderSubcontractor.getService_name());
+        contractProviderSubcontractor.setServiceType(contractProviderSubcontractorRequestDto.getServiceType() != null ? contractProviderSubcontractorRequestDto.getServiceType() : contractProviderSubcontractor.getServiceType());
+        contractProviderSubcontractor.setServiceDuration(contractProviderSubcontractorRequestDto.getServiceDuration() != null ? contractProviderSubcontractorRequestDto.getServiceDuration() : contractProviderSubcontractor.getServiceDuration());
+        contractProviderSubcontractor.setServiceName(contractProviderSubcontractorRequestDto.getServiceName() != null ? contractProviderSubcontractorRequestDto.getServiceName() : contractProviderSubcontractor.getServiceName());
         contractProviderSubcontractor.setDescription(contractProviderSubcontractorRequestDto.getDescription() != null ? contractProviderSubcontractorRequestDto.getDescription() : contractProviderSubcontractor.getDescription());
-        contractProviderSubcontractor.setAllocated_limit(contractProviderSubcontractorRequestDto.getAllocated_limit() != null ? contractProviderSubcontractorRequestDto.getAllocated_limit() : contractProviderSubcontractor.getAllocated_limit());
-        contractProviderSubcontractor.setStart_date(contractProviderSubcontractorRequestDto.getStart_date() != null ? contractProviderSubcontractorRequestDto.getStart_date() : contractProviderSubcontractor.getStart_date());
-        contractProviderSubcontractor.setEnd_date(contractProviderSubcontractorRequestDto.getEnd_date() != null ? contractProviderSubcontractorRequestDto.getEnd_date() : contractProviderSubcontractor.getEnd_date());
+        contractProviderSubcontractor.setAllocatedLimit(contractProviderSubcontractorRequestDto.getAllocatedLimit() != null ? contractProviderSubcontractorRequestDto.getAllocatedLimit() : contractProviderSubcontractor.getAllocatedLimit());
+        contractProviderSubcontractor.setStartDate(contractProviderSubcontractorRequestDto.getStartDate() != null ? contractProviderSubcontractorRequestDto.getStartDate() : contractProviderSubcontractor.getStartDate());
+        contractProviderSubcontractor.setEndDate(contractProviderSubcontractorRequestDto.getEndDate() != null ? contractProviderSubcontractorRequestDto.getEndDate() : contractProviderSubcontractor.getEndDate());
         contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getActivities() != null ? activities : contractProviderSubcontractor.getActivities());
         contractProviderSubcontractor.setRequirements(contractProviderSubcontractorRequestDto.getRequirements() != null ? requirements : contractProviderSubcontractor.getRequirements());
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
 
         ContractProviderResponseDto contractSubcontractorResponse = ContractProviderResponseDto.builder()
-                .id_contract(savedContractSubcontractor.getId_contract())
-                .service_type(savedContractSubcontractor.getService_type())
-                .service_duration(savedContractSubcontractor.getService_duration())
-                .service_name(savedContractSubcontractor.getService_name())
+                .idContract(savedContractSubcontractor.getIdContract())
+                .serviceType(savedContractSubcontractor.getServiceType())
+                .serviceDuration(savedContractSubcontractor.getServiceDuration())
+                .serviceName(savedContractSubcontractor.getServiceName())
                 .description(savedContractSubcontractor.getDescription())
-                .allocated_limit(savedContractSubcontractor.getAllocated_limit())
-                .start_date(savedContractSubcontractor.getStart_date())
-                .end_date(savedContractSubcontractor.getEnd_date())
+                .allocatedLimit(savedContractSubcontractor.getAllocatedLimit())
+                .startDate(savedContractSubcontractor.getStartDate())
+                .endDate(savedContractSubcontractor.getEndDate())
                 .activities(savedContractSubcontractor.getActivities())
                 .requirements(savedContractSubcontractor.getRequirements())
-                .contract_reference(savedContractSubcontractor.getContract_reference())
-                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getId_provider())
+                .contractReference(savedContractSubcontractor.getContractReference())
+                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
 
         return Optional.of(contractSubcontractorResponse);

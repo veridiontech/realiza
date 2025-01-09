@@ -21,9 +21,9 @@ import java.sql.Date;
 public abstract class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id_employee;
+    private String idEmployee;
     private String pis;
-    private String marital_status;
+    private String maritalStatus;
     private String contract;
     private String cep;
     private String name;
@@ -32,19 +32,19 @@ public abstract class Employee {
     private String country;
     private String acronym;
     private String state;
-    private Date birth_date;
+    private Date birthDate;
     private String city;
-    private String postal_code;
+    private String postalCode;
     private String gender;
     private String position;
     private String registration;
     private Double salary;
     private String cellphone;
-    private String platform_access;
+    private String platformAccess;
     private String telephone;
     private String directory;
     private String email;
-    private String level_of_education;
+    private String levelOfEducation;
     private String cbo;
 
     @ManyToOne

@@ -32,20 +32,20 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .risk(documentEmployeeRequestDto.getRisk())
                 .status(documentEmployeeRequestDto.getStatus())
                 .documentation(documentEmployeeRequestDto.getDocumentation())
-                .creation_date(documentEmployeeRequestDto.getCreation_date())
+                .creationDate(documentEmployeeRequestDto.getCreationDate())
                 .employee(employee)
                 .build();
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(newDocumentEmployee);
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentEmployee.getId_documentation())
+                .idDocumentation(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .risk(savedDocumentEmployee.getRisk())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
-                .creation_date(savedDocumentEmployee.getCreation_date())
-                .employee(savedDocumentEmployee.getEmployee().getId_employee())
+                .creationDate(savedDocumentEmployee.getCreationDate())
+                .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
                 .build();
 
         return documentEmployeeResponseDto;
@@ -58,13 +58,13 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
-                .id_documentation(documentEmployee.getId_documentation())
+                .idDocumentation(documentEmployee.getIdDocumentation())
                 .title(documentEmployee.getTitle())
                 .risk(documentEmployee.getRisk())
                 .status(documentEmployee.getStatus())
                 .documentation(documentEmployee.getDocumentation())
-                .creation_date(documentEmployee.getCreation_date())
-                .employee(documentEmployee.getEmployee().getId_employee())
+                .creationDate(documentEmployee.getCreationDate())
+                .employee(documentEmployee.getEmployee().getIdEmployee())
                 .build();
 
         return Optional.of(documentEmployeeResponseDto);
@@ -76,13 +76,13 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
                 documentEmployee -> DocumentResponseDto.builder()
-                        .id_documentation(documentEmployee.getId_documentation())
+                        .idDocumentation(documentEmployee.getIdDocumentation())
                         .title(documentEmployee.getTitle())
                         .risk(documentEmployee.getRisk())
                         .status(documentEmployee.getStatus())
                         .documentation(documentEmployee.getDocumentation())
-                        .creation_date(documentEmployee.getCreation_date())
-                        .employee(documentEmployee.getEmployee().getId_employee())
+                        .creationDate(documentEmployee.getCreationDate())
+                        .employee(documentEmployee.getEmployee().getIdEmployee())
                         .build()
         );
 
@@ -91,7 +91,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public Optional<DocumentResponseDto> update(DocumentEmployeeRequestDto documentEmployeeRequestDto) {
-        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(documentEmployeeRequestDto.getId_documentation());
+        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(documentEmployeeRequestDto.getIdDocumentation());
 
         DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
 
@@ -99,18 +99,18 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         documentEmployee.setRisk(documentEmployeeRequestDto.getRisk() != null ? documentEmployeeRequestDto.getRisk() : documentEmployee.getRisk());
         documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
         documentEmployee.setDocumentation(documentEmployeeRequestDto.getDocumentation() != null ? documentEmployeeRequestDto.getDocumentation() : documentEmployee.getDocumentation());
-        documentEmployee.setCreation_date(documentEmployeeRequestDto.getCreation_date() != null ? documentEmployeeRequestDto.getCreation_date() : documentEmployee.getCreation_date());
+        documentEmployee.setCreationDate(documentEmployeeRequestDto.getCreationDate() != null ? documentEmployeeRequestDto.getCreationDate() : documentEmployee.getCreationDate());
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
-                .id_documentation(savedDocumentEmployee.getId_documentation())
+                .idDocumentation(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .risk(savedDocumentEmployee.getRisk())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
-                .creation_date(savedDocumentEmployee.getCreation_date())
-                .employee(savedDocumentEmployee.getEmployee().getId_employee())
+                .creationDate(savedDocumentEmployee.getCreationDate())
+                .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
                 .build();
 
         return Optional.of(documentEmployeeResponseDto);

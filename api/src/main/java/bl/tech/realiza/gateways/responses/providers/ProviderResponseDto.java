@@ -9,7 +9,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ProviderResponseDto {
     // provider
-    private String id_provider;
+    private String idProvider;
     private String cnpj;
 
     // subcontractor

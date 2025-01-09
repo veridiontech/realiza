@@ -35,7 +35,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(newProviderSupplier);
 
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
-                .id_provider(savedProviderSupplier.getId_provider())
+                .idProvider(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
                 .client(savedProviderSupplier.getClient().getIdClient())
                 .build();
@@ -50,7 +50,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider not found"));
 
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
-                .id_provider(providerSupplier.getId_provider())
+                .idProvider(providerSupplier.getIdProvider())
                 .cnpj(providerSupplier.getCnpj())
                 .client(providerSupplier.getClient().getIdClient())
                 .build();
@@ -64,7 +64,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
                 providerSupplier -> ProviderResponseDto.builder()
-                        .id_provider(providerSupplier.getId_provider())
+                        .idProvider(providerSupplier.getIdProvider())
                         .cnpj(providerSupplier.getCnpj())
                         .client(providerSupplier.getClient().getIdClient())
                         .build()
@@ -75,7 +75,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public Optional<ProviderResponseDto> update(ProviderSupplierRequestDto providerSupplierRequestDto) {
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSupplierRequestDto.getId_provider());
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSupplierRequestDto.getIdProvider());
 
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider not found"));
 
@@ -84,7 +84,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(providerSupplier);
 
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
-                .id_provider(savedProviderSupplier.getId_provider())
+                .idProvider(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
                 .client(savedProviderSupplier.getClient().getIdClient())
                 .build();

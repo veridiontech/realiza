@@ -35,9 +35,9 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(newProviderSubcontractor);
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
-                .id_provider(savedProviderSubcontractor.getId_provider())
+                .idProvider(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
-                .supplier(savedProviderSubcontractor.getProviderSupplier().getId_provider())
+                .supplier(savedProviderSubcontractor.getProviderSupplier().getIdProvider())
                 .build();
 
         return providerSubcontractorResponse;
@@ -50,9 +50,9 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
-                .id_provider(providerSubcontractor.getId_provider())
+                .idProvider(providerSubcontractor.getIdProvider())
                 .cnpj(providerSubcontractor.getCnpj())
-                .supplier(providerSubcontractor.getProviderSupplier().getId_provider())
+                .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(providerSubcontractorResponse);
@@ -64,9 +64,9 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
                 providerSubcontractor -> ProviderResponseDto.builder()
-                        .id_provider(providerSubcontractor.getId_provider())
+                        .idProvider(providerSubcontractor.getIdProvider())
                         .cnpj(providerSubcontractor.getCnpj())
-                        .supplier(providerSubcontractor.getProviderSupplier().getId_provider())
+                        .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
                         .build()
         );
 
@@ -75,7 +75,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public Optional<ProviderResponseDto> update(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(providerSubcontractorRequestDto.getId_provider());
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(providerSubcontractorRequestDto.getIdProvider());
 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
 
@@ -84,9 +84,9 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(providerSubcontractor);
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
-                .id_provider(savedProviderSubcontractor.getId_provider())
+                .idProvider(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
-                .supplier(savedProviderSubcontractor.getProviderSupplier().getId_provider())
+                .supplier(savedProviderSubcontractor.getProviderSupplier().getIdProvider())
                 .build();
 
         return Optional.of(providerSubcontractorResponse);
