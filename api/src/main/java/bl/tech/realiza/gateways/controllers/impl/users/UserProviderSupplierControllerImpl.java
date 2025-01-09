@@ -3,8 +3,12 @@ package bl.tech.realiza.gateways.controllers.impl.users;
 import bl.tech.realiza.gateways.controllers.interfaces.users.UserProviderSupplierController;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.usecases.impl.users.CrudUserProviderSupplierImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,38 +20,56 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/user/supplier")
 public class UserProviderSupplierControllerImpl implements UserProviderSupplierController {
+
+    private final CrudUserProviderSupplierImpl crudUserSupplier;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<UserResponseDto> createUserSupplier(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
-        return null;
+    public ResponseEntity<UserResponseDto> createUserSupplier(@RequestBody @Valid UserProviderSupplierRequestDto userSupplierRequestDto) {
+        UserResponseDto userSupplier = crudUserSupplier.save(userSupplierRequestDto);
+
+        return ResponseEntity.of(Optional.of(userSupplier));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<UserResponseDto>> getOneUserSupplier(String id) {
-        return null;
+    public ResponseEntity<Optional<UserResponseDto>> getOneUserSupplier(@PathVariable String id) {
+        Optional<UserResponseDto> userSupplier = crudUserSupplier.findOne(id);
+
+        return ResponseEntity.of(Optional.of(userSupplier));
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<UserResponseDto>> getAllUserSuppliers(int page, int size, String sort, Sort.Direction direction) {
-        return null;
+    public ResponseEntity<Page<UserResponseDto>> getAllUserSuppliers(@RequestParam(defaultValue = "0") int page,
+                                                                     @RequestParam(defaultValue = "5") int size,
+                                                                     @RequestParam(defaultValue = "id") String sort,
+                                                                     @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<UserResponseDto> pageUserSupplier = crudUserSupplier.findAll(pageable);
+
+        return ResponseEntity.ok(pageUserSupplier);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<UserResponseDto>> updateUserSupplier(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
-        return null;
+    public ResponseEntity<Optional<UserResponseDto>> updateUserSupplier(@RequestBody @Valid UserProviderSupplierRequestDto userSupplierRequestDto) {
+        Optional<UserResponseDto> userSupplier = crudUserSupplier.update(userSupplierRequestDto);
+
+        return ResponseEntity.of(Optional.of(userSupplier));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
-    public ResponseEntity<Void> deleteUserSupplier(String id) {
-        return null;
+    public ResponseEntity<Void> deleteUserSupplier(@PathVariable String id) {
+        crudUserSupplier.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

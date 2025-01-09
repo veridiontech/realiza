@@ -3,8 +3,12 @@ package bl.tech.realiza.gateways.controllers.impl.providers;
 import bl.tech.realiza.gateways.controllers.interfaces.providers.ProviderSupplierController;
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import bl.tech.realiza.usecases.impl.providers.CrudProviderSupplierImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,38 +20,56 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/supplier")
 public class ProviderSupplierControllerImpl implements ProviderSupplierController {
+
+    private final CrudProviderSupplierImpl crudProviderSupplier;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ProviderResponseDto> createProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto) {
-        return null;
+    public ResponseEntity<ProviderResponseDto> createProviderSupplier(@RequestBody @Valid ProviderSupplierRequestDto providerSupplierRequestDto) {
+        ProviderResponseDto providerSupplier = crudProviderSupplier.save(providerSupplierRequestDto);
+
+        return ResponseEntity.of(Optional.of(providerSupplier));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ProviderResponseDto>> getOneProviderSupplier(String id) {
-        return null;
+    public ResponseEntity<Optional<ProviderResponseDto>> getOneProviderSupplier(@PathVariable String id) {
+        Optional<ProviderResponseDto> providerSupplier = crudProviderSupplier.findOne(id);
+
+        return ResponseEntity.of(Optional.of(providerSupplier));
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplier(int page, int size, String sort, Sort.Direction direction) {
-        return null;
+    public ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplier(@RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "5") int size,
+                                                                             @RequestParam(defaultValue = "id") String sort,
+                                                                             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ProviderResponseDto> pageProviderSupplier = crudProviderSupplier.findAll(pageable);
+
+        return ResponseEntity.ok(pageProviderSupplier);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto) {
-        return null;
+    public ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(@RequestBody @Valid ProviderSupplierRequestDto providerSupplierRequestDto) {
+        Optional<ProviderResponseDto> providerSupplier = crudProviderSupplier.update(providerSupplierRequestDto);
+
+        return ResponseEntity.of(Optional.of(providerSupplier));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
-    public ResponseEntity<Void> deleteProviderSupplier(String id) {
-        return null;
+    public ResponseEntity<Void> deleteProviderSupplier(@PathVariable String id) {
+        crudProviderSupplier.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
