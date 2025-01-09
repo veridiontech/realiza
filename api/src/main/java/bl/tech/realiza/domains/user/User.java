@@ -24,7 +24,8 @@ public abstract class User {
     private String description;
     private String password;
     private String position;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
     private String firstName;
     private TimeZone timeZone;
     private String surname;
@@ -32,4 +33,12 @@ public abstract class User {
     private String profilePicture;
     private String telephone;
     private String cellphone;
+
+    public enum Role {
+        ROLE_ADMIN,
+        ROLE_MANAGER,
+        ROLE_CLIENT,
+        ROLE_SUPPLIER,
+        ROLE_SUBCONTRACTOR
+    }
 }
