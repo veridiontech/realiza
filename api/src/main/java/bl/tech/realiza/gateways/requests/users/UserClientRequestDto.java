@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.requests.users;
 
+import bl.tech.realiza.domains.user.User;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ public class UserClientRequestDto {
     @NotEmpty
     private String position;
     @NotEmpty
-    private String role;
+    private User.Role role;
     @NotEmpty
     private String firstName;
     @NotEmpty

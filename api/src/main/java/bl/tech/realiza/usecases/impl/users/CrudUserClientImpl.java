@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     private final UserClientRepository userClientRepository;
     private final ClientRepository clientRepository;
+    private PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -27,10 +29,12 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
 
+        String encryptedPassword = passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword());
+
         UserClient newUserClient = UserClient.builder()
                 .cpf(userClientRequestDto.getCpf())
                 .description(userClientRequestDto.getDescription())
-                .password(userClientRequestDto.getPassword())
+                .password(encryptedPassword)
                 .position(userClientRequestDto.getPosition())
                 .role(userClientRequestDto.getRole())
                 .firstName(userClientRequestDto.getFirstName())
@@ -122,7 +126,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
         userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());
-        userClient.setPassword(userClientRequestDto.getPassword() != null ? userClientRequestDto.getPassword() : userClient.getPassword());
+        userClient.setPassword(passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) != null ? passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) : userClient.getPassword());
         userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
         userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
         userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());
