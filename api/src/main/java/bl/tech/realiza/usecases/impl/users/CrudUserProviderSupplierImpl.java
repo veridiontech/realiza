@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     private final UserProviderSupplierRepository userSupplierRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
+    private PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
@@ -27,10 +29,12 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
 
+        String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword());
+
         UserProviderSupplier newUserSupplier = UserProviderSupplier.builder()
                 .cpf(userProviderSupplierRequestDto.getCpf())
                 .description(userProviderSupplierRequestDto.getDescription())
-                .password(userProviderSupplierRequestDto.getPassword())
+                .password(encryptedPassword)
                 .position(userProviderSupplierRequestDto.getPosition())
                 .role(userProviderSupplierRequestDto.getRole())
                 .firstName(userProviderSupplierRequestDto.getFirstName())
@@ -122,7 +126,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
         userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());
-        userProvider.setPassword(userProviderSupplierRequestDto.getPassword() != null ? userProviderSupplierRequestDto.getPassword() : userProvider.getPassword());
+        userProvider.setPassword(passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) != null ? passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) : userProvider.getPassword());
         userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null ? userProviderSupplierRequestDto.getPosition() : userProvider.getPosition());
         userProvider.setRole(userProviderSupplierRequestDto.getRole() != null ? userProviderSupplierRequestDto.getRole() : userProvider.getRole());
         userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null ? userProviderSupplierRequestDto.getFirstName() : userProvider.getFirstName());

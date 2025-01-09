@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepo
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,16 +21,20 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     private final UserProviderSubcontractorRepository userSubcontractorRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
+    private PasswordEncryptionService passwordEncryptionService;
+
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor());
 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
 
+        String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword());
+
         UserProviderSubcontractor newUserSubcontractor = UserProviderSubcontractor.builder()
                 .cpf(userProviderSubcontractorRequestDto.getCpf())
                 .description(userProviderSubcontractorRequestDto.getDescription())
-                .password(userProviderSubcontractorRequestDto.getPassword())
+                .password(encryptedPassword)
                 .position(userProviderSubcontractorRequestDto.getPosition())
                 .role(userProviderSubcontractorRequestDto.getRole())
                 .firstName(userProviderSubcontractorRequestDto.getFirstName())
@@ -121,7 +126,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
         userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
         userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());
-        userSubcontractor.setPassword(userProviderSubcontractorRequestDto.getPassword() != null ? userProviderSubcontractorRequestDto.getPassword() : userSubcontractor.getPassword());
+        userSubcontractor.setPassword(passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) != null ? passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) : userSubcontractor.getPassword());
         userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null ? userProviderSubcontractorRequestDto.getPosition() : userSubcontractor.getPosition());
         userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null ? userProviderSubcontractorRequestDto.getRole() : userSubcontractor.getRole());
         userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null ? userProviderSubcontractorRequestDto.getFirstName() : userSubcontractor.getFirstName());

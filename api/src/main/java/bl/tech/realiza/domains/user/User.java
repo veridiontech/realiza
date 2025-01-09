@@ -13,6 +13,7 @@ import java.util.TimeZone;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "APP_USER")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "company")
 public abstract class User {
