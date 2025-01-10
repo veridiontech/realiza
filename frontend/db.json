@@ -289,6 +289,143 @@
         "units": "Estrada das Entregas, 890"
       }
       
-    ]
+    ],
+    "Contracts": [
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    }
+  ]
   }
   

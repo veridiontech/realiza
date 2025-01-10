@@ -6,6 +6,15 @@ import { QuickActions } from "@/components/quickActions/quickAction";
 import { StepOneServiceProviders } from "./modals/stepOne";
 import { StepTwoServiceProviders } from "./modals/stepTwo";
 
+type ServiceProviders = {
+  id: number;
+  category: string;
+  corporateReason: string;
+  enterprise: string;
+  cnpj: string;
+  units: string;
+};
+
 export function ServiceProvider() {
   const fetchLimit = 1000;
   const itemsPerPage = 10;
@@ -32,6 +41,27 @@ export function ServiceProvider() {
     console.log("Dados do segundo modal enviados:", data);
     setIsStepTwoModalOpen(false);
   };
+
+  const columns: {
+    key: keyof ServiceProviders;
+    label: string;
+    render?: (value: any) => JSX.Element;
+  }[] = [
+    { key: "category", label: "Categoria" },
+    { key: "corporateReason", label: "Razão Social" },
+    { key: "enterprise", label: "Empresa" },
+    { key: "cnpj", label: "CNPJ" },
+    { key: "units", label: "Unidades" },
+    {
+      key: "id",
+      label: "Ações",
+      render: (id: number) => (
+        <button className="text-blue-500 hover:underline">
+          Gerenciar {id}
+        </button>
+      ),
+    },
+  ];
 
   if (isLoading) {
     return <p className="mt-10 text-center">Carregando...</p>;
@@ -66,7 +96,7 @@ export function ServiceProvider() {
           </button>
         </div>
 
-        <Table data={currentData || []} />
+        <Table data={currentData || []} columns={columns} />
 
         <Pagination
           currentPage={currentPage}
