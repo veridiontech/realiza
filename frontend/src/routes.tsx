@@ -18,7 +18,7 @@ import { EditProfile } from "./pages/auth/profileEdit";
 import { ProfileUser } from "./pages/auth/profileUser/__profileUser";
 import { SelectClient } from "./pages/auth/selectClient";
 import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
-import { ServiceProvider } from "./pages/auth/ServiceProviders";
+import { ServiceProvider } from "./pages/auth/serviceProviders/ServiceProviders";
 
 export const router = createBrowserRouter([
   {

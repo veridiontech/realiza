@@ -1,0 +1,294 @@
+{
+    "ServiceProviders": [
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      }
+      
+    ]
+  }
+  

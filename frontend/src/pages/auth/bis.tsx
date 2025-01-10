@@ -1,22 +1,22 @@
-import { CircleDollarSign } from 'lucide-react'
-import { Helmet } from 'react-helmet-async'
+import { CircleDollarSign } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
-import { BarChartMonitoring } from '@/components/BIs/BisPageComponents/barChartRecive'
-import { BarChartTotalSale } from '@/components/BIs/BisPageComponents/barChartTotalSale'
-import { PieChartDespesas } from '@/components/BIs/BisPageComponents/pieChartDespesas'
-import { PrejudiceChart } from '@/components/BIs/BisPageComponents/prejudiceChart'
-import { ProfitChart } from '@/components/BIs/BisPageComponents/profitChart'
+import { BarChartMonitoring } from "@/components/BIs/BisPageComponents/barChartRecive";
+import { BarChartTotalSale } from "@/components/BIs/BisPageComponents/barChartTotalSale";
+import { PieChartDespesas } from "@/components/BIs/BisPageComponents/pieChartDespesas";
+import { PrejudiceChart } from "@/components/BIs/BisPageComponents/prejudiceChart";
+import { ProfitChart } from "@/components/BIs/BisPageComponents/profitChart";
 
 const MonittoringBis = () => {
   return (
     <>
       <Helmet title="monitoring table" />
       <section className="mx-20 flex flex-col gap-[50px]">
-        <div className="mt-[30px] flex h-[250px] flex-col gap-[50px] rounded-md bg-white pt-[35px] shadow-custom-blue">
+        <div className="shadow-custom-blue mt-[30px] flex h-[250px] flex-col gap-[50px] rounded-md bg-white pt-[35px]">
           <div className="flex flex-row justify-between px-20">
             <div className="flex items-center gap-2">
               <CircleDollarSign />
-              <h2 className="font-semibold">Receita total da empresa</h2>
+              <h2 className="font-semibold">Receita total da enterprise</h2>
             </div>
             <span className="text-[14px] font-medium text-gray-600">
               atualizado em 2024
@@ -79,6 +79,6 @@ const MonittoringBis = () => {
         <BarChartTotalSale />
       </section>
     </>
-  )
-}
-export default MonittoringBis
+  );
+};
+export default MonittoringBis;
