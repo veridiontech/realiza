@@ -5,13 +5,14 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
 public interface DocumentProviderSupplierControlller {
-    ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto);
+    ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderSupplier(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplier(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderSupplier(String id);
 }

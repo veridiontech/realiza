@@ -15,9 +15,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/login", "/user/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/h2-console/**").permitAll()
+//                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
 }

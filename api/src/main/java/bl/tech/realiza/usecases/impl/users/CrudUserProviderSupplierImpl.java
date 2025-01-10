@@ -6,7 +6,7 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
-import bl.tech.realiza.services.PasswordEncryptionService;
+import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

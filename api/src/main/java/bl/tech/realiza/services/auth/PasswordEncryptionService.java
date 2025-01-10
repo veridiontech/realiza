@@ -1,12 +1,8 @@
-package bl.tech.realiza.services;
+package bl.tech.realiza.services.auth;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.sql.Date;
 
 @Service
 @RequiredArgsConstructor
