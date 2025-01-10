@@ -5,10 +5,12 @@ import { fetchCompanyByCNPJ } from "@/hooks/useCnpjApi";
 
 interface StepOneServiceProvidersProps {
   onClose: () => void;
+  onSubmit: (data: Record<string, any>) => void;
 }
 
 export function StepOneServiceProviders({
   onClose,
+  onSubmit,
 }: StepOneServiceProvidersProps) {
   const [cnpj, setCnpj] = useState("");
   const [providerData, setProviderData] = useState<{
@@ -35,8 +37,7 @@ export function StepOneServiceProviders({
   };
 
   const handleAddProvider = (data: Record<string, any>) => {
-    console.log("Dados do Prestador:", { ...data, cnpj });
-    onClose();
+    onSubmit({ ...data, cnpj });
   };
 
   return (
@@ -93,6 +94,7 @@ export function StepOneServiceProviders({
                 label: "Telefone",
                 type: "telephone" as const,
                 placeholder: "(XX) XXXXX-XXXX",
+                required: true,
               },
             ]
           : []),

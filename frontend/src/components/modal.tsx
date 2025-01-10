@@ -42,6 +42,13 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
     ),
   );
 
+  React.useEffect(() => {
+    document.body.style.overflow = "hidden"; // Desativa o scroll da página principal
+    return () => {
+      document.body.style.overflow = "auto"; // Restaura o scroll ao fechar o modal
+    };
+  }, []);
+
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -55,12 +62,12 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       onClick={onClose}
     >
       <div
-        className="w-[40rem] rounded bg-white p-8 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
+        className="relative max-h-[90%] w-[90%] max-w-[40rem] overflow-y-auto rounded-lg bg-white p-8 shadow-lg"
+        onClick={(e) => e.stopPropagation()} // Impede que o clique no modal feche o overlay
       >
         <h2 className="mb-4 text-xl font-semibold">{title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

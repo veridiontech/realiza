@@ -4,6 +4,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { useServiceProviders } from "@/hooks/useServiceProviders";
 import { QuickActions } from "@/components/quickActions/quickAction";
 import { StepOneServiceProviders } from "./modals/stepOne";
+import { StepTwoServiceProviders } from "./modals/stepTwo";
 
 export function ServiceProvider() {
   const fetchLimit = 1000;
@@ -12,6 +13,25 @@ export function ServiceProvider() {
     limit: fetchLimit,
     page: 1,
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
+  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = data?.slice(startIndex, startIndex + itemsPerPage) || [];
+  const totalPages = Math.ceil((data?.length || 0) / itemsPerPage);
+
+  const handleStepOneSubmit = (data: Record<string, any>) => {
+    console.log("Dados do primeiro modal enviados:", data);
+    setIsStepOneModalOpen(false);
+    setIsStepTwoModalOpen(true);
+  };
+
+  const handleStepTwoSubmit = (data: Record<string, any>) => {
+    console.log("Dados do segundo modal enviados:", data);
+    setIsStepTwoModalOpen(false);
+  };
 
   if (isLoading) {
     return <p className="mt-10 text-center">Carregando...</p>;
@@ -24,14 +44,6 @@ export function ServiceProvider() {
       </p>
     );
   }
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [isAddProviderModalOpen, setIsAddProviderModalOpen] = useState(false);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = data?.slice(startIndex, startIndex + itemsPerPage) || [];
-  const totalPages = Math.ceil((data?.length || 0) / itemsPerPage);
 
   return (
     <div className="m-10 flex min-h-full justify-center">
@@ -48,7 +60,7 @@ export function ServiceProvider() {
           </div>
           <button
             className="h-[3rem] rounded-md border-2 border-blue-300 px-6 text-black hover:border-blue-600 hover:bg-blue-300 hover:text-white"
-            onClick={() => setIsAddProviderModalOpen(true)}
+            onClick={() => setIsStepOneModalOpen(true)}
           >
             Adicionar Prestador
           </button>
@@ -66,9 +78,18 @@ export function ServiceProvider() {
           <QuickActions />
         </div>
       </div>
-      {isAddProviderModalOpen && (
+
+      {isStepOneModalOpen && (
         <StepOneServiceProviders
-          onClose={() => setIsAddProviderModalOpen(false)} // Fecha o modal
+          onClose={() => setIsStepOneModalOpen(false)}
+          onSubmit={handleStepOneSubmit} // Submete o primeiro modal
+        />
+      )}
+
+      {isStepTwoModalOpen && (
+        <StepTwoServiceProviders
+          onClose={() => setIsStepTwoModalOpen(false)}
+          onSubmit={handleStepTwoSubmit} // Submete o segundo modal
         />
       )}
     </div>
