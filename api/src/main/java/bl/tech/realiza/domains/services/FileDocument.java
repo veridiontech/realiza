@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Builder
-@Document(collection = "files")
+@Document(collection = "documents")
 public class FileDocument {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

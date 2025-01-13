@@ -1,6 +1,7 @@
 package bl.tech.realiza.services.auth;
 
 import bl.tech.realiza.domains.user.User;
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
@@ -9,8 +10,16 @@ import java.sql.Date;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "yourSecretKey";
-    private static final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
+
+    private final Dotenv dotenv;
+    private final String SECRET_KEY;
+    private final long EXPIRATION_TIME;
+
+    public JwtService(Dotenv dotenv) {
+        this.dotenv = dotenv;
+        this.SECRET_KEY = dotenv.get("SECRET_KEY");
+        this.EXPIRATION_TIME = Long.parseLong(dotenv.get("EXPIRATION_TIME"));
+    }
 
     public String generateToken(String email, User.Role role) {
         return Jwts.builder()
