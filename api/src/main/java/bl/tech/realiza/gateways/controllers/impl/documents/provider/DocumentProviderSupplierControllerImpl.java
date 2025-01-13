@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -25,11 +27,18 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
 
     private final CrudDocumentProviderSupplierImpl crudDocumentSupplier;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(@RequestBody @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto) {
-        DocumentResponseDto documentSupplier = crudDocumentSupplier.save(documentSupplierRequestDto);
+    public ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(
+            @RequestPart("documentSupplierRequestDto") @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto,
+            @RequestParam("file") MultipartFile file) {
+        DocumentResponseDto documentSupplier = null;
+        try {
+            documentSupplier = crudDocumentSupplier.save(documentSupplierRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentSupplier));
     }
@@ -60,8 +69,16 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(@RequestBody @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto) {
-        Optional<DocumentResponseDto> documentSupplier = crudDocumentSupplier.update(documentSupplierRequestDto);
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(
+            @RequestPart("documentSupplierRequestDto")
+            @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        Optional<DocumentResponseDto> documentSupplier = null;
+        try {
+            documentSupplier = crudDocumentSupplier.update(documentSupplierRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentSupplier));
     }

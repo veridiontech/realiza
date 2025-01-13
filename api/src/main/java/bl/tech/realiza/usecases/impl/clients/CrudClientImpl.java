@@ -32,6 +32,7 @@ public class CrudClientImpl implements CrudClient {
         Client savedClient = clientRepository.save(newClient);
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
                 .companyName(savedClient.getCompanyName())
@@ -51,6 +52,7 @@ public class CrudClientImpl implements CrudClient {
         Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .idClient(client.getIdClient())
                 .cnpj(client.getCnpj())
                 .tradeName(client.getTradeName())
                 .companyName(client.getCompanyName())
@@ -69,6 +71,7 @@ public class CrudClientImpl implements CrudClient {
 
         Page<ClientResponseDto> clientResponseDtoPage = clientPage.map(
                 client -> ClientResponseDto.builder()
+                        .idClient(client.getIdClient())
                         .cnpj(client.getCnpj())
                         .tradeName(client.getTradeName())
                         .companyName(client.getCompanyName())
@@ -99,6 +102,7 @@ public class CrudClientImpl implements CrudClient {
         Client savedClient = clientRepository.save(client);
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
                 .companyName(savedClient.getCompanyName())

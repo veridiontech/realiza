@@ -15,7 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -26,11 +28,18 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
 
     private final CrudDocumentProviderSubcontractorImpl crudDocumentSubcontractor;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(@RequestBody @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto) {
-        DocumentResponseDto documentSubcontractor = crudDocumentSubcontractor.save(documentSubcontractorRequestDto);
+    public ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(
+            @RequestPart("documentSubcontractorRequestDto") @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
+            @RequestParam("file") MultipartFile file) {
+        DocumentResponseDto documentSubcontractor = null;
+        try {
+            documentSubcontractor = crudDocumentSubcontractor.save(documentSubcontractorRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentSubcontractor));
     }
@@ -61,8 +70,16 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(@RequestBody @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto) {
-        Optional<DocumentResponseDto> documentSubcontractor = crudDocumentSubcontractor.update(documentSubcontractorRequestDto);
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(
+            @RequestPart("documentSubcontractorRequestDto")
+            @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        Optional<DocumentResponseDto> documentSubcontractor = null;
+        try {
+            documentSubcontractor = crudDocumentSubcontractor.update(documentSubcontractorRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentSubcontractor));
     }

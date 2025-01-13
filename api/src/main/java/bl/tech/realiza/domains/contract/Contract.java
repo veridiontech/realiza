@@ -25,6 +25,7 @@ public abstract class Contract {
     private String serviceName;
     private String description;
     private String allocatedLimit;
+    // responsável -> user
     private Date startDate;
     private Date endDate;
 

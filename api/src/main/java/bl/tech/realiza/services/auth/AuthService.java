@@ -1,4 +1,4 @@
-package bl.tech.realiza.services;
+package bl.tech.realiza.services.auth;
 
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;

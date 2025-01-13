@@ -2,8 +2,10 @@ package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
@@ -11,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -20,18 +24,27 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     private final DocumentBranchRepository documentBranchRepository;
     private final BranchRepository branchRepository;
+    private final FileRepository fileRepository;
 
     @Override
-    public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto) {
+    public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
         Optional<Branch> branchOptional = branchRepository.findById(documentBranchRequestDto.getBranch());
 
         Branch branch = branchOptional.orElseThrow(() -> new RuntimeException("Branch not found"));
+
+        FileDocument fileDocument = FileDocument.builder()
+                .name(file.getOriginalFilename())
+                .contentType(file.getContentType())
+                .data(file.getBytes())
+                .build();
+
+        FileDocument savedFileDocument= fileRepository.save(fileDocument);
 
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
                 .title(documentBranchRequestDto.getTitle())
                 .risk(documentBranchRequestDto.getRisk())
                 .status(documentBranchRequestDto.getStatus())
-                .documentation(documentBranchRequestDto.getDocumentation())
+                .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentBranchRequestDto.getCreationDate())
                 .branch(branch)
                 .build();
@@ -90,15 +103,28 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto) {
+    public Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
         Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(documentBranchRequestDto.getIdDocumentation());
 
         DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
 
+        if (file != null && !file.isEmpty()) {
+            // Process the file if it exists
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes()) // Handle the IOException
+                    .build();
+
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+
+            // Update the documentBranch with the new file's ID
+            documentBranch.setDocumentation(savedFileDocument.getIdDocument());
+        }
+
         documentBranch.setTitle(documentBranchRequestDto.getTitle() != null ? documentBranchRequestDto.getTitle() : documentBranch.getTitle());
         documentBranch.setRisk(documentBranchRequestDto.getRisk() != null ? documentBranchRequestDto.getRisk() : documentBranch.getRisk());
         documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
-        documentBranch.setDocumentation(documentBranchRequestDto.getDocumentation() != null ? documentBranchRequestDto.getDocumentation() : documentBranch.getDocumentation());
         documentBranch.setCreationDate(documentBranchRequestDto.getCreationDate() != null ? documentBranchRequestDto.getCreationDate() : documentBranch.getCreationDate());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);

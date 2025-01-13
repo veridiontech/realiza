@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -25,11 +27,18 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
 
     private final CrudDocumentBranchImpl crudDocumentBranch;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentBranch(@RequestBody @Valid DocumentBranchRequestDto documentBranchRequestDto) {
-        DocumentResponseDto documentBranch = crudDocumentBranch.save(documentBranchRequestDto);
+    public ResponseEntity<DocumentResponseDto> createDocumentBranch(
+            @RequestPart("documentBranchRequestDto") @Valid DocumentBranchRequestDto documentBranchRequestDto,
+            @RequestPart(value = "file") MultipartFile file) {
+        DocumentResponseDto documentBranch = null;
+        try {
+            documentBranch = crudDocumentBranch.save(documentBranchRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentBranch));
     }
@@ -46,10 +55,11 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranch(@RequestParam(defaultValue = "0") int page,
-                                                                           @RequestParam(defaultValue = "5") int size,
-                                                                           @RequestParam(defaultValue = "idDocumentation") String sort,
-                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranch(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "idDocumentation") String sort,
+            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
         Page<DocumentResponseDto> pageDocumentBranch = crudDocumentBranch.findAll(pageable);
@@ -57,11 +67,19 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.ok(pageDocumentBranch);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(@RequestBody @Valid DocumentBranchRequestDto documentBranchRequestDto) {
-        Optional<DocumentResponseDto> documentBranch = crudDocumentBranch.update(documentBranchRequestDto);
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(
+            @RequestPart("documentBranchRequestDto")
+            @Valid DocumentBranchRequestDto documentBranchRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        Optional<DocumentResponseDto> documentBranch = null;
+        try {
+            documentBranch = crudDocumentBranch.update(documentBranchRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentBranch));
     }

@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -25,11 +27,18 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
 
     private final CrudDocumentEmployeeImpl crudDocumentEmployeeImpl;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentEmployee(@RequestBody @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto) {
-        DocumentResponseDto documentEmployee = crudDocumentEmployeeImpl.save(documentEmployeeRequestDto);
+    public ResponseEntity<DocumentResponseDto> createDocumentEmployee(
+            @RequestPart("documentEmployeeRequestDto") @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto,
+            @RequestParam("file") MultipartFile file) {
+        DocumentResponseDto documentEmployee = null;
+        try {
+            documentEmployee = crudDocumentEmployeeImpl.save(documentEmployeeRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentEmployee));
     }
@@ -60,8 +69,16 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(@RequestBody @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto) {
-        Optional<DocumentResponseDto> documentEmployee = crudDocumentEmployeeImpl.update(documentEmployeeRequestDto);
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(
+            @RequestPart("documentEmployeeRequestDto")
+            @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        Optional<DocumentResponseDto> documentEmployee = null;
+        try {
+            documentEmployee = crudDocumentEmployeeImpl.update(documentEmployeeRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentEmployee));
     }

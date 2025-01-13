@@ -4,6 +4,10 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.client.Document
 import bl.tech.realiza.gateways.requests.documents.client.DocumentClientRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentClientImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +18,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -25,11 +31,21 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
 
     private final CrudDocumentClientImpl crudDocumentClient;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentClient(@RequestBody @Valid DocumentClientRequestDto documentClientRequestDto) {
-        DocumentResponseDto documentClient = crudDocumentClient.save(documentClientRequestDto);
+    public ResponseEntity<DocumentResponseDto> createDocumentClient(
+            @RequestPart("documentClientRequestDto")
+            @Valid DocumentClientRequestDto documentClientRequestDto,
+            @RequestPart(value = "file")
+            MultipartFile file) {
+        DocumentResponseDto documentClient = null;
+
+        try {
+            documentClient = crudDocumentClient.save(documentClientRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException("Error saving document client", e);
+        }
 
         return ResponseEntity.of(Optional.of(documentClient));
     }
@@ -57,11 +73,19 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
         return ResponseEntity.ok(pageDocumentClient);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(@RequestBody @Valid DocumentClientRequestDto documentClientRequestDto) {
-        Optional<DocumentResponseDto> documentClient = crudDocumentClient.update(documentClientRequestDto);
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(
+            @RequestPart("documentClientRequestDto")
+            @Valid DocumentClientRequestDto documentClientRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        Optional<DocumentResponseDto> documentClient = null;
+        try {
+            documentClient = crudDocumentClient.update(documentClientRequestDto, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(documentClient));
     }

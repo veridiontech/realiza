@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.responses.users;
 
+import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class UserResponseDto {
     private String description;
     private String password;
     private String position;
-    private String role;
+    private User.Role role;
     private String firstName;
     private TimeZone timeZone;
     private String surname;

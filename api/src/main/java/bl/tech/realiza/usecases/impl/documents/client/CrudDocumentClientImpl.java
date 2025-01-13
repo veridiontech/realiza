@@ -2,8 +2,10 @@ package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentClientRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentClientRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentClient;
@@ -11,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -20,18 +24,27 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     private final DocumentClientRepository documentClientRepository;
     private final ClientRepository clientRepository;
+    private final FileRepository fileRepository;
 
     @Override
-    public DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto) {
+    public DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
         Optional<Client> clientOptional = clientRepository.findById(documentClientRequestDto.getClient());
 
         Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+
+        FileDocument fileDocument = FileDocument.builder()
+                .name(file.getOriginalFilename())
+                .contentType(file.getContentType())
+                .data(file.getBytes())
+                .build();
+
+        FileDocument savedFileDocument= fileRepository.save(fileDocument);
 
         DocumentClient newDocumentClient = DocumentClient.builder()
                 .title(documentClientRequestDto.getTitle())
                 .risk(documentClientRequestDto.getRisk())
                 .status(documentClientRequestDto.getStatus())
-                .documentation(documentClientRequestDto.getDocumentation())
+                .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentClientRequestDto.getCreationDate())
                 .client(client)
                 .build();
@@ -57,12 +70,14 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
 
+        FileDocument fileDocument = fileRepository.findById(documentClient.getDocumentation()).orElseThrow(() -> new RuntimeException("File not found"));
+
         DocumentResponseDto documentClientResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentClient.getIdDocumentation())
                 .title(documentClient.getTitle())
                 .risk(documentClient.getRisk())
                 .status(documentClient.getStatus())
-                .documentation(documentClient.getDocumentation())
+                .documentation(fileDocument.getIdDocument())
                 .creationDate(documentClient.getCreationDate())
                 .client(documentClient.getClient().getIdClient())
                 .build();
@@ -90,15 +105,28 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto) {
+    public Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
         Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(documentClientRequestDto.getIdDocumentation());
 
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
 
+        if (file != null && !file.isEmpty()) {
+            // Process the file if it exists
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes()) // Handle the IOException
+                    .build();
+
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+
+            // Update the documentBranch with the new file's ID
+            documentClient.setDocumentation(savedFileDocument.getIdDocument());
+        }
+
         documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
         documentClient.setRisk(documentClientRequestDto.getRisk() != null ? documentClientRequestDto.getRisk() : documentClient.getRisk());
         documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
-        documentClient.setDocumentation(documentClientRequestDto.getDocumentation() != null ? documentClientRequestDto.getDocumentation() : documentClient.getDocumentation());
         documentClient.setCreationDate(documentClientRequestDto.getCreationDate() != null ? documentClientRequestDto.getCreationDate() : documentClient.getCreationDate());
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);

@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Exclude H2 database files
+/data/*.mv.db
+/data/*.trace.db
+
+# Maven build directory
+/target/
+
+# env
+**/.env
