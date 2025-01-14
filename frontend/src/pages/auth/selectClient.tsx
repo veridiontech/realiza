@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dropdown } from "@/components/ui/dropdown";
 import { useClients } from "@/hooks/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
+import { Dialog } from "@/components/ui/dialog";
 
 export function SelectClient() {
   const { data: clients, isLoading, error } = useClients();
@@ -19,8 +20,12 @@ export function SelectClient() {
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 
           <div className="my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
-            <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
-
+            <div>
+              <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
+              <Dialog >
+                
+              </Dialog>
+            </div>
             <div className="relative mb-4">
               <input
                 type="text"

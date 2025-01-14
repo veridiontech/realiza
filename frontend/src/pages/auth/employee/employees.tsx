@@ -38,6 +38,7 @@ export const EmployeesTable = () => {
     page: 1, // Apenas uma página na requisição
   });
 
+  
   const employees = data?.data || [];
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = employees.slice(startIndex, startIndex + itemsPerPage);
