@@ -32,14 +32,16 @@ export const EmployeesTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar o modal
   const itemsPerPage = 10;
 
+  // Buscando todos os dados de uma vez
   const { data, isLoading, error } = useEmployees({
-    limit: itemsPerPage,
-    page: currentPage,
+    limit: 1000, // Busca todos os registros disponíveis
+    page: 1, // Apenas uma página na requisição
   });
 
   const employees = data?.data || [];
-  const total = data?.total || 0;
-  const totalPages = Math.ceil(total / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = employees.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.ceil((employees.length || 0) / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -73,7 +75,7 @@ export const EmployeesTable = () => {
             Adicionar Funcionário
           </ButtonBlue>
         </div>
-        <Table<Employee> data={employees} columns={columns} />
+        <Table<Employee> data={currentData} columns={columns} />
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -81,7 +83,6 @@ export const EmployeesTable = () => {
         />
       </div>
 
-      {/* Modal de Cadastro de Funcionário */}
       {isModalOpen && (
         <StepOneEmployee
           onClose={() => setIsModalOpen(false)} // Fecha o modal

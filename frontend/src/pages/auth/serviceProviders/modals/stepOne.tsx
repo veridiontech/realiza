@@ -15,18 +15,33 @@ export function StepOneServiceProviders({
   const [cnpj, setCnpj] = useState("");
   const [providerData, setProviderData] = useState<{
     nome?: string;
+    email?: string;
+    phone?: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const validateCNPJ = (cnpj: string) => {
+    const cleanedCNPJ = cnpj.replace(/\D/g, ""); // Remove caracteres não numéricos
+    return cleanedCNPJ.length === 14;
+  };
 
   const handleSearchCNPJ = async () => {
     setError(null);
     setLoading(true);
 
+    if (!validateCNPJ(cnpj)) {
+      setError("CNPJ inválido. Por favor, verifique o formato.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = await fetchCompanyByCNPJ(cnpj);
       setProviderData({
         nome: data.razaoSocial || data.nomeFantasia,
+        email: "",
+        phone: "",
       });
     } catch (err: any) {
       setError(err.message || "Erro desconhecido.");
@@ -72,7 +87,7 @@ export function StepOneServiceProviders({
                 </button>
               </div>
               {providerData?.nome && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-black">
                   Nome: {providerData.nome}
                 </span>
               )}
@@ -88,6 +103,7 @@ export function StepOneServiceProviders({
                 type: "email" as const,
                 placeholder: "exemplo@email.com",
                 required: true,
+                defaultValue: providerData.email,
               },
               {
                 name: "phone",
@@ -95,11 +111,19 @@ export function StepOneServiceProviders({
                 type: "telephone" as const,
                 placeholder: "(XX) XXXXX-XXXX",
                 required: true,
+                defaultValue: providerData.phone,
               },
             ]
           : []),
       ]}
-      onSubmit={handleAddProvider}
+      onSubmit={(data) => {
+        console.log("Dados enviados:", data); // Debug para verificar os dados
+        if (!data.email || !data.phone) {
+          setError("Preencha todos os campos obrigatórios.");
+          return;
+        }
+        handleAddProvider(data);
+      }}
       onClose={onClose}
     />
   );

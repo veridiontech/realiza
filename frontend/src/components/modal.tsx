@@ -1,4 +1,5 @@
 import React from "react";
+import bgImage from "@/assets/modalBG.jpeg";
 
 type FieldType =
   | "text"
@@ -43,9 +44,9 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
   );
 
   React.useEffect(() => {
-    document.body.style.overflow = "hidden"; // Desativa o scroll da página principal
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "auto"; // Restaura o scroll ao fechar o modal
+      document.body.style.overflow = "auto";
     };
   }, []);
 
@@ -63,17 +64,21 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={onClose}
+      onClick={() => onClose()} // Chama `onClose` ao clicar fora
     >
       <div
-        className="relative max-h-[90%] w-[90%] max-w-[40rem] overflow-y-auto rounded-lg bg-white p-8 shadow-lg"
-        onClick={(e) => e.stopPropagation()} // Impede que o clique no modal feche o overlay
+        className="scrollbar-hide relative max-h-[90%] w-[90%] max-w-[40rem] overflow-y-scroll rounded-lg bg-cover bg-no-repeat p-8 text-white shadow-lg"
+        style={{ backgroundImage: `url(${bgImage})` }}
+        onClick={(e) => e.stopPropagation()} // Impede propagação do clique
       >
-        <h2 className="mb-4 text-xl font-semibold">{title}</h2>
+        <h2 className="mb-4 text-xl font-semibold text-yellow-400">{title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map((field) => (
-            <div key={field.name} className="flex flex-col">
-              <label htmlFor={field.name} className="mb-2 text-sm font-medium">
+            <div key={field.name} className="flex flex-col text-black">
+              <label
+                htmlFor={field.name}
+                className="mb-2 text-sm font-medium text-white"
+              >
                 {field.label}
               </label>
               {field.type === "custom" && field.render ? (
@@ -125,7 +130,7 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
             <button
               type="button"
               className="rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400"
-              onClick={onClose}
+              onClick={onClose} // Fecha ao clicar no botão cancelar
             >
               Cancelar
             </button>

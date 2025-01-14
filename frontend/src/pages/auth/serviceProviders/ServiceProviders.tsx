@@ -7,6 +7,7 @@ import { StepOneServiceProviders } from "./modals/stepOne";
 import { StepTwoServiceProviders } from "./modals/stepTwo";
 import { NotebookPen } from "lucide-react";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
+import { NewContract } from "./modals/newContract";
 
 type ServiceProviders = {
   id: number;
@@ -28,6 +29,7 @@ export function ServiceProvider() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
   const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
+  const [isNewContractOpen, setIsNewContractOpen] = useState(false);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = data?.slice(startIndex, startIndex + itemsPerPage) || [];
@@ -44,6 +46,11 @@ export function ServiceProvider() {
     setIsStepTwoModalOpen(false);
   };
 
+  const handleNewContractSubmit = (data: Record<string, any>) => {
+    console.log("Dados do novo contrato enviados:", data);
+    setIsNewContractOpen(false);
+  };
+
   const columns: {
     key: keyof ServiceProviders;
     label: string;
@@ -57,8 +64,11 @@ export function ServiceProvider() {
     {
       key: "id",
       label: "Ações",
-      render: (id: number) => (
-        <button className="ml-4 text-blue-500 hover:underline">
+      render: () => (
+        <button
+          onClick={() => setIsNewContractOpen(true)}
+          className="ml-4 text-blue-500 hover:underline"
+        >
           <NotebookPen />
         </button>
       ),
@@ -111,14 +121,20 @@ export function ServiceProvider() {
       {isStepOneModalOpen && (
         <StepOneServiceProviders
           onClose={() => setIsStepOneModalOpen(false)}
-          onSubmit={handleStepOneSubmit} // Submete o primeiro modal
+          onSubmit={handleStepOneSubmit}
         />
       )}
 
       {isStepTwoModalOpen && (
         <StepTwoServiceProviders
           onClose={() => setIsStepTwoModalOpen(false)}
-          onSubmit={handleStepTwoSubmit} // Submete o segundo modal
+          onSubmit={handleStepTwoSubmit}
+        />
+      )}
+      {isNewContractOpen && (
+        <NewContract
+          onClose={() => setIsNewContractOpen(false)}
+          onSubmit={handleNewContractSubmit}
         />
       )}
     </div>
