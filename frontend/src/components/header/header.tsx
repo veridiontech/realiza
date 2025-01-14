@@ -32,7 +32,7 @@ export function Header() {
             <span className="mr-4 text-xl text-blue-600">
               Cliente Selecionado:
             </span>
-            UrbanWear Co.
+            UltraGaz BR
           </span>
           <button
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"

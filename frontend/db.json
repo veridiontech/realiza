@@ -428,30 +428,31 @@
     }
   ],
   
-    "employees": [
-      { "name": "Ray Clarke", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Jessica Taylor", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Nathan Foster", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Catherine Reynolds", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Olivia Knight", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Anna Lee", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Samuel Hayes", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Grace Spencer", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Alexander Davidson", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Emma Brown", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Matthew Johnson", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "David Wright", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Isabella Nguyen", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Liam Smith", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Sophia Johnson", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Mason Williams", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Ava Martinez", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Ethan Brown", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Mia Davis", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Noah Wilson", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Amelia Moore", "avatarUrl": "https://via.placeholder.com/40" },
-      { "name": "Lucas Taylor", "avatarUrl": "https://via.placeholder.com/40" }
-    ]
+"Employees": [
+  { "name": "Ray Clarke", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Jessica Taylor", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Nathan Foster", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Catherine Reynolds", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Olivia Knight", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Anna Lee", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Samuel Hayes", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Grace Spencer", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Alexander Davidson", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Emma Brown", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Matthew Johnson", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "David Wright", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Isabella Nguyen", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Liam Smith", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Sophia Johnson", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Mason Williams", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Ava Martinez", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Ethan Brown", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Mia Davis", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Noah Wilson", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "name": "Amelia Moore", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "name": "Lucas Taylor", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" }
+]
+
   }
   
   

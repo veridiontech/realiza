@@ -3,7 +3,7 @@ type TableProps<T> = {
   columns: {
     key: keyof T;
     label: string;
-    render?: (value: any) => JSX.Element;
+    render?: (value: any, row: T) => JSX.Element;
   }[];
 };
 
@@ -29,7 +29,7 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
               {columns.map((col) => (
                 <td key={String(col.key)} className="px-4 py-2">
                   {col.render
-                    ? col.render(row[col.key])
+                    ? col.render(row[col.key], row)
                     : (row[col.key] as React.ReactNode)}
                 </td>
               ))}

@@ -45,10 +45,17 @@ export function LateralMenu() {
           </span>
         </Button>
       </Link>
-      <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
-        <ChartPie className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Ver BI’s</span>
-      </Button>
+      <Link to={"/dashboard"}>
+        <Button
+          variant={"ghost"}
+          className="mt-1 w-full justify-start px-4 py-2"
+        >
+          <ChartPie className="size-4 text-zinc-800" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">
+            Ver BI’s
+          </span>
+        </Button>
+      </Link>
       <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
         <Layers className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
@@ -91,12 +98,17 @@ export function LateralMenu() {
         <Factory className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Filiais</span>
       </Button>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
-        <PersonStanding className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">
-          Funcionários
-        </span>
-      </Button>
+      <Link to={"/employees"}>
+        <Button
+          variant={"ghost"}
+          className="mt-2 w-full justify-start px-4 py-2"
+        >
+          <PersonStanding className="size-4 text-zinc-800" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">
+            Funcionários
+          </span>
+        </Button>
+      </Link>
       <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <MessageSquare className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">

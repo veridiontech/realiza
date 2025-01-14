@@ -6,6 +6,7 @@ import { QuickActions } from "@/components/quickActions/quickAction";
 import { StepOneServiceProviders } from "./modals/stepOne";
 import { StepTwoServiceProviders } from "./modals/stepTwo";
 import { NotebookPen } from "lucide-react";
+import { ButtonBlue } from "@/components/ui/buttonBlue";
 
 type ServiceProviders = {
   id: number;
@@ -89,12 +90,9 @@ export function ServiceProvider() {
               value={""}
             />
           </div>
-          <button
-            className="h-[3rem] rounded-md border-2 border-blue-300 px-6 text-black hover:border-blue-600 hover:bg-blue-300 hover:text-white"
-            onClick={() => setIsStepOneModalOpen(true)}
-          >
+          <ButtonBlue onClick={() => setIsStepOneModalOpen(true)}>
             Adicionar Prestador
-          </button>
+          </ButtonBlue>
         </div>
 
         <Table data={currentData || []} columns={columns} />
