@@ -37,6 +37,7 @@ export const EmployeesTable = () => {
     page: currentPage,
   });
 
+  
   const employees = data?.data || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / itemsPerPage);

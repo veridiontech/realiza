@@ -57,7 +57,7 @@ export function ServiceProvider() {
     {
       key: "id",
       label: "Ações",
-      render: (id: number) => (
+      render: () => (
         <button className="ml-4 text-blue-500 hover:underline">
           <NotebookPen />
         </button>

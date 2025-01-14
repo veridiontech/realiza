@@ -21,6 +21,10 @@ import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
 import { ServiceProvider } from "./pages/auth/serviceProviders/ServiceProviders";
 import ContractsTable from "./pages/auth/contracts/contracts";
 import { EmployeesTable } from "./pages/auth/employee/employees";
+import { EmailLayout } from "./_layouts/email";
+import { LoginPageEmail } from "./pages/auth/emailPages/login-page";
+import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
+import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
 
 export const router = createBrowserRouter([
   {
@@ -62,4 +66,13 @@ export const router = createBrowserRouter([
     element: <EnterpriseLayout />,
     children: [{ path: "enterprise", element: <Enterprise /> }],
   },
+  {
+    path: '/email',
+    element: <EmailLayout />,
+    children: [
+      { path: 'Sign-Up', element: <SignUpPageEmail />},
+      {path: 'Login', element: <LoginPageEmail />},
+      {path: 'Enterprise-sign-up', element: <EnterprisePageEmail />}
+    ]
+  }
 ]);
