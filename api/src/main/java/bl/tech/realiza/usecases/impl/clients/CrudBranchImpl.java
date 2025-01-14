@@ -80,6 +80,7 @@ public class CrudBranchImpl implements CrudBranch {
         Branch branch = branchOptional.orElseThrow(() -> new RuntimeException("Branch not found"));
 
         branch.setName(branchRequestDto.getName() != null ? branchRequestDto.getName() : branch.getName());
+        branch.setIsActive(branchRequestDto.getIsActive() != null ? branchRequestDto.getIsActive() : branch.getIsActive());
 
         Branch savedBranch = branchRepository.save(branch);
 

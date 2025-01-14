@@ -30,4 +30,5 @@ public class ContractProviderSupplierRequestDto {
     private List<String> activities;
     @NotEmpty
     private List<String> requirements;
+    private Boolean isActive;
 }

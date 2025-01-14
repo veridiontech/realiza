@@ -18,4 +18,5 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idActivity;
     private String title;
+    private Boolean isActive = true;
 }

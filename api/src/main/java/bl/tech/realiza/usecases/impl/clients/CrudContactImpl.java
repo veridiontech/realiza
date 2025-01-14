@@ -100,6 +100,7 @@ public class CrudContactImpl implements CrudContact {
         contact.setCountry(contactRequestDto.getCountry() != null ? contactRequestDto.getCountry() : contact.getCountry());
         contact.setTelephone(contactRequestDto.getTelephone() != null ? contactRequestDto.getTelephone() : contact.getTelephone());
         contact.setMainContact(contactRequestDto.getMainContact() != null ? contactRequestDto.getMainContact() : contact.getMainContact());
+        contact.setIsActive(contactRequestDto.getIsActive() != null ? contactRequestDto.getIsActive() : contact.getIsActive());
 
         Contact savedContact = contactRepository.save(contact);
 

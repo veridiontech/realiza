@@ -9,6 +9,10 @@ public class DotenvConfig {
 
     @Bean
     public Dotenv dotenv() {
-        return Dotenv.load();
+
+        return Dotenv.configure()
+                .directory("./") // Specify the directory where .env is located
+                .ignoreIfMissing() // Optional: Skip if .env doesn't exist
+                .load();
     }
 }

@@ -35,4 +35,5 @@ public class UserClientRequestDto {
     private String cellphone;
     @NotEmpty
     private String client;
+    private Boolean isActive;
 }

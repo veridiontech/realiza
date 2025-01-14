@@ -18,4 +18,6 @@ public abstract class Provider {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idProvider;
     private String cnpj;
+    private String companyName;
+    private Boolean isActive = true;
 }

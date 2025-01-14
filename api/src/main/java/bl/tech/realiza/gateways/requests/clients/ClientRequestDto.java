@@ -20,4 +20,5 @@ public class ClientRequestDto {
     private String staff;
     @NotEmpty
     private String customers;
+    private Boolean isActive;
 }

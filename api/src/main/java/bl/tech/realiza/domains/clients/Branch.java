@@ -16,6 +16,7 @@ public class Branch {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idBranch;
     private String name;
+    private Boolean isActive = true;
 
     @ManyToOne
     private Client client;

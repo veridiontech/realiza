@@ -8,4 +8,5 @@ public class ActivityRequestDto {
     private String idActivity;
     @NotEmpty
     private String title;
+    private Boolean isActive;
 }
