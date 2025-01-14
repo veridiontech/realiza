@@ -5,6 +5,7 @@ import { useServiceProviders } from "@/hooks/useServiceProviders";
 import { QuickActions } from "@/components/quickActions/quickAction";
 import { StepOneServiceProviders } from "./modals/stepOne";
 import { StepTwoServiceProviders } from "./modals/stepTwo";
+import { NotebookPen } from "lucide-react";
 
 type ServiceProviders = {
   id: number;
@@ -56,8 +57,8 @@ export function ServiceProvider() {
       key: "id",
       label: "Ações",
       render: (id: number) => (
-        <button className="text-blue-500 hover:underline">
-          Gerenciar {id}
+        <button className="ml-4 text-blue-500 hover:underline">
+          <NotebookPen />
         </button>
       ),
     },

@@ -20,6 +20,7 @@ import { SelectClient } from "./pages/auth/selectClient";
 import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
 import { ServiceProvider } from "./pages/auth/serviceProviders/ServiceProviders";
 import ContractsTable from "./pages/auth/contracts/contracts";
+import { EmployeesTable } from "./pages/auth/employee/employees";
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
       { path: "/selectClient", element: <SelectClient /> },
       { path: "/serviceProviders", element: <ServiceProvider /> },
       { path: "/contracts", element: <ContractsTable /> },
+      { path: "/employees", element: <EmployeesTable /> },
     ],
   },
   {

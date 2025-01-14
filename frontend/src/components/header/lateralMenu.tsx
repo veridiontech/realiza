@@ -34,12 +34,17 @@ export function LateralMenu() {
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
-        <Users2 className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">
-          Ver prestadores
-        </span>
-      </Button>
+      <Link to={"/serviceProviders"}>
+        <Button
+          variant={"ghost"}
+          className="mt-2 w-full justify-start px-4 py-2"
+        >
+          <Users2 className="size-4 text-zinc-800" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">
+            Ver prestadores
+          </span>
+        </Button>
+      </Link>
       <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
         <ChartPie className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Ver BI’s</span>

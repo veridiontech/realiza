@@ -426,6 +426,33 @@
       "startDate": "2025-03-01",
       "endDate": "2025-10-31"
     }
-  ]
+  ],
+  
+    "employees": [
+      { "name": "Ray Clarke", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Jessica Taylor", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Nathan Foster", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Catherine Reynolds", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Olivia Knight", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Anna Lee", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Samuel Hayes", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Grace Spencer", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Alexander Davidson", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Emma Brown", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Matthew Johnson", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "David Wright", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Isabella Nguyen", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Liam Smith", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Sophia Johnson", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Mason Williams", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Ava Martinez", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Ethan Brown", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Mia Davis", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Noah Wilson", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Amelia Moore", "avatarUrl": "https://via.placeholder.com/40" },
+      { "name": "Lucas Taylor", "avatarUrl": "https://via.placeholder.com/40" }
+    ]
   }
+  
+  
   

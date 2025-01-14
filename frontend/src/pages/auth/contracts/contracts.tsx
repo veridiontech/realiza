@@ -2,7 +2,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { useState } from "react";
-import { NotebookPen } from "lucide-react";
+import { ScrollText } from "lucide-react";
 
 type Contract = {
   id: string;
@@ -44,8 +44,8 @@ const ContractsTable = () => {
       key: "id",
       label: "Ações",
       render: (id: string) => (
-        <button className="text-blue-500 hover:underline">
-          <NotebookPen />
+        <button className="ml-4 text-blue-500 hover:underline">
+          <ScrollText />
         </button>
       ),
     },
