@@ -1,6 +1,5 @@
-# Fase 1: Build da aplicação usando Maven e JDK 17
-FROM maven:3.8.7-jdk-11 AS build
-
+# Fase 1: Build da aplicação usando Maven com JDK 23
+FROM maven:3.9.9-eclipse-temurin-23 AS build
 
 # Diretório de trabalho para o build
 WORKDIR /app
@@ -15,8 +14,8 @@ COPY src ./src
 # Compila o projeto e gera o JAR
 RUN mvn clean package -DskipTests
 
-# Fase 2: Cria a imagem final usando JDK 23
-FROM eclipse-temurin:23-jdk
+# Fase 2: Cria a imagem final usando apenas o JDK 23
+FROM maven:3.9.9-eclipse-temurin-23
 
 # Diretório de trabalho no container final
 WORKDIR /app
