@@ -1,28 +1,26 @@
-# Use a imagem base com JDK 17 e Maven para builds
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+# Fase 1: Build da aplicação usando Maven e JDK 23
+FROM maven:3.8.7-eclipse-temurin-23 AS build
 
-# Diretório de trabalho para a aplicação
+# Diretório de trabalho para o build
 WORKDIR /app
 
-# Copia os arquivos de configuração do Maven (pom.xml) para baixar dependências
+# Copia o arquivo de configuração do Maven e baixa dependências
 COPY pom.xml .
-
-# Faz o download das dependências do Maven para cache
 RUN mvn dependency:go-offline
 
-# Copia o código-fonte para o container
+# Copia o restante do código-fonte para o build
 COPY src ./src
 
 # Compila o projeto e gera o JAR
 RUN mvn clean package -DskipTests
 
-# Fase 2: Cria uma imagem final para rodar a aplicação
-FROM eclipse-temurin:17-jdk-slim
+# Fase 2: Cria a imagem final usando JDK 23
+FROM eclipse-temurin:23-jdk-slim
 
 # Diretório de trabalho no container final
 WORKDIR /app
 
-# Copia o JAR gerado da fase anterior para o container final
+# Copia o JAR gerado na fase de build para o container final
 COPY --from=build /app/target/*.jar app.jar
 
 # Expõe a porta padrão do Spring Boot
