@@ -15,7 +15,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Fase 2: Cria a imagem final usando JDK 23
-FROM eclipse-temurin:23-jdk-slim
+FROM eclipse-temurin:23-jdk
 
 # Diretório de trabalho no container final
 WORKDIR /app
