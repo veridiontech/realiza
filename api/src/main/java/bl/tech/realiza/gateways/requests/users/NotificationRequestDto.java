@@ -12,7 +12,7 @@ public class NotificationRequestDto {
     @NotEmpty
     private String description;
     @NotNull
-    private Boolean read;
+    private Boolean isRead;
     @NotEmpty
     private String user;
     private Boolean isActive;

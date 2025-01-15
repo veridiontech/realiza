@@ -30,7 +30,7 @@ public class CrudNotificationImpl implements CrudNotification {
         Notification newNotification = Notification.builder()
                 .title(notificationRequestDto.getTitle())
                 .description(notificationRequestDto.getDescription())
-                .read(notificationRequestDto.getRead())
+                .isRead(notificationRequestDto.getIsRead())
                 .user(user)
                 .build();
 
@@ -40,7 +40,7 @@ public class CrudNotificationImpl implements CrudNotification {
                 .idNotification(savedNotification.getIdNotification())
                 .title(savedNotification.getTitle())
                 .description(savedNotification.getDescription())
-                .read(savedNotification.getRead())
+                .isRead(savedNotification.getIsRead())
                 .user(savedNotification.getUser().getIdUser())
                 .build();
 
@@ -57,7 +57,7 @@ public class CrudNotificationImpl implements CrudNotification {
                 .idNotification(notification.getIdNotification())
                 .title(notification.getTitle())
                 .description(notification.getDescription())
-                .read(notification.getRead())
+                .isRead(notification.getIsRead())
                 .user(notification.getUser().getIdUser())
                 .build();
 
@@ -73,7 +73,7 @@ public class CrudNotificationImpl implements CrudNotification {
                         .idNotification(notification.getIdNotification())
                         .title(notification.getTitle())
                         .description(notification.getDescription())
-                        .read(notification.getRead())
+                        .isRead(notification.getIsRead())
                         .user(notification.getUser().getIdUser())
                         .build()
         );
@@ -89,7 +89,7 @@ public class CrudNotificationImpl implements CrudNotification {
 
         notification.setTitle(notificationRequestDto.getTitle() != null ? notificationRequestDto.getTitle() : notification.getTitle());
         notification.setDescription(notificationRequestDto.getDescription() != null ? notificationRequestDto.getDescription() : notification.getDescription());
-        notification.setRead(notificationRequestDto.getRead() != null ? notificationRequestDto.getRead() : notification.getRead());
+        notification.setIsRead(notificationRequestDto.getIsRead() != null ? notificationRequestDto.getIsRead() : notification.getIsRead());
         notification.setIsActive(notificationRequestDto.getIsActive() != null ? notificationRequestDto.getIsActive() : notification.getIsActive());
 
         Notification savedNotification = notificationRepository.save(notification);
@@ -98,7 +98,7 @@ public class CrudNotificationImpl implements CrudNotification {
                 .idNotification(savedNotification.getIdNotification())
                 .title(savedNotification.getTitle())
                 .description(savedNotification.getDescription())
-                .read(savedNotification.getRead())
+                .isRead(savedNotification.getIsRead())
                 .user(savedNotification.getUser().getIdUser())
                 .build();
 

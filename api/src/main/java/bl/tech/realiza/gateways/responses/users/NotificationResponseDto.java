@@ -11,6 +11,6 @@ public class NotificationResponseDto {
     private String idNotification;
     private String title;
     private String description;
-    private Boolean read;
+    private Boolean isRead;
     private String user;
 }
