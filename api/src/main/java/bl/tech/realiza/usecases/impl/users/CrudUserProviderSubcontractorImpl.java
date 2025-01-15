@@ -24,7 +24,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     private final UserProviderSubcontractorRepository userSubcontractorRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final EmailSender emailSender;
-    private PasswordEncryptionService passwordEncryptionService;
+    private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {

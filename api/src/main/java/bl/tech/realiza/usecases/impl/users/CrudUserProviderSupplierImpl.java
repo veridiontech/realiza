@@ -21,7 +21,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     private final UserProviderSupplierRepository userSupplierRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
-    private PasswordEncryptionService passwordEncryptionService;
+    private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {

@@ -21,7 +21,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     private final UserClientRepository userClientRepository;
     private final ClientRepository clientRepository;
-    private PasswordEncryptionService passwordEncryptionService;
+    private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
