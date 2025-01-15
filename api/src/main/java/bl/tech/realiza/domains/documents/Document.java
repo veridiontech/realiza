@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.documents;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -27,5 +28,6 @@ public abstract class Document {
     private Date creationDate;
     private Date versionDate;
     private Date expirationDate;
+    @Builder.Default
     private Boolean isActive = true;
 }

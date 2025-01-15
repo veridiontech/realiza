@@ -19,6 +19,7 @@ public class Notification {
     private String title;
     private String description;
     private Boolean isRead;
+    @Builder.Default
     private Boolean isActive = true;
 
     @ManyToOne

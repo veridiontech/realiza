@@ -18,5 +18,6 @@ public class Requirement {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idRequirement;
     private String title;
+    @Builder.Default
     private Boolean isActive = true;
 }

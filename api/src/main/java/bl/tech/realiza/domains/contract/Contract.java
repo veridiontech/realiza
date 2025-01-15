@@ -3,6 +3,7 @@ package bl.tech.realiza.domains.contract;
 import bl.tech.realiza.domains.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -30,6 +31,7 @@ public abstract class Contract {
     private User responsible;
     private Date startDate;
     private Date endDate;
+    @Builder.Default
     private Boolean isActive = true;
 
     @ManyToMany
