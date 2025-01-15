@@ -21,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/branch")
 @Tag(name = "Branch")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class BranchControllerImpl implements BranchControlller {
 
     private final CrudBranchImpl crudBranch;
