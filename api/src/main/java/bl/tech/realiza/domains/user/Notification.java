@@ -18,6 +18,7 @@ public class Notification {
     private String title;
     private String description;
     private Boolean read;
+    private Boolean isActive = true;
 
     @ManyToOne
     private User user;

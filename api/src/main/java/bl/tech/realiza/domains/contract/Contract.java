@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contract;
 
+import bl.tech.realiza.domains.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,9 +26,11 @@ public abstract class Contract {
     private String serviceName;
     private String description;
     private String allocatedLimit;
-    // responsável -> user
+    @OneToOne(cascade = CascadeType.ALL)
+    private User responsible;
     private Date startDate;
     private Date endDate;
+    private Boolean isActive = true;
 
     @ManyToMany
     @JoinTable(

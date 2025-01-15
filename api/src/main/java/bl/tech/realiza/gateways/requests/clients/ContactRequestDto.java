@@ -19,4 +19,5 @@ public class ContactRequestDto {
     private Boolean mainContact;
     @NotEmpty
     private String client;
+    private Boolean isActive;
 }

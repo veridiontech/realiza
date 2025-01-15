@@ -10,4 +10,5 @@ public class BranchRequestDto {
     private String name;
     @NotEmpty
     private String client;
+    private Boolean isActive;
 }

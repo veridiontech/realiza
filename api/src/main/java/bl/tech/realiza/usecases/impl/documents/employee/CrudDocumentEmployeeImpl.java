@@ -70,12 +70,18 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
 
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentEmployee.getIdDocumentation())
                 .title(documentEmployee.getTitle())
                 .risk(documentEmployee.getRisk())
                 .status(documentEmployee.getStatus())
                 .documentation(documentEmployee.getDocumentation())
+                .fileName(fileDocument.getName())
+                .fileContentType(fileDocument.getContentType())
+                .fileData(fileDocument.getData())
                 .creationDate(documentEmployee.getCreationDate())
                 .employee(documentEmployee.getEmployee().getIdEmployee())
                 .build();
@@ -88,15 +94,23 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         Page<DocumentEmployee> documentEmployeePage = documentEmployeeRepository.findAll(pageable);
 
         Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
-                documentEmployee -> DocumentResponseDto.builder()
-                        .idDocumentation(documentEmployee.getIdDocumentation())
-                        .title(documentEmployee.getTitle())
-                        .risk(documentEmployee.getRisk())
-                        .status(documentEmployee.getStatus())
-                        .documentation(documentEmployee.getDocumentation())
-                        .creationDate(documentEmployee.getCreationDate())
-                        .employee(documentEmployee.getEmployee().getIdEmployee())
-                        .build()
+                documentEmployee -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentEmployee.getIdDocumentation())
+                            .title(documentEmployee.getTitle())
+                            .risk(documentEmployee.getRisk())
+                            .status(documentEmployee.getStatus())
+                            .documentation(documentEmployee.getDocumentation())
+                            .fileName(fileDocument.getName())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentEmployee.getCreationDate())
+                            .employee(documentEmployee.getEmployee().getIdEmployee())
+                            .build();
+                }
         );
 
         return documentEmployeeResponseDtoPage;
@@ -126,6 +140,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         documentEmployee.setRisk(documentEmployeeRequestDto.getRisk() != null ? documentEmployeeRequestDto.getRisk() : documentEmployee.getRisk());
         documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
         documentEmployee.setCreationDate(documentEmployeeRequestDto.getCreationDate() != null ? documentEmployeeRequestDto.getCreationDate() : documentEmployee.getCreationDate());
+        documentEmployee.setIsActive(documentEmployeeRequestDto.getIsActive() != null ? documentEmployeeRequestDto.getIsActive() : documentEmployee.getIsActive());
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 

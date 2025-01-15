@@ -6,10 +6,13 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepo
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,6 +23,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
+    private final EmailSender emailSender;
 
     @Override
     public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
@@ -80,6 +84,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
 
         providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
+        providerSubcontractor.setIsActive(providerSubcontractorRequestDto.getIsActive() != null ? providerSubcontractorRequestDto.getIsActive() : providerSubcontractor.getIsActive());
 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(providerSubcontractor);
 

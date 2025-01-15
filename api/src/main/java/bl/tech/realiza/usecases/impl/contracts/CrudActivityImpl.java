@@ -69,6 +69,7 @@ public class CrudActivityImpl implements CrudActivity {
         Activity activity = activityOptional.orElseThrow(() -> new RuntimeException("Activity not found"));
 
         activity.setTitle(activityRequestDto.getTitle() != null ? activityRequestDto.getTitle() : activity.getTitle());
+        activity.setIsActive(activityRequestDto.getIsActive() != null ? activityRequestDto.getIsActive() : activity.getIsActive());
 
         Activity savedActivity = activityRepository.save(activity);
 

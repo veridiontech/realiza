@@ -8,4 +8,5 @@ public class RequirementRequestDto {
     private String idRequirement;
     @NotEmpty
     private String title;
+    private Boolean isActive;
 }

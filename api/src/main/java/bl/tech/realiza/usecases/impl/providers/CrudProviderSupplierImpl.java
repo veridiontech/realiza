@@ -80,6 +80,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider not found"));
 
         providerSupplier.setCnpj(providerSupplierRequestDto.getCnpj() != null ? providerSupplierRequestDto.getCnpj() : providerSupplier.getCnpj());
+        providerSupplier.setIsActive(providerSupplierRequestDto.getIsActive() != null ? providerSupplierRequestDto.getIsActive() : providerSupplier.getIsActive());
 
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(providerSupplier);
 

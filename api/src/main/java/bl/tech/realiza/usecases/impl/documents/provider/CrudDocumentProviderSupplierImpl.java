@@ -70,12 +70,18 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
 
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentSupplier.getDocumentation())
                 .title(documentSupplier.getTitle())
                 .risk(documentSupplier.getRisk())
                 .status(documentSupplier.getStatus())
                 .documentation(documentSupplier.getDocumentation())
+                .fileName(fileDocument.getIdDocument())
+                .fileContentType(fileDocument.getContentType())
+                .fileData(fileDocument.getData())
                 .creationDate(documentSupplier.getCreationDate())
                 .supplier(documentSupplier.getProviderSupplier().getIdProvider())
                 .build();
@@ -88,15 +94,23 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAll(pageable);
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
-                documentSupplier -> DocumentResponseDto.builder()
-                        .idDocumentation(documentSupplier.getDocumentation())
-                        .title(documentSupplier.getTitle())
-                        .risk(documentSupplier.getRisk())
-                        .status(documentSupplier.getStatus())
-                        .documentation(documentSupplier.getDocumentation())
-                        .creationDate(documentSupplier.getCreationDate())
-                        .supplier(documentSupplier.getProviderSupplier().getIdProvider())
-                        .build()
+                documentSupplier -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentSupplier.getDocumentation())
+                            .title(documentSupplier.getTitle())
+                            .risk(documentSupplier.getRisk())
+                            .status(documentSupplier.getStatus())
+                            .documentation(documentSupplier.getDocumentation())
+                            .fileName(fileDocument.getIdDocument())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentSupplier.getCreationDate())
+                            .supplier(documentSupplier.getProviderSupplier().getIdProvider())
+                            .build();
+                }
         );
 
         return documentSupplierResponseDtoPage;
@@ -126,6 +140,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         documentSupplier.setRisk(documentProviderSupplierRequestDto.getRisk() != null ? documentProviderSupplierRequestDto.getRisk() : documentSupplier.getRisk());
         documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
         documentSupplier.setCreationDate(documentProviderSupplierRequestDto.getCreationDate() != null ? documentProviderSupplierRequestDto.getCreationDate() : documentSupplier.getCreationDate());
+        documentSupplier.setIsActive(documentProviderSupplierRequestDto.getIsActive() != null ? documentProviderSupplierRequestDto.getIsActive() : documentSupplier.getIsActive());
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
