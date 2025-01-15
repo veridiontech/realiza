@@ -1,30 +1,16 @@
-# Fase 1: Build da aplicação usando Maven com JDK 23
-FROM maven:3.9.9-eclipse-temurin-23 AS build
+FROM ubuntu:latest AS build
+RUN apt-get update
+RUN apt-get install openjudk-17-jdk -y
+COPY . .
 
-# Diretório de trabalho para o build
-WORKDIR /app
 
-# Copia o arquivo de configuração do Maven e baixa dependências
-COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN apt-get install maven -y
+RUN mvn clean install
 
-# Copia o restante do código-fonte para o build
-COPY src ./src
+FROM openjdk:17-jdk-slim
 
-# Compila o projeto e gera o JAR
-RUN mvn clean package -DskipTests
-
-# Fase 2: Cria a imagem final usando apenas o JDK 23
-FROM maven:3.9.9-eclipse-temurin-23
-
-# Diretório de trabalho no container final
-WORKDIR /app
-
-# Copia o JAR gerado na fase de build para o container final
-COPY --from=build /app/target/*.jar app.jar
-
-# Expõe a porta padrão do Spring Boot
 EXPOSE 8080
 
-# Define o comando para iniciar a aplicação
+COPY --from=build /out/artifacts/realiza_jar/realiza.jar app.jar
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
