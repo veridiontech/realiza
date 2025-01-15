@@ -7,10 +7,12 @@ import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepo
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,7 +23,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     private final UserProviderSubcontractorRepository userSubcontractorRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
-    private PasswordEncryptionService passwordEncryptionService;
+    private final EmailSender emailSender;
+    private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
@@ -136,6 +139,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         userSubcontractor.setProfilePicture(userProviderSubcontractorRequestDto.getProfilePicture() != null ? userProviderSubcontractorRequestDto.getProfilePicture() : userSubcontractor.getProfilePicture());
         userSubcontractor.setTelephone(userProviderSubcontractorRequestDto.getTelephone() != null ? userProviderSubcontractorRequestDto.getTelephone() : userSubcontractor.getTelephone());
         userSubcontractor.setCellphone(userProviderSubcontractorRequestDto.getCellphone() != null ? userProviderSubcontractorRequestDto.getCellphone() : userSubcontractor.getCellphone());
+        userSubcontractor.setIsActive(userProviderSubcontractorRequestDto.getIsActive() != null ? userProviderSubcontractorRequestDto.getIsActive() : userSubcontractor.getIsActive());
 
         UserProviderSubcontractor savedUserSubcontractor = userSubcontractorRepository.save(userSubcontractor);
 

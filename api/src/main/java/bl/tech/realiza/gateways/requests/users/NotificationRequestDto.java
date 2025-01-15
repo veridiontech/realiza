@@ -15,4 +15,5 @@ public class NotificationRequestDto {
     private Boolean read;
     @NotEmpty
     private String user;
+    private Boolean isActive;
 }

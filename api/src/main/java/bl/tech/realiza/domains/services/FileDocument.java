@@ -15,6 +15,7 @@ public class FileDocument {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocument;
     private String name;
+
     private String contentType;
     private byte[] data;
 }

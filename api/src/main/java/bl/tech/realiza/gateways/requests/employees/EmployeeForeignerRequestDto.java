@@ -69,4 +69,5 @@ public class EmployeeForeignerRequestDto {
     private String supplier;
     @NotEmpty
     private String subcontract;
+    private Boolean isActive;
 }

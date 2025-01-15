@@ -1,7 +1,9 @@
 package bl.tech.realiza.gateways.controllers.impl.clients;
 
 import bl.tech.realiza.gateways.controllers.interfaces.clients.ClientControlller;
+import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
+import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
@@ -74,5 +76,14 @@ public class ClientControllerImpl implements ClientControlller {
         crudClient.delete(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/user")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<ClientAndUserClientResponseDto> createClientAndUser(@RequestBody @Valid ClientAndUserClientRequestDto clientAndUserClientRequestDto) {
+        ClientAndUserClientResponseDto clientAndUser = crudClient.saveBoth(clientAndUserClientRequestDto);
+
+        return ResponseEntity.of(Optional.of(clientAndUser));
     }
 }

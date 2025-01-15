@@ -33,6 +33,7 @@ public abstract class User {
     private String profilePicture;
     private String telephone;
     private String cellphone;
+    private Boolean isActive = true;
 
     public enum Role {
         ROLE_ADMIN,

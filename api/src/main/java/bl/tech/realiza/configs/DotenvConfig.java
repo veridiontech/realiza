@@ -12,5 +12,10 @@ public class DotenvConfig {
         return Dotenv.configure()
         .directory("C:/Users/minel/Desktop/BL PROJECTS/realiza/api") // Caminho do diretório
         .load();
+
+        return Dotenv.configure()
+                .directory("./") // Specify the directory where .env is located
+                .ignoreIfMissing() // Optional: Skip if .env doesn't exist
+                .load();
     }
 }

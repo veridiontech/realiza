@@ -35,4 +35,5 @@ public class UserProviderSubcontractorRequestDto {
     private String cellphone;
     @NotEmpty
     private String subcontractor;
+    private Boolean isActive;
 }

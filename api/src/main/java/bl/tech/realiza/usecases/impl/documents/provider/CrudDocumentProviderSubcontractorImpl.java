@@ -70,12 +70,18 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
 
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentSubcontractor.getDocumentation())
                 .title(documentSubcontractor.getTitle())
                 .risk(documentSubcontractor.getRisk())
                 .status(documentSubcontractor.getStatus())
                 .documentation(documentSubcontractor.getDocumentation())
+                .fileName(fileDocument.getIdDocument())
+                .fileContentType(fileDocument.getContentType())
+                .fileData(fileDocument.getData())
                 .creationDate(documentSubcontractor.getCreationDate())
                 .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
@@ -88,15 +94,23 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAll(pageable);
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
-                documentSubcontractor -> DocumentResponseDto.builder()
-                        .idDocumentation(documentSubcontractor.getDocumentation())
-                        .title(documentSubcontractor.getTitle())
-                        .risk(documentSubcontractor.getRisk())
-                        .status(documentSubcontractor.getStatus())
-                        .documentation(documentSubcontractor.getDocumentation())
-                        .creationDate(documentSubcontractor.getCreationDate())
-                        .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
-                        .build()
+                documentSubcontractor -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentSubcontractor.getDocumentation())
+                            .title(documentSubcontractor.getTitle())
+                            .risk(documentSubcontractor.getRisk())
+                            .status(documentSubcontractor.getStatus())
+                            .documentation(documentSubcontractor.getDocumentation())
+                            .fileName(fileDocument.getIdDocument())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentSubcontractor.getCreationDate())
+                            .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .build();
+                }
         );
 
         return documentSubcontractorResponseDtoPage;
@@ -126,6 +140,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         documentSubcontractor.setRisk(documentProviderSubcontractorRequestDto.getRisk() != null ? documentProviderSubcontractorRequestDto.getRisk() : documentSubcontractor.getRisk());
         documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
         documentSubcontractor.setCreationDate(documentProviderSubcontractorRequestDto.getCreationDate() != null ? documentProviderSubcontractorRequestDto.getCreationDate() : documentSubcontractor.getCreationDate());
+        documentSubcontractor.setIsActive(documentProviderSubcontractorRequestDto.getIsActive() != null ? documentProviderSubcontractorRequestDto.getIsActive() : documentSubcontractor.getIsActive());
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
 

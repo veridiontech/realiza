@@ -10,4 +10,5 @@ public class ProviderSupplierRequestDto {
     private String cnpj;
     @NotEmpty
     private String client;
+    private Boolean isActive;
 }

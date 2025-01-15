@@ -25,5 +25,6 @@ public class Client {
     private String telephone;
     private String staff;
     private String customers;
-    // objective
+    private String objective;
+    private Boolean isActive = true;
 }

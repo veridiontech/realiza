@@ -46,6 +46,7 @@ public abstract class Employee {
     private String email;
     private String levelOfEducation;
     private String cbo;
+    private Boolean isActive = true;
 
     @ManyToOne
     private Client client;

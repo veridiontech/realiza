@@ -242,6 +242,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         employeeForeigner.setRneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() != null ? employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() : employeeForeigner.getRneRnmFederalPoliceProtocol());
         employeeForeigner.setPassport(employeeForeignerRequestDto.getPassport() != null ? employeeForeignerRequestDto.getPassport() : employeeForeigner.getPassport());
         employeeForeigner.setBrazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate() != null ? employeeForeignerRequestDto.getBrazilEntryDate() : employeeForeigner.getBrazilEntryDate());
+        employeeForeigner.setIsActive(employeeForeignerRequestDto.getIsActive() != null ? employeeForeignerRequestDto.getIsActive() : employeeForeigner.getIsActive());
 
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(employeeForeigner);
 

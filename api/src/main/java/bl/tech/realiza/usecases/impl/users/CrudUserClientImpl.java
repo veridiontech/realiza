@@ -21,7 +21,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     private final UserClientRepository userClientRepository;
     private final ClientRepository clientRepository;
-    private PasswordEncryptionService passwordEncryptionService;
+    private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -136,6 +136,7 @@ public class CrudUserClientImpl implements CrudUserClient {
         userClient.setProfilePicture(userClientRequestDto.getProfilePicture() != null ? userClientRequestDto.getProfilePicture() : userClient.getProfilePicture());
         userClient.setTelephone(userClientRequestDto.getTelephone() != null ? userClientRequestDto.getTelephone() : userClient.getTelephone());
         userClient.setCellphone(userClientRequestDto.getCellphone() != null ? userClientRequestDto.getCellphone() : userClient.getCellphone());
+        userClient.setIsActive(userClientRequestDto.getIsActive() != null ? userClientRequestDto.getIsActive() : userClient.getIsActive());
 
         UserClient savedUserClient = userClientRepository.save(userClient);
 

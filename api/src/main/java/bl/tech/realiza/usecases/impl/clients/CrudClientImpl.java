@@ -1,9 +1,14 @@
 package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
+import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
+import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
+import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +21,8 @@ import java.util.Optional;
 public class CrudClientImpl implements CrudClient {
 
     private final ClientRepository clientRepository;
+    private final UserClientRepository userClientRepository;
+    private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -98,6 +105,7 @@ public class CrudClientImpl implements CrudClient {
         client.setTelephone(clientRequestDto.getTelephone() != null ? clientRequestDto.getTelephone() : client.getTelephone());
         client.setStaff(clientRequestDto.getStaff() != null ? clientRequestDto.getStaff() : client.getStaff());
         client.setCustomers(clientRequestDto.getCustomers() != null ? clientRequestDto.getCustomers() : client.getCustomers());
+        client.setIsActive(clientRequestDto.getIsActive() != null ? clientRequestDto.getIsActive() : client.getIsActive());
 
         Client savedClient = clientRepository.save(client);
 
@@ -118,5 +126,51 @@ public class CrudClientImpl implements CrudClient {
     @Override
     public void delete(String id) {
         clientRepository.deleteById(id);
+    }
+
+    @Override
+    public ClientAndUserClientResponseDto saveBoth(ClientAndUserClientRequestDto clientAndUserClientRequestDto) {
+        Client newClient = Client.builder()
+                .cnpj(clientAndUserClientRequestDto.getCnpj())
+                .tradeName(clientAndUserClientRequestDto.getNameEnterprise())
+                .companyName(clientAndUserClientRequestDto.getSocialReason())
+                .email(clientAndUserClientRequestDto.getEmail())
+                .telephone(clientAndUserClientRequestDto.getPhone())
+                .build();
+
+        Client savedClient = clientRepository.save(newClient);
+
+        String encryptedPassword = passwordEncryptionService.encryptPassword(clientAndUserClientRequestDto.getPassword());
+
+        UserClient newUserClient = UserClient.builder()
+                .cpf(clientAndUserClientRequestDto.getCpf())
+                .password(encryptedPassword)
+                .position(clientAndUserClientRequestDto.getPosition())
+                .role(clientAndUserClientRequestDto.getRole())
+                .firstName(clientAndUserClientRequestDto.getName())
+                .surname(clientAndUserClientRequestDto.getSurname())
+                .email(clientAndUserClientRequestDto.getEmail())
+                .telephone(clientAndUserClientRequestDto.getPhone())
+                .client(savedClient)
+                .build();
+
+        UserClient savedUserClient = userClientRepository.save(newUserClient);
+
+        ClientAndUserClientResponseDto clientAndUserClientResponseDto = ClientAndUserClientResponseDto.builder()
+                .idClient(savedClient.getIdClient())
+                .cnpj(savedClient.getCnpj())
+                .tradeName(savedClient.getTradeName())
+                .companyName(savedClient.getCompanyName())
+                .email(savedClient.getEmail())
+                .telephone(savedClient.getTelephone())
+                .idUser(savedUserClient.getIdUser())
+                .cpf(savedUserClient.getCpf())
+                .position(savedUserClient.getPosition())
+                .role(savedUserClient.getRole())
+                .firstName(savedUserClient.getFirstName())
+                .surname(savedUserClient.getSurname())
+                .build();
+
+        return clientAndUserClientResponseDto;
     }
 }

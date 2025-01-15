@@ -17,8 +17,12 @@ public class DocumentBranchRequestDto {
     private String status;
     @NotEmpty
     private String documentation;
+    private String type;
     @NotNull
     private Date creationDate;
+    private Date versionDate;
+    private Date expirationDate;
     @NotEmpty
     private String branch;
+    private Boolean isActive;
 }

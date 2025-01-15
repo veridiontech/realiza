@@ -16,6 +16,9 @@ public class DocumentResponseDto {
     private String risk;
     private String status;
     private String documentation;
+    private String fileName;
+    private String fileContentType;
+    private byte[] fileData;
     private Date creationDate;
 
     // branch
