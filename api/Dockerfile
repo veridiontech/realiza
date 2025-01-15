@@ -1,6 +1,7 @@
 # Fase 1: Build da aplicação usando Maven e JDK 17
 FROM maven:3.8.7-jdk-11 AS build
 
+
 # Diretório de trabalho para o build
 WORKDIR /app
 
