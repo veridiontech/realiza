@@ -1,5 +1,5 @@
-# Fase 1: Build da aplicação usando Maven e JDK 23
-FROM maven:3.8.7-eclipse-temurin-23 AS build
+# Fase 1: Build da aplicação usando Maven e JDK 17
+FROM maven:3.8.7-openjdk-17 AS build
 
 # Diretório de trabalho para o build
 WORKDIR /app
