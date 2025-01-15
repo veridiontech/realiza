@@ -16,6 +16,7 @@ public class Branch {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idBranch;
     private String name;
+    @Builder.Default
     private Boolean isActive = true;
 
     @ManyToOne

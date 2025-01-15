@@ -26,5 +26,6 @@ public class Client {
     private String staff;
     private String customers;
     private String objective;
+    @Builder.Default
     private Boolean isActive = true;
 }
