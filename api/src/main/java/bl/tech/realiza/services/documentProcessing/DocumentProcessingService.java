@@ -87,4 +87,28 @@ public class DocumentProcessingService {
     public boolean containsKeyword(String text, String keyword) {
         return text.toLowerCase().contains(keyword.toLowerCase());
     }
+
+    public String extractText(MultipartFile file) throws IOException, TesseractException {
+        String extractedText;
+        try {
+            extractedText = processFile(file);
+        } catch (IOException | TesseractException e) {
+            throw new RuntimeException("Erro ao processar o documento", e);
+        }
+        return extractedText;
+    }
+
+    public String findKeyword(MultipartFile file, String keyword) throws IOException, TesseractException {
+        try {
+            String extractedText = processFile(file);
+            boolean containsKeyword = containsKeyword(extractedText, keyword);
+            if (containsKeyword) {
+                return ("Palavra-chave encontrada no documento!");
+            } else {
+                return ("Palavra-chave não encontrada.");
+            }
+        } catch (IOException | TesseractException e) {
+            throw new RuntimeException("Erro ao processar o documento", e);
+        }
+    }
 }

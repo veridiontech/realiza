@@ -1,23 +1,18 @@
 package bl.tech.realiza.services.email;
 
-import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.gateways.controllers.impl.services.EmailController;
+import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
-import bl.tech.realiza.services.auth.TokenManager;
+import bl.tech.realiza.services.auth.TokenManagerService;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -29,7 +24,7 @@ public class EmailSender {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ClientRepository clientRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
-    private final TokenManager tokenManager;
+    private final TokenManagerService tokenManagerService;
 
     public void sendEmail(EmailRequestDto emailRequestDto) {
         String companyName = "";
@@ -58,12 +53,12 @@ public class EmailSender {
 
         try {
             // Generating a unique token
-            String token = tokenManager.generateToken();
+            String token = tokenManagerService.generateToken();
             String emailBody;
 
             // Reading and customizing the email template
             try (var inputStream = Objects.requireNonNull(
-                    EmailController.class.getResourceAsStream("/templates/email-content.html"))) {
+                    EmailControllerImpl.class.getResourceAsStream("/templates/email-content.html"))) {
                 emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
                         .replace("<span class=\"highlight\">Realiza Assessoria Empresarial Ltda</span>",
                                 "<span class=\"highlight\">" + companyName + "</span>")

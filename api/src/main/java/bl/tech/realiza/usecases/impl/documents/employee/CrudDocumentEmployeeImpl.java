@@ -55,22 +55,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(newDocumentEmployee);
 
-        try {
-            // Processa o texto do documento e verifica palavras-chave
-            String extractedText = documentProcessingService.processFile(file);
-            boolean containsKeyword = documentProcessingService.containsKeyword(extractedText, savedDocumentEmployee.getTitle());
-
-            // Logs para debug
-            System.out.println("Texto extraído: " + extractedText);
-            if (containsKeyword) {
-                System.out.println("Palavra-chave encontrada no documento!");
-            } else {
-                System.out.println("Palavra-chave não encontrada.");
-            }
-        } catch (IOException | TesseractException e) {
-            throw new RuntimeException("Erro ao processar o documento", e);
-        }
-
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
