@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormDataContext } from "@/context/formDataProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ const enterprisePageEmailFormSchema = z.object({
 
 type EnterprisePageEmailFormSchema = z.infer<typeof enterprisePageEmailFormSchema>;
 export function EnterprisePageEmail() {
+    const {setEnterpriseData} = useFormDataContext()
     const navigate = useNavigate()
 
   const {
@@ -29,8 +31,10 @@ export function EnterprisePageEmail() {
   });
 
   const onSubmit = (data: EnterprisePageEmailFormSchema) => {
+    setEnterpriseData(data)
+    localStorage.setItem('enterpriseData', JSON.stringify(data))
     console.log("Dados enviados", data);
-    navigate(`/email/Login`)
+    navigate(`/email/Sign-up`)
   };
 
   return (

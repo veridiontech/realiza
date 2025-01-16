@@ -1,10 +1,14 @@
 package bl.tech.realiza.services.email;
 
+import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailController;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
+import bl.tech.realiza.services.auth.TokenManager;
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -20,54 +24,67 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class EmailSender {
-
+    private final Dotenv dotenv;
     private final JavaMailSender mailSender;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ClientRepository clientRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
+    private final TokenManager tokenManager;
 
     public void sendEmail(EmailRequestDto emailRequestDto) {
+        String companyName = "";
+        String idCompany = "";
+
         switch (emailRequestDto.getCompany()) {
             case CLIENT -> {
-                clientRepository.findById(emailRequestDto.getIdCompany())
+                var client = clientRepository.findById(emailRequestDto.getIdCompany())
                         .orElseThrow(() -> new RuntimeException("Client not found"));
+                companyName = client.getCompanyName();
+                idCompany = client.getIdClient();
             }
             case SUPPLIER -> {
-                providerSupplierRepository.findById(emailRequestDto.getIdCompany())
+                var supplier = providerSupplierRepository.findById(emailRequestDto.getIdCompany())
                         .orElseThrow(() -> new RuntimeException("Supplier not found"));
+                companyName = supplier.getCompanyName();
+                idCompany = supplier.getIdProvider();
             }
             case SUBCONTRACTOR -> {
-                providerSubcontractorRepository.findById(emailRequestDto.getIdCompany())
+                var subcontractor = providerSubcontractorRepository.findById(emailRequestDto.getIdCompany())
                         .orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+                companyName = subcontractor.getCompanyName();
+                idCompany = subcontractor.getIdProvider();
             }
         }
 
         try {
-            // Creating a MimeMessage
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            // Generating a unique token
+            String token = tokenManager.generateToken();
+            String emailBody;
 
-            // Setting sender, recipient, and subject
-            helper.setFrom("jhonatan.sampaiof@gmail.com");
-            helper.setTo(emailRequestDto.getEmail());
-            helper.setSubject("Java email with attachment | From GC");
-
-            // Adding the HTML email body from a file
+            // Reading and customizing the email template
             try (var inputStream = Objects.requireNonNull(
                     EmailController.class.getResourceAsStream("/templates/email-content.html"))) {
-                helper.setText(
-                        new String(inputStream.readAllBytes(), StandardCharsets.UTF_8),
-                        true // Enables HTML format
-                );
+                emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+                        .replace("<span class=\"highlight\">Realiza Assessoria Empresarial Ltda</span>",
+                                "<span class=\"highlight\">" + companyName + "</span>")
+                        .replace("#TOKEN_PLACEHOLDER#", token)
+                        .replace("#ID_PLACEHOLDER#",idCompany);
             }
 
-            // Adding an inline image attachment
+            // Creating and sending the email
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(dotenv.get("GMAIL_EMAIL"));
+            helper.setTo(emailRequestDto.getEmail());
+            helper.setSubject("Bem-vindo à " + companyName);
+            helper.setText(emailBody, true); // Enable HTML format
+
+            // Adding inline attachments (if needed)
             helper.addInline(
                     "fe2da35f82b3200096d22e32b6a7c011.jpg",
                     new File("C:/Users/Rogerio/Pictures/fe2da35f82b3200096d22e32b6a7c011.jpg")
             );
 
-            // Sending the email
             mailSender.send(message);
         } catch (Exception e) {
             throw new RuntimeException("Failed to send email", e);

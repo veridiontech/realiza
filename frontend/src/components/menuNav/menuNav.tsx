@@ -22,7 +22,7 @@ export function MenuNav() {
           {" "}
           Cadastro{" "}
         </NavLink>
-        <NavLink
+        {/* <NavLink
           to={"/email/Login"}
           className={({ isActive }) =>
             `flex h-[6vh] w-[10vw] items-center justify-center rounded-r-md bg-gray-300 ${isActive ? "bg-realizaBlue h-[9vh] w-[10vw] rounded-md font-bold text-white shadow-md" : `text-black cursor-not-allowed pointer-events-none`}`
@@ -30,7 +30,7 @@ export function MenuNav() {
         >
           {" "}
           Login{" "}
-        </NavLink>
+        </NavLink> */}
       </nav>
     </div>
   );

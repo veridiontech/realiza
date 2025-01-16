@@ -20,6 +20,7 @@ public class Contact {
     private String country;
     private String telephone;
     private Boolean mainContact;
+    @Builder.Default
     private Boolean isActive = true;
 
     @ManyToOne

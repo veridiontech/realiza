@@ -9,6 +9,9 @@ public class DotenvConfig {
 
     @Bean
     public Dotenv dotenv() {
+        return Dotenv.configure()
+        .directory("C:/Users/minel/Desktop/BL PROJECTS/realiza/api") // Caminho do diretório
+        .load();
 
         return Dotenv.configure()
                 .directory("./") // Specify the directory where .env is located

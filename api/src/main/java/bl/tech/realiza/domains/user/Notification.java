@@ -11,13 +11,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "USER_NOTIFICATION")
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idNotification;
     private String title;
     private String description;
-    private Boolean read;
+    private Boolean isRead;
+    @Builder.Default
     private Boolean isActive = true;
 
     @ManyToOne

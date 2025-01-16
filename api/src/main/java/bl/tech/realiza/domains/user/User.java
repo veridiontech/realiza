@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -33,6 +34,7 @@ public abstract class User {
     private String profilePicture;
     private String telephone;
     private String cellphone;
+    @Builder.Default
     private Boolean isActive = true;
 
     public enum Role {

@@ -17,4 +17,6 @@ public interface ClientControlller {
     ResponseEntity<Optional<ClientResponseDto>> updateClient(ClientRequestDto clientRequestDto);
     ResponseEntity<Void> deleteClient(String id);
     ResponseEntity<ClientAndUserClientResponseDto> createClientAndUser(ClientAndUserClientRequestDto clientAndUserClientRequestDto);
+    ResponseEntity<?> createClientAndUserToken(ClientAndUserClientRequestDto clientAndUserClientRequestDto, String token);
+    ResponseEntity<?> getClientAndUserToken(String token, String id);
 }

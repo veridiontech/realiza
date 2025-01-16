@@ -1,22 +1,8 @@
-# FROM ubuntu:latest
+FROM maven:3.8.5-openjdk-17 AS build
+COPY . .
+RUN mvn clean package -DskipTests
 
-# ENTRYPOINT ["top", "-b"]
-
-# Use a imagem base do OpenJDK
-FROM openjdk:17-jdk-slim
-LABEL authors="Jhonatan"
-
-# Cria um diretório para a aplicação
-WORKDIR /app
-
-# Copia o arquivo JAR gerado pelo build para dentro do container
-COPY target/realiza-application.jar app.jar
-
-# Expõe a porta padrão do Spring Boot
+FROM openjdk:17.0.1-jdk-slim
+COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
 EXPOSE 8080
-
-# Define a variável de ambiente para produção (se necessário)
-ENV SPRING_PROFILES_ACTIVE=prod
-
-# Comando para executar o JAR
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","demo.jar"]

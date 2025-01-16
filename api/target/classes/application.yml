@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: realiza
+  profiles:
+    active: ${SPRING_ACTIVE_DATABASE:local}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_EMAIL}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail.smtp:
+        auth: true
+        starttls.enable: true

@@ -5,6 +5,7 @@ import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -46,6 +47,7 @@ public abstract class Employee {
     private String email;
     private String levelOfEducation;
     private String cbo;
+    @Builder.Default
     private Boolean isActive = true;
 
     @ManyToOne

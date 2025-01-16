@@ -11,6 +11,7 @@
 	<groupId>com.kciao</groupId>
 	<artifactId>GS24</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<name>Java</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -121,11 +122,25 @@
 
 	<build>
 		<plugins>
+			<!-- Spring Boot Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Maven Compiler Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+					<outputDirectory>C:\Users\Rogerio\Downloads\BLComunicacoes\Realiza</outputDirectory>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
 
 </project>
