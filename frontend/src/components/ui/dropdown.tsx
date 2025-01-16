@@ -1,9 +1,5 @@
 import { useState } from "react";
-
-type Option = {
-  id: number;
-  name: string;
-};
+import { Option } from "@/types/dropDown";
 
 interface DropdownProps {
   options: Option[];

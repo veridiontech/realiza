@@ -1,15 +1,6 @@
 import React from "react";
 import bgImage from "@/assets/modalBG.jpeg";
-
-type FieldType =
-  | "text"
-  | "number"
-  | "email"
-  | "telephone"
-  | "checkbox"
-  | "select"
-  | "date"
-  | "custom";
+import { FieldType } from "@/types/fieldModal";
 
 interface Field {
   name: string;

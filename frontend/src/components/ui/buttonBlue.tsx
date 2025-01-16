@@ -1,7 +1,4 @@
-type ButtonProps = {
-  onClick?: () => void;
-  children: React.ReactNode; // Para passar o texto ou elementos dentro do botão
-};
+import { ButtonProps } from "@/types/buttonBlue";
 
 export const ButtonBlue: React.FC<ButtonProps> = ({ onClick, children }) => {
   return (

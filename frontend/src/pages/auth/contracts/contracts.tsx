@@ -3,16 +3,7 @@ import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { useState } from "react";
 import { ScrollText } from "lucide-react";
-
-type Contract = {
-  id: string;
-  ref: string;
-  project: string;
-  clientFinal: string;
-  client: string;
-  startDate: string;
-  endDate: string;
-};
+import { Contract } from "@/types/contracts";
 
 const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);

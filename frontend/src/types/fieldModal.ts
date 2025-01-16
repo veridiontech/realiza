@@ -1,0 +1,9 @@
+export type FieldType =
+  | "text"
+  | "number"
+  | "email"
+  | "telephone"
+  | "checkbox"
+  | "select"
+  | "date"
+  | "custom";

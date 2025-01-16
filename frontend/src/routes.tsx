@@ -1,5 +1,4 @@
 import { createBrowserRouter } from "react-router-dom";
-
 import { AppLayout } from "./_layouts/app";
 import { AuthLayout } from "./_layouts/auth";
 import { ConfigurationLayout } from "./_layouts/configurantion";
@@ -25,6 +24,7 @@ import { EmailLayout } from "./_layouts/email";
 import { LoginPageEmail } from "./pages/auth/emailPages/login-page";
 import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
 import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
+import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "/serviceProviders", element: <ServiceProvider /> },
       { path: "/contracts", element: <ContractsTable /> },
       { path: "/employees", element: <EmployeesTable /> },
+      { path: "/detailsEmployees/:id", element: <DetailsEmployee /> },
     ],
   },
   {
@@ -67,12 +68,12 @@ export const router = createBrowserRouter([
     children: [{ path: "enterprise", element: <Enterprise /> }],
   },
   {
-    path: '/email',
+    path: "/email",
     element: <EmailLayout />,
     children: [
-      { path: 'Sign-Up', element: <SignUpPageEmail />},
-      {path: 'Login', element: <LoginPageEmail />},
-      {path: 'Enterprise-sign-up', element: <EnterprisePageEmail />}
-    ]
-  }
+      { path: "Sign-Up", element: <SignUpPageEmail /> },
+      { path: "Login", element: <LoginPageEmail /> },
+      { path: "Enterprise-sign-up", element: <EnterprisePageEmail /> },
+    ],
+  },
 ]);

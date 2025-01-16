@@ -1,11 +1,4 @@
-interface LabelWithInputProps {
-  label: string;
-  type: string;
-  placeholder?: string;
-  register: any;
-  name: string;
-  error?: string;
-}
+import { LabelWithInputProps } from "@/types/labelWithInput";
 
 export const LabelWithInput: React.FC<LabelWithInputProps> = ({
   label,

@@ -8,15 +8,7 @@ import { StepTwoServiceProviders } from "./modals/stepTwo";
 import { NotebookPen } from "lucide-react";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { NewContract } from "./modals/newContract";
-
-type ServiceProviders = {
-  id: number;
-  category: string;
-  corporateReason: string;
-  enterprise: string;
-  cnpj: string;
-  units: string;
-};
+import { ServiceProviders } from "@/types/serviceProvider";
 
 export function ServiceProvider() {
   const fetchLimit = 1000;

@@ -1,11 +1,5 @@
-type TableProps<T> = {
-  data: T[];
-  columns: {
-    key: keyof T;
-    label: string;
-    render?: (value: any, row: T) => JSX.Element;
-  }[];
-};
+import { TableProps } from "@/types/table";
+import { ReactNode } from "react";
 
 export const Table = <T,>({ data, columns }: TableProps<T>) => {
   return (
@@ -24,13 +18,18 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
           {data.map((row, index) => (
             <tr
               key={index}
-              className={`border-t ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+              className={`border-t ${
+                index % 2 === 0 ? "bg-white" : "bg-gray-50"
+              }`}
             >
               {columns.map((col) => (
-                <td key={String(col.key)} className="px-4 py-2">
+                <td
+                  key={String(col.key)}
+                  className={`px-4 py-2 ${col.className || ""}`}
+                >
                   {col.render
                     ? col.render(row[col.key], row)
-                    : (row[col.key] as React.ReactNode)}
+                    : (row[col.key] as ReactNode)}
                 </td>
               ))}
             </tr>

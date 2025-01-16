@@ -1,9 +1,5 @@
+import { Employee } from "@/types/employee";
 import { useQuery } from "@tanstack/react-query";
-
-interface Employee {
-  name: string;
-  status: "Ativo" | "Desligado";
-}
 
 interface UseEmployeesProps {
   limit?: number;
@@ -34,6 +30,7 @@ export function useEmployees({ limit = 10, page = 1 }: UseEmployeesProps) {
 
       return {
         data: data.map((employee: any) => ({
+          id: employee.id,
           name: employee.name,
           status: employee.status || "Ativo",
         })),

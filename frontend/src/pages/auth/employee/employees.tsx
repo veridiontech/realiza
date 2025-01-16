@@ -3,17 +3,16 @@ import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { useEmployees } from "@/hooks/useEmployees";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
-import { StepOneEmployee } from "./modals/stepOne"; // Certifique-se de ajustar o caminho para onde o modal está localizado
-
-type Employee = {
-  name: string;
-  status: "Ativo" | "Desligado";
-};
+import { StepOneEmployee } from "./modals/stepOne";
+import { Settings2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Employee } from "@/types/employee";
 
 const columns: {
   key: keyof Employee;
   label: string;
   render?: (value: any, row: Employee) => JSX.Element;
+  className?: string;
 }[] = [
   { key: "name", label: "Nome" },
   {
@@ -25,20 +24,29 @@ const columns: {
       </span>
     ),
   },
+  {
+    key: "id",
+    label: "Ações",
+    render: (value, row) => (
+      <Link to={`/detailsEmployees/${row.id}`}>
+        <button className="ml-4 text-blue-500 hover:underline">
+          <Settings2 />
+        </button>
+      </Link>
+    ),
+  },
 ];
 
 export const EmployeesTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar o modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
-  // Buscando todos os dados de uma vez
   const { data, isLoading, error } = useEmployees({
-    limit: 1000, // Busca todos os registros disponíveis
-    page: 1, // Apenas uma página na requisição
+    limit: 1000,
+    page: 1,
   });
 
-  
   const employees = data?.data || [];
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = employees.slice(startIndex, startIndex + itemsPerPage);
@@ -52,7 +60,7 @@ export const EmployeesTable = () => {
 
   const handleModalSubmit = (formData: Record<string, any>) => {
     console.log("Dados do novo funcionário:", formData);
-    setIsModalOpen(false); // Fecha o modal após o envio
+    setIsModalOpen(false);
   };
 
   if (isLoading) {
@@ -86,8 +94,8 @@ export const EmployeesTable = () => {
 
       {isModalOpen && (
         <StepOneEmployee
-          onClose={() => setIsModalOpen(false)} // Fecha o modal
-          onSubmit={handleModalSubmit} // Lida com o envio do formulário
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleModalSubmit}
         />
       )}
     </div>
