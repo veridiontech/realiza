@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Pendencia } from "@/types/pendencia";
+import { ButtonBlue } from "@/components/ui/buttonBlue";
+import { AddDocument } from "./modals/addDocument";
 
 interface Employee {
   id: number;
@@ -12,11 +14,11 @@ interface Employee {
 
 export function DetailsEmployee() {
   const { id } = useParams<{ id: string }>();
-
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar o modal
 
   const allPendencias: Pendencia[] = [
     {
@@ -102,7 +104,12 @@ export function DetailsEmployee() {
       <div className="flex gap-6">
         <div className="flex w-2/3 flex-col gap-6">
           <div className="rounded-lg bg-white p-6 shadow">
-            <h2 className="mb-4 text-lg font-semibold">Pendências</h2>
+            <div className="mb-4 flex flex-row items-center justify-between">
+              <h2 className="text-lg font-semibold">Pendências</h2>
+              <ButtonBlue onClick={() => setIsModalOpen(true)}>
+                Adicionar Documento
+              </ButtonBlue>
+            </div>
             <Table data={currentData} columns={pendenciasColumns} />
             <Pagination
               currentPage={currentPage}
@@ -124,6 +131,9 @@ export function DetailsEmployee() {
           </div>
         </div>
       </div>
+
+      {/* Renderização condicional do modal */}
+      {isModalOpen && <AddDocument onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 }

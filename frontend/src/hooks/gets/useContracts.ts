@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 interface Contract {
   id: string;
@@ -19,13 +20,10 @@ export function useContracts({ limit = 1000, page = 1 }: UseContractsProps) {
   return useQuery<Contract[]>({
     queryKey: ["Contracts", limit, page],
     queryFn: async () => {
-      const response = await fetch(
+      const response = await axios.get(
         `http://localhost:3001/Contracts?_limit=${limit}&_page=${page}`,
       );
-      if (!response.ok) {
-        throw new Error("Erro ao carregar os dados de contratos");
-      }
-      return response.json();
+      return response.data;
     },
     staleTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData || [],

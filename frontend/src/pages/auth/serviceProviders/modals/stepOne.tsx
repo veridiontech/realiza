@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "@/components/modal";
 import { Search } from "lucide-react";
-import { fetchCompanyByCNPJ } from "@/hooks/useCnpjApi";
+import { fetchCompanyByCNPJ } from "@/hooks/gets/useCnpjApi";
 
 interface StepOneServiceProvidersProps {
   onClose: () => void;

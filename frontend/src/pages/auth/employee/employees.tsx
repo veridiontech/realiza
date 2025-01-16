@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { useEmployees } from "@/hooks/useEmployees";
+import { useEmployees } from "@/hooks/gets/useEmployees";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { StepOneEmployee } from "./modals/stepOne";
 import { Settings2 } from "lucide-react";
