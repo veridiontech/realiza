@@ -24,7 +24,7 @@ export function SelectClient() {
 
   return (
     <div className="flex justify-center min-h-full m-10">
-      <div className="flex justify-between bg-white w-[80rem] h-[30rem] rounded-lg">
+      <div className="flex justify-between bg-white dark:bg-primary dark:shadow-md w-[80rem] h-[30rem] rounded-lg">
         <div className="ml-10 mt-4">
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 

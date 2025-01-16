@@ -12,7 +12,7 @@ const MonittoringBis = () => {
     <>
       <Helmet title="monitoring table" />
       <section className="mx-20 flex flex-col gap-[50px]">
-        <div className="mt-[30px] flex h-[250px] flex-col gap-[50px] rounded-md bg-white pt-[35px] shadow-custom-blue">
+        <div className="mt-[30px] flex h-[250px] flex-col gap-[50px] rounded-md bg-white dark:bg-primary pt-[35px] shadow-custom-blue">
           <div className="flex flex-row justify-between px-20">
             <div className="flex items-center gap-2">
               <CircleDollarSign />

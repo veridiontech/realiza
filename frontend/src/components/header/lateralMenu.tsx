@@ -26,7 +26,7 @@ export function LateralMenu() {
     <SheetContent className="h-full overflow-auto" side={'left'}>
       <Button
         variant={'ghost'}
-        className="w-full justify-start bg-zinc-100 px-4 py-2"
+        className="w-full justify-start bg-foreground px-4 py-2"
       >
         <Home className="size-4 text-blue-600" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>

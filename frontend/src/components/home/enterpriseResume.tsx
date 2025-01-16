@@ -6,7 +6,7 @@ import { Button } from '../ui/button'
 export function EnterpriseResume() {
   return (
     <Link to="/profile">
-      <div className="flex w-full flex-col justify-between rounded bg-white p-4 shadow md:flex-row">
+      <div className="flex w-full flex-col justify-between rounded bg-white dark:bg-primary p-4 shadow md:flex-row">
         <div className="flex gap-3">
           <div className="flex aspect-square size-24 items-center justify-center rounded bg-red-600 uppercase text-white">
             LOGO
@@ -25,15 +25,15 @@ export function EnterpriseResume() {
         <div className="flex gap-4 pt-4 md:pt-0">
           <Button
             variant={'ghost'}
-            className="rounded-full bg-zinc-100 p-2 text-zinc-600"
+            className="rounded-full bg-zinc-100 p-2 dark:bg-muted-foreground text-zinc-600"
           >
-            <Pencil size={24} />
+            <Pencil size={24} className='dark:text-white'/>
           </Button>
           <Button
             variant={'ghost'}
-            className="rounded-full bg-zinc-100 p-2 text-zinc-600"
+            className="rounded-full bg-zinc-100 dark:bg-muted-foreground p-2 text-zinc-600"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={24} className='dark:text-white'/>
           </Button>
         </div>
       </div>

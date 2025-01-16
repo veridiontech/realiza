@@ -6,10 +6,11 @@ import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
 import { Link } from "react-router-dom";
+import { ToggleTheme } from "../toggle-theme";
 
 export function Header() {
   return (
-    <header className="relative p-5">
+    <header className="relative p-5 dark:bg-primary">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <Sheet>
@@ -42,7 +43,7 @@ export function Header() {
           </button>
         </div>
 
-        <div className="hidden items-center md:flex">
+        <div className="hidden items-center gap-12 md:flex">
           <div className="flex w-[320px] items-center gap-3 rounded-full border border-none bg-zinc-100 px-4 py-2">
             <Search className="size-5 text-zinc-900" />
             <input
@@ -50,18 +51,23 @@ export function Header() {
               placeholder="Pesquise aqui..."
             />
           </div>
-          <Button
-            variant={"ghost"}
-            className="ml-14 mr-5 rounded-full bg-zinc-100 p-2"
-          >
-            <Bell size={24} />
-          </Button>
-          <Link to={"/profile-user"}>
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </Link>
+          <div className="flex items-center gap-5">
+            <ToggleTheme />
+            <div className="flex gap-2">
+              <Button
+                variant={"ghost"}
+                className="rounded-full bg-zinc-100 dark:bg-muted-foreground p-2"
+              >
+                <Bell size={24} />
+              </Button>
+              <Link to={"/profile-user"}>
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </header>
