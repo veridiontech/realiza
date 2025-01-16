@@ -17,5 +17,5 @@ public class DocumentMatrixSubgroup {
     private String idDocumentSubgroup;
     private String subgroupName;
     @ManyToOne
-    private DocumentMatrixSubgroup subGroup;
+    private DocumentMatrixGroup group;
 }

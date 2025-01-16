@@ -21,6 +21,8 @@ public class DocumentMatrix {
     private String expiration;
     private String type;
     private String doesBlock;
+    @Builder.Default
+    private Boolean isActive = true;
     private Date creationDate;
     @ManyToOne
     private DocumentMatrixSubgroup subGroup;
