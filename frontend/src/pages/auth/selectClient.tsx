@@ -20,11 +20,11 @@ export function SelectClient() {
 
   return (
     <div className="m-10 flex min-h-full justify-center">
-      <div className="flex h-[30rem] w-[80rem] justify-between rounded-lg bg-white">
+      <div className="flex h-[30rem] w-[80rem] justify-between rounded-lg bg-white dark:bg-primary shadow-md border border-realizaBlue dark:border-white">
         <div className="ml-10 mt-4">
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 
-          <div className="my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
+          <div className="my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300 dark:bg-primary-foreground">
             <div>
               <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
               <Dialog></Dialog>

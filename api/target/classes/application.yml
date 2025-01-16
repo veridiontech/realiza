@@ -2,7 +2,7 @@ spring:
   application:
     name: realiza
   profiles:
-    active: ${SPRING_ACTIVE_DATABASE:local}
+    active: ${SPRING_ACTIVE_DATABASE:prod}
   servlet:
     multipart:
       enabled: true
@@ -17,3 +17,12 @@ spring:
       mail.smtp:
         auth: true
         starttls.enable: true
+  logging:
+    level:
+      org:
+        springframework:
+          mail: DEBUG
+          springframework: DEBUG
+        apache:
+          commons:
+            mail: DEBUG

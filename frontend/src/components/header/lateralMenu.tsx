@@ -23,7 +23,7 @@ import { Link } from "react-router-dom";
 
 export function LateralMenu() {
   return (
-    <SheetContent className="h-full overflow-auto" side={"left"}>
+    <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
       <Button
         variant={"ghost"}
         className="w-full justify-start bg-zinc-100 px-4 py-2"

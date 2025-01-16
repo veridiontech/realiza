@@ -71,17 +71,9 @@ export function ServiceProvider() {
     return <p className="mt-10 text-center">Carregando...</p>;
   }
 
-  if (error) {
-    return (
-      <p className="mt-10 text-center text-red-500">
-        Erro ao carregar os dados
-      </p>
-    );
-  }
-
   return (
     <div className="m-10 flex min-h-full justify-center">
-      <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
+      <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white dark:bg-primary">
         <h1 className="m-8">Prestadores de Serviço</h1>
         <div className="flex w-[90rem] flex-row justify-between px-10">
           <div className="relative mb-4">
@@ -98,7 +90,7 @@ export function ServiceProvider() {
         </div>
 
         <Table data={currentData || []} columns={columns} />
-
+        
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
