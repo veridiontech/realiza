@@ -31,7 +31,7 @@ export function EnterprisePageEmail() {
   useEffect(() => {
     const validateToken = async() => {
       try{ 
-        const res = await axios.get(`${ip}/invite/validate?token=${token}`)
+        const res = await axios.get(`${ip}/email/Enterprise-sign-up/validate?token=${token}`)
         if(res.status === 200) {
           setIsValidToken(true)
         }
@@ -51,7 +51,7 @@ export function EnterprisePageEmail() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<EnterprisePageEmailFormSchema>({
     resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange"
@@ -59,7 +59,7 @@ export function EnterprisePageEmail() {
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     try {
-      const response = await axios.post(`${ip}/invite`, { ...data, token });
+      const response = await axios.post(`${ip}/clients/user`, { ...data, token });
       setEnterpriseData(data);
       localStorage.setItem("enterpriseData", JSON.stringify(data));
       console.log("Cadastro realizado:", response.data);

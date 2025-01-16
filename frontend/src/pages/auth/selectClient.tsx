@@ -3,6 +3,7 @@ import { Dropdown } from "@/components/ui/dropdown";
 import { useFetchClients } from "@/hooks/gets/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
 import { Dialog } from "@/components/ui/dialog";
+import { ModalSendEmail } from "@/components/modal-send-email";
 
 export function SelectClient() {
   const { clients, loading, error, fetchClients } = useFetchClients(); // Hook customizado
@@ -28,9 +29,9 @@ export function SelectClient() {
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 
           <div className="dark:bg-primary-foreground my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
-            <div>
+            <div className="flex items-start justify-between">
               <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
-              <Dialog></Dialog>
+              <ModalSendEmail />
             </div>
             <div className="relative mb-4">
               <input
