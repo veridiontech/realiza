@@ -54,7 +54,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         DocumentClient newDocumentClient = DocumentClient.builder()
                 .title(documentClientRequestDto.getTitle())
-                .risk(documentClientRequestDto.getRisk())
                 .status(documentClientRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentClientRequestDto.getCreationDate())
@@ -66,7 +65,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
-                .risk(savedDocumentClient.getRisk())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
                 .creationDate(savedDocumentClient.getCreationDate())
@@ -88,7 +86,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentResponseDto documentClientResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentClient.getIdDocumentation())
                 .title(documentClient.getTitle())
-                .risk(documentClient.getRisk())
                 .status(documentClient.getStatus())
                 .documentation(fileDocument.getIdDocument())
                 .fileName(fileDocument.getName())
@@ -113,7 +110,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentClient.getIdDocumentation())
                             .title(documentClient.getTitle())
-                            .risk(documentClient.getRisk())
                             .status(documentClient.getStatus())
                             .documentation(documentClient.getDocumentation())
                             .fileName(fileDocument.getName())
@@ -149,7 +145,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         }
 
         documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
-        documentClient.setRisk(documentClientRequestDto.getRisk() != null ? documentClientRequestDto.getRisk() : documentClient.getRisk());
         documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
         documentClient.setCreationDate(documentClientRequestDto.getCreationDate() != null ? documentClientRequestDto.getCreationDate() : documentClient.getCreationDate());
         documentClient.setIsActive(documentClientRequestDto.getIsActive() != null ? documentClientRequestDto.getIsActive() : documentClient.getIsActive());
@@ -159,7 +154,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
-                .risk(savedDocumentClient.getRisk())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
                 .creationDate(savedDocumentClient.getCreationDate())

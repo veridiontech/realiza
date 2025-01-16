@@ -42,7 +42,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentProviderSupplier newDocumentSupplier = DocumentProviderSupplier.builder()
                 .title(documentProviderSupplierRequestDto.getTitle())
-                .risk(documentProviderSupplierRequestDto.getRisk())
                 .status(documentProviderSupplierRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentProviderSupplierRequestDto.getCreationDate())
@@ -54,7 +53,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentSupplier.getDocumentation())
                 .title(savedDocumentSupplier.getTitle())
-                .risk(savedDocumentSupplier.getRisk())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
@@ -76,7 +74,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentSupplier.getDocumentation())
                 .title(documentSupplier.getTitle())
-                .risk(documentSupplier.getRisk())
                 .status(documentSupplier.getStatus())
                 .documentation(documentSupplier.getDocumentation())
                 .fileName(fileDocument.getIdDocument())
@@ -101,7 +98,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentSupplier.getDocumentation())
                             .title(documentSupplier.getTitle())
-                            .risk(documentSupplier.getRisk())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
                             .fileName(fileDocument.getIdDocument())
@@ -137,7 +133,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         }
 
         documentSupplier.setTitle(documentProviderSupplierRequestDto.getTitle() != null ? documentProviderSupplierRequestDto.getTitle() : documentSupplier.getTitle());
-        documentSupplier.setRisk(documentProviderSupplierRequestDto.getRisk() != null ? documentProviderSupplierRequestDto.getRisk() : documentSupplier.getRisk());
         documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
         documentSupplier.setCreationDate(documentProviderSupplierRequestDto.getCreationDate() != null ? documentProviderSupplierRequestDto.getCreationDate() : documentSupplier.getCreationDate());
         documentSupplier.setIsActive(documentProviderSupplierRequestDto.getIsActive() != null ? documentProviderSupplierRequestDto.getIsActive() : documentSupplier.getIsActive());
@@ -147,7 +142,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentSupplier.getDocumentation())
                 .title(savedDocumentSupplier.getTitle())
-                .risk(savedDocumentSupplier.getRisk())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())

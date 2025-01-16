@@ -47,6 +47,7 @@ public abstract class Employee {
     private String email;
     private String levelOfEducation;
     private String cbo;
+    private String situation;
     @Builder.Default
     private Boolean isActive = true;
 
