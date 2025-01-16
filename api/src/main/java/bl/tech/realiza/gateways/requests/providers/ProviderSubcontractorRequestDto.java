@@ -6,9 +6,7 @@ import lombok.Data;
 @Data
 public class ProviderSubcontractorRequestDto {
     private String idProvider;
-    @NotEmpty
     private String cnpj;
-    @NotEmpty
     private String supplier;
     private Boolean isActive;
 }

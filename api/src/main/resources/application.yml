@@ -17,3 +17,12 @@ spring:
       mail.smtp:
         auth: true
         starttls.enable: true
+  logging:
+    level:
+      org:
+        springframework:
+          mail: DEBUG
+          springframework: DEBUG
+        apache:
+          commons:
+            mail: DEBUG

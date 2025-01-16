@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class TokenManager {
+public class TokenManagerService {
     private final Map<String, Long> tokenStore = new HashMap<>();
     private static final long TOKEN_EXPIRATION_TIME = 864000000; // 1 dia
 
