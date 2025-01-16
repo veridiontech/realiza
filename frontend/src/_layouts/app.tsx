@@ -6,7 +6,7 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <div className="flex-grow bg-[#F4F4F5]">
+      <div className="flex-grow bg-[#F4F4F5] dark:bg-primary-foreground">
         <Outlet />
       </div>
     </div>

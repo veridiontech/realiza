@@ -23,7 +23,7 @@ export function Dashboard() {
   return (
     <>
       <Helmet title="Dashboard" />
-      <section className="bg-zinc-100 pb-10 pt-14">
+      <section className="bg-zinc-100 dark:bg-primary-foreground pb-10 pt-14">
         <div className="container mx-auto max-w-7xl">
           <EnterpriseResume />
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
@@ -32,7 +32,7 @@ export function Dashboard() {
           </div>
           <div className="mt-5 w-full text-right">
             <NavLink to="/BIs">
-              <Button className="bg-blue-600 hover:bg-blue-500">
+              <Button className="bg-blue-600 hover:bg-blue-500 dark:bg-primary dark:text-white dark:hover:bg-blue-950">
                 Ver mais <ChevronRight />
               </Button>
             </NavLink>

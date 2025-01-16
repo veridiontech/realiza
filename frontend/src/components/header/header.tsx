@@ -6,10 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
+import { ToggleTheme } from "../toggle-theme";
 
 export function Header() {
   return (
-    <header className="relative p-5">
+    <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <Sheet>
@@ -52,18 +53,23 @@ export function Header() {
               placeholder="Pesquise aqui..."
             />
           </div>
-          <Button
-            variant={"ghost"}
-            className="ml-14 mr-5 rounded-full bg-zinc-100 p-2"
-          >
-            <Bell size={24} />
-          </Button>
-          <Link to={"/profile-user"}>
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </Link>
+          <div className="flex items-center gap-8 ml-12">
+            <ToggleTheme />
+            <div className="flex items-center gap-1">
+              <Button
+                variant={"ghost"}
+                className=" rounded-full bg-zinc-100 w-[2.2vw] p-2 dark:bg-primary-foreground"
+              >
+                <Bell size={24} />
+              </Button>
+              <Link to={"/profile-user"}>
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </header>
