@@ -10,10 +10,19 @@ public class RealizaApplication {
 	public static void main(String[] args) {
 
 		Dotenv dotenv = Dotenv.configure()
-				.directory("./")
+				.directory("./")      // Busca o .env no diretório atual
+				.ignoreIfMissing()    // Ignora se o .env não for encontrado
 				.load();
 
-		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
+		// Adiciona as variáveis do .env às variáveis de ambiente do sistema
+		dotenv.entries().forEach(entry -> {
+			// Se a variável do sistema já existir, não sobrescreve
+			System.setProperty(entry.getKey(),
+					System.getenv(entry.getKey()) != null
+							? System.getenv(entry.getKey())
+							: entry.getValue());
+		});
+
 
 		SpringApplication.run(RealizaApplication.class, args);
 	}

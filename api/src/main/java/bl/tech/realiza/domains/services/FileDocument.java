@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "documents")
 public class FileDocument {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocument;
     private String name;
 
