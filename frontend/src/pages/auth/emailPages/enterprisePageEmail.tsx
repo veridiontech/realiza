@@ -5,6 +5,7 @@ import { useFormDataContext } from "@/context/formDataProvider";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
@@ -24,6 +25,28 @@ export function EnterprisePageEmail() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
+    const [ isValidToken, setIsValidToken ] = useState(false)
+
+
+  useEffect(() => {
+    const validateToken = async() => {
+      try{ 
+        const res = await axios.get(`${ip}/invite/validate?token=${token}`)
+        if(res.status === 200) {
+          setIsValidToken(true)
+        }
+      }catch(err) {
+        console.log("Nao foi possivel validar o token", err);
+        setIsValidToken(false)
+      }
+    }
+
+    if(token) {
+      validateToken()
+    } else {
+      console.log("nao foi possivel verificar o token");
+    }
+  }, [token])
 
   const {
     register,
@@ -34,20 +57,20 @@ export function EnterprisePageEmail() {
     mode: "onChange"
   });
 
-  const onSubmit = (data: EnterprisePageEmailFormSchema) => {
-    setEnterpriseData(data)
-    localStorage.setItem('enterpriseData', JSON.stringify(data))
-    console.log("Dados enviados", data);
-    navigate(`/email/Sign-up`)
+  const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
+    try {
+      const response = await axios.post(`${ip}/invite`, { ...data, token });
+      setEnterpriseData(data);
+      localStorage.setItem("enterpriseData", JSON.stringify(data));
+      console.log("Cadastro realizado:", response.data);
+      navigate(`/email/success`);
+    } catch (err) {
+      console.error("Erro ao enviar os dados:", err);
+    }
   };
 
-  const handleEmailSignUp = async() => {
-    try {
-      const res = await axios.get(`${ip}/ivite`)
-    }catch(err) {
-      console.log(err);
-      
-    }
+  if (!isValidToken) {
+    return <div className="text-red-600">Token inválido ou expirado. Por favor, solicite um novo convite.</div>;
   }
 
   return (

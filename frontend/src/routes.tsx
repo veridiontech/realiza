@@ -25,6 +25,7 @@ import { EmailLayout } from "./_layouts/email";
 import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
 import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
 import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
+import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <SelectClient /> },
       { path: "/dashboard", element: <Dashboard /> },
+      { path: "/profile", element: <ProfileEnterpriseReprise /> },
       { path: "/profileClient", element: <ProfileClient /> },
       { path: "/collaborators", element: <Collaborators /> },
       { path: "/bis", element: <MonittoringBis /> },
