@@ -1,36 +1,44 @@
-import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useState } from "react";
+import { ip } from "@/utils/ip";
 
-interface ServiceProviders {
-  id: number;
-  category: string;
-  corporateReason: string;
-  enterprise: string;
+export interface ServiceProviderProps {
+  idProvider: string;
   cnpj: string;
-  units: string;
-  options: JSX.Element;
+  client: string;
 }
 
-interface UseServiceProvidersProps {
-  limit?: number;
-  page?: number;
-}
+const API_URL = `${ip}/supplier`; // Altere para a URL real da API, se necessário
 
-export function useServiceProviders({
-  limit = 1000,
-  page = 1,
-}: UseServiceProvidersProps) {
-  return useQuery<ServiceProviders[]>({
-    queryKey: ["ServiceProviders", limit, page],
-    queryFn: async () => {
-      const response = await fetch(
-        "http://localhost:3001/ServiceProviders?_limit=${limit}&_page=${page}",
+export function useFetchServiceProviders() {
+  const [serviceProviders, setServiceProviders] = useState<
+    ServiceProviderProps[]
+  >([]);
+  const [totalPages, setTotalPages] = useState(0); // Total de páginas para paginação
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function fetchServiceProviders(limit = 5, page = 0) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `${API_URL}?_limit=${limit}&_page=${page}`,
       );
-      if (!response.ok) {
-        throw new Error("Erro ao carregar os dados");
-      }
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000,
-    placeholderData: (previousData) => previousData || [],
-  });
+      setServiceProviders(response.data.content); // Ajuste para pegar o array `content`
+      setTotalPages(response.data.totalPages); // Ajusta o total de páginas
+    } catch (err: any) {
+      setError(err.message || "Erro ao buscar prestadores de serviço.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return {
+    serviceProviders,
+    totalPages,
+    error,
+    loading,
+    fetchServiceProviders,
+  };
 }

@@ -13,18 +13,21 @@ export function SelectClient() {
     fetchClients(); // Busca os clientes ao carregar o componente
   }, []);
 
-  // Filtra os clientes com base no termo de pesquisa
-  const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  // Verifica se os clientes estão definidos e não são nulos
+  const filteredClients = (clients || []).filter(
+    (client) =>
+      client &&
+      client.name &&
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
     <div className="m-10 flex min-h-full justify-center">
-      <div className="flex h-[30rem] w-[80rem] justify-between rounded-lg bg-white dark:bg-primary shadow-md border border-realizaBlue dark:border-white">
+      <div className="dark:bg-primary border-realizaBlue flex h-[30rem] w-[80rem] justify-between rounded-lg border bg-white shadow-md dark:border-white">
         <div className="ml-10 mt-4">
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 
-          <div className="my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300 dark:bg-primary-foreground">
+          <div className="dark:bg-primary-foreground my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
             <div>
               <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
               <Dialog></Dialog>
