@@ -16,7 +16,7 @@ public class MailTestController {
     public String testSmtp() {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo("test-email@gmail.com"); // Substitua pelo seu e-mail
+            message.setTo("jhonatan.sampaiof@gmail.com"); // Substitua pelo seu e-mail
             message.setSubject("SMTP Test");
             message.setText("This is a test email from Render.");
             mailSender.send(message);
