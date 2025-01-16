@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.documents;
 
+import bl.tech.realiza.domains.clients.Client;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,13 +22,14 @@ public abstract class Document {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocumentation;
     private String title;
-    private String risk;
     private String status;
     private String documentation;
-    private String type;
     private Date creationDate;
     private Date versionDate;
     private Date expirationDate;
     @Builder.Default
     private Boolean isActive = true;
+
+    @ManyToOne
+    private Client documentInMatrix;
 }

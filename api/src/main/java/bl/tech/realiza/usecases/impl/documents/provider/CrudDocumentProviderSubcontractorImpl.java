@@ -42,7 +42,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         DocumentProviderSubcontractor newDocumentSubcontractor = DocumentProviderSubcontractor.builder()
                 .title(documentProviderSubcontractorRequestDto.getTitle())
-                .risk(documentProviderSubcontractorRequestDto.getRisk())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentProviderSubcontractorRequestDto.getCreationDate())
@@ -54,7 +53,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentSubcontractor.getDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
-                .risk(savedDocumentSubcontractor.getRisk())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
@@ -76,7 +74,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentSubcontractor.getDocumentation())
                 .title(documentSubcontractor.getTitle())
-                .risk(documentSubcontractor.getRisk())
                 .status(documentSubcontractor.getStatus())
                 .documentation(documentSubcontractor.getDocumentation())
                 .fileName(fileDocument.getIdDocument())
@@ -101,7 +98,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentSubcontractor.getDocumentation())
                             .title(documentSubcontractor.getTitle())
-                            .risk(documentSubcontractor.getRisk())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
                             .fileName(fileDocument.getIdDocument())
@@ -137,7 +133,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         }
 
         documentSubcontractor.setTitle(documentProviderSubcontractorRequestDto.getTitle() != null ? documentProviderSubcontractorRequestDto.getTitle() : documentSubcontractor.getTitle());
-        documentSubcontractor.setRisk(documentProviderSubcontractorRequestDto.getRisk() != null ? documentProviderSubcontractorRequestDto.getRisk() : documentSubcontractor.getRisk());
         documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
         documentSubcontractor.setCreationDate(documentProviderSubcontractorRequestDto.getCreationDate() != null ? documentProviderSubcontractorRequestDto.getCreationDate() : documentSubcontractor.getCreationDate());
         documentSubcontractor.setIsActive(documentProviderSubcontractorRequestDto.getIsActive() != null ? documentProviderSubcontractorRequestDto.getIsActive() : documentSubcontractor.getIsActive());
@@ -147,7 +142,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentSubcontractor.getDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
-                .risk(savedDocumentSubcontractor.getRisk())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())

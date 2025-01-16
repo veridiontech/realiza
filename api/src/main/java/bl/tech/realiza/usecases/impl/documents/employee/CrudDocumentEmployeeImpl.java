@@ -46,7 +46,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         DocumentEmployee newDocumentEmployee = DocumentEmployee.builder()
                 .title(documentEmployeeRequestDto.getTitle())
-                .risk(documentEmployeeRequestDto.getRisk())
                 .status(documentEmployeeRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentEmployeeRequestDto.getCreationDate())
@@ -58,7 +57,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
-                .risk(savedDocumentEmployee.getRisk())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
@@ -80,7 +78,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentEmployee.getIdDocumentation())
                 .title(documentEmployee.getTitle())
-                .risk(documentEmployee.getRisk())
                 .status(documentEmployee.getStatus())
                 .documentation(documentEmployee.getDocumentation())
                 .fileName(fileDocument.getName())
@@ -105,7 +102,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
-                            .risk(documentEmployee.getRisk())
                             .status(documentEmployee.getStatus())
                             .documentation(documentEmployee.getDocumentation())
                             .fileName(fileDocument.getName())
@@ -141,7 +137,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         }
 
         documentEmployee.setTitle(documentEmployeeRequestDto.getTitle() != null ? documentEmployeeRequestDto.getTitle() : documentEmployee.getTitle());
-        documentEmployee.setRisk(documentEmployeeRequestDto.getRisk() != null ? documentEmployeeRequestDto.getRisk() : documentEmployee.getRisk());
         documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
         documentEmployee.setCreationDate(documentEmployeeRequestDto.getCreationDate() != null ? documentEmployeeRequestDto.getCreationDate() : documentEmployee.getCreationDate());
         documentEmployee.setIsActive(documentEmployeeRequestDto.getIsActive() != null ? documentEmployeeRequestDto.getIsActive() : documentEmployee.getIsActive());
@@ -151,7 +146,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
-                .risk(savedDocumentEmployee.getRisk())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
