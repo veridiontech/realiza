@@ -42,7 +42,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
                 .title(documentBranchRequestDto.getTitle())
-                .risk(documentBranchRequestDto.getRisk())
                 .status(documentBranchRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
                 .creationDate(documentBranchRequestDto.getCreationDate())
@@ -54,7 +53,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
-                .risk(savedDocumentBranch.getRisk())
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
                 .creationDate(savedDocumentBranch.getCreationDate())
@@ -76,7 +74,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentBranch.getIdDocumentation())
                 .title(documentBranch.getTitle())
-                .risk(documentBranch.getRisk())
                 .status(documentBranch.getStatus())
                 .documentation(documentBranch.getDocumentation())
                 .fileName(fileDocument.getIdDocument())
@@ -101,7 +98,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentBranch.getIdDocumentation())
                             .title(documentBranch.getTitle())
-                            .risk(documentBranch.getRisk())
                             .status(documentBranch.getStatus())
                             .documentation(documentBranch.getDocumentation())
                             .fileName(fileDocument != null ? fileDocument.getName() : null)
@@ -138,7 +134,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         }
 
         documentBranch.setTitle(documentBranchRequestDto.getTitle() != null ? documentBranchRequestDto.getTitle() : documentBranch.getTitle());
-        documentBranch.setRisk(documentBranchRequestDto.getRisk() != null ? documentBranchRequestDto.getRisk() : documentBranch.getRisk());
         documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
         documentBranch.setCreationDate(documentBranchRequestDto.getCreationDate() != null ? documentBranchRequestDto.getCreationDate() : documentBranch.getCreationDate());
         documentBranch.setIsActive(documentBranchRequestDto.getIsActive() != null ? documentBranchRequestDto.getIsActive() : documentBranch.getIsActive());
@@ -148,7 +143,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
-                .risk(savedDocumentBranch.getRisk())
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
                 .creationDate(savedDocumentBranch.getCreationDate())
