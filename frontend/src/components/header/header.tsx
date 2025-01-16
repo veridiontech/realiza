@@ -1,7 +1,7 @@
 import { ArrowLeftRight, Bell, ChartNoAxesGantt, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import realizaLogo from "../../assets/realiza-logo.png";
+import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
@@ -25,7 +25,7 @@ export function Header() {
             <LateralMenu />
           </Sheet>
           <Link to="/">
-            <img src={realizaLogo} alt="" />
+            <img src={realizaLogo} alt="" className="w-[6vw]"/>
           </Link>
         </div>
         <div className="flex items-center gap-4">

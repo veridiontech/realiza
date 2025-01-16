@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 
 const enterprisePageEmailFormSchema = z.object({
@@ -20,6 +22,8 @@ type EnterprisePageEmailFormSchema = z.infer<typeof enterprisePageEmailFormSchem
 export function EnterprisePageEmail() {
     const {setEnterpriseData} = useFormDataContext()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams();
+    const token = searchParams.get("token");
 
   const {
     register,
@@ -36,6 +40,15 @@ export function EnterprisePageEmail() {
     console.log("Dados enviados", data);
     navigate(`/email/Sign-up`)
   };
+
+  const handleEmailSignUp = async() => {
+    try {
+      const res = await axios.get(`${ip}/ivite`)
+    }catch(err) {
+      console.log(err);
+      
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">

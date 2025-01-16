@@ -7,11 +7,22 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #fff;
             margin: 0;
             padding: 0;
         }
+        .container-title {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            aling-items: center;
+            text-align: center;
+        }
         .email-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             max-width: 600px;
             background-color: #333333;
             color: #ffffff;
@@ -33,18 +44,21 @@
             font-weight: bold;
         }
         .button {
-            display: inline-block;
+
+            display: flex;
+            justify-content: center;
             margin-top: 20px;
             padding: 12px 24px;
+            width: 10vw;
             font-size: 16px;
-            color: #ffffff;
-            background-color: #ff007f;
+            color: white;
+            background-color: #34495D;
             border-radius: 8px;
             text-decoration: none;
             font-weight: bold;
         }
         .button:hover {
-            background-color: #e60072;
+            background-color: #31195D;
         }
         .footer {
             margin-top: 30px;
@@ -52,7 +66,7 @@
             color: #aaaaaa;
         }
         a {
-            color: #ff007f;
+            color: #34495D;
             text-decoration: none;
         }
         a:hover {
@@ -62,8 +76,10 @@
 </head>
 <body>
 <div class="email-container">
-    <h1>Bem-vindo à Realiza! Aqui estão os próximos passos.</h1>
-    <h2>Seja bem vindo! 😄</h2>
+    <div class="container-title">
+        <h1>Bem-vindo à Realiza! Aqui estão os próximos passos.</h1>
+        <h2>Seja bem vindo! 😄</h2>
+    </div>
     <p>
         A <span class="highlight">Realiza Assessoria Empresarial Ltda</span> está implementando um
         novo sistema para gestão de seus terceiros.
@@ -75,7 +91,7 @@
     <p>
         Vamos começar pelo cadastro? Nos vemos lá dentro.
     </p>
-    <a href="https://realiza-test.onrender.com/client/token?token=#TOKEN_PLACEHOLDER#&id=#ID_PLACEHOLDER#" class="button">Acessar Realiza*</a>
+    <a href="http://localhost:8080/client/token?token=#TOKEN_PLACEHOLDER#&id=#ID_PLACEHOLDER#" class="button">Acessar Realiza*</a>
     <p>
         <b>*O link é de acesso único e tem validade de 24h a partir do envio</b>
     </p>
