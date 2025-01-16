@@ -1,4 +1,4 @@
-import { useContracts } from "@/hooks/useContracts";
+import { useContracts } from "@/hooks/gets/useContracts";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { useState } from "react";

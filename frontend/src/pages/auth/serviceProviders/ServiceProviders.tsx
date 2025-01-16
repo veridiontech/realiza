@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { useServiceProviders } from "@/hooks/useServiceProviders";
+import { useServiceProviders } from "@/hooks/gets/useServiceProviders";
 import { QuickActions } from "@/components/quickActions/quickAction";
 import { StepOneServiceProviders } from "./modals/stepOne";
 import { StepTwoServiceProviders } from "./modals/stepTwo";

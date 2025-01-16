@@ -6,4 +6,5 @@ export type FieldType =
   | "checkbox"
   | "select"
   | "date"
+  | "file"
   | "custom";
