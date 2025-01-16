@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dropdown } from "@/components/ui/dropdown";
-import { useClients } from "@/hooks/gets/useClients";
+import { useFetchClients } from "@/hooks/gets/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
 import { Dialog } from "@/components/ui/dialog";
 
 export function SelectClient() {
-  const { data: clients, isLoading, error } = useClients();
+  const { clients, loading, error, fetchClients } = useFetchClients(); // Hook customizado
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedClient, setSelectedClient] = useState<number | null>(null); // Ajustado para ser number | null
 
-  const filteredClients = clients?.filter((client) =>
+  useEffect(() => {
+    fetchClients(); // Busca os clientes ao carregar o componente
+  }, []);
+
+  // Filtra os clientes com base no termo de pesquisa
+  const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -34,18 +39,21 @@ export function SelectClient() {
               />
             </div>
 
-            {isLoading ? (
+            {loading ? (
               <div className="flex items-center justify-center p-4">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
                 <span className="ml-2 text-gray-500">Carregando...</span>
               </div>
             ) : error ? (
-              <div className="p-2 text-red-500">{error.message}</div>
+              <div className="p-2 text-red-500">{error}</div>
             ) : (
               <Dropdown
-                options={filteredClients || []}
+                options={filteredClients.map((client) => ({
+                  id: Number(client.id), // Converte id para number
+                  name: client.name,
+                }))}
                 selectedOption={selectedClient}
-                onSelect={(client) => setSelectedClient(client.name)}
+                onSelect={(option) => setSelectedClient(option.id)} // Atualiza o ID do cliente selecionado
                 placeholder="Escolha o Cliente"
               />
             )}

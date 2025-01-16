@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Option } from "@/types/dropDown";
 
 interface DropdownProps {
-  options: Option[];
-  selectedOption: string | null;
+  options: Option[]; // Presume que Option possui id: number
+  selectedOption: number | null; // Ajustado para ser consistente com o tipo de option.id
   onSelect: (option: Option) => void;
   placeholder: string;
 }
@@ -16,20 +16,25 @@ export function Dropdown({
 }: DropdownProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const getSelectedOptionName = (): string => {
+    const selected = options.find((option) => option.id === selectedOption);
+    return selected ? selected.name : placeholder;
+  };
+
   return (
     <div className="relative">
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="flex w-full items-center justify-between rounded-lg bg-blue-100 p-3 font-medium text-blue-600 focus:outline-none"
       >
-        {selectedOption || placeholder}
+        {getSelectedOptionName()}
         <span>{isDropdownOpen ? "▲" : "▼"}</span>
       </button>
 
       {isDropdownOpen && (
         <div className="absolute z-10 mt-2 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
           {options.length > 0 ? (
-            options.map((option, index) => (
+            options.map((option) => (
               <div
                 key={option.id}
                 onClick={() => {
