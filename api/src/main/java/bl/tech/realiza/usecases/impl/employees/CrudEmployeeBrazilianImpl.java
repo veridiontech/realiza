@@ -116,8 +116,8 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .client(savedEmployeeBrazilian.getClient().getIdClient())
-                .supplier(savedEmployeeBrazilian.getSupplier().getIdProvider())
-                .subcontract(savedEmployeeBrazilian.getSubcontract().getIdProvider())
+                .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
+                .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
                 .build();
 
         return employeeBrazilianResponse;
@@ -156,9 +156,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cbo(employeeBrazilian.getCbo())
                 .rg(employeeBrazilian.getRg())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
-                .client(employeeBrazilian.getClient().getIdClient())
-                .supplier(employeeBrazilian.getSupplier().getIdProvider())
-                .subcontract(employeeBrazilian.getSubcontract().getIdProvider())
+                .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
+                .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
+                .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
                 .build();
 
         return Optional.of(employeeBrazilianResponse);
@@ -196,9 +196,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                         .cbo(employeeBrazilian.getCbo())
                         .rg(employeeBrazilian.getRg())
                         .admissionDate(employeeBrazilian.getAdmissionDate())
-                        .client(employeeBrazilian.getClient().getIdClient())
-                        .supplier(employeeBrazilian.getSupplier().getIdProvider())
-                        .subcontract(employeeBrazilian.getSubcontract().getIdProvider())
+                        .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
+                        .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
+                        .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
                         .build()
         );
 

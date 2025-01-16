@@ -61,11 +61,8 @@ public class EmployeeBrazilianRequestDto {
     private String rg;
     @NotNull
     private Date admissionDate;
-    @NotEmpty
     private String client;
-    @NotEmpty
     private String supplier;
-    @NotEmpty
     private String subcontract;
     private Boolean isActive;
 }

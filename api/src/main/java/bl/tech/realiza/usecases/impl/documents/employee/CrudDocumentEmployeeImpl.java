@@ -8,8 +8,11 @@ import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+
+import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
 import lombok.RequiredArgsConstructor;
+import net.sourceforge.tess4j.TesseractException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final EmployeeRepository employeeRepository;
     private final FileRepository fileRepository;
+    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
@@ -50,6 +54,22 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .build();
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(newDocumentEmployee);
+
+        try {
+            // Processa o texto do documento e verifica palavras-chave
+            String extractedText = documentProcessingService.processFile(file);
+            boolean containsKeyword = documentProcessingService.containsKeyword(extractedText, savedDocumentEmployee.getTitle());
+
+            // Logs para debug
+            System.out.println("Texto extraído: " + extractedText);
+            if (containsKeyword) {
+                System.out.println("Palavra-chave encontrada no documento!");
+            } else {
+                System.out.println("Palavra-chave não encontrada.");
+            }
+        } catch (IOException | TesseractException e) {
+            throw new RuntimeException("Erro ao processar o documento", e);
+        }
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentEmployee.getIdDocumentation())
