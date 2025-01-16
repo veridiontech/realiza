@@ -79,12 +79,6 @@ public class EmailSender {
             helper.setSubject("Bem-vindo à " + companyName);
             helper.setText(emailBody, true); // Enable HTML format
 
-            // Adding inline attachments (if needed)
-            helper.addInline(
-                    "fe2da35f82b3200096d22e32b6a7c011.jpg",
-                    new File("C:/Users/Rogerio/Pictures/fe2da35f82b3200096d22e32b6a7c011.jpg")
-            );
-
             mailSender.send(message);
         } catch (Exception e) {
             throw new RuntimeException("Failed to send email", e);
