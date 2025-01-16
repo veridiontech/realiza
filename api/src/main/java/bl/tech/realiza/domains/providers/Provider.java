@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.providers;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -19,5 +20,6 @@ public abstract class Provider {
     private String idProvider;
     private String cnpj;
     private String companyName;
+    @Builder.Default
     private Boolean isActive = true;
 }

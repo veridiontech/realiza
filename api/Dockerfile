@@ -1,22 +1,17 @@
-# FROM ubuntu:latest
+# Etapa 1: Construção do JAR
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src/ src/
+RUN mvn clean package -DskipTests
 
-# ENTRYPOINT ["top", "-b"]
-
-# Use a imagem base do OpenJDK
+# Etapa 2: Imagem final para execução
 FROM openjdk:17-jdk-slim
-LABEL authors="Jhonatan"
-
-# Cria um diretório para a aplicação
 WORKDIR /app
 
-# Copia o arquivo JAR gerado pelo build para dentro do container
-COPY target/realiza-application.jar app.jar
+# Instala o telnet na imagem final
+RUN apt-get update && apt-get install -y telnet
 
-# Expõe a porta padrão do Spring Boot
+COPY --from=build /app/target/realiza-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# Define a variável de ambiente para produção (se necessário)
-ENV SPRING_PROFILES_ACTIVE=prod
-
-# Comando para executar o JAR
 ENTRYPOINT ["java", "-jar", "app.jar"]

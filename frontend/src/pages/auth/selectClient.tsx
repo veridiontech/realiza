@@ -1,25 +1,16 @@
 import { useState } from "react";
+import { Dropdown } from "@/components/ui/dropdown";
+import { useClients } from "@/hooks/gets/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
+import { Dialog } from "@/components/ui/dialog";
 
 export function SelectClient() {
+  const { data: clients, isLoading, error } = useClients();
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState("");
 
-  const clients = [
-    "Distribuidora de gás LTDA",
-    "InovaTech Solutions",
-    "UrbanWear Co.",
-    "UrbanWear Co.",
-    "UrbanWear Co.",
-    "UrbanWear Co.",
-    "UrbanWear Co.",
-    "UrbanWear Co.",
-    "UrbanWear Co.",
-  ];
-
-  const filteredClients = clients.filter((client) =>
-    client.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredClients = clients?.filter((client) =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -28,59 +19,44 @@ export function SelectClient() {
         <div className="ml-10 mt-4">
           <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
 
-          <div className="w-[40rem] h-[23rem] my-10  outline outline-offset-2 outline-1 outline-slate-300 rounded-lg p-6">
-            <h2 className="text-xl font-medium mb-4">Selecione um Cliente</h2>
-
+          <div className="my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
+            <div>
+              <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
+              <Dialog></Dialog>
+            </div>
             <div className="relative mb-4">
               <input
                 type="text"
                 placeholder="🔍 Procure por clientes cadastrados aqui..."
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-blue-400"
+                className="w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full p-3 bg-blue-100 text-blue-600 font-medium rounded-lg flex justify-between items-center focus:outline-none"
-              >
-                {selectedClient || "Escolha o Cliente"}
-                <span>{isDropdownOpen ? "▲" : "▼"}</span>
-              </button>
-
-              {isDropdownOpen && (
-                <div
-                  className="absolute w-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10"
-                >
-                  {filteredClients.length > 0 ? (
-                    filteredClients.map((client, index) => (
-                      <div
-                        key={index}
-                        onClick={() => {
-                          setSelectedClient(client);
-                          setIsDropdownOpen(false);
-                        }}
-                        className="p-2 hover:bg-blue-100 cursor-pointer"
-                      >
-                        {client}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-2 text-gray-500">Nenhum cliente encontrado</div>
-                  )}
-                </div>
-              )}
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center p-4">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-500">Carregando...</span>
+              </div>
+            ) : error ? (
+              <div className="p-2 text-red-500">{error.message}</div>
+            ) : (
+              <Dropdown
+                options={filteredClients || []}
+                selectedOption={selectedClient}
+                onSelect={(client) => setSelectedClient(client.name)}
+                placeholder="Escolha o Cliente"
+              />
+            )}
           </div>
         </div>
 
-        <div className="mx-8 my-4 w-[30rem] h-[28rem] rounded-lg bg-blue-50">
+        <div className="mx-8 my-4 h-[28rem] w-[30rem] rounded-lg bg-blue-50">
           <img
             src={selectClientImage}
             alt="imagem de seleção de cliente"
-            className="object-cover w-full h-full rounded-lg"
+            className="h-full w-full rounded-lg object-cover"
           />
         </div>
       </div>

@@ -10,14 +10,16 @@ import {
   University,
   User,
   UsersRound,
-} from 'lucide-react'
-import { Helmet } from 'react-helmet-async'
-import { NavLink } from 'react-router-dom'
+} from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { NavLink } from "react-router-dom";
 
-import { EnterpriseResume } from '@/components/home/enterpriseResume'
-import { GraphicHomeLeft } from '@/components/home/graphicHomeLeft'
-import { GraphicHomeRight } from '@/components/home/graphicHomeRight'
-import { Button } from '@/components/ui/button'
+import { EnterpriseResume } from "@/components/home/enterpriseResume";
+import { GraphicHomeLeft } from "@/components/home/graphicHomeLeft";
+import { GraphicHomeRight } from "@/components/home/graphicHomeRight";
+import { Button } from "@/components/ui/button";
+import { MainCard } from "@/components/quickActions/mainCard";
+import { ActionButton } from "@/components/quickActions/actionButton";
 
 export function Dashboard() {
   return (
@@ -37,8 +39,10 @@ export function Dashboard() {
               </Button>
             </NavLink>
           </div>
+
           <div className="pt-20">
             <h2 className="pb-6 text-xl font-medium">Ações rápidas</h2>
+
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <Button className="group h-full w-full max-w-none items-center justify-between border-zinc-200 bg-white p-5 hover:bg-blue-500 dark:bg-primary ">
                 <div className="flex flex-col items-start text-zinc-900 group-hover:text-white">
@@ -188,5 +192,5 @@ export function Dashboard() {
         </div>
       </section>
     </>
-  )
+  );
 }

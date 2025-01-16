@@ -32,13 +32,25 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
 
-        FileDocument fileDocument = FileDocument.builder()
-                .name(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .data(file.getBytes())
-                .build();
+        FileDocument fileDocument = null;
+        try {
+            fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
 
-        FileDocument savedFileDocument= fileRepository.save(fileDocument);
+        FileDocument savedFileDocument= null;
+        try {
+            savedFileDocument = fileRepository.save(fileDocument);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
 
         DocumentClient newDocumentClient = DocumentClient.builder()
                 .title(documentClientRequestDto.getTitle())

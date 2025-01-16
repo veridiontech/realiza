@@ -5,9 +5,8 @@ import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
-import bl.tech.realiza.services.auth.TokenManager;
+import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;
-import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ import java.util.Optional;
 public class ClientControllerImpl implements ClientControlller {
 
     private final CrudClientImpl crudClient;
-    private final TokenManager tokenManager;
+    private final TokenManagerService tokenManagerService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -93,7 +92,7 @@ public class ClientControllerImpl implements ClientControlller {
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<?> createClientAndUserToken(@RequestBody @Valid ClientAndUserClientRequestDto clientAndUserClientRequestDto, @RequestParam String token) {
-        boolean isValid = tokenManager.validateToken(token);
+        boolean isValid = tokenManagerService.validateToken(token);
         if (isValid){
             ClientAndUserClientResponseDto clientAndUser = crudClient.saveBoth(clientAndUserClientRequestDto);
 
@@ -109,7 +108,7 @@ public class ClientControllerImpl implements ClientControlller {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<?> getClientAndUserToken(@RequestParam String token, @RequestParam String id) {
-        boolean isValid = tokenManager.validateToken(token);
+        boolean isValid = tokenManagerService.validateToken(token);
         if (isValid){
             Optional<ClientResponseDto> client = crudClient.findOne(id);
 
