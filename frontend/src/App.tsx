@@ -1,15 +1,21 @@
-import './global.css'
+import "./global.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
+import { FormDataProvider } from "./context/formDataProvider";
 
-import { Helmet, HelmetProvider } from 'react-helmet-async'
-import { RouterProvider } from 'react-router-dom'
-
-import { router } from './routes'
+const queryClient = new QueryClient();
 
 export function App() {
   return (
-    <HelmetProvider>
-      <Helmet titleTemplate="%s | realiza" />
-      <RouterProvider router={router} />
-    </HelmetProvider>
-  )
+    <QueryClientProvider client={queryClient}>
+      <FormDataProvider>
+        <HelmetProvider>
+          <Helmet titleTemplate="%s | realiza" />
+          <RouterProvider router={router} />
+        </HelmetProvider>
+      </FormDataProvider>
+    </QueryClientProvider>
+  );
 }

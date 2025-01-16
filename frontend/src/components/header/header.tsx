@@ -1,11 +1,11 @@
-import { Bell, ChartNoAxesGantt, Search, ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, Bell, ChartNoAxesGantt, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import realizaLogo from "../../assets/realiza-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
-import { Link } from "react-router-dom";
 
 export function Header() {
   return (
@@ -29,12 +29,14 @@ export function Header() {
         </div>
         <div className="flex items-center gap-4">
           <span>
-            <span className="text-xl mr-4 text-blue-600">Cliente Selecionado:</span>
-            UrbanWear Co.
+            <span className="mr-4 text-xl text-blue-600">
+              Cliente Selecionado:
+            </span>
+            UltraGaz BR
           </span>
           <button
-           className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"
-           title="Trocar"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"
+            title="Trocar"
           >
             <Link to={"/selectCLient"}>
               <ArrowLeftRight className="h-6 w-6 hover:text-white" />

@@ -1,0 +1,460 @@
+{
+    "ServiceProviders": [
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      },
+      {
+        "id": 1,
+        "category": "Manutenção",
+        "corporateReason": "Manutenção Total Serviços Ltda.",
+        "enterprise": "Manutenção Total S.A.",
+        "cnpj": "12.345.678/0001-90",
+        "units": "Av. das Indústrias, 1234"
+      },
+      {
+        "id": 2,
+        "category": "TI",
+        "corporateReason": "TI Soluções Ltda.",
+        "enterprise": "TI Solutions S.A.",
+        "cnpj": "98.765.432/0001-00",
+        "units": "Rua das Inovações, 567"
+      },
+      {
+        "id": 3,
+        "category": "Logística",
+        "corporateReason": "Logística Express Ltda.",
+        "enterprise": "Logística Rápida S.A.",
+        "cnpj": "45.678.123/0001-33",
+        "units": "Estrada das Entregas, 890"
+      }
+      
+    ],
+    "Contracts": [
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    },
+    {
+      "id": "1",
+      "ref": "REF001",
+      "project": "Projeto Alpha",
+      "clientFinal": "Cliente A",
+      "client": "Empresa X",
+      "startDate": "2025-01-01",
+      "endDate": "2025-12-31"
+    },
+    {
+      "id": "2",
+      "ref": "REF002",
+      "project": "Projeto Beta",
+      "clientFinal": "Cliente B",
+      "client": "Empresa Y",
+      "startDate": "2025-02-01",
+      "endDate": "2025-11-30"
+    },
+    {
+      "id": "3",
+      "ref": "REF003",
+      "project": "Projeto Gamma",
+      "clientFinal": "Cliente C",
+      "client": "Empresa Z",
+      "startDate": "2025-03-01",
+      "endDate": "2025-10-31"
+    }
+  ],
+  
+"Employees": [
+  { "id": 1, "name": "Ray Clarke", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 2, "name": "Jessica Taylor", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 3, "name": "Nathan Foster", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 4, "name": "Catherine Reynolds", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 5, "name": "Olivia Knight", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 6, "name": "Anna Lee", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 7, "name": "Samuel Hayes", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 8, "name": "Grace Spencer", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 9, "name": "Alexander Davidson", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 10, "name": "Emma Brown", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 11, "name": "Matthew Johnson", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 12, "name": "David Wright", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 13, "name": "Isabella Nguyen", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 14, "name": "Liam Smith", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 15, "name": "Sophia Johnson", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 16, "name": "Mason Williams", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 17, "name": "Ava Martinez", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 18, "name": "Ethan Brown", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 19, "name": "Mia Davis", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 20, "name": "Noah Wilson", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" },
+  { "id": 21, "name": "Amelia Moore", "avatarUrl": "https://via.placeholder.com/40", "status": "Ativo" },
+  { "id": 22, "name": "Lucas Taylor", "avatarUrl": "https://via.placeholder.com/40", "status": "Desligado" }
+]
+
+
+  }
+  
+  
+  
