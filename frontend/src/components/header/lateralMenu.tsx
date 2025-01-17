@@ -34,7 +34,7 @@ export function LateralMenu() {
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>
-      <Link to={"/serviceProviders"}>
+      <Link to={"/sistema/serviceProviders/:id"}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -45,7 +45,7 @@ export function LateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={"/dashboard"}>
+      <Link to={"/sistema/dashboard/:id"}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -71,7 +71,7 @@ export function LateralMenu() {
           Meus colaboradores
         </span>
       </Button>
-      <Link to={"/contracts"}>
+      <Link to={"/sistema/contracts/:id"}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -83,7 +83,7 @@ export function LateralMenu() {
         </Button>
       </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
-      <Link to={"/enterprise"}>
+      <Link to={"/sistema/profile/:id"}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -98,7 +98,7 @@ export function LateralMenu() {
         <Factory className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Filiais</span>
       </Button>
-      <Link to={"/employees"}>
+      <Link to={"/sistema/employees/:id"}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"

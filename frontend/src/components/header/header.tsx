@@ -25,7 +25,7 @@ export function Header() {
             <LateralMenu />
           </Sheet>
           <Link to="/">
-            <img src={realizaLogo} alt="" className="w-[6vw]"/>
+            <img src={realizaLogo} alt="" className="w-[6vw]" />
           </Link>
         </div>
         <div className="flex items-center gap-4">
@@ -39,7 +39,7 @@ export function Header() {
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"
             title="Trocar"
           >
-            <Link to={"/selectCLient"}>
+            <Link to={"/sistema/select-client/:id"}>
               <ArrowLeftRight className="h-6 w-6 hover:text-white" />
             </Link>
           </button>
@@ -53,12 +53,12 @@ export function Header() {
               placeholder="Pesquise aqui..."
             />
           </div>
-          <div className="flex items-center gap-8 ml-12">
+          <div className="ml-12 flex items-center gap-8">
             <ToggleTheme />
             <div className="flex items-center gap-1">
               <Button
                 variant={"ghost"}
-                className=" rounded-full bg-zinc-100 w-[2.2vw] p-2 dark:bg-primary-foreground"
+                className="dark:bg-primary-foreground w-[2.2vw] rounded-full bg-zinc-100 p-2"
               >
                 <Bell size={24} />
               </Button>

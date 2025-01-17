@@ -8,7 +8,12 @@ const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { contracts, totalPages, loading, error } = useContracts({
+  const {
+    contracts = [], // Fallback para array vazio
+    totalPages = 1, // Fallback para 1 página
+    loading,
+    error,
+  } = useContracts({
     limit: itemsPerPage,
     page: currentPage,
   });
@@ -35,24 +40,28 @@ const ContractsTable = () => {
     },
   ];
 
-  if (loading) {
-    return <p className="mt-10 text-center">Carregando...</p>;
-  }
-
-  if (error) {
-    return (
-      <p className="mt-10 text-center text-red-500">
-        Erro ao carregar contratos.
-      </p>
-    );
-  }
+  const handlePageChange = (newPage: number) => {
+    // Garante que a página não vá além dos limites
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
         <h1 className="m-4 text-xl">Tabela de Contratos</h1>
 
-        {contracts.length > 0 ? (
+        {loading ? (
+          <p className="mt-10 text-center">Carregando...</p>
+        ) : error ? (
+          <p className="text-center text-red-600">
+            Erro ao carregar os dados:{" "}
+            {typeof error === "string"
+              ? error
+              : "Algo deu errado. Tente novamente mais tarde."}
+          </p>
+        ) : contracts.length > 0 ? (
           <Table data={contracts} columns={columns} />
         ) : (
           <p className="text-center text-gray-500">
@@ -62,8 +71,8 @@ const ContractsTable = () => {
 
         <Pagination
           currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          totalPages={Math.max(totalPages, 1)}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>
