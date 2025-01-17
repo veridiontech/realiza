@@ -19,6 +19,6 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        return jwtService.generateToken(user.getEmail(), user.getRole());
+        return jwtService.generateToken(user);
     }
 }

@@ -7,6 +7,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class JwtService {
@@ -35,13 +37,35 @@ public class JwtService {
     }
 
 
-    public String generateToken(String email, User.Role role) {
+    public String generateToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("idUser", user.getIdUser());
+        claims.put("cpf", user.getCpf());
+        claims.put("description", user.getDescription());
+        claims.put("password", user.getPassword());
+        claims.put("position", user.getPosition());
+        claims.put("role", user.getRole().name());
+        claims.put("firstName", user.getFirstName());
+        claims.put("timeZone", user.getTimeZone().getID());
+        claims.put("surname", user.getSurname());
+        claims.put("email", user.getEmail());
+        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("telephone", user.getTelephone());
+        claims.put("cellphone", user.getCellphone());
+
         return Jwts.builder()
-                .setSubject(email)
-                .claim("role",role.name())
+                .setClaims(claims)
+                .setSubject(user.getEmail())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
+    }
+
+    public Map<String, Object> extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public String extractEmail(String token) {
