@@ -9,6 +9,7 @@ import bl.tech.realiza.services.auth.TokenManagerService;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -28,14 +29,13 @@ public class EmailSender {
 
     public void sendEmail(EmailRequestDto emailRequestDto) {
         String companyName = "";
-        String idCompany = null;
+        String idCompany = "";
         EmailRequestDto.Company company = emailRequestDto.getCompany();
-
         switch (emailRequestDto.getCompany()) {
             case CLIENT -> {
-                var client = clientRepository.findById(emailRequestDto.getIdCompany())
-                        .orElseThrow(() -> new RuntimeException("Client not found"));
-                companyName = client.getCompanyName();
+                /*var client = clientRepository.findById(emailRequestDto.getIdCompany())
+                        .orElseThrow(() -> new RuntimeException("Client not found"));*/
+                companyName = "Realiza Assessoria Empresarial Ltda";
             }
             case SUPPLIER -> {
                 var supplier = providerSupplierRepository.findById(emailRequestDto.getIdCompany())
@@ -65,8 +65,9 @@ public class EmailSender {
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
                         .replace("#COMPANY_PLACEHOLDER#",company.name());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to generate email", e);
             }
-
             // Creating and sending the email
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -75,9 +76,13 @@ public class EmailSender {
             helper.setSubject("Bem-vindo à " + companyName);
             helper.setText(emailBody, true); // Enable HTML format
 
-            mailSender.send(message);
+            try {
+                mailSender.send(message);
+            } catch (MailException e) {
+                throw new RuntimeException("Failed to send the email", e);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to send email", e);
+            throw new RuntimeException("Failed to generate email", e);
         }
     }
 }
