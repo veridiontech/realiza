@@ -6,10 +6,10 @@ interface Contract {
   id: string;
   ref: string;
   project: string;
-  clientFinal: string;
-  client: string;
+  supplier: string;
   startDate: string;
   endDate: string;
+  serviceName: string; // Certifique-se de mapear o campo corretamente
 }
 
 interface UseContractsProps {
@@ -19,19 +19,32 @@ interface UseContractsProps {
 
 export function useContracts({ limit = 10, page = 1 }: UseContractsProps) {
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [totalPages, setTotalPages] = useState(0); // Total de páginas para paginação
+  const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   async function fetchContracts() {
     setLoading(true);
     setError(null);
+
     try {
       const response = await axios.get(
         `${ip}/contract/supplier?page=${page - 1}&size=${limit}`,
       );
-      setContracts(response.data.content); // Dados retornados no campo `content`
-      setTotalPages(response.data.totalPages); // Total de páginas retornado pela API
+      console.log(response.data);
+      // Mapeando os dados para garantir o mapeamento correto do service_name
+      const mappedContracts = response.data.content.map((contract: any) => ({
+        id: contract.id || "",
+        ref: contract.ref || "",
+        project: contract.project || "",
+        supplier: contract.supplier || "",
+        startDate: contract.startDate || "",
+        endDate: contract.endDate || "",
+        serviceName: contract.serviceName || "", // Certifique-se de capturar service_name
+      }));
+
+      setContracts(mappedContracts);
+      setTotalPages(response.data.totalPages);
     } catch (err: any) {
       setError(err.message || "Erro ao buscar contratos.");
     } finally {
@@ -39,10 +52,9 @@ export function useContracts({ limit = 10, page = 1 }: UseContractsProps) {
     }
   }
 
-  // Chama o fetch ao carregar ou mudar a página
   useEffect(() => {
     fetchContracts();
-  }, [page, limit]); // Dependências garantem que o fetch será chamado ao mudar `page` ou `limit`
+  }, [page, limit]);
 
   return { contracts, totalPages, error, loading };
 }

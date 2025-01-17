@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { useEmployees } from "@/hooks/gets/useEmployees";
@@ -28,7 +28,7 @@ const columns: {
     key: "id",
     label: "Ações",
     render: (value, row) => (
-      <Link to={`/detailsEmployees/${row.id}`}>
+      <Link to={`/sistema/detailsEmployees`}>
         <button className="ml-4 text-blue-500 hover:underline">
           <Settings2 />
         </button>
@@ -42,15 +42,12 @@ export const EmployeesTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
-  const { data, isLoading, error } = useEmployees({
-    limit: 1000,
-    page: 1,
-  });
+  const { employees, totalPages, loading, error, fetchEmployees } =
+    useEmployees();
 
-  const employees = data?.data || [];
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = employees.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil((employees.length || 0) / itemsPerPage);
+  useEffect(() => {
+    fetchEmployees(itemsPerPage, currentPage - 1);
+  }, [currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -63,14 +60,14 @@ export const EmployeesTable = () => {
     setIsModalOpen(false);
   };
 
-  if (isLoading) {
+  if (loading) {
     return <p className="text-center">Carregando...</p>;
   }
 
   if (error) {
     return (
       <p className="text-center text-red-500">
-        Erro ao carregar os dados de funcionários.
+        Erro ao carregar os dados de funcionários: {error}
       </p>
     );
   }
@@ -80,11 +77,12 @@ export const EmployeesTable = () => {
       <div className="flex w-[90rem] flex-col rounded-lg bg-white p-4 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="mb-6 text-xl font-semibold">Funcionários</h1>
+          {/* Aqui corrigimos para abrir o modal */}
           <ButtonBlue onClick={() => setIsModalOpen(true)}>
             Adicionar Funcionário
           </ButtonBlue>
         </div>
-        <Table<Employee> data={currentData} columns={columns} />
+        <Table<Employee> data={employees} columns={columns} />
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

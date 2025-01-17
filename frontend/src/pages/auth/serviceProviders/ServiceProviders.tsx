@@ -50,7 +50,7 @@ export function ServiceProvider() {
   };
 
   const columns = [
-    { key: "idProvider", label: "ID do Fornecedor" },
+    { key: "companyName", label: "Nome do Fornecedor" }, // Exibindo o nome do fornecedor
     { key: "cnpj", label: "CNPJ" },
     { key: "client", label: "ID do Cliente" },
     {

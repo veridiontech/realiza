@@ -1,4 +1,6 @@
 import { Modal } from "@/components/modal";
+import axios from "axios";
+import { ip } from "@/utils/ip";
 
 interface StepOneEmployeeProps {
   onClose: () => void;
@@ -6,6 +8,23 @@ interface StepOneEmployeeProps {
 }
 
 export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
+  const handleSubmit = async (formData: Record<string, any>) => {
+    try {
+      const response = await axios.post(
+        `${ip}/employee/brazilian`, // Altere para o endpoint correto
+        formData,
+      );
+      console.log("Funcionário criado com sucesso:", response.data);
+      onSubmit(response.data); // Retorna os dados para o componente pai
+    } catch (error: any) {
+      console.error(
+        "Erro ao criar funcionário:",
+        error.response?.data || error.message,
+      );
+      alert("Erro ao criar funcionário. Verifique os dados e tente novamente.");
+    }
+  };
+
   return (
     <Modal
       title="Cadastrar Funcionário"
@@ -65,7 +84,6 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
           label: "PIS",
           type: "text",
           placeholder: "PIS",
-          required: false,
         },
         {
           name: "email",
@@ -134,7 +152,6 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
           label: "Telefone",
           type: "telephone",
           placeholder: "(XX) XXXX-XXXX",
-          required: false,
         },
         {
           name: "mobile",
@@ -175,7 +192,6 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
           label: "CBO",
           type: "text",
           placeholder: "CBO",
-          required: false,
         },
         {
           name: "platformAccess",
@@ -185,7 +201,7 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
           required: true,
         },
       ]}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       onClose={onClose}
     />
   );

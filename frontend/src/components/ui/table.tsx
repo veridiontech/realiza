@@ -31,8 +31,8 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
                     className={`px-4 py-2 ${col.className || ""}`}
                   >
                     {col.render
-                      ? col.render(row[col.key], row)
-                      : (row[col.key] as ReactNode)}
+                      ? col.render(row[col.key as keyof T], row)
+                      : (row[col.key as keyof T] as ReactNode)}
                   </td>
                 ))}
               </tr>

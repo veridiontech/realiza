@@ -1,16 +1,21 @@
 import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { ScrollText } from "lucide-react";
+import { ScrollText, FilePlus2 } from "lucide-react";
 import { useContracts } from "@/hooks/gets/useContracts";
+import { StepTwoServiceProviders } from "../serviceProviders/modals/stepTwo";
 
 const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false); // Moved inside
+  const [providerData, setProviderData] = useState<Record<string, any> | null>(
+    null,
+  ); // Moved inside
   const itemsPerPage = 10;
 
   const {
-    contracts = [], // Fallback para array vazio
-    totalPages = 1, // Fallback para 1 página
+    contracts = [],
+    totalPages = 1,
     loading,
     error,
   } = useContracts({
@@ -23,25 +28,37 @@ const ContractsTable = () => {
     label: string;
     render?: (value: any) => JSX.Element;
   }[] = [
-    { key: "ref", label: "Referência" },
-    { key: "project", label: "Projeto" },
-    { key: "clientFinal", label: "Cliente Final" },
-    { key: "client", label: "Cliente" },
+    { key: "serviceName", label: "Serviço" }, // Nova coluna adicionada
     { key: "startDate", label: "Data de Início" },
     { key: "endDate", label: "Data de Fim" },
     {
       key: "id",
       label: "Ações",
       render: (id: string) => (
-        <button className="ml-4 text-blue-500 hover:underline">
-          <ScrollText />
-        </button>
+        <div>
+          <button
+            className="text-blue-500 hover:underline"
+            onClick={() => {
+              setProviderData({ id });
+              setIsStepTwoModalOpen(true);
+            }}
+          >
+            <FilePlus2 />
+          </button>
+          <button className="ml-4 text-blue-500 hover:underline">
+            <ScrollText />
+          </button>
+        </div>
       ),
     },
   ];
 
+  const handleStepTwoSubmit = (data: Record<string, any>) => {
+    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
+    setIsStepTwoModalOpen(false);
+  };
+
   const handlePageChange = (newPage: number) => {
-    // Garante que a página não vá além dos limites
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
@@ -74,6 +91,13 @@ const ContractsTable = () => {
           totalPages={Math.max(totalPages, 1)}
           onPageChange={handlePageChange}
         />
+
+        {isStepTwoModalOpen && (
+          <StepTwoServiceProviders
+            onClose={() => setIsStepTwoModalOpen(false)}
+            onSubmit={handleStepTwoSubmit}
+          />
+        )}
       </div>
     </div>
   );

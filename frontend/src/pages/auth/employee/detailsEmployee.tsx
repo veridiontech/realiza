@@ -63,7 +63,7 @@ export function DetailsEmployee() {
       setError(null);
 
       try {
-        const response = await fetch(`http://localhost:3001/Employees/${id}`);
+        const response = await fetch(`http://localhost:3001/Employees`);
         if (!response.ok) {
           throw new Error("Erro ao carregar o funcionário");
         }

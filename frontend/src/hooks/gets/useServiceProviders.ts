@@ -6,6 +6,7 @@ export interface ServiceProviderProps {
   idProvider: string;
   cnpj: string;
   client: string;
+  companyName: string; // Adicionado o campo companyName
 }
 
 const API_URL = `${ip}/supplier`; // Altere para a URL real da API, se necessário
@@ -25,7 +26,13 @@ export function useFetchServiceProviders() {
       const response = await axios.get(
         `${API_URL}?_limit=${limit}&_page=${page}`,
       );
-      setServiceProviders(response.data.content); // Ajuste para pegar o array `content`
+      const mappedProviders = response.data.content.map((provider: any) => ({
+        idProvider: provider.idProvider,
+        cnpj: provider.cnpj,
+        client: provider.client,
+        companyName: provider.companyName, // Mapear company_name para o frontend
+      }));
+      setServiceProviders(mappedProviders); // Atualiza o estado com o mapeamento
       setTotalPages(response.data.totalPages); // Ajusta o total de páginas
     } catch (err: any) {
       setError(err.message || "Erro ao buscar prestadores de serviço.");

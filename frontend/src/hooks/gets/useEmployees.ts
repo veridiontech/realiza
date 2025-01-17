@@ -1,43 +1,45 @@
+import axios from "axios";
+import { useState } from "react";
 import { Employee } from "@/types/employee";
-import { useQuery } from "@tanstack/react-query";
+import { ip } from "@/utils/ip";
 
-interface UseEmployeesProps {
-  limit?: number;
-  page?: number;
-}
+const API_URL = `${ip}/employee/brazilian`;
 
-export function useEmployees({ limit = 10, page = 1 }: UseEmployeesProps) {
-  return useQuery<{
-    data: Employee[];
-    total: number;
-  }>({
-    queryKey: ["Employees", limit, page],
-    queryFn: async () => {
-      const response = await fetch(
-        `http://localhost:3001/Employees?_limit=${limit}&_page=${page}`,
-      );
-      if (!response.ok) {
-        throw new Error("Erro ao carregar os dados de funcionários");
-      }
+export function useEmployees() {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-      const totalResponse = await fetch("http://localhost:3001/Employees");
-      if (!totalResponse.ok) {
-        throw new Error("Erro ao carregar o total de funcionários");
-      }
+  async function fetchEmployees(limit = 10, page = 0) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(API_URL, {
+        params: { size: limit, page },
+      });
 
-      const total = (await totalResponse.json()).length;
-      const data = await response.json();
-
-      return {
-        data: data.map((employee: any) => ({
-          id: employee.id,
-          name: employee.name,
-          status: employee.status || "Ativo",
+      const { content, totalPages } = response.data;
+      setEmployees(
+        content.map((emp: any) => ({
+          id: emp.idEmployee,
+          name: emp.name,
+          status: emp.isActive ? "Ativo" : "Desligado",
         })),
-        total,
-      };
-    },
-    staleTime: 5 * 60 * 1000,
-    placeholderData: { data: [], total: 0 },
-  });
+      );
+      setTotalPages(totalPages);
+    } catch (err: any) {
+      setError(err.message || "Erro ao carregar funcionários.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return {
+    employees,
+    totalPages,
+    loading,
+    error,
+    fetchEmployees,
+  };
 }
