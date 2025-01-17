@@ -24,6 +24,8 @@ public class AuthControllerImpl implements AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         String email = loginRequestDto.getEmail();

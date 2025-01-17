@@ -46,7 +46,6 @@ public class JwtService {
         claims.put("position", user.getPosition());
         claims.put("role", user.getRole().name());
         claims.put("firstName", user.getFirstName());
-        claims.put("timeZone", user.getTimeZone().getID());
         claims.put("surname", user.getSurname());
         claims.put("email", user.getEmail());
         claims.put("profilePicture", user.getProfilePicture());
