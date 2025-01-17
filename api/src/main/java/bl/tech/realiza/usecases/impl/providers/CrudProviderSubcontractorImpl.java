@@ -33,6 +33,15 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
                 .cnpj(providerSubcontractorRequestDto.getCnpj())
+                .companyName(providerSubcontractorRequestDto.getCompanyName())
+                .tradeName(providerSubcontractorRequestDto.getTradeName())
+                .fantasyName(providerSubcontractorRequestDto.getFantasyName())
+                .email(providerSubcontractorRequestDto.getEmail())
+                .cep(providerSubcontractorRequestDto.getCep())
+                .state(providerSubcontractorRequestDto.getState())
+                .city(providerSubcontractorRequestDto.getCity())
+                .address(providerSubcontractorRequestDto.getAddress())
+                .number(providerSubcontractorRequestDto.getNumber())
                 .providerSupplier(providerSupplier)
                 .build();
 
@@ -41,6 +50,15 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
+                .companyName(savedProviderSubcontractor.getCompanyName())
+                .tradeName(savedProviderSubcontractor.getTradeName())
+                .fantasyName(savedProviderSubcontractor.getFantasyName())
+                .email(savedProviderSubcontractor.getEmail())
+                .cep(savedProviderSubcontractor.getCep())
+                .state(savedProviderSubcontractor.getState())
+                .city(savedProviderSubcontractor.getCity())
+                .address(savedProviderSubcontractor.getAddress())
+                .number(savedProviderSubcontractor.getNumber())
                 .supplier(savedProviderSubcontractor.getProviderSupplier().getIdProvider())
                 .build();
 
@@ -56,6 +74,15 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(providerSubcontractor.getIdProvider())
                 .cnpj(providerSubcontractor.getCnpj())
+                .companyName(providerSubcontractor.getCompanyName())
+                .tradeName(providerSubcontractor.getTradeName())
+                .fantasyName(providerSubcontractor.getFantasyName())
+                .email(providerSubcontractor.getEmail())
+                .cep(providerSubcontractor.getCep())
+                .state(providerSubcontractor.getState())
+                .city(providerSubcontractor.getCity())
+                .address(providerSubcontractor.getAddress())
+                .number(providerSubcontractor.getNumber())
                 .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
                 .build();
 
@@ -70,6 +97,15 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                 providerSubcontractor -> ProviderResponseDto.builder()
                         .idProvider(providerSubcontractor.getIdProvider())
                         .cnpj(providerSubcontractor.getCnpj())
+                        .companyName(providerSubcontractor.getCompanyName())
+                        .tradeName(providerSubcontractor.getTradeName())
+                        .fantasyName(providerSubcontractor.getFantasyName())
+                        .email(providerSubcontractor.getEmail())
+                        .cep(providerSubcontractor.getCep())
+                        .state(providerSubcontractor.getState())
+                        .city(providerSubcontractor.getCity())
+                        .address(providerSubcontractor.getAddress())
+                        .number(providerSubcontractor.getNumber())
                         .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
                         .build()
         );
@@ -84,6 +120,16 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
 
         providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
+        providerSubcontractor.setCompanyName(providerSubcontractorRequestDto.getCompanyName());
+        providerSubcontractor.setTradeName(providerSubcontractorRequestDto.getTradeName());
+        providerSubcontractor.setFantasyName(providerSubcontractorRequestDto.getFantasyName());
+        providerSubcontractor.setEmail(providerSubcontractorRequestDto.getEmail());
+        providerSubcontractor.setCep(providerSubcontractorRequestDto.getCep());
+        providerSubcontractor.setState(providerSubcontractorRequestDto.getState());
+        providerSubcontractor.setCity(providerSubcontractorRequestDto.getCity());
+        providerSubcontractor.setAddress(providerSubcontractorRequestDto.getAddress());
+        providerSubcontractor.setNumber(providerSubcontractorRequestDto.getNumber());
+
         providerSubcontractor.setIsActive(providerSubcontractorRequestDto.getIsActive() != null ? providerSubcontractorRequestDto.getIsActive() : providerSubcontractor.getIsActive());
 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(providerSubcontractor);
@@ -91,6 +137,15 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
+                .companyName(savedProviderSubcontractor.getCompanyName())
+                .tradeName(savedProviderSubcontractor.getTradeName())
+                .fantasyName(savedProviderSubcontractor.getFantasyName())
+                .email(savedProviderSubcontractor.getEmail())
+                .cep(savedProviderSubcontractor.getCep())
+                .state(savedProviderSubcontractor.getState())
+                .city(savedProviderSubcontractor.getCity())
+                .address(savedProviderSubcontractor.getAddress())
+                .number(savedProviderSubcontractor.getNumber())
                 .supplier(savedProviderSubcontractor.getProviderSupplier().getIdProvider())
                 .build();
 

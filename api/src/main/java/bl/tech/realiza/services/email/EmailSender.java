@@ -28,26 +28,26 @@ public class EmailSender {
 
     public void sendEmail(EmailRequestDto emailRequestDto) {
         String companyName = "";
-        String idCompany = "";
+        String idCompany = null;
+        EmailRequestDto.Company company = emailRequestDto.getCompany();
 
         switch (emailRequestDto.getCompany()) {
             case CLIENT -> {
                 var client = clientRepository.findById(emailRequestDto.getIdCompany())
                         .orElseThrow(() -> new RuntimeException("Client not found"));
                 companyName = client.getCompanyName();
-                idCompany = client.getIdClient();
             }
             case SUPPLIER -> {
                 var supplier = providerSupplierRepository.findById(emailRequestDto.getIdCompany())
                         .orElseThrow(() -> new RuntimeException("Supplier not found"));
                 companyName = supplier.getCompanyName();
-                idCompany = supplier.getIdProvider();
+                idCompany = supplier.getClient().getIdClient();
             }
             case SUBCONTRACTOR -> {
                 var subcontractor = providerSubcontractorRepository.findById(emailRequestDto.getIdCompany())
                         .orElseThrow(() -> new RuntimeException("Subcontractor not found"));
                 companyName = subcontractor.getCompanyName();
-                idCompany = subcontractor.getIdProvider();
+                idCompany = subcontractor.getProviderSupplier().getIdProvider();
             }
         }
 
@@ -63,7 +63,8 @@ public class EmailSender {
                         .replace("<span class=\"highlight\">Realiza Assessoria Empresarial Ltda</span>",
                                 "<span class=\"highlight\">" + companyName + "</span>")
                         .replace("#TOKEN_PLACEHOLDER#", token)
-                        .replace("#ID_PLACEHOLDER#",idCompany);
+                        .replace("#ID_PLACEHOLDER#",idCompany)
+                        .replace("#COMPANY_PLACEHOLDER#",company.name());
             }
 
             // Creating and sending the email
