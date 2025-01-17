@@ -14,8 +14,8 @@ export function ServiceProvider() {
   const itemsPerPage = 5;
 
   const {
-    serviceProviders,
-    totalPages,
+    serviceProviders = [], // Default to an empty array to handle missing data
+    totalPages = 0, // Default to 0 pages to avoid pagination issues
     loading,
     error,
     fetchServiceProviders,
@@ -71,14 +71,6 @@ export function ServiceProvider() {
     render?: (value: string) => React.ReactNode;
   }[];
 
-  if (loading) {
-    return <p className="mt-10 text-center">Carregando...</p>;
-  }
-
-  if (error) {
-    return <p className="mt-10 text-center text-red-500">Erro: {error}</p>;
-  }
-
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
@@ -98,10 +90,12 @@ export function ServiceProvider() {
           </ButtonBlue>
         </div>
 
-        {serviceProviders.length > 0 ? (
-          <Table data={serviceProviders} columns={columns} />
+        {error ? (
+          <p className="text-center text-red-600">
+            Erro ao carregar os dados: {error}
+          </p>
         ) : (
-          <p className="text-center text-gray-500">Nenhum dado disponível.</p>
+          <Table data={serviceProviders} columns={columns} />
         )}
 
         <Pagination
