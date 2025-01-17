@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Puff } from "react-loader-spinner";
 import {
-    Dialog,
-    DialogContent, DialogHeader,
-    DialogTitle,
-    DialogTrigger
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,9 +39,9 @@ const editModalEnterpriseSchema = z.object({
 
 type EditModalEnterpriseSchema = z.infer<typeof editModalEnterpriseSchema>;
 export function EditModalEnterprise() {
-  const [enterpriseDatas, setEnterpriseDatas] = useState<
-    EditModalEnterpriseSchema | undefined
-  >(undefined);
+  // const [enterpriseDatas, setEnterpriseDatas] = useState<
+  //   EditModalEnterpriseSchema | undefined
+  // >(undefined);
   const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -56,10 +57,24 @@ export function EditModalEnterprise() {
   const getDatasEnterprise = async (id: string) => {
     try {
       const res = await axios.get(`${ip}/client/${id}`);
-      console.log(res.data);
-      setEnterpriseDatas(res.data);
+      const data = res.data;
+
+      // Use `setValue` para preencher os campos com os dados recebidos
+      setValue("cnpj", data.cnpj || "");
+      setValue("nameEnterprise", data.nameEnterprise || "");
+      setValue("fantasyName", data.fantasyName || "");
+      setValue("socialReason", data.socialReason || "");
+      setValue("email", data.email || "");
+      setValue("phone", data.phone || "");
+      setValue("cep", data.cep || "");
+      setValue("state", data.state || "");
+      setValue("city", data.city || "");
+      setValue("adress", data.adress || "");
+      setValue("number", data.number || "");
+
+      // setEnterpriseDatas(data); // Atualiza o estado local (opcional)
     } catch (err) {
-      console.log("nao foi possivel recuperar os dados da empresa", err);
+      console.error("Não foi possível recuperar os dados da empresa", err);
     }
   };
 
@@ -93,7 +108,8 @@ export function EditModalEnterprise() {
   };
 
   useEffect(() => {
-    getDatasEnterprise();
+    const id = "123";
+    getDatasEnterprise(id);
   }, []);
 
   return (
@@ -112,34 +128,37 @@ export function EditModalEnterprise() {
             className="flex flex-col gap-2"
           >
             <div>
-              <Label>Cnpj</Label>
-              <Input placeholder="CNPJ: __.___.___/____-__"/>
+              <Label>CNPJ</Label>
+              <Input
+                placeholder="CNPJ: __.___.___/____-__"
+                {...register("cnpj")}
+              />
             </div>
             <div className="flex items-center gap-1">
               <div>
                 <Label>Nome da empresa</Label>
-                <Input className="w-[12vw]" />
+                <Input className="w-[12vw]" {...register("nameEnterprise")} />
               </div>
               <div>
-                <Label>Nome fanstasia</Label>
-                <Input className="w-[12vw]" />
+                <Label>Nome fantasia</Label>
+                <Input className="w-[12vw]" {...register("fantasyName")} />
               </div>
             </div>
             <div>
               <Label>Razão social</Label>
-              <Input />
+              <Input {...register("socialReason")} />
             </div>
             <div>
-              <Label>email corporativo</Label>
-              <Input />
+              <Label>Email corporativo</Label>
+              <Input {...register("email")} />
             </div>
             <div>
               <Label>Telefone</Label>
-              <Input />
+              <Input {...register("phone")} />
             </div>
             <div className="flex items-end gap-3">
               <div>
-                <Label>Cep</Label>
+                <Label>CEP</Label>
                 <Input
                   className="w-[21vw]"
                   {...register("cep")}
@@ -156,13 +175,11 @@ export function EditModalEnterprise() {
               >
                 {isLoading ? (
                   <Puff
-                  visible={true}
-                  height="80"
-                  width="80"
-                  color="white"
-                  ariaLabel="puff-loading"
-                  wrapperStyle={{}}
-                  wrapperClass=""
+                    visible={true}
+                    height="80"
+                    width="80"
+                    color="white"
+                    ariaLabel="puff-loading"
                   />
                 ) : (
                   <Search />
@@ -174,7 +191,7 @@ export function EditModalEnterprise() {
               <Input
                 {...register("state")}
                 readOnly
-                placeholder="Preencha o cep"
+                placeholder="Preencha o CEP"
               />
             </div>
             <div>
@@ -182,7 +199,7 @@ export function EditModalEnterprise() {
               <Input
                 {...register("city")}
                 readOnly
-                placeholder="Preencha o cep"
+                placeholder="Preencha o CEP"
               />
             </div>
             <div className="flex items-center gap-3">
@@ -191,20 +208,17 @@ export function EditModalEnterprise() {
                 <Input
                   {...register("adress")}
                   readOnly
-                  placeholder="Preencha o cep"
+                  placeholder="Preencha o CEP"
                   className="w-[20.6vw]"
                 />
               </div>
               <div>
-                <Label>Numero</Label>
-                <Input
-                  className="w-[3vw]"
-                  placeholder=""  
-                />
+                <Label>Número</Label>
+                <Input className="w-[3vw]" {...register("number")} />
               </div>
             </div>
             <div>
-              <Label>Responsável pela unidadee</Label>
+              <Label>Responsável pela unidade</Label>
               <Input />
             </div>
             <Button className="bg-realizaBlue">Confirmar edição</Button>

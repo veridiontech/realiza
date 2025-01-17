@@ -2,10 +2,10 @@ import { Mail, Pencil, Phone } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+// import { useState } from "react";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
 export function ProfileEnterpriseReprise() {
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>

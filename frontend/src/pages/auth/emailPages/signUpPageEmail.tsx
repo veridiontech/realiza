@@ -44,12 +44,20 @@ export function SignUpPageEmail() {
   });
 
   const onSubmit = async(data: SignUpEmailFormSchema) => {
-    setUserData(data);
-    const allDatas = {
-      ...enterpriseData,
-      ...data,
-    };
-    await axios.post(`${ip}/client/user`, allDatas)
+    try{
+      setUserData(data);
+      const allDatas = {
+        ...enterpriseData,
+        ...data,
+      };
+      await axios.post(`${ip}/client/user`, allDatas)
+      console.log('sucesso');
+      
+    }catch(err) {
+      console.log(err);
+      
+    }
+    
   };
 
   const togglePasswordVisibility = () => {
