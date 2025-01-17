@@ -27,7 +27,7 @@ const columns: {
   {
     key: "id",
     label: "Ações",
-    render: (value, row) => (
+    render: (row) => (
       <Link to={`/detailsEmployees/${row.id}`}>
         <button className="ml-4 text-blue-500 hover:underline">
           <Settings2 />

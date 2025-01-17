@@ -1,21 +1,21 @@
 import { useState } from "react";
 import ultraIcon from "@/assets/ultraIcon.png";
 import { Modal } from "@/components/modal";
-import { z } from "zod";
+// import { z } from "zod";
 
-const enterpriseSchema = z.object({
-  nameEnterprise: z.string(),
-  unityName: z.string(),
-  cep: z.string(),
-  state: z.string(),
-  city: z.string(),
-  addres: z.string(),
-  responsibleForUnity: z.string(),
-  category: z.string(),
-  phone: z.string()
-})
+// const enterpriseSchema = z.object({
+//   nameEnterprise: z.string(),
+//   unityName: z.string(),
+//   cep: z.string(),
+//   state: z.string(),
+//   city: z.string(),
+//   addres: z.string(),
+//   responsibleForUnity: z.string(),
+//   category: z.string(),
+//   phone: z.string()
+// })
 
-type EnterpriseSchema = z.infer<typeof enterpriseSchema>
+// type EnterpriseSchema = z.infer<typeof enterpriseSchema>
 export function Enterprise() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 

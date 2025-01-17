@@ -32,7 +32,7 @@ const ContractsTable = () => {
     {
       key: "id",
       label: "Ações",
-      render: (id: string) => (
+      render: () => (
         <button className="ml-4 text-blue-500 hover:underline">
           <ScrollText />
         </button>

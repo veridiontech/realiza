@@ -16,7 +16,7 @@ export function ServiceProvider() {
   const {
     serviceProviders = [], // Default to an empty array to handle missing data
     totalPages = 0, // Default to 0 pages to avoid pagination issues
-    loading,
+    // loading,
     error,
     fetchServiceProviders,
   } = useFetchServiceProviders();

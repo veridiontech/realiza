@@ -215,10 +215,10 @@ export function ProfileClient() {
           </div>
         </div>
         <div className="flex flex-col gap-4 md:flex-row m-10">
-          <Button variant="realizaSec" className="w-full md:w-auto">
+          <Button  className="w-full md:w-auto">
             Cancelar
           </Button>
-          <Button variant="realiza" className="w-full md:w-auto">
+          <Button className="w-full md:w-auto">
             Excluir conta
           </Button>
         </div>

@@ -46,9 +46,9 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (name: string, file: File | null) => {
-    setFormData((prev) => ({ ...prev, [name]: file }));
-  };
+  // const handleFileChange = (name: string, file: File | null) => {
+  //   setFormData((prev) => ({ ...prev, [name]: file }));
+  // };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
