@@ -1,100 +1,167 @@
 import { Modal } from "@/components/modal";
+import * as z from "zod";
+import { useActivities, Activity } from "@/hooks/gets/useActivities";
+import { useRequirements, Requirement } from "@/hooks/gets/useRequirements";
+import axios from "axios";
 
 interface StepTwoServiceProvidersProps {
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }
 
+// Definindo o esquema Zod
+const stepTwoSchema = z.object({
+  serviceType: z.enum(["Tipo 1", "Tipo 2", "Tipo 3"], {
+    errorMap: () => ({ message: "Selecione um tipo de serviço válido." }),
+  }),
+  serviceDuration: z.string().min(1, "A duração do serviço é obrigatória."),
+  serviceName: z
+    .string()
+    .min(1, "O nome do serviço é obrigatório.")
+    .max(300, "O nome do serviço não pode exceder 300 caracteres."),
+  description: z.string().optional(),
+  allocatedLimit: z.number().positive("O limite alocado deve ser positivo."),
+  startDate: z.string().refine((date) => !isNaN(new Date(date).getTime()), {
+    message: "Data de início inválida.",
+  }),
+  endDate: z
+    .string()
+    .optional()
+    .refine((date) => !date || !isNaN(new Date(date).getTime()), {
+      message: "Data de término inválida.",
+    }),
+  activities: z.array(z.string()).nonempty("Selecione ao menos uma atividade."),
+  requirements: z
+    .array(z.string())
+    .nonempty("Selecione ao menos um requisito."),
+  providerSupplier: z.string().uuid("Selecione um fornecedor válido."),
+});
+
 export function StepTwoServiceProviders({
   onClose,
   onSubmit,
 }: StepTwoServiceProvidersProps) {
+  const {
+    activities,
+    loading: activitiesLoading,
+    error: activitiesError,
+  } = useActivities();
+  const {
+    requirements,
+    loading: requirementsLoading,
+    error: requirementsError,
+  } = useRequirements();
+
+  const handleSubmit = async (data: Record<string, any>) => {
+    try {
+      const validatedData = stepTwoSchema.parse({
+        ...data,
+        allocatedLimit: Number(data.allocatedLimit),
+      });
+
+      const response = await axios.post(
+        "https://realiza.onrender.com/contract/supplier",
+        validatedData,
+      );
+
+      onSubmit(response.data);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        alert(error.errors[0]?.message || "Erro de validação.");
+      } else if (axios.isAxiosError(error)) {
+        alert(
+          error.response?.data?.message ||
+            "Erro ao enviar os dados. Verifique sua conexão ou tente novamente.",
+        );
+      }
+    }
+  };
+
+  if (activitiesLoading || requirementsLoading) {
+    return <p>Carregando dados...</p>;
+  }
+
+  if (activitiesError || requirementsError) {
+    return <p>Erro ao carregar atividades ou requisitos.</p>;
+  }
+
   return (
     <Modal
       title="Solicitar Serviço"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       fields={[
         {
-          name: "subcontratacao",
-          label: "Subcontratação?",
-          type: "custom",
-          render: ({ value, onChange }) => (
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="subcontratacao"
-                  value="Não"
-                  checked={value === "Não"}
-                  onChange={() => onChange("Não")}
-                  className="h-5 w-5 text-red-600"
-                />
-                <span>Não</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  name="subcontratacao"
-                  value="Sim"
-                  checked={value === "Sim"}
-                  onChange={() => onChange("Sim")}
-                  className="h-5 w-5 text-green-600"
-                />
-                <span>Sim</span>
-              </label>
-            </div>
-          ),
-          defaultValue: "Não",
-        },
-        {
-          name: "nome_servico",
-          label: "* Nome do Serviço",
-          type: "text",
-          placeholder: "Máximo 300 caracteres",
-          required: true,
-        },
-        {
-          name: "ref_contrato",
-          label: "Ref. do contrato",
-          type: "text",
-          placeholder: "Referência Contrato",
-        },
-        {
-          name: "data_inicio",
-          label: "* Data de Início",
-          type: "date",
-          required: true,
-        },
-        {
-          name: "data_termino",
-          label: "Data de Término do contrato",
-          type: "date",
-        },
-        {
-          name: "tipo_servico",
+          name: "serviceType",
           label: "* Tipo do Serviço",
           type: "select",
           options: ["Tipo 1", "Tipo 2", "Tipo 3"],
           required: true,
         },
         {
-          name: "atividades",
-          label: "Atividades",
-          type: "select",
-          options: ["Atividade 1", "Atividade 2", "Atividade 3"],
-        },
-        {
-          name: "exigencias",
-          label: "Outras exigências",
-          type: "select",
-          options: ["Exigência 1", "Exigência 2", "Exigência 3"],
-        },
-        {
-          name: "descricao",
-          label: "Descrição da solicitação (opcional)",
+          name: "serviceDuration",
+          label: "* Duração do Serviço",
           type: "text",
-          placeholder: "Descrição da solicitação (opcional)",
+          placeholder: "Exemplo: 6 months",
+          required: true,
+        },
+        {
+          name: "serviceName",
+          label: "* Nome do Serviço",
+          type: "text",
+          placeholder: "Máximo 300 caracteres",
+          required: true,
+        },
+        {
+          name: "description",
+          label: "Descrição do Serviço (opcional)",
+          type: "text",
+          placeholder: "Descrição detalhada do serviço",
+        },
+        {
+          name: "allocatedLimit",
+          label: "* Limite Alocado",
+          type: "number",
+          placeholder: "Exemplo: 50000",
+          required: true,
+        },
+        {
+          name: "startDate",
+          label: "* Data de Início",
+          type: "date",
+          required: true,
+        },
+        {
+          name: "endDate",
+          label: "Data de Término",
+          type: "date",
+        },
+        {
+          name: "activities",
+          label: "* Atividades",
+          type: "multiselect",
+          options: activities.map((activity: Activity) => ({
+            label: activity.title,
+            value: activity.idActivity,
+          })),
+          required: true,
+        },
+        {
+          name: "requirements",
+          label: "* Requisitos",
+          type: "multiselect",
+          options: requirements.map((requirement: Requirement) => ({
+            label: requirement.title,
+            value: requirement.idRequirement,
+          })),
+          required: true,
+        },
+        {
+          name: "providerSupplier",
+          label: "* Fornecedor",
+          type: "text",
+          placeholder: "3a88a8e5-0f77-4c50-aa70-267710682ac4",
+          required: true,
         },
       ]}
     />

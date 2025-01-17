@@ -31,16 +31,17 @@ export function EnterprisePageEmail() {
   useEffect(() => {
     const validateToken = async() => {
       try{ 
-        const res = await axios.get(`${ip}/invite/validate?token=${token}`)
+        const res = await axios.get(`http://localhost:5173/email/Enterprise-sign-up/validate?token=${token}`)
         if(res.status === 200) {
           setIsValidToken(true)
+        }else {
+          console.log('erro');
         }
       }catch(err) {
         console.log("Nao foi possivel validar o token", err);
         setIsValidToken(false)
       }
     }
-
     if(token) {
       validateToken()
     } else {
@@ -51,7 +52,7 @@ export function EnterprisePageEmail() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<EnterprisePageEmailFormSchema>({
     resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange"
@@ -59,11 +60,9 @@ export function EnterprisePageEmail() {
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     try {
-      const response = await axios.post(`${ip}/invite`, { ...data, token });
       setEnterpriseData(data);
-      localStorage.setItem("enterpriseData", JSON.stringify(data));
-      console.log("Cadastro realizado:", response.data);
-      navigate(`/email/success`);
+      console.log("Cadastro realizado:", data);
+      navigate(`/email/Sign-up`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
     }

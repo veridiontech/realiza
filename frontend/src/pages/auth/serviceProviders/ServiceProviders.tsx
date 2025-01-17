@@ -7,26 +7,46 @@ import {
 } from "@/hooks/gets/useServiceProviders";
 import { NotebookPen } from "lucide-react";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
+import { StepOneServiceProviders } from "./modals/stepOne";
+import { StepTwoServiceProviders } from "./modals/stepTwo";
 
 export function ServiceProvider() {
   const itemsPerPage = 5;
 
   const {
-    serviceProviders,
-    totalPages,
+    serviceProviders = [], // Default to an empty array to handle missing data
+    totalPages = 0, // Default to 0 pages to avoid pagination issues
     loading,
     error,
     fetchServiceProviders,
   } = useFetchServiceProviders();
 
   const [currentPage, setCurrentPage] = useState(0);
+  const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
+  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
+  const [providerData, setProviderData] = useState<Record<string, any> | null>(
+    null,
+  );
 
   useEffect(() => {
-    fetchServiceProviders(itemsPerPage, currentPage); // Chama o fetch ao carregar a página ou mudar a página
+    fetchServiceProviders(itemsPerPage, currentPage);
   }, [currentPage]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+  };
+
+  const handleStepOneSubmit = (data: Record<string, any>) => {
+    console.log("Dados do Primeiro Modal:", data);
+    setProviderData(data);
+    setIsStepOneModalOpen(false);
+    setIsStepTwoModalOpen(true);
+  };
+
+  const handleStepTwoSubmit = (data: Record<string, any>) => {
+    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
+    setIsStepTwoModalOpen(false);
+    // Aqui você pode adicionar lógica para enviar os dados combinados ao servidor.
   };
 
   const columns = [
@@ -51,14 +71,6 @@ export function ServiceProvider() {
     render?: (value: string) => React.ReactNode;
   }[];
 
-  if (loading) {
-    return <p className="mt-10 text-center">Carregando...</p>;
-  }
-
-  if (error) {
-    return <p className="mt-10 text-center text-red-500">Erro: {error}</p>;
-  }
-
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
@@ -73,15 +85,17 @@ export function ServiceProvider() {
               onChange={() => {}}
             />
           </div>
-          <ButtonBlue onClick={() => console.log("Adicionar Fornecedor")}>
+          <ButtonBlue onClick={() => setIsStepOneModalOpen(true)}>
             Adicionar Prestador
           </ButtonBlue>
         </div>
 
-        {serviceProviders.length > 0 ? (
-          <Table data={serviceProviders} columns={columns} />
+        {error ? (
+          <p className="text-center text-red-600">
+            Erro ao carregar os dados: {error}
+          </p>
         ) : (
-          <p className="text-center text-gray-500">Nenhum dado disponível.</p>
+          <Table data={serviceProviders} columns={columns} />
         )}
 
         <Pagination
@@ -89,6 +103,20 @@ export function ServiceProvider() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
+
+        {isStepOneModalOpen && (
+          <StepOneServiceProviders
+            onClose={() => setIsStepOneModalOpen(false)}
+            onSubmit={handleStepOneSubmit}
+          />
+        )}
+
+        {isStepTwoModalOpen && (
+          <StepTwoServiceProviders
+            onClose={() => setIsStepTwoModalOpen(false)}
+            onSubmit={handleStepTwoSubmit}
+          />
+        )}
       </div>
     </div>
   );

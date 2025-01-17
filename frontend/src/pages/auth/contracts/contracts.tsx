@@ -1,27 +1,25 @@
-import { useContracts } from "@/hooks/gets/useContracts";
+import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { useState } from "react";
 import { ScrollText } from "lucide-react";
-import { Contract } from "@/types/contracts";
+import { useContracts } from "@/hooks/gets/useContracts";
 
 const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const {
-    data: contracts = [],
-    isLoading,
+    contracts = [], // Fallback para array vazio
+    totalPages = 1, // Fallback para 1 página
+    loading,
     error,
   } = useContracts({
     limit: itemsPerPage,
     page: currentPage,
   });
 
-  const totalPages = Math.ceil((contracts.length || 0) / itemsPerPage);
-
   const columns: {
-    key: keyof Contract;
+    key: keyof (typeof contracts)[0];
     label: string;
     render?: (value: any) => JSX.Element;
   }[] = [
@@ -42,29 +40,39 @@ const ContractsTable = () => {
     },
   ];
 
-  if (isLoading) {
-    return <p className="mt-10 text-center">Carregando...</p>;
-  }
-
-  if (error) {
-    return (
-      <p className="mt-10 text-center text-red-500">
-        Erro ao carregar contratos.
-      </p>
-    );
-  }
+  const handlePageChange = (newPage: number) => {
+    // Garante que a página não vá além dos limites
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
         <h1 className="m-4 text-xl">Tabela de Contratos</h1>
 
-        <Table data={contracts} columns={columns} />
+        {loading ? (
+          <p className="mt-10 text-center">Carregando...</p>
+        ) : error ? (
+          <p className="text-center text-red-600">
+            Erro ao carregar os dados:{" "}
+            {typeof error === "string"
+              ? error
+              : "Algo deu errado. Tente novamente mais tarde."}
+          </p>
+        ) : contracts.length > 0 ? (
+          <Table data={contracts} columns={columns} />
+        ) : (
+          <p className="text-center text-gray-500">
+            Nenhum contrato disponível.
+          </p>
+        )}
 
         <Pagination
           currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          totalPages={Math.max(totalPages, 1)}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>

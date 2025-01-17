@@ -17,7 +17,7 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
           </tr>
         </thead>
         <tbody>
-          {hasData ?(
+          {hasData ? (
             data.map((row, index) => (
               <tr
                 key={index}
@@ -37,7 +37,7 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
                 ))}
               </tr>
             ))
-          ):(
+          ) : (
             <tr>
               <td
                 colSpan={columns.length}

@@ -7,4 +7,5 @@ export type FieldType =
   | "select"
   | "date"
   | "file"
-  | "custom";
+  | "custom"
+  | "multiselect";

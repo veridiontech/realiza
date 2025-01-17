@@ -2,15 +2,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, Link } from "react-router-dom";
+import { Form, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useUser } from "@/context/user-provider";
+import { ip } from "@/utils/ip";
 
 const loginFormSchema = z.object({
   email: z
     .string()
     .nonempty("O email é obrigatório")
     .email("Formato de email inválido"),
-  password: z.string().min(6, "A senha precisa conter no mínimo 6 caracteres"),
+    password: z.string().min(6, "A senha precisa conter no mínimo 6 caracteres"),
 });
 
 type loginFormData = z.infer<typeof loginFormSchema>;
@@ -18,7 +20,8 @@ type loginFormData = z.infer<typeof loginFormSchema>;
 export function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const { setUser } = useUser();
+  const navigate = useNavigate()
 
   const {
     register,
@@ -28,22 +31,37 @@ export function SignIn() {
     resolver: zodResolver(loginFormSchema),
   });
 
-  const onSubmit = async (data: loginFormData) => {
-    setLoading(true);
-    setErrorMessage("");
-
+  const getUser = async (data: loginFormData) => {
+    setLoading(true)
     try {
-      const response = await axios.post("http://localhost:3001/api/login", data);
-
-      localStorage.setItem("authToken", response.data.token);
-
-    } catch (error: any) {
-      console.error("Erro ao fazer login:", error);
-      setErrorMessage(
-        error.response?.data?.message || "Erro ao autenticar, tente novamente."
-      );
-    } finally {
-      setLoading(false);
+      console.log('aa');
+      console.log('dados:',data);
+      
+      const res = await axios.post(`${ip}/login`, {
+        email: data.email,
+        password: data.password,
+      });
+      console.log(res.data);
+      const token = res.data.token;
+      localStorage.setItem("tokenClient", token);
+      const userResponse = await axios.post(`${ip}/login/extract-token`, token, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      
+      const userData = userResponse.data
+      localStorage.setItem("userId", userData.idUser)
+      console.log(userData);
+      
+      setUser(userData)
+      navigate(`/sistema/select-client/${userData.idUser}`)
+      window.location.reload()
+    } catch (err) {
+      console.error("Erro ao buscar usuário:", err);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -54,10 +72,7 @@ export function SignIn() {
         <span className="text-center">
           Insira seu email e senha para continuar
         </span>
-        <Form
-          className="mt-16 flex flex-col"
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <Form className="mt-16 flex flex-col" onSubmit={handleSubmit(getUser)}>
           <label htmlFor="email">E-mail</label>
           <input
             className="mb-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -84,12 +99,6 @@ export function SignIn() {
           </div>
           {errors.password && <span>{errors.password.message}</span>}
 
-          {errorMessage && (
-            <span className="mb-2 text-sm font-bold text-red-500">
-              {errorMessage}
-            </span>
-          )}
-
           <span className="mb-16 text-xs font-light text-gray-600">
             Esqueceu a senha?{" "}
             <Link
@@ -100,7 +109,7 @@ export function SignIn() {
             </Link>
           </span>
           <button
-            className="rounded bg-realizaBlue px-4 py-2 font-bold text-white hover:bg-blue-700"
+            className="bg-realizaBlue rounded px-4 py-2 font-bold text-white hover:bg-blue-700"
             type="submit"
             disabled={loading}
           >
