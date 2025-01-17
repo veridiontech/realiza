@@ -2,11 +2,19 @@ import { useState } from "react";
 import { Modal } from "@/components/modal";
 import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/useCnpjApi";
+import * as z from "zod";
 
 interface StepOneServiceProvidersProps {
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }
+
+const providerSchema = z.object({
+  cnpj: z
+    .string()
+    .regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/, "CNPJ inválido"),
+  email: z.string().email("E-mail inválido"),
+});
 
 export function StepOneServiceProviders({
   onClose,
@@ -21,22 +29,16 @@ export function StepOneServiceProviders({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validateCNPJ = (cnpj: string) => {
-    const cleanedCNPJ = cnpj.replace(/\D/g, ""); // Remove caracteres não numéricos
-    return cleanedCNPJ.length === 14;
-  };
-
   const handleSearchCNPJ = async () => {
     setError(null);
     setLoading(true);
 
-    if (!validateCNPJ(cnpj)) {
-      setError("CNPJ inválido. Por favor, verifique o formato.");
-      setLoading(false);
-      return;
-    }
-
     try {
+      const cleanedCNPJ = cnpj.replace(/\D/g, "");
+      if (!cleanedCNPJ || cleanedCNPJ.length !== 14) {
+        throw new Error("CNPJ inválido. Por favor, verifique o formato.");
+      }
+
       const data = await fetchCompanyByCNPJ(cnpj);
       setProviderData({
         nome: data.razaoSocial || data.nomeFantasia,
@@ -52,7 +54,14 @@ export function StepOneServiceProviders({
   };
 
   const handleAddProvider = (data: Record<string, any>) => {
-    onSubmit({ ...data, cnpj });
+    try {
+      providerSchema.parse({ ...data, cnpj });
+      onSubmit({ ...data, cnpj });
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        setError(validationError.errors[0]?.message || "Erro de validação.");
+      }
+    }
   };
 
   return (
@@ -105,23 +114,11 @@ export function StepOneServiceProviders({
                 required: true,
                 defaultValue: providerData.email,
               },
-              {
-                name: "phone",
-                label: "Telefone",
-                type: "telephone" as const,
-                placeholder: "(XX) XXXXX-XXXX",
-                required: true,
-                defaultValue: providerData.phone,
-              },
             ]
           : []),
       ]}
       onSubmit={(data) => {
-        console.log("Dados enviados:", data); // Debug para verificar os dados
-        if (!data.email || !data.phone) {
-          setError("Preencha todos os campos obrigatórios.");
-          return;
-        }
+        console.log("Dados enviados:", data);
         handleAddProvider(data);
       }}
       onClose={onClose}

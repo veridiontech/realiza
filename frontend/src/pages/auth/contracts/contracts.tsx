@@ -1,27 +1,20 @@
-import { useContracts } from "@/hooks/gets/useContracts";
+import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { useState } from "react";
 import { ScrollText } from "lucide-react";
-import { Contract } from "@/types/contracts";
+import { useContracts } from "@/hooks/gets/useContracts";
 
 const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const {
-    data: contracts = [],
-    isLoading,
-    error,
-  } = useContracts({
+  const { contracts, totalPages, loading, error } = useContracts({
     limit: itemsPerPage,
     page: currentPage,
   });
 
-  const totalPages = Math.ceil((contracts.length || 0) / itemsPerPage);
-
   const columns: {
-    key: keyof Contract;
+    key: keyof (typeof contracts)[0];
     label: string;
     render?: (value: any) => JSX.Element;
   }[] = [
@@ -42,7 +35,7 @@ const ContractsTable = () => {
     },
   ];
 
-  if (isLoading) {
+  if (loading) {
     return <p className="mt-10 text-center">Carregando...</p>;
   }
 
@@ -59,7 +52,13 @@ const ContractsTable = () => {
       <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
         <h1 className="m-4 text-xl">Tabela de Contratos</h1>
 
-        <Table data={contracts} columns={columns} />
+        {contracts.length > 0 ? (
+          <Table data={contracts} columns={columns} />
+        ) : (
+          <p className="text-center text-gray-500">
+            Nenhum contrato disponível.
+          </p>
+        )}
 
         <Pagination
           currentPage={currentPage}

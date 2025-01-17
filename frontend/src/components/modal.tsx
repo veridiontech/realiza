@@ -7,7 +7,7 @@ interface Field {
   label: string;
   type: FieldType;
   placeholder?: string;
-  options?: string[];
+  options?: string[] | { label: string; value: string }[]; // Atualizado
   required?: boolean;
   defaultValue?: any;
   accept?: string;
@@ -82,6 +82,36 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
                   value: formData[field.name],
                   onChange: (value) => handleChange(field.name, value),
                 })
+              ) : field.type === "multiselect" ? (
+                <select
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name]}
+                  onChange={(e) =>
+                    handleChange(
+                      field.name,
+                      Array.from(e.target.selectedOptions).map(
+                        (option) => option.value,
+                      ),
+                    )
+                  }
+                  multiple
+                  className="rounded border border-gray-300 p-2"
+                  required={field.required}
+                >
+                  {Array.isArray(field.options) &&
+                    field.options.map((option) =>
+                      typeof option === "string" ? (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ) : (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ),
+                    )}
+                </select>
               ) : field.type === "select" ? (
                 <select
                   id={field.name}
@@ -92,50 +122,19 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
                   required={field.required}
                 >
                   <option value="">Selecione</option>
-                  {field.options?.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                  {Array.isArray(field.options) &&
+                    field.options.map((option) =>
+                      typeof option === "string" ? (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ) : (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ),
+                    )}
                 </select>
-              ) : field.type === "checkbox" ? (
-                <input
-                  id={field.name}
-                  name={field.name}
-                  type="checkbox"
-                  checked={formData[field.name]}
-                  onChange={(e) => handleChange(field.name, e.target.checked)}
-                  className="h-5 w-5"
-                  required={field.required}
-                />
-              ) : field.type === "file" ? (
-                <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-100 p-2">
-                  {/* Botão de escolher arquivo */}
-                  <label
-                    htmlFor={field.name}
-                    className="cursor-pointer rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
-                  >
-                    Escolher arquivo
-                  </label>
-
-                  {/* Nome do arquivo selecionado ou placeholder */}
-                  <span className="truncate text-sm text-gray-500">
-                    {formData[field.name]?.name || "Nenhum arquivo selecionado"}
-                  </span>
-
-                  {/* Input de arquivo oculto */}
-                  <input
-                    id={field.name}
-                    name={field.name}
-                    type="file"
-                    accept={field.accept}
-                    onChange={(e) =>
-                      handleFileChange(field.name, e.target.files?.[0] || null)
-                    }
-                    className="hidden"
-                    required={field.required}
-                  />
-                </div>
               ) : (
                 <input
                   id={field.name}
