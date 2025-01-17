@@ -71,6 +71,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .activities(savedContractProviderSupplier.getActivities())
                 .requirements(savedContractProviderSupplier.getRequirements())
                 .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getIdProvider())
+                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getFantasyName())
                 .build();
 
         return contractProviderResponseDto;
@@ -94,6 +95,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .activities(contractProviderSupplier.getActivities())
                 .requirements(contractProviderSupplier.getRequirements())
                 .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                .providerSupplier(contractProviderSupplier.getProviderSupplier().getFantasyName())
                 .build();
 
         return Optional.of(contractProviderResponseDto);
@@ -116,6 +118,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .activities(contractProviderSupplier.getActivities())
                         .requirements(contractProviderSupplier.getRequirements())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getFantasyName())
                         .build()
         );
 
@@ -170,6 +173,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .activities(savedContractProviderSupplier.getActivities())
                 .requirements(savedContractProviderSupplier.getRequirements())
                 .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getIdProvider())
+                .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getFantasyName())
                 .build();
 
         return Optional.of(contractProviderResponseDto);

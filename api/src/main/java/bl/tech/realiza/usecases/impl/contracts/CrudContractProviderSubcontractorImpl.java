@@ -73,6 +73,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .requirements(savedContractSubcontractor.getRequirements())
                 .contractReference(savedContractSubcontractor.getContractReference())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
+                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
 
         return contractSubcontractorResponse;
@@ -97,6 +98,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .requirements(contractProviderSubcontractor.getRequirements())
                 .contractReference(contractProviderSubcontractor.getContractReference())
                 .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
+                .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
 
         return Optional.of(contractProviderResponseDto);
@@ -120,6 +122,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                         .requirements(contractProviderSubcontractor.getRequirements())
                         .contractReference(contractProviderSubcontractor.getContractReference())
                         .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
                         .build()
         );
 
@@ -175,6 +178,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .requirements(savedContractSubcontractor.getRequirements())
                 .contractReference(savedContractSubcontractor.getContractReference())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
+                .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
 
         return Optional.of(contractSubcontractorResponse);

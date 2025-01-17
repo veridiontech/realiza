@@ -26,9 +26,11 @@ public class ContractProviderResponseDto {
     private List<Requirement> requirements;
 
     // supplier
+    private String providerSupplierName;
     private String providerSupplier;
 
     // subcontractor
     private String contractReference;
+    private String providerSubcontractorName;
     private String providerSubcontractor;
 }
