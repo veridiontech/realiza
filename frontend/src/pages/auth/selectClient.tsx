@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Dropdown } from "@/components/ui/dropdown";
 import { useFetchClients } from "@/hooks/gets/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
-import { Dialog } from "@/components/ui/dialog";
+// import { Dialog } from "@/components/ui/dialog";
 import { ModalSendEmail } from "@/components/modal-send-email";
 
 export function SelectClient() {
