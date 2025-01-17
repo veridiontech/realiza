@@ -40,7 +40,6 @@ export function EnterprisePageEmail() {
         setIsValidToken(false)
       }
     }
-
     if(token) {
       validateToken()
     } else {
@@ -59,11 +58,9 @@ export function EnterprisePageEmail() {
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     try {
-      const response = await axios.post(`${ip}/clients/user`, { ...data, token });
       setEnterpriseData(data);
-      localStorage.setItem("enterpriseData", JSON.stringify(data));
-      console.log("Cadastro realizado:", response.data);
-      navigate(`/email/success`);
+      console.log("Cadastro realizado:", data);
+      navigate(`/email/Sign-up`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
     }
