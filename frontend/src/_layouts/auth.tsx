@@ -2,10 +2,10 @@ import { Outlet, useLocation } from 'react-router-dom'
 import imageLogin from '@/assets/imageLogin.png'
 import imageForgotPassword from '@/assets/imageForgotPassword.svg'
 import bgAuth from '@/assets/bg-auth.svg'
-import { useUser } from '@/context/user-provider'
+// import { useUser } from '@/context/user-provider'
 
 export function AuthLayout() {
-  const { authUser } = useUser()
+  // const { authUser } = useUser()
   const location = useLocation()
 
   const imageMap: Record<string, string> = {
@@ -17,11 +17,11 @@ export function AuthLayout() {
 
   const dynamicImage = imageMap[location.pathname]
 
-  if(!authUser) {
-    <div>
-      pagina nao autenticada
-    </div>
-  }  
+  // if(!authUser) {
+  //   <div>
+  //     pagina nao autenticada
+  //   </div>
+  // }  
 
   return (
     <div className='flex h-screen overflow-hidden'>

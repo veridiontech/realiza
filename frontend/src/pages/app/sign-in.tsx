@@ -1,17 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "@/context/user-provider";
-
-interface UserProps {
-  id: string
-  email: string,
-  password: string,
-  token: string
-}
+import { ip } from "@/utils/ip";
 
 const loginFormSchema = z.object({
   email: z
@@ -26,7 +20,6 @@ type loginFormData = z.infer<typeof loginFormSchema>;
 export function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [findUser, setFindUser] = useState([]);
   const { setUser } = useUser();
   const navigate = useNavigate()
 
@@ -39,29 +32,28 @@ export function SignIn() {
   });
 
   const getUser = async (data: loginFormData) => {
+    setLoading(true)
     try {
-      const res = await axios.get(`http://localhost:3000/User`, {
+      const res = await axios.post(`${ip}/login`, {
         params: {
           email: data.email,
           password: data.password,
         },
       });
-      setFindUser(res.data);
-      const userFinder = res.data.find(
-        (user: UserProps) => user.email === data.email && user.password === data.password
-      );
-      if (userFinder) {
-        const token = userFinder.token || "tokenClient";
-        localStorage.setItem('tokenClient', token);
-        localStorage.setItem('userId', userFinder.idUser);
-        console.log('Usuário encontrado', userFinder);
-        setUser(userFinder);
-        
-        navigate(`/sistema/select-client/${userFinder.idUser}`)
-      } else {
-        console.log('Usuário não encontrado');
-      }
+      const token = res.data.token;
+      localStorage.setItem("tokenClient", token);
+      const userResponse = await axios.post(`${ip}/login/extract-token`, token, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userData = userResponse.data
+      localStorage.setItem("userId", userData.idUser)
+      console.log(userData);
       
+      setUser(userData)
+      navigate(`/sistema/select-client/${userData.idUser}`)
+      // window.location.reload()
     } catch (err) {
       console.error("Erro ao buscar usuário:", err);
     }
