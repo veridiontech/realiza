@@ -4,7 +4,13 @@ import { useFetchClients } from "@/hooks/gets/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
 // import { Dialog } from "@/components/ui/dialog";
 import { ModalSendEmail } from "@/components/modal-send-email";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+
+
+type SelectClientFormSchema = z.infer<typeof selectClienteFormSchema>
 export function SelectClient() {
   const { clients, loading, error, fetchClients } = useFetchClients(); // Hook customizado
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +27,8 @@ export function SelectClient() {
       client.name &&
       client.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+
 
   return (
     <div className="m-10 flex min-h-full justify-center">

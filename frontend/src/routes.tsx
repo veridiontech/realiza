@@ -75,7 +75,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "Sign-Up", element: <SignUpPageEmail /> },
       //{ path: "Login", element: <LoginPageEmail /> },
-      { path: "Enterprise-sign-up", element: <EnterprisePageEmail /> },
+      { path: "Enterprise-sign-up/validate", element: <EnterprisePageEmail /> },
     ],
   },
 ]);

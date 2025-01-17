@@ -12,7 +12,7 @@ const loginFormSchema = z.object({
     .string()
     .nonempty("O email é obrigatório")
     .email("Formato de email inválido"),
-  password: z.string().min(6, "A senha precisa conter no mínimo 6 caracteres"),
+    password: z.string().min(6, "A senha precisa conter no mínimo 6 caracteres"),
 });
 
 type loginFormData = z.infer<typeof loginFormSchema>;
@@ -34,12 +34,14 @@ export function SignIn() {
   const getUser = async (data: loginFormData) => {
     setLoading(true)
     try {
+      console.log('aa');
+      console.log('dados:',data);
+      
       const res = await axios.post(`${ip}/login`, {
-        params: {
-          email: data.email,
-          password: data.password,
-        },
+        email: data.email,
+        password: data.password,
       });
+      console.log(res.data);
       const token = res.data.token;
       localStorage.setItem("tokenClient", token);
       const userResponse = await axios.post(`${ip}/login/extract-token`, token, {
@@ -47,15 +49,19 @@ export function SignIn() {
           Authorization: `Bearer ${token}`,
         },
       });
+      
+      
       const userData = userResponse.data
       localStorage.setItem("userId", userData.idUser)
       console.log(userData);
       
       setUser(userData)
       navigate(`/sistema/select-client/${userData.idUser}`)
-      // window.location.reload()
+      window.location.reload()
     } catch (err) {
       console.error("Erro ao buscar usuário:", err);
+    }finally{
+      setLoading(false)
     }
   };
 
