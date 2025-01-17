@@ -39,7 +39,7 @@ export function Collaborators() {
               </span>
             </div>
             <NavLink to="/monittoring">
-              <Button variant="realiza">Ver tabela de monitoramento</Button>
+              <Button >Ver tabela de monitoramento</Button>
             </NavLink>
           </div>
         </div>
