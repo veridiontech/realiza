@@ -50,6 +50,7 @@ public class CrudUserClientImpl implements CrudUserClient {
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
+                .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
                 .description(savedUserClient.getDescription())
                 .password(savedUserClient.getPassword())
@@ -75,6 +76,7 @@ public class CrudUserClientImpl implements CrudUserClient {
         UserClient userClient = userClientOptional.orElseThrow(() -> new RuntimeException("User not found"));
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
+                .idUser(userClient.getIdUser())
                 .cpf(userClient.getCpf())
                 .description(userClient.getDescription())
                 .password(userClient.getPassword())
@@ -99,6 +101,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> UserResponseDto.builder()
+                        .idUser(userClient.getIdUser())
                         .cpf(userClient.getCpf())
                         .description(userClient.getDescription())
                         .password(userClient.getPassword())
@@ -141,6 +144,7 @@ public class CrudUserClientImpl implements CrudUserClient {
         UserClient savedUserClient = userClientRepository.save(userClient);
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
+                .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
                 .description(savedUserClient.getDescription())
                 .password(savedUserClient.getPassword())
