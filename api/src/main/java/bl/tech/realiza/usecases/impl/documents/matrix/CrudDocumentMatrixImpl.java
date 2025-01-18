@@ -28,6 +28,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
 
         DocumentMatrix newDocumentMatrix = DocumentMatrix.builder()
+                .name(documentMatrixRequestDto.getName())
                 .risk(documentMatrixRequestDto.getRisk())
                 .expiration(documentMatrixRequestDto.getExpiration())
                 .type(documentMatrixRequestDto.getType())
@@ -38,6 +39,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrix savedDocumentMatrix = documentMatrixRepository.save(newDocumentMatrix);
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
+                .name(savedDocumentMatrix.getName())
                 .idDocumentMatrix(savedDocumentMatrix.getIdDocument())
                 .risk(savedDocumentMatrix.getRisk())
                 .expiration(savedDocumentMatrix.getExpiration())
@@ -57,6 +59,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
+                .name(documentMatrix.getName())
                 .risk(documentMatrix.getRisk())
                 .expiration(documentMatrix.getExpiration())
                 .type(documentMatrix.getType())
@@ -74,6 +77,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixPage.map(
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
+                        .name(documentMatrix.getName())
                         .risk(documentMatrix.getRisk())
                         .expiration(documentMatrix.getExpiration())
                         .type(documentMatrix.getType())
@@ -95,6 +99,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
 
+        documentMatrix.setName(documentMatrixRequestDto.getName() != null ? documentMatrixRequestDto.getName() : documentMatrix.getName());
         documentMatrix.setRisk(documentMatrixRequestDto.getRisk() != null ? documentMatrixRequestDto.getRisk() : documentMatrix.getRisk());
         documentMatrix.setExpiration(documentMatrixRequestDto.getExpiration() != null ? documentMatrixRequestDto.getExpiration() : documentMatrix.getExpiration());
         documentMatrix.setType(documentMatrixRequestDto.getType() != null ? documentMatrixRequestDto.getType() : documentMatrix.getType());
@@ -103,6 +108,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
+                .name(documentMatrix.getName())
                 .risk(documentMatrix.getRisk())
                 .expiration(documentMatrix.getExpiration())
                 .type(documentMatrix.getType())

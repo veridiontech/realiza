@@ -17,6 +17,7 @@ public class DocumentMatrix {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocument;
+    private String name;
     private String risk;
     private String expiration;
     private String type;

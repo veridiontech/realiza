@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class DocumentMatrixRequestDto {
     private String idDocumentMatrix;
+    private String name;
     private String risk;
     private String expiration;
     private String type;

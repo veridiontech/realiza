@@ -9,6 +9,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DocumentMatrixResponseDto {
     private String idDocumentMatrix;
+    private String name;
     private String risk;
     private String expiration;
     private String type;
