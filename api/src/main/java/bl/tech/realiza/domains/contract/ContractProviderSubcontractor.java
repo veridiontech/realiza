@@ -17,7 +17,6 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorValue("SUBCONTRACTOR")
 public class ContractProviderSubcontractor extends Contract {
-    private String contractReference;
     @ManyToOne
     private ProviderSubcontractor providerSubcontractor;
 }

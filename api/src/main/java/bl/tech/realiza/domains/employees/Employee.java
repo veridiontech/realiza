@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @SuperBuilder
@@ -48,6 +49,7 @@ public abstract class Employee {
     private String levelOfEducation;
     private String cbo;
     private String situation;
+    private LocalDateTime creationDate;
     @Builder.Default
     private Boolean isActive = true;
 
@@ -57,4 +59,9 @@ public abstract class Employee {
     private ProviderSupplier supplier;
     @ManyToOne
     private ProviderSubcontractor subcontract;
+
+    @PrePersist
+    protected void onCreate() {
+        this.creationDate = LocalDateTime.now();
+    }
 }

@@ -1,9 +1,9 @@
 package bl.tech.realiza.gateways.controllers.impl.clients;
 
 import bl.tech.realiza.gateways.controllers.interfaces.clients.ClientControlller;
-import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
+import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
+import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;
@@ -82,8 +82,8 @@ public class ClientControllerImpl implements ClientControlller {
     @PostMapping("/user")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ClientAndUserClientResponseDto> createClientAndUser(@RequestBody @Valid ClientAndUserClientRequestDto clientAndUserClientRequestDto) {
-        ClientAndUserClientResponseDto clientAndUser = crudClient.saveBoth(clientAndUserClientRequestDto);
+    public ResponseEntity<EnterpriseAndUserResponseDto> createClientAndUser(@RequestBody @Valid EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
+        EnterpriseAndUserResponseDto clientAndUser = crudClient.saveBoth(enterpriseAndUserRequestDto);
 
         return ResponseEntity.of(Optional.of(clientAndUser));
     }
@@ -91,10 +91,10 @@ public class ClientControllerImpl implements ClientControlller {
     @PostMapping("/usertoken")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<?> createClientAndUserToken(@RequestBody @Valid ClientAndUserClientRequestDto clientAndUserClientRequestDto, @RequestParam String token) {
+    public ResponseEntity<?> createClientAndUserToken(@RequestBody @Valid EnterpriseAndUserRequestDto enterpriseAndUserRequestDto, @RequestParam String token) {
         boolean isValid = tokenManagerService.validateToken(token);
         if (isValid){
-            ClientAndUserClientResponseDto clientAndUser = crudClient.saveBoth(clientAndUserClientRequestDto);
+            EnterpriseAndUserResponseDto clientAndUser = crudClient.saveBoth(enterpriseAndUserRequestDto);
 
             return ResponseEntity.of(Optional.of(clientAndUser));
         } else {

@@ -19,10 +19,11 @@ public abstract class Provider {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idProvider;
     private String cnpj;
-    private String companyName;
     private String tradeName;
+    private String companyName;
     private String fantasyName;
     private String email;
+    private String telephone;
     private String cep;
     private String state;
     private String city;

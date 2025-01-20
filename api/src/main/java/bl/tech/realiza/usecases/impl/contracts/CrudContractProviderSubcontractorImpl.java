@@ -8,8 +8,8 @@ import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.requests.contracts.ContractProviderSubcontractorRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractProviderResponseDto;
+import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +29,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final RequirementRepository requirementRepository;
 
     @Override
-    public ContractProviderResponseDto save(ContractProviderSubcontractorRequestDto contractProviderSubcontractorRequestDto) {
+    public ContractResponseDto save(ContractRequestDto contractProviderSubcontractorRequestDto) {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getProviderSubcontractor());
 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
@@ -60,7 +60,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(newContractSubcontractor);
 
-        ContractProviderResponseDto contractSubcontractorResponse = ContractProviderResponseDto.builder()
+        ContractResponseDto contractSubcontractorResponse = ContractResponseDto.builder()
                 .idContract(savedContractSubcontractor.getIdContract())
                 .serviceType(savedContractSubcontractor.getServiceType())
                 .serviceDuration(savedContractSubcontractor.getServiceDuration())
@@ -80,12 +80,12 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     }
 
     @Override
-    public Optional<ContractProviderResponseDto> findOne(String id) {
+    public Optional<ContractResponseDto> findOne(String id) {
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(id);
 
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
 
-        ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
+        ContractResponseDto contractProviderResponseDto = ContractResponseDto.builder()
                 .idContract(contractProviderSubcontractor.getIdContract())
                 .serviceType(contractProviderSubcontractor.getServiceType())
                 .serviceDuration(contractProviderSubcontractor.getServiceDuration())
@@ -105,11 +105,11 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     }
 
     @Override
-    public Page<ContractProviderResponseDto> findAll(Pageable pageable) {
+    public Page<ContractResponseDto> findAll(Pageable pageable) {
         Page<ContractProviderSubcontractor> contractProviderSubcontractorPage = contractProviderSubcontractorRepository.findAll(pageable);
 
-        Page<ContractProviderResponseDto> contractProviderResponseDtoPage = contractProviderSubcontractorPage.map(
-                contractProviderSubcontractor -> ContractProviderResponseDto.builder()
+        Page<ContractResponseDto> contractProviderResponseDtoPage = contractProviderSubcontractorPage.map(
+                contractProviderSubcontractor -> ContractResponseDto.builder()
                         .idContract(contractProviderSubcontractor.getIdContract())
                         .serviceType(contractProviderSubcontractor.getServiceType())
                         .serviceDuration(contractProviderSubcontractor.getServiceDuration())
@@ -130,7 +130,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     }
 
     @Override
-    public Optional<ContractProviderResponseDto> update(ContractProviderSubcontractorRequestDto contractProviderSubcontractorRequestDto) {
+    public Optional<ContractResponseDto> update(ContractRequestDto contractProviderSubcontractorRequestDto) {
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getIdContract());
 
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
@@ -165,7 +165,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
 
-        ContractProviderResponseDto contractSubcontractorResponse = ContractProviderResponseDto.builder()
+        ContractResponseDto contractSubcontractorResponse = ContractResponseDto.builder()
                 .idContract(savedContractSubcontractor.getIdContract())
                 .serviceType(savedContractSubcontractor.getServiceType())
                 .serviceDuration(savedContractSubcontractor.getServiceDuration())

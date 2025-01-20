@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.responses.clients;
+package bl.tech.realiza.gateways.responses.enterprises;
 
 import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,7 +10,7 @@ import java.util.TimeZone;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ClientAndUserClientResponseDto {
+public class EnterpriseAndUserResponseDto {
     private String idClient;
     private String cnpj;
     private String tradeName;

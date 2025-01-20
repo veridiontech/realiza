@@ -4,12 +4,13 @@ import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
-import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
+import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
+import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,10 +31,14 @@ public class CrudClientImpl implements CrudClient {
                 .cnpj(clientRequestDto.getCnpj())
                 .tradeName(clientRequestDto.getTradeName())
                 .companyName(clientRequestDto.getCompanyName())
+                .fantasyName(clientRequestDto.getFantasyName())
                 .email(clientRequestDto.getEmail())
                 .telephone(clientRequestDto.getTelephone())
-                .staff(clientRequestDto.getStaff())
-                .customers(clientRequestDto.getCustomers())
+                .cep(clientRequestDto.getCep())
+                .state(clientRequestDto.getState())
+                .city(clientRequestDto.getCity())
+                .address(clientRequestDto.getAddress())
+                .number(clientRequestDto.getNumber())
                 .build();
 
         Client savedClient = clientRepository.save(newClient);
@@ -43,10 +48,14 @@ public class CrudClientImpl implements CrudClient {
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
                 .companyName(savedClient.getCompanyName())
+                .fantasyName(savedClient.getFantasyName())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
-                .staff(savedClient.getStaff())
-                .customers(savedClient.getCustomers())
+                .cep(savedClient.getCep())
+                .state(savedClient.getState())
+                .city(savedClient.getCity())
+                .address(savedClient.getAddress())
+                .number(savedClient.getNumber())
                 .build();
 
         return clientResponse;
@@ -63,10 +72,14 @@ public class CrudClientImpl implements CrudClient {
                 .cnpj(client.getCnpj())
                 .tradeName(client.getTradeName())
                 .companyName(client.getCompanyName())
+                .fantasyName(client.getFantasyName())
                 .email(client.getEmail())
                 .telephone(client.getTelephone())
-                .staff(client.getStaff())
-                .customers(client.getCustomers())
+                .cep(client.getCep())
+                .state(client.getState())
+                .city(client.getCity())
+                .address(client.getAddress())
+                .number(client.getNumber())
                 .build();
 
         return Optional.of(clientResponse);
@@ -82,10 +95,14 @@ public class CrudClientImpl implements CrudClient {
                         .cnpj(client.getCnpj())
                         .tradeName(client.getTradeName())
                         .companyName(client.getCompanyName())
+                        .fantasyName(client.getFantasyName())
                         .email(client.getEmail())
                         .telephone(client.getTelephone())
-                        .staff(client.getStaff())
-                        .customers(client.getCustomers())
+                        .cep(client.getCep())
+                        .state(client.getState())
+                        .city(client.getCity())
+                        .address(client.getAddress())
+                        .number(client.getNumber())
                         .build()
         );
 
@@ -96,15 +113,18 @@ public class CrudClientImpl implements CrudClient {
     public Optional<ClientResponseDto> update(ClientRequestDto clientRequestDto) {
         Optional<Client> clientOptional = clientRepository.findById(clientRequestDto.getIdClient());
 
-        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         client.setCnpj(clientRequestDto.getCnpj() != null ? clientRequestDto.getCnpj() : client.getCnpj());
         client.setTradeName(clientRequestDto.getTradeName() != null ? clientRequestDto.getTradeName() : client.getTradeName());
         client.setCompanyName(clientRequestDto.getCompanyName() != null ? clientRequestDto.getCompanyName() : client.getCompanyName());
         client.setEmail(clientRequestDto.getEmail() != null ? clientRequestDto.getEmail() : client.getEmail());
         client.setTelephone(clientRequestDto.getTelephone() != null ? clientRequestDto.getTelephone() : client.getTelephone());
-        client.setStaff(clientRequestDto.getStaff() != null ? clientRequestDto.getStaff() : client.getStaff());
-        client.setCustomers(clientRequestDto.getCustomers() != null ? clientRequestDto.getCustomers() : client.getCustomers());
+        client.setCep(clientRequestDto.getCep() != null ? clientRequestDto.getCep() : client.getCep());
+        client.setState(client.getState() != null ? clientRequestDto.getState() : client.getState());
+        client.setCity(client.getCity() != null ? clientRequestDto.getCity() : client.getCity());
+        client.setAddress(client.getAddress() != null ? clientRequestDto.getAddress() : client.getAddress());
+        client.setNumber(client.getNumber() != null ? clientRequestDto.getNumber() : client.getNumber());
         client.setIsActive(clientRequestDto.getIsActive() != null ? clientRequestDto.getIsActive() : client.getIsActive());
 
         Client savedClient = clientRepository.save(client);
@@ -114,10 +134,14 @@ public class CrudClientImpl implements CrudClient {
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
                 .companyName(savedClient.getCompanyName())
+                .fantasyName(savedClient.getFantasyName())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
-                .staff(savedClient.getStaff())
-                .customers(savedClient.getCustomers())
+                .cep(savedClient.getCep())
+                .state(savedClient.getState())
+                .city(savedClient.getCity())
+                .address(savedClient.getAddress())
+                .number(savedClient.getNumber())
                 .build();
 
         return Optional.of(clientResponse);
@@ -129,34 +153,34 @@ public class CrudClientImpl implements CrudClient {
     }
 
     @Override
-    public ClientAndUserClientResponseDto saveBoth(ClientAndUserClientRequestDto clientAndUserClientRequestDto) {
+    public EnterpriseAndUserResponseDto saveBoth(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
         Client newClient = Client.builder()
-                .cnpj(clientAndUserClientRequestDto.getCnpj())
-                .tradeName(clientAndUserClientRequestDto.getNameEnterprise())
-                .companyName(clientAndUserClientRequestDto.getSocialReason())
-                .email(clientAndUserClientRequestDto.getEmail())
-                .telephone(clientAndUserClientRequestDto.getPhone())
+                .cnpj(enterpriseAndUserRequestDto.getCnpj())
+                .tradeName(enterpriseAndUserRequestDto.getNameEnterprise())
+                .companyName(enterpriseAndUserRequestDto.getSocialReason())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .telephone(enterpriseAndUserRequestDto.getPhone())
                 .build();
 
         Client savedClient = clientRepository.save(newClient);
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(clientAndUserClientRequestDto.getPassword());
+        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
         UserClient newUserClient = UserClient.builder()
-                .cpf(clientAndUserClientRequestDto.getCpf())
+                .cpf(enterpriseAndUserRequestDto.getCpf())
                 .password(encryptedPassword)
-                .position(clientAndUserClientRequestDto.getPosition())
-                .role(clientAndUserClientRequestDto.getRole())
-                .firstName(clientAndUserClientRequestDto.getName())
-                .surname(clientAndUserClientRequestDto.getSurname())
-                .email(clientAndUserClientRequestDto.getEmail())
-                .telephone(clientAndUserClientRequestDto.getPhone())
+                .position(enterpriseAndUserRequestDto.getPosition())
+                .role(enterpriseAndUserRequestDto.getRole())
+                .firstName(enterpriseAndUserRequestDto.getName())
+                .surname(enterpriseAndUserRequestDto.getSurname())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .telephone(enterpriseAndUserRequestDto.getPhone())
                 .client(savedClient)
                 .build();
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
-        ClientAndUserClientResponseDto clientAndUserClientResponseDto = ClientAndUserClientResponseDto.builder()
+        EnterpriseAndUserResponseDto enterpriseAndUserResponseDto = EnterpriseAndUserResponseDto.builder()
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
@@ -171,6 +195,6 @@ public class CrudClientImpl implements CrudClient {
                 .surname(savedUserClient.getSurname())
                 .build();
 
-        return clientAndUserClientResponseDto;
+        return enterpriseAndUserResponseDto;
     }
 }

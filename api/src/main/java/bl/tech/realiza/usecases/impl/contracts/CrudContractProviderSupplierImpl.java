@@ -8,8 +8,8 @@ import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
-import bl.tech.realiza.gateways.requests.contracts.ContractProviderSupplierRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractProviderResponseDto;
+import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSupplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +29,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final RequirementRepository requirementRepository;
 
     @Override
-    public ContractProviderResponseDto save(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto) {
+    public ContractResponseDto save(ContractRequestDto contractProviderSupplierRequestDto) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(contractProviderSupplierRequestDto.getProviderSupplier());
 
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
@@ -59,7 +59,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(newContractSupplier);
 
-        ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
+        ContractResponseDto contractResponseDto = ContractResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())
                 .serviceType(savedContractProviderSupplier.getServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
@@ -74,16 +74,16 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getFantasyName())
                 .build();
 
-        return contractProviderResponseDto;
+        return contractResponseDto;
     }
 
     @Override
-    public Optional<ContractProviderResponseDto> findOne(String id) {
+    public Optional<ContractResponseDto> findOne(String id) {
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(id);
 
         ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
 
-        ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
+        ContractResponseDto contractResponseDto = ContractResponseDto.builder()
                 .idContract(contractProviderSupplier.getIdContract())
                 .serviceType(contractProviderSupplier.getServiceType())
                 .serviceDuration(contractProviderSupplier.getServiceDuration())
@@ -98,15 +98,15 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .providerSupplier(contractProviderSupplier.getProviderSupplier().getFantasyName())
                 .build();
 
-        return Optional.of(contractProviderResponseDto);
+        return Optional.of(contractResponseDto);
     }
 
     @Override
-    public Page<ContractProviderResponseDto> findAll(Pageable pageable) {
+    public Page<ContractResponseDto> findAll(Pageable pageable) {
         Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAll(pageable);
 
-        Page<ContractProviderResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
-                contractProviderSupplier -> ContractProviderResponseDto.builder()
+        Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
+                contractProviderSupplier -> ContractResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
                         .serviceType(contractProviderSupplier.getServiceType())
                         .serviceDuration(contractProviderSupplier.getServiceDuration())
@@ -126,7 +126,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     }
 
     @Override
-    public Optional<ContractProviderResponseDto> update(ContractProviderSupplierRequestDto contractProviderSupplierRequestDto) {
+    public Optional<ContractResponseDto> update(ContractRequestDto contractProviderSupplierRequestDto) {
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getIdContract());
 
         ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
@@ -161,7 +161,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(contractProviderSupplier);
 
-        ContractProviderResponseDto contractProviderResponseDto = ContractProviderResponseDto.builder()
+        ContractResponseDto contractResponseDto = ContractResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())
                 .serviceType(savedContractProviderSupplier.getServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
@@ -176,7 +176,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getFantasyName())
                 .build();
 
-        return Optional.of(contractProviderResponseDto);
+        return Optional.of(contractResponseDto);
     }
 
     @Override

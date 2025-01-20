@@ -1,9 +1,8 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts;
 
-import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProviderSupplierControlller;
-import bl.tech.realiza.gateways.requests.contracts.ContractProviderSupplierRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractProviderResponseDto;
+import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudContractProviderSupplierImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,8 +28,8 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ContractProviderResponseDto> createContractProviderSupplier(@RequestBody @Valid ContractProviderSupplierRequestDto contractSupplierRequestDto) {
-        ContractProviderResponseDto supplier = crudSupplier.save(contractSupplierRequestDto);
+    public ResponseEntity<ContractResponseDto> createContractProviderSupplier(@RequestBody @Valid ContractRequestDto contractSupplierRequestDto) {
+        ContractResponseDto supplier = crudSupplier.save(contractSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }
@@ -38,8 +37,8 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ContractProviderResponseDto>> getOneContractProviderSupplier(@PathVariable String id) {
-        Optional<ContractProviderResponseDto> contractSupplier = crudSupplier.findOne(id);
+    public ResponseEntity<Optional<ContractResponseDto>> getOneContractProviderSupplier(@PathVariable String id) {
+        Optional<ContractResponseDto> contractSupplier = crudSupplier.findOne(id);
 
         return ResponseEntity.of(Optional.of(contractSupplier));
     }
@@ -47,13 +46,13 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<ContractProviderResponseDto>> getAllContractsProviderSupplier(@RequestParam(defaultValue = "0") int page,
-                                                                                             @RequestParam(defaultValue = "5") int size,
-                                                                                             @RequestParam(defaultValue = "idContract") String sort,
-                                                                                             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+    public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplier(@RequestParam(defaultValue = "0") int page,
+                                                                                     @RequestParam(defaultValue = "5") int size,
+                                                                                     @RequestParam(defaultValue = "idContract") String sort,
+                                                                                     @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractProviderResponseDto> pageContractSupplier = crudSupplier.findAll(pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAll(pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }
@@ -61,8 +60,8 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ContractProviderResponseDto>> updateContractProviderSupplier(@RequestBody @Valid ContractProviderSupplierRequestDto contractSupplierRequestDto) {
-        Optional<ContractProviderResponseDto> supplier = crudSupplier.update(contractSupplierRequestDto);
+    public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSupplier(@RequestBody @Valid ContractRequestDto contractSupplierRequestDto) {
+        Optional<ContractResponseDto> supplier = crudSupplier.update(contractSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }

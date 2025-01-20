@@ -1,14 +1,12 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Date;
 import java.util.List;
 
 @Data
-public class ContractProviderSubcontractorRequestDto {
+public class ContractRequestDto {
     private String idContract;
     private String serviceType;
     private String serviceDuration;
@@ -18,8 +16,13 @@ public class ContractProviderSubcontractorRequestDto {
     private Date startDate;
     private Date endDate;
     private String contractReference;
-    private String providerSubcontractor;
     private List<String> activities;
     private List<String> requirements;
     private Boolean isActive;
+
+    // supplier
+    private String providerSupplier;
+
+    // subcontractor
+    private String providerSubcontractor;
 }

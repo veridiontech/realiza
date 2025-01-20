@@ -10,10 +10,14 @@ import lombok.Data;
 public class ClientResponseDto {
     private String idClient;
     private String cnpj;
-    private String tradeName;
     private String companyName;
-    private String email;
+    private String tradeName;
+    private String fantasyName;
     private String telephone;
-    private String staff;
-    private String customers;
+    private String email;
+    private String cep;
+    private String state;
+    private String city;
+    private String address;
+    private String number;
 }

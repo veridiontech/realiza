@@ -12,12 +12,11 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
-import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
-import bl.tech.realiza.gateways.requests.services.EnterpriseAndUserRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
+import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,29 +34,29 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     private final PasswordEncryptionService passwordEncryptionService;
 
     @Override
-    public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequest) {
+    public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
         Client newClient = Client.builder()
-                .cnpj(enterpriseAndUserRequest.getCnpj())
-                .tradeName(enterpriseAndUserRequest.getNameEnterprise())
-                .companyName(enterpriseAndUserRequest.getSocialReason())
-                .fantasyName(enterpriseAndUserRequest.getFantasyName())
-                .email(enterpriseAndUserRequest.getEmail())
-                .telephone(enterpriseAndUserRequest.getPhone())
+                .cnpj(enterpriseAndUserRequestDto.getCnpj())
+                .tradeName(enterpriseAndUserRequestDto.getNameEnterprise())
+                .companyName(enterpriseAndUserRequestDto.getSocialReason())
+                .fantasyName(enterpriseAndUserRequestDto.getFantasyName())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .telephone(enterpriseAndUserRequestDto.getPhone())
                 .build();
 
         Client savedClient = clientRepository.save(newClient);
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequest.getPassword());
+        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
         UserClient newUserClient = UserClient.builder()
-                .cpf(enterpriseAndUserRequest.getCpf())
+                .cpf(enterpriseAndUserRequestDto.getCpf())
                 .password(encryptedPassword)
-                .position(enterpriseAndUserRequest.getPosition())
-                .role(enterpriseAndUserRequest.getRole())
-                .firstName(enterpriseAndUserRequest.getName())
-                .surname(enterpriseAndUserRequest.getSurname())
-                .email(enterpriseAndUserRequest.getEmail())
-                .telephone(enterpriseAndUserRequest.getPhone())
+                .position(enterpriseAndUserRequestDto.getPosition())
+                .role(enterpriseAndUserRequestDto.getRole())
+                .firstName(enterpriseAndUserRequestDto.getName())
+                .surname(enterpriseAndUserRequestDto.getSurname())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .telephone(enterpriseAndUserRequestDto.getPhone())
                 .client(savedClient)
                 .build();
 
@@ -83,33 +82,33 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     }
 
     @Override
-    public EnterpriseAndUserResponseDto saveBothSupplier(EnterpriseAndUserRequestDto enterpriseAndUserRequest) {
-        Optional<Client> clientOptional = clientRepository.findById(enterpriseAndUserRequest.getIdCompany());
+    public EnterpriseAndUserResponseDto saveBothSupplier(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
+        Optional<Client> clientOptional = clientRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
 
-        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         ProviderSupplier newProviderSupplier = ProviderSupplier.builder()
-                .cnpj(enterpriseAndUserRequest.getCnpj())
-                .companyName(enterpriseAndUserRequest.getNameEnterprise())
-                .tradeName(enterpriseAndUserRequest.getSocialReason())
-                .fantasyName(enterpriseAndUserRequest.getFantasyName())
-                .email(enterpriseAndUserRequest.getEmail())
+                .cnpj(enterpriseAndUserRequestDto.getCnpj())
+                .companyName(enterpriseAndUserRequestDto.getNameEnterprise())
+                .tradeName(enterpriseAndUserRequestDto.getSocialReason())
+                .fantasyName(enterpriseAndUserRequestDto.getFantasyName())
+                .email(enterpriseAndUserRequestDto.getEmail())
                 .client(client)
                 .build();
 
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(newProviderSupplier);
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequest.getPassword());
+        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
         UserProviderSupplier newUserProviderSupplier = UserProviderSupplier.builder()
-                .cpf(enterpriseAndUserRequest.getCpf())
+                .cpf(enterpriseAndUserRequestDto.getCpf())
                 .password(encryptedPassword)
-                .position(enterpriseAndUserRequest.getPosition())
-                .role(enterpriseAndUserRequest.getRole())
-                .firstName(enterpriseAndUserRequest.getName())
-                .surname(enterpriseAndUserRequest.getSurname())
-                .email(enterpriseAndUserRequest.getEmail())
-                .telephone(enterpriseAndUserRequest.getPhone())
+                .position(enterpriseAndUserRequestDto.getPosition())
+                .role(enterpriseAndUserRequestDto.getRole())
+                .firstName(enterpriseAndUserRequestDto.getName())
+                .surname(enterpriseAndUserRequestDto.getSurname())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .telephone(enterpriseAndUserRequestDto.getPhone())
                 .providerSupplier(savedProviderSupplier)
                 .build();
 
@@ -135,33 +134,33 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     }
 
     @Override
-    public EnterpriseAndUserResponseDto saveBothSubcontractor(EnterpriseAndUserRequestDto enterpriseAndUserRequest) {
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(enterpriseAndUserRequest.getIdCompany());
+    public EnterpriseAndUserResponseDto saveBothSubcontractor(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
-                .cnpj(enterpriseAndUserRequest.getCnpj())
-                .companyName(enterpriseAndUserRequest.getNameEnterprise())
-                .tradeName(enterpriseAndUserRequest.getSocialReason())
-                .fantasyName(enterpriseAndUserRequest.getFantasyName())
-                .email(enterpriseAndUserRequest.getEmail())
+                .cnpj(enterpriseAndUserRequestDto.getCnpj())
+                .companyName(enterpriseAndUserRequestDto.getNameEnterprise())
+                .tradeName(enterpriseAndUserRequestDto.getSocialReason())
+                .fantasyName(enterpriseAndUserRequestDto.getFantasyName())
+                .email(enterpriseAndUserRequestDto.getEmail())
                 .providerSupplier(providerSupplier)
                 .build();
 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(newProviderSubcontractor);
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequest.getPassword());
+        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
         UserProviderSubcontractor newUserProviderSubcontractor = UserProviderSubcontractor.builder()
-                .cpf(enterpriseAndUserRequest.getCpf())
+                .cpf(enterpriseAndUserRequestDto.getCpf())
                 .password(encryptedPassword)
-                .position(enterpriseAndUserRequest.getPosition())
-                .role(enterpriseAndUserRequest.getRole())
-                .firstName(enterpriseAndUserRequest.getName())
-                .surname(enterpriseAndUserRequest.getSurname())
-                .email(enterpriseAndUserRequest.getEmail())
-                .telephone(enterpriseAndUserRequest.getPhone())
+                .position(enterpriseAndUserRequestDto.getPosition())
+                .role(enterpriseAndUserRequestDto.getRole())
+                .firstName(enterpriseAndUserRequestDto.getName())
+                .surname(enterpriseAndUserRequestDto.getSurname())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .telephone(enterpriseAndUserRequestDto.getPhone())
                 .providerSubcontractor(savedProviderSubcontractor)
                 .build();
 

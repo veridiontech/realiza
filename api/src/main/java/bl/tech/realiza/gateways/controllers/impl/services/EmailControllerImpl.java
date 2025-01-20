@@ -1,15 +1,12 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
 import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor

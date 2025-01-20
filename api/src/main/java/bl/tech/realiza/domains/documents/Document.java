@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @SuperBuilder
@@ -24,12 +25,17 @@ public abstract class Document {
     private String title;
     private String status;
     private String documentation;
-    private Date creationDate;
-    private Date versionDate;
-    private Date expirationDate;
+    private LocalDateTime creationDate;
+    private LocalDateTime versionDate;
+    private LocalDateTime expirationDate;
     @Builder.Default
     private Boolean isActive = true;
 
     @ManyToOne
     private Client documentInMatrix;
+
+    @PrePersist
+    protected void onCreate() {
+        this.creationDate = LocalDateTime.now();
+    }
 }

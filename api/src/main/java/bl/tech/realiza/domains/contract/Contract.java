@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -25,12 +26,14 @@ public abstract class Contract {
     private String serviceType;
     private String serviceDuration;
     private String serviceName;
+    private String contractReference;
     private String description;
     private String allocatedLimit;
     @OneToOne(cascade = CascadeType.ALL)
     private User responsible;
     private Date startDate;
     private Date endDate;
+    private LocalDateTime creationDate;
     @Builder.Default
     private Boolean isActive = true;
 
@@ -49,4 +52,9 @@ public abstract class Contract {
             inverseJoinColumns = @JoinColumn(name = "idRequirement")
     )
     private List<Requirement> requirements;
+
+    @PrePersist
+    protected void onCreate() {
+        this.creationDate = LocalDateTime.now();
+    }
 }

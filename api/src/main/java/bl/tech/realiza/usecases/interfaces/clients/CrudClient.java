@@ -1,8 +1,8 @@
 package bl.tech.realiza.usecases.interfaces.clients;
 
-import bl.tech.realiza.gateways.requests.clients.ClientAndUserClientRequestDto;
+import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ClientAndUserClientResponseDto;
+import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,5 +15,5 @@ public interface CrudClient {
     Page<ClientResponseDto> findAll(Pageable pageable);
     Optional<ClientResponseDto> update(ClientRequestDto clientRequestDto);
     void delete(String id);
-    ClientAndUserClientResponseDto saveBoth(ClientAndUserClientRequestDto clientAndUserClientRequestDto);
+    EnterpriseAndUserResponseDto saveBoth(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto);
 }

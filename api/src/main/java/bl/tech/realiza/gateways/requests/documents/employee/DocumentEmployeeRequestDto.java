@@ -14,7 +14,6 @@ public class DocumentEmployeeRequestDto {
     private String status;
     private String documentation;
     private String type;
-    private Date creationDate;
     private Date versionDate;
     private Date expirationDate;
     private String employee;

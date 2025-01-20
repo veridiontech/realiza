@@ -12,12 +12,13 @@ import java.util.List;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ContractProviderResponseDto {
+public class ContractResponseDto {
     // provider
     private String idContract;
     private String serviceType;
     private String serviceDuration;
     private String serviceName;
+    private String contractReference;
     private String description;
     private String allocatedLimit;
     private Date startDate;
@@ -30,7 +31,6 @@ public class ContractProviderResponseDto {
     private String providerSupplier;
 
     // subcontractor
-    private String contractReference;
     private String providerSubcontractorName;
     private String providerSubcontractor;
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -24,7 +25,12 @@ public class DocumentMatrix {
     private String doesBlock;
     @Builder.Default
     private Boolean isActive = true;
-    private Date creationDate;
+    private LocalDateTime creationDate;
     @ManyToOne
     private DocumentMatrixSubgroup subGroup;
+
+    @PrePersist
+    protected void onCreate() {
+        this.creationDate = LocalDateTime.now();
+    }
 }

@@ -24,9 +24,11 @@ public class Client {
     private String fantasyName;
     private String email;
     private String telephone;
-    private String staff;
-    private String customers;
-    private String objective;
+    private String cep;
+    private String state;
+    private String city;
+    private String address;
+    private String number;
     @Builder.Default
     private Boolean isActive = true;
 }
