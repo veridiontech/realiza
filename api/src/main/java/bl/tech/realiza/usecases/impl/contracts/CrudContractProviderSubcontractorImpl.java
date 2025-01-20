@@ -48,13 +48,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .serviceType(contractProviderSubcontractorRequestDto.getServiceType())
                 .serviceDuration(contractProviderSubcontractorRequestDto.getServiceDuration())
                 .serviceName(contractProviderSubcontractorRequestDto.getServiceName())
+                .contractReference(contractProviderSubcontractorRequestDto.getContractReference())
                 .description(contractProviderSubcontractorRequestDto.getDescription())
                 .allocatedLimit(contractProviderSubcontractorRequestDto.getAllocatedLimit())
                 .startDate(contractProviderSubcontractorRequestDto.getStartDate())
                 .endDate(contractProviderSubcontractorRequestDto.getEndDate())
                 .activities(activities)
                 .requirements(requirements)
-                .contractReference(contractProviderSubcontractorRequestDto.getContractReference())
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
@@ -65,13 +65,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .serviceType(savedContractSubcontractor.getServiceType())
                 .serviceDuration(savedContractSubcontractor.getServiceDuration())
                 .serviceName(savedContractSubcontractor.getServiceName())
+                .contractReference(savedContractSubcontractor.getContractReference())
                 .description(savedContractSubcontractor.getDescription())
                 .allocatedLimit(savedContractSubcontractor.getAllocatedLimit())
                 .startDate(savedContractSubcontractor.getStartDate())
                 .endDate(savedContractSubcontractor.getEndDate())
                 .activities(savedContractSubcontractor.getActivities())
                 .requirements(savedContractSubcontractor.getRequirements())
-                .contractReference(savedContractSubcontractor.getContractReference())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
@@ -90,13 +90,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .serviceType(contractProviderSubcontractor.getServiceType())
                 .serviceDuration(contractProviderSubcontractor.getServiceDuration())
                 .serviceName(contractProviderSubcontractor.getServiceName())
+                .contractReference(contractProviderSubcontractor.getContractReference())
                 .description(contractProviderSubcontractor.getDescription())
                 .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
                 .startDate(contractProviderSubcontractor.getStartDate())
                 .endDate(contractProviderSubcontractor.getEndDate())
                 .activities(contractProviderSubcontractor.getActivities())
                 .requirements(contractProviderSubcontractor.getRequirements())
-                .contractReference(contractProviderSubcontractor.getContractReference())
                 .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                 .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
@@ -114,13 +114,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                         .serviceType(contractProviderSubcontractor.getServiceType())
                         .serviceDuration(contractProviderSubcontractor.getServiceDuration())
                         .serviceName(contractProviderSubcontractor.getServiceName())
+                        .contractReference(contractProviderSubcontractor.getContractReference())
                         .description(contractProviderSubcontractor.getDescription())
                         .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
                         .startDate(contractProviderSubcontractor.getStartDate())
                         .endDate(contractProviderSubcontractor.getEndDate())
                         .activities(contractProviderSubcontractor.getActivities())
                         .requirements(contractProviderSubcontractor.getRequirements())
-                        .contractReference(contractProviderSubcontractor.getContractReference())
                         .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                         .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
                         .build()
@@ -155,6 +155,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         contractProviderSubcontractor.setServiceType(contractProviderSubcontractorRequestDto.getServiceType() != null ? contractProviderSubcontractorRequestDto.getServiceType() : contractProviderSubcontractor.getServiceType());
         contractProviderSubcontractor.setServiceDuration(contractProviderSubcontractorRequestDto.getServiceDuration() != null ? contractProviderSubcontractorRequestDto.getServiceDuration() : contractProviderSubcontractor.getServiceDuration());
         contractProviderSubcontractor.setServiceName(contractProviderSubcontractorRequestDto.getServiceName() != null ? contractProviderSubcontractorRequestDto.getServiceName() : contractProviderSubcontractor.getServiceName());
+        contractProviderSubcontractor.setContractReference(contractProviderSubcontractorRequestDto.getContractReference() != null ? contractProviderSubcontractorRequestDto.getContractReference() : contractProviderSubcontractor.getContractReference());
         contractProviderSubcontractor.setDescription(contractProviderSubcontractorRequestDto.getDescription() != null ? contractProviderSubcontractorRequestDto.getDescription() : contractProviderSubcontractor.getDescription());
         contractProviderSubcontractor.setAllocatedLimit(contractProviderSubcontractorRequestDto.getAllocatedLimit() != null ? contractProviderSubcontractorRequestDto.getAllocatedLimit() : contractProviderSubcontractor.getAllocatedLimit());
         contractProviderSubcontractor.setStartDate(contractProviderSubcontractorRequestDto.getStartDate() != null ? contractProviderSubcontractorRequestDto.getStartDate() : contractProviderSubcontractor.getStartDate());
@@ -170,13 +171,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .serviceType(savedContractSubcontractor.getServiceType())
                 .serviceDuration(savedContractSubcontractor.getServiceDuration())
                 .serviceName(savedContractSubcontractor.getServiceName())
+                .contractReference(savedContractSubcontractor.getContractReference())
                 .description(savedContractSubcontractor.getDescription())
                 .allocatedLimit(savedContractSubcontractor.getAllocatedLimit())
                 .startDate(savedContractSubcontractor.getStartDate())
                 .endDate(savedContractSubcontractor.getEndDate())
                 .activities(savedContractSubcontractor.getActivities())
                 .requirements(savedContractSubcontractor.getRequirements())
-                .contractReference(savedContractSubcontractor.getContractReference())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
