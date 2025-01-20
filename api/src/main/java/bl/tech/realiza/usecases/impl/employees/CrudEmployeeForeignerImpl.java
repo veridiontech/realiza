@@ -90,6 +90,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(newEmployeeForeigner);
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
+                .idEmployee(savedEmployeeForeigner.getIdEmployee())
                 .pis(savedEmployeeForeigner.getPis())
                 .maritalStatus(savedEmployeeForeigner.getMaritalStatus())
                 .contract(savedEmployeeForeigner.getContract())
@@ -132,6 +133,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new RuntimeException("Employee Foreigner not found"));
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
+                .idEmployee(employeeForeigner.getIdEmployee())
                 .pis(employeeForeigner.getPis())
                 .maritalStatus(employeeForeigner.getMaritalStatus())
                 .contract(employeeForeigner.getContract())
@@ -173,6 +175,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
         Page<EmployeeResponseDto> employeeForeignerResponseDtoPage = employeeForeignerPage.map(
                 employeeForeigner -> EmployeeResponseDto.builder()
+                        .idEmployee(employeeForeigner.getIdEmployee())
                         .pis(employeeForeigner.getPis())
                         .maritalStatus(employeeForeigner.getMaritalStatus())
                         .contract(employeeForeigner.getContract())
@@ -247,6 +250,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(employeeForeigner);
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
+                .idEmployee(employeeForeigner.getIdEmployee())
                 .pis(savedEmployeeForeigner.getPis())
                 .maritalStatus(savedEmployeeForeigner.getMaritalStatus())
                 .contract(savedEmployeeForeigner.getContract())

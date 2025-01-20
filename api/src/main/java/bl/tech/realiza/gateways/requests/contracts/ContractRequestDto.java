@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
+import bl.tech.realiza.domains.contract.Contract;
 import lombok.Data;
 
 import java.sql.Date;
@@ -13,6 +14,7 @@ public class ContractRequestDto {
     private String serviceName;
     private String description;
     private String allocatedLimit;
+    private Contract.ExpenseType expenseType;
     private Date startDate;
     private Date endDate;
     private String contractReference;

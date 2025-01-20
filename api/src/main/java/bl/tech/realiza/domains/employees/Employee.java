@@ -54,6 +54,7 @@ public abstract class Employee {
     private Boolean isActive = true;
 
     @ManyToOne
+    @JoinColumn(name = "client_id_client", referencedColumnName = "idClient")
     private Client client;
     @ManyToOne
     private ProviderSupplier supplier;
