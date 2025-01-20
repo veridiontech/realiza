@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ public class DocumentResponseDto {
     private String fileName;
     private String fileContentType;
     private byte[] fileData;
-    private Date creationDate;
+    private LocalDateTime creationDate;
     private Date versionDate;
     private Date expirationDate;
 

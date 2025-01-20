@@ -2,7 +2,6 @@ package bl.tech.realiza.gateways.controllers.impl.services;
 
 import bl.tech.realiza.gateways.controllers.interfaces.services.EnterpriseController;
 import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
-import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
 import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.usecases.impl.CrudEnterpriseAndUserImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;

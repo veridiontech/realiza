@@ -44,7 +44,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .title(documentProviderSubcontractorRequestDto.getTitle())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
-                .creationDate(documentProviderSubcontractorRequestDto.getCreationDate())
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
@@ -134,7 +133,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         documentSubcontractor.setTitle(documentProviderSubcontractorRequestDto.getTitle() != null ? documentProviderSubcontractorRequestDto.getTitle() : documentSubcontractor.getTitle());
         documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
-        documentSubcontractor.setCreationDate(documentProviderSubcontractorRequestDto.getCreationDate() != null ? documentProviderSubcontractorRequestDto.getCreationDate() : documentSubcontractor.getCreationDate());
         documentSubcontractor.setIsActive(documentProviderSubcontractorRequestDto.getIsActive() != null ? documentProviderSubcontractorRequestDto.getIsActive() : documentSubcontractor.getIsActive());
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
