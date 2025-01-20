@@ -13,7 +13,11 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Libera CORS para todos os endpoints
-                        .allowedOrigins("http://localhost:3000", "https://realiza-1.onrender.com", "http://localhost:5173") // URLs permitidas
+                        .allowedOrigins(
+                                "http://localhost:3000",
+                                "https://realiza-1.onrender.com",
+                                "http://localhost:5173"
+                        ) // URLs permitidas
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
                         .allowedHeaders("*") // Headers permitidos
                         .exposedHeaders("Authorization", "Content-Type") // Headers expostos na resposta

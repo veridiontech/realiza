@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,7 +25,6 @@ public class EmailSender {
     private final Dotenv dotenv;
     private final JavaMailSender mailSender;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
-    private final ClientRepository clientRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final TokenManagerService tokenManagerService;
 
@@ -34,19 +34,17 @@ public class EmailSender {
         Provider.Company company = emailRequestDto.getCompany();
         switch (emailRequestDto.getCompany()) {
             case CLIENT -> {
-                /*var client = clientRepository.findById(emailRequestDto.getIdCompany())
-                        .orElseThrow(() -> new RuntimeException("Client not found"));*/
                 companyName = "Realiza Assessoria Empresarial Ltda";
             }
             case SUPPLIER -> {
                 var supplier = providerSupplierRepository.findById(emailRequestDto.getIdCompany())
-                        .orElseThrow(() -> new RuntimeException("Supplier not found"));
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = supplier.getCompanyName();
                 idCompany = supplier.getClient().getIdClient();
             }
             case SUBCONTRACTOR -> {
                 var subcontractor = providerSubcontractorRepository.findById(emailRequestDto.getIdCompany())
-                        .orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+                        .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
                 companyName = subcontractor.getCompanyName();
                 idCompany = subcontractor.getProviderSupplier().getIdProvider();
             }

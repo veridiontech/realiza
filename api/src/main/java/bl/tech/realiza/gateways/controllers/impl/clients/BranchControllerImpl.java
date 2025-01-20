@@ -19,9 +19,8 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("client/branch")
+@RequestMapping("/branch")
 @Tag(name = "Branch")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class BranchControllerImpl implements BranchControlller {
 
     private final CrudBranchImpl crudBranch;
