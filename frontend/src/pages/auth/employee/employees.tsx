@@ -8,35 +8,6 @@ import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Employee } from "@/types/employee";
 
-const columns: {
-  key: keyof Employee;
-  label: string;
-  render?: (value: any, row: Employee) => JSX.Element;
-  className?: string;
-}[] = [
-  { key: "name", label: "Nome" },
-  {
-    key: "status",
-    label: "Status",
-    render: (status) => (
-      <span className={status === "Ativo" ? "text-green-500" : "text-red-500"}>
-        {status}
-      </span>
-    ),
-  },
-  {
-    key: "id",
-    label: "Ações",
-    render: (value, row) => (
-      <Link to={`/detailsEmployees/${row.id}`}>
-        <button className="ml-4 text-blue-500 hover:underline">
-          <Settings2 />
-        </button>
-      </Link>
-    ),
-  },
-];
-
 export const EmployeesTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +20,37 @@ export const EmployeesTable = () => {
     fetchEmployees(itemsPerPage, currentPage - 1);
   }, [currentPage]);
 
+  const columns: {
+    key: keyof Employee;
+    label: string;
+    render?: (value: any, row: Employee) => JSX.Element;
+    className?: string;
+  }[] = [
+    { key: "name", label: "Nome" },
+    {
+      key: "status",
+      label: "Status",
+      render: (status) => (
+        <span
+          className={status === "Ativo" ? "text-green-500" : "text-red-500"}
+        >
+          {status}
+        </span>
+      ),
+    },
+    {
+      key: "id",
+      label: "Ações",
+      render: (_, row) => (
+        <Link to={`/detailsEmployees/${row.id}`}>
+          <button className="ml-4 text-blue-500 hover:underline">
+            <Settings2 />
+          </button>
+        </Link>
+      ),
+    },
+  ];
+
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -60,10 +62,6 @@ export const EmployeesTable = () => {
     setIsModalOpen(false);
   };
 
-  if (loading) {
-    return <p className="text-center">Carregando...</p>;
-  }
-
   if (error) {
     return (
       <p className="text-center text-red-500">
@@ -74,20 +72,27 @@ export const EmployeesTable = () => {
 
   return (
     <div className="m-4 flex justify-center">
-      <div className="flex w-[90rem] flex-col rounded-lg bg-white p-4 shadow-md">
+      <div className="flex w-[90rem] flex-col rounded-lg bg-white dark:bg-primary shadow-md p-10">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="mb-6 text-xl font-semibold">Funcionários</h1>
-          {/* Aqui corrigimos para abrir o modal */}
+          <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
           <ButtonBlue onClick={() => setIsModalOpen(true)}>
             Adicionar Funcionário
           </ButtonBlue>
         </div>
-        <Table<Employee> data={employees} columns={columns} />
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <span>Carregando...</span>
+          </div>
+        ) : (
+          <div>
+            <Table<Employee> data={employees} columns={columns} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </div>
 
       {isModalOpen && (

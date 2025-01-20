@@ -1,7 +1,5 @@
 package bl.tech.realiza.gateways.requests.documents.client;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Date;

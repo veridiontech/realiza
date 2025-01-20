@@ -44,7 +44,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .title(documentProviderSupplierRequestDto.getTitle())
                 .status(documentProviderSupplierRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
-                .creationDate(documentProviderSupplierRequestDto.getCreationDate())
                 .providerSupplier(providerSupplier)
                 .build();
 
@@ -134,7 +133,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         documentSupplier.setTitle(documentProviderSupplierRequestDto.getTitle() != null ? documentProviderSupplierRequestDto.getTitle() : documentSupplier.getTitle());
         documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
-        documentSupplier.setCreationDate(documentProviderSupplierRequestDto.getCreationDate() != null ? documentProviderSupplierRequestDto.getCreationDate() : documentSupplier.getCreationDate());
         documentSupplier.setIsActive(documentProviderSupplierRequestDto.getIsActive() != null ? documentProviderSupplierRequestDto.getIsActive() : documentSupplier.getIsActive());
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);

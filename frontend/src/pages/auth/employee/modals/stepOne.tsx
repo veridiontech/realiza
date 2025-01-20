@@ -47,22 +47,14 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
             "Jovem Aprendiz",
             "Sócio",
             "Temporário",
-            "PJ",
           ],
           required: true,
         },
         {
           name: "name",
-          label: "Nome",
+          label: "Nome completo",
           type: "text",
-          placeholder: "Nome",
-          required: true,
-        },
-        {
-          name: "surname",
-          label: "Sobrenome",
-          type: "text",
-          placeholder: "Sobrenome",
+          placeholder: "Digite seu nome completo...",
           required: true,
         },
         {
@@ -84,13 +76,6 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
           label: "PIS",
           type: "text",
           placeholder: "PIS",
-        },
-        {
-          name: "email",
-          label: "E-mail",
-          type: "email",
-          placeholder: "exemplo@email.com",
-          required: true,
         },
         {
           name: "salary",

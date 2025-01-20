@@ -56,7 +56,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 .title(documentClientRequestDto.getTitle())
                 .status(documentClientRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
-                .creationDate(documentClientRequestDto.getCreationDate())
                 .client(client)
                 .build();
 
@@ -146,7 +145,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
         documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
-        documentClient.setCreationDate(documentClientRequestDto.getCreationDate() != null ? documentClientRequestDto.getCreationDate() : documentClient.getCreationDate());
         documentClient.setIsActive(documentClientRequestDto.getIsActive() != null ? documentClientRequestDto.getIsActive() : documentClient.getIsActive());
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);

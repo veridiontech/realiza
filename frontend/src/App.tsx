@@ -6,6 +6,8 @@ import { router } from "./routes";
 import { FormDataProvider } from "./context/formDataProvider";
 import { ThemeProvider } from "./context/Theme-Provider";
 import { UserProvider } from "./context/user-provider";
+import { Toaster } from 'sonner'
+
 
 const queryClient = new QueryClient();
 
@@ -16,6 +18,7 @@ export function App() {
         <QueryClientProvider client={queryClient}>
           <FormDataProvider>
             <HelmetProvider>
+            <Toaster richColors closeButton expand={false} className="w-[20vw]"/>
               <Helmet titleTemplate="%s | realiza" />
               <RouterProvider router={router} />
             </HelmetProvider>

@@ -1,5 +1,5 @@
 import { ArrowLeftRight, Bell, ChartNoAxesGantt, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -7,8 +7,13 @@ import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
 import { ToggleTheme } from "../toggle-theme";
+import { useUser } from "@/context/user-provider";
 
 export function Header() {
+  const { user } = useUser()
+
+  const getIdUser = user?.idUser
+  
   return (
     <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
@@ -24,7 +29,7 @@ export function Header() {
             </SheetTrigger>
             <LateralMenu />
           </Sheet>
-          <Link to="/">
+          <Link to={`/sistema/select-client/${getIdUser}`}>
             <img src={realizaLogo} alt="" className="w-[6vw]" />
           </Link>
         </div>
@@ -39,7 +44,7 @@ export function Header() {
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"
             title="Trocar"
           >
-            <Link to={"/sistema/select-client/:id"}>
+            <Link to={`"sistema/select-client/${getIdUser}`}>
               <ArrowLeftRight className="h-6 w-6 hover:text-white" />
             </Link>
           </button>
@@ -62,7 +67,7 @@ export function Header() {
               >
                 <Bell size={24} />
               </Button>
-              <Link to={"/profile-user"}>
+              <Link to={`/profile-user`}>
                 <Avatar>
                   <AvatarImage src="https://github.com/shadcn.png" />
                   <AvatarFallback>CN</AvatarFallback>

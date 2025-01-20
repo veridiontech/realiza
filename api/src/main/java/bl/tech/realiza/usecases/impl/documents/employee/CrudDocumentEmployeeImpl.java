@@ -48,7 +48,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .title(documentEmployeeRequestDto.getTitle())
                 .status(documentEmployeeRequestDto.getStatus())
                 .documentation(savedFileDocument.getIdDocument())
-                .creationDate(documentEmployeeRequestDto.getCreationDate())
                 .employee(employee)
                 .build();
 
@@ -138,7 +137,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         documentEmployee.setTitle(documentEmployeeRequestDto.getTitle() != null ? documentEmployeeRequestDto.getTitle() : documentEmployee.getTitle());
         documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
-        documentEmployee.setCreationDate(documentEmployeeRequestDto.getCreationDate() != null ? documentEmployeeRequestDto.getCreationDate() : documentEmployee.getCreationDate());
         documentEmployee.setIsActive(documentEmployeeRequestDto.getIsActive() != null ? documentEmployeeRequestDto.getIsActive() : documentEmployee.getIsActive());
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
