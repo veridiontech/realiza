@@ -1,28 +1,53 @@
 import { useState, useEffect } from "react";
-import { Dropdown } from "@/components/ui/dropdown";
-import { useFetchClients } from "@/hooks/gets/useClients";
+// import { Dropdown } from "@/components/ui/dropdown";
+// import { useFetchClients } from "@/hooks/gets/useClients";
 import selectClientImage from "@/assets/selectClientImage.png";
 // import { Dialog } from "@/components/ui/dialog";
 import { ModalSendEmail } from "@/components/modal-send-email";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@/context/user-provider";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { Puff } from "react-loader-spinner";
 
 export function SelectClient() {
-  const { clients, loading, error, fetchClients } = useFetchClients(); // Hook customizado
+  const [loading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedClient, setSelectedClient] = useState<number | null>(null); // Ajustado para ser number | null
+
+  const [getClients, setGetClients] = useState([]);
+  const navigate = useNavigate();
+  const { user } = useUser();
+
+  const getClient = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axios.get(`${ip}/client`);
+      setGetClients(res.data.content);
+    } catch (err) {
+      console.log("erro ao buscar clientes", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchClients(); // Busca os clientes ao carregar o componente
+    getClient();
+    if (user?.idUser) {
+      toast("Você está na versão 1.0.0 do sistema realiza", {
+        action: (
+          <Button
+            className="bg-realizaBlue"
+            onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
+          >
+            Visualizar novas funções
+          </Button>
+        ),
+      });
+    }
+    // fetchClients();
   }, []);
-
-  // Verifica se os clientes estão definidos e não são nulos
-  const filteredClients = (clients || []).filter(
-    (client) =>
-      client &&
-      client.name &&
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-
 
   return (
     <div className="m-10 flex min-h-full justify-center">
@@ -44,7 +69,29 @@ export function SelectClient() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            {loading ? (
+              <div className="flex items-center justify-start border p-2 rounded-md w-[20vw]">
+                <Puff
+                  visible={true}
+                  height="30"
+                  width="30"
+                  color="#34495D"
+                  ariaLabel="puff-loading"
+                />
+              </div>
+            ) : getClients.length === 0 ? (
+              <p className="text-gray-500">Nenhum cliente encontrado.</p>
+            ) : (
+              <select className="h-[5vh] w-[20vw] rounded-md border">
+                {getClients.map((client: any) => (
+                  <option key={client.idClient} value={client.idClient}>
+                    {client.companyName}
+                  </option>
+                ))}
+              </select>
+            )}
 
+            {/* 
             {loading ? (
               <div className="flex items-center justify-center p-4">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
@@ -53,16 +100,17 @@ export function SelectClient() {
             ) : error ? (
               <div className="p-2 text-red-500">{error}</div>
             ) : (
-              <Dropdown
-                options={filteredClients.map((client) => ({
-                  id: Number(client.id), // Converte id para number
-                  name: client.name,
-                }))}
-                selectedOption={selectedClient}
-                onSelect={(option) => setSelectedClient(option.id)} // Atualiza o ID do cliente selecionado
-                placeholder="Escolha o Cliente"
-              />
-            )}
+              // <Dropdown
+              //   options={filteredClients.map((client) => ({
+              //     id: Number(client.id), // Converte id para number
+              //     name: client.name,
+              //   }))}
+              //   selectedOption={selectedClient}
+              //   onSelect={(option) => setSelectedClient(option.id)} // Atualiza o ID do cliente selecionado
+              //   placeholder="Escolha o Cliente"
+              // />
+              
+            )} */}
           </div>
         </div>
 

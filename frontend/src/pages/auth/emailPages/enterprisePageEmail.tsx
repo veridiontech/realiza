@@ -31,7 +31,7 @@ export function EnterprisePageEmail() {
   useEffect(() => {
     const validateToken = async() => {
       try{ 
-        const res = await axios.get(`http://localhost:5173/email/Enterprise-sign-up/validate?token=${token}`)
+        const res = await axios.get(`https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${token}`)
         if(res.status === 200) {
           setIsValidToken(true)
         }else {
