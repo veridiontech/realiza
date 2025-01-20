@@ -92,10 +92,34 @@ export function StepTwoServiceProviders({
       onSubmit={handleSubmit}
       fields={[
         {
+          name: "confirmation",
+          label: "* É uma Subcontratação?",
+          type: "radio",
+          options: [
+            { label: "Sim", value: "yes" },
+            { label: "Não", value: "no" },
+          ],
+          required: true,
+        },
+        {
+          name: "serviceReference",
+          label: "* Referência do Serviço",
+          type: "text",
+          placeholder: "Exemplo: 0001",
+          required: true,
+        },
+        {
           name: "serviceType",
           label: "* Tipo do Serviço",
           type: "select",
           options: ["Tipo 1", "Tipo 2", "Tipo 3"],
+          required: true,
+        },
+        {
+          name: "serviceTypeExpense",
+          label: "* Tipo de Despesa",
+          type: "select",
+          options: ["CAPEX", "OPEX"],
           required: true,
         },
         {
@@ -120,10 +144,10 @@ export function StepTwoServiceProviders({
         },
         {
           name: "allocatedLimit",
-          label: "* Limite Alocado",
+          label: "Número Máximo de Empregados Alocados",
           type: "number",
           placeholder: "Exemplo: 50000",
-          required: true,
+          required: false,
         },
         {
           name: "startDate",
@@ -138,30 +162,23 @@ export function StepTwoServiceProviders({
         },
         {
           name: "activities",
-          label: "* Atividades",
+          label: "Atividades",
           type: "multiselect",
           options: activities.map((activity: Activity) => ({
             label: activity.title,
             value: activity.idActivity,
           })),
-          required: true,
+          required: false,
         },
         {
           name: "requirements",
-          label: "* Requisitos",
+          label: "Requisitos",
           type: "multiselect",
           options: requirements.map((requirement: Requirement) => ({
             label: requirement.title,
             value: requirement.idRequirement,
           })),
-          required: true,
-        },
-        {
-          name: "providerSupplier",
-          label: "* Fornecedor",
-          type: "text",
-          placeholder: "3a88a8e5-0f77-4c50-aa70-267710682ac4",
-          required: true,
+          required: false,
         },
       ]}
     />

@@ -7,7 +7,7 @@ interface Field {
   label: string;
   type: FieldType;
   placeholder?: string;
-  options?: string[] | { label: string; value: string }[]; // Atualizado
+  options?: string[] | { label: string; value: string }[];
   required?: boolean;
   defaultValue?: any;
   accept?: string;
@@ -46,10 +46,6 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // const handleFileChange = (name: string, file: File | null) => {
-  //   setFormData((prev) => ({ ...prev, [name]: file }));
-  // };
-
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (onSubmit) {
@@ -70,55 +66,45 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
         <h2 className="mb-4 text-xl font-semibold text-yellow-400">{title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map((field) => (
-            <div key={field.name} className="flex flex-col text-black">
+            <div key={field.name} className="flex flex-col text-white">
               <label
                 htmlFor={field.name}
                 className="mb-2 text-sm font-medium text-white"
               >
                 {field.label}
               </label>
-              {field.type === "custom" && field.render ? (
-                field.render({
-                  value: formData[field.name],
-                  onChange: (value) => handleChange(field.name, value),
-                })
-              ) : field.type === "multiselect" ? (
-                <select
-                  id={field.name}
-                  name={field.name}
-                  value={formData[field.name]}
-                  onChange={(e) =>
-                    handleChange(
-                      field.name,
-                      Array.from(e.target.selectedOptions).map(
-                        (option) => option.value,
-                      ),
-                    )
-                  }
-                  multiple
-                  className="rounded border border-gray-300 p-2"
-                  required={field.required}
-                >
+              {field.type === "radio" ? (
+                <div className="flex items-center space-x-4">
                   {Array.isArray(field.options) &&
-                    field.options.map((option) =>
-                      typeof option === "string" ? (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ) : (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ),
+                    field.options.map(
+                      (option) =>
+                        typeof option !== "string" && (
+                          <label
+                            key={option.value}
+                            className="flex items-center space-x-2 text-white"
+                          >
+                            <input
+                              type="radio"
+                              name={field.name}
+                              value={option.value}
+                              checked={formData[field.name] === option.value}
+                              onChange={(e) =>
+                                handleChange(field.name, e.target.value)
+                              }
+                              required={field.required}
+                            />
+                            <span>{option.label}</span>
+                          </label>
+                        ),
                     )}
-                </select>
+                </div>
               ) : field.type === "select" ? (
                 <select
                   id={field.name}
                   name={field.name}
                   value={formData[field.name]}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  className="rounded border border-gray-300 p-2"
+                  className="rounded border border-gray-300 p-2 text-black"
                   required={field.required}
                 >
                   <option value="">Selecione</option>
@@ -143,7 +129,7 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
                   placeholder={field.placeholder}
                   value={formData[field.name]}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  className="rounded border border-gray-300 p-2"
+                  className="rounded border border-gray-300 p-2 text-black"
                   required={field.required}
                 />
               )}
@@ -166,6 +152,47 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [showModal, setShowModal] = React.useState(false);
+
+  const fields: Field[] = [
+    {
+      name: "confirmation",
+      label: "* Você confirma que deseja continuar?",
+      type: "radio",
+      options: [
+        { label: "Sim", value: "yes" },
+        { label: "Não", value: "no" },
+      ],
+      required: true,
+    },
+  ];
+
+  const handleSubmit = (formData: Record<string, any>) => {
+    console.log("Form Submitted:", formData);
+    setShowModal(false);
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <button
+        onClick={() => setShowModal(true)}
+        className="rounded bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
+      >
+        Abrir Modal
+      </button>
+      {showModal && (
+        <Modal
+          title="Confirmação"
+          fields={fields}
+          onSubmit={handleSubmit}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 }
