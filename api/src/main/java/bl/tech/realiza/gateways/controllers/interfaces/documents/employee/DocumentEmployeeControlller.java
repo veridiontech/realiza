@@ -15,4 +15,5 @@ public interface DocumentEmployeeControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployee(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentEmployee(String id);
+    ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployeeByEmployee(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

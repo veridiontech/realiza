@@ -123,4 +123,42 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     public void delete(String id) {
         documentMatrixRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentMatrixResponseDto> findAllBySubgroup(String idSearch, Pageable pageable) {
+        Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable);
+
+        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixPage.map(
+                documentMatrix -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(documentMatrix.getIdDocument())
+                        .name(documentMatrix.getName())
+                        .risk(documentMatrix.getRisk())
+                        .expiration(documentMatrix.getExpiration())
+                        .type(documentMatrix.getType())
+                        .doesBlock(documentMatrix.getDoesBlock())
+                        .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                        .build()
+        );
+
+        return documentMatrixResponseDtoPage;
+    }
+
+    @Override
+    public Page<DocumentMatrixResponseDto> findAllByGroup(String idSearch, Pageable pageable) {
+        Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable);
+
+        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixPage.map(
+                documentMatrix -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(documentMatrix.getIdDocument())
+                        .name(documentMatrix.getName())
+                        .risk(documentMatrix.getRisk())
+                        .expiration(documentMatrix.getExpiration())
+                        .type(documentMatrix.getType())
+                        .doesBlock(documentMatrix.getDoesBlock())
+                        .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                        .build()
+        );
+
+        return documentMatrixResponseDtoPage;
+    }
 }

@@ -92,4 +92,19 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-subcontractor")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(@RequestParam(defaultValue = "0") int page,
+                                                                                                         @RequestParam(defaultValue = "5") int size,
+                                                                                                         @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                                                         @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                                         @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentResponseDto> pageDocumentSubcontractor = crudDocumentSubcontractor.findAllBySubcontractor(idSearch, pageable);
+
+        return ResponseEntity.ok(pageDocumentSubcontractor);
+    }
 }

@@ -157,4 +157,30 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public void delete(String id) {
         documentEmployeeRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentResponseDto> findAllByEmployee(String idSearch, Pageable pageable) {
+        Page<DocumentEmployee> documentEmployeePage = documentEmployeeRepository.findAllByEmployee_IdEmployee(idSearch, pageable);
+
+        Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
+                documentEmployee -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentEmployee.getIdDocumentation())
+                            .title(documentEmployee.getTitle())
+                            .status(documentEmployee.getStatus())
+                            .documentation(documentEmployee.getDocumentation())
+                            .fileName(fileDocument.getName())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentEmployee.getCreationDate())
+                            .employee(documentEmployee.getEmployee().getIdEmployee())
+                            .build();
+                }
+        );
+
+        return documentEmployeeResponseDtoPage;
+    }
 }

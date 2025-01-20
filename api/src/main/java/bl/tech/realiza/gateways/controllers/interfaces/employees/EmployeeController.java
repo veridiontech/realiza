@@ -1,8 +1,8 @@
 package bl.tech.realiza.gateways.controllers.interfaces.employees;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
-import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 public interface EmployeeController {
-    ResponseEntity<Page<EmployeeResponseDto>> getAllEmployees(int page, int size, String sort, Sort.Direction direction, EmailRequestDto.Company company, String idSearch);
+    ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByEnterprise(int page, int size, String sort, Sort.Direction direction, Provider.Company company, String idSearch);
 
     // brazilian
     ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);

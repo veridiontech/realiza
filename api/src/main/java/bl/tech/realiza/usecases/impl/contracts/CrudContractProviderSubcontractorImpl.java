@@ -196,4 +196,30 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     public void delete(String id) {
         contractProviderSubcontractorRepository.deleteById(id);
     }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
+        Page<ContractProviderSubcontractor> contractProviderSubcontractorPage = contractProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+
+        Page<ContractResponseDto> contractProviderResponseDtoPage = contractProviderSubcontractorPage.map(
+                contractProviderSubcontractor -> ContractResponseDto.builder()
+                        .idContract(contractProviderSubcontractor.getIdContract())
+                        .serviceType(contractProviderSubcontractor.getServiceType())
+                        .serviceDuration(contractProviderSubcontractor.getServiceDuration())
+                        .serviceName(contractProviderSubcontractor.getServiceName())
+                        .contractReference(contractProviderSubcontractor.getContractReference())
+                        .description(contractProviderSubcontractor.getDescription())
+                        .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                        .expenseType(contractProviderSubcontractor.getExpenseType())
+                        .startDate(contractProviderSubcontractor.getStartDate())
+                        .endDate(contractProviderSubcontractor.getEndDate())
+                        .activities(contractProviderSubcontractor.getActivities())
+                        .requirements(contractProviderSubcontractor.getRequirements())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
+                        .build()
+        );
+
+        return contractProviderResponseDtoPage;
+    }
 }

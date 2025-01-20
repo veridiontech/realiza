@@ -165,4 +165,30 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     public void delete(String id) {
         documentClientRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentResponseDto> findAllByClient(String idSearch, Pageable pageable) {
+        Page<DocumentClient> documentClientPage = documentClientRepository.findAllByClient_IdClient(idSearch, pageable);
+
+        Page<DocumentResponseDto> documentClientResponseDtoPage = documentClientPage.map(
+                documentClient -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentClient.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentClient.getIdDocumentation())
+                            .title(documentClient.getTitle())
+                            .status(documentClient.getStatus())
+                            .documentation(documentClient.getDocumentation())
+                            .fileName(fileDocument.getName())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentClient.getCreationDate())
+                            .client(documentClient.getClient().getIdClient())
+                            .build();
+                }
+        );
+
+        return documentClientResponseDtoPage;
+    }
 }

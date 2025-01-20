@@ -1,5 +1,6 @@
 package bl.tech.realiza.services.email;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
@@ -30,7 +31,7 @@ public class EmailSender {
     public void sendEmail(EmailRequestDto emailRequestDto) {
         String companyName = "";
         String idCompany = "";
-        EmailRequestDto.Company company = emailRequestDto.getCompany();
+        Provider.Company company = emailRequestDto.getCompany();
         switch (emailRequestDto.getCompany()) {
             case CLIENT -> {
                 /*var client = clientRepository.findById(emailRequestDto.getIdCompany())

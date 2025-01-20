@@ -14,4 +14,5 @@ public interface ProviderSubcontractorController {
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractor(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ProviderResponseDto>> updateProviderSubcontractor(ProviderSubcontractorRequestDto providerSubcontractorRequestDto);
     ResponseEntity<Void> deleteProviderSubcontractor(String id);
+    ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractorBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

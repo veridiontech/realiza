@@ -2,10 +2,9 @@ package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
-import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
-import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CrudEmployeeImpl implements CrudEmployee {
 
-    private final EmployeeRepository employeeRepository;
     private final EmployeeBrazilianRepository employeeBrazilianRepository;
     private final EmployeeForeignerRepository employeeForeignerRepository;
 
     @Override
-    public Page<EmployeeResponseDto> findAllByEnterprise(Pageable pageable, EmailRequestDto.Company company, String idSearch) {
+    public Page<EmployeeResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable) {
         Page<EmployeeBrazilian> employeeBrazilianPage = Page.empty();
         Page<EmployeeForeigner> employeeForeignerPage = Page.empty();
         Page<EmployeeResponseDto> employeeResponseDtoPage = null;

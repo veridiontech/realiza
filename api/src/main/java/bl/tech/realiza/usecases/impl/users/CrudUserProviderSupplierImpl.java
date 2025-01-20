@@ -163,4 +163,29 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public void delete(String id) {
         userSupplierRepository.deleteById(id);
     }
+
+    @Override
+    public Page<UserResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
+        Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+
+        Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
+                userProvider -> UserResponseDto.builder()
+                        .cpf(userProvider.getCpf())
+                        .description(userProvider.getDescription())
+                        .password(userProvider.getPassword())
+                        .position(userProvider.getPosition())
+                        .role(userProvider.getRole())
+                        .firstName(userProvider.getFirstName())
+                        .timeZone(userProvider.getTimeZone())
+                        .surname(userProvider.getSurname())
+                        .email(userProvider.getEmail())
+                        .profilePicture(userProvider.getProfilePicture())
+                        .telephone(userProvider.getTelephone())
+                        .cellphone(userProvider.getCellphone())
+                        .supplier(userProvider.getProviderSupplier().getIdProvider())
+                        .build()
+        );
+
+        return userSupplierResponseDtoPage;
+    }
 }

@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProviderSubcontractorControlller;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
@@ -73,5 +74,20 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
         crudSubcontractor.delete(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filtered-subcontractor")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSubcontractorBySupplier(@RequestParam(defaultValue = "0") int page,
+                                                                                                    @RequestParam(defaultValue = "5") int size,
+                                                                                                    @RequestParam(defaultValue = "idContract") String sort,
+                                                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                                    @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ContractResponseDto> pageContractSubcontractor = crudSubcontractor.findAll(pageable);
+
+        return ResponseEntity.ok(pageContractSubcontractor);
     }
 }

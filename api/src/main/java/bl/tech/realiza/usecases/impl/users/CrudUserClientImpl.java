@@ -167,4 +167,30 @@ public class CrudUserClientImpl implements CrudUserClient {
     public void delete(String id) {
         userClientRepository.deleteById(id);
     }
+
+    @Override
+    public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
+        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClient(idSearch, pageable);
+
+        Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
+                userClient -> UserResponseDto.builder()
+                        .idUser(userClient.getIdUser())
+                        .cpf(userClient.getCpf())
+                        .description(userClient.getDescription())
+                        .password(userClient.getPassword())
+                        .position(userClient.getPosition())
+                        .role(userClient.getRole())
+                        .firstName(userClient.getFirstName())
+                        .timeZone(userClient.getTimeZone())
+                        .surname(userClient.getSurname())
+                        .email(userClient.getEmail())
+                        .profilePicture(userClient.getProfilePicture())
+                        .telephone(userClient.getTelephone())
+                        .cellphone(userClient.getCellphone())
+                        .client(userClient.getClient().getIdClient())
+                        .build()
+        );
+
+        return userClientResponseDtoPage;
+    }
 }

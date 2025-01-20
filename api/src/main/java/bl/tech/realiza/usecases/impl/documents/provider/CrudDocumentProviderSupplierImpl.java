@@ -153,4 +153,30 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     public void delete(String id) {
         documentSupplierRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
+        Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+
+        Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
+                documentSupplier -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentSupplier.getDocumentation())
+                            .title(documentSupplier.getTitle())
+                            .status(documentSupplier.getStatus())
+                            .documentation(documentSupplier.getDocumentation())
+                            .fileName(fileDocument.getIdDocument())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentSupplier.getCreationDate())
+                            .supplier(documentSupplier.getProviderSupplier().getIdProvider())
+                            .build();
+                }
+        );
+
+        return documentSupplierResponseDtoPage;
+    }
 }

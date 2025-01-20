@@ -13,4 +13,5 @@ public interface CrudNotification {
     Page<NotificationResponseDto> findAll(Pageable pageable);
     Optional<NotificationResponseDto> update(NotificationRequestDto notificationRequestDto);
     void delete(String id);
+    Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable);
 }

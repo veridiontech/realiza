@@ -196,4 +196,30 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     public void delete(String id) {
         contractProviderSupplierRepository.deleteById(id);
     }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+
+        Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
+                contractProviderSupplier -> ContractResponseDto.builder()
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceDuration(contractProviderSupplier.getServiceDuration())
+                        .serviceName(contractProviderSupplier.getServiceName())
+                        .contractReference(contractProviderSupplier.getContractReference())
+                        .description(contractProviderSupplier.getDescription())
+                        .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .expenseType(contractProviderSupplier.getExpenseType())
+                        .startDate(contractProviderSupplier.getStartDate())
+                        .endDate(contractProviderSupplier.getEndDate())
+                        .activities(contractProviderSupplier.getActivities())
+                        .requirements(contractProviderSupplier.getRequirements())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                        .build()
+        );
+
+        return providerResponseDtoPage;
+    }
 }

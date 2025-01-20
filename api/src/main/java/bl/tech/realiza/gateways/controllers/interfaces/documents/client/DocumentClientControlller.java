@@ -15,4 +15,5 @@ public interface DocumentClientControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsClient(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(DocumentClientRequestDto documentClientRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentClient(String id);
+    ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

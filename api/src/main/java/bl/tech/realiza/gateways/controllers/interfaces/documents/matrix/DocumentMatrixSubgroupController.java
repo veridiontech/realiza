@@ -14,4 +14,5 @@ public interface DocumentMatrixSubgroupController {
     ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroup(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixSubgroup(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequestDto);
     ResponseEntity<Void> deleteDocumentMatrixSubgroup(String id);
+    ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroupByGroup(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

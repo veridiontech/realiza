@@ -15,4 +15,5 @@ public interface CrudUserProviderSubcontractor {
     Page<UserResponseDto> findAll(Pageable pageable);
     Optional<UserResponseDto> update(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto);
     void delete(String id);
+    Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
 }

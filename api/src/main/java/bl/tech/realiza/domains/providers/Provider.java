@@ -31,4 +31,10 @@ public abstract class Provider {
     private String number;
     @Builder.Default
     private Boolean isActive = true;
+
+    public enum Company {
+        CLIENT,
+        SUPPLIER,
+        SUBCONTRACTOR
+    }
 }

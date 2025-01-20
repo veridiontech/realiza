@@ -25,7 +25,7 @@ public class DocumentMatrix {
     @Builder.Default
     private Boolean isActive = true;
     private LocalDateTime creationDate;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentMatrixSubgroup subGroup;
 
     @PrePersist

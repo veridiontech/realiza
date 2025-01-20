@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.documents.provider;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -19,6 +20,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class DocumentProviderSupplier extends Document {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier providerSupplier;
 }

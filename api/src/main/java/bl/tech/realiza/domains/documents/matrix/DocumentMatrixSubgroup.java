@@ -16,6 +16,6 @@ public class DocumentMatrixSubgroup {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocumentSubgroup;
     private String subgroupName;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentMatrixGroup group;
 }
