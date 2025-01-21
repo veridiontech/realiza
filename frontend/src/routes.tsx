@@ -64,7 +64,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <ConfigurationLayout />,
-    children: [{ path: "profile-user", element: <ProfileUser /> }],
+    children: [{ path: "profile-user/:id", element: <ProfileUser /> }],
   },
 
   {

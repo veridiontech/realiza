@@ -54,9 +54,7 @@ export function SignUpPageEmail() {
       navigate("/")
     }catch(err) {
       console.log(err);
-      
     }
-    
   };
 
   const togglePasswordVisibility = () => {

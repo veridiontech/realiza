@@ -13,6 +13,7 @@ import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useClient } from "@/context/Client-Provider";
 import { propsClient } from "@/types/interfaces";
+import { ProfilePic } from "./profile-pic";
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
@@ -112,11 +113,14 @@ export function Header() {
               >
                 <Bell size={24} />
               </Button>
-              <Link to={`/profile-user`}>
+              {/* <Link to={`/profile-user`}>
                 <Avatar>
                   <AvatarImage src="https://github.com/shadcn.png" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
+              </Link> */}
+              <Link to={`/profile-user/${user?.idUser}`}>
+                <ProfilePic />
               </Link>
             </div>
           </div>
