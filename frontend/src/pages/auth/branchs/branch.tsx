@@ -18,7 +18,7 @@
 //   {
 //     key: "id",
 //     label: "Ações",
-//     render: (value, row) => (
+//     render: (row) => (
 //       <button
 //         className="ml-4 text-blue-500 hover:underline"
 //         onClick={() => console.log(`Editar: ${row.branchName}`)}
