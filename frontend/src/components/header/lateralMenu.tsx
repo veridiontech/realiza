@@ -23,9 +23,9 @@ import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 
 export function LateralMenu() {
-  const { user } = useUser()
+  const { user } = useUser();
 
-  const getIdUser = user?.idUser
+  const getIdUser = user?.idUser;
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
@@ -61,12 +61,6 @@ export function LateralMenu() {
           </span>
         </Button>
       </Link>
-      <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
-        <Layers className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">
-          Ver filiais
-        </span>
-      </Button>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Colaboradores e contratos
       </h3>
@@ -99,10 +93,17 @@ export function LateralMenu() {
           </span>
         </Button>
       </Link>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
-        <Factory className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Filiais</span>
-      </Button>
+      <Link to={`/sistema/branch/${getIdUser}`}>
+        <Button
+          variant={"ghost"}
+          className="mt-2 w-full justify-start px-4 py-2"
+        >
+          <Factory className="size-4 text-zinc-800" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">
+            Filiais
+          </span>
+        </Button>
+      </Link>
       <Link to={`/sistema/employees/${getIdUser}`}>
         <Button
           variant={"ghost"}
@@ -110,7 +111,7 @@ export function LateralMenu() {
         >
           <PersonStanding className="size-4 text-zinc-800" />
           <span className="ml-2 text-sm font-medium text-zinc-900">
-            Funcionários
+            Colaboradores
           </span>
         </Button>
       </Link>

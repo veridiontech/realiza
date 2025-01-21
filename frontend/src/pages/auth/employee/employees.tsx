@@ -72,7 +72,7 @@ export const EmployeesTable = () => {
 
   return (
     <div className="m-4 flex justify-center">
-      <div className="flex w-[90rem] flex-col rounded-lg bg-white dark:bg-primary shadow-md p-10">
+      <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
           <ButtonBlue onClick={() => setIsModalOpen(true)}>

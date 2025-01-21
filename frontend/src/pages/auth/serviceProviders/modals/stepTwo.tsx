@@ -145,7 +145,7 @@ export function StepTwoServiceProviders({
         },
         {
           name: "allocatedLimit",
-          label: "Número Máximo de Empregados Alocados",
+          label: "Número Máximo de Colaboradores Alocados",
           type: "number",
           placeholder: "Exemplo: 50000",
           required: false,
