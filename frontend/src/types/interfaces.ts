@@ -1,5 +1,7 @@
 export interface propsUser{
-    idUser: string
+    idUser: string,
+    firstName: string,
+    surname: string
 }
 
 export interface propsClient {
