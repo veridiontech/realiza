@@ -22,7 +22,8 @@ const modalSendEmailFormSchema = z.object({
   company: z.string().default("CLIENT"),
 });
 
-type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
+type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;                       
+
 export function ModalSendEmail() {
   const [isLoading, setIsLoading] = useState(false);
 
