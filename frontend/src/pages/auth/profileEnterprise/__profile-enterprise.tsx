@@ -2,9 +2,13 @@ import { Mail, Phone } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 // import { useState } from "react";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
+import { useClient } from "@/context/Client-Provider";
 export function ProfileEnterpriseReprise() {
   // const [isOpen, setIsOpen] = useState(false);
+  const { client } = useClient()
 
+  console.log(client);
+  
   return (
     <>
       <Helmet title="profile" />
@@ -19,11 +23,10 @@ export function ProfileEnterpriseReprise() {
                 </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5">
                   <h2 className="text-lg font-medium text-sky-800">
-                    DISTRIBUIDORA DE GAS LTDA
+                    {client?.companyName}
                   </h2>
                   <span className="text-xs font-medium text-sky-700">
-                    Ultragaz | Distribuidora de Gás Residencial e GLP para
-                    Empresas
+                    {client?.email} / {client?.cnpj}
                   </span>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import { ArrowLeftRight, Bell, ChartNoAxesGantt, Search } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -8,12 +8,40 @@ import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
 import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { useEffect, useState } from "react";
+import { useClient } from "@/context/Client-Provider";
 
 export function Header() {
-  const { user } = useUser()
+  const [clients, setClients] = useState<[]>([]);
+  const { setClient } = useClient();
+  const { user } = useUser();
 
-  const getIdUser = user?.idUser
-  
+  const getIdUser = user?.idUser;
+
+  const getClients = async () => {
+    try {
+      const res = await axios.get(`${ip}/client`);
+      setClients(res.data.content);
+    } catch (err) {
+      console.log("erro ao puxar clientes", err);
+    }
+  };
+
+  const handleSelectClient = async (id: string) => {
+    try {
+      const res = await axios.get(`${ip}/client/${id}`);
+      setClient(res.data);
+    } catch (err) {
+      console.log("erro ao selecionar cliente", err);
+    }
+  };
+
+  useEffect(() => {
+    getClients();
+  });
+
   return (
     <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
@@ -38,13 +66,26 @@ export function Header() {
             <span className="mr-4 text-xl text-blue-600">
               Cliente Selecionado:
             </span>
-            UltraGaz BR
+            <select
+              onChange={(e) => handleSelectClient(e.target.value)} // Use onChange para capturar o id selecionado
+              defaultValue="" // Adicione um valor padrão
+            >
+              <option value="" disabled>
+                Selecione um cliente
+              </option>{" "}
+              {/* Placeholder */}
+              {clients.map((client) => (
+                <option key={client.idClient} value={client.idClient}>
+                  {client.companyName}
+                </option>
+              ))}
+            </select>
           </span>
           <button
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"
             title="Trocar"
           >
-            <Link to={`"sistema/select-client/${getIdUser}`}>
+            <Link to={`/sistema/select-client/${getIdUser}`}>
               <ArrowLeftRight className="h-6 w-6 hover:text-white" />
             </Link>
           </button>

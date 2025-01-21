@@ -7,6 +7,7 @@ import { FormDataProvider } from "./context/formDataProvider";
 import { ThemeProvider } from "./context/Theme-Provider";
 import { UserProvider } from "./context/user-provider";
 import { Toaster } from 'sonner'
+import { ClientProvider } from "./context/Client-Provider";
 
 
 const queryClient = new QueryClient();
@@ -15,6 +16,7 @@ export function App() {
   return (
     <ThemeProvider>
       <UserProvider>
+        <ClientProvider>
         <QueryClientProvider client={queryClient}>
           <FormDataProvider>
             <HelmetProvider>
@@ -24,6 +26,7 @@ export function App() {
             </HelmetProvider>
           </FormDataProvider>
         </QueryClientProvider>
+        </ClientProvider>
       </UserProvider>
     </ThemeProvider>
   );

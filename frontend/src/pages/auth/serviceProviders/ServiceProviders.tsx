@@ -9,6 +9,7 @@ import { NotebookPen } from "lucide-react";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { StepOneServiceProviders } from "./modals/stepOne";
 import { StepTwoServiceProviders } from "./modals/stepTwo";
+import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
 
 export function ServiceProvider() {
   const itemsPerPage = 5;
@@ -101,8 +102,9 @@ export function ServiceProvider() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
+        <ModalTesteSendSupplier />
 
-        {isStepOneModalOpen && (
+        {/* {isStepOneModalOpen && (
           <StepOneServiceProviders
             onClose={() => setIsStepOneModalOpen(false)}
             onSubmit={handleStepOneSubmit}
@@ -114,7 +116,7 @@ export function ServiceProvider() {
             onClose={() => setIsStepTwoModalOpen(false)}
             onSubmit={handleStepTwoSubmit}
           />
-        )}
+        )} */}
       </div>
     </div>
   );
