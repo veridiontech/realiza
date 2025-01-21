@@ -8,7 +8,6 @@ import {
   Flag,
   Home,
   Info,
-  Layers,
   MessageSquare,
   Users2,
   UserSquare,

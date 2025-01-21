@@ -8,7 +8,7 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const signUpEmailFormSchema = z
@@ -32,7 +32,7 @@ type SignUpEmailFormSchema = z.infer<typeof signUpEmailFormSchema>;
 export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -51,8 +51,7 @@ export function SignUpPageEmail() {
         ...data,
       };
       await axios.post(`${ip}/client/user`, allDatas)
-      console.log('sucesso');
-      
+      navigate("/")
     }catch(err) {
       console.log(err);
       

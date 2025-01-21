@@ -1,6 +1,7 @@
 import { Modal } from "@/components/modal";
 import axios from "axios";
 import { ip } from "@/utils/ip";
+import { useClient } from "@/context/Client-Provider";
 
 interface StepOneEmployeeProps {
   onClose: () => void;
@@ -8,14 +9,23 @@ interface StepOneEmployeeProps {
 }
 
 export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
+  const { client } = useClient()
+
   const handleSubmit = async (formData: Record<string, any>) => {
+    const filterIdClient = client?.idClient
+    console.log(filterIdClient);
+    
+    const payload = {
+      ...formData,
+      client: filterIdClient
+    }
     try {
       const response = await axios.post(
-        `${ip}/employee/brazilian`, // Altere para o endpoint correto
-        formData,
+        `${ip}/employee/brazilian`,
+        payload,
       );
       console.log("Funcionário criado com sucesso:", response.data);
-      onSubmit(response.data); // Retorna os dados para o componente pai
+      onSubmit(response.data); 
     } catch (error: any) {
       console.error(
         "Erro ao criar funcionário:",

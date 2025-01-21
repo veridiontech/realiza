@@ -26,7 +26,7 @@ const columns: {
   {
     key: "idBranch",
     label: "Ações",
-    render: (value, row) => (
+    render: ( row) => (
       <button
         className="ml-4 text-blue-500 hover:underline"
         onClick={() => console.log(`Editar: ${row.name}`)} // Atualizado para "name"
@@ -47,7 +47,7 @@ export function Branch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const itemsPerPage = 10;
+//   const itemsPerPage = 10;
 
   const fetchBranches = async () => {
     setLoading(true);
