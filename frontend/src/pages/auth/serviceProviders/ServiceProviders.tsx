@@ -102,9 +102,9 @@ export function ServiceProvider() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-        <ModalTesteSendSupplier />
+        {/* <ModalTesteSendSupplier /> */}
 
-        {/* {isStepOneModalOpen && (
+        {isStepOneModalOpen && (
           <StepOneServiceProviders
             onClose={() => setIsStepOneModalOpen(false)}
             onSubmit={handleStepOneSubmit}
@@ -116,7 +116,7 @@ export function ServiceProvider() {
             onClose={() => setIsStepTwoModalOpen(false)}
             onSubmit={handleStepTwoSubmit}
           />
-        )} */}
+        )}
       </div>
     </div>
   );

@@ -138,9 +138,10 @@ export function StepTwoServiceProviders({
         },
         {
           name: "description",
-          label: "Descrição do Serviço (opcional)",
+          label: "Escopo do Serviço",
           type: "text",
           placeholder: "Descrição detalhada do serviço",
+          required: false,
         },
         {
           name: "allocatedLimit",
