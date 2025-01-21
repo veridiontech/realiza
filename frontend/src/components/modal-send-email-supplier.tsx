@@ -10,7 +10,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
