@@ -14,7 +14,6 @@ import {
   Building2,
   Factory,
   PersonStanding,
-  Layers,
 } from "lucide-react";
 
 import { Button } from "../ui/button";
