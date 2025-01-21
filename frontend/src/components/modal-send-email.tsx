@@ -13,40 +13,46 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { ip } from "@/utils/ip";
+import { useState } from "react";
+import { Radio } from "react-loader-spinner";
+import { toast } from "sonner";
 
 const modalSendEmailFormSchema = z.object({
-  email: z.string(),
-  company: z.string().default('CLIENT')
-})
+  email: z.string().email("Insira um email válido"),
+  company: z.string().default("CLIENT"),
+});
 
-type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>
+type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 export function ModalSendEmail() {
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
-    handleSubmit
+    handleSubmit,
+    formState: { errors },
   } = useForm<ModalSendEmailFormSchema>({
-    resolver: zodResolver(modalSendEmailFormSchema)
-  })
+    resolver: zodResolver(modalSendEmailFormSchema),
+  });
 
-  const createClient = async(data: ModalSendEmailFormSchema) => {
-    console.log('teste');
-    try{
+  const createClient = async (data: ModalSendEmailFormSchema) => {
+    console.log("teste");
+    setIsLoading(true);
+    try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        company: data.company
-      })
-      console.log('sucesso');
-      
-    }catch(err) {
-      console.log('erro ao enviar email para usuario', err);
-      
+        company: data.company,
+      });
+      toast.success("Email enviado ao novo cliente")
+    } catch (err) {
+      toast.error("Erro ao enviar email. Tente novamente")
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog>
-      <DialogTrigger asChild> 
+      <DialogTrigger asChild>
         <Button className="bg-sky-700">Cadastrar cliente</Button>
       </DialogTrigger>
       <DialogContent>
@@ -54,13 +60,38 @@ export function ModalSendEmail() {
           <DialogTitle>Cadastrar novo cliente</DialogTitle>
         </DialogHeader>
         <div>
-          <form action="" onSubmit={handleSubmit(createClient)} className="flex flex-col gap-2">
+          <form
+            action=""
+            onSubmit={handleSubmit(createClient)}
+            className="flex flex-col gap-2"
+          >
             <div>
               <Label>Email</Label>
-              <Input type="email" placeholder="Digite o email do novo cliente" {...register("email")} className="w-full"/>
+              <Input
+                type="email"
+                placeholder="Digite o email do novo cliente"
+                {...register("email")}
+                className="w-full"
+              />
+              {errors.email && (
+                <span className="text-red-600">{errors.email.message}</span>
+              )}
             </div>
             <div className="flex justify-end">
-            <Button className="bg-realizaBlue">Enviar</Button>
+              {isLoading ? (
+                <Button className="bg-realizaBlue">
+                  <Radio
+                    visible={true}
+                    height="80"
+                    width="80"
+                    ariaLabel="radio-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                  />
+                </Button>
+              ) : (
+                <Button className="bg-realizaBlue">Enviar</Button>
+              )}
             </div>
           </form>
         </div>

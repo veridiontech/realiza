@@ -19,9 +19,9 @@ import { propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 
 const modalSendEmailFormSchema = z.object({
-  email: z.string(),
+  email: z.string().email("Insira um email valido"),
   company: z.string().default("SUPPLIER"),
-  idCompany: z.string(),
+  idCompany: z.string().nonempty("Selecione um cliente"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -29,7 +29,7 @@ export function ModalTesteSendSupplier() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit } = useForm<ModalSendEmailFormSchema>({
+  const { register, handleSubmit, formState : { errors } } = useForm<ModalSendEmailFormSchema>({
     resolver: zodResolver(modalSendEmailFormSchema),
   });
 
@@ -37,7 +37,6 @@ export function ModalTesteSendSupplier() {
     try {
       const res = await axios.get(`${ip}/client`);
       setClients(res.data.content);
-      console.log(res.data.content);
     } catch (err) {
       console.log("erro ao puxar clientes", err);
     }
@@ -55,6 +54,7 @@ export function ModalTesteSendSupplier() {
       toast.success("Email de cadastro enviado para novo prestador")
     } catch (err) {
       console.log("erro ao enviar email para usuario", err);
+      toast.error('Erro ao enviar email. Tente novamente')
     } finally {
       setIsLoading(false);
     }
@@ -87,6 +87,7 @@ export function ModalTesteSendSupplier() {
                 {...register("email")}
                 className="w-full"
               />
+              {errors.email && <span className="text-red-600">{errors.email.message}</span>}
             </div>
             <div className="flex flex-col gap-1">
               <Label>Selecione um cliente</Label>
@@ -104,6 +105,7 @@ export function ModalTesteSendSupplier() {
                   </option>
                 ))}
               </select>
+              {errors.idCompany && <span className="text-red-600">{errors.idCompany.message}</span>}
             </div>
             <div className="flex justify-end">
               {isLoading ? (
