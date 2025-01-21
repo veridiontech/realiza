@@ -26,11 +26,6 @@ import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail
 import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
 import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
 import { AtualizationPage } from "./pages/auth/atualizationsPage";
-<<<<<<< HEAD
-// import { Branch } from "./pages/auth/branchs/branch";
-=======
-import { AtualizationPage } from "./pages/auth/atualizationsPage";
->>>>>>> b8683e8cb44c21556ba24981df53c7f406b6bd88
 
 export const router = createBrowserRouter([
   {
@@ -51,7 +46,7 @@ export const router = createBrowserRouter([
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "employees/:id", element: <EmployeesTable /> },
       { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
-      {path: "new-features/:id", element: <AtualizationPage />}
+      { path: "new-features/:id", element: <AtualizationPage /> },
     ],
   },
   {

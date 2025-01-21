@@ -46,6 +46,10 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (name: string, file: File | null) => {
+    setFormData((prev) => ({ ...prev, [name]: file }));
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (onSubmit) {
@@ -92,6 +96,7 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
                                 handleChange(field.name, e.target.value)
                               }
                               required={field.required}
+                              className="h-4 w-4 text-blue-500 focus:ring focus:ring-blue-500"
                             />
                             <span>{option.label}</span>
                           </label>
@@ -121,6 +126,11 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
                       ),
                     )}
                 </select>
+              ) : field.type === "custom" && field.render ? (
+                field.render({
+                  value: formData[field.name],
+                  onChange: (value) => handleChange(field.name, value),
+                })
               ) : (
                 <input
                   id={field.name}
@@ -138,14 +148,14 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              className="rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400"
+              className="rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400 focus:ring focus:ring-gray-500"
               onClick={onClose}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:ring focus:ring-blue-500"
             >
               Enviar
             </button>
@@ -181,7 +191,7 @@ export default function App() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <button
         onClick={() => setShowModal(true)}
-        className="rounded bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
+        className="rounded bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 focus:ring focus:ring-blue-500"
       >
         Abrir Modal
       </button>
