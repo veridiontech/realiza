@@ -35,14 +35,13 @@ import { useClient } from "@/context/Client-Provider";
     
 
     const createClient = async(data: ModalSendEmailFormSchema) => {
-      console.log('teste');
+      const payload = {
+        ...data,
+        idCompany: getIdUniqueClient
+      }
       try{
-        const res = await axios.post(`${ip}/invite`, {
-          email: data.email,
-          idCompany: getIdUniqueClient,
-          company: data.company
-        })
-        console.log(res.data);
+        await axios.post(`${ip}/invite`, payload)
+        console.log(payload);
         
         console.log('sucesso');
         
@@ -55,7 +54,7 @@ import { useClient } from "@/context/Client-Provider";
     return (
       <Dialog>
         <DialogTrigger asChild> 
-          <Button className="bg-sky-700">Cadastrar cliente</Button>
+          <Button className="bg-sky-700">Cadastrar novo prestador</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

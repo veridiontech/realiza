@@ -38,7 +38,7 @@ export function SelectClient() {
       toast("Você está na versão 1.0.0 do sistema realiza", {
         action: (
           <Button
-            className="bg-realizaBlue"
+            className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
             onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
           >
             Visualizar novas funções
@@ -69,7 +69,7 @@ export function SelectClient() {
               />
             </div>
             {loading ? (
-              <div className="flex items-center justify-start border p-2 rounded-md w-[20vw]">
+              <div className="flex items-center gap-4 justify-start border p-2 rounded-md w-[20vw] dark:bg-white">
                 <Puff
                   visible={true}
                   height="30"
@@ -77,11 +77,12 @@ export function SelectClient() {
                   color="#34495D"
                   ariaLabel="puff-loading"
                 />
+                <span className="text-black">Carregando...</span>
               </div>
             ) : getClients.length === 0 ? (
               <p className="text-gray-500">Nenhum cliente encontrado.</p>
             ) : (
-              <select className="h-[5vh] w-[20vw] rounded-md border">
+              <select className="h-[5vh] w-[20vw] rounded-md border text-black p-1">
                 {getClients.map((client: any) => (
                   <option key={client.idClient} value={client.idClient}>
                     {client.companyName}

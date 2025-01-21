@@ -12,9 +12,10 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useClient } from "@/context/Client-Provider";
+import { propsClient } from "@/types/interfaces";
 
 export function Header() {
-  const [clients, setClients] = useState<[]>([]);
+  const [clients, setClients] = useState<propsClient[]>([]);
   const { setClient } = useClient();
   const { user } = useUser();
 
@@ -24,6 +25,8 @@ export function Header() {
     try {
       const res = await axios.get(`${ip}/client`);
       setClients(res.data.content);
+      console.log(res.data.content);
+      
     } catch (err) {
       console.log("erro ao puxar clientes", err);
     }
@@ -40,7 +43,7 @@ export function Header() {
 
   useEffect(() => {
     getClients();
-  });
+  }, []);
 
   return (
     <header className="dark:bg-primary relative p-5">
@@ -67,8 +70,9 @@ export function Header() {
               Cliente Selecionado:
             </span>
             <select
-              onChange={(e) => handleSelectClient(e.target.value)} // Use onChange para capturar o id selecionado
-              defaultValue="" // Adicione um valor padrão
+              onChange={(e) => handleSelectClient(e.target.value)} 
+              defaultValue="" 
+              className="text-black border rounded-md p-1"
             >
               <option value="" disabled>
                 Selecione um cliente

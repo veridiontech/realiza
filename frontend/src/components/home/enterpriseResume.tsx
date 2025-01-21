@@ -2,10 +2,15 @@ import { ChevronRight, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '../ui/button'
+import { useClient } from '@/context/Client-Provider'
 
 export function EnterpriseResume() {
+  const { client } = useClient()
+
+  const getIdClient = client?.idClient
+
   return (
-    <Link to="/profile">
+    <Link to={`/sistema/profile/${getIdClient}`}>
       <div className="flex w-full flex-col justify-between rounded bg-white dark:bg-primary p-4 shadow md:flex-row">
         <div className="flex gap-3">
           <div className="flex aspect-square size-24 items-center justify-center rounded bg-red-600 uppercase text-white">

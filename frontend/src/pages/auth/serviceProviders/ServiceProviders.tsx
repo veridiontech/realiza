@@ -7,8 +7,8 @@ import {
 } from "@/hooks/gets/useServiceProviders";
 import { NotebookPen } from "lucide-react";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
-import { StepOneServiceProviders } from "./modals/stepOne";
-import { StepTwoServiceProviders } from "./modals/stepTwo";
+// import { StepOneServiceProviders } from "./modals/stepOne";
+// import { StepTwoServiceProviders } from "./modals/stepTwo";
 import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
 
 export function ServiceProvider() {
@@ -22,11 +22,11 @@ export function ServiceProvider() {
   } = useFetchServiceProviders();
 
   const [currentPage, setCurrentPage] = useState(0);
-  const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
-  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  const [providerData, setProviderData] = useState<Record<string, any> | null>(
-    null,
-  );
+  // const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
+  // const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
+  // const [providerData, setProviderData] = useState<Record<string, any> | null>(
+  //   null,
+  // );
 
   useEffect(() => {
     fetchServiceProviders(itemsPerPage, currentPage);
@@ -36,17 +36,17 @@ export function ServiceProvider() {
     setCurrentPage(newPage);
   };
 
-  const handleStepOneSubmit = (data: Record<string, any>) => {
-    console.log("Dados do Primeiro Modal:", data);
-    setProviderData(data);
-    setIsStepOneModalOpen(false);
-    setIsStepTwoModalOpen(true);
-  };
+  // const handleStepOneSubmit = (data: Record<string, any>) => {
+  //   console.log("Dados do Primeiro Modal:", data);
+  //   setProviderData(data);
+  //   // setIsStepOneModalOpen(false);
+  //   // setIsStepTwoModalOpen(true);
+  // };
 
-  const handleStepTwoSubmit = (data: Record<string, any>) => {
-    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
-    setIsStepTwoModalOpen(false);
-  };
+  // const handleStepTwoSubmit = (data: Record<string, any>) => {
+  //   console.log("Dados do Segundo Modal:", { ...providerData, ...data });
+  //   setIsStepTwoModalOpen(false);
+  // };
 
   const columns = [
     { key: "companyName", label: "Nome do Fornecedor" },
@@ -84,9 +84,10 @@ export function ServiceProvider() {
               onChange={() => {}}
             />
           </div>
-          <ButtonBlue onClick={() => setIsStepOneModalOpen(true)}>
+          {/* <ButtonBlue onClick={() => setIsStepOneModalOpen(true)}>
             Adicionar Prestador
-          </ButtonBlue>
+          </ButtonBlue> */}
+          <ModalTesteSendSupplier />
         </div>
 
         {error ? (
@@ -102,7 +103,7 @@ export function ServiceProvider() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-        <ModalTesteSendSupplier />
+        
 
         {/* {isStepOneModalOpen && (
           <StepOneServiceProviders

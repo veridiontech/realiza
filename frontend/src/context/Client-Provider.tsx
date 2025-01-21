@@ -1,11 +1,11 @@
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { propsUser } from "@/types/interfaces";
+import { propsClient } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 
 interface ClientContextProps {
-  client: propsUser | null;
-  setClient: React.Dispatch<React.SetStateAction<propsUser | null>>;
+  client: propsClient | null;
+  setClient: React.Dispatch<React.SetStateAction<propsClient | null>>;
 }
 
 const ClientContext = createContext<ClientContextProps | undefined>(undefined);
@@ -19,7 +19,7 @@ export function useClient() {
 }
 
 export function ClientProvider({ children }: { children: React.ReactNode }) {
-  const [client, setClient] = useState<propsUser | null>(null);
+  const [client, setClient] = useState<propsClient | null>(null);
 
   useEffect(() => {
     const idClient = localStorage.getItem("idClient");
