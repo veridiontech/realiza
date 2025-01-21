@@ -42,7 +42,7 @@ export const EmployeesTable = () => {
       key: "id",
       label: "Ações",
       render: (_, row) => (
-        <Link to={`/detailsEmployees/${row.id}`}>
+        <Link to={`/sistema/detailsEmployees/${row.id}`}>
           <button className="ml-4 text-blue-500 hover:underline">
             <Settings2 />
           </button>
@@ -76,7 +76,7 @@ export const EmployeesTable = () => {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
           <ButtonBlue onClick={() => setIsModalOpen(true)}>
-            Adicionar Funcionário
+            Adicionar Colaborador
           </ButtonBlue>
         </div>
         {loading ? (

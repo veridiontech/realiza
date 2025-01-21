@@ -1,10 +1,11 @@
-import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom"; // Importa o hook para capturar o ID da URL
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { Pendencia } from "@/types/pendencia";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { AddDocument } from "./modals/addDocument";
+import { ip } from "@/utils/ip";
 
 interface Employee {
   id: number;
@@ -13,12 +14,12 @@ interface Employee {
 }
 
 export function DetailsEmployee() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>(); // Obtém o ID da URL
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar o modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const allPendencias: Pendencia[] = [
     {
@@ -63,9 +64,10 @@ export function DetailsEmployee() {
       setError(null);
 
       try {
-        const response = await fetch(`http://localhost:3001/Employees`);
+        // Faz a requisição usando o ID do funcionário
+        const response = await fetch(`${ip}/employee/brazilian/${id}`);
         if (!response.ok) {
-          throw new Error("Erro ao carregar o funcionário");
+          throw new Error("Erro ao carregar os detalhes do funcionário");
         }
 
         const data = await response.json();
@@ -81,7 +83,7 @@ export function DetailsEmployee() {
       }
     };
 
-    fetchEmployee();
+    if (id) fetchEmployee();
   }, [id]);
 
   if (isLoading) {
@@ -132,7 +134,6 @@ export function DetailsEmployee() {
         </div>
       </div>
 
-      {/* Renderização condicional do modal */}
       {isModalOpen && <AddDocument onClose={() => setIsModalOpen(false)} />}
     </div>
   );
