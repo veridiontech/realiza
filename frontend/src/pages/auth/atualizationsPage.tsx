@@ -11,8 +11,10 @@ export function AtualizationPage() {
           viewport={{ once: true }}
           className="flex flex-col"
         >
-          <h1 className="text-[30px]">Nova atualização: Versão 1.0.0</h1>
-          <span className="text-[14px] text-gray-600 dark:text-gray-400">Realiza sistema</span>
+          <h1 className="text-[30px]">Nova atualização: Versão 1.0.1</h1>
+          <span className="text-[14px] text-gray-600 dark:text-gray-400">
+            Realiza sistema
+          </span>
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
