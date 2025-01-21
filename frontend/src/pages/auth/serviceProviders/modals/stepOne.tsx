@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Modal } from "@/components/modal";
 import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/useCnpjApi";
+import axios from "axios";
 import * as z from "zod";
+import { ip } from "@/utils/ip";
 
 interface StepOneServiceProvidersProps {
   onClose: () => void;
@@ -39,7 +41,7 @@ export function StepOneServiceProviders({
         throw new Error("CNPJ inválido. Por favor, verifique o formato.");
       }
 
-      const data = await fetchCompanyByCNPJ(cnpj);
+      const data = await fetchCompanyByCNPJ(cleanedCNPJ);
       setProviderData({
         nome: data.razaoSocial || data.nomeFantasia,
         email: "",
@@ -53,13 +55,20 @@ export function StepOneServiceProviders({
     }
   };
 
-  const handleAddProvider = (data: Record<string, any>) => {
+  const handleSubmit = async (data: Record<string, any>) => {
     try {
-      providerSchema.parse({ ...data, cnpj });
-      onSubmit({ ...data, cnpj });
-    } catch (validationError) {
-      if (validationError instanceof z.ZodError) {
-        setError(validationError.errors[0]?.message || "Erro de validação.");
+      const validatedData = providerSchema.parse({ ...data, cnpj });
+
+      // Envia o email via API `/invite`
+      await axios.post(`${ip}/invite`, { email: validatedData.email });
+
+      // Chama o próximo passo
+      onSubmit(validatedData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setError(error.errors[0]?.message || "Erro de validação.");
+      } else if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message || "Erro ao enviar o e-mail.");
       }
     }
   };
@@ -117,10 +126,7 @@ export function StepOneServiceProviders({
             ]
           : []),
       ]}
-      onSubmit={(data) => {
-        console.log("Dados enviados:", data);
-        handleAddProvider(data);
-      }}
+      onSubmit={(data) => handleSubmit(data)}
       onClose={onClose}
     />
   );

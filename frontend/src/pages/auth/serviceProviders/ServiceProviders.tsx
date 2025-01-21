@@ -14,9 +14,8 @@ export function ServiceProvider() {
   const itemsPerPage = 5;
 
   const {
-    serviceProviders = [], // Default to an empty array to handle missing data
-    totalPages = 0, // Default to 0 pages to avoid pagination issues
-    // loading,
+    serviceProviders = [],
+    totalPages = 0,
     error,
     fetchServiceProviders,
   } = useFetchServiceProviders();
@@ -46,11 +45,10 @@ export function ServiceProvider() {
   const handleStepTwoSubmit = (data: Record<string, any>) => {
     console.log("Dados do Segundo Modal:", { ...providerData, ...data });
     setIsStepTwoModalOpen(false);
-    // Aqui você pode adicionar lógica para enviar os dados combinados ao servidor.
   };
 
   const columns = [
-    { key: "companyName", label: "Nome do Fornecedor" }, // Exibindo o nome do fornecedor
+    { key: "companyName", label: "Nome do Fornecedor" },
     { key: "cnpj", label: "CNPJ" },
     { key: "client", label: "ID do Cliente" },
     {
