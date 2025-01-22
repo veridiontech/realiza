@@ -153,4 +153,30 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public void delete(String id) {
         documentSubcontractorRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
+        Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+
+        Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
+                documentSubcontractor -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentSubcontractor.getDocumentation())
+                            .title(documentSubcontractor.getTitle())
+                            .status(documentSubcontractor.getStatus())
+                            .documentation(documentSubcontractor.getDocumentation())
+                            .fileName(fileDocument.getIdDocument())
+                            .fileContentType(fileDocument.getContentType())
+                            .fileData(fileDocument.getData())
+                            .creationDate(documentSubcontractor.getCreationDate())
+                            .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .build();
+                }
+        );
+
+        return documentSubcontractorResponseDtoPage;
+    }
 }

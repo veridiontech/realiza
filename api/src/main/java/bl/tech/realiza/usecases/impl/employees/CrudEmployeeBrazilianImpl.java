@@ -89,6 +89,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(newEmployeeBrazilian);
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
+                .idEmployee(savedEmployeeBrazilian.getIdEmployee())
                 .pis(savedEmployeeBrazilian.getPis())
                 .maritalStatus(savedEmployeeBrazilian.getMaritalStatus())
                 .contract(savedEmployeeBrazilian.getContract())
@@ -130,6 +131,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
+                .idEmployee(employeeBrazilian.getIdEmployee())
                 .pis(employeeBrazilian.getPis())
                 .maritalStatus(employeeBrazilian.getMaritalStatus())
                 .contract(employeeBrazilian.getContract())
@@ -170,6 +172,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         Page<EmployeeResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
                 employeeBrazilian -> EmployeeResponseDto.builder()
+                        .idEmployee(employeeBrazilian.getIdEmployee())
                         .pis(employeeBrazilian.getPis())
                         .maritalStatus(employeeBrazilian.getMaritalStatus())
                         .contract(employeeBrazilian.getContract())
@@ -242,6 +245,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(employeeBrazilian);
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
+                .idEmployee(savedEmployeeBrazilian.getIdEmployee())
                 .pis(savedEmployeeBrazilian.getPis())
                 .maritalStatus(savedEmployeeBrazilian.getMaritalStatus())
                 .contract(savedEmployeeBrazilian.getContract())

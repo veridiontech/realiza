@@ -1,9 +1,6 @@
 package bl.tech.realiza.domains.providers;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,6 +15,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("SUBCONTRACTOR")
 public class ProviderSubcontractor extends Provider {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier providerSupplier;
 }

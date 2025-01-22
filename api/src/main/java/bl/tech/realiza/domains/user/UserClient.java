@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.clients.Client;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -18,6 +19,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CLIENT")
 public class UserClient extends User {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Client client;
 }

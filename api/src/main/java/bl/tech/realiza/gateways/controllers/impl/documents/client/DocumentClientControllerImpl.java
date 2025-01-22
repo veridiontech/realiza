@@ -99,4 +99,19 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-client")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsClientByClient(@RequestParam(defaultValue = "0") int page,
+                                                                                   @RequestParam(defaultValue = "5") int size,
+                                                                                   @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                   @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentResponseDto> pageDocumentClient = crudDocumentClient.findAllByClient(idSearch, pageable);
+
+        return ResponseEntity.ok(pageDocumentClient);
+    }
 }

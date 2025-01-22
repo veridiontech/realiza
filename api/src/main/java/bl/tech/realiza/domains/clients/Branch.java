@@ -19,6 +19,6 @@ public class Branch {
     @Builder.Default
     private Boolean isActive = true;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Client client;
 }

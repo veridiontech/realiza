@@ -1,7 +1,5 @@
 package bl.tech.realiza.usecases.interfaces.users;
 
-import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
-import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -15,4 +13,5 @@ public interface CrudUserProviderSupplier {
     Page<UserResponseDto> findAll(Pageable pageable);
     Optional<UserResponseDto> update(UserProviderSupplierRequestDto userProviderSupplierRequestDto);
     void delete(String id);
+    Page<UserResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
 }

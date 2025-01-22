@@ -1,7 +1,8 @@
-package bl.tech.realiza.usecases.interfaces.clients;
+package bl.tech.realiza.usecases.interfaces;
 
-import bl.tech.realiza.gateways.requests.clients.ContactRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ContactResponseDto;
+import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.gateways.requests.services.ContactRequestDto;
+import bl.tech.realiza.gateways.responses.services.ContactResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,4 +14,5 @@ public interface CrudContact {
     Page<ContactResponseDto> findAll(Pageable pageable);
     Optional<ContactResponseDto> update(ContactRequestDto contactRequestDto);
     void delete(String id);
+    Page<ContactResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable);
 }

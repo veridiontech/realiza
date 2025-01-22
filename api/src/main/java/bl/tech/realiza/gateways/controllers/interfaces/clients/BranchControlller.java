@@ -14,4 +14,5 @@ public interface BranchControlller {
     ResponseEntity<Page<BranchResponseDto>> getAllBranches(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<BranchResponseDto>> updateBranch(BranchRequestDto branchRequestDto);
     ResponseEntity<Void> deleteBranch(String id);
+    ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

@@ -56,9 +56,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceType(contractProviderSupplierRequestDto.getServiceType())
                 .serviceDuration(contractProviderSupplierRequestDto.getServiceDuration())
                 .serviceName(contractProviderSupplierRequestDto.getServiceName())
+                .contractReference(contractProviderSupplierRequestDto.getContractReference())
                 .description(contractProviderSupplierRequestDto.getDescription())
                 .allocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit())
                 .responsible(userClient)
+                .expenseType(contractProviderSupplierRequestDto.getExpenseType())
                 .startDate(contractProviderSupplierRequestDto.getStartDate())
                 .endDate(contractProviderSupplierRequestDto.getEndDate())
                 .activities(activities)
@@ -73,9 +75,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceType(savedContractProviderSupplier.getServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
+                .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
                 .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
+                .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .activities(savedContractProviderSupplier.getActivities())
@@ -98,9 +102,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceType(contractProviderSupplier.getServiceType())
                 .serviceDuration(contractProviderSupplier.getServiceDuration())
                 .serviceName(contractProviderSupplier.getServiceName())
+                .contractReference(contractProviderSupplier.getContractReference())
                 .description(contractProviderSupplier.getDescription())
                 .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
                 .responsible(contractProviderSupplier.getResponsible().getIdUser())
+                .expenseType(contractProviderSupplier.getExpenseType())
                 .startDate(contractProviderSupplier.getStartDate())
                 .endDate(contractProviderSupplier.getEndDate())
                 .activities(contractProviderSupplier.getActivities())
@@ -122,9 +128,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .serviceType(contractProviderSupplier.getServiceType())
                         .serviceDuration(contractProviderSupplier.getServiceDuration())
                         .serviceName(contractProviderSupplier.getServiceName())
+                        .contractReference(contractProviderSupplier.getContractReference())
                         .description(contractProviderSupplier.getDescription())
                         .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
                         .responsible(contractProviderSupplier.getResponsible().getIdUser())
+                        .expenseType(contractProviderSupplier.getExpenseType())
                         .startDate(contractProviderSupplier.getStartDate())
                         .endDate(contractProviderSupplier.getEndDate())
                         .activities(contractProviderSupplier.getActivities())
@@ -167,9 +175,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         contractProviderSupplier.setServiceType(contractProviderSupplierRequestDto.getServiceType() != null ? contractProviderSupplierRequestDto.getServiceType() : contractProviderSupplier.getServiceType());
         contractProviderSupplier.setServiceDuration(contractProviderSupplierRequestDto.getServiceDuration() != null ? contractProviderSupplierRequestDto.getServiceDuration() : contractProviderSupplier.getServiceDuration());
         contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());
+        contractProviderSupplier.setContractReference(contractProviderSupplierRequestDto.getContractReference() != null ? contractProviderSupplierRequestDto.getContractReference() : contractProviderSupplier.getContractReference());
         contractProviderSupplier.setDescription(contractProviderSupplierRequestDto.getDescription() != null ? contractProviderSupplierRequestDto.getDescription() : contractProviderSupplier.getDescription());
         contractProviderSupplier.setAllocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit() != null ? contractProviderSupplierRequestDto.getAllocatedLimit() : contractProviderSupplier.getAllocatedLimit());
         contractProviderSupplier.setResponsible(contractProviderSupplierRequestDto.getResponsible() != null ? userClient : contractProviderSupplier.getResponsible());
+        contractProviderSupplier.setExpenseType(contractProviderSupplierRequestDto.getExpenseType() != null ? contractProviderSupplierRequestDto.getExpenseType() : contractProviderSupplier.getExpenseType());
         contractProviderSupplier.setStartDate(contractProviderSupplierRequestDto.getStartDate() != null ? contractProviderSupplierRequestDto.getStartDate() : contractProviderSupplier.getStartDate());
         contractProviderSupplier.setEndDate(contractProviderSupplierRequestDto.getEndDate() != null ? contractProviderSupplierRequestDto.getEndDate() : contractProviderSupplier.getEndDate());
         contractProviderSupplier.setActivities(contractProviderSupplierRequestDto.getActivities() != null ? activities : contractProviderSupplier.getActivities());
@@ -183,9 +193,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceType(savedContractProviderSupplier.getServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
+                .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
                 .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
+                .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .activities(savedContractProviderSupplier.getActivities())
@@ -200,5 +212,31 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     @Override
     public void delete(String id) {
         contractProviderSupplierRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+
+        Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
+                contractProviderSupplier -> ContractResponseDto.builder()
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceDuration(contractProviderSupplier.getServiceDuration())
+                        .serviceName(contractProviderSupplier.getServiceName())
+                        .contractReference(contractProviderSupplier.getContractReference())
+                        .description(contractProviderSupplier.getDescription())
+                        .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .expenseType(contractProviderSupplier.getExpenseType())
+                        .startDate(contractProviderSupplier.getStartDate())
+                        .endDate(contractProviderSupplier.getEndDate())
+                        .activities(contractProviderSupplier.getActivities())
+                        .requirements(contractProviderSupplier.getRequirements())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                        .build()
+        );
+
+        return providerResponseDtoPage;
     }
 }

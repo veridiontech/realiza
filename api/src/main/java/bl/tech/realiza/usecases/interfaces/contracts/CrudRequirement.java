@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.contracts;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.requests.contracts.RequirementRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.RequirementResponseDto;
 import org.springframework.data.domain.Page;

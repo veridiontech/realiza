@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
-import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailUpdateRequestDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,24 @@ public class EmailControllerImpl {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping("/invite")
-    public String sendEmail(@RequestBody EmailRequestDto email) {
+    public String sendEmailInvite(@RequestBody EmailInviteRequestDto email) {
         try {
 
-            emailSender.sendEmail(email);
+            emailSender.sendInviteEmail(email);
+
+            return "Success!";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping("/update")
+    public String sendEmailUpdate(@RequestBody EmailUpdateRequestDto email) {
+        try {
+
+            emailSender.sendUpdateEmail(email);
 
             return "Success!";
         } catch (Exception e) {

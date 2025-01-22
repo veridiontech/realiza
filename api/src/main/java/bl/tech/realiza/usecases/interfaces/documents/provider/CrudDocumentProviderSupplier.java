@@ -19,4 +19,5 @@ public interface CrudDocumentProviderSupplier {
     Page<DocumentResponseDto> findAll(Pageable pageable);
     Optional<DocumentResponseDto> update(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
     void delete(String id);
+    Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
 }

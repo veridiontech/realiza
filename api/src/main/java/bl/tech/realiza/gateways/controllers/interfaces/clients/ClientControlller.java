@@ -16,7 +16,4 @@ public interface ClientControlller {
     ResponseEntity<Page<ClientResponseDto>> getAllClients(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ClientResponseDto>> updateClient(ClientRequestDto clientRequestDto);
     ResponseEntity<Void> deleteClient(String id);
-    ResponseEntity<EnterpriseAndUserResponseDto> createClientAndUser(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto);
-    ResponseEntity<?> createClientAndUserToken(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto, String token);
-    ResponseEntity<?> getClientAndUserToken(String token, String id);
 }

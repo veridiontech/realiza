@@ -74,4 +74,19 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-supplier")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractorBySupplier(@RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "5") int size,
+                                                                                            @RequestParam(defaultValue = "idProvider") String sort,
+                                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                            @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ProviderResponseDto> pageProviderSubcontractor = crudProviderSubcontractor.findAllBySupplier(idSearch, pageable);
+
+        return ResponseEntity.ok(pageProviderSubcontractor);
+    }
 }

@@ -96,4 +96,19 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
     public void delete(String id) {
         documentMatrixGroupRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentMatrixResponseDto> findAllByGroup(String idSearch, Pageable pageable) {
+        Page<DocumentMatrixSubgroup> documentMatrixSubgroupPage = documentMatrixSubgroupRepository.findAllByGroup_IdDocumentGroup(idSearch, pageable);
+
+        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixSubgroupPage.map(
+                documentMatrixSubgroup -> DocumentMatrixResponseDto.builder()
+                        .idDocumentSubgroup(documentMatrixSubgroup.getIdDocumentSubgroup())
+                        .subgroupName(documentMatrixSubgroup.getSubgroupName())
+                        .idDocumentGroup(documentMatrixSubgroup.getGroup().getIdDocumentGroup())
+                        .build()
+        );
+
+        return documentMatrixResponseDtoPage;
+    }
 }

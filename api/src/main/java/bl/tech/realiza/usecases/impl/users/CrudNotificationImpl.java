@@ -109,4 +109,21 @@ public class CrudNotificationImpl implements CrudNotification {
     public void delete(String id) {
         notificationRepository.deleteById(id);
     }
+
+    @Override
+    public Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable) {
+        Page<Notification> notificationPage = notificationRepository.findAllByUser_IdUser(idSearch, pageable);
+
+        Page<NotificationResponseDto> notificationResponseDtoPage = notificationPage.map(
+                notification -> NotificationResponseDto.builder()
+                        .idNotification(notification.getIdNotification())
+                        .title(notification.getTitle())
+                        .description(notification.getDescription())
+                        .isRead(notification.getIsRead())
+                        .user(notification.getUser().getIdUser())
+                        .build()
+        );
+
+        return notificationResponseDtoPage;
+    }
 }

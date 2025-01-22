@@ -1,9 +1,10 @@
-package bl.tech.realiza.gateways.controllers.impl.clients;
+package bl.tech.realiza.gateways.controllers.impl.services;
 
-import bl.tech.realiza.gateways.controllers.interfaces.clients.ContactControlller;
-import bl.tech.realiza.gateways.requests.clients.ContactRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ContactResponseDto;
-import bl.tech.realiza.usecases.impl.clients.CrudContactImpl;
+import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.gateways.controllers.interfaces.services.ContactControlller;
+import bl.tech.realiza.gateways.requests.services.ContactRequestDto;
+import bl.tech.realiza.gateways.responses.services.ContactResponseDto;
+import bl.tech.realiza.usecases.impl.CrudContactImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -73,5 +74,21 @@ public class ContactControllerImpl implements ContactControlller {
         crudContact.delete(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filtered-enterprise")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<ContactResponseDto>> getAllContactByEnterprise(@RequestParam(defaultValue = "0") int page,
+                                                                              @RequestParam(defaultValue = "5") int size,
+                                                                              @RequestParam(defaultValue = "idContact") String sort,
+                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                              @RequestParam Provider.Company company,
+                                                                              @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ContactResponseDto> pageContact = crudContact.findAllByEnterprise(idSearch, company, pageable);
+
+        return ResponseEntity.ok(pageContact);
     }
 }
