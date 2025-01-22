@@ -4,16 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PersonStanding } from 'lucide-react';
 import { useUser } from "@/context/user-provider";
 import { useEffect } from "react";
+import axios from "axios";
+import { ip } from "@/utils/ip";
 
 const profileSchema = z.object({
-    firstName: z.string().min(1, "O nome completo é obrigatório"),
-    surname: z.string().min(1,"Sobrenome é obrigatório"),
-    email: z.string().email("Insira um e-mail válido"),
-    phone: z
-      .string()
-      .regex(/^\+\d{2}\s\d{2}\s\d{4,5}-\d{4}$/, "Telefone inválido"),
+    firstName: z.string(),
+    surname: z.string(),
+    email: z.string(),
+    telephone: z
+      .string(),
     cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
-    description: z.string().min(1, "A descrição é obrigatória"),
+    description: z.string(),
   });
   
   type ProfileFormData = z.infer<typeof profileSchema>;
@@ -30,9 +31,14 @@ export function MiddleSection (){
         resolver: zodResolver(profileSchema),
       });
     
-      const onSubmit = (data: ProfileFormData) => {
-        console.log("Dados do formulário:", data);
-        alert("Dados salvos com sucesso!");
+      const onSubmit = async(data: ProfileFormData) => {
+        try{
+          console.log(user?.idUser);
+          console.log(data);
+          await axios.put(`${ip}/user/client/${user?.idUser}`, data)
+        }catch(err){
+          console.log("erro ao atualizar usuário",err);
+        }
       };
 
       useEffect(() => {
@@ -40,7 +46,7 @@ export function MiddleSection (){
         setValue("surname", user?.surname ||"")
         setValue("cpf", user?.cpf ||"")
         setValue("email", user?.email ||"")
-        setValue("phone", user?.phone ||"")
+        setValue("telephone", user?.telephone ||"")
       }, [])
 
     return (
@@ -110,14 +116,14 @@ export function MiddleSection (){
           </label>
           <input
             type="text"
-            {...register("phone")}
+            {...register("telephone")}
             className={`w-full p-3 border rounded ${
-              errors.phone ? "border-red-500" : "border-gray-300"
+              errors.telephone ? "border-red-500" : "border-gray-300"
             }`}
             placeholder="+55 11 91234-5678"
           />
-          {errors.phone && (
-            <p className="text-sm text-red-500">{errors.phone.message}</p>
+          {errors.telephone && (
+            <p className="text-sm text-red-500">{errors.telephone.message}</p>
           )}
         </div>
 
