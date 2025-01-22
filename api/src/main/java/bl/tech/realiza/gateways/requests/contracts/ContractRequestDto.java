@@ -13,6 +13,7 @@ public class ContractRequestDto {
     private String serviceName;
     private String description;
     private String allocatedLimit;
+    private String responsible;
     private Date startDate;
     private Date endDate;
     private String contractReference;

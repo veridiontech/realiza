@@ -4,13 +4,16 @@ import bl.tech.realiza.domains.contract.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSupplier;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,21 +30,26 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ActivityRepository activityRepository;
     private final RequirementRepository requirementRepository;
+    private final UserClientRepository userClientRepository;
 
     @Override
     public ContractResponseDto save(ContractRequestDto contractProviderSupplierRequestDto) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(contractProviderSupplierRequestDto.getProviderSupplier());
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        Optional<UserClient> userClientOptional = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible());
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
         if (activities.isEmpty()) {
-            throw new RuntimeException("Activities not found");
+            throw new EntityNotFoundException("Activities not found");
         }
 
         List<Requirement> requirements = requirementRepository.findAllById(contractProviderSupplierRequestDto.getRequirements());
         if (requirements.isEmpty()) {
-            throw new RuntimeException("Requirements not found");
+            throw new EntityNotFoundException("Requirements not found");
         }
 
         ContractProviderSupplier newContractSupplier = ContractProviderSupplier.builder()
@@ -50,6 +58,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceName(contractProviderSupplierRequestDto.getServiceName())
                 .description(contractProviderSupplierRequestDto.getDescription())
                 .allocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit())
+                .responsible(userClient)
                 .startDate(contractProviderSupplierRequestDto.getStartDate())
                 .endDate(contractProviderSupplierRequestDto.getEndDate())
                 .activities(activities)
@@ -66,6 +75,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
+                .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .activities(savedContractProviderSupplier.getActivities())
@@ -81,7 +91,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     public Optional<ContractResponseDto> findOne(String id) {
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(id);
 
-        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 
         ContractResponseDto contractResponseDto = ContractResponseDto.builder()
                 .idContract(contractProviderSupplier.getIdContract())
@@ -90,6 +100,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceName(contractProviderSupplier.getServiceName())
                 .description(contractProviderSupplier.getDescription())
                 .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                .responsible(contractProviderSupplier.getResponsible().getIdUser())
                 .startDate(contractProviderSupplier.getStartDate())
                 .endDate(contractProviderSupplier.getEndDate())
                 .activities(contractProviderSupplier.getActivities())
@@ -113,6 +124,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .serviceName(contractProviderSupplier.getServiceName())
                         .description(contractProviderSupplier.getDescription())
                         .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .responsible(contractProviderSupplier.getResponsible().getIdUser())
                         .startDate(contractProviderSupplier.getStartDate())
                         .endDate(contractProviderSupplier.getEndDate())
                         .activities(contractProviderSupplier.getActivities())
@@ -129,7 +141,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     public Optional<ContractResponseDto> update(ContractRequestDto contractProviderSupplierRequestDto) {
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getIdContract());
 
-        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        Optional<UserClient> userClientOptional = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible());
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         List<Activity> activities = List.of();
         List<Requirement> requirements = List.of();
@@ -137,14 +153,14 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         if (contractProviderSupplierRequestDto.getActivities() != null) {
             activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
             if (activities.isEmpty()) {
-                throw new RuntimeException("Activities not found");
+                throw new EntityNotFoundException("Activities not found");
             }
         }
 
         if (contractProviderSupplierRequestDto.getRequirements() != null) {
             requirements = requirementRepository.findAllById(contractProviderSupplierRequestDto.getRequirements());
             if (requirements.isEmpty()) {
-                throw new RuntimeException("Requirements not found");
+                throw new EntityNotFoundException("Requirements not found");
             }
         }
 
@@ -153,6 +169,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());
         contractProviderSupplier.setDescription(contractProviderSupplierRequestDto.getDescription() != null ? contractProviderSupplierRequestDto.getDescription() : contractProviderSupplier.getDescription());
         contractProviderSupplier.setAllocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit() != null ? contractProviderSupplierRequestDto.getAllocatedLimit() : contractProviderSupplier.getAllocatedLimit());
+        contractProviderSupplier.setResponsible(contractProviderSupplierRequestDto.getResponsible() != null ? userClient : contractProviderSupplier.getResponsible());
         contractProviderSupplier.setStartDate(contractProviderSupplierRequestDto.getStartDate() != null ? contractProviderSupplierRequestDto.getStartDate() : contractProviderSupplier.getStartDate());
         contractProviderSupplier.setEndDate(contractProviderSupplierRequestDto.getEndDate() != null ? contractProviderSupplierRequestDto.getEndDate() : contractProviderSupplier.getEndDate());
         contractProviderSupplier.setActivities(contractProviderSupplierRequestDto.getActivities() != null ? activities : contractProviderSupplier.getActivities());
@@ -168,6 +185,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
+                .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .activities(savedContractProviderSupplier.getActivities())

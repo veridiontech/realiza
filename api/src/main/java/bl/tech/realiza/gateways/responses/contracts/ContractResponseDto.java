@@ -21,6 +21,7 @@ public class ContractResponseDto {
     private String contractReference;
     private String description;
     private String allocatedLimit;
+    private String responsible;
     private Date startDate;
     private Date endDate;
     private List<Activity> activities;
