@@ -30,7 +30,7 @@ public abstract class Document {
     @Builder.Default
     private Boolean isActive = true;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Client documentInMatrix;
 
     @PrePersist

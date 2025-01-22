@@ -69,4 +69,18 @@ public class DocumentMatrixSubgroupControllerImpl implements DocumentMatrixSubgr
         documentMatrixSubgroup.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-group")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroupByGroup(@RequestParam(defaultValue = "0") int page,
+                                                                                                @RequestParam(defaultValue = "5") int size,
+                                                                                                @RequestParam(defaultValue = "idDocumentSubgroup") String sort,
+                                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                                @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentMatrixResponseDto> pageDocumentMatrixGroup = documentMatrixSubgroup.findAllByGroup(idSearch, pageable);
+        return ResponseEntity.ok(pageDocumentMatrixGroup);
+    }
 }

@@ -1,12 +1,13 @@
-package bl.tech.realiza.usecases.impl.clients;
+package bl.tech.realiza.usecases.impl;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.clients.Contact;
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.clients.ContactRepository;
-import bl.tech.realiza.gateways.requests.clients.ContactRequestDto;
-import bl.tech.realiza.gateways.responses.clients.ContactResponseDto;
-import bl.tech.realiza.usecases.interfaces.clients.CrudContact;
+import bl.tech.realiza.gateways.repositories.services.ContactRepository;
+import bl.tech.realiza.gateways.requests.services.ContactRequestDto;
+import bl.tech.realiza.gateways.responses.services.ContactResponseDto;
+import bl.tech.realiza.usecases.interfaces.CrudContact;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -120,5 +121,24 @@ public class CrudContactImpl implements CrudContact {
     @Override
     public void delete(String id) {
         contactRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ContactResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable) {
+        Page<Contact> contactPage = contactRepository.findAllByClient_IdClient(idSearch, pageable);
+
+        Page<ContactResponseDto> contactResponseDtoPage = contactPage.map(
+                contact -> ContactResponseDto.builder()
+                        .idContact(contact.getIdContact())
+                        .department(contact.getDepartment())
+                        .email(contact.getEmail())
+                        .country(contact.getCountry())
+                        .telephone(contact.getTelephone())
+                        .mainContact(contact.getMainContact())
+                        .client(contact.getClient().getIdClient())
+                        .build()
+        );
+
+        return contactResponseDtoPage;
     }
 }

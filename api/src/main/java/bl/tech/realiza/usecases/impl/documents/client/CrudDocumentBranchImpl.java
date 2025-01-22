@@ -154,4 +154,31 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     public void delete(String id) {
         documentBranchRepository.deleteById(id);
     }
+
+    @Override
+    public Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable) {
+        Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAllByBranch_IdBranch(idSearch, pageable);
+
+        Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
+                documentBranch -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentBranch.getDocumentation());
+                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+
+                    return DocumentResponseDto.builder()
+                            .idDocumentation(documentBranch.getIdDocumentation())
+                            .title(documentBranch.getTitle())
+                            .status(documentBranch.getStatus())
+                            .documentation(documentBranch.getDocumentation())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .creationDate(documentBranch.getCreationDate())
+                            .branch(documentBranch.getBranch().getIdBranch())
+                            .build();
+                }
+
+        );
+
+        return documentBranchResponseDtoPage;
+    }
 }

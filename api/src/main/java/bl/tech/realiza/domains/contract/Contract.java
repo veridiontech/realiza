@@ -29,6 +29,7 @@ public abstract class Contract {
     private String contractReference;
     private String description;
     private String allocatedLimit;
+    private ExpenseType expenseType;
     @OneToOne(cascade = CascadeType.ALL)
     private User responsible;
     private Date startDate;
@@ -56,5 +57,10 @@ public abstract class Contract {
     @PrePersist
     protected void onCreate() {
         this.creationDate = LocalDateTime.now();
+    }
+
+    public enum ExpenseType {
+        CAPEX,
+        OPEX
     }
 }

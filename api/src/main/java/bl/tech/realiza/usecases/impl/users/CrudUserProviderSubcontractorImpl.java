@@ -166,4 +166,29 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public void delete(String id) {
         userSubcontractorRepository.deleteById(id);
     }
+
+    @Override
+    public Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
+        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+
+        Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
+                userSubcontractor -> UserResponseDto.builder()
+                        .cpf(userSubcontractor.getCpf())
+                        .description(userSubcontractor.getDescription())
+                        .password(userSubcontractor.getPassword())
+                        .position(userSubcontractor.getPosition())
+                        .role(userSubcontractor.getRole())
+                        .firstName(userSubcontractor.getFirstName())
+                        .timeZone(userSubcontractor.getTimeZone())
+                        .surname(userSubcontractor.getSurname())
+                        .email(userSubcontractor.getEmail())
+                        .profilePicture(userSubcontractor.getProfilePicture())
+                        .telephone(userSubcontractor.getTelephone())
+                        .cellphone(userSubcontractor.getCellphone())
+                        .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
+                        .build()
+        );
+
+        return userSubcontractorResponseDtoPage;
+    }
 }

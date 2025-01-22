@@ -19,4 +19,5 @@ public interface CrudDocumentEmployee {
     Page<DocumentResponseDto> findAll(Pageable pageable);
     Optional<DocumentResponseDto> update(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException;
     void delete(String id);
+    Page<DocumentResponseDto> findAllByEmployee(String idSearch, Pageable pageable);
 }

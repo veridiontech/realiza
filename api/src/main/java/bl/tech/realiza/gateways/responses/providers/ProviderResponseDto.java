@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -20,10 +22,18 @@ public class ProviderResponseDto {
     private String city;
     private String address;
     private String number;
+    private List<BranchDto> branches;
 
     // subcontractor
     private String supplier;
 
     // supplier
     private String client;
+
+    @Data
+    @Builder
+    public class BranchDto {
+        private String idBranch;
+        private String nameBranch;
+    }
 }

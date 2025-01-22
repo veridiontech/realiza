@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.responses.contracts;
 
 import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.Requirement;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -21,6 +22,8 @@ public class ContractResponseDto {
     private String contractReference;
     private String description;
     private String allocatedLimit;
+    private String responsible;
+    private Contract.ExpenseType expenseType;
     private Date startDate;
     private Date endDate;
     private List<Activity> activities;

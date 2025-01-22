@@ -13,4 +13,5 @@ public interface CrudContractProviderSupplier {
     Page<ContractResponseDto> findAll(Pageable pageable);
     Optional<ContractResponseDto> update(ContractRequestDto contractProviderSupplierRequestDto);
     void delete(String id);
+    Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
 }

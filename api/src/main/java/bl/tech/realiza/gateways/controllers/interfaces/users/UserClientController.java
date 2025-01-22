@@ -14,4 +14,5 @@ public interface UserClientController {
     ResponseEntity<Page<UserResponseDto>> getAllUsersClient(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<UserResponseDto>> updateUserClient(UserClientRequestDto userClientRequestDto);
     ResponseEntity<Void> deleteUserClient(String id);
+    ResponseEntity<Page<UserResponseDto>> getAllUsersClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

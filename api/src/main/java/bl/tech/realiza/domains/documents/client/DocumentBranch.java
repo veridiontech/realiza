@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -20,6 +21,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("BRANCH")
 public class DocumentBranch extends Document {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Branch branch;
 }

@@ -1,7 +1,7 @@
 package bl.tech.realiza.gateways.requests.enterprises;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.gateways.requests.services.EmailRequestDto;
 import lombok.Data;
 
 @Data
@@ -19,5 +19,5 @@ public class EnterpriseAndUserRequestDto {
     private User.Role role;
     private String password;
     private String idCompany;
-    private EmailRequestDto.Company company;
+    private Provider.Company company;
 }

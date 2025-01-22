@@ -42,6 +42,7 @@ public abstract class User {
         ROLE_MANAGER,
         ROLE_CLIENT,
         ROLE_SUPPLIER,
-        ROLE_SUBCONTRACTOR
+        ROLE_SUBCONTRACTOR,
+        ROLE_VIEWER
     }
 }
