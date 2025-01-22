@@ -2,7 +2,7 @@ import { ArrowLeftRight, Bell, ChartNoAxesGantt, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+// import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
@@ -120,7 +120,7 @@ export function Header() {
                 </Avatar>
               </Link> */}
               <Link to={`/profile-user/${user?.idUser}`}>
-                <ProfilePic />
+                <ProfilePic className="bg-realizaBlue text-white p-2 rounded-full"/>
               </Link>
             </div>
           </div>

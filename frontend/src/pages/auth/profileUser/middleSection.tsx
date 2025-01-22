@@ -2,26 +2,30 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PersonStanding } from 'lucide-react';
+import { useUser } from "@/context/user-provider";
+import { useEffect } from "react";
 
 const profileSchema = z.object({
-    fullName: z.string().min(1, "O nome completo é obrigatório"),
+    firstName: z.string().min(1, "O nome completo é obrigatório"),
+    surname: z.string().min(1,"Sobrenome é obrigatório"),
     email: z.string().email("Insira um e-mail válido"),
     phone: z
       .string()
       .regex(/^\+\d{2}\s\d{2}\s\d{4,5}-\d{4}$/, "Telefone inválido"),
     cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
     description: z.string().min(1, "A descrição é obrigatória"),
-    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   });
   
   type ProfileFormData = z.infer<typeof profileSchema>;
 
 export function MiddleSection (){
-
+    const { user } = useUser()
+    
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setValue,
       } = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
       });
@@ -30,6 +34,14 @@ export function MiddleSection (){
         console.log("Dados do formulário:", data);
         alert("Dados salvos com sucesso!");
       };
+
+      useEffect(() => {
+        setValue("firstName", user?.firstName || "")
+        setValue("surname", user?.surname ||"")
+        setValue("cpf", user?.cpf ||"")
+        setValue("email", user?.email ||"")
+        setValue("phone", user?.phone ||"")
+      }, [])
 
     return (
         <form
@@ -43,18 +55,35 @@ export function MiddleSection (){
 
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Nome Completo
+            Nome
           </label>
           <input
             type="text"
-            {...register("fullName")}
+            {...register("firstName")}
             className={`w-full p-3 border rounded ${
-              errors.fullName ? "border-red-500" : "border-gray-300"
+              errors.firstName ? "border-red-500" : "border-gray-300"
             }`}
             placeholder="Digite seu nome completo"
           />
-          {errors.fullName && (
-            <p className="text-sm text-red-500">{errors.fullName.message}</p>
+          {errors.firstName && (
+            <p className="text-sm text-red-500">{errors.firstName.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Sobrenome
+          </label>
+          <input
+            type="text"
+            {...register("surname")}
+            className={`w-full p-3 border rounded ${
+              errors.surname ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder="Digite seu nome completo"
+          />
+          {errors.surname && (
+            <p className="text-sm text-red-500">{errors.surname.message}</p>
           )}
         </div>
 
