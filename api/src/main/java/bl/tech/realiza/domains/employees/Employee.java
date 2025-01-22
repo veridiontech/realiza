@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.employees;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
@@ -12,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -26,7 +28,7 @@ public abstract class Employee {
     private String idEmployee;
     private String pis;
     private String maritalStatus;
-    private String contract;
+    private String contractType;
     private String cep;
     private String name;
     private String surname;
@@ -60,6 +62,14 @@ public abstract class Employee {
     private ProviderSupplier supplier;
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSubcontractor subcontract;
+
+    @ManyToMany
+    @JoinTable(
+            name = "EMPLOYEE_CONTRACT",
+            joinColumns = @JoinColumn(name = "idEmployee"),
+            inverseJoinColumns = @JoinColumn(name = "idContract")
+    )
+    private List<Contract> contracts;
 
     @PrePersist
     protected void onCreate() {
