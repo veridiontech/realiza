@@ -19,4 +19,5 @@ public interface CrudDocumentClient {
     Page<DocumentResponseDto> findAll(Pageable pageable);
     Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException;
     void delete(String id);
+    Page<DocumentResponseDto> findAllByClient(String idSearch, Pageable pageable);
 }

@@ -53,11 +53,12 @@ public abstract class Employee {
     @Builder.Default
     private Boolean isActive = true;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "client_id_client", referencedColumnName = "idClient")
     private Client client;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier supplier;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSubcontractor subcontract;
 
     @PrePersist

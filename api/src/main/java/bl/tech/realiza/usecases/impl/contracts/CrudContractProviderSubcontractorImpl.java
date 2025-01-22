@@ -11,6 +11,7 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepo
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSubcontractor;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,29 +33,30 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     public ContractResponseDto save(ContractRequestDto contractProviderSubcontractorRequestDto) {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getProviderSubcontractor());
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         List<Activity> activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getActivities());
         if (activities.isEmpty()) {
-            throw new RuntimeException("Activities not found");
+            throw new EntityNotFoundException("Activities not found");
         }
 
         List<Requirement> requirements = requirementRepository.findAllById(contractProviderSubcontractorRequestDto.getRequirements());
         if (requirements.isEmpty()) {
-            throw new RuntimeException("Requirements not found");
+            throw new EntityNotFoundException("Requirements not found");
         }
 
         ContractProviderSubcontractor newContractSubcontractor = ContractProviderSubcontractor.builder()
                 .serviceType(contractProviderSubcontractorRequestDto.getServiceType())
                 .serviceDuration(contractProviderSubcontractorRequestDto.getServiceDuration())
                 .serviceName(contractProviderSubcontractorRequestDto.getServiceName())
+                .contractReference(contractProviderSubcontractorRequestDto.getContractReference())
                 .description(contractProviderSubcontractorRequestDto.getDescription())
                 .allocatedLimit(contractProviderSubcontractorRequestDto.getAllocatedLimit())
+                .expenseType(contractProviderSubcontractorRequestDto.getExpenseType())
                 .startDate(contractProviderSubcontractorRequestDto.getStartDate())
                 .endDate(contractProviderSubcontractorRequestDto.getEndDate())
                 .activities(activities)
                 .requirements(requirements)
-                .contractReference(contractProviderSubcontractorRequestDto.getContractReference())
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
@@ -65,13 +67,14 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .serviceType(savedContractSubcontractor.getServiceType())
                 .serviceDuration(savedContractSubcontractor.getServiceDuration())
                 .serviceName(savedContractSubcontractor.getServiceName())
+                .contractReference(savedContractSubcontractor.getContractReference())
                 .description(savedContractSubcontractor.getDescription())
                 .allocatedLimit(savedContractSubcontractor.getAllocatedLimit())
+                .expenseType(savedContractSubcontractor.getExpenseType())
                 .startDate(savedContractSubcontractor.getStartDate())
                 .endDate(savedContractSubcontractor.getEndDate())
                 .activities(savedContractSubcontractor.getActivities())
                 .requirements(savedContractSubcontractor.getRequirements())
-                .contractReference(savedContractSubcontractor.getContractReference())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
@@ -83,20 +86,21 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     public Optional<ContractResponseDto> findOne(String id) {
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(id);
 
-        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
+        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Contract not found"));
 
         ContractResponseDto contractProviderResponseDto = ContractResponseDto.builder()
                 .idContract(contractProviderSubcontractor.getIdContract())
                 .serviceType(contractProviderSubcontractor.getServiceType())
                 .serviceDuration(contractProviderSubcontractor.getServiceDuration())
                 .serviceName(contractProviderSubcontractor.getServiceName())
+                .contractReference(contractProviderSubcontractor.getContractReference())
                 .description(contractProviderSubcontractor.getDescription())
                 .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                .expenseType(contractProviderSubcontractor.getExpenseType())
                 .startDate(contractProviderSubcontractor.getStartDate())
                 .endDate(contractProviderSubcontractor.getEndDate())
                 .activities(contractProviderSubcontractor.getActivities())
                 .requirements(contractProviderSubcontractor.getRequirements())
-                .contractReference(contractProviderSubcontractor.getContractReference())
                 .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                 .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
@@ -114,13 +118,14 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                         .serviceType(contractProviderSubcontractor.getServiceType())
                         .serviceDuration(contractProviderSubcontractor.getServiceDuration())
                         .serviceName(contractProviderSubcontractor.getServiceName())
+                        .contractReference(contractProviderSubcontractor.getContractReference())
                         .description(contractProviderSubcontractor.getDescription())
                         .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                        .expenseType(contractProviderSubcontractor.getExpenseType())
                         .startDate(contractProviderSubcontractor.getStartDate())
                         .endDate(contractProviderSubcontractor.getEndDate())
                         .activities(contractProviderSubcontractor.getActivities())
                         .requirements(contractProviderSubcontractor.getRequirements())
-                        .contractReference(contractProviderSubcontractor.getContractReference())
                         .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                         .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
                         .build()
@@ -133,7 +138,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     public Optional<ContractResponseDto> update(ContractRequestDto contractProviderSubcontractorRequestDto) {
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getIdContract());
 
-        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new RuntimeException("Contract not found"));
+        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Contract not found"));
 
         List<Activity> activities = List.of();
         List<Requirement> requirements = List.of();
@@ -141,22 +146,24 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         if (contractProviderSubcontractorRequestDto.getActivities() != null) {
             activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getActivities());
             if (activities.isEmpty()) {
-                throw new RuntimeException("Activities not found");
+                throw new EntityNotFoundException("Activities not found");
             }
         }
 
         if (contractProviderSubcontractorRequestDto.getRequirements() != null) {
             requirements = requirementRepository.findAllById(contractProviderSubcontractorRequestDto.getRequirements());
             if (requirements.isEmpty()) {
-                throw new RuntimeException("Requirements not found");
+                throw new EntityNotFoundException("Requirements not found");
             }
         }
 
         contractProviderSubcontractor.setServiceType(contractProviderSubcontractorRequestDto.getServiceType() != null ? contractProviderSubcontractorRequestDto.getServiceType() : contractProviderSubcontractor.getServiceType());
         contractProviderSubcontractor.setServiceDuration(contractProviderSubcontractorRequestDto.getServiceDuration() != null ? contractProviderSubcontractorRequestDto.getServiceDuration() : contractProviderSubcontractor.getServiceDuration());
         contractProviderSubcontractor.setServiceName(contractProviderSubcontractorRequestDto.getServiceName() != null ? contractProviderSubcontractorRequestDto.getServiceName() : contractProviderSubcontractor.getServiceName());
+        contractProviderSubcontractor.setContractReference(contractProviderSubcontractorRequestDto.getContractReference() != null ? contractProviderSubcontractorRequestDto.getContractReference() : contractProviderSubcontractor.getContractReference());
         contractProviderSubcontractor.setDescription(contractProviderSubcontractorRequestDto.getDescription() != null ? contractProviderSubcontractorRequestDto.getDescription() : contractProviderSubcontractor.getDescription());
         contractProviderSubcontractor.setAllocatedLimit(contractProviderSubcontractorRequestDto.getAllocatedLimit() != null ? contractProviderSubcontractorRequestDto.getAllocatedLimit() : contractProviderSubcontractor.getAllocatedLimit());
+        contractProviderSubcontractor.setExpenseType(contractProviderSubcontractorRequestDto.getExpenseType() != null ? contractProviderSubcontractorRequestDto.getExpenseType() : contractProviderSubcontractor.getExpenseType());
         contractProviderSubcontractor.setStartDate(contractProviderSubcontractorRequestDto.getStartDate() != null ? contractProviderSubcontractorRequestDto.getStartDate() : contractProviderSubcontractor.getStartDate());
         contractProviderSubcontractor.setEndDate(contractProviderSubcontractorRequestDto.getEndDate() != null ? contractProviderSubcontractorRequestDto.getEndDate() : contractProviderSubcontractor.getEndDate());
         contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getActivities() != null ? activities : contractProviderSubcontractor.getActivities());
@@ -170,13 +177,14 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .serviceType(savedContractSubcontractor.getServiceType())
                 .serviceDuration(savedContractSubcontractor.getServiceDuration())
                 .serviceName(savedContractSubcontractor.getServiceName())
+                .contractReference(savedContractSubcontractor.getContractReference())
                 .description(savedContractSubcontractor.getDescription())
                 .allocatedLimit(savedContractSubcontractor.getAllocatedLimit())
+                .expenseType(savedContractSubcontractor.getExpenseType())
                 .startDate(savedContractSubcontractor.getStartDate())
                 .endDate(savedContractSubcontractor.getEndDate())
                 .activities(savedContractSubcontractor.getActivities())
                 .requirements(savedContractSubcontractor.getRequirements())
-                .contractReference(savedContractSubcontractor.getContractReference())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
                 .providerSubcontractor(savedContractSubcontractor.getProviderSubcontractor().getFantasyName())
                 .build();
@@ -187,5 +195,31 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     @Override
     public void delete(String id) {
         contractProviderSubcontractorRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
+        Page<ContractProviderSubcontractor> contractProviderSubcontractorPage = contractProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+
+        Page<ContractResponseDto> contractProviderResponseDtoPage = contractProviderSubcontractorPage.map(
+                contractProviderSubcontractor -> ContractResponseDto.builder()
+                        .idContract(contractProviderSubcontractor.getIdContract())
+                        .serviceType(contractProviderSubcontractor.getServiceType())
+                        .serviceDuration(contractProviderSubcontractor.getServiceDuration())
+                        .serviceName(contractProviderSubcontractor.getServiceName())
+                        .contractReference(contractProviderSubcontractor.getContractReference())
+                        .description(contractProviderSubcontractor.getDescription())
+                        .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                        .expenseType(contractProviderSubcontractor.getExpenseType())
+                        .startDate(contractProviderSubcontractor.getStartDate())
+                        .endDate(contractProviderSubcontractor.getEndDate())
+                        .activities(contractProviderSubcontractor.getActivities())
+                        .requirements(contractProviderSubcontractor.getRequirements())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getFantasyName())
+                        .build()
+        );
+
+        return contractProviderResponseDtoPage;
     }
 }

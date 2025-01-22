@@ -18,4 +18,5 @@ public interface CrudDocumentMatrixSubgroup {
     Page<DocumentMatrixResponseDto> findAll(Pageable pageable);
     Optional<DocumentMatrixResponseDto> update(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequest);
     void delete(String id);
+    Page<DocumentMatrixResponseDto> findAllByGroup(String idSearch, Pageable pageable);
 }

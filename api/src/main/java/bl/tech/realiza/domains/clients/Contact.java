@@ -1,5 +1,7 @@
 package bl.tech.realiza.domains.clients;
 
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +25,12 @@ public class Contact {
     @Builder.Default
     private Boolean isActive = true;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Client client;
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    private ProviderSupplier supplier;
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    private ProviderSubcontractor subcontractor;
 }

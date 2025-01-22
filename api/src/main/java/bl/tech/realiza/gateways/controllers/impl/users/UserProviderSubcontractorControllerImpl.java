@@ -74,4 +74,19 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-subcontractor")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<UserResponseDto>> getAllUsersProviderSubcontractorBySubcontractor(@RequestParam(defaultValue = "0") int page,
+                                                                                                 @RequestParam(defaultValue = "5") int size,
+                                                                                                 @RequestParam(defaultValue = "idUser") String sort,
+                                                                                                 @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                                 @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<UserResponseDto> pageUserSubContractor = crudUserSubcontractor.findAllBySubcontractor(idSearch, pageable);
+
+        return ResponseEntity.ok(pageUserSubContractor);
+    }
 }

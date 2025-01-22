@@ -22,6 +22,6 @@ public class Notification {
     @Builder.Default
     private Boolean isActive = true;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private User user;
 }

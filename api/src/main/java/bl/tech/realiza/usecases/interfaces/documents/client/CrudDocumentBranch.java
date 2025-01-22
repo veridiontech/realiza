@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.documents.client;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentClientRequestDto;
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
@@ -19,4 +20,5 @@ public interface CrudDocumentBranch {
     Page<DocumentResponseDto> findAll(Pageable pageable);
     Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
     void delete(String id);
+    Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
 }

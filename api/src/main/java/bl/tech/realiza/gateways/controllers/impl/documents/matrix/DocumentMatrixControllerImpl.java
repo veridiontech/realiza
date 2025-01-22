@@ -69,4 +69,32 @@ public class DocumentMatrixControllerImpl implements DocumentMatrixController {
         crudDocumentMatrix.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-subgroup")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixBySubgroup(@RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "5") int size,
+                                                                                 @RequestParam(defaultValue = "idDocument") String sort,
+                                                                                 @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                 @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentMatrixResponseDto> pageDocumentMatrix = crudDocumentMatrix.findAllBySubgroup(idSearch, pageable);
+        return ResponseEntity.ok(pageDocumentMatrix);
+    }
+
+    @GetMapping("/filtered-group")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixByGroup(@RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "5") int size,
+                                                                                 @RequestParam(defaultValue = "idDocument") String sort,
+                                                                                 @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                 @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentMatrixResponseDto> pageDocumentMatrix = crudDocumentMatrix.findAllByGroup(idSearch, pageable);
+        return ResponseEntity.ok(pageDocumentMatrix);
+    }
 }

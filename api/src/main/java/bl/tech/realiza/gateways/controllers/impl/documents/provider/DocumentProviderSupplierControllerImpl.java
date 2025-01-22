@@ -91,4 +91,19 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-supplier")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplierBySupplier(@RequestParam(defaultValue = "0") int page,
+                                                                                               @RequestParam(defaultValue = "5") int size,
+                                                                                               @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                               @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<DocumentResponseDto> pageDocumentSupplier = crudDocumentSupplier.findAllBySupplier(idSearch, pageable);
+
+        return ResponseEntity.ok(pageDocumentSupplier);
+    }
 }

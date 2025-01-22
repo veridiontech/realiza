@@ -21,7 +21,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/branch")
 @Tag(name = "Branch")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 public class BranchControllerImpl implements BranchControlller {
 
     private final CrudBranchImpl crudBranch;
@@ -74,5 +73,20 @@ public class BranchControllerImpl implements BranchControlller {
         crudBranch.delete(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filtered-client")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClient(@RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "5") int size,
+                                                                          @RequestParam(defaultValue = "idBranch") String sort,
+                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                          @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<BranchResponseDto> pageBranch = crudBranch.findAllByClient(idSearch, pageable);
+
+        return ResponseEntity.ok(pageBranch);
     }
 }

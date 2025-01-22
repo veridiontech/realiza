@@ -14,4 +14,5 @@ public interface ProviderSupplierController {
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplier(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto);
     ResponseEntity<Void> deleteProviderSupplier(String id);
+    ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplierByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

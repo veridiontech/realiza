@@ -97,4 +97,19 @@ public class CrudBranchImpl implements CrudBranch {
     public void delete(String id) {
         branchRepository.deleteById(id);
     }
+
+    @Override
+    public Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable) {
+        Page<Branch> pageBranch = branchRepository.findAllByClient_IdClient(idSearch, pageable);
+
+        Page<BranchResponseDto> pageBranchResponse = pageBranch.map(
+                branch -> BranchResponseDto.builder()
+                        .idBranch(branch.getIdBranch())
+                        .name(branch.getName())
+                        .client(branch.getClient().getIdClient())
+                        .build()
+        );
+
+        return pageBranchResponse;
+    }
 }

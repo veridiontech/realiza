@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.interfaces.contracts;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import org.springframework.data.domain.Page;
@@ -14,4 +15,5 @@ public interface ContractProviderSubcontractorControlller {
     ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSubcontractor(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSubcontractor(ContractRequestDto contractRequestDto);
     ResponseEntity<Void> deleteContractProviderSubcontractor(String id);
+    ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSubcontractorBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

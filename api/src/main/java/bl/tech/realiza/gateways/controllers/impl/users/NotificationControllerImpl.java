@@ -74,4 +74,19 @@ public class NotificationControllerImpl implements NotificationController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-user")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<NotificationResponseDto>> getAllNotificationsByUser(@RequestParam(defaultValue = "0") int page,
+                                                                                   @RequestParam(defaultValue = "5") int size,
+                                                                                   @RequestParam(defaultValue = "idNotification") String sort,
+                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                   @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<NotificationResponseDto> pageNotification = crudNotification.findAllByUser(idSearch, pageable);
+
+        return ResponseEntity.ok(pageNotification);
+    }
 }

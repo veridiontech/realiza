@@ -156,4 +156,28 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     public void delete(String id) {
         providerSubcontractorRepository.deleteById(id);
     }
+
+    @Override
+    public Page<ProviderResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
+        Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+
+        Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
+                providerSubcontractor -> ProviderResponseDto.builder()
+                        .idProvider(providerSubcontractor.getIdProvider())
+                        .cnpj(providerSubcontractor.getCnpj())
+                        .companyName(providerSubcontractor.getCompanyName())
+                        .tradeName(providerSubcontractor.getTradeName())
+                        .fantasyName(providerSubcontractor.getFantasyName())
+                        .email(providerSubcontractor.getEmail())
+                        .cep(providerSubcontractor.getCep())
+                        .state(providerSubcontractor.getState())
+                        .city(providerSubcontractor.getCity())
+                        .address(providerSubcontractor.getAddress())
+                        .number(providerSubcontractor.getNumber())
+                        .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
+                        .build()
+        );
+
+        return providerSubcontractorResponseDtoPage;
+    }
 }

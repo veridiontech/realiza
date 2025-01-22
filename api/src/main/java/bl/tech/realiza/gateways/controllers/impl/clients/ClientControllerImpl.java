@@ -78,43 +78,4 @@ public class ClientControllerImpl implements ClientControlller {
 
         return ResponseEntity.noContent().build();
     }
-
-    @PostMapping("/user")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Override
-    public ResponseEntity<EnterpriseAndUserResponseDto> createClientAndUser(@RequestBody @Valid EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
-        EnterpriseAndUserResponseDto clientAndUser = crudClient.saveBoth(enterpriseAndUserRequestDto);
-
-        return ResponseEntity.of(Optional.of(clientAndUser));
-    }
-
-    @PostMapping("/usertoken")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Override
-    public ResponseEntity<?> createClientAndUserToken(@RequestBody @Valid EnterpriseAndUserRequestDto enterpriseAndUserRequestDto, @RequestParam String token) {
-        boolean isValid = tokenManagerService.validateToken(token);
-        if (isValid){
-            EnterpriseAndUserResponseDto clientAndUser = crudClient.saveBoth(enterpriseAndUserRequestDto);
-
-            return ResponseEntity.of(Optional.of(clientAndUser));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.");
-        }
-
-
-    }
-
-    @GetMapping("/token")
-    @ResponseStatus(HttpStatus.OK)
-    @Override
-    public ResponseEntity<?> getClientAndUserToken(@RequestParam String token, @RequestParam String id) {
-        boolean isValid = tokenManagerService.validateToken(token);
-        if (isValid){
-            Optional<ClientResponseDto> client = crudClient.findOne(id);
-
-            return ResponseEntity.of(Optional.of(client));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.");
-        }
-    }
 }

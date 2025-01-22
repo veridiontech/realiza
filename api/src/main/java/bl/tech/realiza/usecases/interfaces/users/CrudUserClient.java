@@ -15,4 +15,5 @@ public interface CrudUserClient {
     Page<UserResponseDto> findAll(Pageable pageable);
     Optional<UserResponseDto> update(UserClientRequestDto userClientRequestDto);
     void delete(String id);
+    Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable);
 }

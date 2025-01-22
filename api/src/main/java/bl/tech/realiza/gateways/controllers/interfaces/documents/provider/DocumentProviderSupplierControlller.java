@@ -15,4 +15,5 @@ public interface DocumentProviderSupplierControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplier(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderSupplier(String id);
+    ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplierBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

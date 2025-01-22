@@ -74,4 +74,19 @@ public class UserClientControllerImpl implements UserClientController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/filtered-client")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<UserResponseDto>> getAllUsersClientByClient(@RequestParam(defaultValue = "0") int page,
+                                                                           @RequestParam(defaultValue = "5") int size,
+                                                                           @RequestParam(defaultValue = "idUser") String sort,
+                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                           @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<UserResponseDto> pageUserClient = crudUserClient.findAllByClient(idSearch, pageable);
+
+        return ResponseEntity.ok(pageUserClient);
+    }
 }
