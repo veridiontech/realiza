@@ -14,6 +14,7 @@ public class ContractRequestDto {
     private String serviceName;
     private String description;
     private String allocatedLimit;
+    private String responsible;
     private Contract.ExpenseType expenseType;
     private Date startDate;
     private Date endDate;

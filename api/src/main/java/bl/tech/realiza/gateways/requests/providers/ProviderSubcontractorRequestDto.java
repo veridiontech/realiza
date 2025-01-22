@@ -3,6 +3,8 @@ package bl.tech.realiza.gateways.requests.providers;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ProviderSubcontractorRequestDto {
     private String idProvider;
@@ -18,4 +20,5 @@ public class ProviderSubcontractorRequestDto {
     private String number;
     private String supplier;
     private Boolean isActive;
+    private List<String> branches;
 }

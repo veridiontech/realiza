@@ -22,6 +22,7 @@ public class ContractResponseDto {
     private String contractReference;
     private String description;
     private String allocatedLimit;
+    private String responsible;
     private Contract.ExpenseType expenseType;
     private Date startDate;
     private Date endDate;

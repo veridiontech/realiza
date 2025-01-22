@@ -4,10 +4,12 @@ import bl.tech.realiza.domains.contract.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSupplier;
@@ -28,12 +30,17 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ActivityRepository activityRepository;
     private final RequirementRepository requirementRepository;
+    private final UserClientRepository userClientRepository;
 
     @Override
     public ContractResponseDto save(ContractRequestDto contractProviderSupplierRequestDto) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(contractProviderSupplierRequestDto.getProviderSupplier());
 
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        Optional<UserClient> userClientOptional = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible());
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
         if (activities.isEmpty()) {
@@ -52,6 +59,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .contractReference(contractProviderSupplierRequestDto.getContractReference())
                 .description(contractProviderSupplierRequestDto.getDescription())
                 .allocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit())
+                .responsible(userClient)
                 .expenseType(contractProviderSupplierRequestDto.getExpenseType())
                 .startDate(contractProviderSupplierRequestDto.getStartDate())
                 .endDate(contractProviderSupplierRequestDto.getEndDate())
@@ -70,6 +78,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
+                .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
@@ -96,6 +105,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .contractReference(contractProviderSupplier.getContractReference())
                 .description(contractProviderSupplier.getDescription())
                 .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                .responsible(contractProviderSupplier.getResponsible().getIdUser())
                 .expenseType(contractProviderSupplier.getExpenseType())
                 .startDate(contractProviderSupplier.getStartDate())
                 .endDate(contractProviderSupplier.getEndDate())
@@ -121,6 +131,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .contractReference(contractProviderSupplier.getContractReference())
                         .description(contractProviderSupplier.getDescription())
                         .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .responsible(contractProviderSupplier.getResponsible().getIdUser())
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .startDate(contractProviderSupplier.getStartDate())
                         .endDate(contractProviderSupplier.getEndDate())
@@ -139,6 +150,10 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getIdContract());
 
         ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        Optional<UserClient> userClientOptional = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible());
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         List<Activity> activities = List.of();
         List<Requirement> requirements = List.of();
@@ -163,6 +178,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         contractProviderSupplier.setContractReference(contractProviderSupplierRequestDto.getContractReference() != null ? contractProviderSupplierRequestDto.getContractReference() : contractProviderSupplier.getContractReference());
         contractProviderSupplier.setDescription(contractProviderSupplierRequestDto.getDescription() != null ? contractProviderSupplierRequestDto.getDescription() : contractProviderSupplier.getDescription());
         contractProviderSupplier.setAllocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit() != null ? contractProviderSupplierRequestDto.getAllocatedLimit() : contractProviderSupplier.getAllocatedLimit());
+        contractProviderSupplier.setResponsible(contractProviderSupplierRequestDto.getResponsible() != null ? userClient : contractProviderSupplier.getResponsible());
         contractProviderSupplier.setExpenseType(contractProviderSupplierRequestDto.getExpenseType() != null ? contractProviderSupplierRequestDto.getExpenseType() : contractProviderSupplier.getExpenseType());
         contractProviderSupplier.setStartDate(contractProviderSupplierRequestDto.getStartDate() != null ? contractProviderSupplierRequestDto.getStartDate() : contractProviderSupplier.getStartDate());
         contractProviderSupplier.setEndDate(contractProviderSupplierRequestDto.getEndDate() != null ? contractProviderSupplierRequestDto.getEndDate() : contractProviderSupplier.getEndDate());
@@ -180,6 +196,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
+                .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
