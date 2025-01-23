@@ -27,11 +27,16 @@ import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
 import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
 import { AtualizationPage } from "./pages/auth/atualizationsPage";
 import { Branch } from "./pages/auth/branchs/branch";
+import { UserProvider } from "./context/user-provider";
 
 export const router = createBrowserRouter([
   {
     path: "/sistema",
-    element: <AppLayout />,
+    element: (
+      <UserProvider>
+        <AppLayout />
+      </UserProvider>
+    ),
     children: [
       { path: "select-client/:id", element: <SelectClient /> },
       { path: "dashboard/:id", element: <Dashboard /> },
@@ -53,7 +58,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <AuthLayout />,
+    element: (
+      <UserProvider>
+        <AuthLayout />
+      </UserProvider>
+    ),
     children: [
       { path: "/", element: <SignIn /> },
       { path: "forgot-password", element: <ForgotPassword /> },
@@ -63,7 +72,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <ConfigurationLayout />,
+    element: (
+      <UserProvider>
+        <ConfigurationLayout />
+      </UserProvider>
+    ),
     children: [{ path: "profile-user/:id", element: <ProfileUser /> }],
   },
 

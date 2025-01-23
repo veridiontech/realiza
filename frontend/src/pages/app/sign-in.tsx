@@ -34,9 +34,7 @@ export function SignIn() {
   const getUser = async (data: loginFormData) => {
     setLoading(true)
     try {
-      console.log('aa');
       console.log('dados:',data);
-      
       const res = await axios.post(`${ip}/login`, {
         email: data.email,
         password: data.password,

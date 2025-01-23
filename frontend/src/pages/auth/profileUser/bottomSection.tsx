@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LockKeyhole } from "lucide-react";
-import { useUser } from "@/context/user-provider";
+// import { useUser } from "@/context/user-provider";
 
 const profileSchema = z.object({
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),

@@ -34,7 +34,9 @@ export function SelectClient() {
 
   useEffect(() => {
     getClient();
-    if (user?.idUser) {
+    const hasShownToast = localStorage.getItem("hasShownToast");
+
+    if (!hasShownToast && user?.idUser) {
       toast("Você está na versão 1.0.0 do sistema realiza", {
         action: (
           <Button
@@ -45,8 +47,9 @@ export function SelectClient() {
           </Button>
         ),
       });
+      localStorage.setItem("hasShownToast", "true");
     }
-  }, []);
+  }, [user, navigate]);
 
   return (
     <div className="m-10 flex min-h-full justify-center">
