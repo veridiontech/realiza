@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "contract_type")
+@DiscriminatorColumn(name = "employee_type")
 public abstract class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
