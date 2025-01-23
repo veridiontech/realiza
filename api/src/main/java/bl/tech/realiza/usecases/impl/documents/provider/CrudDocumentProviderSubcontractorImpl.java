@@ -60,7 +60,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentProviderSubcontractor newDocumentSubcontractor = DocumentProviderSubcontractor.builder()
                 .title(documentProviderSubcontractorRequestDto.getTitle())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocumentAsString())
+                .documentation(fileDocumentId)
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
@@ -130,22 +130,34 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
         Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
 
         DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
-            // Process the file if it exists
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes()) // Handle the IOException
-                    .build();
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
 
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-
-            // Update the documentBranch with the new file's ID
-            documentSubcontractor.setDocumentation(savedFileDocument.getIdDocumentAsString());
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentSubcontractor.setDocumentation(fileDocumentId);
         }
 
         documentSubcontractor.setTitle(documentProviderSubcontractorRequestDto.getTitle() != null ? documentProviderSubcontractorRequestDto.getTitle() : documentSubcontractor.getTitle());
