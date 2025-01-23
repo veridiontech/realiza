@@ -25,9 +25,11 @@ import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
 import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
 import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
 import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
+import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
 import { AtualizationPage } from "./pages/auth/atualizationsPage";
 import { Branch } from "./pages/auth/branchs/branch";
 import { UserProvider } from "./context/user-provider";
+import EmployeeToContract from "./pages/auth/serviceProviders/employeeToContract";
 
 export const router = createBrowserRouter([
   {
@@ -51,9 +53,11 @@ export const router = createBrowserRouter([
       { path: "serviceProviders/:id", element: <ServiceProvider /> },
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
+      { path: "detailsEmployees/:id/:id", element: <DetailsEmployee /> },
+      { path: "viewDoc", element: <DocumentViewer /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
+      { path: "employee-to-contract", element: <EmployeeToContract /> },
     ],
   },
   {

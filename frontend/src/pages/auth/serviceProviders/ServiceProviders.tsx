@@ -5,11 +5,10 @@ import {
   useFetchServiceProviders,
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
-import { NotebookPen } from "lucide-react";
-// import { ButtonBlue } from "@/components/ui/buttonBlue";
-// import { StepOneServiceProviders } from "./modals/stepOne";
-// import { StepTwoServiceProviders } from "./modals/stepTwo";
-import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
+import { FilePlus2, NotebookPen } from "lucide-react";
+import { ButtonBlue } from "@/components/ui/buttonBlue";
+import { StepOneServiceProviders } from "./modals/stepOne";
+import { StepTwoServiceProviders } from "./modals/stepTwo";
 
 export function ServiceProvider() {
   const itemsPerPage = 5;
@@ -56,12 +55,22 @@ export function ServiceProvider() {
       key: "idProvider",
       label: "Ações",
       render: (value: string) => (
-        <button
-          onClick={() => console.log("Ação para o fornecedor:", value)}
-          className="ml-4 text-blue-500 hover:underline"
-        >
-          <NotebookPen />
-        </button>
+        <div>
+          <button
+            onClick={() => console.log("Ação para o fornecedor:", value)}
+            className="text-blue-500 hover:underline"
+          >
+            <NotebookPen />
+          </button>
+          <button
+            onClick={() => {
+              setIsStepTwoModalOpen(true);
+            }}
+            className="ml-2 text-blue-500 hover:underline"
+          >
+            <FilePlus2 />
+          </button>
+        </div>
       ),
     },
   ] as {
@@ -103,7 +112,6 @@ export function ServiceProvider() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-        
 
         {/* {isStepOneModalOpen && (
           <StepOneServiceProviders

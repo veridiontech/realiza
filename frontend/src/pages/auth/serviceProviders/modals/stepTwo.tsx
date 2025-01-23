@@ -3,6 +3,7 @@ import * as z from "zod";
 import { useActivities, Activity } from "@/hooks/gets/useActivities";
 import { useRequirements, Requirement } from "@/hooks/gets/useRequirements";
 import axios from "axios";
+import { ip } from "@/utils/ip";
 
 interface StepTwoServiceProvidersProps {
   onClose: () => void;
@@ -60,7 +61,7 @@ export function StepTwoServiceProviders({
       });
 
       const response = await axios.post(
-        "https://realiza.onrender.com/contract/supplier",
+        `${ip}/contract/supplier`,
         validatedData,
       );
 
@@ -119,7 +120,7 @@ export function StepTwoServiceProviders({
           name: "serviceTypeExpense",
           label: "* Tipo de Despesa",
           type: "select",
-          options: ["CAPEX", "OPEX"],
+          options: ["CAPEX", "OPEX", ""],
           required: true,
         },
         {
@@ -145,7 +146,7 @@ export function StepTwoServiceProviders({
         },
         {
           name: "allocatedLimit",
-          label: "Número Máximo de Colaboradores Alocados",
+          label: "Número Máximo de Empregados Alocados",
           type: "number",
           placeholder: "Exemplo: 50000",
           required: false,
@@ -160,6 +161,7 @@ export function StepTwoServiceProviders({
           name: "endDate",
           label: "Data de Término",
           type: "date",
+          required: false,
         },
         {
           name: "activities",

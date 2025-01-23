@@ -1,91 +1,122 @@
-import { useAddDocument, AddDocumentData } from "@/hooks/posts/useAddDocument";
+import React, { useState } from "react";
+import axios from "axios";
 import { Modal } from "@/components/modal";
 
 interface AddDocumentProps {
+  isOpen: boolean;
   onClose: () => void;
+  employeeId: string;
 }
 
-export function AddDocument({ onClose }: AddDocumentProps) {
-  const addDocumentMutation = useAddDocument();
+export const AddDocument: React.FC<AddDocumentProps> = ({
+  isOpen,
+  onClose,
+  employeeId,
+}) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [status, setStatus] = useState("");
 
-  const handleSubmit = (data: { [key: string]: any }) => {
-    // Verificação de tipo antes de enviar
-    if (data.documentType && data.file) {
-      // Criar a estrutura necessária para o envio do arquivo
-      const formData = new FormData();
-      formData.append("documentType", data.documentType);
-      formData.append("file", data.file);
-
-      addDocumentMutation.mutate(formData as unknown as AddDocumentData, {
-        onSuccess: () => {
-          alert("Documento adicionado com sucesso!");
-          onClose();
-        },
-        onError: (error) => {
-          alert("Erro ao adicionar documento.");
-          console.error(error);
-        },
-      });
-    } else {
-      alert("Todos os campos obrigatórios devem ser preenchidos.");
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0]);
+      setFileName(event.target.files[0].name);
     }
   };
 
-  return (
+  const handleSubmit = async (formData: Record<string, any>) => {
+    if (!selectedFile) {
+      alert("Por favor, selecione um arquivo antes de enviar.");
+      return;
+    }
+
+    const data = new FormData();
+
+    const jsonBlob = new Blob(
+      [
+        JSON.stringify({
+          title: formData.title,
+          status: "ativo",
+          employee: employeeId,
+        }),
+      ],
+      { type: "application/json" },
+    );
+
+    data.append("documentEmployeeRequestDto", jsonBlob);
+    data.append("file", selectedFile);
+
+    try {
+      const response = await axios.post(
+        "https://realiza.onrender.com/document/employee",
+        data,
+      );
+      setStatus("Arquivo enviado com sucesso!");
+    } catch (error) {
+      console.error(error);
+      setStatus("Erro ao enviar o arquivo. Tente novamente.");
+    }
+  };
+
+  return isOpen ? (
     <Modal
-      title="Adicionar Documento"
+      title="Upload de Documento"
+      onClose={onClose}
+      onSubmit={handleSubmit}
       fields={[
         {
-          name: "documentType",
+          name: "title",
           label: "Tipo de Documento",
           type: "select",
           options: [
-            "RG",
-            "CPF",
-            "CNH",
+            "Contrato de Trabalho",
+            "Declaração",
             "Comprovante de Residência",
-            "Certidão de Nascimento",
-            "Certidão de Casamento",
-            "Certidão de Óbito",
-            "Carteira de Trabalho",
-            "Cartão do SUS",
-            "Cartão do Plano de Saúde",
-            "Cartão do Banco",
-            "Cartão do Transporte",
-            "Cartão de Crédito",
-            "Cartão de Débito",
-            "Cartão de Vacinação",
-            "Cartão de Estacionamento",
-            "Cartão de Benefício",
-            "Cartão de Convênio",
-            "Cartão de Acesso",
-            "Cartão de Alimentação",
-            "Cartão de Refeição",
-            "Cartão de Combustível",
-            "Cartão de Pagamento",
-            "Cartão de Crachá",
-            "Cartão de Identificação",
-            "Cartão de Afiliação",
-            "Cartão de Fidelidade",
-            "Cartão de Desconto",
-            "Cartão de Estudante",
-            "Cartão de Visita",
-            "Cartão de Embarque",
-            "Cartão de Empréstimo",
-            "Cartão de Segurança",
+            "Certificado",
           ],
           required: true,
         },
         {
           name: "file",
-          label: "Anexar Documento",
-          type: "file",
-          accept: ".pdf,.doc,.docx,.jpg,.png", // Define os formatos aceitos
-          required: true,
+          label: "Arquivo PDF",
+          type: "custom",
+          render: ({ onChange }) => (
+            <div className="flex flex-col items-start">
+              <label className="w-full">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => {
+                    handleFileChange(e);
+                    onChange(e.target.files?.[0]);
+                  }}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    className="cursor-pointer rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
+                    onClick={() =>
+                      document.getElementById("file-upload")?.click()
+                    }
+                  >
+                    Escolher Arquivo
+                  </button>
+                  {fileName && (
+                    <span className="text-sm text-yellow-400">
+                      {fileName.length > 30
+                        ? `${fileName.substring(0, 30)}...`
+                        : fileName}
+                    </span>
+                  )}
+                </div>
+              </label>
+            </div>
+          ),
         },
       ]}
-      onSubmit={handleSubmit}
-      onClose={onClose}
-    />
-  );
-}
+    >
+      {status && <p className="text-yellow-400">{status}</p>}
+    </Modal>
+  ) : null;
+};

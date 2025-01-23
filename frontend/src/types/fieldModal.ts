@@ -9,4 +9,5 @@ export type FieldType =
   | "date"
   | "file"
   | "custom"
+  | "radio"
   | "multiselect";
