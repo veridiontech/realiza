@@ -1,13 +1,12 @@
 package bl.tech.realiza.gateways.requests.users;
 
 import bl.tech.realiza.domains.user.User;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.TimeZone;
 
 @Data
-public class UserProviderSubcontractorRequestDto {
+public class UserManagerRequestDto {
     private String cpf;
     private String description;
     private String password;
@@ -21,6 +20,5 @@ public class UserProviderSubcontractorRequestDto {
     private String profilePicture;
     private String telephone;
     private String cellphone;
-    private String subcontractor;
     private Boolean isActive;
 }
