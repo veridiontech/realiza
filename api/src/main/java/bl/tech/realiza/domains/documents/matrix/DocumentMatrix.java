@@ -24,12 +24,8 @@ public class DocumentMatrix {
     private String doesBlock;
     @Builder.Default
     private Boolean isActive = true;
-    private LocalDateTime creationDate;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentMatrixSubgroup subGroup;
-
-    @PrePersist
-    protected void onCreate() {
-        this.creationDate = LocalDateTime.now();
-    }
 }

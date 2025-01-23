@@ -8,7 +8,7 @@ import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Employee } from "@/types/employee";
 
-export const EmployeesTable = () => {
+export const EmployeesTable = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
@@ -19,6 +19,17 @@ export const EmployeesTable = () => {
   useEffect(() => {
     fetchEmployees(itemsPerPage, currentPage - 1);
   }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleModalSubmit = (formData: Record<string, any>) => {
+    console.log("Dados do novo colaborador:", formData);
+    setIsModalOpen(false);
+  };
 
   const columns: {
     key: keyof Employee;
@@ -41,8 +52,8 @@ export const EmployeesTable = () => {
     {
       key: "id",
       label: "Ações",
-      render: (_, row) => (
-        <Link to={`/sistema/detailsEmployees/${row.id}`}>
+      render: (value, row) => (
+        <Link to={`/detailsEmployees/${row.id}`}>
           <button className="ml-4 text-blue-500 hover:underline">
             <Settings2 />
           </button>
@@ -51,21 +62,10 @@ export const EmployeesTable = () => {
     },
   ];
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handleModalSubmit = (formData: Record<string, any>) => {
-    console.log("Dados do novo funcionário:", formData);
-    setIsModalOpen(false);
-  };
-
   if (error) {
     return (
       <p className="text-center text-red-500">
-        Erro ao carregar os dados de funcionários: {error}
+        Erro ao carregar os dados de Colaborador: {error}
       </p>
     );
   }

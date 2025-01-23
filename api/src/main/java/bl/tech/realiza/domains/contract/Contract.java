@@ -34,7 +34,8 @@ public abstract class Contract {
     private User responsible;
     private Date startDate;
     private Date endDate;
-    private LocalDateTime creationDate;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
     private Boolean isActive = true;
 
@@ -53,11 +54,6 @@ public abstract class Contract {
             inverseJoinColumns = @JoinColumn(name = "idRequirement")
     )
     private List<Requirement> requirements;
-
-    @PrePersist
-    protected void onCreate() {
-        this.creationDate = LocalDateTime.now();
-    }
 
     public enum ExpenseType {
         CAPEX,

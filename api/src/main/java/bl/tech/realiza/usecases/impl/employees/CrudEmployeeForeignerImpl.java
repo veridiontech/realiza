@@ -98,6 +98,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .email(employeeForeignerRequestDto.getEmail())
                 .levelOfEducation(employeeForeignerRequestDto.getLevelOfEducation())
                 .cbo(employeeForeignerRequestDto.getCbo())
+                .situation(employeeForeignerRequestDto.getSituation())
                 .rneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate())
                 .passport(employeeForeignerRequestDto.getPassport())
@@ -132,6 +133,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .email(savedEmployeeForeigner.getEmail())
                 .levelOfEducation(savedEmployeeForeigner.getLevelOfEducation())
                 .cbo(savedEmployeeForeigner.getCbo())
+                .situation(savedEmployeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
                 .passport(savedEmployeeForeigner.getPassport())
@@ -181,6 +183,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .email(employeeForeigner.getEmail())
                 .levelOfEducation(employeeForeigner.getLevelOfEducation())
                 .cbo(employeeForeigner.getCbo())
+                .situation(employeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                 .passport(employeeForeigner.getPassport())
@@ -229,6 +232,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                         .email(employeeForeigner.getEmail())
                         .levelOfEducation(employeeForeigner.getLevelOfEducation())
                         .cbo(employeeForeigner.getCbo())
+                        .situation(employeeForeigner.getSituation())
                         .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                         .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                         .passport(employeeForeigner.getPassport())
@@ -286,6 +290,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         employeeForeigner.setEmail(employeeForeignerRequestDto.getEmail() != null ? employeeForeignerRequestDto.getEmail() : employeeForeigner.getEmail());
         employeeForeigner.setLevelOfEducation(employeeForeignerRequestDto.getLevelOfEducation() != null ? employeeForeignerRequestDto.getLevelOfEducation() : employeeForeigner.getLevelOfEducation());
         employeeForeigner.setCbo(employeeForeignerRequestDto.getCbo() != null ? employeeForeignerRequestDto.getCbo() : employeeForeigner.getCbo());
+        employeeForeigner.setSituation(employeeForeignerRequestDto.getSituation() != null ? employeeForeignerRequestDto.getSituation() : employeeForeigner.getSituation());
         employeeForeigner.setRneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() != null ? employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() : employeeForeigner.getRneRnmFederalPoliceProtocol());
         employeeForeigner.setPassport(employeeForeignerRequestDto.getPassport() != null ? employeeForeignerRequestDto.getPassport() : employeeForeigner.getPassport());
         employeeForeigner.setBrazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate() != null ? employeeForeignerRequestDto.getBrazilEntryDate() : employeeForeigner.getBrazilEntryDate());
@@ -320,6 +325,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .email(savedEmployeeForeigner.getEmail())
                 .levelOfEducation(savedEmployeeForeigner.getLevelOfEducation())
                 .cbo(savedEmployeeForeigner.getCbo())
+                .situation(savedEmployeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
                 .passport(savedEmployeeForeigner.getPassport())

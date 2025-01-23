@@ -11,6 +11,7 @@ public class UserClientRequestDto {
     private String cpf;
     private String description;
     private String password;
+    private String newPassword;
     private String position;
     private User.Role role;
     private String firstName;
