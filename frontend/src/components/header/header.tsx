@@ -1,8 +1,15 @@
-import { ArrowLeftRight, Bell, ChartNoAxesGantt, Search } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Bell,
+  ChartNoAxesGantt,
+  LogOut,
+  Search,
+  User,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+// import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
 import { LateralMenu } from "./lateralMenu";
@@ -14,11 +21,19 @@ import { useEffect, useState } from "react";
 import { useClient } from "@/context/Client-Provider";
 import { propsClient } from "@/types/interfaces";
 import { ProfilePic } from "./profile-pic";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const { setClient } = useClient();
-  const { user } = useUser();
+  const { user, logout } = useUser();
 
   const getIdUser = user?.idUser;
 
@@ -27,7 +42,6 @@ export function Header() {
       const res = await axios.get(`${ip}/client`);
       setClients(res.data.content);
       console.log(res.data.content);
-      
     } catch (err) {
       console.log("erro ao puxar clientes", err);
     }
@@ -71,9 +85,9 @@ export function Header() {
               Cliente Selecionado:
             </span>
             <select
-              onChange={(e) => handleSelectClient(e.target.value)} 
-              defaultValue="" 
-              className="text-black border rounded-md p-1"
+              onChange={(e) => handleSelectClient(e.target.value)}
+              defaultValue=""
+              className="rounded-md border p-1 text-black"
             >
               <option value="" disabled>
                 Selecione um cliente
@@ -119,9 +133,32 @@ export function Header() {
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </Link> */}
-              <Link to={`/profile-user/${user?.idUser}`}>
-                <ProfilePic />
-              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <ProfilePic className="bg-realizaBlue rounded-full p-2 text-white" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="dark:bg-primary mr-5">
+                  <DropdownMenuLabel>
+                    {user?.firstName} {user?.surname}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Link to={`/profile-user/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <User />
+                        <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem onClick={logout} className="cursor-pointer hover:bg-gray-200">
+                    <div className="flex items-center gap-1">
+                      <LogOut />
+                      <p>Sair</p>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

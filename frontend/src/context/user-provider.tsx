@@ -1,7 +1,11 @@
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import { propsUser } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface UserContextProps {
   user: propsUser | null;
@@ -24,46 +28,74 @@ export function useUser() {
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState(false);
   const [user, setUser] = useState<propsUser | null>(null);
+  const location = useLocation(); 
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      getUser(userId);
-    }
+    validateTokenAndFetchUser();
   }, []);
 
-  const getUser = async (userId: string) => {
+  const isTokenValid = (token: string): boolean => {
     try {
-      const res = await axios.get(`${ip}/user/client/${userId}`, {
-        // params: {
-        //   idUser: userId
-        // },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
-        },
-      });
-
-      if (res.data) {
-        setUser(res.data);
-        setAuthUser(true);
-      } else {
-        console.error("Usuário não encontrado.");
-        setUser(null);
-        setAuthUser(false);
-      }
+      // throw new Error()
+      const decoded: any = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+      return decoded.exp > currentTime;
     } catch (error) {
-      console.error("Erro ao buscar usuário:", error);
-      setUser(null);
-      setAuthUser(false);
+      console.error("Erro ao decodificar o token:", error);
+      return false;
     }
   };
 
-  const logout = async () => {
+  const validateTokenAndFetchUser = async () => {
+    const token = localStorage.getItem("tokenClient");
+    const userId = localStorage.getItem("userId");
+
+    if (token && isTokenValid(token) && userId) {
+      try {
+        const res = await axios.get(`${ip}/user/client/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data) {
+          setUser(res.data);
+          setAuthUser(true);
+        } else {
+          console.error("Usuário não encontrado.");
+          logout();
+        }
+      } catch (error) {
+        console.error("Erro ao buscar usuário:", error);
+        logout();
+      }
+    } else {
+      if (location.pathname === "/") {
+        return;
+      }
+      toast("Sua sessão expirou. Faça seu Login novamente", {
+        action: (
+          <Button
+            className="bg-realizaBlue"
+            onClick={() => navigate("/")}
+          >
+            Entendido
+          </Button>
+        ),
+      });
+      
+    }
+  };
+
+  const logout = () => {
     try {
       localStorage.removeItem("userId");
       localStorage.removeItem("tokenClient");
+      localStorage.removeItem("hasShowToast");
       setUser(null);
       setAuthUser(false);
+      navigate("/")
     } catch (error) {
       console.error(`Erro ao deslogar: ${error}`);
     }

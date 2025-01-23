@@ -1,24 +1,27 @@
-import { useUser } from "@/context/user-provider"
+import { useUser } from "@/context/user-provider";
+import { Skeleton } from "../ui/skeleton";
 
-export function ProfilePic() {
-    const{ user } = useUser()
+interface profilePicProps {
+  className: string;
+}
 
-    console.log(user);
-    
+export function ProfilePic({ className }: profilePicProps) {
+  const { user } = useUser();
 
-    const getNameUser = user?.firstName?.[0]
-    console.log(getNameUser);
-    
-    const getSurnameUser = user?.surname?.[0] 
+  const getNameUser = user?.firstName?.[0];
 
+  const getSurnameUser = user?.surname?.[0];
 
-
-    return(
-        <div>
-            <div className="bg-realizaBlue text-white p-2 rounded-full">
-                <span>{getNameUser}</span>
-                <span>{getSurnameUser}</span>
-            </div>
+  return (
+    <div>
+      {user ? (
+        <div className={className}>
+          <span>{getNameUser}</span>
+          <span>{getSurnameUser}</span>
         </div>
-    )
+      ) : (
+        <Skeleton className="w-[5vw] h-[10vh] rounded-full"/>
+      )}
+    </div>
+  );
 }

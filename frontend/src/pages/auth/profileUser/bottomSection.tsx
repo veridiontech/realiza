@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { LockKeyhole } from "lucide-react";
+// import { useUser } from "@/context/user-provider";
 
 const profileSchema = z.object({
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
@@ -24,6 +25,7 @@ export function BottomSection() {
   const onSubmit = () => {
     alert("Dados salvos com sucesso!");
   };
+
 
   return (
     <div className="flex flex-col bg-white shadow rounded-lg p-6 mt-6">
