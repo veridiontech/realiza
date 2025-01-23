@@ -11,6 +11,7 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,11 +30,13 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+
         Optional<Client> clientOptional = clientRepository.findById(documentClientRequestDto.getClient());
 
         Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
-        FileDocument fileDocument = null;
         try {
             fileDocument = FileDocument.builder()
                     .name(file.getOriginalFilename())
@@ -48,6 +51,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         FileDocument savedFileDocument= null;
         try {
             savedFileDocument = fileRepository.save(fileDocument);
+            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new EntityNotFoundException(e);
@@ -56,7 +60,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentClient newDocumentClient = DocumentClient.builder()
                 .title(documentClientRequestDto.getTitle())
                 .status(documentClientRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocument())
+                .documentation(savedFileDocument.getIdDocumentAsString())
                 .client(client)
                 .build();
 
@@ -80,14 +84,15 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new EntityNotFoundException("Document not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentClient.getDocumentation());
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentClient.getDocumentation()));
+
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentClientResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentClient.getIdDocumentation())
                 .title(documentClient.getTitle())
                 .status(documentClient.getStatus())
-                .documentation(fileDocument.getIdDocument())
+                .documentation(documentClient.getDocumentation())
                 .fileName(fileDocument.getName())
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
@@ -104,7 +109,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         Page<DocumentResponseDto> documentClientResponseDtoPage = documentClientPage.map(
                 documentClient -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentClient.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentClient.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
@@ -141,7 +146,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             FileDocument savedFileDocument = fileRepository.save(fileDocument);
 
             // Update the documentBranch with the new file's ID
-            documentClient.setDocumentation(savedFileDocument.getIdDocument());
+            documentClient.setDocumentation(savedFileDocument.getIdDocumentAsString());
         }
 
         documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
@@ -173,7 +178,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         Page<DocumentResponseDto> documentClientResponseDtoPage = documentClientPage.map(
                 documentClient -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentClient.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentClient.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()

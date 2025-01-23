@@ -11,6 +11,7 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,22 +30,37 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getSubcontractor());
 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
-        FileDocument fileDocument = FileDocument.builder()
-                .name(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .data(file.getBytes())
-                .build();
+        try {
+            fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
 
-        FileDocument savedFileDocument= fileRepository.save(fileDocument);
+        FileDocument savedFileDocument= null;
+        try {
+            savedFileDocument = fileRepository.save(fileDocument);
+            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
 
         DocumentProviderSubcontractor newDocumentSubcontractor = DocumentProviderSubcontractor.builder()
                 .title(documentProviderSubcontractorRequestDto.getTitle())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocument())
+                .documentation(savedFileDocument.getIdDocumentAsString())
                 .providerSubcontractor(providerSubcontractor)
                 .build();
 
@@ -68,7 +84,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
@@ -76,7 +92,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .title(documentSubcontractor.getTitle())
                 .status(documentSubcontractor.getStatus())
                 .documentation(documentSubcontractor.getDocumentation())
-                .fileName(fileDocument.getIdDocument())
+                .fileName(fileDocument.getName())
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
                 .creationDate(documentSubcontractor.getCreationDate())
@@ -92,7 +108,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
                 documentSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
@@ -100,7 +116,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument.getIdDocument())
+                            .fileName(fileDocument.getName())
                             .fileContentType(fileDocument.getContentType())
                             .fileData(fileDocument.getData())
                             .creationDate(documentSubcontractor.getCreationDate())
@@ -129,7 +145,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             FileDocument savedFileDocument = fileRepository.save(fileDocument);
 
             // Update the documentBranch with the new file's ID
-            documentSubcontractor.setDocumentation(savedFileDocument.getIdDocument());
+            documentSubcontractor.setDocumentation(savedFileDocument.getIdDocumentAsString());
         }
 
         documentSubcontractor.setTitle(documentProviderSubcontractorRequestDto.getTitle() != null ? documentProviderSubcontractorRequestDto.getTitle() : documentSubcontractor.getTitle());
@@ -161,7 +177,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
                 documentSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
@@ -169,7 +185,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument.getIdDocument())
+                            .fileName(fileDocument.getName())
                             .fileContentType(fileDocument.getContentType())
                             .fileData(fileDocument.getData())
                             .creationDate(documentSubcontractor.getCreationDate())
