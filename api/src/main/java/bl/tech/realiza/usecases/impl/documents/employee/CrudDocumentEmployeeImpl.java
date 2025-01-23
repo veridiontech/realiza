@@ -14,6 +14,7 @@ import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmploy
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import net.sourceforge.tess4j.TesseractException;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,22 +34,37 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+
         Optional<Employee> employeeOptional = employeeRepository.findById(documentEmployeeRequestDto.getEmployee());
 
         Employee employee = employeeOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        FileDocument fileDocument = FileDocument.builder()
-                .name(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .data(file.getBytes())
-                .build();
+        try {
+            fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
 
-        FileDocument savedFileDocument= fileRepository.save(fileDocument);
+        FileDocument savedFileDocument= null;
+        try {
+            savedFileDocument = fileRepository.save(fileDocument);
+            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
 
         DocumentEmployee newDocumentEmployee = DocumentEmployee.builder()
                 .title(documentEmployeeRequestDto.getTitle())
                 .status(documentEmployeeRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocument())
+                .documentation(savedFileDocument.getIdDocumentAsString())
                 .employee(employee)
                 .build();
 
@@ -72,7 +88,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
@@ -96,7 +112,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
                 documentEmployee -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
@@ -133,7 +149,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
             FileDocument savedFileDocument = fileRepository.save(fileDocument);
 
             // Update the documentBranch with the new file's ID
-            documentEmployee.setDocumentation(savedFileDocument.getIdDocument());
+            documentEmployee.setDocumentation(savedFileDocument.getIdDocumentAsString());
         }
 
         documentEmployee.setTitle(documentEmployeeRequestDto.getTitle() != null ? documentEmployeeRequestDto.getTitle() : documentEmployee.getTitle());
@@ -165,7 +181,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
                 documentEmployee -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
