@@ -60,8 +60,8 @@ public class NotificationControllerImpl implements NotificationController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<NotificationResponseDto>> updateNotification(@RequestBody @Valid NotificationRequestDto notificationRequestDto) {
-        Optional<NotificationResponseDto> notification = crudNotification.update(notificationRequestDto);
+    public ResponseEntity<Optional<NotificationResponseDto>> updateNotification(@PathVariable String id, @RequestBody @Valid NotificationRequestDto notificationRequestDto) {
+        Optional<NotificationResponseDto> notification = crudNotification.update(id, notificationRequestDto);
 
         return ResponseEntity.of(Optional.of(notification));
     }

@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
         Optional<Client> clientOptional = clientRepository.findById(userClientRequestDto.getClient());
 
-        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword());
 
@@ -73,7 +74,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     public Optional<UserResponseDto> findOne(String id) {
         Optional<UserClient> userClientOptional = userClientRepository.findById(id);
 
-        UserClient userClient = userClientOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
                 .idUser(userClient.getIdUser())
@@ -122,10 +123,10 @@ public class CrudUserClientImpl implements CrudUserClient {
     }
 
     @Override
-    public Optional<UserResponseDto> update(UserClientRequestDto userClientRequestDto) {
-        Optional<UserClient> userClientOptional = userClientRepository.findById(userClientRequestDto.getIdUser());
+    public Optional<UserResponseDto> update(String id, UserClientRequestDto userClientRequestDto) {
+        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
 
-        UserClient userClient = userClientOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
         userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());

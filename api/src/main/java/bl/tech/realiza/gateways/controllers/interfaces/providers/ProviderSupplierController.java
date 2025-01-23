@@ -12,7 +12,7 @@ public interface ProviderSupplierController {
     ResponseEntity<ProviderResponseDto> createProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto);
     ResponseEntity<Optional<ProviderResponseDto>> getOneProviderSupplier(String id);
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplier(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto);
+    ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(String id, ProviderSupplierRequestDto providerSupplierRequestDto);
     ResponseEntity<Void> deleteProviderSupplier(String id);
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplierByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

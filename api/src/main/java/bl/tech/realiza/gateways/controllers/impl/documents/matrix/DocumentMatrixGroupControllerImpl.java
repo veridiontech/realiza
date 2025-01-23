@@ -58,8 +58,8 @@ public class DocumentMatrixGroupControllerImpl implements DocumentMatrixGroupCon
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixGroup(@RequestBody @Valid DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto) {
-        Optional<DocumentMatrixResponseDto> documentMatrixGroup = crudDocumentMatrixGroup.update(documentMatrixGroupRequestDto);
+    public ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixGroup(@PathVariable String id, @RequestBody @Valid DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto) {
+        Optional<DocumentMatrixResponseDto> documentMatrixGroup = crudDocumentMatrixGroup.update(id, documentMatrixGroupRequestDto);
         return ResponseEntity.of(Optional.of(documentMatrixGroup));
     }
 

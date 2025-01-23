@@ -14,6 +14,6 @@ public interface ClientControlller {
     ResponseEntity<ClientResponseDto> createClient(ClientRequestDto clientRequestDto);
     ResponseEntity<Optional<ClientResponseDto>> getOneClient(String id);
     ResponseEntity<Page<ClientResponseDto>> getAllClients(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<ClientResponseDto>> updateClient(ClientRequestDto clientRequestDto);
+    ResponseEntity<Optional<ClientResponseDto>> updateClient(String id, ClientRequestDto clientRequestDto);
     ResponseEntity<Void> deleteClient(String id);
 }

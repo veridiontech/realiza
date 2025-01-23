@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class BranchRequestDto {
-    private String idBranch;
     private String name;
     private String client;
     private Boolean isActive;

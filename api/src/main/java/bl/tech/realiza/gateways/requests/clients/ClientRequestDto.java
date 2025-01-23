@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ClientRequestDto {
-    private String idClient;
     private String cnpj;
     private String tradeName;
     private String fantasyName;

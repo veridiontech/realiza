@@ -12,6 +12,6 @@ public interface CrudActivity {
     ActivityResponseDto save(ActivityRequestDto activityRequestDto);
     Optional<ActivityResponseDto> findOne(String id);
     Page<ActivityResponseDto> findAll(Pageable pageable);
-    Optional<ActivityResponseDto> update(ActivityRequestDto activityRequestDto);
+    Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto);
     void delete(String id);
 }

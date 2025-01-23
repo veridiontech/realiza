@@ -60,8 +60,8 @@ public class UserProviderSupplierControllerImpl implements UserProviderSupplierC
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<UserResponseDto>> updateUserSupplier(@RequestBody @Valid UserProviderSupplierRequestDto userSupplierRequestDto) {
-        Optional<UserResponseDto> userSupplier = crudUserSupplier.update(userSupplierRequestDto);
+    public ResponseEntity<Optional<UserResponseDto>> updateUserSupplier(@PathVariable String id, @RequestBody @Valid UserProviderSupplierRequestDto userSupplierRequestDto) {
+        Optional<UserResponseDto> userSupplier = crudUserSupplier.update(id, userSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(userSupplier));
     }

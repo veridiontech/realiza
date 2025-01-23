@@ -1,17 +1,15 @@
 package bl.tech.realiza.gateways.requests.employees;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 public class EmployeeBrazilianRequestDto {
-    private String idEmployee;
     private String pis;
     private String maritalStatus;
-    private String contract;
+    private String contractType;
     private String cep;
     private String name;
     private String surname;
@@ -39,4 +37,5 @@ public class EmployeeBrazilianRequestDto {
     private String supplier;
     private String subcontract;
     private Boolean isActive;
+    private List<String> idContracts;
 }

@@ -17,13 +17,13 @@ public interface EmployeeController {
     ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     ResponseEntity<Optional<EmployeeResponseDto>> getOneEmployeeBrazilian(String id);
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesBrazilian(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
+    ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeBrazilian(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     ResponseEntity<Void> deleteEmployeeBrazilian(String id);
 
     // foreigner
     ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     ResponseEntity<Optional<EmployeeResponseDto>> getOneEmployeeForeigner(String id);
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesForeigner(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
+    ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto);
     ResponseEntity<Void> deleteEmployeeForeigner(String id);
 }

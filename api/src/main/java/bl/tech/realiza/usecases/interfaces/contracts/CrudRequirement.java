@@ -12,6 +12,6 @@ public interface CrudRequirement {
     RequirementResponseDto save(RequirementRequestDto requirementRequestDto);
     Optional<RequirementResponseDto> findOne(String id);
     Page<RequirementResponseDto> findAll(Pageable pageable);
-    Optional<RequirementResponseDto> update(RequirementRequestDto requirementRequestDto);
+    Optional<RequirementResponseDto> update(String id, RequirementRequestDto requirementRequestDto);
     void delete(String id);
 }

@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class DocumentMatrixGroupRequestDto {
-    private String idGroup;
     private String groupName;
 }

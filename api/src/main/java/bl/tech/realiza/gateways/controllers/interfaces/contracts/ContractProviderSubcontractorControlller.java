@@ -13,7 +13,7 @@ public interface ContractProviderSubcontractorControlller {
     ResponseEntity<ContractResponseDto> createContractProviderSubcontractor(ContractRequestDto contractRequestDto);
     ResponseEntity<Optional<ContractResponseDto>> getOneContractProviderSubcontractor(String id);
     ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSubcontractor(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSubcontractor(ContractRequestDto contractRequestDto);
+    ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSubcontractor(String id, ContractRequestDto contractRequestDto);
     ResponseEntity<Void> deleteContractProviderSubcontractor(String id);
     ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSubcontractorBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

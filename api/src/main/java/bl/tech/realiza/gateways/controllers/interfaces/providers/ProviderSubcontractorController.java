@@ -12,7 +12,7 @@ public interface ProviderSubcontractorController {
     ResponseEntity<ProviderResponseDto> createProviderSubcontractor(ProviderSubcontractorRequestDto providerSubcontractorRequestDto);
     ResponseEntity<Optional<ProviderResponseDto>> getOneProviderSubcontractor(String id);
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractor(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<ProviderResponseDto>> updateProviderSubcontractor(ProviderSubcontractorRequestDto providerSubcontractorRequestDto);
+    ResponseEntity<Optional<ProviderResponseDto>> updateProviderSubcontractor(String id, ProviderSubcontractorRequestDto providerSubcontractorRequestDto);
     ResponseEntity<Void> deleteProviderSubcontractor(String id);
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractorBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

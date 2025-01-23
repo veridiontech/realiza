@@ -18,7 +18,7 @@ public interface CrudDocumentBranch {
     DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException;
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
-    Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
+    Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
     void delete(String id);
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
 }

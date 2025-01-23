@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSupplier;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(documentProviderSupplierRequestDto.getSupplier());
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
 
         FileDocument fileDocument = FileDocument.builder()
                 .name(file.getOriginalFilename())
@@ -65,10 +66,10 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
 
-        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
+        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentSupplier.getDocumentation())
@@ -112,10 +113,10 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(documentProviderSupplierRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
 
-        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
+        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
         if (file != null && !file.isEmpty()) {
             // Process the file if it exists

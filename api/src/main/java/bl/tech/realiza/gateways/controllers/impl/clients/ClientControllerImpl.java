@@ -64,8 +64,8 @@ public class ClientControllerImpl implements ClientControlller {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ClientResponseDto>> updateClient(@RequestBody @Valid ClientRequestDto clientRequestDto) {
-        Optional<ClientResponseDto> client = crudClient.update(clientRequestDto);
+    public ResponseEntity<Optional<ClientResponseDto>> updateClient(@PathVariable String id, @RequestBody @Valid ClientRequestDto clientRequestDto) {
+        Optional<ClientResponseDto> client = crudClient.update(id, clientRequestDto);
 
         return ResponseEntity.of(Optional.of(client));
     }

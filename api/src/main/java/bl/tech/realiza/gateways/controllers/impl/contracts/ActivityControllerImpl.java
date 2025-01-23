@@ -60,8 +60,8 @@ public class ActivityControllerImpl implements ActivityControlller {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ActivityResponseDto>> updateActivity(@RequestBody @Valid ActivityRequestDto activityRequestDto) {
-        Optional<ActivityResponseDto> activity = crudActivity.update(activityRequestDto);
+    public ResponseEntity<Optional<ActivityResponseDto>> updateActivity(@PathVariable String id, @RequestBody @Valid ActivityRequestDto activityRequestDto) {
+        Optional<ActivityResponseDto> activity = crudActivity.update(id, activityRequestDto);
 
         return ResponseEntity.of(Optional.of(activity));
     }

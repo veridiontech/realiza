@@ -7,6 +7,7 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubg
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixSubgroupRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrixSubgroup;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
 
         Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(documentMatrixSubgroupRequest.getGroup());
 
-        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new RuntimeException("Group not found"));
+        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
         DocumentMatrixSubgroup newDocumentMatrixSubgroup = DocumentMatrixSubgroup.builder()
                 .subgroupName(documentMatrixSubgroupRequest.getSubgroupName())
@@ -49,7 +50,7 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
 
         Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(id);
 
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
+        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentSubgroup(documentMatrixSubgroup.getIdDocumentSubgroup())
@@ -76,10 +77,10 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
     }
 
     @Override
-    public Optional<DocumentMatrixResponseDto> update(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequest) {
-        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixSubgroupRequest.getIdSubgroup());
+    public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequest) {
+        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(id);
 
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
+        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
         documentMatrixSubgroup.setSubgroupName(documentMatrixSubgroupRequest.getSubgroupName() != null ? documentMatrixSubgroupRequest.getSubgroupName() : documentMatrixSubgroup.getSubgroupName());
 

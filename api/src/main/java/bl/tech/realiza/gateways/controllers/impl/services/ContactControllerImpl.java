@@ -61,8 +61,8 @@ public class ContactControllerImpl implements ContactControlller {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ContactResponseDto>> updateContact(@RequestBody @Valid ContactRequestDto contactRequestDto) {
-        Optional<ContactResponseDto> contact = crudContact.update(contactRequestDto);
+    public ResponseEntity<Optional<ContactResponseDto>> updateContact(@PathVariable String id, @RequestBody @Valid ContactRequestDto contactRequestDto) {
+        Optional<ContactResponseDto> contact = crudContact.update(id, contactRequestDto);
 
         return ResponseEntity.of(Optional.of(contact));
     }

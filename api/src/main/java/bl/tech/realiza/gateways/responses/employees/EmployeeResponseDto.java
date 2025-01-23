@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,7 +15,7 @@ public class EmployeeResponseDto {
     private String idEmployee;
     private String pis;
     private String maritalStatus;
-    private String contract;
+    private String contractType;
     private String cep;
     private String name;
     private String surname;
@@ -36,6 +37,7 @@ public class EmployeeResponseDto {
     private String email;
     private String levelOfEducation;
     private String cbo;
+    private List<ContractDto> contracts;
 
     // brazilian
     private String rg;
@@ -54,4 +56,11 @@ public class EmployeeResponseDto {
 
     // supplier
     private String supplier;
+
+    @Data
+    @Builder
+    public static class ContractDto {
+        private String idContract;
+        private String serviceName;
+    }
 }

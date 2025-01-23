@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.repositories.services.ContactRepository;
 import bl.tech.realiza.gateways.requests.services.ContactRequestDto;
 import bl.tech.realiza.gateways.responses.services.ContactResponseDto;
 import bl.tech.realiza.usecases.interfaces.CrudContact;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public class CrudContactImpl implements CrudContact {
     public ContactResponseDto save(ContactRequestDto contactRequestDto) {
         Optional<Client> clientOptional = clientRepository.findById(contactRequestDto.getClient());
 
-        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         Contact newContact = Contact.builder()
                 .department(contactRequestDto.getDepartment())
@@ -56,7 +57,7 @@ public class CrudContactImpl implements CrudContact {
     public Optional<ContactResponseDto> findOne(String id) {
         Optional<Contact> contactOptional = contactRepository.findById(id);
 
-        Contact contact = contactOptional.orElseThrow(() -> new RuntimeException("Contact not found"));
+        Contact contact = contactOptional.orElseThrow(() -> new EntityNotFoundException("Contact not found"));
 
         ContactResponseDto contactResponse = ContactResponseDto.builder()
                 .idContact(contact.getIdContact())
@@ -91,10 +92,10 @@ public class CrudContactImpl implements CrudContact {
     }
 
     @Override
-    public Optional<ContactResponseDto> update(ContactRequestDto contactRequestDto) {
-        Optional<Contact> contactOptional = contactRepository.findById(contactRequestDto.getIdContact());
+    public Optional<ContactResponseDto> update(String id, ContactRequestDto contactRequestDto) {
+        Optional<Contact> contactOptional = contactRepository.findById(id);
 
-        Contact contact = contactOptional.orElseThrow(() -> new RuntimeException("Contact not found"));
+        Contact contact = contactOptional.orElseThrow(() -> new EntityNotFoundException("Contact not found"));
 
         contact.setDepartment(contactRequestDto.getDepartment() != null ? contactRequestDto.getDepartment() : contact.getDepartment());
         contact.setEmail(contactRequestDto.getEmail() != null ? contactRequestDto.getEmail() : contact.getEmail());
