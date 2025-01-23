@@ -7,6 +7,7 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubg
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrix;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     public DocumentMatrixResponseDto save(DocumentMatrixRequestDto documentMatrixRequestDto) {
         Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubGroup());
 
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
+        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
         DocumentMatrix newDocumentMatrix = DocumentMatrix.builder()
                 .name(documentMatrixRequestDto.getName())
@@ -55,7 +56,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     public Optional<DocumentMatrixResponseDto> findOne(String id) {
         Optional<DocumentMatrix> documentMatrixOptional = documentMatrixRepository.findById(id);
 
-        DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new RuntimeException("DocumentMatrix not found"));
+        DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
@@ -93,11 +94,11 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixRequestDto documentMatrixRequestDto) {
         Optional<DocumentMatrix> documentMatrixOptional = documentMatrixRepository.findById(id);
 
-        DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new RuntimeException("DocumentMatrix not found"));
+        DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
 
         Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubGroup());
 
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
+        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
         documentMatrix.setName(documentMatrixRequestDto.getName() != null ? documentMatrixRequestDto.getName() : documentMatrix.getName());
         documentMatrix.setRisk(documentMatrixRequestDto.getRisk() != null ? documentMatrixRequestDto.getRisk() : documentMatrix.getRisk());

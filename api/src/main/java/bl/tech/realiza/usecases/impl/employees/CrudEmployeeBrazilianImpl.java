@@ -51,7 +51,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         if (employeeBrazilianRequestDto.getClient() != null) {
             Optional<Client> clientOptional = clientRepository.findById(employeeBrazilianRequestDto.getClient());
 
-            Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+            Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
             newEmployeeBrazilian = EmployeeBrazilian.builder()
                     .client(client)
@@ -60,7 +60,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         } else if (employeeBrazilianRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
 
-            ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+            ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 
             newEmployeeBrazilian = EmployeeBrazilian.builder()
                     .supplier(providerSupplier)
@@ -69,7 +69,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         } else if(employeeBrazilianRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeBrazilianRequestDto.getSubcontract());
 
-            ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+            ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
             if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
                 contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -158,7 +158,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     public Optional<EmployeeResponseDto> findOne(String id) {
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
 
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
                 .idEmployee(employeeBrazilian.getIdEmployee())
@@ -256,7 +256,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
 
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());

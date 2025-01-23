@@ -11,6 +11,7 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import net.sourceforge.tess4j.TesseractException;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
         Optional<Employee> employeeOptional = employeeRepository.findById(documentEmployeeRequestDto.getEmployee());
 
-        Employee employee = employeeOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
+        Employee employee = employeeOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
         FileDocument fileDocument = FileDocument.builder()
                 .name(file.getOriginalFilename())
@@ -69,10 +70,10 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
 
-        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
+        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentEmployee.getDocumentation());
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentEmployee.getIdDocumentation())
@@ -119,7 +120,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public Optional<DocumentResponseDto> update(String id, DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
         Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
 
-        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
+        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
 
         if (file != null && !file.isEmpty()) {
             // Process the file if it exists

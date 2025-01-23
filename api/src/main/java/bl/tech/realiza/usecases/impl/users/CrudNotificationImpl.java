@@ -7,6 +7,7 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,7 @@ public class CrudNotificationImpl implements CrudNotification {
     public NotificationResponseDto save(NotificationRequestDto notificationRequestDto) {
         Optional<User> userOptional = userRepository.findById(notificationRequestDto.getUser());
 
-        User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Notification newNotification = Notification.builder()
                 .title(notificationRequestDto.getTitle())
@@ -51,7 +52,7 @@ public class CrudNotificationImpl implements CrudNotification {
     public Optional<NotificationResponseDto> findOne(String id) {
         Optional<Notification> notificationOptional = notificationRepository.findById(id);
 
-        Notification notification = notificationOptional.orElseThrow(() -> new RuntimeException("Notification not found"));
+        Notification notification = notificationOptional.orElseThrow(() -> new EntityNotFoundException("Notification not found"));
 
         NotificationResponseDto notificationResponse = NotificationResponseDto.builder()
                 .idNotification(notification.getIdNotification())
@@ -85,7 +86,7 @@ public class CrudNotificationImpl implements CrudNotification {
     public Optional<NotificationResponseDto> update(String id, NotificationRequestDto notificationRequestDto) {
         Optional<Notification> notificationOptional = notificationRepository.findById(id);
 
-        Notification notification = notificationOptional.orElseThrow(() -> new RuntimeException("Notification not found"));
+        Notification notification = notificationOptional.orElseThrow(() -> new EntityNotFoundException("Notification not found"));
 
         notification.setTitle(notificationRequestDto.getTitle() != null ? notificationRequestDto.getTitle() : notification.getTitle());
         notification.setDescription(notificationRequestDto.getDescription() != null ? notificationRequestDto.getDescription() : notification.getDescription());

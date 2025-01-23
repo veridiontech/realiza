@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor());
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword());
 
@@ -75,7 +76,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public Optional<UserResponseDto> findOne(String id) {
         Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
 
-        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
                 .cpf(userSubcontractor.getCpf())
@@ -125,7 +126,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public Optional<UserResponseDto> update(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
         Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
 
-        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
         userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());

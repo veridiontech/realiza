@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.requests.contracts.RequirementRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.RequirementResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudRequirement;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +39,7 @@ public class CrudRequirementImpl implements CrudRequirement {
     public Optional<RequirementResponseDto> findOne(String id) {
         Optional<Requirement> requirementOptional = requirementRepository.findById(id);
 
-        Requirement requirement = requirementOptional.orElseThrow(() -> new RuntimeException("Requirement not found"));
+        Requirement requirement = requirementOptional.orElseThrow(() -> new EntityNotFoundException("Requirement not found"));
 
         RequirementResponseDto requirementResponse = RequirementResponseDto.builder()
                 .idRequirement(requirement.getIdRequirement())
@@ -66,7 +67,7 @@ public class CrudRequirementImpl implements CrudRequirement {
     public Optional<RequirementResponseDto> update(String id, RequirementRequestDto requirementRequestDto) {
         Optional<Requirement> requirementOptional = requirementRepository.findById(id);
 
-        Requirement requirement = requirementOptional.orElseThrow(() -> new RuntimeException("Requirement not found"));
+        Requirement requirement = requirementOptional.orElseThrow(() -> new EntityNotFoundException("Requirement not found"));
 
         requirement.setTitle(requirementRequestDto.getTitle() != null ? requirementRequestDto.getTitle() : requirement.getTitle());
         requirement.setIsActive(requirementRequestDto.getIsActive() != null ? requirementRequestDto.getIsActive() : requirement.getIsActive());

@@ -7,6 +7,7 @@ import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixGroupReq
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrixGroup;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +41,7 @@ public class CrudDocumentMatrixGroupImpl implements CrudDocumentMatrixGroup {
     public Optional<DocumentMatrixResponseDto> findOne(String id) {
         Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(id);
 
-        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new RuntimeException("Group not found"));
+        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentGroup(documentMatrixGroup.getIdDocumentGroup())
@@ -68,7 +69,7 @@ public class CrudDocumentMatrixGroupImpl implements CrudDocumentMatrixGroup {
     public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto) {
         Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(id);
 
-        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new RuntimeException("Group not found"));
+        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
         documentMatrixGroup.setGroupName(documentMatrixGroupRequestDto.getGroupName() != null ? documentMatrixGroupRequestDto.getGroupName() : documentMatrixGroup.getGroupName());
 

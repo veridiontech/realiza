@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier());
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword());
 
@@ -72,7 +73,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public Optional<UserResponseDto> findOne(String id) {
         Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
 
-        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
                 .cpf(userProvider.getCpf())
@@ -122,7 +123,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public Optional<UserResponseDto> update(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
         Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
 
-        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
         userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());

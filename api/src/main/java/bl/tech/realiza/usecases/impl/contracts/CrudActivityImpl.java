@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudActivity;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +39,7 @@ public class CrudActivityImpl implements CrudActivity {
     public Optional<ActivityResponseDto> findOne(String id) {
         Optional<Activity> activityOptional = activityRepository.findById(id);
 
-        Activity activity = activityOptional.orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityOptional.orElseThrow(() -> new EntityNotFoundException("Activity not found"));
 
         ActivityResponseDto activityResponse = ActivityResponseDto.builder()
                 .idActivity(activity.getIdActivity())
@@ -66,7 +67,7 @@ public class CrudActivityImpl implements CrudActivity {
     public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto) {
         Optional<Activity> activityOptional = activityRepository.findById(id);
 
-        Activity activity = activityOptional.orElseThrow(() -> new RuntimeException("Activity not found"));
+        Activity activity = activityOptional.orElseThrow(() -> new EntityNotFoundException("Activity not found"));
 
         activity.setTitle(activityRequestDto.getTitle() != null ? activityRequestDto.getTitle() : activity.getTitle());
         activity.setIsActive(activityRequestDto.getIsActive() != null ? activityRequestDto.getIsActive() : activity.getIsActive());

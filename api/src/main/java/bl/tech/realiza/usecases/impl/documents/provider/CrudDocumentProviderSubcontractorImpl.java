@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getSubcontractor());
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         FileDocument fileDocument = FileDocument.builder()
                 .name(file.getOriginalFilename())
@@ -65,10 +66,10 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
 
-        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSubcontractor.getDocumentation());
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentSubcontractor.getDocumentation())
@@ -115,7 +116,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
         Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
 
-        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new RuntimeException("Subcontractor not found"));
+        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
             // Process the file if it exists
