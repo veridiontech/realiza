@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 @Data
@@ -36,6 +37,8 @@ public abstract class User {
     private String cellphone;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Role {
         ROLE_ADMIN,

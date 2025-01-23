@@ -105,6 +105,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .email(employeeBrazilianRequestDto.getEmail())
                 .levelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation())
                 .cbo(employeeBrazilianRequestDto.getCbo())
+                .situation(employeeBrazilianRequestDto.getSituation())
                 .rg(employeeBrazilianRequestDto.getRg())
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
                 .contracts(contracts)
@@ -138,6 +139,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .email(savedEmployeeBrazilian.getEmail())
                 .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
                 .cbo(savedEmployeeBrazilian.getCbo())
+                .situation(savedEmployeeBrazilian.getSituation())
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .client(savedEmployeeBrazilian.getClient().getIdClient())
@@ -186,6 +188,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .email(employeeBrazilian.getEmail())
                 .levelOfEducation(employeeBrazilian.getLevelOfEducation())
                 .cbo(employeeBrazilian.getCbo())
+                .situation(employeeBrazilian.getSituation())
                 .rg(employeeBrazilian.getRg())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
                 .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
@@ -233,6 +236,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                         .email(employeeBrazilian.getEmail())
                         .levelOfEducation(employeeBrazilian.getLevelOfEducation())
                         .cbo(employeeBrazilian.getCbo())
+                        .situation(employeeBrazilian.getSituation())
                         .rg(employeeBrazilian.getRg())
                         .admissionDate(employeeBrazilian.getAdmissionDate())
                         .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
@@ -289,6 +293,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setEmail(employeeBrazilianRequestDto.getEmail() != null ? employeeBrazilianRequestDto.getEmail() : employeeBrazilian.getEmail());
         employeeBrazilian.setLevelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation() != null ? employeeBrazilianRequestDto.getLevelOfEducation() : employeeBrazilian.getLevelOfEducation());
         employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCbo() != null ? employeeBrazilianRequestDto.getCbo() : employeeBrazilian.getCbo());
+        employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null ? employeeBrazilianRequestDto.getSituation() : employeeBrazilian.getSituation());
         employeeBrazilian.setRg(employeeBrazilianRequestDto.getRg() != null ? employeeBrazilianRequestDto.getRg() : employeeBrazilian.getRg());
         employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
         employeeBrazilian.setIsActive(employeeBrazilianRequestDto.getIsActive() != null ? employeeBrazilianRequestDto.getIsActive() : employeeBrazilian.getIsActive());
@@ -322,6 +327,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .email(savedEmployeeBrazilian.getEmail())
                 .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
                 .cbo(savedEmployeeBrazilian.getCbo())
+                .situation(savedEmployeeBrazilian.getSituation())
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .client(savedEmployeeBrazilian.getClient().getIdClient())

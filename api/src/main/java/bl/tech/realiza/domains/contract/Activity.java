@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,4 +21,6 @@ public class Activity {
     private String title;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
 }

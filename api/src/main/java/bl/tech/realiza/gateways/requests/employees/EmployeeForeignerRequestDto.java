@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.requests.employees;
 
+import bl.tech.realiza.domains.employees.Employee;
 import lombok.Data;
 
 import java.sql.Date;
@@ -31,6 +32,7 @@ public class EmployeeForeignerRequestDto {
     private String email;
     private String levelOfEducation;
     private String cbo;
+    private Employee.Situation situation;
     private String rneRnmFederalPoliceProtocol;
     private Date brazilEntryDate;
     private String passport;

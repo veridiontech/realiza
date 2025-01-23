@@ -50,8 +50,10 @@ public abstract class Employee {
     private String email;
     private String levelOfEducation;
     private String cbo;
-    private String situation;
-    private LocalDateTime creationDate;
+    @Builder.Default
+    private Situation situation = Situation.DESALOCADO;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
     private Boolean isActive = true;
 
@@ -71,8 +73,10 @@ public abstract class Employee {
     )
     private List<Contract> contracts;
 
-    @PrePersist
-    protected void onCreate() {
-        this.creationDate = LocalDateTime.now();
+    public enum Situation {
+        ALOCADO,
+        DESALOCADO,
+        DEMITIDO,
+        AFASTADO
     }
 }
