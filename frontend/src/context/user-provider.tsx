@@ -53,7 +53,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     if (token && isTokenValid(token) && userId) {
       try {
-        const res = await axios.get(`${ip}/user/client/${userId}`, {
+        const res = await axios.get(`${ip}/user/manager/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -68,7 +68,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error("Erro ao buscar usuário:", error);
-        logout();
+        logout()
       }
     } else {
       if (location.pathname === "/") {

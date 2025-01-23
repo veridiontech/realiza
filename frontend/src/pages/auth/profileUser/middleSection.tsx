@@ -34,11 +34,11 @@ export function MiddleSection (){
       const onSubmit = async(data: ProfileFormData) => {
         const payload = {
           ...data,
-          password: user?.password
+          password: "40028922"
         }
         try{
-          console.log(data);
-          await axios.put(`${ip}/user/client/${user?.idUser}`, payload)
+          console.log(payload);
+          await axios.put(`${ip}/user/manager/${user?.idUser}`, payload)
           console.log("sucesso");
           
         }catch(err){
@@ -52,7 +52,7 @@ export function MiddleSection (){
         setValue("cpf", user?.cpf ||"")
         setValue("email", user?.email ||"")
         setValue("telephone", user?.telephone ||"")
-        setValue("description", user?.description ||"")
+        setValue("description", user?.description ||"") 
       }, [])
 
     return (

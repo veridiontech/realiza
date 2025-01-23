@@ -6,9 +6,10 @@ import {
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
 import { FilePlus2, NotebookPen } from "lucide-react";
-import { ButtonBlue } from "@/components/ui/buttonBlue";
-import { StepOneServiceProviders } from "./modals/stepOne";
-import { StepTwoServiceProviders } from "./modals/stepTwo";
+// import { ButtonBlue } from "@/components/ui/buttonBlue";
+// import { StepOneServiceProviders } from "./modals/stepOne";
+// import { StepTwoServiceProviders } from "./modals/stepTwo";
+import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
 
 export function ServiceProvider() {
   const itemsPerPage = 5;
