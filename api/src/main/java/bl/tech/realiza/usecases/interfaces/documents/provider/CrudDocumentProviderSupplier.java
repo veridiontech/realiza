@@ -17,7 +17,7 @@ public interface CrudDocumentProviderSupplier {
     DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
-    Optional<DocumentResponseDto> update(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
+    Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
     void delete(String id);
     Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
 }

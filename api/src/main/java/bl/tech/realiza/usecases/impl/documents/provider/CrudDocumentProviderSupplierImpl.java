@@ -112,8 +112,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(documentProviderSupplierRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
 
         DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new RuntimeException("Document supplier not found"));
 

@@ -122,8 +122,8 @@ public class CrudUserClientImpl implements CrudUserClient {
     }
 
     @Override
-    public Optional<UserResponseDto> update(UserClientRequestDto userClientRequestDto) {
-        Optional<UserClient> userClientOptional = userClientRepository.findById(userClientRequestDto.getIdUser());
+    public Optional<UserResponseDto> update(String id, UserClientRequestDto userClientRequestDto) {
+        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
 
         UserClient userClient = userClientOptional.orElseThrow(() -> new RuntimeException("User not found"));
 

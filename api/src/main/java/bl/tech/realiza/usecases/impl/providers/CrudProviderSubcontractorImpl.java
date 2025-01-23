@@ -114,8 +114,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     }
 
     @Override
-    public Optional<ProviderResponseDto> update(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(providerSubcontractorRequestDto.getIdProvider());
+    public Optional<ProviderResponseDto> update(String id, ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
 

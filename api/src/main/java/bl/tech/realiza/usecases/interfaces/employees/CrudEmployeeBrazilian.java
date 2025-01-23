@@ -12,6 +12,6 @@ public interface CrudEmployeeBrazilian {
     EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     Optional<EmployeeResponseDto> findOne(String id);
     Page<EmployeeResponseDto> findAll(Pageable pageable);
-    Optional<EmployeeResponseDto> update(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
+    Optional<EmployeeResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     void delete(String id);
 }

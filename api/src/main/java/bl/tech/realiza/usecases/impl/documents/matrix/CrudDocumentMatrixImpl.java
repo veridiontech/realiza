@@ -90,8 +90,8 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     }
 
     @Override
-    public Optional<DocumentMatrixResponseDto> update(DocumentMatrixRequestDto documentMatrixRequestDto) {
-        Optional<DocumentMatrix> documentMatrixOptional = documentMatrixRepository.findById(documentMatrixRequestDto.getIdDocumentMatrix());
+    public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixRequestDto documentMatrixRequestDto) {
+        Optional<DocumentMatrix> documentMatrixOptional = documentMatrixRepository.findById(id);
 
         DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new RuntimeException("DocumentMatrix not found"));
 

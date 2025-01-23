@@ -63,8 +63,8 @@ public class CrudRequirementImpl implements CrudRequirement {
     }
 
     @Override
-    public Optional<RequirementResponseDto> update(RequirementRequestDto requirementRequestDto) {
-        Optional<Requirement> requirementOptional = requirementRepository.findById(requirementRequestDto.getIdRequirement());
+    public Optional<RequirementResponseDto> update(String id, RequirementRequestDto requirementRequestDto) {
+        Optional<Requirement> requirementOptional = requirementRepository.findById(id);
 
         Requirement requirement = requirementOptional.orElseThrow(() -> new RuntimeException("Requirement not found"));
 

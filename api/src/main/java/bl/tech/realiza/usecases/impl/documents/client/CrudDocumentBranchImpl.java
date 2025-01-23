@@ -113,8 +113,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(documentBranchRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
 
         DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
 

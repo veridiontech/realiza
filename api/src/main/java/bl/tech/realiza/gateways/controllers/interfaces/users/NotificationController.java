@@ -12,7 +12,7 @@ public interface NotificationController {
     ResponseEntity<NotificationResponseDto> createNotification(NotificationRequestDto notificationRequestDto);
     ResponseEntity<Optional<NotificationResponseDto>> getOneNotification(String id);
     ResponseEntity<Page<NotificationResponseDto>> getAllNotifications(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<NotificationResponseDto>> updateNotification(NotificationRequestDto notificationRequestDto);
+    ResponseEntity<Optional<NotificationResponseDto>> updateNotification(String id, NotificationRequestDto notificationRequestDto);
     ResponseEntity<Void> deleteNotification(String id);
     ResponseEntity<Page<NotificationResponseDto>> getAllNotificationsByUser(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

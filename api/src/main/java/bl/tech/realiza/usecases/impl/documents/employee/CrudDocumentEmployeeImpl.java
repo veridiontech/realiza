@@ -116,8 +116,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(documentEmployeeRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
 
         DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new RuntimeException("DocumentEmployee not found"));
 

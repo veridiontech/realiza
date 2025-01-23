@@ -82,8 +82,9 @@ public class EmployeeControllerImpl implements EmployeeController {
     @PutMapping("/brazilian/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeBrazilian(@RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
-        Optional<EmployeeResponseDto> employeeBrazilian = crudEmployeeBrazilian.update(employeeBrazilianRequestDto);
+    public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeBrazilian(@PathVariable String id,
+                                                                                 @RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
+        Optional<EmployeeResponseDto> employeeBrazilian = crudEmployeeBrazilian.update(id, employeeBrazilianRequestDto);
 
         return ResponseEntity.of(Optional.of(employeeBrazilian));
     }
@@ -132,8 +133,8 @@ public class EmployeeControllerImpl implements EmployeeController {
     @PutMapping("/foreigner/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(@RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
-        Optional<EmployeeResponseDto> employeeForeigner = crudEmployeeForeigner.update(employeeForeignerRequestDto);
+    public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(@PathVariable String id, @RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
+        Optional<EmployeeResponseDto> employeeForeigner = crudEmployeeForeigner.update(id, employeeForeignerRequestDto);
 
         return ResponseEntity.of(Optional.of(employeeForeigner));
     }

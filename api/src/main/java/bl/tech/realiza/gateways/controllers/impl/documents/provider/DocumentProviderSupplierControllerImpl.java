@@ -70,12 +70,13 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(
+            @PathVariable String id,
             @RequestPart("documentSupplierRequestDto")
             @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         Optional<DocumentResponseDto> documentSupplier = null;
         try {
-            documentSupplier = crudDocumentSupplier.update(documentSupplierRequestDto, file);
+            documentSupplier = crudDocumentSupplier.update(id, documentSupplierRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

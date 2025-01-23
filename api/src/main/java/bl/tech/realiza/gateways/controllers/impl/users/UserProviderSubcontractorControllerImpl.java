@@ -60,8 +60,8 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<UserResponseDto>> updateUserProviderSubcontractor(@RequestBody @Valid UserProviderSubcontractorRequestDto userSubcontractorRequestDto) {
-        Optional<UserResponseDto> userSubcontractor = crudUserSubcontractor.update(userSubcontractorRequestDto);
+    public ResponseEntity<Optional<UserResponseDto>> updateUserProviderSubcontractor(@PathVariable String id, @RequestBody @Valid UserProviderSubcontractorRequestDto userSubcontractorRequestDto) {
+        Optional<UserResponseDto> userSubcontractor = crudUserSubcontractor.update(id, userSubcontractorRequestDto);
 
         return ResponseEntity.of(Optional.of(userSubcontractor));
     }

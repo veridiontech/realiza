@@ -13,7 +13,7 @@ public interface DocumentProviderSupplierControlller {
     ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderSupplier(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplier(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderSupplier(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplierBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

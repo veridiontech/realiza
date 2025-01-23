@@ -119,8 +119,8 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     }
 
     @Override
-    public Optional<UserResponseDto> update(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
-        Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(userProviderSupplierRequestDto.getIdUser());
+    public Optional<UserResponseDto> update(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
+        Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
 
         UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new RuntimeException("User not found"));
 

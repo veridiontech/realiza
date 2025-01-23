@@ -153,8 +153,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     }
 
     @Override
-    public Optional<ContractResponseDto> update(ContractRequestDto contractProviderSupplierRequestDto) {
-        Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSupplierRequestDto.getIdContract());
+    public Optional<ContractResponseDto> update(String id, ContractRequestDto contractProviderSupplierRequestDto) {
+        Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(id);
 
         ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 

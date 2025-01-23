@@ -8,7 +8,6 @@ import java.util.List;
 
 @Data
 public class ContractRequestDto {
-    private String idContract;
     private String serviceType;
     private String serviceDuration;
     private String serviceName;
@@ -24,7 +23,8 @@ public class ContractRequestDto {
     private Boolean isActive;
 
     // supplier
-    private String providerSupplier;
+    private String providerSupplier; // also for subcontractor
+    private String client;
 
     // subcontractor
     private String providerSubcontractor;

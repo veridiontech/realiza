@@ -65,8 +65,8 @@ public class CrudDocumentMatrixGroupImpl implements CrudDocumentMatrixGroup {
     }
 
     @Override
-    public Optional<DocumentMatrixResponseDto> update(DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto) {
-        Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(documentMatrixGroupRequestDto.getIdGroup());
+    public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto) {
+        Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(id);
 
         DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new RuntimeException("Group not found"));
 

@@ -251,10 +251,10 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     }
 
     @Override
-    public Optional<EmployeeResponseDto> update(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
+    public Optional<EmployeeResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         List<Contract> contracts = List.of();
 
-        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(employeeBrazilianRequestDto.getIdEmployee());
+        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
 
         EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new RuntimeException("Employee not found"));
 

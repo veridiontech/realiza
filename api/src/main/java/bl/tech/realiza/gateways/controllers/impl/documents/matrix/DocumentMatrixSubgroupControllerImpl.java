@@ -57,8 +57,8 @@ public class DocumentMatrixSubgroupControllerImpl implements DocumentMatrixSubgr
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixSubgroup(@RequestBody @Valid DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequestDto) {
-        Optional<DocumentMatrixResponseDto> documentMatrixGroup = documentMatrixSubgroup.update(documentMatrixSubgroupRequestDto);
+    public ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixSubgroup(@PathVariable String id, @RequestBody @Valid DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequestDto) {
+        Optional<DocumentMatrixResponseDto> documentMatrixGroup = documentMatrixSubgroup.update(id, documentMatrixSubgroupRequestDto);
         return ResponseEntity.of(Optional.of(documentMatrixGroup));
     }
 

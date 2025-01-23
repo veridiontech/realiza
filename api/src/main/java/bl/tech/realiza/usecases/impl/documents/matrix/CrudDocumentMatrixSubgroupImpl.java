@@ -76,8 +76,8 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
     }
 
     @Override
-    public Optional<DocumentMatrixResponseDto> update(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequest) {
-        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixSubgroupRequest.getIdSubgroup());
+    public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequest) {
+        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(id);
 
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new RuntimeException("Subgroup not found"));
 

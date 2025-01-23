@@ -60,8 +60,8 @@ public class BranchControllerImpl implements BranchControlller {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<BranchResponseDto>> updateBranch(@RequestBody @Valid BranchRequestDto branchRequestDto) {
-        Optional<BranchResponseDto> branch = crudBranch.update(branchRequestDto);
+    public ResponseEntity<Optional<BranchResponseDto>> updateBranch(@PathVariable String id, @RequestBody @Valid BranchRequestDto branchRequestDto) {
+        Optional<BranchResponseDto> branch = crudBranch.update(id, branchRequestDto);
 
         return ResponseEntity.of(Optional.of(branch));
     }

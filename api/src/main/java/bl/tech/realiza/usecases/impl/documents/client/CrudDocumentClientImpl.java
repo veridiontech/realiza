@@ -124,8 +124,8 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(documentClientRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(id);
 
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
 

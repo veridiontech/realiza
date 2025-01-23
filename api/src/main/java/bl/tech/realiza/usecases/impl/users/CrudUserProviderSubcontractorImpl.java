@@ -122,8 +122,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     }
 
     @Override
-    public Optional<UserResponseDto> update(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
-        Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getIdUser());
+    public Optional<UserResponseDto> update(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
+        Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
 
         UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new RuntimeException("User not found"));
 

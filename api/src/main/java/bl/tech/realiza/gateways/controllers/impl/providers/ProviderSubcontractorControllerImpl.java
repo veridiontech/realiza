@@ -60,8 +60,9 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ProviderResponseDto>> updateProviderSubcontractor(@RequestBody @Valid ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        Optional<ProviderResponseDto> providerSubcontractor = crudProviderSubcontractor.update(providerSubcontractorRequestDto);
+    public ResponseEntity<Optional<ProviderResponseDto>> updateProviderSubcontractor(@PathVariable String id,
+                                                                                     @RequestBody @Valid ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
+        Optional<ProviderResponseDto> providerSubcontractor = crudProviderSubcontractor.update(id, providerSubcontractorRequestDto);
 
         return ResponseEntity.of(Optional.of(providerSubcontractor));
     }

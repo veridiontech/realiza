@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ContactRequestDto {
-    private String idContact;
     private String department;
     private String email;
     private String country;

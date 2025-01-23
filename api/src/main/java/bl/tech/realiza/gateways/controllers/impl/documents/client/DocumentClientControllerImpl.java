@@ -77,13 +77,14 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(
+            @PathVariable String id,
             @RequestPart("documentClientRequestDto")
             @Valid DocumentClientRequestDto documentClientRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
 
         Optional<DocumentResponseDto> documentClient = null;
         try {
-            documentClient = crudDocumentClient.update(documentClientRequestDto, file);
+            documentClient = crudDocumentClient.update(id, documentClientRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -61,8 +61,8 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSubcontractor(@RequestBody @Valid ContractRequestDto contractSubcontractorRequestDto) {
-        Optional<ContractResponseDto> subcontractor = crudSubcontractor.update(contractSubcontractorRequestDto);
+    public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSubcontractor(@PathVariable String id, @RequestBody @Valid ContractRequestDto contractSubcontractorRequestDto) {
+        Optional<ContractResponseDto> subcontractor = crudSubcontractor.update(id, contractSubcontractorRequestDto);
 
         return ResponseEntity.of(Optional.of(subcontractor));
     }

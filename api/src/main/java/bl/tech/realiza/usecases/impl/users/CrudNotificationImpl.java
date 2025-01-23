@@ -82,8 +82,8 @@ public class CrudNotificationImpl implements CrudNotification {
     }
 
     @Override
-    public Optional<NotificationResponseDto> update(NotificationRequestDto notificationRequestDto) {
-        Optional<Notification> notificationOptional = notificationRepository.findById(notificationRequestDto.getIdNotification());
+    public Optional<NotificationResponseDto> update(String id, NotificationRequestDto notificationRequestDto) {
+        Optional<Notification> notificationOptional = notificationRepository.findById(id);
 
         Notification notification = notificationOptional.orElseThrow(() -> new RuntimeException("Notification not found"));
 

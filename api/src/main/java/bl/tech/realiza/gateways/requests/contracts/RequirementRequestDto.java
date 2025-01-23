@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class RequirementRequestDto {
-    private String idRequirement;
     private String title;
     private Boolean isActive;
 }

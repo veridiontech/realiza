@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class EmployeeBrazilianRequestDto {
-    private String idEmployee;
     private String pis;
     private String maritalStatus;
     private String contractType;

@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.contract;
 
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,4 +20,6 @@ import lombok.experimental.SuperBuilder;
 public class ContractProviderSubcontractor extends Contract {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSubcontractor providerSubcontractor;
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    private ProviderSupplier providerSupplier;
 }

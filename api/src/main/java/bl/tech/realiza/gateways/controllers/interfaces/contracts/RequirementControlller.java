@@ -12,6 +12,6 @@ public interface RequirementControlller {
     ResponseEntity<RequirementResponseDto> createRequirement(RequirementRequestDto requirementRequestDto);
     ResponseEntity<Optional<RequirementResponseDto>> getOneRequirement(String id);
     ResponseEntity<Page<RequirementResponseDto>> getAllRequirements(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<RequirementResponseDto>> updateRequirement(RequirementRequestDto requirementRequestDto);
+    ResponseEntity<Optional<RequirementResponseDto>> updateRequirement(String id, RequirementRequestDto requirementRequestDto);
     ResponseEntity<Void> deleteRequirement(String id);
 }

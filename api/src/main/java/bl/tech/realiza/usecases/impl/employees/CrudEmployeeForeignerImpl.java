@@ -248,10 +248,10 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     }
 
     @Override
-    public Optional<EmployeeResponseDto> update(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
+    public Optional<EmployeeResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         List<Contract> contracts = List.of();
         
-        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(employeeForeignerRequestDto.getIdEmployee());
+        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
 
         EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new EntityNotFoundException("Employee Foreigner not found"));
 
