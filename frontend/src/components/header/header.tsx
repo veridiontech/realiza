@@ -3,6 +3,7 @@ import {
   Bell,
   ChartNoAxesGantt,
   LogOut,
+  Plus,
   Search,
   User,
 } from "lucide-react";
@@ -148,6 +149,14 @@ export function Header() {
                       <div className="flex items-center gap-1">
                         <User />
                         <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to={`/sistema/create-new-user/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <Plus />
+                        <p>Criar usuário</p>
                       </div>
                     </DropdownMenuItem>
                   </Link>

@@ -120,7 +120,7 @@ export function ModalTesteSendSupplier() {
                   />
                 </Button>
               ) : (
-                <Button className="bg-realizaBlue">Enviar</Button>
+                <Button className="bg-realizaBlue" type="submit">Enviar</Button>
               )}
             </div>
           </form>
