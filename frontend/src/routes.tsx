@@ -29,6 +29,7 @@ import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
 import { AtualizationPage } from "./pages/auth/atualizationsPage";
 import { Branch } from "./pages/auth/branchs/branch";
 import { UserProvider } from "./context/user-provider";
+import EmployeeToContract from "./pages/auth/serviceProviders/employeeToContract";
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: "viewDoc", element: <DocumentViewer /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
+      { path: "employee-to-contract", element: <EmployeeToContract /> },
     ],
   },
   {

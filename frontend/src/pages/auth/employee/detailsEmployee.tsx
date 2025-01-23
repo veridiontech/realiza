@@ -3,7 +3,7 @@ import axios from "axios";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { ip } from "@/utils/ip";
 import { AddDocument } from "./modals/addDocument";
-import { ip } from "@/utils/ip";
+import { useParams } from "react-router-dom";
 
 interface Employee {
   id: string;
