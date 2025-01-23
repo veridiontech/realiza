@@ -15,7 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +56,7 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentClient(@PathVariable String id) {
+
         Optional<DocumentResponseDto> documentClient = crudDocumentClient.findOne(id);
 
         return ResponseEntity.of(Optional.of(documentClient));

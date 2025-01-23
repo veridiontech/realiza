@@ -11,6 +11,7 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,22 +30,37 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(documentProviderSupplierRequestDto.getSupplier());
 
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
 
-        FileDocument fileDocument = FileDocument.builder()
-                .name(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .data(file.getBytes())
-                .build();
+        try {
+            fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
 
-        FileDocument savedFileDocument= fileRepository.save(fileDocument);
+        FileDocument savedFileDocument= null;
+        try {
+            savedFileDocument = fileRepository.save(fileDocument);
+            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
 
         DocumentProviderSupplier newDocumentSupplier = DocumentProviderSupplier.builder()
                 .title(documentProviderSupplierRequestDto.getTitle())
                 .status(documentProviderSupplierRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocument())
+                .documentation(savedFileDocument.getIdDocumentAsString())
                 .providerSupplier(providerSupplier)
                 .build();
 
@@ -68,7 +84,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
@@ -76,7 +92,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .title(documentSupplier.getTitle())
                 .status(documentSupplier.getStatus())
                 .documentation(documentSupplier.getDocumentation())
-                .fileName(fileDocument.getIdDocument())
+                .fileName(fileDocument.getName())
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
                 .creationDate(documentSupplier.getCreationDate())
@@ -92,7 +108,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
@@ -100,7 +116,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument.getIdDocument())
+                            .fileName(fileDocument.getName())
                             .fileContentType(fileDocument.getContentType())
                             .fileData(fileDocument.getData())
                             .creationDate(documentSupplier.getCreationDate())
@@ -129,7 +145,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             FileDocument savedFileDocument = fileRepository.save(fileDocument);
 
             // Update the documentBranch with the new file's ID
-            documentSupplier.setDocumentation(savedFileDocument.getIdDocument());
+            documentSupplier.setDocumentation(savedFileDocument.getIdDocumentAsString());
         }
 
         documentSupplier.setTitle(documentProviderSupplierRequestDto.getTitle() != null ? documentProviderSupplierRequestDto.getTitle() : documentSupplier.getTitle());
@@ -161,7 +177,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentSupplier.getDocumentation());
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
@@ -169,7 +185,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument.getIdDocument())
+                            .fileName(fileDocument.getName())
                             .fileContentType(fileDocument.getContentType())
                             .fileData(fileDocument.getData())
                             .creationDate(documentSupplier.getCreationDate())
