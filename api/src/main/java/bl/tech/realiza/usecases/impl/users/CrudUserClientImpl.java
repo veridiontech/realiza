@@ -128,9 +128,13 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        if (!passwordEncryptionService.matches(userClientRequestDto.getPassword(), userClient.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
         userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
         userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());
-        userClient.setPassword(passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) != null ? passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) : userClient.getPassword());
+        userClient.setPassword(userClientRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) : userClient.getPassword());
         userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
         userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
         userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());

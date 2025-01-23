@@ -125,9 +125,13 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        if (!passwordEncryptionService.matches(userProviderSupplierRequestDto.getPassword(), userProvider.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
         userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
         userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());
-        userProvider.setPassword(passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) != null ? passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) : userProvider.getPassword());
+        userProvider.setPassword(userProviderSupplierRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) : userProvider.getPassword());
         userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null ? userProviderSupplierRequestDto.getPosition() : userProvider.getPosition());
         userProvider.setRole(userProviderSupplierRequestDto.getRole() != null ? userProviderSupplierRequestDto.getRole() : userProvider.getRole());
         userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null ? userProviderSupplierRequestDto.getFirstName() : userProvider.getFirstName());

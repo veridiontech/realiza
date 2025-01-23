@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -31,4 +33,6 @@ public class Client {
     private String number;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
 }

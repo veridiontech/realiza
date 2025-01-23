@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 @Data
@@ -21,6 +22,7 @@ public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idUser;
+    @Column(unique = true)
     private String cpf;
     private String description;
     private String password;
@@ -30,12 +32,15 @@ public abstract class User {
     private String firstName;
     private TimeZone timeZone;
     private String surname;
+    @Column(unique = true)
     private String email;
     private String profilePicture;
     private String telephone;
     private String cellphone;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Role {
         ROLE_ADMIN,

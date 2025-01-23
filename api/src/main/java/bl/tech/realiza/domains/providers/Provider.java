@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -31,6 +33,8 @@ public abstract class Provider {
     private String number;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Company {
         CLIENT,

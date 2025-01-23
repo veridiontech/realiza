@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,6 +18,9 @@ public class DocumentMatrixSubgroup {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocumentSubgroup;
     private String subgroupName;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
+
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentMatrixGroup group;
 }

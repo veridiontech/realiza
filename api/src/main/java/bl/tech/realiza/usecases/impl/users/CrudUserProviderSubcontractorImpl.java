@@ -128,9 +128,13 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
         UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        if (!passwordEncryptionService.matches(userProviderSubcontractorRequestDto.getPassword(), userSubcontractor.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
         userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
         userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());
-        userSubcontractor.setPassword(passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) != null ? passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) : userSubcontractor.getPassword());
+        userSubcontractor.setPassword(userProviderSubcontractorRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) : userSubcontractor.getPassword());
         userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null ? userProviderSubcontractorRequestDto.getPosition() : userSubcontractor.getPosition());
         userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null ? userProviderSubcontractorRequestDto.getRole() : userSubcontractor.getRole());
         userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null ? userProviderSubcontractorRequestDto.getFirstName() : userSubcontractor.getFirstName());

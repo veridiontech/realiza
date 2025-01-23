@@ -24,7 +24,8 @@ public abstract class Document {
     private String title;
     private String status;
     private String documentation;
-    private LocalDateTime creationDate;
+    @Builder.Default
+    private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
@@ -32,9 +33,4 @@ public abstract class Document {
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Client documentInMatrix;
-
-    @PrePersist
-    protected void onCreate() {
-        this.creationDate = LocalDateTime.now();
-    }
 }
