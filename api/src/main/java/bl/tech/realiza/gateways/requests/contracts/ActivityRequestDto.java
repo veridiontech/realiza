@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class ActivityRequestDto {
-    private String idActivity;
     private String title;
     private Boolean isActive;
 }

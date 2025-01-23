@@ -12,7 +12,7 @@ public interface CrudContact {
     ContactResponseDto save(ContactRequestDto contactRequestDto);
     Optional<ContactResponseDto> findOne(String id);
     Page<ContactResponseDto> findAll(Pageable pageable);
-    Optional<ContactResponseDto> update(ContactRequestDto contactRequestDto);
+    Optional<ContactResponseDto> update(String id, ContactRequestDto contactRequestDto);
     void delete(String id);
     Page<ContactResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable);
 }

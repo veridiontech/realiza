@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.requests.providers.ProviderSubcontractorRequestD
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSubcontractor;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new RuntimeException("Provider supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
                 .cnpj(providerSubcontractorRequestDto.getCnpj())
@@ -69,7 +70,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     public Optional<ProviderResponseDto> findOne(String id) {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Provider subcontractor not found"));
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(providerSubcontractor.getIdProvider())
@@ -114,10 +115,10 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     }
 
     @Override
-    public Optional<ProviderResponseDto> update(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(providerSubcontractorRequestDto.getIdProvider());
+    public Optional<ProviderResponseDto> update(String id, ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new RuntimeException("Provider subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Provider subcontractor not found"));
 
         providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
         providerSubcontractor.setCompanyName(providerSubcontractorRequestDto.getCompanyName());

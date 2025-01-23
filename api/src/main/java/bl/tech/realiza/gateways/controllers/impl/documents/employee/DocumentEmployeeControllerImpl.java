@@ -70,12 +70,13 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(
+            @PathVariable String id,
             @RequestPart("documentEmployeeRequestDto")
             @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         Optional<DocumentResponseDto> documentEmployee = null;
         try {
-            documentEmployee = crudDocumentEmployeeImpl.update(documentEmployeeRequestDto, file);
+            documentEmployee = crudDocumentEmployeeImpl.update(id, documentEmployeeRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

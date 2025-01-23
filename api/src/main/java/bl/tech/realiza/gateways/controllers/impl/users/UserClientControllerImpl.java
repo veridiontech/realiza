@@ -60,8 +60,8 @@ public class UserClientControllerImpl implements UserClientController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<UserResponseDto>> updateUserClient(@RequestBody @Valid UserClientRequestDto userClientRequestDto) {
-        Optional<UserResponseDto> userClient = crudUserClient.update(userClientRequestDto);
+    public ResponseEntity<Optional<UserResponseDto>> updateUserClient(@PathVariable String id, @RequestBody @Valid UserClientRequestDto userClientRequestDto) {
+        Optional<UserResponseDto> userClient = crudUserClient.update(id, userClientRequestDto);
 
         return ResponseEntity.of(Optional.of(userClient));
     }

@@ -14,6 +14,6 @@ public interface DocumentMatrixGroupController {
     ResponseEntity<DocumentMatrixResponseDto> createDocumentMatrixGroup(DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto);
     ResponseEntity<Optional<DocumentMatrixResponseDto>> getOneDocumentMatrixGroup(String id);
     ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixGroup(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixGroup(DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto);
+    ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixGroup(String id, DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto);
     ResponseEntity<Void> deleteDocumentMatrixGroup(String id);
 }

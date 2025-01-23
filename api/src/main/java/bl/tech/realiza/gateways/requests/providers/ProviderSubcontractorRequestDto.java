@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class ProviderSubcontractorRequestDto {
-    private String idProvider;
     private String cnpj;
     private String companyName;
     private String tradeName;

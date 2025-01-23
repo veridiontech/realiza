@@ -12,7 +12,7 @@ public interface DocumentMatrixSubgroupController {
     ResponseEntity<DocumentMatrixResponseDto> createDocumentMatrixSubgroup(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequestDto);
     ResponseEntity<Optional<DocumentMatrixResponseDto>> getOneDocumentMatrixSubgroup(String id);
     ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroup(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixSubgroup(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequestDto);
+    ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrixSubgroup(String id, DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequestDto);
     ResponseEntity<Void> deleteDocumentMatrixSubgroup(String id);
     ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroupByGroup(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

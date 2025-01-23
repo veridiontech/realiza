@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentClientRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentClient;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     public DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
         Optional<Client> clientOptional = clientRepository.findById(documentClientRequestDto.getClient());
 
-        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         FileDocument fileDocument = null;
         try {
@@ -41,7 +42,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                     .build();
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new EntityNotFoundException(e);
         }
 
         FileDocument savedFileDocument= null;
@@ -49,7 +50,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             savedFileDocument = fileRepository.save(fileDocument);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new EntityNotFoundException(e);
         }
 
         DocumentClient newDocumentClient = DocumentClient.builder()
@@ -77,10 +78,10 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(id);
 
-        DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
+        DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new EntityNotFoundException("Document not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentClient.getDocumentation());
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentClientResponseDto = DocumentResponseDto.builder()
                 .idDocumentation(documentClient.getIdDocumentation())
@@ -124,10 +125,10 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(documentClientRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(id);
 
-        DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new RuntimeException("Document not found"));
+        DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new EntityNotFoundException("Document not found"));
 
         if (file != null && !file.isEmpty()) {
             // Process the file if it exists

@@ -12,7 +12,7 @@ public interface UserClientController {
     ResponseEntity<UserResponseDto> createUserClient(UserClientRequestDto userClientRequestDto);
     ResponseEntity<Optional<UserResponseDto>> getOneUserClient(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersClient(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<UserResponseDto>> updateUserClient(UserClientRequestDto userClientRequestDto);
+    ResponseEntity<Optional<UserResponseDto>> updateUserClient(String id, UserClientRequestDto userClientRequestDto);
     ResponseEntity<Void> deleteUserClient(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

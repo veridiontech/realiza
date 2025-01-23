@@ -11,7 +11,7 @@ public interface CrudBranch {
     BranchResponseDto save(BranchRequestDto branchRequestDto);
     Optional<BranchResponseDto> findOne(String id);
     Page<BranchResponseDto> findAll(Pageable pageable);
-    Optional<BranchResponseDto> update(BranchRequestDto branchRequestDto);
+    Optional<BranchResponseDto> update(String id, BranchRequestDto branchRequestDto);
     void delete(String id);
     Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable);
 }

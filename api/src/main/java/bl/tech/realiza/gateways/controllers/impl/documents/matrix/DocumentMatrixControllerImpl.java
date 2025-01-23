@@ -57,8 +57,8 @@ public class DocumentMatrixControllerImpl implements DocumentMatrixController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrix(@RequestBody @Valid DocumentMatrixRequestDto documentMatrixRequestDto) {
-        Optional<DocumentMatrixResponseDto> documentMatrix = crudDocumentMatrix.update(documentMatrixRequestDto);
+    public ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrix(@PathVariable String id, @RequestBody @Valid DocumentMatrixRequestDto documentMatrixRequestDto) {
+        Optional<DocumentMatrixResponseDto> documentMatrix = crudDocumentMatrix.update(id, documentMatrixRequestDto);
         return ResponseEntity.of(Optional.of(documentMatrix));
     }
 

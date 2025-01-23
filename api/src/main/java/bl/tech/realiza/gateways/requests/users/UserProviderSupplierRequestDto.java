@@ -8,7 +8,6 @@ import java.util.TimeZone;
 
 @Data
 public class UserProviderSupplierRequestDto {
-    private String idUser;
     private String cpf;
     private String description;
     private String password;

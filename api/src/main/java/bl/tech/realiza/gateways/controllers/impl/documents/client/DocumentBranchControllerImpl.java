@@ -71,12 +71,13 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(
+            @PathVariable String id,
             @RequestPart("documentBranchRequestDto")
             @Valid DocumentBranchRequestDto documentBranchRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         Optional<DocumentResponseDto> documentBranch = null;
         try {
-            documentBranch = crudDocumentBranch.update(documentBranchRequestDto, file);
+            documentBranch = crudDocumentBranch.update(id, documentBranchRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

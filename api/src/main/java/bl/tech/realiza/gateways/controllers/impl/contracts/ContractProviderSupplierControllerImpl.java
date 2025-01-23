@@ -60,8 +60,8 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSupplier(@RequestBody @Valid ContractRequestDto contractSupplierRequestDto) {
-        Optional<ContractResponseDto> supplier = crudSupplier.update(contractSupplierRequestDto);
+    public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSupplier(@PathVariable String id, @RequestBody @Valid ContractRequestDto contractSupplierRequestDto) {
+        Optional<ContractResponseDto> supplier = crudSupplier.update(id, contractSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }

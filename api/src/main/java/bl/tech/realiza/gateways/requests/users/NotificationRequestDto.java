@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class NotificationRequestDto {
-    private String idNotification;
     private String title;
     private String description;
     private Boolean isRead;

@@ -8,7 +8,6 @@ import java.sql.Date;
 
 @Data
 public class DocumentProviderSubcontractorRequestDto {
-    private String idDocumentation;
     private String title;
     private String risk;
     private String status;

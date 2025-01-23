@@ -60,8 +60,8 @@ public class RequirementControllerImpl implements RequirementControlller {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<RequirementResponseDto>> updateRequirement(@RequestBody @Valid RequirementRequestDto requirementRequestDto) {
-        Optional<RequirementResponseDto> requirement = crudRequirement.update(requirementRequestDto);
+    public ResponseEntity<Optional<RequirementResponseDto>> updateRequirement(@PathVariable String id, @RequestBody @Valid RequirementRequestDto requirementRequestDto) {
+        Optional<RequirementResponseDto> requirement = crudRequirement.update(id, requirementRequestDto);
 
         return ResponseEntity.of(Optional.of(requirement));
     }

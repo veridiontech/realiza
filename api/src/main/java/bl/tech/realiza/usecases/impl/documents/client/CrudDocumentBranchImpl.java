@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
         Optional<Branch> branchOptional = branchRepository.findById(documentBranchRequestDto.getBranch());
 
-        Branch branch = branchOptional.orElseThrow(() -> new RuntimeException("Branch not found"));
+        Branch branch = branchOptional.orElseThrow(() -> new EntityNotFoundException("Branch not found"));
 
         FileDocument fileDocument = FileDocument.builder()
                 .name(file.getOriginalFilename())
@@ -65,10 +66,10 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
 
-        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
+        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(documentBranch.getDocumentation());
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new RuntimeException("FileDocument not found"));
+        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
                 .idDocumentation(documentBranch.getIdDocumentation())
@@ -113,10 +114,10 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
-        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(documentBranchRequestDto.getIdDocumentation());
+    public Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
 
-        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new RuntimeException("DocumentBranch not found"));
+        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         if (file != null && !file.isEmpty()) {
             // Process the file if it exists

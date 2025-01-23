@@ -13,7 +13,7 @@ public interface CrudClient {
     ClientResponseDto save(ClientRequestDto clientRequestDto);
     Optional<ClientResponseDto> findOne(String id);
     Page<ClientResponseDto> findAll(Pageable pageable);
-    Optional<ClientResponseDto> update(ClientRequestDto clientRequestDto);
+    Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto);
     void delete(String id);
     EnterpriseAndUserResponseDto saveBoth(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto);
 }

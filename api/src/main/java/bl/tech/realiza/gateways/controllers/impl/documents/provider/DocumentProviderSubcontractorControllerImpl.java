@@ -71,12 +71,13 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(
+            @PathVariable String id,
             @RequestPart("documentSubcontractorRequestDto")
             @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         Optional<DocumentResponseDto> documentSubcontractor = null;
         try {
-            documentSubcontractor = crudDocumentSubcontractor.update(documentSubcontractorRequestDto, file);
+            documentSubcontractor = crudDocumentSubcontractor.update(id, documentSubcontractorRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -13,7 +13,7 @@ public interface DocumentProviderSubcontractorControlller {
     ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderSubcontractor(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractor(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderSubcontractor(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

@@ -65,7 +65,7 @@ public class CrudClientImpl implements CrudClient {
     public Optional<ClientResponseDto> findOne(String id) {
         Optional<Client> clientOptional = clientRepository.findById(id);
 
-        Client client = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(client.getIdClient())
@@ -110,8 +110,8 @@ public class CrudClientImpl implements CrudClient {
     }
 
     @Override
-    public Optional<ClientResponseDto> update(ClientRequestDto clientRequestDto) {
-        Optional<Client> clientOptional = clientRepository.findById(clientRequestDto.getIdClient());
+    public Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto) {
+        Optional<Client> clientOptional = clientRepository.findById(id);
 
         Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 

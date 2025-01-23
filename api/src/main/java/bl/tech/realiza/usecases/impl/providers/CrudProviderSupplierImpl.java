@@ -30,13 +30,17 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto) {
+        List<Branch> branches = List.of();
+
         Optional<Client> clientOptional = clientRepository.findById(providerSupplierRequestDto.getClient());
 
         Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
-        List<Branch> branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
-        if (branches.isEmpty()) {
-            throw new EntityNotFoundException("Branches not found");
+        if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
+            branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
+            if (branches.isEmpty()) {
+                throw new EntityNotFoundException("Branches not found");
+            }
         }
 
         ProviderSupplier newProviderSupplier = ProviderSupplier.builder()
@@ -141,14 +145,17 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     }
 
     @Override
-    public Optional<ProviderResponseDto> update(ProviderSupplierRequestDto providerSupplierRequestDto) {
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSupplierRequestDto.getIdProvider());
+    public Optional<ProviderResponseDto> update(String id, ProviderSupplierRequestDto providerSupplierRequestDto) {
+        List<Branch> branches = List.of();
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
 
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider not found"));
 
-        List<Branch> branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
-        if (branches.isEmpty()) {
-            throw new EntityNotFoundException("Branches not found");
+        if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
+            branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
+            if (branches.isEmpty()) {
+                throw new EntityNotFoundException("Branches not found");
+            }
         }
 
         providerSupplier.setCnpj(providerSupplierRequestDto.getCnpj() != null ? providerSupplierRequestDto.getCnpj() : providerSupplier.getCnpj());

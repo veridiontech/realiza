@@ -12,6 +12,6 @@ public interface ActivityControlller {
     ResponseEntity<ActivityResponseDto> createActivity(ActivityRequestDto activityRequestDto);
     ResponseEntity<Optional<ActivityResponseDto>> getOneActivity(String id);
     ResponseEntity<Page<ActivityResponseDto>> getAllActivities(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<ActivityResponseDto>> updateActivity(ActivityRequestDto activityRequestDto);
+    ResponseEntity<Optional<ActivityResponseDto>> updateActivity(String id, ActivityRequestDto activityRequestDto);
     ResponseEntity<Void> deleteActivity(String id);
 }

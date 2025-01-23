@@ -32,7 +32,7 @@ public class ProviderResponseDto {
 
     @Data
     @Builder
-    public class BranchDto {
+    public static class BranchDto {
         private String idBranch;
         private String nameBranch;
     }
