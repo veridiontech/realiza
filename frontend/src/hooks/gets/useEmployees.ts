@@ -29,7 +29,7 @@ export function useEmployees() {
       );
       setTotalPages(totalPages);
     } catch (err: any) {
-      setError(err.message || "Erro ao carregar funcionários.");
+      setError(err.message || "Erro ao carregar Colaboradores.");
     } finally {
       setLoading(false);
     }

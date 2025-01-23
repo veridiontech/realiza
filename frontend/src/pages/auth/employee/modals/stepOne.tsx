@@ -9,35 +9,32 @@ interface StepOneEmployeeProps {
 }
 
 export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
-  const { client } = useClient()
+  const { client } = useClient();
 
   const handleSubmit = async (formData: Record<string, any>) => {
-    const filterIdClient = client?.idClient
+    const filterIdClient = client?.idClient;
     console.log(filterIdClient);
-    
+
     const payload = {
       ...formData,
-      client: filterIdClient
-    }
+      client: filterIdClient,
+    };
     try {
-      const response = await axios.post(
-        `${ip}/employee/brazilian`,
-        payload,
-      );
-      console.log("Funcionário criado com sucesso:", response.data);
-      onSubmit(response.data); 
+      const response = await axios.post(`${ip}/employee/brazilian`, payload);
+      console.log("Colaborador criado com sucesso:", response.data);
+      onSubmit(response.data); // Retorna os dados para o componente pai
     } catch (error: any) {
       console.error(
-        "Erro ao criar funcionário:",
+        "Erro ao criar Colaborador:",
         error.response?.data || error.message,
       );
-      alert("Erro ao criar funcionário. Verifique os dados e tente novamente.");
+      alert("Erro ao criar colaborador. Verifique os dados e tente novamente.");
     }
   };
 
   return (
     <Modal
-      title="Cadastrar Funcionário"
+      title="Cadastrar colaborador"
       fields={[
         {
           name: "contractType",

@@ -22,9 +22,16 @@ interface ModalProps {
   fields?: Field[];
   onSubmit?: (formData: Record<string, any>) => void;
   onClose: () => void;
+  children?: React.ReactNode;
 }
 
-export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
+export function Modal({
+  title,
+  fields = [],
+  onSubmit,
+  onClose,
+  children,
+}: ModalProps) {
   const [formData, setFormData] = React.useState<Record<string, any>>(
     fields.reduce(
       (acc, field) => ({
@@ -45,10 +52,6 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  // const handleFileChange = (name: string, file: File | null) => {
-  //   setFormData((prev) => ({ ...prev, [name]: file }));
-  // };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -126,11 +129,58 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
                       ),
                     )}
                 </select>
-              ) : field.type === "custom" && field.render ? (
-                field.render({
-                  value: formData[field.name],
-                  onChange: (value) => handleChange(field.name, value),
-                })
+              ) : field.type === "radio" && Array.isArray(field.options) ? (
+                <div className="flex flex-col space-y-2">
+                  {field.options.map((option) =>
+                    typeof option === "string" ? (
+                      <label
+                        key={option}
+                        className="flex cursor-pointer items-center space-x-2"
+                      >
+                        <input
+                          type="radio"
+                          id={`${field.name}-${option}`}
+                          name={field.name}
+                          value={option}
+                          checked={formData[field.name] === option}
+                          onChange={(e) =>
+                            handleChange(field.name, e.target.value)
+                          }
+                          className="peer hidden"
+                          required={field.required}
+                        />
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-transparent peer-checked:border-blue-500 peer-checked:bg-blue-500 peer-checked:text-white">
+                          ✔
+                        </span>
+                        <span className="text-sm text-white">{option}</span>
+                      </label>
+                    ) : (
+                      <label
+                        key={option.value}
+                        className="flex cursor-pointer items-center space-x-2"
+                      >
+                        <input
+                          type="radio"
+                          id={`${field.name}-${option.value}`}
+                          name={field.name}
+                          value={option.value}
+                          checked={formData[field.name] === option.value}
+                          onChange={(e) =>
+                            handleChange(field.name, e.target.value)
+                          }
+                          className="peer hidden"
+                          required={field.required}
+                        />
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-transparent peer-checked:border-blue-500 peer-checked:bg-blue-500 peer-checked:text-white">
+                          ✔
+                        </span>
+                        <span className="text-sm text-white">
+                          {option.label}
+                        </span>
+                      </label>
+                    ),
+                  )}
+                </div>
               ) : (
                 <input
                   id={field.name}
@@ -145,6 +195,7 @@ export function Modal({ title, fields = [], onSubmit, onClose }: ModalProps) {
               )}
             </div>
           ))}
+          {children && <div className="mt-4">{children}</div>}
           <div className="flex justify-end space-x-4">
             <button
               type="button"

@@ -20,36 +20,46 @@ export const EmployeesTable = () => {
     fetchEmployees(itemsPerPage, currentPage - 1);
   }, [currentPage]);
 
-  const columns: {
-    key: keyof Employee;
-    label: string;
-    render?: (value: any, row: Employee) => JSX.Element;
-    className?: string;
-  }[] = [
-    { key: "name", label: "Nome" },
-    {
-      key: "status",
-      label: "Status",
-      render: (status) => (
-        <span
-          className={status === "Ativo" ? "text-green-500" : "text-red-500"}
-        >
-          {status}
-        </span>
-      ),
-    },
-    {
-      key: "id",
-      label: "Ações",
-      render: (_, row) => (
-        <Link to={`/sistema/detailsEmployees/${row.id}`}>
-          <button className="ml-4 text-blue-500 hover:underline">
-            <Settings2 />
-          </button>
-        </Link>
-      ),
-    },
-  ];
+const columns: {
+  key: keyof Employee;
+  label: string;
+  render?: (value: any, row: Employee) => JSX.Element;
+  className?: string;
+}[] = [
+  { key: "name", label: "Nome" },
+  {
+    key: "status",
+    label: "Status",
+    render: (status) => (
+      <span className={status === "Ativo" ? "text-green-500" : "text-red-500"}>
+        {status}
+      </span>
+    ),
+  },
+  {
+    key: "id",
+    label: "Ações",
+    render: (value, row) => (
+      <Link to={`/detailsEmployees/${row.id}`}>
+        <button className="ml-4 text-blue-500 hover:underline">
+          <Settings2 />
+        </button>
+      </Link>
+    ),
+  },
+];
+
+export const EmployeesTable = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const itemsPerPage = 10;
+
+  const { employees, totalPages, loading, error, fetchEmployees } =
+    useEmployees();
+
+  useEffect(() => {
+    fetchEmployees(itemsPerPage, currentPage - 1);
+  }, [currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -58,14 +68,14 @@ export const EmployeesTable = () => {
   };
 
   const handleModalSubmit = (formData: Record<string, any>) => {
-    console.log("Dados do novo funcionário:", formData);
+    console.log("Dados do novo colaborador:", formData);
     setIsModalOpen(false);
   };
 
   if (error) {
     return (
       <p className="text-center text-red-500">
-        Erro ao carregar os dados de funcionários: {error}
+        Erro ao carregar os dados de Colaborador: {error}
       </p>
     );
   }
@@ -75,6 +85,7 @@ export const EmployeesTable = () => {
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
+          {/* Aqui corrigimos para abrir o modal */}
           <ButtonBlue onClick={() => setIsModalOpen(true)}>
             Adicionar Colaborador
           </ButtonBlue>
