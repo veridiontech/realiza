@@ -32,10 +32,15 @@ export function MiddleSection (){
       });
     
       const onSubmit = async(data: ProfileFormData) => {
+        const payload = {
+          ...data,
+          idUser: user?.idUser
+        }
         try{
+          
           console.log(user?.idUser);
           console.log(data);
-          await axios.put(`${ip}/user/client/${user?.idUser}`, data)
+          await axios.put(`${ip}/user/client/`, payload)
         }catch(err){
           console.log("erro ao atualizar usuário",err);
         }
