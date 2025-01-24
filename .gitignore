@@ -24,11 +24,12 @@ dist-ssr
 *.sw?
 
 # Exclude H2 database files
-/data/*.mv.db
-/data/*.trace.db
+data/*.mv.db
+data/*.trace.db
+*/data
 
 # Maven build directory
-/target/
+*/target/
 
 # env
 **/.env
