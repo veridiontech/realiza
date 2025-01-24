@@ -50,7 +50,7 @@ export function SignUpPageEmail() {
         ...enterpriseData,
         ...data,
       };
-      await axios.post(`${ip}/client/user`, allDatas)
+      await axios.post(`${ip}/sign-enterprise`, allDatas)
       navigate("/")
     }catch(err) {
       console.log(err);
