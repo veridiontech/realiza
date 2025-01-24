@@ -39,21 +39,23 @@ export function MiddleSection (){
         try{
           console.log(payload);
           await axios.put(`${ip}/user/manager/${user?.idUser}`, payload)
-          console.log("sucesso");
-          
+          window.location.reload()
         }catch(err){
           console.log("erro ao atualizar usuário",err);
         }
       };
 
       useEffect(() => {
-        setValue("firstName", user?.firstName || "")
-        setValue("surname", user?.surname ||"")
-        setValue("cpf", user?.cpf ||"")
-        setValue("email", user?.email ||"")
-        setValue("telephone", user?.telephone ||"")
-        setValue("description", user?.description ||"") 
-      }, [])
+        if(user) {
+          setValue("firstName", user?.firstName || "")
+          setValue("surname", user?.surname ||"")
+          setValue("cpf", user?.cpf ||"")
+          setValue("email", user?.email ||"")
+          setValue("telephone", user?.telephone ||"")
+          setValue("description", user?.description ||"") 
+        }
+        
+      }, [user, setValue])
 
     return (
         <form

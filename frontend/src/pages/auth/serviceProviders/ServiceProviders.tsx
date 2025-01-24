@@ -23,10 +23,10 @@ export function ServiceProvider() {
 
   const [currentPage, setCurrentPage] = useState(0);
   // const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
-  // const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  // const [providerData, setProviderData] = useState<Record<string, any> | null>(
-  //   null,
-  // );
+  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
+  const [providerData, setProviderData] = useState<Record<string, any> | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchServiceProviders(itemsPerPage, currentPage);
@@ -43,10 +43,10 @@ export function ServiceProvider() {
   //   // setIsStepTwoModalOpen(true);
   // };
 
-  // const handleStepTwoSubmit = (data: Record<string, any>) => {
-  //   console.log("Dados do Segundo Modal:", { ...providerData, ...data });
-  //   setIsStepTwoModalOpen(false);
-  // };
+  const handleStepTwoSubmit = (data: Record<string, any>) => {
+    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
+    setIsStepTwoModalOpen(false);
+  };
 
   const columns = [
     { key: "companyName", label: "Nome do Fornecedor" },
