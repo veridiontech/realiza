@@ -1,9 +1,6 @@
 package bl.tech.realiza.domains.documents.matrix;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = "groupName")
+})
 public class DocumentMatrixGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

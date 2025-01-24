@@ -89,4 +89,13 @@ public class UserClientControllerImpl implements UserClientController {
 
         return ResponseEntity.ok(pageUserClient);
     }
+
+    @PutMapping("/change-password/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateUserClientPassword(@PathVariable String id, @RequestBody @Valid UserClientRequestDto userClientRequestDto) {
+        String userClient = crudUserClient.changePassword(id, userClientRequestDto);
+
+        return ResponseEntity.ok(userClient);
+    }
 }

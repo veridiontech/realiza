@@ -15,4 +15,5 @@ public interface UserClientController {
     ResponseEntity<Optional<UserResponseDto>> updateUserClient(String id, UserClientRequestDto userClientRequestDto);
     ResponseEntity<Void> deleteUserClient(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<String> updateUserClientPassword(String id, UserClientRequestDto userClientRequestDto);
 }

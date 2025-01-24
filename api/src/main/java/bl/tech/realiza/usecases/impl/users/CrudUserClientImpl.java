@@ -54,7 +54,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
                 .description(savedUserClient.getDescription())
-                .password(savedUserClient.getPassword())
                 .position(savedUserClient.getPosition())
                 .role(savedUserClient.getRole())
                 .firstName(savedUserClient.getFirstName())
@@ -80,7 +79,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .idUser(userClient.getIdUser())
                 .cpf(userClient.getCpf())
                 .description(userClient.getDescription())
-                .password(userClient.getPassword())
                 .position(userClient.getPosition())
                 .role(userClient.getRole())
                 .firstName(userClient.getFirstName())
@@ -105,7 +103,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                         .idUser(userClient.getIdUser())
                         .cpf(userClient.getCpf())
                         .description(userClient.getDescription())
-                        .password(userClient.getPassword())
                         .position(userClient.getPosition())
                         .role(userClient.getRole())
                         .firstName(userClient.getFirstName())
@@ -128,13 +125,8 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        if (!passwordEncryptionService.matches(userClientRequestDto.getPassword(), userClient.getPassword())) {
-            throw new IllegalArgumentException("Invalid data");
-        }
-
         userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
         userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());
-        userClient.setPassword(userClientRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) : userClient.getPassword());
         userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
         userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
         userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());
@@ -152,7 +144,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
                 .description(savedUserClient.getDescription())
-                .password(savedUserClient.getPassword())
                 .position(savedUserClient.getPosition())
                 .role(savedUserClient.getRole())
                 .firstName(savedUserClient.getFirstName())
@@ -182,7 +173,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                         .idUser(userClient.getIdUser())
                         .cpf(userClient.getCpf())
                         .description(userClient.getDescription())
-                        .password(userClient.getPassword())
                         .position(userClient.getPosition())
                         .role(userClient.getRole())
                         .firstName(userClient.getFirstName())
@@ -197,5 +187,22 @@ public class CrudUserClientImpl implements CrudUserClient {
         );
 
         return userClientResponseDtoPage;
+    }
+
+    @Override
+    public String changePassword(String id, UserClientRequestDto userClientRequestDto) {
+        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
+
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!passwordEncryptionService.matches(userClientRequestDto.getPassword(), userClient.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        userClient.setPassword(userClientRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()) : userClient.getPassword());
+
+        userClientRepository.save(userClient);
+
+        return "Password updated successfully";
     }
 }

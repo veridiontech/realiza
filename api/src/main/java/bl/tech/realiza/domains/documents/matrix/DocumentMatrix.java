@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name")
+})
 public class DocumentMatrix {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
