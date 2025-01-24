@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class DocumentMatrixSubgroupRequestDto {
     private String subgroupName;
-    private String Group;
+    private String group;
 }

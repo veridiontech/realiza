@@ -14,4 +14,5 @@ public interface CrudUserProviderSupplier {
     Optional<UserResponseDto> update(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto);
     void delete(String id);
     Page<UserResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
+    String changePassword(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto);
 }

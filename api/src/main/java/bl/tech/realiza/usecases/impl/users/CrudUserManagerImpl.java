@@ -1,10 +1,12 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
+import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
@@ -49,7 +51,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .idUser(savedUserManager.getIdUser())
                 .cpf(savedUserManager.getCpf())
                 .description(savedUserManager.getDescription())
-                .password(savedUserManager.getPassword())
                 .position(savedUserManager.getPosition())
                 .role(savedUserManager.getRole())
                 .firstName(savedUserManager.getFirstName())
@@ -74,7 +75,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .idUser(userManager.getIdUser())
                 .cpf(userManager.getCpf())
                 .description(userManager.getDescription())
-                .password(userManager.getPassword())
                 .position(userManager.getPosition())
                 .role(userManager.getRole())
                 .firstName(userManager.getFirstName())
@@ -98,7 +98,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                         .idUser(userManager.getIdUser())
                         .cpf(userManager.getCpf())
                         .description(userManager.getDescription())
-                        .password(userManager.getPassword())
                         .position(userManager.getPosition())
                         .role(userManager.getRole())
                         .firstName(userManager.getFirstName())
@@ -120,13 +119,8 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
         UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        if (!passwordEncryptionService.matches(userManagerRequestDto.getPassword(), userManager.getPassword())) {
-            throw new IllegalArgumentException("Invalid data");
-        }
-
         userManager.setCpf(userManagerRequestDto.getCpf() != null ? userManagerRequestDto.getCpf() : userManager.getCpf());
         userManager.setDescription(userManagerRequestDto.getDescription() != null ? userManagerRequestDto.getDescription() : userManager.getDescription());
-        userManager.setPassword(userManagerRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userManagerRequestDto.getPassword()) : userManager.getPassword());
         userManager.setPosition(userManagerRequestDto.getPosition() != null ? userManagerRequestDto.getPosition() : userManager.getPosition());
         userManager.setRole(userManagerRequestDto.getRole() != null ? userManagerRequestDto.getRole() : userManager.getRole());
         userManager.setFirstName(userManagerRequestDto.getFirstName() != null ? userManagerRequestDto.getFirstName() : userManager.getFirstName());
@@ -144,7 +138,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .idUser(savedUserManager.getIdUser())
                 .cpf(savedUserManager.getCpf())
                 .description(savedUserManager.getDescription())
-                .password(savedUserManager.getPassword())
                 .position(savedUserManager.getPosition())
                 .role(savedUserManager.getRole())
                 .firstName(savedUserManager.getFirstName())
@@ -162,5 +155,22 @@ public class CrudUserManagerImpl implements CrudUserManager {
     @Override
     public void delete(String id) {
         userManagerRepository.deleteById(id);
+    }
+
+    @Override
+    public String changePassword(String id, UserManagerRequestDto userManagerRequestDto) {
+        Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
+
+        UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!passwordEncryptionService.matches(userManagerRequestDto.getPassword(), userManager.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        userManager.setPassword(userManagerRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userManagerRequestDto.getPassword()) : userManager.getPassword());
+
+        userManagerRepository.save(userManager);
+
+        return "Password updated successfully";
     }
 }

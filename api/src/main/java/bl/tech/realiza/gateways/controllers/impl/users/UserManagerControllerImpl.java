@@ -3,6 +3,7 @@ package bl.tech.realiza.gateways.controllers.impl.users;
 import bl.tech.realiza.gateways.controllers.interfaces.users.UserManagerController;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
+import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserManagerImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -74,5 +75,14 @@ public class UserManagerControllerImpl implements UserManagerController {
         crudUserManager.delete(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/change-password/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateUserManagerPassword(@PathVariable String id, @RequestBody @Valid UserManagerRequestDto userManagerRequestDto) {
+        String userManager = crudUserManager.changePassword(id, userManagerRequestDto);
+
+        return ResponseEntity.ok(userManager);
     }
 }

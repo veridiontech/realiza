@@ -32,6 +32,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
     public DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
         FileDocument fileDocument = null;
         String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
 
         Optional<Client> clientOptional = clientRepository.findById(documentClientRequestDto.getClient());
 
@@ -48,7 +49,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             throw new EntityNotFoundException(e);
         }
 
-        FileDocument savedFileDocument= null;
         try {
             savedFileDocument = fileRepository.save(fileDocument);
             fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
@@ -60,7 +60,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentClient newDocumentClient = DocumentClient.builder()
                 .title(documentClientRequestDto.getTitle())
                 .status(documentClientRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocumentAsString())
+                .documentation(fileDocumentId)
                 .client(client)
                 .build();
 
@@ -131,22 +131,34 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public Optional<DocumentResponseDto> update(String id, DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
         Optional<DocumentClient> documentClientOptional = documentClientRepository.findById(id);
 
         DocumentClient documentClient = documentClientOptional.orElseThrow(() -> new EntityNotFoundException("Document not found"));
 
         if (file != null && !file.isEmpty()) {
-            // Process the file if it exists
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes()) // Handle the IOException
-                    .build();
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
 
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-
-            // Update the documentBranch with the new file's ID
-            documentClient.setDocumentation(savedFileDocument.getIdDocumentAsString());
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentClient.setDocumentation(fileDocumentId);
         }
 
         documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());

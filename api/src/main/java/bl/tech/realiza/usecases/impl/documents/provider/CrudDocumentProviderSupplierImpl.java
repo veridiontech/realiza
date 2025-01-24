@@ -32,6 +32,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
         FileDocument fileDocument = null;
         String fileDocumentId = null;
+        FileDocument savedFileDocument = null;
 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(documentProviderSupplierRequestDto.getSupplier());
 
@@ -48,10 +49,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             throw new EntityNotFoundException(e);
         }
 
-        FileDocument savedFileDocument= null;
         try {
             savedFileDocument = fileRepository.save(fileDocument);
-            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+            fileDocumentId = savedFileDocument.getIdDocumentAsString();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new EntityNotFoundException(e);
@@ -60,7 +60,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentProviderSupplier newDocumentSupplier = DocumentProviderSupplier.builder()
                 .title(documentProviderSupplierRequestDto.getTitle())
                 .status(documentProviderSupplierRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocumentAsString())
+                .documentation(fileDocumentId)
                 .providerSupplier(providerSupplier)
                 .build();
 
@@ -130,22 +130,34 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
         Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
 
         DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
         if (file != null && !file.isEmpty()) {
-            // Process the file if it exists
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes()) // Handle the IOException
-                    .build();
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
 
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-
-            // Update the documentBranch with the new file's ID
-            documentSupplier.setDocumentation(savedFileDocument.getIdDocumentAsString());
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentSupplier.setDocumentation(fileDocumentId);
         }
 
         documentSupplier.setTitle(documentProviderSupplierRequestDto.getTitle() != null ? documentProviderSupplierRequestDto.getTitle() : documentSupplier.getTitle());

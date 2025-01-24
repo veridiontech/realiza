@@ -13,4 +13,5 @@ public interface CrudUserManager {
     Page<UserResponseDto> findAll(Pageable pageable);
     Optional<UserResponseDto> update(String id, UserManagerRequestDto userManagerRequestDto);
     void delete(String id);
+    String changePassword(String id, UserManagerRequestDto userManagerRequestDto);
 }

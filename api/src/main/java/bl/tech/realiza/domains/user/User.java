@@ -15,14 +15,17 @@ import java.util.TimeZone;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "APP_USER")
+@Table(name = "APP_USER",
+uniqueConstraints = {
+        @UniqueConstraint(columnNames = "cpf"),
+        @UniqueConstraint(columnNames = "email")
+})
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "company")
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idUser;
-    @Column(unique = true)
     private String cpf;
     private String description;
     private String password;
@@ -32,7 +35,6 @@ public abstract class User {
     private String firstName;
     private TimeZone timeZone;
     private String surname;
-    @Column(unique = true)
     private String email;
     private String profilePicture;
     private String telephone;

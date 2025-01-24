@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = "subgroupName")
+})
 public class DocumentMatrixSubgroup {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

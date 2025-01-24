@@ -40,6 +40,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         List<Contract> contracts = List.of();
         EmployeeBrazilian newEmployeeBrazilian = null;
+        Client client = null;
+        ProviderSupplier providerSupplier = null;
+        ProviderSubcontractor providerSubcontractor = null;
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -51,33 +54,21 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         if (employeeBrazilianRequestDto.getClient() != null) {
             Optional<Client> clientOptional = clientRepository.findById(employeeBrazilianRequestDto.getClient());
 
-            Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
-
-            newEmployeeBrazilian = EmployeeBrazilian.builder()
-                    .client(client)
-                    .build();
+            client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         } else if (employeeBrazilianRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
 
-            ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
-
-            newEmployeeBrazilian = EmployeeBrazilian.builder()
-                    .supplier(providerSupplier)
-                    .build();
+            providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 
         } else if(employeeBrazilianRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeBrazilianRequestDto.getSubcontract());
 
-            ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
             if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
                 contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
             }
-
-            newEmployeeBrazilian = EmployeeBrazilian.builder()
-                    .subcontract(providerSubcontractor)
-                    .build();
         }
 
         newEmployeeBrazilian = EmployeeBrazilian.builder()
@@ -108,6 +99,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(employeeBrazilianRequestDto.getSituation())
                 .rg(employeeBrazilianRequestDto.getRg())
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
+                .client(client)
+                .supplier(providerSupplier)
+                .subcontract(providerSubcontractor)
                 .contracts(contracts)
                 .build();
 
@@ -142,7 +136,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(savedEmployeeBrazilian.getSituation())
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
-                .client(savedEmployeeBrazilian.getClient().getIdClient())
+                .client(savedEmployeeBrazilian.getClient() != null ? savedEmployeeBrazilian.getClient().getIdClient() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
                 .contracts(savedEmployeeBrazilian.getContracts().stream().map(
@@ -330,9 +324,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(savedEmployeeBrazilian.getSituation())
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
-                .client(savedEmployeeBrazilian.getClient().getIdClient())
-                .supplier(savedEmployeeBrazilian.getSupplier().getIdProvider())
-                .subcontract(savedEmployeeBrazilian.getSubcontract().getIdProvider())
+                .client(savedEmployeeBrazilian.getClient() != null ? savedEmployeeBrazilian.getClient().getIdClient() : null)
+                .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
+                .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
                 .contracts(savedEmployeeBrazilian.getContracts().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
                                         .idContract(contract.getIdContract())

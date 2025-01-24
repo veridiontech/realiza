@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.interfaces.users;
 
+import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -15,4 +16,5 @@ public interface UserProviderSupplierController {
     ResponseEntity<Optional<UserResponseDto>> updateUserSupplier(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto);
     ResponseEntity<Void> deleteUserSupplier(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUserSuppliersBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<String> updateUserProviderSupplierPassword(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto);
 }

@@ -89,4 +89,13 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
 
         return ResponseEntity.ok(pageUserSubContractor);
     }
+
+    @PutMapping("/change-password/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateUserProviderSubcontractorPassword(@PathVariable String id, @RequestBody @Valid UserProviderSubcontractorRequestDto userSubcontractorRequestDto) {
+        String userSubcontractor = crudUserSubcontractor.changePassword(id, userSubcontractorRequestDto);
+
+        return ResponseEntity.ok(userSubcontractor);
+    }
 }

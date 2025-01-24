@@ -16,4 +16,5 @@ public interface CrudUserClient {
     Optional<UserResponseDto> update(String id, UserClientRequestDto userClientRequestDto);
     void delete(String id);
     Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable);
+    String changePassword(String id, UserClientRequestDto userClientRequestDto);
 }

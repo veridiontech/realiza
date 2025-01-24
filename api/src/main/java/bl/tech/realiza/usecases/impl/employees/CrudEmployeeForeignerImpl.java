@@ -38,6 +38,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         List<Contract> contracts = List.of();
         EmployeeForeigner newEmployeeForeigner = null;
+        Client client = null;
+        ProviderSupplier providerSupplier = null;
+        ProviderSubcontractor providerSubcontractor = null;
 
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
@@ -49,28 +52,16 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         if (employeeForeignerRequestDto.getClient() != null) {
             Optional<Client> clientOptional = clientRepository.findById(employeeForeignerRequestDto.getClient());
 
-            Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
-
-            newEmployeeForeigner = EmployeeForeigner.builder()
-                    .client(client)
-                    .build();
+            client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
         } else if (employeeForeignerRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier());
 
-            ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
-
-            newEmployeeForeigner = EmployeeForeigner.builder()
-                    .supplier(providerSupplier)
-                    .build();
+            providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 
         } else if(employeeForeignerRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract());
 
-            ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
-
-            newEmployeeForeigner = EmployeeForeigner.builder()
-                    .subcontract(providerSubcontractor)
-                    .build();
+            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
         }
 
         newEmployeeForeigner = EmployeeForeigner.builder()
@@ -103,6 +94,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .brazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate())
                 .passport(employeeForeignerRequestDto.getPassport())
                 .contracts(contracts)
+                .client(client)
+                .supplier(providerSupplier)
+                .subcontract(providerSubcontractor)
                 .build();
 
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(newEmployeeForeigner);
@@ -137,9 +131,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
                 .passport(savedEmployeeForeigner.getPassport())
-                .client(savedEmployeeForeigner.getClient().getIdClient())
-                .supplier(savedEmployeeForeigner.getSupplier().getIdProvider())
-                .subcontract(savedEmployeeForeigner.getSubcontract().getIdProvider())
+                .client(savedEmployeeForeigner.getClient() != null ? savedEmployeeForeigner.getClient().getIdClient() : null)
+                .supplier(savedEmployeeForeigner.getSupplier() != null ? savedEmployeeForeigner.getSupplier().getIdProvider() : null)
+                .subcontract(savedEmployeeForeigner.getSubcontract() != null ? savedEmployeeForeigner.getSubcontract().getIdProvider() : null)
                 .contracts(savedEmployeeForeigner.getContracts().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
                                         .idContract(contract.getIdContract())
@@ -187,9 +181,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                 .passport(employeeForeigner.getPassport())
-                .client(employeeForeigner.getClient().getIdClient())
-                .supplier(employeeForeigner.getSupplier().getIdProvider())
-                .subcontract(employeeForeigner.getSubcontract().getIdProvider())
+                .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
+                .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
+                .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
                 .contracts(employeeForeigner.getContracts().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
                                         .idContract(contract.getIdContract())
@@ -236,9 +230,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                         .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                         .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                         .passport(employeeForeigner.getPassport())
-                        .client(employeeForeigner.getClient().getIdClient())
-                        .supplier(employeeForeigner.getSupplier().getIdProvider())
-                        .subcontract(employeeForeigner.getSubcontract().getIdProvider())
+                        .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
+                        .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
+                        .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
                         .contracts(employeeForeigner.getContracts().stream().map(
                                         contract -> EmployeeResponseDto.ContractDto.builder()
                                                 .idContract(contract.getIdContract())
