@@ -85,7 +85,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
-
         DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));

@@ -3,23 +3,27 @@ package bl.tech.realiza.usecases.impl.employees;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
-import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeForeigner;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,14 +37,18 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ClientRepository clientRepository;
     private final ContractRepository contractRepository;
+    private final FileRepository fileRepository;
 
     @Override
-    public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
+    public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto, MultipartFile file) {
         List<Contract> contracts = List.of();
         EmployeeForeigner newEmployeeForeigner = null;
         Client client = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
 
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
@@ -64,6 +72,25 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
         }
 
+        try {
+            fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
+
+        try {
+            savedFileDocument = fileRepository.save(fileDocument);
+            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new EntityNotFoundException(e);
+        }
+
         newEmployeeForeigner = EmployeeForeigner.builder()
                 .pis(employeeForeignerRequestDto.getPis())
                 .maritalStatus(employeeForeignerRequestDto.getMaritalStatus())
@@ -71,6 +98,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .cep(employeeForeignerRequestDto.getCep())
                 .name(employeeForeignerRequestDto.getName())
                 .surname(employeeForeignerRequestDto.getSurname())
+                .profilePicture(fileDocumentId)
                 .address(employeeForeignerRequestDto.getAddress())
                 .country(employeeForeignerRequestDto.getCountry())
                 .acronym(employeeForeignerRequestDto.getAcronym())
@@ -109,6 +137,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .cep(savedEmployeeForeigner.getCep())
                 .name(savedEmployeeForeigner.getName())
                 .surname(savedEmployeeForeigner.getSurname())
+                .profilePictureId(savedEmployeeForeigner.getProfilePicture())
                 .address(savedEmployeeForeigner.getAddress())
                 .country(savedEmployeeForeigner.getCountry())
                 .acronym(savedEmployeeForeigner.getAcronym())
@@ -147,9 +176,15 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
     @Override
     public Optional<EmployeeResponseDto> findOne(String id) {
-        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
         EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new EntityNotFoundException("Employee Foreigner not found"));
+
+        if (employeeForeigner.getProfilePicture() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+        }
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
                 .idEmployee(employeeForeigner.getIdEmployee())
@@ -159,6 +194,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .cep(employeeForeigner.getCep())
                 .name(employeeForeigner.getName())
                 .surname(employeeForeigner.getSurname())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .address(employeeForeigner.getAddress())
                 .country(employeeForeigner.getCountry())
                 .acronym(employeeForeigner.getAcronym())
@@ -200,46 +236,52 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         Page<EmployeeForeigner> employeeForeignerPage = employeeForeignerRepository.findAll(pageable);
 
         Page<EmployeeResponseDto> employeeForeignerResponseDtoPage = employeeForeignerPage.map(
-                employeeForeigner -> EmployeeResponseDto.builder()
-                        .idEmployee(employeeForeigner.getIdEmployee())
-                        .pis(employeeForeigner.getPis())
-                        .maritalStatus(employeeForeigner.getMaritalStatus())
-                        .contractType(employeeForeigner.getContractType())
-                        .cep(employeeForeigner.getCep())
-                        .name(employeeForeigner.getName())
-                        .surname(employeeForeigner.getSurname())
-                        .address(employeeForeigner.getAddress())
-                        .country(employeeForeigner.getCountry())
-                        .acronym(employeeForeigner.getAcronym())
-                        .state(employeeForeigner.getState())
-                        .birthDate(employeeForeigner.getBirthDate())
-                        .city(employeeForeigner.getCity())
-                        .postalCode(employeeForeigner.getPostalCode())
-                        .gender(employeeForeigner.getGender())
-                        .position(employeeForeigner.getPosition())
-                        .registration(employeeForeigner.getRegistration())
-                        .salary(employeeForeigner.getSalary())
-                        .cellphone(employeeForeigner.getCellphone())
-                        .platformAccess(employeeForeigner.getPlatformAccess())
-                        .telephone(employeeForeigner.getTelephone())
-                        .directory(employeeForeigner.getDirectory())
-                        .email(employeeForeigner.getEmail())
-                        .levelOfEducation(employeeForeigner.getLevelOfEducation())
-                        .cbo(employeeForeigner.getCbo())
-                        .situation(employeeForeigner.getSituation())
-                        .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
-                        .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
-                        .passport(employeeForeigner.getPassport())
-                        .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
-                        .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
-                        .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
-                        .contracts(employeeForeigner.getContracts().stream().map(
-                                        contract -> EmployeeResponseDto.ContractDto.builder()
-                                                .idContract(contract.getIdContract())
-                                                .serviceName(contract.getServiceName())
-                                                .build())
-                                .collect(Collectors.toList()))
-                        .build()
+                employeeForeigner -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+
+                    return EmployeeResponseDto.builder()
+                            .idEmployee(employeeForeigner.getIdEmployee())
+                            .pis(employeeForeigner.getPis())
+                            .maritalStatus(employeeForeigner.getMaritalStatus())
+                            .contractType(employeeForeigner.getContractType())
+                            .cep(employeeForeigner.getCep())
+                            .name(employeeForeigner.getName())
+                            .surname(employeeForeigner.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .address(employeeForeigner.getAddress())
+                            .country(employeeForeigner.getCountry())
+                            .acronym(employeeForeigner.getAcronym())
+                            .state(employeeForeigner.getState())
+                            .birthDate(employeeForeigner.getBirthDate())
+                            .city(employeeForeigner.getCity())
+                            .postalCode(employeeForeigner.getPostalCode())
+                            .gender(employeeForeigner.getGender())
+                            .position(employeeForeigner.getPosition())
+                            .registration(employeeForeigner.getRegistration())
+                            .salary(employeeForeigner.getSalary())
+                            .cellphone(employeeForeigner.getCellphone())
+                            .platformAccess(employeeForeigner.getPlatformAccess())
+                            .telephone(employeeForeigner.getTelephone())
+                            .directory(employeeForeigner.getDirectory())
+                            .email(employeeForeigner.getEmail())
+                            .levelOfEducation(employeeForeigner.getLevelOfEducation())
+                            .cbo(employeeForeigner.getCbo())
+                            .situation(employeeForeigner.getSituation())
+                            .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
+                            .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
+                            .passport(employeeForeigner.getPassport())
+                            .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
+                            .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
+                            .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
+                            .contracts(employeeForeigner.getContracts().stream().map(
+                                            contract -> EmployeeResponseDto.ContractDto.builder()
+                                                    .idContract(contract.getIdContract())
+                                                    .serviceName(contract.getServiceName())
+                                                    .build())
+                                    .collect(Collectors.toList()))
+                            .build();
+                }
         );
 
         return employeeForeignerResponseDtoPage;

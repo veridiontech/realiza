@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
@@ -166,7 +167,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClient(idSearch, pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClientAndRole(idSearch, User.Role.ROLE_CLIENT, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> UserResponseDto.builder()

@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
@@ -167,7 +168,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
-        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRole(idSearch, User.Role.ROLE_SUBCONTRACTOR, pageable);
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
                 userSubcontractor -> UserResponseDto.builder()
