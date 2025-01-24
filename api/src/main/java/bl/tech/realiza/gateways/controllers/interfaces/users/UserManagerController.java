@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.interfaces.users;
 
+import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -14,4 +15,5 @@ public interface UserManagerController {
     ResponseEntity<Page<UserResponseDto>> getAllUsersManager(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<UserResponseDto>> updateUserManager(String id, UserManagerRequestDto userManagerRequestDto);
     ResponseEntity<Void> deleteUserManager(String id);
+    ResponseEntity<String> updateUserManagerPassword(String id, UserManagerRequestDto userManagerRequestDto);
 }

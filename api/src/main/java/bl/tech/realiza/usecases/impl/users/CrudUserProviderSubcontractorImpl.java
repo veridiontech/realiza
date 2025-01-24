@@ -1,9 +1,11 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
@@ -56,7 +58,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
                 .cpf(savedUserSubcontractor.getCpf())
                 .description(savedUserSubcontractor.getDescription())
-                .password(savedUserSubcontractor.getPassword())
                 .position(savedUserSubcontractor.getPosition())
                 .role(savedUserSubcontractor.getRole())
                 .firstName(savedUserSubcontractor.getFirstName())
@@ -81,7 +82,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
                 .cpf(userSubcontractor.getCpf())
                 .description(userSubcontractor.getDescription())
-                .password(userSubcontractor.getPassword())
                 .position(userSubcontractor.getPosition())
                 .role(userSubcontractor.getRole())
                 .firstName(userSubcontractor.getFirstName())
@@ -105,7 +105,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 userSubcontractor -> UserResponseDto.builder()
                         .cpf(userSubcontractor.getCpf())
                         .description(userSubcontractor.getDescription())
-                        .password(userSubcontractor.getPassword())
                         .position(userSubcontractor.getPosition())
                         .role(userSubcontractor.getRole())
                         .firstName(userSubcontractor.getFirstName())
@@ -128,13 +127,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
         UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        if (!passwordEncryptionService.matches(userProviderSubcontractorRequestDto.getPassword(), userSubcontractor.getPassword())) {
-            throw new IllegalArgumentException("Invalid data");
-        }
-
         userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
         userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());
-        userSubcontractor.setPassword(userProviderSubcontractorRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) : userSubcontractor.getPassword());
         userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null ? userProviderSubcontractorRequestDto.getPosition() : userSubcontractor.getPosition());
         userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null ? userProviderSubcontractorRequestDto.getRole() : userSubcontractor.getRole());
         userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null ? userProviderSubcontractorRequestDto.getFirstName() : userSubcontractor.getFirstName());
@@ -151,7 +145,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
                 .cpf(savedUserSubcontractor.getCpf())
                 .description(savedUserSubcontractor.getDescription())
-                .password(savedUserSubcontractor.getPassword())
                 .position(savedUserSubcontractor.getPosition())
                 .role(savedUserSubcontractor.getRole())
                 .firstName(savedUserSubcontractor.getFirstName())
@@ -180,7 +173,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 userSubcontractor -> UserResponseDto.builder()
                         .cpf(userSubcontractor.getCpf())
                         .description(userSubcontractor.getDescription())
-                        .password(userSubcontractor.getPassword())
                         .position(userSubcontractor.getPosition())
                         .role(userSubcontractor.getRole())
                         .firstName(userSubcontractor.getFirstName())
@@ -195,5 +187,22 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         );
 
         return userSubcontractorResponseDtoPage;
+    }
+
+    @Override
+    public String changePassword(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
+        Optional<UserProviderSubcontractor> userProviderSubcontractorOptional = userSubcontractorRepository.findById(id);
+
+        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!passwordEncryptionService.matches(userProviderSubcontractorRequestDto.getPassword(), userProviderSubcontractor.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        userProviderSubcontractor.setPassword(userProviderSubcontractorRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword()) : userProviderSubcontractor.getPassword());
+
+        userSubcontractorRepository.save(userProviderSubcontractor);
+
+        return "Password updated successfully";
     }
 }

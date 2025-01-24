@@ -1,9 +1,11 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
+import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
@@ -53,7 +55,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
                 .cpf(savedUserSupplier.getCpf())
                 .description(savedUserSupplier.getDescription())
-                .password(savedUserSupplier.getPassword())
                 .position(savedUserSupplier.getPosition())
                 .role(savedUserSupplier.getRole())
                 .firstName(savedUserSupplier.getFirstName())
@@ -78,7 +79,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
                 .cpf(userProvider.getCpf())
                 .description(userProvider.getDescription())
-                .password(userProvider.getPassword())
                 .position(userProvider.getPosition())
                 .role(userProvider.getRole())
                 .firstName(userProvider.getFirstName())
@@ -102,7 +102,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 userProvider -> UserResponseDto.builder()
                         .cpf(userProvider.getCpf())
                         .description(userProvider.getDescription())
-                        .password(userProvider.getPassword())
                         .position(userProvider.getPosition())
                         .role(userProvider.getRole())
                         .firstName(userProvider.getFirstName())
@@ -125,13 +124,8 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        if (!passwordEncryptionService.matches(userProviderSupplierRequestDto.getPassword(), userProvider.getPassword())) {
-            throw new IllegalArgumentException("Invalid data");
-        }
-
         userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
         userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());
-        userProvider.setPassword(userProviderSupplierRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) : userProvider.getPassword());
         userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null ? userProviderSupplierRequestDto.getPosition() : userProvider.getPosition());
         userProvider.setRole(userProviderSupplierRequestDto.getRole() != null ? userProviderSupplierRequestDto.getRole() : userProvider.getRole());
         userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null ? userProviderSupplierRequestDto.getFirstName() : userProvider.getFirstName());
@@ -148,7 +142,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
                 .cpf(savedUserSupplier.getCpf())
                 .description(savedUserSupplier.getDescription())
-                .password(savedUserSupplier.getPassword())
                 .position(savedUserSupplier.getPosition())
                 .role(savedUserSupplier.getRole())
                 .firstName(savedUserSupplier.getFirstName())
@@ -177,7 +170,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 userProvider -> UserResponseDto.builder()
                         .cpf(userProvider.getCpf())
                         .description(userProvider.getDescription())
-                        .password(userProvider.getPassword())
                         .position(userProvider.getPosition())
                         .role(userProvider.getRole())
                         .firstName(userProvider.getFirstName())
@@ -192,5 +184,22 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         );
 
         return userSupplierResponseDtoPage;
+    }
+
+    @Override
+    public String changePassword(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
+        Optional<UserProviderSupplier> userProviderSupplierOptional = userSupplierRepository.findById(id);
+
+        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!passwordEncryptionService.matches(userProviderSupplierRequestDto.getPassword(), userProviderSupplier.getPassword())) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        userProviderSupplier.setPassword(userProviderSupplierRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword()) : userProviderSupplier.getPassword());
+
+        userSupplierRepository.save(userProviderSupplier);
+
+        return "Password updated successfully";
     }
 }

@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.users;
 
 import bl.tech.realiza.gateways.controllers.interfaces.users.UserProviderSupplierController;
+import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserProviderSupplierImpl;
@@ -88,5 +89,15 @@ public class UserProviderSupplierControllerImpl implements UserProviderSupplierC
         Page<UserResponseDto> pageUserSupplier = crudUserSupplier.findAllBySupplier(idSearch, pageable);
 
         return ResponseEntity.ok(pageUserSupplier);
+    }
+
+    @PutMapping("/change-password/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateUserProviderSupplierPassword(@PathVariable String id, @RequestBody @Valid UserProviderSupplierRequestDto userSupplierRequestDto) {
+
+        String userSupplier = crudUserSupplier.changePassword(id, userSupplierRequestDto);
+
+        return ResponseEntity.ok(userSupplier);
     }
 }

@@ -132,22 +132,34 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
         Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
 
         DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         if (file != null && !file.isEmpty()) {
-            // Process the file if it exists
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes()) // Handle the IOException
-                    .build();
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
 
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-
-            // Update the documentBranch with the new file's ID
-            documentBranch.setDocumentation(savedFileDocument.getIdDocumentAsString());
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentBranch.setDocumentation(fileDocumentId);
         }
 
         documentBranch.setTitle(documentBranchRequestDto.getTitle() != null ? documentBranchRequestDto.getTitle() : documentBranch.getTitle());

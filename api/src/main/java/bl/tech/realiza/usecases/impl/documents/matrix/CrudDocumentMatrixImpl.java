@@ -24,7 +24,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
     @Override
     public DocumentMatrixResponseDto save(DocumentMatrixRequestDto documentMatrixRequestDto) {
-        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubGroup());
+        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup());
 
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
@@ -96,7 +96,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
         DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
 
-        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubGroup());
+        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup());
 
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
@@ -105,7 +105,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrix.setExpiration(documentMatrixRequestDto.getExpiration() != null ? documentMatrixRequestDto.getExpiration() : documentMatrix.getExpiration());
         documentMatrix.setType(documentMatrixRequestDto.getType() != null ? documentMatrixRequestDto.getType() : documentMatrix.getType());
         documentMatrix.setDoesBlock(documentMatrixRequestDto.getDoesBlock() != null ? documentMatrixRequestDto.getDoesBlock() : documentMatrix.getDoesBlock());
-        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubGroup() != null ? documentMatrixSubgroup : documentMatrix.getSubGroup());
+        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null ? documentMatrixSubgroup : documentMatrix.getSubGroup());
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
