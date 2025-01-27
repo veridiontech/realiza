@@ -25,7 +25,7 @@ import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
 import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
 import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
 import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
-import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
+// import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
 import { AtualizationPage } from "./pages/auth/atualizationsPage";
 import { Branch } from "./pages/auth/branchs/branch";
 import { UserProvider } from "./context/user-provider";
