@@ -5,7 +5,7 @@ import { RouterProvider } from "react-router-dom"; // Somente o RouterProvider
 import { router } from "./routes"; // Certifique-se de que foi criado com `createBrowserRouter`
 import { FormDataProvider } from "./context/formDataProvider";
 import { ThemeProvider } from "./context/Theme-Provider";
-import { UserProvider } from "./context/user-provider";
+// import { UserProvider } from "./context/user-provider";
 import { Toaster } from "sonner";
 import { ClientProvider } from "./context/Client-Provider";
 
