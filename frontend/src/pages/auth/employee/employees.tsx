@@ -7,18 +7,23 @@ import { StepOneEmployee } from "./modals/stepOne";
 import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Employee } from "@/types/employee";
+import { useClient } from "@/context/Client-Provider";
 
 export const EmployeesTable = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
+  const { client } = useClient();
+
   const { employees, totalPages, loading, error, fetchEmployees } =
     useEmployees();
 
   useEffect(() => {
-    fetchEmployees(itemsPerPage, currentPage - 1);
-  }, [currentPage]);
+    if (client?.idClient) {
+      fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT", client?.idClient);
+    }
+  }, [currentPage, client?.idClient]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
