@@ -30,18 +30,33 @@ const contractFormSchema = z.object({
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
-  serviceDuration: z.string(),
-  startDate: z.string().nonempty("A data de início é obrigatória"),
-  endDate: z.string().nonempty("A data de término é obrigatória"),
-
+  serviceDuration: z.string().nonempty("A duração do serviço é obrigatória"),
+  startDate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)),
+      "A data de início deve ser válida",
+    ),
+  endDate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)),
+      "A data de término deve ser válida",
+    ),
   serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
-  activities: z.string().nonempty("As atividades são obrigatórias"),
-  requirements: z.string().nonempty("As exigências são obrigatórias"),
-  description: z.string().nonempty("As unidades são obrigatórias"),
-  serviceTypeExpense: z.string().nonempty("O gestor é obrigatório"),
+  activities: z
+    .array(z.string())
+    .min(1, "Pelo menos uma atividade é obrigatória"),
+  requirements: z
+    .array(z.string())
+    .min(1, "Pelo menos um requisito é obrigatório"),
+  description: z.string().nonempty("A descrição detalhada é obrigatória"),
+  serviceTypeExpense: z.string().nonempty("O tipo de despesa é obrigatório"),
   allocatedLimit: z
     .string()
     .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
+  client: z.string().nonempty("O cliente é obrigatório"),
+  responsible: z.string().nonempty("O responsável é obrigatório"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -200,14 +215,15 @@ export function ModalTesteSendSupplier() {
                   >
                     <div className="flex flex-col gap-2">
                       <Label>Gestor do serviço</Label>
-                      <select key={managers.idUser} className="border p-2 rounded-md">
+                      <select
+                        key={managers.idUser}
+                        className="rounded-md border p-2"
+                      >
                         {Array.isArray(managers) &&
                           managers.map((manager) => (
-
-                              <option>
-                                 {manager.firstName} {manager.surname}
-                              </option>
-                            
+                            <option>
+                              {manager.firstName} {manager.surname}
+                            </option>
                           ))}
                       </select>
                     </div>
