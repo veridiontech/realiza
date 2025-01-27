@@ -47,9 +47,12 @@ public abstract class User {
     public enum Role {
         ROLE_ADMIN,
         ROLE_MANAGER,
-        ROLE_CLIENT,
-        ROLE_SUPPLIER,
-        ROLE_SUBCONTRACTOR,
+        ROLE_CLIENT_RESPONSIBLE,
+        ROLE_CLIENT_MANAGER,
+        ROLE_SUPPLIER_RESPONSIBLE,
+        ROLE_SUPPLIER_MANAGER,
+        ROLE_SUBCONTRACTOR_RESPONSIBLE,
+        ROLE_SUBCONTRACTOR_MANAGER,
         ROLE_VIEWER
     }
 }

@@ -1,9 +1,12 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.employees.EmployeeBrazilian;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
@@ -11,10 +14,13 @@ import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -24,6 +30,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final UserClientRepository userClientRepository;
     private final ClientRepository clientRepository;
     private final PasswordEncryptionService passwordEncryptionService;
+    private final FileRepository fileRepository;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -167,7 +174,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClientAndRole(idSearch, User.Role.ROLE_CLIENT, pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClientAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> UserResponseDto.builder()
@@ -205,5 +212,46 @@ public class CrudUserClientImpl implements CrudUserClient {
         userClientRepository.save(userClient);
 
         return "Password updated successfully";
+    }
+
+    @Override
+    public String changeProfilePicture(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<UserClient> employeeBrazilianOptional = userClientRepository.findById(id);
+        UserClient employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                if (employeeBrazilian.getProfilePicture() != null) {
+                    fileRepository.deleteById(new ObjectId(employeeBrazilian.getProfilePicture()));
+                }
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
+        userClientRepository.save(UserClient.builder()
+                .profilePicture(fileDocumentId)
+                .build());
+
+
+        return "Profile picture updated successfully";
     }
 }

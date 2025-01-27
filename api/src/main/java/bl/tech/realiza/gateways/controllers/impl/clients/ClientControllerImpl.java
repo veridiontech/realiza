@@ -17,7 +17,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -32,8 +34,9 @@ public class ClientControllerImpl implements ClientControlller {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ClientResponseDto> createClient(@RequestBody @Valid ClientRequestDto clientRequestDto) {
-        ClientResponseDto client = crudClient.save(clientRequestDto);
+    public ResponseEntity<ClientResponseDto> createClient(@RequestPart("clientRequestDto") @Valid ClientRequestDto clientRequestDto,
+                                                          @RequestPart(value = "file", required = false) MultipartFile file) {
+        ClientResponseDto client = crudClient.save(clientRequestDto, file);
 
         return ResponseEntity.of(Optional.of(client));
     }
@@ -68,6 +71,20 @@ public class ClientControllerImpl implements ClientControlller {
         Optional<ClientResponseDto> client = crudClient.update(id, clientRequestDto);
 
         return ResponseEntity.of(Optional.of(client));
+    }
+
+    @PutMapping("/change-logo/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateLogo(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String userClient = null;
+        try {
+            userClient = crudClient.changeLogo(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(userClient);
     }
 
     @DeleteMapping("/{id}")

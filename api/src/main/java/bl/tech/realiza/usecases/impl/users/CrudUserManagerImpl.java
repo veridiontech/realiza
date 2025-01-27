@@ -1,9 +1,11 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserManager;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
@@ -13,10 +15,13 @@ import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -25,6 +30,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     
     private final UserManagerRepository userManagerRepository;
     private final PasswordEncryptionService passwordEncryptionService;
+    private final FileRepository fileRepository;
     
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto) {
@@ -172,5 +178,46 @@ public class CrudUserManagerImpl implements CrudUserManager {
         userManagerRepository.save(userManager);
 
         return "Password updated successfully";
+    }
+
+    @Override
+    public String changeProfilePicture(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
+        UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                if (userManager.getProfilePicture() != null) {
+                    fileRepository.deleteById(new ObjectId(userManager.getProfilePicture()));
+                }
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
+        userManagerRepository.save(UserManager.builder()
+                .profilePicture(fileDocumentId)
+                .build());
+
+
+        return "Profile picture updated successfully";
     }
 }

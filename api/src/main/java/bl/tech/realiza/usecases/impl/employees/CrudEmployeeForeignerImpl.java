@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -72,23 +73,25 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
         }
 
-        try {
-            fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
 
-        try {
-            savedFileDocument = fileRepository.save(fileDocument);
-            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
         }
 
         newEmployeeForeigner = EmployeeForeigner.builder()
@@ -382,5 +385,46 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     @Override
     public void delete(String id) {
         employeeForeignerRepository.deleteById(id);
+    }
+
+    @Override
+    public String changeProfilePicture(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
+        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                if (employeeForeigner.getProfilePicture() != null) {
+                    fileRepository.deleteById(new ObjectId(employeeForeigner.getProfilePicture()));
+                }
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
+        employeeForeignerRepository.save(EmployeeForeigner.builder()
+                .profilePicture(fileDocumentId)
+                .build());
+
+
+        return "Profile picture updated successfully";
     }
 }

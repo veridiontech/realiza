@@ -1,10 +1,12 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
@@ -14,11 +16,14 @@ import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -29,6 +34,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final EmailSender emailSender;
     private final PasswordEncryptionService passwordEncryptionService;
+    private final FileRepository fileRepository;
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
@@ -168,7 +174,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
-        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRole(idSearch, User.Role.ROLE_SUBCONTRACTOR, pageable);
+        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRole(idSearch, User.Role.ROLE_SUBCONTRACTOR_MANAGER, pageable);
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
                 userSubcontractor -> UserResponseDto.builder()
@@ -205,5 +211,46 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         userSubcontractorRepository.save(userProviderSubcontractor);
 
         return "Password updated successfully";
+    }
+
+    @Override
+    public String changeProfilePicture(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<UserProviderSubcontractor> userProviderSubcontractorOptional = userSubcontractorRepository.findById(id);
+        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                if (userProviderSubcontractor.getProfilePicture() != null) {
+                    fileRepository.deleteById(new ObjectId(userProviderSubcontractor.getProfilePicture()));
+                }
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
+        userSubcontractorRepository.save(UserProviderSubcontractor.builder()
+                .profilePicture(fileDocumentId)
+                .build());
+
+
+        return "Profile picture updated successfully";
     }
 }

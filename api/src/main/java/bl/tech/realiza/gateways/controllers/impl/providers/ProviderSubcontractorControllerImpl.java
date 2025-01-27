@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -28,8 +30,9 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ProviderResponseDto> createProviderSubcontractor(@RequestBody @Valid ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        ProviderResponseDto providerSubcontractor = crudProviderSubcontractor.save(providerSubcontractorRequestDto);
+    public ResponseEntity<ProviderResponseDto> createProviderSubcontractor(@RequestPart("providerSubcontractorRequestDto") @Valid ProviderSubcontractorRequestDto providerSubcontractorRequestDto,
+                                                                           @RequestPart(value = "file", required = false) MultipartFile file) {
+        ProviderResponseDto providerSubcontractor = crudProviderSubcontractor.save(providerSubcontractorRequestDto, file);
 
         return ResponseEntity.of(Optional.of(providerSubcontractor));
     }
@@ -65,6 +68,20 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
         Optional<ProviderResponseDto> providerSubcontractor = crudProviderSubcontractor.update(id, providerSubcontractorRequestDto);
 
         return ResponseEntity.of(Optional.of(providerSubcontractor));
+    }
+
+    @PutMapping("/change-logo/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateProviderSubcontractorLog(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String providerSubcontractor = null;
+        try {
+            providerSubcontractor = crudProviderSubcontractor.changeLogo(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(providerSubcontractor);
     }
 
     @DeleteMapping("/{id}")

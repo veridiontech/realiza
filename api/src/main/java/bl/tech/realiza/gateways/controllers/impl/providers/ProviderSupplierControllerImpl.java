@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -28,8 +30,9 @@ public class ProviderSupplierControllerImpl implements ProviderSupplierControlle
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ProviderResponseDto> createProviderSupplier(@RequestBody @Valid ProviderSupplierRequestDto providerSupplierRequestDto) {
-        ProviderResponseDto providerSupplier = crudProviderSupplier.save(providerSupplierRequestDto);
+    public ResponseEntity<ProviderResponseDto> createProviderSupplier(@RequestPart("providerSupplierRequestDto") @Valid ProviderSupplierRequestDto providerSupplierRequestDto,
+                                                                      @RequestPart(value = "file", required = false) MultipartFile file) {
+        ProviderResponseDto providerSupplier = crudProviderSupplier.save(providerSupplierRequestDto, file);
 
         return ResponseEntity.of(Optional.of(providerSupplier));
     }
@@ -65,6 +68,20 @@ public class ProviderSupplierControllerImpl implements ProviderSupplierControlle
         Optional<ProviderResponseDto> providerSupplier = crudProviderSupplier.update(id, providerSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(providerSupplier));
+    }
+
+    @PutMapping("/change-logo/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateProviderSupplierLogo(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String providerSupplier = null;
+        try {
+            providerSupplier = crudProviderSupplier.changeLogo(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(providerSupplier);
     }
 
     @DeleteMapping("/{id}")

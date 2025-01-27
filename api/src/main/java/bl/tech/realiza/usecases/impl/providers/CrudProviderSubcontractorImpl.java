@@ -1,21 +1,27 @@
 package bl.tech.realiza.usecases.impl.providers;
 
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -25,18 +31,44 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final EmailSender emailSender;
+    private final FileRepository fileRepository;
 
     @Override
-    public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
+    public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto, MultipartFile file) {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
 
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
                 .cnpj(providerSubcontractorRequestDto.getCnpj())
                 .companyName(providerSubcontractorRequestDto.getCompanyName())
                 .tradeName(providerSubcontractorRequestDto.getTradeName())
                 .fantasyName(providerSubcontractorRequestDto.getFantasyName())
+                .logo(fileDocumentId)
                 .email(providerSubcontractorRequestDto.getEmail())
                 .cep(providerSubcontractorRequestDto.getCep())
                 .state(providerSubcontractorRequestDto.getState())
@@ -54,6 +86,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                 .companyName(savedProviderSubcontractor.getCompanyName())
                 .tradeName(savedProviderSubcontractor.getTradeName())
                 .fantasyName(savedProviderSubcontractor.getFantasyName())
+                .logoId(savedProviderSubcontractor.getLogo())
                 .email(savedProviderSubcontractor.getEmail())
                 .cep(savedProviderSubcontractor.getCep())
                 .state(savedProviderSubcontractor.getState())
@@ -68,9 +101,15 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public Optional<ProviderResponseDto> findOne(String id) {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Provider subcontractor not found"));
+
+        if (providerSubcontractor.getLogo() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+        }
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(providerSubcontractor.getIdProvider())
@@ -78,6 +117,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                 .companyName(providerSubcontractor.getCompanyName())
                 .tradeName(providerSubcontractor.getTradeName())
                 .fantasyName(providerSubcontractor.getFantasyName())
+                .logoData(fileDocument != null ? fileDocument.getData() : null)
                 .email(providerSubcontractor.getEmail())
                 .cep(providerSubcontractor.getCep())
                 .state(providerSubcontractor.getState())
@@ -95,20 +135,26 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAll(pageable);
 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
-                providerSubcontractor -> ProviderResponseDto.builder()
-                        .idProvider(providerSubcontractor.getIdProvider())
-                        .cnpj(providerSubcontractor.getCnpj())
-                        .companyName(providerSubcontractor.getCompanyName())
-                        .tradeName(providerSubcontractor.getTradeName())
-                        .fantasyName(providerSubcontractor.getFantasyName())
-                        .email(providerSubcontractor.getEmail())
-                        .cep(providerSubcontractor.getCep())
-                        .state(providerSubcontractor.getState())
-                        .city(providerSubcontractor.getCity())
-                        .address(providerSubcontractor.getAddress())
-                        .number(providerSubcontractor.getNumber())
-                        .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
-                        .build()
+                providerSubcontractor -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+
+                    return ProviderResponseDto.builder()
+                            .idProvider(providerSubcontractor.getIdProvider())
+                            .cnpj(providerSubcontractor.getCnpj())
+                            .companyName(providerSubcontractor.getCompanyName())
+                            .tradeName(providerSubcontractor.getTradeName())
+                            .fantasyName(providerSubcontractor.getFantasyName())
+                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(providerSubcontractor.getEmail())
+                            .cep(providerSubcontractor.getCep())
+                            .state(providerSubcontractor.getState())
+                            .city(providerSubcontractor.getCity())
+                            .address(providerSubcontractor.getAddress())
+                            .number(providerSubcontractor.getNumber())
+                            .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
+                            .build();
+                }
         );
 
         return providerSubcontractorResponseDtoPage;
@@ -180,5 +226,46 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         );
 
         return providerSubcontractorResponseDtoPage;
+    }
+
+    @Override
+    public String changeLogo(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                if (providerSubcontractor.getLogo() != null) {
+                    fileRepository.deleteById(new ObjectId(providerSubcontractor.getLogo()));
+                }
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
+        providerSubcontractorRepository.save(ProviderSubcontractor.builder()
+                .logo(fileDocumentId)
+                .build());
+
+
+        return "Logo updated successfully";
     }
 }

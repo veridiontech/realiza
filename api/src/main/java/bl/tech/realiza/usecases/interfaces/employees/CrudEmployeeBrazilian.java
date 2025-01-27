@@ -16,4 +16,5 @@ public interface CrudEmployeeBrazilian {
     Page<EmployeeResponseDto> findAll(Pageable pageable);
     Optional<EmployeeResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     void delete(String id);
+    String changeProfilePicture(String id, MultipartFile file) throws IOException;
 }

@@ -16,4 +16,5 @@ public interface CrudEmployeeForeigner {
     Page<EmployeeResponseDto> findAll(Pageable pageable);
     Optional<EmployeeResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto);
     void delete(String id);
+    String changeProfilePicture(String id, MultipartFile file) throws IOException;
 }

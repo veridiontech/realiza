@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -64,6 +66,20 @@ public class UserClientControllerImpl implements UserClientController {
         Optional<UserResponseDto> userClient = crudUserClient.update(id, userClientRequestDto);
 
         return ResponseEntity.of(Optional.of(userClient));
+    }
+
+    @PutMapping("/change-profile-picture/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateUserClientProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String userClient = null;
+        try {
+            userClient = crudUserClient.changeProfilePicture(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(userClient);
     }
 
     @DeleteMapping("/{id}")

@@ -1,8 +1,10 @@
 package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
@@ -12,10 +14,13 @@ import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 @Service
 @RequiredArgsConstructor
@@ -24,14 +29,41 @@ public class CrudClientImpl implements CrudClient {
     private final ClientRepository clientRepository;
     private final UserClientRepository userClientRepository;
     private final PasswordEncryptionService passwordEncryptionService;
+    private final FileRepository fileRepository;
 
     @Override
-    public ClientResponseDto save(ClientRequestDto clientRequestDto) {
+    public ClientResponseDto save(ClientRequestDto clientRequestDto, MultipartFile file) {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
         Client newClient = Client.builder()
                 .cnpj(clientRequestDto.getCnpj())
                 .tradeName(clientRequestDto.getTradeName())
                 .companyName(clientRequestDto.getCompanyName())
                 .fantasyName(clientRequestDto.getFantasyName())
+                .logo(fileDocumentId)
                 .email(clientRequestDto.getEmail())
                 .telephone(clientRequestDto.getTelephone())
                 .cep(clientRequestDto.getCep())
@@ -49,6 +81,7 @@ public class CrudClientImpl implements CrudClient {
                 .tradeName(savedClient.getTradeName())
                 .companyName(savedClient.getCompanyName())
                 .fantasyName(savedClient.getFantasyName())
+                .logoId(savedClient.getLogo())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
                 .cep(savedClient.getCep())
@@ -63,9 +96,15 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public Optional<ClientResponseDto> findOne(String id) {
-        Optional<Client> clientOptional = clientRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<Client> clientOptional = clientRepository.findById(id);
         Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+
+        if (client.getLogo() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+        }
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(client.getIdClient())
@@ -73,6 +112,7 @@ public class CrudClientImpl implements CrudClient {
                 .tradeName(client.getTradeName())
                 .companyName(client.getCompanyName())
                 .fantasyName(client.getFantasyName())
+                .logoData(fileDocument != null ? fileDocument.getData() : null)
                 .email(client.getEmail())
                 .telephone(client.getTelephone())
                 .cep(client.getCep())
@@ -90,20 +130,27 @@ public class CrudClientImpl implements CrudClient {
         Page<Client> clientPage = clientRepository.findAll(pageable);
 
         Page<ClientResponseDto> clientResponseDtoPage = clientPage.map(
-                client -> ClientResponseDto.builder()
-                        .idClient(client.getIdClient())
-                        .cnpj(client.getCnpj())
-                        .tradeName(client.getTradeName())
-                        .companyName(client.getCompanyName())
-                        .fantasyName(client.getFantasyName())
-                        .email(client.getEmail())
-                        .telephone(client.getTelephone())
-                        .cep(client.getCep())
-                        .state(client.getState())
-                        .city(client.getCity())
-                        .address(client.getAddress())
-                        .number(client.getNumber())
-                        .build()
+                client -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+
+                    return ClientResponseDto.builder()
+
+                            .idClient(client.getIdClient())
+                            .cnpj(client.getCnpj())
+                            .tradeName(client.getTradeName())
+                            .companyName(client.getCompanyName())
+                            .fantasyName(client.getFantasyName())
+                            .email(client.getEmail())
+                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .telephone(client.getTelephone())
+                            .cep(client.getCep())
+                            .state(client.getState())
+                            .city(client.getCity())
+                            .address(client.getAddress())
+                            .number(client.getNumber())
+                            .build();
+                }
         );
 
         return clientResponseDtoPage;
@@ -112,7 +159,6 @@ public class CrudClientImpl implements CrudClient {
     @Override
     public Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto) {
         Optional<Client> clientOptional = clientRepository.findById(id);
-
         Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         client.setCnpj(clientRequestDto.getCnpj() != null ? clientRequestDto.getCnpj() : client.getCnpj());
@@ -196,5 +242,46 @@ public class CrudClientImpl implements CrudClient {
                 .build();
 
         return enterpriseAndUserResponseDto;
+    }
+
+    @Override
+    public String changeLogo(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<Client> clientOptional = clientRepository.findById(id);
+        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                if (client.getLogo() != null) {
+                    fileRepository.deleteById(new ObjectId(client.getLogo()));
+                }
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
+        clientRepository.save(Client.builder()
+                .logo(fileDocumentId)
+                .build());
+
+
+        return "Logo updated successfully";
     }
 }
