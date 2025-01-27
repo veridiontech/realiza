@@ -32,7 +32,7 @@ type SignUpEmailFormSchema = z.infer<typeof signUpEmailFormSchema>;
 export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const {
     register,
@@ -49,7 +49,10 @@ export function SignUpPageEmail() {
       const allDatas = {
         ...enterpriseData,
         ...data,
+
       };
+      console.log("enviando dados:",allDatas);
+      
       await axios.post(`${ip}/sign-enterprise`, allDatas)
       navigate("/")
     }catch(err) {

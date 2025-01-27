@@ -26,6 +26,8 @@ export function EnterprisePageEmail() {
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
     const [ isValidToken, setIsValidToken ] = useState(false)
+    const findIdCompany = searchParams.get("id")
+    const findCompany = searchParams.get("company")
 
 
   useEffect(() => {
@@ -60,7 +62,14 @@ export function EnterprisePageEmail() {
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     try {
-      setEnterpriseData(data);
+      const payload = {
+        ...data,
+        idCompany: findIdCompany || "",
+        company: findCompany 
+      }
+      console.log("teste",payload);
+      
+      setEnterpriseData(payload);
       console.log("Cadastro realizado:", data);
       navigate(`/email/Sign-up`);
     } catch (err) {
