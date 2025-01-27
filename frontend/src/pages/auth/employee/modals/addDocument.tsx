@@ -47,10 +47,7 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
     data.append("file", selectedFile);
 
     try {
-      const response = await axios.post(
-        "https://realiza.onrender.com/document/employee",
-        data,
-      );
+      await axios.post("https://realiza.onrender.com/document/employee", data);
       setStatus("Arquivo enviado com sucesso!");
     } catch (error) {
       console.error(error);
@@ -80,37 +77,27 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
           name: "file",
           label: "Arquivo PDF",
           type: "custom",
-          render: ({ onChange }) => (
+          render: () => (
             <div className="flex flex-col items-start">
-              <label className="w-full">
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(e) => {
-                    handleFileChange(e);
-                    onChange(e.target.files?.[0]);
-                  }}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    className="cursor-pointer rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600"
-                    onClick={() =>
-                      document.getElementById("file-upload")?.click()
-                    }
-                  >
-                    Escolher Arquivo
-                  </button>
-                  {fileName && (
-                    <span className="text-sm text-yellow-400">
-                      {fileName.length > 30
-                        ? `${fileName.substring(0, 30)}...`
-                        : fileName}
-                    </span>
-                  )}
-                </div>
-              </label>
+              {/* O input file está escondido e só é acessado pelo botão */}
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                id="file-upload"
+                className="hidden"
+              />
+              <button
+                className="mt-2 cursor-pointer rounded bg-blue-500 px-4 py-2 text-white shadow-sm hover:bg-blue-600 focus:outline-none"
+                onClick={() => document.getElementById("file-upload")?.click()}
+              >
+                Escolher Arquivo
+              </button>
+              {fileName && (
+                <span className="mt-2 text-sm text-green-600">
+                  Arquivo selecionado: {fileName}
+                </span>
+              )}
             </div>
           ),
         },

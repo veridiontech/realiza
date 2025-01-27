@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { ScrollText, FilePlus2 } from "lucide-react";
+import { ScrollText, FilePlus2, SquareUser } from "lucide-react";
 import { useContracts } from "@/hooks/gets/useContracts";
 import { StepTwoServiceProviders } from "../serviceProviders/modals/stepTwo";
 
@@ -47,6 +47,9 @@ const ContractsTable = () => {
           </button>
           <button className="ml-4 text-blue-500 hover:underline">
             <ScrollText />
+          </button>
+          <button className="ml-4 text-blue-500 hover:underline">
+            <SquareUser />
           </button>
         </div>
       ),

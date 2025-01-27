@@ -5,7 +5,7 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
   const hasData = data && data.length > 0;
 
   return (
-    <div className="mx-10 mt-20 overflow-hidden rounded-lg border border-gray-300 shadow-md">
+    <div className="mx-10 overflow-hidden rounded-lg border border-gray-300 shadow-md">
       <table className="w-full table-auto border-collapse">
         <thead className="bg-blue-100 text-blue-800">
           <tr>

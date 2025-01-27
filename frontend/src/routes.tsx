@@ -53,11 +53,10 @@ export const router = createBrowserRouter([
       { path: "serviceProviders/:id", element: <ServiceProvider /> },
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      { path: "detailsEmployees/:id/:id", element: <DetailsEmployee /> },
-      { path: "viewDoc", element: <DocumentViewer /> },
+      { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
-      {path: "create-new-user/:id", element: < CreateUserRealiza />}
+      { path: "create-new-user/:id", element: <CreateUserRealiza /> },
     ],
   },
   {
