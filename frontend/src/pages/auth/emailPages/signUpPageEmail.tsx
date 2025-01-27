@@ -49,10 +49,8 @@ export function SignUpPageEmail() {
       const allDatas = {
         ...enterpriseData,
         ...data,
-
       };
       console.log("enviando dados:",allDatas);
-      
       await axios.post(`${ip}/sign-enterprise`, allDatas)
       navigate("/")
     }catch(err) {

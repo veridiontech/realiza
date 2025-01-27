@@ -30,8 +30,7 @@ const contractFormSchema = z.object({
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
-  serviceDuration: z
-    .string(),
+  serviceDuration: z.string(),
   startDate: z.string().nonempty("A data de início é obrigatória"),
   endDate: z.string().nonempty("A data de término é obrigatória"),
 
@@ -40,9 +39,9 @@ const contractFormSchema = z.object({
   requirements: z.string().nonempty("As exigências são obrigatórias"),
   description: z.string().nonempty("As unidades são obrigatórias"),
   serviceTypeExpense: z.string().nonempty("O gestor é obrigatório"),
-  allocatedLimit: 
-  z.string()
-  .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
+  allocatedLimit: z
+    .string()
+    .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -51,6 +50,7 @@ export function ModalTesteSendSupplier() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
+  const [managers, setManagers] = useState<any>([]);
 
   const {
     register,
@@ -88,6 +88,16 @@ export function ModalTesteSendSupplier() {
       });
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
+      try {
+        console.log("teste");
+        const res = await axios.get(
+          `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
+        );
+        setManagers(res.data.content);
+        console.log(res.data.content);
+      } catch (err) {
+        console.log("erro ao buscar gestores", err);
+      }
     } catch (err) {
       console.log("erro ao enviar email para usuario", err);
       toast.error("Erro ao enviar email. Tente novamente");
@@ -188,6 +198,19 @@ export function ModalTesteSendSupplier() {
                     className="flex flex-col gap-2"
                     onSubmit={handleSubmitContract(createContract)}
                   >
+                    <div className="flex flex-col gap-2">
+                      <Label>Gestor do serviço</Label>
+                      <select key={managers.idUser} className="border p-2 rounded-md">
+                        {Array.isArray(managers) &&
+                          managers.map((manager) => (
+
+                              <option>
+                                 {manager.firstName} {manager.surname}
+                              </option>
+                            
+                          ))}
+                      </select>
+                    </div>
                     <div>
                       <Label>Referência de serviço</Label>
                       <Input {...registerContract("serviceReference")} />
@@ -231,7 +254,7 @@ export function ModalTesteSendSupplier() {
                         <span className="text-red-500">
                           {errorsContract.serviceName.message}
                         </span>
-                      )} 
+                      )}
                     </div>
                     <div>
                       <Label>Escopo do serviço</Label>
@@ -269,10 +292,7 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    
-                    
-                    
-                    
+
                     <div>
                       <Label>Descrição detalhada do serviço</Label>
                       <Input {...registerContract("description")} />

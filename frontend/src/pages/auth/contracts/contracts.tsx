@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { ScrollText, FilePlus2, SquareUser } from "lucide-react";
-import { useContracts } from "@/hooks/gets/useContracts";
+import { StepTwoServiceProviders } from "../serviceProviders/modals/stepTwo";
+// import { useContracts } from "@/hooks/gets/useContracts";
 
 const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,7 +96,7 @@ const ContractsTable = () => {
             onSubmit={handleStepTwoSubmit}
           />
         )}
-      </div>
+      </div>,-
     </div>
   );
 };
