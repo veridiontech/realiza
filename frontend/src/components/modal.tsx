@@ -66,53 +66,27 @@ export function Modal({
       onClick={() => onClose()}
     >
       <div
-        className="scrollbar-hide relative max-h-[90%] w-[90%] max-w-[40rem] overflow-y-scroll rounded-lg bg-cover bg-no-repeat p-8 text-white shadow-lg"
+        className="relative w-[90%] max-w-[40rem] overflow-hidden rounded-lg bg-cover bg-no-repeat p-6 text-white shadow-lg"
         style={{ backgroundImage: `url(${bgImage})` }}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="mb-4 text-xl font-semibold text-yellow-400">{title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {fields.map((field) => (
-            <div key={field.name} className="flex flex-col text-white">
+            <div key={field.name} className="flex flex-col">
               <label
                 htmlFor={field.name}
                 className="mb-2 text-sm font-medium text-white"
               >
                 {field.label}
               </label>
-              {field.type === "radio" ? (
-                <div className="flex items-center space-x-4">
-                  {Array.isArray(field.options) &&
-                    field.options.map(
-                      (option) =>
-                        typeof option !== "string" && (
-                          <label
-                            key={option.value}
-                            className="flex items-center space-x-2 text-white"
-                          >
-                            <input
-                              type="radio"
-                              name={field.name}
-                              value={option.value}
-                              checked={formData[field.name] === option.value}
-                              onChange={(e) =>
-                                handleChange(field.name, e.target.value)
-                              }
-                              required={field.required}
-                              className="h-4 w-4 text-blue-500 focus:ring focus:ring-blue-500"
-                            />
-                            <span>{option.label}</span>
-                          </label>
-                        ),
-                    )}
-                </div>
-              ) : field.type === "select" ? (
+              {field.type === "select" ? (
                 <select
                   id={field.name}
                   name={field.name}
                   value={formData[field.name]}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  className="rounded border border-gray-300 p-2 text-black"
+                  className="rounded border border-gray-300 bg-white p-2 text-black"
                   required={field.required}
                 >
                   <option value="">Selecione</option>
@@ -130,57 +104,52 @@ export function Modal({
                     )}
                 </select>
               ) : field.type === "radio" && Array.isArray(field.options) ? (
-                <div className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-4">
                   {field.options.map((option) =>
                     typeof option === "string" ? (
                       <label
                         key={option}
-                        className="flex cursor-pointer items-center space-x-2"
+                        className="flex items-center space-x-2"
                       >
                         <input
                           type="radio"
-                          id={`${field.name}-${option}`}
                           name={field.name}
                           value={option}
                           checked={formData[field.name] === option}
                           onChange={(e) =>
                             handleChange(field.name, e.target.value)
                           }
-                          className="peer hidden"
                           required={field.required}
+                          className="h-4 w-4"
                         />
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-transparent peer-checked:border-blue-500 peer-checked:bg-blue-500 peer-checked:text-white">
-                          ✔
-                        </span>
-                        <span className="text-sm text-white">{option}</span>
+                        <span>{option}</span>
                       </label>
                     ) : (
                       <label
                         key={option.value}
-                        className="flex cursor-pointer items-center space-x-2"
+                        className="flex items-center space-x-2"
                       >
                         <input
                           type="radio"
-                          id={`${field.name}-${option.value}`}
                           name={field.name}
                           value={option.value}
                           checked={formData[field.name] === option.value}
                           onChange={(e) =>
                             handleChange(field.name, e.target.value)
                           }
-                          className="peer hidden"
                           required={field.required}
+                          className="h-4 w-4"
                         />
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-transparent peer-checked:border-blue-500 peer-checked:bg-blue-500 peer-checked:text-white">
-                          ✔
-                        </span>
-                        <span className="text-sm text-white">
-                          {option.label}
-                        </span>
+                        <span>{option.label}</span>
                       </label>
                     ),
                   )}
                 </div>
+              ) : field.type === "custom" && field.render ? (
+                field.render({
+                  value: formData[field.name],
+                  onChange: (value: any) => handleChange(field.name, value),
+                })
               ) : (
                 <input
                   id={field.name}
@@ -189,7 +158,7 @@ export function Modal({
                   placeholder={field.placeholder}
                   value={formData[field.name]}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  className="rounded border border-gray-300 p-2 text-black"
+                  className="rounded border border-gray-300 bg-white p-2 text-black"
                   required={field.required}
                 />
               )}
@@ -199,61 +168,20 @@ export function Modal({
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              className="rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400 focus:ring focus:ring-gray-500"
+              className="rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400"
               onClick={onClose}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:ring focus:ring-blue-500"
+              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               Enviar
             </button>
           </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-export default function App() {
-  const [showModal, setShowModal] = React.useState(false);
-
-  const fields: Field[] = [
-    {
-      name: "confirmation",
-      label: "* Você confirma que deseja continuar?",
-      type: "radio",
-      options: [
-        { label: "Sim", value: "yes" },
-        { label: "Não", value: "no" },
-      ],
-      required: true,
-    },
-  ];
-
-  const handleSubmit = (formData: Record<string, any>) => {
-    console.log("Form Submitted:", formData);
-    setShowModal(false);
-  };
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <button
-        onClick={() => setShowModal(true)}
-        className="rounded bg-blue-500 px-6 py-2 text-white hover:bg-blue-600 focus:ring focus:ring-blue-500"
-      >
-        Abrir Modal
-      </button>
-      {showModal && (
-        <Modal
-          title="Confirmação"
-          fields={fields}
-          onSubmit={handleSubmit}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </div>
   );
 }
