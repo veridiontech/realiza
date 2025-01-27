@@ -6,13 +6,12 @@ import {
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
 import { FilePlus2, NotebookPen } from "lucide-react";
-// import { ButtonBlue } from "@/components/ui/buttonBlue";
-// import { StepOneServiceProviders } from "./modals/stepOne";
-// import { StepTwoServiceProviders } from "./modals/stepTwo";
 import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
-
+import { useClient } from "@/context/Client-Provider";
 
 export function ServiceProvider() {
+  const { client } = useClient();
+  console.log(client);
 
   const itemsPerPage = 5;
 
@@ -24,36 +23,23 @@ export function ServiceProvider() {
   } = useFetchServiceProviders();
 
   const [currentPage, setCurrentPage] = useState(0);
-  // const [isStepOneModalOpen, setIsStepOneModalOpen] = useState(false);
   const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  const [providerData, setProviderData] = useState<Record<string, any> | null>(
-    null,
-  );
+  const [providerData] = useState<Record<string, any> | null>(null);
+
+  // Pegando o ID do cliente para o filtro
 
   useEffect(() => {
-    fetchServiceProviders(itemsPerPage, currentPage);
-  }, [currentPage]);
+    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient); // Adicionando o id para filtrar pelo cliente
+  }, [currentPage, client?.idClient]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
-  // const handleStepOneSubmit = (data: Record<string, any>) => {
-  //   console.log("Dados do Primeiro Modal:", data);
-  //   setProviderData(data);
-  //   // setIsStepOneModalOpen(false);
-  //   // setIsStepTwoModalOpen(true);
-  // };
-
-  const handleStepTwoSubmit = (data: Record<string, any>) => {
-    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
-    setIsStepTwoModalOpen(false);
-  };
-
   const columns = [
     { key: "companyName", label: "Nome do Fornecedor" },
     { key: "cnpj", label: "CNPJ" },
-    { key: "client", label: "ID do Cliente" },
+    { key: "branches", label: "Filiais que atua" },
     {
       key: "idProvider",
       label: "Ações",
@@ -96,9 +82,6 @@ export function ServiceProvider() {
               onChange={() => {}}
             />
           </div>
-          {/* <ButtonBlue onClick={() => setIsStepOneModalOpen(true)}>
-            Adicionar Prestador
-          </ButtonBlue> */}
           <ModalTesteSendSupplier />
         </div>
 
@@ -107,7 +90,10 @@ export function ServiceProvider() {
             Erro ao carregar os dados: {error}
           </p>
         ) : (
-          <Table data={serviceProviders} columns={columns} />
+          <Table<ServiceProviderProps>
+            data={serviceProviders}
+            columns={columns}
+          />
         )}
 
         <Pagination
@@ -115,20 +101,6 @@ export function ServiceProvider() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-
-        {/* {isStepOneModalOpen && (
-          <StepOneServiceProviders
-            onClose={() => setIsStepOneModalOpen(false)}
-            onSubmit={handleStepOneSubmit}
-          />
-        )}
-
-        {isStepTwoModalOpen && (
-          <StepTwoServiceProviders
-            onClose={() => setIsStepTwoModalOpen(false)}
-            onSubmit={handleStepTwoSubmit}
-          />
-        )} */}
       </div>
     </div>
   );

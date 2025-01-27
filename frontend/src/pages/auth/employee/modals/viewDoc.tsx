@@ -13,28 +13,35 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDocument = async () => {
+    const fetchFileData = async () => {
       setLoading(true);
-      setError(null);
-
       try {
-        const response = await axios.get(
-          `${ip}/document/employee/${documentId}`,
-          { responseType: "blob" }, // Recebe como Blob para exibição no iframe
-        );
+        const res = await axios.get(`${ip}/document/employee/${documentId}`);
+        const fileData = res.data.fileData;
 
-        const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
+        if (fileData) {
+          const binaryString = atob(fileData);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
 
-        setPdfUrl(pdfUrl);
-      } catch (err: any) {
-        setError("Erro ao carregar o documento.");
+          const pdfBlob = new Blob([bytes], { type: "application/pdf" });
+          const pdfUrl = URL.createObjectURL(pdfBlob);
+          setPdfUrl(pdfUrl);
+        } else {
+          setError("Nenhum dado de arquivo encontrado.");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Erro ao buscar o documento.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDocument();
+    fetchFileData();
   }, [documentId]);
 
   return (
