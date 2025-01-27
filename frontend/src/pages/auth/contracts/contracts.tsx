@@ -2,33 +2,36 @@ import { useState } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
 import { ScrollText, FilePlus2 } from "lucide-react";
-import { useContracts } from "@/hooks/gets/useContracts";
 import { StepTwoServiceProviders } from "../serviceProviders/modals/stepTwo";
 
 const ContractsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false); // Moved inside
+  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
   const [providerData, setProviderData] = useState<Record<string, any> | null>(
     null,
-  ); // Moved inside
+  );
   const itemsPerPage = 10;
 
-  const {
-    contracts = [],
-    totalPages = 1,
-    loading,
-    error,
-  } = useContracts({
-    limit: itemsPerPage,
-    page: currentPage,
-  });
+  // Mock de contratos
+  const mockContracts = Array.from({ length: 20 }, (_, index) => ({
+    id: `${index + 1}`,
+    serviceName: `Serviço ${index + 1}`,
+    startDate: new Date(2023, 0, index + 1).toLocaleDateString("pt-BR"),
+    endDate: new Date(2023, 0, index + 10).toLocaleDateString("pt-BR"),
+  }));
+
+  const totalPages = Math.ceil(mockContracts.length / itemsPerPage);
+  const contracts = mockContracts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   const columns: {
     key: keyof (typeof contracts)[0];
     label: string;
     render?: (value: any) => JSX.Element;
   }[] = [
-    { key: "serviceName", label: "Serviço" }, // Nova coluna adicionada
+    { key: "serviceName", label: "Serviço" },
     { key: "startDate", label: "Data de Início" },
     { key: "endDate", label: "Data de Fim" },
     {
@@ -69,16 +72,7 @@ const ContractsTable = () => {
       <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
         <h1 className="m-4 text-xl">Tabela de Contratos</h1>
 
-        {loading ? (
-          <p className="mt-10 text-center">Carregando...</p>
-        ) : error ? (
-          <p className="text-center text-red-600">
-            Erro ao carregar os dados:{" "}
-            {typeof error === "string"
-              ? error
-              : "Algo deu errado. Tente novamente mais tarde."}
-          </p>
-        ) : contracts.length > 0 ? (
+        {contracts.length > 0 ? (
           <Table data={contracts} columns={columns} />
         ) : (
           <p className="text-center text-gray-500">

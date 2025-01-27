@@ -27,25 +27,22 @@ const modalSendEmailFormSchema = z.object({
 
 const contractFormSchema = z.object({
   serviceName: z.string().nonempty("O nome do serviço é obrigatório"),
-  contractReference: z.string().nonempty("A referência do contrato é obrigatória"),
-  allocatedLimit: z.string().regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
-  startDate: z
+  serviceReference: z
     .string()
-    .nonempty("A data de início é obrigatória"),
-  endDate: z
-    .string()
-    .nonempty("A data de término é obrigatória"),
-    
+    .nonempty("A referência do contrato é obrigatória"),
+  serviceDuration: z
+    .string(),
+  startDate: z.string().nonempty("A data de início é obrigatória"),
+  endDate: z.string().nonempty("A data de término é obrigatória"),
+
   serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
   activities: z.string().nonempty("As atividades são obrigatórias"),
   requirements: z.string().nonempty("As exigências são obrigatórias"),
-  units: z.string().nonempty("As unidades são obrigatórias"),
-  manager: z.string().nonempty("O gestor é obrigatório"),
-  providerSupplier: z.string().nonempty("O fornecedor responsável é obrigatório"),
-  description: z
-    .string()
-    .min(10, "A descrição deve ter no mínimo 10 caracteres")
-    .nonempty("A descrição é obrigatória"),
+  description: z.string().nonempty("As unidades são obrigatórias"),
+  serviceTypeExpense: z.string().nonempty("O gestor é obrigatório"),
+  allocatedLimit: 
+  z.string()
+  .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -192,25 +189,61 @@ export function ModalTesteSendSupplier() {
                     onSubmit={handleSubmitContract(createContract)}
                   >
                     <div>
+                      <Label>Referência de serviço</Label>
+                      <Input {...registerContract("serviceReference")} />
+                      {errorsContract.serviceReference && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceReference.message}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Tipo do Serviço</Label>
+                      <Input {...registerContract("serviceType")} />
+                      {errorsContract.serviceType && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceType.message}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Tipo de despesa</Label>
+                      <Input {...registerContract("serviceTypeExpense")} />
+                      {errorsContract.serviceTypeExpense && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceTypeExpense.message}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Duração do serviço</Label>
+                      <Input {...registerContract("serviceDuration")} />
+                      {errorsContract.serviceDuration && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceDuration.message}
+                        </span>
+                      )}
+                    </div>
+                    <div>
                       <Label>Nome do Serviço</Label>
                       <Input {...registerContract("serviceName")} />
                       {errorsContract.serviceName && (
                         <span className="text-red-500">
                           {errorsContract.serviceName.message}
                         </span>
-                      )}
+                      )} 
                     </div>
                     <div>
-                      <Label>Ref. do contrato</Label>
-                      <Input {...registerContract("contractReference")} />
-                      {errorsContract.contractReference && (
+                      <Label>Escopo do serviço</Label>
+                      <Input {...registerContract("description")} />
+                      {errorsContract.description && (
                         <span className="text-red-500">
-                          {errorsContract.contractReference.message}
+                          {errorsContract.description.message}
                         </span>
                       )}
                     </div>
                     <div>
-                      <Label>Limite de alocados</Label>
+                      <Label>Número máximo de empregados alocados</Label>
                       <Input {...registerContract("allocatedLimit")} />
                       {errorsContract.allocatedLimit && (
                         <span className="text-red-500">
@@ -236,12 +269,16 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
+                    
+                    
+                    
+                    
                     <div>
-                      <Label>Tipo do Serviço</Label>
-                      <Input {...registerContract("serviceType")} />
-                      {errorsContract.serviceType && (
+                      <Label>Descrição detalhada do serviço</Label>
+                      <Input {...registerContract("description")} />
+                      {errorsContract.description && (
                         <span className="text-red-500">
-                          {errorsContract.serviceType.message}
+                          {errorsContract.description.message}
                         </span>
                       )}
                     </div>
@@ -255,47 +292,11 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label>Outras Exigências</Label>
+                      <Label>Requisitos</Label>
                       <Input {...registerContract("requirements")} />
                       {errorsContract.requirements && (
                         <span className="text-red-500">
                           {errorsContract.requirements.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Unidades</Label>
-                      <Input {...registerContract("units")} />
-                      {errorsContract.units && (
-                        <span className="text-red-500">
-                          {errorsContract.units.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Gestor</Label>
-                      <Input {...registerContract("manager")} />
-                      {errorsContract.manager && (
-                        <span className="text-red-500">
-                          {errorsContract.manager.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Fornecedor Responsável</Label>
-                      <Input {...registerContract("providerSupplier")} />
-                      {errorsContract.providerSupplier && (
-                        <span className="text-red-500">
-                          {errorsContract.providerSupplier.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Descrição da solicitação</Label>
-                      <Input {...registerContract("description")} />
-                      {errorsContract.description && (
-                        <span className="text-red-500">
-                          {errorsContract.description.message}
                         </span>
                       )}
                     </div>

@@ -8,7 +8,7 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const signUpEmailFormSchema = z
@@ -33,7 +33,6 @@ export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const {
     register,
