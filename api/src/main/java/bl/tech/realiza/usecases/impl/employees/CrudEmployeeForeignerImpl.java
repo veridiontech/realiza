@@ -240,9 +240,11 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
         Page<EmployeeResponseDto> employeeForeignerResponseDtoPage = employeeForeignerPage.map(
                 employeeForeigner -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
-
+                    FileDocument fileDocument = null;
+                    if (employeeForeigner.getProfilePicture() != null && employeeForeigner.getProfilePicture() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
                     return EmployeeResponseDto.builder()
                             .idEmployee(employeeForeigner.getIdEmployee())
                             .pis(employeeForeigner.getPis())

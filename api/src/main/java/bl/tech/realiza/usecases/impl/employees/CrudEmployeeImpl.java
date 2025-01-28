@@ -56,8 +56,11 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
         combinedResults.addAll(employeeBrazilianPage.map(
                 employeeBrazilian -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    FileDocument fileDocument = null;
+                    if (employeeBrazilian.getProfilePicture() != null && employeeBrazilian.getProfilePicture() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return EmployeeResponseDto.builder()
                             .idEmployee(employeeBrazilian.getIdEmployee())
@@ -93,10 +96,10 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                             .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
                             .contracts(employeeBrazilian.getContracts().stream().map(
-                                    contract -> EmployeeResponseDto.ContractDto.builder()
-                                            .idContract(contract.getIdContract())
-                                            .serviceName(contract.getServiceName())
-                                            .build())
+                                            contract -> EmployeeResponseDto.ContractDto.builder()
+                                                    .idContract(contract.getIdContract())
+                                                    .serviceName(contract.getServiceName())
+                                                    .build())
                                     .collect(Collectors.toList()))
                             .build();
                 }
@@ -104,9 +107,11 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
         combinedResults.addAll(employeeForeignerPage.map(
                 employeeForeigner -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
-
+                    FileDocument fileDocument = null;
+                    if (employeeForeigner.getProfilePicture() != null && employeeForeigner.getProfilePicture() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
                     return EmployeeResponseDto.builder()
                             .idEmployee(employeeForeigner.getIdEmployee())
                             .pis(employeeForeigner.getPis())

@@ -241,8 +241,11 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         Page<EmployeeResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
                 employeeBrazilian -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    FileDocument fileDocument = null;
+                    if (employeeBrazilian.getProfilePicture() != null && employeeBrazilian.getProfilePicture() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return EmployeeResponseDto.builder()
                             .idEmployee(employeeBrazilian.getIdEmployee())
