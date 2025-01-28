@@ -116,8 +116,11 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
                 userProvider -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    FileDocument fileDocument = null;
+                    if (userProvider.getProfilePicture() != null && !userProvider.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
                     return UserResponseDto.builder()
                             .cpf(userProvider.getCpf())
                             .description(userProvider.getDescription())
@@ -187,20 +190,27 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAllByProviderSupplier_IdProviderAndRole(idSearch, User.Role.ROLE_SUPPLIER_MANAGER, pageable);
 
         Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
-                userProvider -> UserResponseDto.builder()
-                        .cpf(userProvider.getCpf())
-                        .description(userProvider.getDescription())
-                        .position(userProvider.getPosition())
-                        .role(userProvider.getRole())
-                        .firstName(userProvider.getFirstName())
-                        .timeZone(userProvider.getTimeZone())
-                        .surname(userProvider.getSurname())
-                        .email(userProvider.getEmail())
-                        .profilePicture(userProvider.getProfilePicture())
-                        .telephone(userProvider.getTelephone())
-                        .cellphone(userProvider.getCellphone())
-                        .supplier(userProvider.getProviderSupplier().getIdProvider())
-                        .build()
+                userProvider -> {
+                    FileDocument fileDocument = null;
+                    if (userProvider.getProfilePicture() != null && !userProvider.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
+                    return UserResponseDto.builder()
+                            .cpf(userProvider.getCpf())
+                            .description(userProvider.getDescription())
+                            .position(userProvider.getPosition())
+                            .role(userProvider.getRole())
+                            .firstName(userProvider.getFirstName())
+                            .timeZone(userProvider.getTimeZone())
+                            .surname(userProvider.getSurname())
+                            .email(userProvider.getEmail())
+                            .profilePicture(userProvider.getProfilePicture())
+                            .telephone(userProvider.getTelephone())
+                            .cellphone(userProvider.getCellphone())
+                            .supplier(userProvider.getProviderSupplier().getIdProvider())
+                            .build();
+                }
         );
 
         return userSupplierResponseDtoPage;

@@ -117,9 +117,11 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
                 userSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
-
+                    FileDocument fileDocument = null;
+                    if (userSubcontractor.getProfilePicture() != null && !userSubcontractor.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
                     return UserResponseDto.builder()
                             .cpf(userSubcontractor.getCpf())
                             .description(userSubcontractor.getDescription())
@@ -128,6 +130,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                             .firstName(userSubcontractor.getFirstName())
                             .timeZone(userSubcontractor.getTimeZone())
                             .surname(userSubcontractor.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userSubcontractor.getEmail())
                             .profilePicture(userSubcontractor.getProfilePicture())
                             .telephone(userSubcontractor.getTelephone())
@@ -190,20 +193,29 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRole(idSearch, User.Role.ROLE_SUBCONTRACTOR_MANAGER, pageable);
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
-                userSubcontractor -> UserResponseDto.builder()
-                        .cpf(userSubcontractor.getCpf())
-                        .description(userSubcontractor.getDescription())
-                        .position(userSubcontractor.getPosition())
-                        .role(userSubcontractor.getRole())
-                        .firstName(userSubcontractor.getFirstName())
-                        .timeZone(userSubcontractor.getTimeZone())
-                        .surname(userSubcontractor.getSurname())
-                        .email(userSubcontractor.getEmail())
-                        .profilePicture(userSubcontractor.getProfilePicture())
-                        .telephone(userSubcontractor.getTelephone())
-                        .cellphone(userSubcontractor.getCellphone())
-                        .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
-                        .build()
+                userSubcontractor -> {
+                    FileDocument fileDocument = null;
+                    if (userSubcontractor.getProfilePicture() != null && !userSubcontractor.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
+                    return UserResponseDto.builder()
+                            .cpf(userSubcontractor.getCpf())
+                            .description(userSubcontractor.getDescription())
+                            .position(userSubcontractor.getPosition())
+                            .role(userSubcontractor.getRole())
+                            .firstName(userSubcontractor.getFirstName())
+                            .timeZone(userSubcontractor.getTimeZone())
+                            .surname(userSubcontractor.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(userSubcontractor.getEmail())
+                            .profilePicture(userSubcontractor.getProfilePicture())
+                            .telephone(userSubcontractor.getTelephone())
+                            .cellphone(userSubcontractor.getCellphone())
+                            .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .build();
+                }
+
         );
 
         return userSubcontractorResponseDtoPage;

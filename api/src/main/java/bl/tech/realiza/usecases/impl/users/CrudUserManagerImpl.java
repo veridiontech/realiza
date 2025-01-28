@@ -108,8 +108,11 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
         Page<UserResponseDto> userManagerResponseDtoPage = userManagerPage.map(
                 userManager -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    FileDocument fileDocument = null;
+                    if (userManager.getProfilePicture() != null && !userManager.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
                     return UserResponseDto.builder()
                             .idUser(userManager.getIdUser())
                             .cpf(userManager.getCpf())
