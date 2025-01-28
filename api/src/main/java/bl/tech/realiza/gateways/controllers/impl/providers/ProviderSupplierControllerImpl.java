@@ -70,7 +70,7 @@ public class ProviderSupplierControllerImpl implements ProviderSupplierControlle
         return ResponseEntity.of(Optional.of(providerSupplier));
     }
 
-    @PutMapping("/change-logo/{id}")
+    @PatchMapping("/change-logo/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateProviderSupplierLogo(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {

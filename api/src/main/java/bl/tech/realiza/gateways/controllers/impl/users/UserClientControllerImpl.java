@@ -68,7 +68,7 @@ public class UserClientControllerImpl implements UserClientController {
         return ResponseEntity.of(Optional.of(userClient));
     }
 
-    @PutMapping("/change-profile-picture/{id}")
+    @PatchMapping("/change-profile-picture/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserClientProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
@@ -106,7 +106,7 @@ public class UserClientControllerImpl implements UserClientController {
         return ResponseEntity.ok(pageUserClient);
     }
 
-    @PutMapping("/change-password/{id}")
+    @PatchMapping("/change-password/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserClientPassword(@PathVariable String id, @RequestBody @Valid UserClientRequestDto userClientRequestDto) {

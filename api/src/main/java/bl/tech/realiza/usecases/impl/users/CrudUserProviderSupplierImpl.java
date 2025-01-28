@@ -16,6 +16,7 @@ import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springdoc.core.parsers.ReturnTypeParser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     private final ProviderSupplierRepository providerSupplierRepository;
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
+    private final ReturnTypeParser genericReturnTypeParser;
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
@@ -79,9 +81,15 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
         UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (userProvider.getProfilePicture() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+        }
 
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
                 .cpf(userProvider.getCpf())
@@ -91,6 +99,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .firstName(userProvider.getFirstName())
                 .timeZone(userProvider.getTimeZone())
                 .surname(userProvider.getSurname())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userProvider.getEmail())
                 .profilePicture(userProvider.getProfilePicture())
                 .telephone(userProvider.getTelephone())
@@ -106,20 +115,24 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAll(pageable);
 
         Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
-                userProvider -> UserResponseDto.builder()
-                        .cpf(userProvider.getCpf())
-                        .description(userProvider.getDescription())
-                        .position(userProvider.getPosition())
-                        .role(userProvider.getRole())
-                        .firstName(userProvider.getFirstName())
-                        .timeZone(userProvider.getTimeZone())
-                        .surname(userProvider.getSurname())
-                        .email(userProvider.getEmail())
-                        .profilePicture(userProvider.getProfilePicture())
-                        .telephone(userProvider.getTelephone())
-                        .cellphone(userProvider.getCellphone())
-                        .supplier(userProvider.getProviderSupplier().getIdProvider())
-                        .build()
+                userProvider -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    return UserResponseDto.builder()
+                            .cpf(userProvider.getCpf())
+                            .description(userProvider.getDescription())
+                            .position(userProvider.getPosition())
+                            .role(userProvider.getRole())
+                            .firstName(userProvider.getFirstName())
+                            .timeZone(userProvider.getTimeZone())
+                            .surname(userProvider.getSurname())
+                            .email(userProvider.getEmail())
+                            .profilePicture(userProvider.getProfilePicture())
+                            .telephone(userProvider.getTelephone())
+                            .cellphone(userProvider.getCellphone())
+                            .supplier(userProvider.getProviderSupplier().getIdProvider())
+                            .build();
+                }
         );
 
         return userSupplierResponseDtoPage;
@@ -212,41 +225,25 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
         Optional<UserProviderSupplier> userProviderSupplierOptional = userSupplierRepository.findById(id);
-        UserProviderSupplier providerSupplier = userProviderSupplierOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+
+            if (userProviderSupplier.getProfilePicture() != null) {
+                fileRepository.deleteById(new ObjectId(userProviderSupplier.getProfilePicture()));
             }
 
-            try {
-                if (providerSupplier.getProfilePicture() != null) {
-                    fileRepository.deleteById(new ObjectId(providerSupplier.getProfilePicture()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            userProviderSupplier.setProfilePicture(savedFileDocument.getIdDocumentAsString());
         }
 
-        userSupplierRepository.save(UserProviderSupplier.builder()
-                .profilePicture(fileDocumentId)
-                .build());
-
+        userSupplierRepository.save(userProviderSupplier);
 
         return "Profile picture updated successfully";
     }

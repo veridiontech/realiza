@@ -229,41 +229,24 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
 
-            try {
-                if (providerSupplier.getLogo() != null) {
-                    fileRepository.deleteById(new ObjectId(providerSupplier.getLogo()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+            if (providerSupplier.getLogo() != null) {
+                fileRepository.deleteById(new ObjectId(providerSupplier.getLogo()));
             }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            providerSupplier.setLogo(savedFileDocument.getIdDocumentAsString());
         }
 
-        providerSupplierRepository.save(ProviderSupplier.builder()
-                .logo(fileDocumentId)
-                .build());
-
+        providerSupplierRepository.save(providerSupplier);
 
         return "Logo updated successfully";
     }

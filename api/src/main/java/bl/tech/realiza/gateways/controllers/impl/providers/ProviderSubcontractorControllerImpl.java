@@ -70,7 +70,7 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
         return ResponseEntity.of(Optional.of(providerSubcontractor));
     }
 
-    @PutMapping("/change-logo/{id}")
+    @PatchMapping("/change-logo/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateProviderSubcontractorLog(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {

@@ -73,7 +73,7 @@ public class ClientControllerImpl implements ClientControlller {
         return ResponseEntity.of(Optional.of(client));
     }
 
-    @PutMapping("/change-logo/{id}")
+    @PatchMapping("/change-logo/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateLogo(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {

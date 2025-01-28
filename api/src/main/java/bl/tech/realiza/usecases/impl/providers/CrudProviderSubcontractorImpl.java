@@ -230,41 +230,24 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
 
-            try {
-                if (providerSubcontractor.getLogo() != null) {
-                    fileRepository.deleteById(new ObjectId(providerSubcontractor.getLogo()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+            if (providerSubcontractor.getLogo() != null) {
+                fileRepository.deleteById(new ObjectId(providerSubcontractor.getLogo()));
             }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            providerSubcontractor.setLogo(savedFileDocument.getIdDocumentAsString());
         }
 
-        providerSubcontractorRepository.save(ProviderSubcontractor.builder()
-                .logo(fileDocumentId)
-                .build());
-
+        providerSubcontractorRepository.save(providerSubcontractor);
 
         return "Logo updated successfully";
     }

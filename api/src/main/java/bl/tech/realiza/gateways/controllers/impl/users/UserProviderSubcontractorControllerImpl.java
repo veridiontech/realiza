@@ -68,7 +68,7 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
         return ResponseEntity.of(Optional.of(userSubcontractor));
     }
 
-    @PutMapping("/change-profile-picture/{id}")
+    @PatchMapping("/change-profile-picture/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserProviderSubcontractorProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
@@ -106,7 +106,7 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
         return ResponseEntity.ok(pageUserSubContractor);
     }
 
-    @PutMapping("/change-password/{id}")
+    @PatchMapping("/change-password/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserProviderSubcontractorPassword(@PathVariable String id, @RequestBody @Valid UserProviderSubcontractorRequestDto userSubcontractorRequestDto) {

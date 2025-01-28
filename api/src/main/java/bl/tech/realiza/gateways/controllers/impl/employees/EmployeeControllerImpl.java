@@ -106,7 +106,7 @@ public class EmployeeControllerImpl implements EmployeeController {
     }
 
 
-    @PutMapping("/brazilian/change-profile-picture/{id}")
+    @PatchMapping("/brazilian/change-profile-picture/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateEmployeeBrazilianProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
@@ -184,7 +184,7 @@ public class EmployeeControllerImpl implements EmployeeController {
     }
 
 
-    @PutMapping("/foreigner/change-profile-picture/{id}")
+    @PatchMapping("/foreigner/change-profile-picture/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateEmployeeForeignerProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {

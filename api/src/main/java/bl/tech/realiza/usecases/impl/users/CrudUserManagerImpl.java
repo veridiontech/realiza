@@ -73,9 +73,15 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
         UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (userManager.getProfilePicture() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+        }
 
         UserResponseDto userManagerResponse = UserResponseDto.builder()
                 .idUser(userManager.getIdUser())
@@ -86,6 +92,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .firstName(userManager.getFirstName())
                 .timeZone(userManager.getTimeZone())
                 .surname(userManager.getSurname())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userManager.getEmail())
                 .profilePicture(userManager.getProfilePicture())
                 .telephone(userManager.getTelephone())
@@ -100,22 +107,25 @@ public class CrudUserManagerImpl implements CrudUserManager {
         Page<UserManager> userManagerPage = userManagerRepository.findAll(pageable);
 
         Page<UserResponseDto> userManagerResponseDtoPage = userManagerPage.map(
-                userManager -> UserResponseDto.builder()
-                        .idUser(userManager.getIdUser())
-                        .cpf(userManager.getCpf())
-                        .description(userManager.getDescription())
-                        .position(userManager.getPosition())
-                        .role(userManager.getRole())
-                        .firstName(userManager.getFirstName())
-                        .timeZone(userManager.getTimeZone())
-                        .surname(userManager.getSurname())
-                        .email(userManager.getEmail())
-                        .profilePicture(userManager.getProfilePicture())
-                        .telephone(userManager.getTelephone())
-                        .cellphone(userManager.getCellphone())
-                        .build()
+                userManager -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    return UserResponseDto.builder()
+                            .idUser(userManager.getIdUser())
+                            .cpf(userManager.getCpf())
+                            .description(userManager.getDescription())
+                            .position(userManager.getPosition())
+                            .role(userManager.getRole())
+                            .firstName(userManager.getFirstName())
+                            .timeZone(userManager.getTimeZone())
+                            .surname(userManager.getSurname())
+                            .email(userManager.getEmail())
+                            .profilePicture(userManager.getProfilePicture())
+                            .telephone(userManager.getTelephone())
+                            .cellphone(userManager.getCellphone())
+                            .build();
+                }
         );
-
         return userManagerResponseDtoPage;
     }
 
@@ -182,41 +192,24 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
         Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
         UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
 
-            try {
-                if (userManager.getProfilePicture() != null) {
-                    fileRepository.deleteById(new ObjectId(userManager.getProfilePicture()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+            if (userManager.getProfilePicture() != null) {
+                fileRepository.deleteById(new ObjectId(userManager.getProfilePicture()));
             }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            userManager.setProfilePicture(savedFileDocument.getIdDocumentAsString());
         }
 
-        userManagerRepository.save(UserManager.builder()
-                .profilePicture(fileDocumentId)
-                .build());
-
+        userManagerRepository.save(userManager);
 
         return "Profile picture updated successfully";
     }

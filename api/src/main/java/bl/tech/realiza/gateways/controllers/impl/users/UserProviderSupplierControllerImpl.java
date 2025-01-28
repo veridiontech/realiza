@@ -69,7 +69,7 @@ public class UserProviderSupplierControllerImpl implements UserProviderSupplierC
         return ResponseEntity.of(Optional.of(userSupplier));
     }
 
-    @PutMapping("/change-profile-picture/{id}")
+    @PatchMapping("/change-profile-picture/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserSupplierProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
@@ -107,7 +107,7 @@ public class UserProviderSupplierControllerImpl implements UserProviderSupplierC
         return ResponseEntity.ok(pageUserSupplier);
     }
 
-    @PutMapping("/change-password/{id}")
+    @PatchMapping("/change-password/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserProviderSupplierPassword(@PathVariable String id, @RequestBody @Valid UserProviderSupplierRequestDto userSupplierRequestDto) {

@@ -70,7 +70,7 @@ public class UserManagerControllerImpl implements UserManagerController {
         return ResponseEntity.of(Optional.of(userManager));
     }
 
-    @PutMapping("/change-profile-picture/{id}")
+    @PatchMapping("/change-profile-picture/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserManagerProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
@@ -93,7 +93,7 @@ public class UserManagerControllerImpl implements UserManagerController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/change-password/{id}")
+    @PatchMapping("/change-password/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserManagerPassword(@PathVariable String id, @RequestBody @Valid UserManagerRequestDto userManagerRequestDto) {

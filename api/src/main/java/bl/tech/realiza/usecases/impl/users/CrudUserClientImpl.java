@@ -79,9 +79,15 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
         UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (userClient.getProfilePicture() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+        }
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
                 .idUser(userClient.getIdUser())
@@ -92,6 +98,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .firstName(userClient.getFirstName())
                 .timeZone(userClient.getTimeZone())
                 .surname(userClient.getSurname())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userClient.getEmail())
                 .profilePicture(userClient.getProfilePicture())
                 .telephone(userClient.getTelephone())
@@ -107,21 +114,27 @@ public class CrudUserClientImpl implements CrudUserClient {
         Page<UserClient> userClientPage = userClientRepository.findAll(pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
-                userClient -> UserResponseDto.builder()
-                        .idUser(userClient.getIdUser())
-                        .cpf(userClient.getCpf())
-                        .description(userClient.getDescription())
-                        .position(userClient.getPosition())
-                        .role(userClient.getRole())
-                        .firstName(userClient.getFirstName())
-                        .timeZone(userClient.getTimeZone())
-                        .surname(userClient.getSurname())
-                        .email(userClient.getEmail())
-                        .profilePicture(userClient.getProfilePicture())
-                        .telephone(userClient.getTelephone())
-                        .cellphone(userClient.getCellphone())
-                        .client(userClient.getClient().getIdClient())
-                        .build()
+                userClient -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+
+                    return UserResponseDto.builder()
+                            .idUser(userClient.getIdUser())
+                            .cpf(userClient.getCpf())
+                            .description(userClient.getDescription())
+                            .position(userClient.getPosition())
+                            .role(userClient.getRole())
+                            .firstName(userClient.getFirstName())
+                            .timeZone(userClient.getTimeZone())
+                            .surname(userClient.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(userClient.getEmail())
+                            .profilePicture(userClient.getProfilePicture())
+                            .telephone(userClient.getTelephone())
+                            .cellphone(userClient.getCellphone())
+                            .client(userClient.getClient().getIdClient())
+                            .build();
+                }
         );
 
         return userClientResponseDtoPage;
@@ -216,41 +229,25 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
-        Optional<UserClient> employeeBrazilianOptional = userClientRepository.findById(id);
-        UserClient employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
+        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
 
-            try {
-                if (employeeBrazilian.getProfilePicture() != null) {
-                    fileRepository.deleteById(new ObjectId(employeeBrazilian.getProfilePicture()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+
+            if (userClient.getProfilePicture() != null) {
+                fileRepository.deleteById(new ObjectId(userClient.getProfilePicture()));
             }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            userClient.setProfilePicture(savedFileDocument.getIdDocumentAsString());
         }
 
-        userClientRepository.save(UserClient.builder()
-                .profilePicture(fileDocumentId)
-                .build());
-
+        userClientRepository.save(userClient);
 
         return "Profile picture updated successfully";
     }

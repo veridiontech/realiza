@@ -21,6 +21,8 @@ public class UserResponseDto {
     private String firstName;
     private TimeZone timeZone;
     private String surname;
+    private String profilePictureId;
+    private byte[] profilePictureData;
     private String email;
     private String profilePicture;
     private String telephone;

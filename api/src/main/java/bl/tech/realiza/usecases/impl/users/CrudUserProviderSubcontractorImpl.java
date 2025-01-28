@@ -82,9 +82,15 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
         UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (userSubcontractor.getProfilePicture() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+        }
 
         UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
                 .cpf(userSubcontractor.getCpf())
@@ -94,6 +100,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .firstName(userSubcontractor.getFirstName())
                 .timeZone(userSubcontractor.getTimeZone())
                 .surname(userSubcontractor.getSurname())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userSubcontractor.getEmail())
                 .profilePicture(userSubcontractor.getProfilePicture())
                 .telephone(userSubcontractor.getTelephone())
@@ -109,20 +116,26 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAll(pageable);
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
-                userSubcontractor -> UserResponseDto.builder()
-                        .cpf(userSubcontractor.getCpf())
-                        .description(userSubcontractor.getDescription())
-                        .position(userSubcontractor.getPosition())
-                        .role(userSubcontractor.getRole())
-                        .firstName(userSubcontractor.getFirstName())
-                        .timeZone(userSubcontractor.getTimeZone())
-                        .surname(userSubcontractor.getSurname())
-                        .email(userSubcontractor.getEmail())
-                        .profilePicture(userSubcontractor.getProfilePicture())
-                        .telephone(userSubcontractor.getTelephone())
-                        .cellphone(userSubcontractor.getCellphone())
-                        .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
-                        .build()
+                userSubcontractor -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+
+                    return UserResponseDto.builder()
+                            .cpf(userSubcontractor.getCpf())
+                            .description(userSubcontractor.getDescription())
+                            .position(userSubcontractor.getPosition())
+                            .role(userSubcontractor.getRole())
+                            .firstName(userSubcontractor.getFirstName())
+                            .timeZone(userSubcontractor.getTimeZone())
+                            .surname(userSubcontractor.getSurname())
+                            .email(userSubcontractor.getEmail())
+                            .profilePicture(userSubcontractor.getProfilePicture())
+                            .telephone(userSubcontractor.getTelephone())
+                            .cellphone(userSubcontractor.getCellphone())
+                            .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .build();
+                }
+
         );
 
         return userSubcontractorResponseDtoPage;
@@ -215,41 +228,24 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
         Optional<UserProviderSubcontractor> userProviderSubcontractorOptional = userSubcontractorRepository.findById(id);
         UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
 
-            try {
-                if (userProviderSubcontractor.getProfilePicture() != null) {
-                    fileRepository.deleteById(new ObjectId(userProviderSubcontractor.getProfilePicture()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+            if (userProviderSubcontractor.getProfilePicture() != null) {
+                fileRepository.deleteById(new ObjectId(userProviderSubcontractor.getProfilePicture()));
             }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            userProviderSubcontractor.setProfilePicture(savedFileDocument.getIdDocumentAsString());
         }
 
-        userSubcontractorRepository.save(UserProviderSubcontractor.builder()
-                .profilePicture(fileDocumentId)
-                .build());
-
+        userSubcontractorRepository.save(userProviderSubcontractor);
 
         return "Profile picture updated successfully";
     }

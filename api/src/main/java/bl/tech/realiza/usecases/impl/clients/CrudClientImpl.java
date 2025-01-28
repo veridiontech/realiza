@@ -246,41 +246,24 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
         Optional<Client> clientOptional = clientRepository.findById(id);
         Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
 
         if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
 
-            try {
-                if (client.getLogo() != null) {
-                    fileRepository.deleteById(new ObjectId(client.getLogo()));
-                }
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+            if (client.getLogo() != null) {
+                fileRepository.deleteById(new ObjectId(client.getLogo()));
             }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            client.setLogo(savedFileDocument.getIdDocumentAsString());
         }
 
-        clientRepository.save(Client.builder()
-                .logo(fileDocumentId)
-                .build());
-
+        clientRepository.save(client);
 
         return "Logo updated successfully";
     }
