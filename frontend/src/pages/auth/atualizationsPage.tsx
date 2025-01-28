@@ -45,7 +45,7 @@ export function AtualizationPage() {
             <h2>Documentos e Contratos</h2>
             <div className="list-disc px-2 text-[14px]">
               <li>Implementada a funcionalidade de check manual de documentos.</li>
-              <li>Adicionados os campos gestor e fiscal do contrato (ponto focal).</li>
+              <li>Adicionados os campos gestor e fiscal do contrato.</li>
               <li>Implementado o recurso de busca para download de documentos.</li>
             </div>
           </div>

@@ -38,7 +38,6 @@ export function SelectClient() {
 
     if(!hasShownToast && user?.idUser) {
       toast("Você está na versão 1.0.2 do sistema realiza", {
-        duration: 10000,
         action: (
           <Button
             className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
