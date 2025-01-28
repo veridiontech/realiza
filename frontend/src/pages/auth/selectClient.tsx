@@ -37,7 +37,7 @@ export function SelectClient() {
     const hasShownToast = localStorage.getItem("hasShownToast");
 
     if (!hasShownToast && user?.idUser) {
-      toast("Você está na versão 1.0.0 do sistema realiza", {
+      toast("Você está na versão 1.0.2 do sistema realiza", {
         action: (
           <Button
             className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"

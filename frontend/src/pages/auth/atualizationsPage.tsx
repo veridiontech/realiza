@@ -11,7 +11,7 @@ export function AtualizationPage() {
           viewport={{ once: true }}
           className="flex flex-col"
         >
-          <h1 className="text-[30px]">Nova atualização: Versão 1.0.1</h1>
+          <h1 className="text-[30px]">Nova atualização: Versão 1.0.2</h1>
           <span className="text-[14px] text-gray-600 dark:text-gray-400">
             Realiza sistema
           </span>
@@ -35,42 +35,37 @@ export function AtualizationPage() {
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-1">
-            <h2>Perfil de empresa</h2>
+            <h2>Cadastro de Fornecedores</h2>
             <div className="list-disc px-2 text-[14px]">
-              <li className="">
-                Perfil da empresa recebendo suas informações de acordo com o
-                cadastro no email
-              </li>
-              <li>Remoção dos campos de endereços e descrição.</li>
+              <li>Adicionados os campos CAPEX e OPEX no cadastro.</li>
+              <li>Adicionados os campos filiais atendidas/bases/CNPJ.</li>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <h2>Página de Colaboradores</h2>
+            <h2>Documentos e Contratos</h2>
             <div className="list-disc px-2 text-[14px]">
-              <li className="">
-                Renomeação da página de "Funcionários" para "Colaboradores
-              </li>
-              <li>
-                Nome e sobrenome agora estão unificados em um único campo.
-              </li>
-              <li>Remoção dos campos "PJ" e "e-mail.</li>
-              <li>
-                Avaliação da possibilidade de incluir ficha de registro para
-                colaboradores
-              </li>
+              <li>Implementada a funcionalidade de check manual de documentos.</li>
+              <li>Adicionados os campos gestor e fiscal do contrato (ponto focal).</li>
+              <li>Implementado o recurso de busca para download de documentos.</li>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <h2>Cadastro de Fornecedores e Subcontratados</h2>
+            <h2>Colaboradores</h2>
             <div className="list-disc px-2 text-[14px]">
-              <li className="">
-                Novo botão para alternar entre "Fornecedor" e "Subcontratado"
-                durante o cadastro
-              </li>
-              <li>
-                Envio automático de e-mail de convite para fornecedores e
-                subcontratados..
-              </li>
+              <li>Renomeado o termo "Funcionário" para "Colaborador" em todo o sistema.</li>
+              <li>Diferenciados colaboradores e acessos ao sistema com menos campos, separando funcionalidades.</li>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <h2>Gestão de Acessos</h2>
+            <div className="list-disc px-2 text-[14px]">
+              <li>Criados usuários "realiza" com a capacidade de criar outros usuários.</li>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <h2>Interface de Cadastro</h2>
+            <div className="list-disc px-2 text-[14px]">
+              <li>Alterado o campo de "descrição do serviço" para ser maior e reposicionado na tela.</li>
             </div>
           </div>
         </motion.ul>

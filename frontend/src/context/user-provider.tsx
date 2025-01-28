@@ -92,7 +92,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem("userId");
       localStorage.removeItem("tokenClient");
-      localStorage.removeItem("hasShowToast");
+      localStorage.removeItem("hasShownToast");
       setUser(null);
       setAuthUser(false);
       navigate("/")
