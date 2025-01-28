@@ -14,17 +14,25 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
   employeeId,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileName, setFileName] = useState("");
   const [status, setStatus] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-      setFileName(event.target.files[0].name);
+      const file = event.target.files[0];
+
+      // Valida se o arquivo é do tipo PDF
+      if (file.type !== "application/pdf") {
+        alert("Por favor, selecione um arquivo no formato PDF.");
+        setSelectedFile(null); // Reseta o arquivo selecionado
+        return;
+      }
+
+      setSelectedFile(file); // Define o arquivo no estado
     }
   };
 
   const handleSubmit = async (formData: Record<string, any>) => {
+    // Validação para garantir que o arquivo foi selecionado
     if (!selectedFile) {
       alert("Por favor, selecione um arquivo antes de enviar.");
       return;
@@ -44,11 +52,12 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
     );
 
     data.append("documentEmployeeRequestDto", jsonBlob);
-    data.append("file", selectedFile);
+    data.append("file", selectedFile); // Adiciona o arquivo selecionado
 
     try {
       await axios.post("https://realiza.onrender.com/document/employee", data);
       setStatus("Arquivo enviado com sucesso!");
+      setSelectedFile(null); // Reseta o arquivo após o envio
     } catch (error) {
       console.error(error);
       setStatus("Erro ao enviar o arquivo. Tente novamente.");
@@ -78,26 +87,26 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
           label: "Arquivo PDF",
           type: "custom",
           render: () => (
-            <div className="flex flex-col items-start">
-              {/* O input file está escondido e só é acessado pelo botão */}
+            <div className="flex flex-col">
+              <label
+                htmlFor="file-upload"
+                className="mb-2 text-sm font-medium text-yellow-400"
+              >
+                Selecione o Arquivo
+              </label>
               <input
+                id="file-upload"
                 type="file"
                 accept=".pdf"
                 onChange={handleFileChange}
-                id="file-upload"
                 className="hidden"
               />
-              <button
-                className="mt-2 cursor-pointer rounded bg-blue-500 px-4 py-2 text-white shadow-sm hover:bg-blue-600 focus:outline-none"
-                onClick={() => document.getElementById("file-upload")?.click()}
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
               >
-                Escolher Arquivo
-              </button>
-              {fileName && (
-                <span className="mt-2 text-sm text-green-600">
-                  Arquivo selecionado: {fileName}
-                </span>
-              )}
+                {selectedFile ? selectedFile.name : "Escolher Arquivo"}
+              </label>
             </div>
           ),
         },

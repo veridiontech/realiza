@@ -1,35 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { ScrollText, FilePlus2, SquareUser } from "lucide-react";
 import { useContracts } from "@/hooks/gets/useContracts";
+import { useClient } from "@/context/Client-Provider";
+import { Contract } from "@/types/contracts";
+import { NotebookPen } from "lucide-react";
 
-const ContractsTable = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  const [providerData, setProviderData] = useState<Record<string, any> | null>(
-    null,
-  );
+export default function ContractsTable() {
+  const { client } = useClient(); // Recebe o cliente do contexto
   const itemsPerPage = 10;
 
-  // Mock de contratos
-  const mockContracts = Array.from({ length: 20 }, (_, index) => ({
-    id: `${index + 1}`,
-    serviceName: `Serviço ${index + 1}`,
-    startDate: new Date(2023, 0, index + 1).toLocaleDateString("pt-BR"),
-    endDate: new Date(2023, 0, index + 10).toLocaleDateString("pt-BR"),
-  }));
+  const {
+    contracts = [],
+    totalPages = 0,
+    loading,
+    error,
+    fetchContracts,
+  } = useContracts();
 
-  const totalPages = Math.ceil(mockContracts.length / itemsPerPage);
-  const contracts = mockContracts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const [currentPage, setCurrentPage] = useState(0);
+
+  useEffect(() => {
+    if (client?.idClient) {
+      // Chama a função fetchContracts sempre que o cliente ou a página muda
+      fetchContracts(itemsPerPage, currentPage, client.idClient);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, client?.idClient]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   const columns: {
-    key: keyof (typeof contracts)[0];
+    key: keyof Contract;
     label: string;
-    render?: (value: any) => JSX.Element;
+    className?: string;
+    render?: (value: string | number | any[], row: Contract) => React.ReactNode;
   }[] = [
     { key: "serviceName", label: "Serviço" },
     { key: "startDate", label: "Data de Início" },
@@ -37,46 +44,43 @@ const ContractsTable = () => {
     {
       key: "id",
       label: "Ações",
-      render: (id: string) => (
-        <div>
+      render: (_, row) => (
+        <div className="flex items-center space-x-2">
           <button
+            onClick={() => console.log("Ação para o contrato:", row)}
             className="text-blue-500 hover:underline"
-            onClick={() => {
-              setProviderData({ id });
-              setIsStepTwoModalOpen(true);
-            }}
           >
-            <FilePlus2 />
-          </button>
-          <button className="ml-4 text-blue-500 hover:underline">
-            <ScrollText />
-          </button>
-          <button className="ml-4 text-blue-500 hover:underline">
-            <SquareUser />
+            <NotebookPen />
           </button>
         </div>
       ),
     },
   ];
 
-  const handleStepTwoSubmit = (data: Record<string, any>) => {
-    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
-    setIsStepTwoModalOpen(false);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
   return (
     <div className="m-10 flex min-h-full justify-center">
-      <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
-        <h1 className="m-4 text-xl">Tabela de Contratos</h1>
+      <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
+        <h1 className="m-8 text-xl font-semibold">Tabela de Contratos</h1>
 
-        {contracts.length > 0 ? (
-          <Table data={contracts} columns={columns} />
+        <div className="flex w-[90rem] flex-row justify-between px-10">
+          <div className="relative mb-4">
+            <input
+              type="text"
+              placeholder="🔍 Pesquisar contrato..."
+              className="w-[34rem] rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
+              onChange={() => {}}
+            />
+          </div>
+        </div>
+
+        {error ? (
+          <p className="text-center text-red-600">
+            Erro ao carregar os dados: {error}
+          </p>
+        ) : loading ? (
+          <p className="text-center">Carregando contratos...</p>
+        ) : contracts.length > 0 ? (
+          <Table<Contract> data={contracts} columns={columns} />
         ) : (
           <p className="text-center text-gray-500">
             Nenhum contrato disponível.
@@ -85,19 +89,10 @@ const ContractsTable = () => {
 
         <Pagination
           currentPage={currentPage}
-          totalPages={Math.max(totalPages, 1)}
+          totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-
-        {isStepTwoModalOpen && (
-          <StepTwoServiceProviders
-            onClose={() => setIsStepTwoModalOpen(false)}
-            onSubmit={handleStepTwoSubmit}
-          />
-        )}
       </div>
     </div>
   );
-};
-
-export default ContractsTable;
+}
