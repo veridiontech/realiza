@@ -10,7 +10,6 @@ import {
   Info,
   MessageSquare,
   Users2,
-  UserSquare,
   Building2,
   Factory,
   PersonStanding,
