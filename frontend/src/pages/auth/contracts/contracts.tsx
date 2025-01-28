@@ -4,8 +4,9 @@ import { Pagination } from "@/components/ui/pagination";
 import { useContracts } from "@/hooks/gets/useContracts";
 import { useClient } from "@/context/Client-Provider";
 import { Contract } from "@/types/contracts";
-import { NotebookPen, Users } from "lucide-react";
+import { NotebookPen, Users, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ModalAddContract } from "@/components/modal-add-contract";
 
 export default function ContractsTable() {
   const { client } = useClient();
@@ -68,8 +69,13 @@ export default function ContractsTable() {
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
-        <h1 className="m-8 text-xl font-semibold">Tabela de Contratos</h1>
+        {/* Cabeçalho com o título e botão para adicionar contrato */}
+        <div className="m-8 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Tabela de Contratos</h1>
+          <ModalAddContract /> {/* Botão Novo Contrato */}
+        </div>
 
+        {/* Mensagens de erro e carregamento */}
         {error ? (
           <p className="text-center text-red-600">
             Erro ao carregar os dados: {error}
@@ -84,6 +90,7 @@ export default function ContractsTable() {
           </p>
         )}
 
+        {/* Paginação */}
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
