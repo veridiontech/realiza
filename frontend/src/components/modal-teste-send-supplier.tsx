@@ -18,6 +18,7 @@ import { Radio } from "react-loader-spinner";
 import { propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email valido"),
@@ -162,9 +163,16 @@ export function ModalTesteSendSupplier() {
       <DialogTrigger asChild>
         <Button className="bg-sky-700">Cadastrar novo prestador</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        style={{
+          backgroundImage: `url(${bgModalRealiza})`,
+        }}
+        className="max-w-[45vw]"
+      >
         <DialogHeader>
-          <DialogTitle>Cadastrar novo prestador</DialogTitle>
+          <DialogTitle className="text-white">
+            Cadastrar novo prestador
+          </DialogTitle>
         </DialogHeader>
         <div>
           <form
@@ -173,7 +181,7 @@ export function ModalTesteSendSupplier() {
             className="flex flex-col gap-4"
           >
             <div>
-              <Label>Email</Label>
+              <Label className="text-white">Email</Label>
               <Input
                 type="email"
                 placeholder="Digite o email do novo cliente"
@@ -185,7 +193,7 @@ export function ModalTesteSendSupplier() {
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <Label>Selecione um cliente</Label>
+              <Label className="text-white">Selecione um cliente</Label>
               <select
                 className="rounded-md border p-2"
                 defaultValue=""
@@ -224,9 +232,14 @@ export function ModalTesteSendSupplier() {
             </div>
           </form>
           <Dialog open={nextModal} onOpenChange={setNextModal}>
-            <DialogContent className="max-w-[50vw]">
+            <DialogContent
+              className="max-w-[45vw] border-none"
+              style={{
+                backgroundImage: `url(${bgModalRealiza})`,
+              }}
+            >
               <DialogHeader>
-                <DialogTitle>Faça o contrato</DialogTitle>
+                <DialogTitle className="text-white">Faça o contrato</DialogTitle>
               </DialogHeader>
               <ScrollArea className="h-[60vh] w-full px-5">
                 <div className="p-4">
@@ -236,15 +249,16 @@ export function ModalTesteSendSupplier() {
                     onSubmit={handleSubmitContract(createContract)}
                   >
                     <div className="flex flex-col gap-2">
-                      <Label>É uma subcontratação?</Label>
+                      <Label className="text-white">É uma subcontratação?</Label>
                       <div className="flex items-center gap-1">
-                        <Label htmlFor="subcontratacao-sim">Sim</Label>
+                        <Label className="text-white" htmlFor="subcontratacao-sim">Sim</Label>
                         <input
                           type="radio"
                           id="subcontratacao-sim"
                           name="subcontratacao"
                           value="sim"
-                          onClick={() => handleRadioClick("sim")} // Define como "sim"
+                          onClick={() => handleRadioClick("sim")} 
+                          className="text-white"
                         />
                       </div>
                       <div className="flex items-center gap-1">
@@ -254,7 +268,8 @@ export function ModalTesteSendSupplier() {
                           id="subcontratacao-nao"
                           name="subcontratacao"
                           value="nao"
-                          onClick={() => handleRadioClick("nao")} // Define como "nao"
+                          onClick={() => handleRadioClick("nao")} 
+                          className="text-white"
                         />
                       </div>
                     </div>
@@ -383,29 +398,29 @@ export function ModalTesteSendSupplier() {
                     </div>
                     {shouldShowServiceType && (
                       <div className="flex flex-col gap-1">
-                      <Label>Atividades</Label>
-                      <select
-                        {...registerContract("activities")}
-                        key={activities.idActivity}
-                        className="rounded-md border p-2"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          Selecione aqui
-                        </option>
-                        {activities.map((activity: any) => (
-                          <option value="">{activity.title}</option>
-                        ))}
-                        <option value=""></option>
-                      </select>
-                      {errorsContract.activities && (
-                        <span className="text-red-500">
-                          {errorsContract.activities.message}
-                        </span>
-                      )}
-                    </div>
+                        <Label>Atividades</Label>
+                        <select
+                          {...registerContract("activities")}
+                          key={activities.idActivity}
+                          className="rounded-md border p-2"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>
+                            Selecione aqui
+                          </option>
+                          {activities.map((activity: any) => (
+                            <option value="">{activity.title}</option>
+                          ))}
+                          <option value=""></option>
+                        </select>
+                        {errorsContract.activities && (
+                          <span className="text-red-500">
+                            {errorsContract.activities.message}
+                          </span>
+                        )}
+                      </div>
                     )}
-                    
+
                     <div className="flex flex-col gap-1">
                       <Label>Requisitos</Label>
                       <select
