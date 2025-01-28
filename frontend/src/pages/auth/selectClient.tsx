@@ -29,31 +29,24 @@ export function SelectClient() {
       console.log("erro ao buscar clientes", err);
     } finally {
       setIsLoading(false);
-      const hasShownToast = localStorage.getItem("hasShownToast");
-      if(!hasShownToast && user?.idUser) {
-        toast("Você está na versão 1.0.2 do sistema realiza", {
-          action: (
-            <Button
-              className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
-              onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
-            >
-              Visualizar novas funções
-            </Button>
-          ),
-        });
-      }
-      
+     
     }
   };
 
   useEffect(() => {
     getClient();
-    
-
-    
-      
-      localStorage.setItem("hasShownToast", "true");
-    
+    if(user?.idUser) {
+      toast("Você está na versão 1.0.2 do sistema realiza", {
+        action: (
+          <Button
+            className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
+            onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
+          >
+            Visualizar novas funções
+          </Button>
+        ),
+      });
+    }
   }, [user, navigate]);
 
   return (

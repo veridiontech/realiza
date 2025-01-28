@@ -350,9 +350,9 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <Label className="text-white">Escopo do serviço</Label >
-                      <Input {...registerContract("description")} />
+                      <textarea {...registerContract("description")} className="border rounded-md p-2 "/>
                       {errorsContract.description && (
                         <span className="text-red-500">
                           {errorsContract.description.message}
@@ -387,9 +387,9 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
 
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <Label className="text-white">Descrição detalhada do serviço</Label >
-                      <Input {...registerContract("description")} />
+                      <textarea {...registerContract("description")}  className="border rounded-md p-2"/>
                       {errorsContract.description && (
                         <span className="text-red-500">
                           {errorsContract.description.message}

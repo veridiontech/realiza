@@ -38,7 +38,6 @@ export function AtualizationPage() {
             <h2>Cadastro de Fornecedores</h2>
             <div className="list-disc px-2 text-[14px]">
               <li>Adicionados os campos CAPEX e OPEX no cadastro.</li>
-              <li>Adicionados os campos filiais atendidas/bases/CNPJ.</li>
             </div>
           </div>
           <div className="flex flex-col gap-1">
@@ -53,7 +52,6 @@ export function AtualizationPage() {
             <h2>Colaboradores</h2>
             <div className="list-disc px-2 text-[14px]">
               <li>Renomeado o termo "Funcionário" para "Colaborador" em todo o sistema.</li>
-              <li>Diferenciados colaboradores e acessos ao sistema com menos campos, separando funcionalidades.</li>
             </div>
           </div>
           <div className="flex flex-col gap-1">
