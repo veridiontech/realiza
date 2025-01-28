@@ -14,5 +14,6 @@ public interface ContractProviderSupplierControlller {
     ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplier(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSupplier(String id, ContractRequestDto contractProviderSupplierRequestDto);
     ResponseEntity<Void> deleteContractProviderSupplier(String id);
+    ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplierBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplierByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

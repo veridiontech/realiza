@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ public interface UserProviderSubcontractorController {
     ResponseEntity<Optional<UserResponseDto>> getOneUserProviderSubcontractor(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersProviderSubcontractor(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<UserResponseDto>> updateUserProviderSubcontractor(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto);
+    ResponseEntity<String> updateUserProviderSubcontractorProfilePicture(String id, MultipartFile file);
     ResponseEntity<Void> deleteUserProviderSubcontractor(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersProviderSubcontractorBySubcontractor(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<String> updateUserProviderSubcontractorPassword(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto);

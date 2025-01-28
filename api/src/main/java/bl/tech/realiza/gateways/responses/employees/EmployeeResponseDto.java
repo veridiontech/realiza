@@ -20,6 +20,8 @@ public class EmployeeResponseDto {
     private String cep;
     private String name;
     private String surname;
+    private String profilePictureId;
+    private byte[] profilePictureData;
     private String address;
     private String country;
     private String acronym;

@@ -6,7 +6,9 @@ import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public interface CrudUserProviderSubcontractor {
@@ -17,4 +19,5 @@ public interface CrudUserProviderSubcontractor {
     void delete(String id);
     Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
     String changePassword(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto);
+    String changeProfilePicture(String id, MultipartFile file) throws IOException;
 }
