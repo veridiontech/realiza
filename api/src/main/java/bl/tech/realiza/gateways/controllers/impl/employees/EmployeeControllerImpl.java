@@ -18,7 +18,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -47,11 +49,20 @@ public class EmployeeControllerImpl implements EmployeeController {
         return ResponseEntity.ok(pageEmployeeForeigner);
     }
 
-    @PostMapping("/brazilian")
+    @PostMapping(value = "/brazilian", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(@RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
-        EmployeeResponseDto employeeBrazilian = crudEmployeeBrazilian.save(employeeBrazilianRequestDto);
+    public ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(
+            @RequestPart("employeeBrazilianRequestDto") @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        EmployeeResponseDto employeeBrazilian = null;
+
+        try {
+            employeeBrazilian= crudEmployeeBrazilian.save(employeeBrazilianRequestDto, file);
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving employee",e);
+        }
 
         return ResponseEntity.of(Optional.of(employeeBrazilian));
     }
@@ -79,14 +90,34 @@ public class EmployeeControllerImpl implements EmployeeController {
         return ResponseEntity.ok(pageEmployeeBrazilian);
     }
 
-    @PutMapping("/brazilian/{id}")
+    @PutMapping(value = "/brazilian/{id}", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeBrazilian(@PathVariable String id,
-                                                                                 @RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
-        Optional<EmployeeResponseDto> employeeBrazilian = crudEmployeeBrazilian.update(id, employeeBrazilianRequestDto);
+                                                                                 @RequestPart("employeeBrazilianRequestDto") @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
+        Optional<EmployeeResponseDto> employeeBrazilian = null;
+        try {
+            employeeBrazilian = crudEmployeeBrazilian.update(id, employeeBrazilianRequestDto);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(employeeBrazilian));
+    }
+
+
+    @PatchMapping("/brazilian/change-profile-picture/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateEmployeeBrazilianProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String employeBrazilian = null;
+        try {
+            employeBrazilian = crudEmployeeBrazilian.changeProfilePicture(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(employeBrazilian);
     }
 
     @DeleteMapping("/brazilian/{id}")
@@ -98,11 +129,18 @@ public class EmployeeControllerImpl implements EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/foreigner")
+    @PostMapping(value = "/foreigner", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(@RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
-        EmployeeResponseDto employeeForeigner = crudEmployeeForeigner.save(employeeForeignerRequestDto);
+    public ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(
+            @RequestPart("employeeForeignerRequestDto") @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        EmployeeResponseDto employeeForeigner = null;
+        try {
+            employeeForeigner = crudEmployeeForeigner.save(employeeForeignerRequestDto, file);
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving employee",e);
+        }
 
         return ResponseEntity.of(Optional.of(employeeForeigner));
     }
@@ -130,13 +168,34 @@ public class EmployeeControllerImpl implements EmployeeController {
         return ResponseEntity.ok(pageEmployeeForeigner);
     }
 
-    @PutMapping("/foreigner/{id}")
+    @PutMapping(value = "/foreigner/{id}", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(@PathVariable String id, @RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
-        Optional<EmployeeResponseDto> employeeForeigner = crudEmployeeForeigner.update(id, employeeForeignerRequestDto);
+    public ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(@PathVariable String id,
+                                                                                 @RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
+        Optional<EmployeeResponseDto> employeeForeigner = null;
+        try {
+            employeeForeigner = crudEmployeeForeigner.update(id, employeeForeignerRequestDto);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.of(Optional.of(employeeForeigner));
+    }
+
+
+    @PatchMapping("/foreigner/change-profile-picture/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateEmployeeForeignerProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String employeeForeigner = null;
+        try {
+            employeeForeigner = crudEmployeeForeigner.changeProfilePicture(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(employeeForeigner);
     }
 
     @DeleteMapping("/foreigner/{id}")

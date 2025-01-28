@@ -2,26 +2,28 @@ package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeBrazilian;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,14 +37,18 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ClientRepository clientRepository;
     private final ContractRepository contractRepository;
+    private final FileRepository fileRepository;
 
     @Override
-    public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
+    public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto, MultipartFile file) {
         List<Contract> contracts = List.of();
         EmployeeBrazilian newEmployeeBrazilian = null;
         Client client = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -71,6 +77,27 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
             }
         }
 
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+        }
+
         newEmployeeBrazilian = EmployeeBrazilian.builder()
                 .pis(employeeBrazilianRequestDto.getPis())
                 .maritalStatus(employeeBrazilianRequestDto.getMaritalStatus())
@@ -78,6 +105,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(employeeBrazilianRequestDto.getCep())
                 .name(employeeBrazilianRequestDto.getName())
                 .surname(employeeBrazilianRequestDto.getSurname())
+                .profilePicture(fileDocumentId)
                 .address(employeeBrazilianRequestDto.getAddress())
                 .country(employeeBrazilianRequestDto.getCountry())
                 .acronym(employeeBrazilianRequestDto.getAcronym())
@@ -115,6 +143,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(savedEmployeeBrazilian.getCep())
                 .name(savedEmployeeBrazilian.getName())
                 .surname(savedEmployeeBrazilian.getSurname())
+                .profilePictureId(savedEmployeeBrazilian.getProfilePicture())
                 .address(savedEmployeeBrazilian.getAddress())
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())
@@ -152,9 +181,15 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public Optional<EmployeeResponseDto> findOne(String id) {
-        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
+        FileDocument fileDocument = null;
 
+        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
         EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        if (employeeBrazilian.getProfilePicture() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+        }
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
                 .idEmployee(employeeBrazilian.getIdEmployee())
@@ -164,6 +199,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(employeeBrazilian.getCep())
                 .name(employeeBrazilian.getName())
                 .surname(employeeBrazilian.getSurname())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .address(employeeBrazilian.getAddress())
                 .country(employeeBrazilian.getCountry())
                 .acronym(employeeBrazilian.getAcronym())
@@ -204,45 +240,51 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         Page<EmployeeBrazilian> employeeBrazilianPage = employeeBrazilianRepository.findAll(pageable);
 
         Page<EmployeeResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
-                employeeBrazilian -> EmployeeResponseDto.builder()
-                        .idEmployee(employeeBrazilian.getIdEmployee())
-                        .pis(employeeBrazilian.getPis())
-                        .maritalStatus(employeeBrazilian.getMaritalStatus())
-                        .contractType(employeeBrazilian.getContractType())
-                        .cep(employeeBrazilian.getCep())
-                        .name(employeeBrazilian.getName())
-                        .surname(employeeBrazilian.getSurname())
-                        .address(employeeBrazilian.getAddress())
-                        .country(employeeBrazilian.getCountry())
-                        .acronym(employeeBrazilian.getAcronym())
-                        .state(employeeBrazilian.getState())
-                        .birthDate(employeeBrazilian.getBirthDate())
-                        .city(employeeBrazilian.getCity())
-                        .postalCode(employeeBrazilian.getPostalCode())
-                        .gender(employeeBrazilian.getGender())
-                        .position(employeeBrazilian.getPosition())
-                        .registration(employeeBrazilian.getRegistration())
-                        .salary(employeeBrazilian.getSalary())
-                        .cellphone(employeeBrazilian.getCellphone())
-                        .platformAccess(employeeBrazilian.getPlatformAccess())
-                        .telephone(employeeBrazilian.getTelephone())
-                        .directory(employeeBrazilian.getDirectory())
-                        .email(employeeBrazilian.getEmail())
-                        .levelOfEducation(employeeBrazilian.getLevelOfEducation())
-                        .cbo(employeeBrazilian.getCbo())
-                        .situation(employeeBrazilian.getSituation())
-                        .rg(employeeBrazilian.getRg())
-                        .admissionDate(employeeBrazilian.getAdmissionDate())
-                        .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
-                        .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
-                        .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
-                        .contracts(employeeBrazilian.getContracts().stream().map(
-                                        contract -> EmployeeResponseDto.ContractDto.builder()
-                                                .idContract(contract.getIdContract())
-                                                .serviceName(contract.getServiceName())
-                                                .build())
-                                .collect(Collectors.toList()))
-                        .build()
+                employeeBrazilian -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
+                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+
+                    return EmployeeResponseDto.builder()
+                            .idEmployee(employeeBrazilian.getIdEmployee())
+                            .pis(employeeBrazilian.getPis())
+                            .maritalStatus(employeeBrazilian.getMaritalStatus())
+                            .contractType(employeeBrazilian.getContractType())
+                            .cep(employeeBrazilian.getCep())
+                            .name(employeeBrazilian.getName())
+                            .surname(employeeBrazilian.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .address(employeeBrazilian.getAddress())
+                            .country(employeeBrazilian.getCountry())
+                            .acronym(employeeBrazilian.getAcronym())
+                            .state(employeeBrazilian.getState())
+                            .birthDate(employeeBrazilian.getBirthDate())
+                            .city(employeeBrazilian.getCity())
+                            .postalCode(employeeBrazilian.getPostalCode())
+                            .gender(employeeBrazilian.getGender())
+                            .position(employeeBrazilian.getPosition())
+                            .registration(employeeBrazilian.getRegistration())
+                            .salary(employeeBrazilian.getSalary())
+                            .cellphone(employeeBrazilian.getCellphone())
+                            .platformAccess(employeeBrazilian.getPlatformAccess())
+                            .telephone(employeeBrazilian.getTelephone())
+                            .directory(employeeBrazilian.getDirectory())
+                            .email(employeeBrazilian.getEmail())
+                            .levelOfEducation(employeeBrazilian.getLevelOfEducation())
+                            .cbo(employeeBrazilian.getCbo())
+                            .situation(employeeBrazilian.getSituation())
+                            .rg(employeeBrazilian.getRg())
+                            .admissionDate(employeeBrazilian.getAdmissionDate())
+                            .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
+                            .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
+                            .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
+                            .contracts(employeeBrazilian.getContracts().stream().map(
+                                            contract -> EmployeeResponseDto.ContractDto.builder()
+                                                    .idContract(contract.getIdContract())
+                                                    .serviceName(contract.getServiceName())
+                                                    .build())
+                                    .collect(Collectors.toList()))
+                            .build();
+                }
         );
 
         return employeeBrazilianResponseDtoPage;
@@ -341,5 +383,29 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     @Override
     public void delete(String id) {
         employeeBrazilianRepository.deleteById(id);
+    }
+
+    @Override
+    public String changeProfilePicture(String id, MultipartFile file) throws IOException {
+        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        if (file != null && !file.isEmpty()) {
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+
+            if (employeeBrazilian.getProfilePicture() != null) {
+                fileRepository.deleteById(new ObjectId(employeeBrazilian.getProfilePicture()));
+            }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            employeeBrazilian.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+        }
+
+        employeeBrazilianRepository.save(employeeBrazilian);
+
+        return "Profile picture updated successfully";
     }
 }

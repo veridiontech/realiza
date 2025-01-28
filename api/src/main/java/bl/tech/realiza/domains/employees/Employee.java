@@ -32,6 +32,7 @@ public abstract class Employee {
     private String cep;
     private String name;
     private String surname;
+    private String profilePicture;
     private String address;
     private String country;
     private String acronym;

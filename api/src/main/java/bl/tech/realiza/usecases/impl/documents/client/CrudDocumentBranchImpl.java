@@ -60,7 +60,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
                 .title(documentBranchRequestDto.getTitle())
                 .status(documentBranchRequestDto.getStatus())
-                .documentation(savedFileDocument.getIdDocumentAsString())
+                .documentation(fileDocumentId)
                 .branch(branch)
                 .build();
 

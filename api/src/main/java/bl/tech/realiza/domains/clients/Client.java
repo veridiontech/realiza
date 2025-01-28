@@ -24,6 +24,7 @@ public class Client {
     private String tradeName;
     private String companyName;
     private String fantasyName;
+    private String logo;
     private String email;
     private String telephone;
     private String cep;

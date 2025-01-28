@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -66,6 +68,20 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
         return ResponseEntity.of(Optional.of(userSubcontractor));
     }
 
+    @PatchMapping("/change-profile-picture/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateUserProviderSubcontractorProfilePicture(@PathVariable String id, @RequestPart(value = "file") MultipartFile file) {
+        String userSubcontractor = null;
+        try {
+            userSubcontractor = crudUserSubcontractor.changeProfilePicture(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(userSubcontractor);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
@@ -90,7 +106,7 @@ public class UserProviderSubcontractorControllerImpl implements UserProviderSubc
         return ResponseEntity.ok(pageUserSubContractor);
     }
 
-    @PutMapping("/change-password/{id}")
+    @PatchMapping("/change-password/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateUserProviderSubcontractorPassword(@PathVariable String id, @RequestBody @Valid UserProviderSubcontractorRequestDto userSubcontractorRequestDto) {

@@ -264,4 +264,32 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         return providerResponseDtoPage;
     }
+
+    @Override
+    public Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable) {
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByClient_IdClient(idSearch, pageable);
+
+        Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
+                contractProviderSupplier -> ContractResponseDto.builder()
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceDuration(contractProviderSupplier.getServiceDuration())
+                        .serviceName(contractProviderSupplier.getServiceName())
+                        .contractReference(contractProviderSupplier.getContractReference())
+                        .description(contractProviderSupplier.getDescription())
+                        .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .expenseType(contractProviderSupplier.getExpenseType())
+                        .startDate(contractProviderSupplier.getStartDate())
+                        .endDate(contractProviderSupplier.getEndDate())
+                        .activities(contractProviderSupplier.getActivities())
+                        .requirements(contractProviderSupplier.getRequirements())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                        .client(contractProviderSupplier.getClient().getIdClient())
+                        .clientName(contractProviderSupplier.getClient().getFantasyName())
+                        .build()
+        );
+
+        return providerResponseDtoPage;
+    }
 }

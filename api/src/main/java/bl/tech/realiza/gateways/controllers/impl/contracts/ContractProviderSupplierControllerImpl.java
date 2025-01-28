@@ -78,6 +78,21 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @GetMapping("/filtered-supplier")
     @ResponseStatus(HttpStatus.OK)
     @Override
+    public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplierBySupplier(@RequestParam(defaultValue = "0") int page,
+                                                                                               @RequestParam(defaultValue = "5") int size,
+                                                                                               @RequestParam(defaultValue = "idContract") String sort,
+                                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                               @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAllBySupplier(idSearch, pageable);
+
+        return ResponseEntity.ok(pageContractSupplier);
+    }
+
+    @GetMapping("/filtered-client")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
     public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplierByClient(@RequestParam(defaultValue = "0") int page,
                                                                                              @RequestParam(defaultValue = "5") int size,
                                                                                              @RequestParam(defaultValue = "idContract") String sort,
@@ -85,7 +100,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                              @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAllBySupplier(idSearch, pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAllByClient(idSearch, pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }

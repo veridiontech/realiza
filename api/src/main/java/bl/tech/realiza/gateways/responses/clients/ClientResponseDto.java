@@ -13,6 +13,8 @@ public class ClientResponseDto {
     private String companyName;
     private String tradeName;
     private String fantasyName;
+    private String logoId;
+    private byte[] logoData;
     private String telephone;
     private String email;
     private String cep;

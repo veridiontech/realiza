@@ -3,19 +3,25 @@ package bl.tech.realiza.usecases.impl.providers;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,9 +33,10 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ClientRepository clientRepository;
     private final BranchRepository branchRepository;
+    private final FileRepository fileRepository;
 
     @Override
-    public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto) {
+    public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file) {
         List<Branch> branches = List.of();
 
         Optional<Client> clientOptional = clientRepository.findById(providerSupplierRequestDto.getClient());
@@ -218,5 +225,29 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         );
 
         return providerSupplierResponseDtoPage;
+    }
+
+    @Override
+    public String changeLogo(String id, MultipartFile file) throws IOException {
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+
+        if (file != null && !file.isEmpty()) {
+            FileDocument fileDocument = FileDocument.builder()
+                    .name(file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+
+            if (providerSupplier.getLogo() != null) {
+                fileRepository.deleteById(new ObjectId(providerSupplier.getLogo()));
+            }
+            FileDocument savedFileDocument = fileRepository.save(fileDocument);
+            providerSupplier.setLogo(savedFileDocument.getIdDocumentAsString());
+        }
+
+        providerSupplierRepository.save(providerSupplier);
+
+        return "Logo updated successfully";
     }
 }
