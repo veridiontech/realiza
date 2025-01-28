@@ -33,13 +33,10 @@ export function SelectClient() {
     }
   };
 
-  
-
-
   useEffect(() => {
     getClient();
     setTimeout(() => {
-      if(user?.idUser) {
+      if( user?.idUser) {
         toast("Você está na versão 1.0.2 do sistema realiza", {
           action: (
             <Button

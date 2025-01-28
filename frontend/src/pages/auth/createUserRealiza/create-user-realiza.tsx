@@ -118,8 +118,8 @@ export function CreateUserRealiza() {
                   {userPreview.firstName} {userPreview.surname}
                 </p>
               </div>
-              <div className="flex items-center gap-1">
-              <p className="mt-2 font-semibold">Email:</p>
+              <div className="flex items-center gap-1 ">
+              <p className="font-semibold">Email:</p>
               <p>{userPreview.email}</p>
               </div>
             </div>
