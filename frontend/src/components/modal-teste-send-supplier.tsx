@@ -30,7 +30,7 @@ const contractFormSchema = z.object({
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
-  serviceDuration: z.string().nonempty("A duração do serviço é obrigatória"),
+  // serviceDuration: z.string().nonempty("A duração do serviço é obrigatória"),
   startDate: z
     .string()
     .refine(
@@ -63,9 +63,13 @@ type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ModalTesteSendSupplier() {
   const [clients, setClients] = useState<propsClient[]>([]);
+  const [managers, setManagers] = useState<any>([]);
+  const [activities, setActivities] = useState<any>([]);
+  const [requirements, setRequirements] = useState<any>([]);
+  const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
-  const [managers, setManagers] = useState<any>([]);
 
   const {
     register,
@@ -92,6 +96,17 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const getActivities = async () => {
+    try {
+      const activitieData = await axios.get(`${ip}/contract/activity`);
+      const requirementData = await axios.get(`${ip}/contract/requirement`);
+      setActivities(activitieData.data.content);
+      setRequirements(requirementData.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const createClient = async (data: ModalSendEmailFormSchema) => {
     console.log("enviando dados:", data);
     setIsLoading(true);
@@ -109,7 +124,6 @@ export function ModalTesteSendSupplier() {
           `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
         );
         setManagers(res.data.content);
-        console.log(res.data.content);
       } catch (err) {
         console.log("erro ao buscar gestores", err);
       }
@@ -131,8 +145,16 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const handleRadioClick = (value: string) => {
+    setSelectedRadio(value);
+  };
+
+  const shouldShowServiceType =
+    selectedRadio === null || selectedRadio === "nao";
+
   useEffect(() => {
     getClients();
+    getActivities();
   }, []);
 
   return (
@@ -214,11 +236,38 @@ export function ModalTesteSendSupplier() {
                     onSubmit={handleSubmitContract(createContract)}
                   >
                     <div className="flex flex-col gap-2">
+                      <Label>É uma subcontratação?</Label>
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="subcontratacao-sim">Sim</Label>
+                        <input
+                          type="radio"
+                          id="subcontratacao-sim"
+                          name="subcontratacao"
+                          value="sim"
+                          onClick={() => handleRadioClick("sim")} // Define como "sim"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="subcontratacao-nao">Não</Label>
+                        <input
+                          type="radio"
+                          id="subcontratacao-nao"
+                          name="subcontratacao"
+                          value="nao"
+                          onClick={() => handleRadioClick("nao")} // Define como "nao"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
                       <Label>Gestor do serviço</Label>
                       <select
                         key={managers.idUser}
                         className="rounded-md border p-2"
+                        defaultValue=""
                       >
+                        <option value="" disabled>
+                          Selecione um gestor
+                        </option>
                         {Array.isArray(managers) &&
                           managers.map((manager) => (
                             <option>
@@ -236,25 +285,39 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <div>
-                      <Label>Tipo do Serviço</Label>
-                      <Input {...registerContract("serviceType")} />
-                      {errorsContract.serviceType && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceType.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
+
+                    {shouldShowServiceType && (
+                      <div>
+                        <Label>Tipo do Serviço</Label>
+                        <Input {...registerContract("serviceType")} />
+                        {errorsContract.serviceType && (
+                          <span className="text-red-500">
+                            {errorsContract.serviceType.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1">
                       <Label>Tipo de despesa</Label>
-                      <Input {...registerContract("serviceTypeExpense")} />
+                      <select
+                        {...registerContract("serviceTypeExpense")}
+                        className="rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione uma opção
+                        </option>
+                        <option>Capex</option>
+                        <option>Opex</option>
+                        <option value="">Nenhuma</option>
+                      </select>
                       {errorsContract.serviceTypeExpense && (
                         <span className="text-red-500">
                           {errorsContract.serviceTypeExpense.message}
                         </span>
                       )}
                     </div>
-                    <div>
+                    {/* <div>
                       <Label>Duração do serviço</Label>
                       <Input {...registerContract("serviceDuration")} />
                       {errorsContract.serviceDuration && (
@@ -262,7 +325,7 @@ export function ModalTesteSendSupplier() {
                           {errorsContract.serviceDuration.message}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                     <div>
                       <Label>Nome do Serviço</Label>
                       <Input {...registerContract("serviceName")} />
@@ -318,18 +381,46 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <div>
+                    {shouldShowServiceType && (
+                      <div className="flex flex-col gap-1">
                       <Label>Atividades</Label>
-                      <Input {...registerContract("activities")} />
+                      <select
+                        {...registerContract("activities")}
+                        key={activities.idActivity}
+                        className="rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione aqui
+                        </option>
+                        {activities.map((activity: any) => (
+                          <option value="">{activity.title}</option>
+                        ))}
+                        <option value=""></option>
+                      </select>
                       {errorsContract.activities && (
                         <span className="text-red-500">
                           {errorsContract.activities.message}
                         </span>
                       )}
                     </div>
-                    <div>
+                    )}
+                    
+                    <div className="flex flex-col gap-1">
                       <Label>Requisitos</Label>
-                      <Input {...registerContract("requirements")} />
+                      <select
+                        {...registerContract("requirements")}
+                        key={requirements.idRequeriment}
+                        defaultValue=""
+                        className="rounded-md border p-2"
+                      >
+                        <option value="" disabled>
+                          Selecione aqui
+                        </option>
+                        {requirements.map((requirement: any) => (
+                          <option value="">{requirement.title}</option>
+                        ))}
+                      </select>
                       {errorsContract.requirements && (
                         <span className="text-red-500">
                           {errorsContract.requirements.message}
