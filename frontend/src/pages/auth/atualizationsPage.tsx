@@ -38,14 +38,13 @@ export function AtualizationPage() {
             <h2>Cadastro de Fornecedores</h2>
             <div className="list-disc px-2 text-[14px]">
               <li>Adicionados os campos CAPEX e OPEX no cadastro.</li>
-              <li>Adicionados os campos filiais atendidas/bases/CNPJ.</li>
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <h2>Documentos e Contratos</h2>
             <div className="list-disc px-2 text-[14px]">
               <li>Implementada a funcionalidade de check manual de documentos.</li>
-              <li>Adicionados os campos gestor e fiscal do contrato (ponto focal).</li>
+              <li>Adicionados os campos gestor e fiscal do contrato.</li>
               <li>Implementado o recurso de busca para download de documentos.</li>
             </div>
           </div>
@@ -53,7 +52,6 @@ export function AtualizationPage() {
             <h2>Colaboradores</h2>
             <div className="list-disc px-2 text-[14px]">
               <li>Renomeado o termo "Funcionário" para "Colaborador" em todo o sistema.</li>
-              <li>Diferenciados colaboradores e acessos ao sistema com menos campos, separando funcionalidades.</li>
             </div>
           </div>
           <div className="flex flex-col gap-1">

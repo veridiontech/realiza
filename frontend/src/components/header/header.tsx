@@ -47,7 +47,6 @@ export function Header() {
       console.log("erro ao puxar clientes", err);
     }
   };
-
   const handleSelectClient = async (id: string) => {
     try {
       const res = await axios.get(`${ip}/client/${id}`);

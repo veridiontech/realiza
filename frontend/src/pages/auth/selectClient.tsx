@@ -29,31 +29,29 @@ export function SelectClient() {
       console.log("erro ao buscar clientes", err);
     } finally {
       setIsLoading(false);
+     
     }
   };
 
+  
+
+
   useEffect(() => {
     getClient();
-    const hasShownToastAt = localStorage.getItem("hasShownToastAt");
-
-    if (
-      !hasShownToastAt ||
-      Date.now() - parseInt(hasShownToastAt) > 3 * 60 * 1000
-    ) {
-      if (user?.idUser) {
+    setTimeout(() => {
+      if(user?.idUser) {
         toast("Você está na versão 1.0.2 do sistema realiza", {
           action: (
             <Button
-              className="bg-realizaBlue dark:border-realizaBlue border dark:bg-white dark:hover:bg-gray-400"
+              className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
               onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
             >
               Visualizar novas funções
             </Button>
           ),
         });
-        localStorage.setItem("hasShownToastAt", Date.now().toString());
       }
-    }
+    }, 3000)
   }, [user, navigate]);
 
   return (
@@ -77,7 +75,7 @@ export function SelectClient() {
               />
             </div>
             {loading ? (
-              <div className="flex w-[20vw] items-center justify-start gap-4 rounded-md border p-2 dark:bg-white">
+              <div className="flex items-center gap-4 justify-start border p-2 rounded-md w-[20vw] dark:bg-white">
                 <Puff
                   visible={true}
                   height="30"
@@ -90,7 +88,7 @@ export function SelectClient() {
             ) : getClients.length === 0 ? (
               <p className="text-gray-500">Nenhum cliente encontrado.</p>
             ) : (
-              <select className="h-[5vh] w-[20vw] rounded-md border p-1 text-black">
+              <select className="h-[5vh] w-[20vw] rounded-md border text-black p-1">
                 {getClients.map((client: any) => (
                   <option key={client.idClient} value={client.idClient}>
                     {client.companyName}
