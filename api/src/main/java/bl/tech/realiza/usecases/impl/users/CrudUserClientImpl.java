@@ -115,8 +115,11 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+                    FileDocument fileDocument = null;
+                    if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return UserResponseDto.builder()
                             .idUser(userClient.getIdUser())
@@ -190,21 +193,30 @@ public class CrudUserClientImpl implements CrudUserClient {
         Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClientAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
-                userClient -> UserResponseDto.builder()
-                        .idUser(userClient.getIdUser())
-                        .cpf(userClient.getCpf())
-                        .description(userClient.getDescription())
-                        .position(userClient.getPosition())
-                        .role(userClient.getRole())
-                        .firstName(userClient.getFirstName())
-                        .timeZone(userClient.getTimeZone())
-                        .surname(userClient.getSurname())
-                        .email(userClient.getEmail())
-                        .profilePicture(userClient.getProfilePicture())
-                        .telephone(userClient.getTelephone())
-                        .cellphone(userClient.getCellphone())
-                        .client(userClient.getClient().getIdClient())
-                        .build()
+                userClient -> {
+                    FileDocument fileDocument = null;
+                    if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
+
+                    return UserResponseDto.builder()
+                            .idUser(userClient.getIdUser())
+                            .cpf(userClient.getCpf())
+                            .description(userClient.getDescription())
+                            .position(userClient.getPosition())
+                            .role(userClient.getRole())
+                            .firstName(userClient.getFirstName())
+                            .timeZone(userClient.getTimeZone())
+                            .surname(userClient.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(userClient.getEmail())
+                            .profilePicture(userClient.getProfilePicture())
+                            .telephone(userClient.getTelephone())
+                            .cellphone(userClient.getCellphone())
+                            .client(userClient.getClient().getIdClient())
+                            .build();
+                }
         );
 
         return userClientResponseDtoPage;

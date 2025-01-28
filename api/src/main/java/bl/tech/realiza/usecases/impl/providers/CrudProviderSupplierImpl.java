@@ -126,28 +126,36 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAll(pageable);
 
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
-                providerSupplier -> ProviderResponseDto.builder()
-                        .idProvider(providerSupplier.getIdProvider())
-                        .cnpj(providerSupplier.getCnpj())
-                        .companyName(providerSupplier.getCompanyName())
-                        .tradeName(providerSupplier.getTradeName())
-                        .fantasyName(providerSupplier.getFantasyName())
-                        .email(providerSupplier.getEmail())
-                        .cep(providerSupplier.getCep())
-                        .state(providerSupplier.getState())
-                        .city(providerSupplier.getCity())
-                        .address(providerSupplier.getAddress())
-                        .number(providerSupplier.getNumber())
-                        .client(providerSupplier.getClient().getIdClient())
-                        .branches(providerSupplier.getBranches().stream().map(
-                                        branch -> ProviderResponseDto.BranchDto.builder()
-                                                .idBranch(branch.getIdBranch())
-                                                .nameBranch(branch.getName())
-                                                .build())
-                                .collect(Collectors.toList()))
-                        .build()
-        );
+                providerSupplier -> {
+                    FileDocument fileDocument = null;
+                    if (providerSupplier.getLogo() != null && providerSupplier.getLogo() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSupplier.getLogo()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
+                    return ProviderResponseDto.builder()
+                            .idProvider(providerSupplier.getIdProvider())
+                            .cnpj(providerSupplier.getCnpj())
+                            .companyName(providerSupplier.getCompanyName())
+                            .tradeName(providerSupplier.getTradeName())
+                            .fantasyName(providerSupplier.getFantasyName())
+                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(providerSupplier.getEmail())
+                            .cep(providerSupplier.getCep())
+                            .state(providerSupplier.getState())
+                            .city(providerSupplier.getCity())
+                            .address(providerSupplier.getAddress())
+                            .number(providerSupplier.getNumber())
+                            .client(providerSupplier.getClient().getIdClient())
+                            .branches(providerSupplier.getBranches().stream().map(
+                                            branch -> ProviderResponseDto.BranchDto.builder()
+                                                    .idBranch(branch.getIdBranch())
+                                                    .nameBranch(branch.getName())
+                                                    .build())
+                                    .collect(Collectors.toList()))
+                            .build();
+                }
+        );
         return providerSupplierResponseDtoPage;
     }
 
@@ -208,22 +216,36 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByClient_IdClient(idSearch, pageable);
 
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
-                providerSupplier -> ProviderResponseDto.builder()
-                        .idProvider(providerSupplier.getIdProvider())
-                        .cnpj(providerSupplier.getCnpj())
-                        .companyName(providerSupplier.getCompanyName())
-                        .tradeName(providerSupplier.getTradeName())
-                        .fantasyName(providerSupplier.getFantasyName())
-                        .email(providerSupplier.getEmail())
-                        .cep(providerSupplier.getCep())
-                        .state(providerSupplier.getState())
-                        .city(providerSupplier.getCity())
-                        .address(providerSupplier.getAddress())
-                        .number(providerSupplier.getNumber())
-                        .client(providerSupplier.getClient().getIdClient())
-                        .build()
-        );
+                providerSupplier -> {
+                    FileDocument fileDocument = null;
+                    if (providerSupplier.getLogo() != null && providerSupplier.getLogo() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSupplier.getLogo()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
+                    return ProviderResponseDto.builder()
+                            .idProvider(providerSupplier.getIdProvider())
+                            .cnpj(providerSupplier.getCnpj())
+                            .companyName(providerSupplier.getCompanyName())
+                            .tradeName(providerSupplier.getTradeName())
+                            .fantasyName(providerSupplier.getFantasyName())
+                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(providerSupplier.getEmail())
+                            .cep(providerSupplier.getCep())
+                            .state(providerSupplier.getState())
+                            .city(providerSupplier.getCity())
+                            .address(providerSupplier.getAddress())
+                            .number(providerSupplier.getNumber())
+                            .client(providerSupplier.getClient().getIdClient())
+                            .branches(providerSupplier.getBranches().stream().map(
+                                            branch -> ProviderResponseDto.BranchDto.builder()
+                                                    .idBranch(branch.getIdBranch())
+                                                    .nameBranch(branch.getName())
+                                                    .build())
+                                    .collect(Collectors.toList()))
+                            .build();
+                }
+        );
         return providerSupplierResponseDtoPage;
     }
 

@@ -131,11 +131,13 @@ public class CrudClientImpl implements CrudClient {
 
         Page<ClientResponseDto> clientResponseDtoPage = clientPage.map(
                 client -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+                    FileDocument fileDocument = null;
+                    if (client.getLogo() != null && !client.getLogo().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return ClientResponseDto.builder()
-
                             .idClient(client.getIdClient())
                             .cnpj(client.getCnpj())
                             .tradeName(client.getTradeName())

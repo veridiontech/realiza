@@ -136,8 +136,11 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
                 providerSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
-                    FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+                    FileDocument fileDocument = null;
+                    if (providerSubcontractor.getLogo() != null && providerSubcontractor.getLogo() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return ProviderResponseDto.builder()
                             .idProvider(providerSubcontractor.getIdProvider())
@@ -209,20 +212,29 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
-                providerSubcontractor -> ProviderResponseDto.builder()
-                        .idProvider(providerSubcontractor.getIdProvider())
-                        .cnpj(providerSubcontractor.getCnpj())
-                        .companyName(providerSubcontractor.getCompanyName())
-                        .tradeName(providerSubcontractor.getTradeName())
-                        .fantasyName(providerSubcontractor.getFantasyName())
-                        .email(providerSubcontractor.getEmail())
-                        .cep(providerSubcontractor.getCep())
-                        .state(providerSubcontractor.getState())
-                        .city(providerSubcontractor.getCity())
-                        .address(providerSubcontractor.getAddress())
-                        .number(providerSubcontractor.getNumber())
-                        .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
-                        .build()
+                providerSubcontractor -> {
+                    FileDocument fileDocument = null;
+                    if (providerSubcontractor.getLogo() != null && providerSubcontractor.getLogo() != null) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
+
+                    return ProviderResponseDto.builder()
+                            .idProvider(providerSubcontractor.getIdProvider())
+                            .cnpj(providerSubcontractor.getCnpj())
+                            .companyName(providerSubcontractor.getCompanyName())
+                            .tradeName(providerSubcontractor.getTradeName())
+                            .fantasyName(providerSubcontractor.getFantasyName())
+                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(providerSubcontractor.getEmail())
+                            .cep(providerSubcontractor.getCep())
+                            .state(providerSubcontractor.getState())
+                            .city(providerSubcontractor.getCity())
+                            .address(providerSubcontractor.getAddress())
+                            .number(providerSubcontractor.getNumber())
+                            .supplier(providerSubcontractor.getProviderSupplier().getIdProvider())
+                            .build();
+                }
         );
 
         return providerSubcontractorResponseDtoPage;
