@@ -1,83 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/table";
 import { Pagination } from "@/components/ui/pagination";
-import { ScrollText, FilePlus2, SquareUser } from "lucide-react";
-import { StepTwoServiceProviders } from "../serviceProviders/modals/stepTwo";
-// import { useContracts } from "@/hooks/gets/useContracts";
+import { useContracts } from "@/hooks/gets/useContracts";
+import { useClient } from "@/context/Client-Provider";
+import { Contract } from "@/types/contracts";
+import { NotebookPen, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const ContractsTable = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  const [providerData, setProviderData] = useState<Record<string, any> | null>(
-    null,
-  );
+export default function ContractsTable() {
+  const { client } = useClient();
   const itemsPerPage = 10;
+  const navigate = useNavigate();
 
-  // Mock de contratos
-  const mockContracts = Array.from({ length: 20 }, (_, index) => ({
-    id: `${index + 1}`,
-    serviceName: `Serviço ${index + 1}`,
-    startDate: new Date(2023, 0, index + 1).toLocaleDateString("pt-BR"),
-    endDate: new Date(2023, 0, index + 10).toLocaleDateString("pt-BR"),
-  }));
+  const {
+    contracts = [],
+    totalPages = 0,
+    loading,
+    error,
+    fetchContracts,
+  } = useContracts();
 
-  const totalPages = Math.ceil(mockContracts.length / itemsPerPage);
-  const contracts = mockContracts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const columns: {
-    key: keyof (typeof contracts)[0];
-    label: string;
-    render?: (value: any) => JSX.Element;
-  }[] = [
-    { key: "serviceName", label: "Serviço" },
-    { key: "startDate", label: "Data de Início" },
-    { key: "endDate", label: "Data de Fim" },
+  useEffect(() => {
+    if (client?.idClient) {
+      fetchContracts(itemsPerPage, currentPage, client.idClient);
+    }
+  }, [currentPage, client?.idClient]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const columns = [
+    { key: "serviceName" as keyof Contract, label: "Serviço" },
+    { key: "startDate" as keyof Contract, label: "Data de Início" },
+    { key: "endDate" as keyof Contract, label: "Data de Fim" },
     {
-      key: "id",
+      key: "id" as keyof Contract,
       label: "Ações",
-      render: (id: string) => (
-        <div>
+      render: (_: any, row: Contract) => (
+        <div className="flex items-center space-x-2">
           <button
+            onClick={() => console.log("Contrato Selecionado:", row)}
             className="text-blue-500 hover:underline"
-            onClick={() => {
-              setProviderData({ id });
-              setIsStepTwoModalOpen(true);
-            }}
           >
-            <FilePlus2 />
+            <NotebookPen />
           </button>
-          <button className="ml-4 text-blue-500 hover:underline">
-            <ScrollText />
-          </button>
-          <button className="ml-4 text-blue-500 hover:underline">
-            <SquareUser />
+          <button
+            onClick={() => {
+              console.log("ID do contrato antes da navegação:", row.id);
+              if (row.id) {
+                navigate(`/sistema/employee-to-contract/${row.id}`);
+              } else {
+                console.error("ID do contrato não encontrado!", row);
+              }
+            }}
+            className="text-green-500 hover:underline"
+          >
+            <Users />
           </button>
         </div>
       ),
     },
   ];
 
-  const handleStepTwoSubmit = (data: Record<string, any>) => {
-    console.log("Dados do Segundo Modal:", { ...providerData, ...data });
-    setIsStepTwoModalOpen(false);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
   return (
     <div className="m-10 flex min-h-full justify-center">
-      <div className="flex h-full w-[90rem] flex-col rounded-lg bg-white">
-        <h1 className="m-4 text-xl">Tabela de Contratos</h1>
+      <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
+        <h1 className="m-8 text-xl font-semibold">Tabela de Contratos</h1>
 
-        {contracts.length > 0 ? (
-          <Table data={contracts} columns={columns} />
+        {error ? (
+          <p className="text-center text-red-600">
+            Erro ao carregar os dados: {error}
+          </p>
+        ) : loading ? (
+          <p className="text-center">Carregando contratos...</p>
+        ) : contracts.length > 0 ? (
+          <Table<Contract> data={contracts} columns={columns} />
         ) : (
           <p className="text-center text-gray-500">
             Nenhum contrato disponível.
@@ -86,19 +86,10 @@ const ContractsTable = () => {
 
         <Pagination
           currentPage={currentPage}
-          totalPages={Math.max(totalPages, 1)}
+          totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-
-        {isStepTwoModalOpen && (
-          <StepTwoServiceProviders
-            onClose={() => setIsStepTwoModalOpen(false)}
-            onSubmit={handleStepTwoSubmit}
-          />
-        )}
-      </div>,-
+      </div>
     </div>
   );
-};
-
-export default ContractsTable;
+}
