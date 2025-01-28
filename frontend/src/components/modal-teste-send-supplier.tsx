@@ -152,7 +152,7 @@ export function ModalTesteSendSupplier() {
 
   const shouldShowServiceType =
     selectedRadio === null || selectedRadio === "nao";
-
+    
   useEffect(() => {
     getClients();
     getActivities();

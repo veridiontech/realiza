@@ -33,20 +33,25 @@ export function SelectClient() {
     }
   };
 
+  
+
+
   useEffect(() => {
     getClient();
-    if(user?.idUser) {
-      toast("Você está na versão 1.0.2 do sistema realiza", {
-        action: (
-          <Button
-            className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
-            onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
-          >
-            Visualizar novas funções
-          </Button>
-        ),
-      });
-    }
+    setTimeout(() => {
+      if(user?.idUser) {
+        toast("Você está na versão 1.0.2 do sistema realiza", {
+          action: (
+            <Button
+              className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
+              onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
+            >
+              Visualizar novas funções
+            </Button>
+          ),
+        });
+      }
+    }, 5000)
   }, [user, navigate]);
 
   return (
