@@ -51,7 +51,7 @@ export function SelectClient() {
           ),
         });
       }
-    }, 5000)
+    }, 3000)
   }, [user, navigate]);
 
   return (
