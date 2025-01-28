@@ -4,7 +4,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { useContracts } from "@/hooks/gets/useContracts";
 import { useClient } from "@/context/Client-Provider";
 import { Contract } from "@/types/contracts";
-import { NotebookPen, Users, PlusCircle } from "lucide-react";
+import { NotebookPen, Users} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ModalAddContract } from "@/components/modal-add-contract";
 
