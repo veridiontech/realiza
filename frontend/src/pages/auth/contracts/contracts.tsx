@@ -4,11 +4,13 @@ import { Pagination } from "@/components/ui/pagination";
 import { useContracts } from "@/hooks/gets/useContracts";
 import { useClient } from "@/context/Client-Provider";
 import { Contract } from "@/types/contracts";
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ContractsTable() {
-  const { client } = useClient(); // Recebe o cliente do contexto
+  const { client } = useClient();
   const itemsPerPage = 10;
+  const navigate = useNavigate();
 
   const {
     contracts = [],
@@ -22,35 +24,41 @@ export default function ContractsTable() {
 
   useEffect(() => {
     if (client?.idClient) {
-      // Chama a função fetchContracts sempre que o cliente ou a página muda
       fetchContracts(itemsPerPage, currentPage, client.idClient);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, client?.idClient]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
-  const columns: {
-    key: keyof Contract;
-    label: string;
-    className?: string;
-    render?: (value: string | number | any[], row: Contract) => React.ReactNode;
-  }[] = [
-    { key: "serviceName", label: "Serviço" },
-    { key: "startDate", label: "Data de Início" },
-    { key: "endDate", label: "Data de Fim" },
+  const columns = [
+    { key: "serviceName" as keyof Contract, label: "Serviço" },
+    { key: "startDate" as keyof Contract, label: "Data de Início" },
+    { key: "endDate" as keyof Contract, label: "Data de Fim" },
     {
-      key: "id",
+      key: "id" as keyof Contract,
       label: "Ações",
-      render: (_, row) => (
+      render: (_: any, row: Contract) => (
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => console.log("Ação para o contrato:", row)}
+            onClick={() => console.log("Contrato Selecionado:", row)}
             className="text-blue-500 hover:underline"
           >
             <NotebookPen />
+          </button>
+          <button
+            onClick={() => {
+              console.log("ID do contrato antes da navegação:", row.id);
+              if (row.id) {
+                navigate(`/sistema/employee-to-contract/${row.id}`);
+              } else {
+                console.error("ID do contrato não encontrado!", row);
+              }
+            }}
+            className="text-green-500 hover:underline"
+          >
+            <Users />
           </button>
         </div>
       ),
@@ -61,17 +69,6 @@ export default function ContractsTable() {
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
         <h1 className="m-8 text-xl font-semibold">Tabela de Contratos</h1>
-
-        <div className="flex w-[90rem] flex-row justify-between px-10">
-          <div className="relative mb-4">
-            <input
-              type="text"
-              placeholder="🔍 Pesquisar contrato..."
-              className="w-[34rem] rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
-              onChange={() => {}}
-            />
-          </div>
-        </div>
 
         {error ? (
           <p className="text-center text-red-600">

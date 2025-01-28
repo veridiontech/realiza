@@ -63,12 +63,6 @@ export function LateralMenu() {
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Colaboradores e contratos
       </h3>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
-        <UserSquare className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">
-          Meus colaboradores
-        </span>
-      </Button>
       <Link to={`/sistema/contracts/${getIdUser}`}>
         <Button
           variant={"ghost"}

@@ -5,7 +5,7 @@ import {
   useFetchServiceProviders,
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
-import { FilePlus2, NotebookPen } from "lucide-react";
+import {NotebookPen } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
 import { useClient } from "@/context/Client-Provider";
 
@@ -23,8 +23,8 @@ export function ServiceProvider() {
   } = useFetchServiceProviders();
 
   const [currentPage, setCurrentPage] = useState(0);
-  const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  const [providerData] = useState<Record<string, any> | null>(null);
+  // const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
+  // const [providerData] = useState<Record<string, any> | null>(null);
 
   // Pegando o ID do cliente para o filtro
 
@@ -51,14 +51,14 @@ export function ServiceProvider() {
           >
             <NotebookPen />
           </button>
-          <button
+          {/* <button
             onClick={() => {
               setIsStepTwoModalOpen(true);
             }}
             className="ml-2 text-blue-500 hover:underline"
           >
             <FilePlus2 />
-          </button>
+          </button> */}
         </div>
       ),
     },

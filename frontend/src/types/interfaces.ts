@@ -13,6 +13,8 @@ export interface propsUser {
   role: string
   password: string; 
   company: string; 
+  telephone: string;
+  description: string;
 }
 
 export interface propsClient {

@@ -66,11 +66,11 @@ export function SignIn() {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex h-3/6 flex-col justify-center">
-        <h1 className="text-center text-3xl font-bold">Bem Vindo</h1>
-        <span className="text-center">
+        <h1 className="text-center text-3xl font-bold dark:text-black">Bem Vindo</h1>
+        <span className="text-center dark:text-black">
           Insira seu email e senha para continuar
         </span>
-        <Form className="mt-16 flex flex-col" onSubmit={handleSubmit(getUser)}>
+        <Form className="mt-16 flex flex-col dark:text-black" onSubmit={handleSubmit(getUser)}>
           <label htmlFor="email">E-mail</label>
           <input
             className="mb-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -101,7 +101,7 @@ export function SignIn() {
             Esqueceu a senha?{" "}
             <Link
               to="/forgot-password"
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 hover:underline "
             >
               Recupere-a aqui!
             </Link>

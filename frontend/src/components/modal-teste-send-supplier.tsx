@@ -6,7 +6,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
-import { Label } from "./ui/label";
+import { Label  } from "./ui/label";
 import { Input } from "./ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import { Radio } from "react-loader-spinner";
 import { propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email valido"),
@@ -30,25 +31,44 @@ const contractFormSchema = z.object({
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
-  serviceDuration: z
-    .string(),
-  startDate: z.string().nonempty("A data de início é obrigatória"),
-  endDate: z.string().nonempty("A data de término é obrigatória"),
-
+  // serviceDuration: z.string().nonempty("A duração do serviço é obrigatória"),
+  startDate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)),
+      "A data de início deve ser válida",
+    ),
+  endDate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)),
+      "A data de término deve ser válida",
+    ),
   serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
-  activities: z.string().nonempty("As atividades são obrigatórias"),
-  requirements: z.string().nonempty("As exigências são obrigatórias"),
-  description: z.string().nonempty("As unidades são obrigatórias"),
-  serviceTypeExpense: z.string().nonempty("O gestor é obrigatório"),
-  allocatedLimit: 
-  z.string()
-  .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
+  activities: z
+    .array(z.string())
+    .min(1, "Pelo menos uma atividade é obrigatória"),
+  requirements: z
+    .array(z.string())
+    .min(1, "Pelo menos um requisito é obrigatório"),
+  description: z.string().nonempty("A descrição detalhada é obrigatória"),
+  serviceTypeExpense: z.string().nonempty("O tipo de despesa é obrigatório"),
+  allocatedLimit: z
+    .string()
+    .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
+  client: z.string().nonempty("O cliente é obrigatório"),
+  responsible: z.string().nonempty("O responsável é obrigatório"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ModalTesteSendSupplier() {
   const [clients, setClients] = useState<propsClient[]>([]);
+  const [managers, setManagers] = useState<any>([]);
+  const [activities, setActivities] = useState<any>([]);
+  const [requirements, setRequirements] = useState<any>([]);
+  const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
 
@@ -77,6 +97,17 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const getActivities = async () => {
+    try {
+      const activitieData = await axios.get(`${ip}/contract/activity`);
+      const requirementData = await axios.get(`${ip}/contract/requirement`);
+      setActivities(activitieData.data.content);
+      setRequirements(requirementData.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const createClient = async (data: ModalSendEmailFormSchema) => {
     console.log("enviando dados:", data);
     setIsLoading(true);
@@ -88,6 +119,15 @@ export function ModalTesteSendSupplier() {
       });
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
+      try {
+        console.log("teste");
+        const res = await axios.get(
+          `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
+        );
+        setManagers(res.data.content);
+      } catch (err) {
+        console.log("erro ao buscar gestores", err);
+      }
     } catch (err) {
       console.log("erro ao enviar email para usuario", err);
       toast.error("Erro ao enviar email. Tente novamente");
@@ -106,8 +146,16 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const handleRadioClick = (value: string) => {
+    setSelectedRadio(value);
+  };
+
+  const shouldShowServiceType =
+    selectedRadio === null || selectedRadio === "nao";
+
   useEffect(() => {
     getClients();
+    getActivities();
   }, []);
 
   return (
@@ -115,9 +163,16 @@ export function ModalTesteSendSupplier() {
       <DialogTrigger asChild>
         <Button className="bg-sky-700">Cadastrar novo prestador</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        style={{
+          backgroundImage: `url(${bgModalRealiza})`,
+        }}
+        className="max-w-[45vw]"
+      >
         <DialogHeader>
-          <DialogTitle>Cadastrar novo prestador</DialogTitle>
+          <DialogTitle className="text-white">
+            Cadastrar novo prestador
+          </DialogTitle>
         </DialogHeader>
         <div>
           <form
@@ -126,7 +181,7 @@ export function ModalTesteSendSupplier() {
             className="flex flex-col gap-4"
           >
             <div>
-              <Label>Email</Label>
+              <Label  className="text-white">Email</Label >
               <Input
                 type="email"
                 placeholder="Digite o email do novo cliente"
@@ -138,7 +193,7 @@ export function ModalTesteSendSupplier() {
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <Label>Selecione um cliente</Label>
+              <Label  className="text-white">Selecione um cliente</Label >
               <select
                 className="rounded-md border p-2"
                 defaultValue=""
@@ -177,9 +232,14 @@ export function ModalTesteSendSupplier() {
             </div>
           </form>
           <Dialog open={nextModal} onOpenChange={setNextModal}>
-            <DialogContent className="max-w-[50vw]">
+            <DialogContent
+              className="max-w-[45vw] border-none"
+              style={{
+                backgroundImage: `url(${bgModalRealiza})`,
+              }}
+            >
               <DialogHeader>
-                <DialogTitle>Faça o contrato</DialogTitle>
+                <DialogTitle className="text-white">Faça o contrato</DialogTitle>
               </DialogHeader>
               <ScrollArea className="h-[60vh] w-full px-5">
                 <div className="p-4">
@@ -188,8 +248,51 @@ export function ModalTesteSendSupplier() {
                     className="flex flex-col gap-2"
                     onSubmit={handleSubmitContract(createContract)}
                   >
+                    <div className="flex flex-col gap-2">
+                      <Label  className="text-white">É uma subcontratação?</Label >
+                      <div className="flex items-center gap-1">
+                        <Label  className="text-white" htmlFor="subcontratacao-sim">Sim</Label >
+                        <input
+                          type="radio"
+                          id="subcontratacao-sim"
+                          name="subcontratacao"
+                          value="sim"
+                          onClick={() => handleRadioClick("sim")} 
+                          className="text-white"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Label  className="text-white" htmlFor="subcontratacao-nao">Não</Label >
+                        <input
+                          type="radio"
+                          id="subcontratacao-nao"
+                          name="subcontratacao"
+                          value="nao"
+                          onClick={() => handleRadioClick("nao")} 
+                          className="text-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label  className="text-white">Gestor do serviço</Label >
+                      <select
+                        key={managers.idUser}
+                        className="rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione um gestor
+                        </option>
+                        {Array.isArray(managers) &&
+                          managers.map((manager) => (
+                            <option>
+                              {manager.firstName} {manager.surname}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
                     <div>
-                      <Label>Referência de serviço</Label>
+                      <Label  className="text-white">Referência de serviço</Label >
                       <Input {...registerContract("serviceReference")} />
                       {errorsContract.serviceReference && (
                         <span className="text-red-500">
@@ -197,44 +300,58 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <div>
-                      <Label>Tipo do Serviço</Label>
-                      <Input {...registerContract("serviceType")} />
-                      {errorsContract.serviceType && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceType.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Tipo de despesa</Label>
-                      <Input {...registerContract("serviceTypeExpense")} />
+
+                    {shouldShowServiceType && (
+                      <div>
+                        <Label  className="text-white">Tipo do Serviço</Label >
+                        <Input {...registerContract("serviceType")} />
+                        {errorsContract.serviceType && (
+                          <span className="text-red-500">
+                            {errorsContract.serviceType.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <Label  className="text-white">Tipo de despesa</Label >
+                      <select
+                        {...registerContract("serviceTypeExpense")}
+                        className="rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione uma opção
+                        </option>
+                        <option>Capex</option>
+                        <option>Opex</option>
+                        <option value="">Nenhuma</option>
+                      </select>
                       {errorsContract.serviceTypeExpense && (
                         <span className="text-red-500">
                           {errorsContract.serviceTypeExpense.message}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <Label>Duração do serviço</Label>
+                    {/* <div>
+                      <Label >Duração do serviço</Label >
                       <Input {...registerContract("serviceDuration")} />
                       {errorsContract.serviceDuration && (
                         <span className="text-red-500">
                           {errorsContract.serviceDuration.message}
                         </span>
                       )}
-                    </div>
+                    </div> */}
                     <div>
-                      <Label>Nome do Serviço</Label>
+                      <Label className="text-white">Nome do Serviço</Label >
                       <Input {...registerContract("serviceName")} />
                       {errorsContract.serviceName && (
                         <span className="text-red-500">
                           {errorsContract.serviceName.message}
                         </span>
-                      )} 
+                      )}
                     </div>
                     <div>
-                      <Label>Escopo do serviço</Label>
+                      <Label className="text-white">Escopo do serviço</Label >
                       <Input {...registerContract("description")} />
                       {errorsContract.description && (
                         <span className="text-red-500">
@@ -243,7 +360,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label>Número máximo de empregados alocados</Label>
+                      <Label className="text-white">Número máximo de empregados alocados</Label >
                       <Input {...registerContract("allocatedLimit")} />
                       {errorsContract.allocatedLimit && (
                         <span className="text-red-500">
@@ -252,7 +369,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label>Data de início</Label>
+                      <Label className="text-white">Data de início</Label >
                       <Input type="date" {...registerContract("startDate")} />
                       {errorsContract.startDate && (
                         <span className="text-red-500">
@@ -261,7 +378,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label>Data de término</Label>
+                      <Label className="text-white">Data de término</Label >
                       <Input type="date" {...registerContract("endDate")} />
                       {errorsContract.endDate && (
                         <span className="text-red-500">
@@ -269,12 +386,9 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    
-                    
-                    
-                    
+
                     <div>
-                      <Label>Descrição detalhada do serviço</Label>
+                      <Label className="text-white">Descrição detalhada do serviço</Label >
                       <Input {...registerContract("description")} />
                       {errorsContract.description && (
                         <span className="text-red-500">
@@ -282,18 +396,46 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <div>
-                      <Label>Atividades</Label>
-                      <Input {...registerContract("activities")} />
-                      {errorsContract.activities && (
-                        <span className="text-red-500">
-                          {errorsContract.activities.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label>Requisitos</Label>
-                      <Input {...registerContract("requirements")} />
+                    {shouldShowServiceType && (
+                      <div className="flex flex-col gap-1">
+                        <Label className="text-white">Atividades</Label >
+                        <select
+                          {...registerContract("activities")}
+                          key={activities.idActivity}
+                          className="rounded-md border p-2"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>
+                            Selecione aqui
+                          </option>
+                          {activities.map((activity: any) => (
+                            <option value="">{activity.title}</option>
+                          ))}
+                          <option value=""></option>
+                        </select>
+                        {errorsContract.activities && (
+                          <span className="text-red-500">
+                            {errorsContract.activities.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-white">Requisitos</Label >
+                      <select
+                        {...registerContract("requirements")}
+                        key={requirements.idRequeriment}
+                        defaultValue=""
+                        className="rounded-md border p-2"
+                      >
+                        <option value="" disabled>
+                          Selecione aqui
+                        </option>
+                        {requirements.map((requirement: any) => (
+                          <option value="">{requirement.title}</option>
+                        ))}
+                      </select>
                       {errorsContract.requirements && (
                         <span className="text-red-500">
                           {errorsContract.requirements.message}

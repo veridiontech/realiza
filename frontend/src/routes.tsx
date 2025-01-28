@@ -25,11 +25,12 @@ import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
 import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
 import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
 import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
-import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
+// import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
 import { AtualizationPage } from "./pages/auth/atualizationsPage";
 import { Branch } from "./pages/auth/branchs/branch";
 import { UserProvider } from "./context/user-provider";
 import { CreateUserRealiza } from "./pages/auth/createUserRealiza/create-user-realiza";
+import EmployeeToContract from "./pages/auth/contracts/employeeToContract";
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ export const router = createBrowserRouter([
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "employees/:id", element: <EmployeesTable /> },
       { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
+      {
+        path: "employee-to-contract/:contractId",
+        element: <EmployeeToContract />,
+      },
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
