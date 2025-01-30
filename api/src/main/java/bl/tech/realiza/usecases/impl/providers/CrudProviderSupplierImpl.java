@@ -2,8 +2,6 @@ package bl.tech.realiza.usecases.impl.providers;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Activity;
-import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -52,9 +50,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
         ProviderSupplier newProviderSupplier = ProviderSupplier.builder()
                 .cnpj(providerSupplierRequestDto.getCnpj())
-                .companyName(providerSupplierRequestDto.getCompanyName())
                 .tradeName(providerSupplierRequestDto.getTradeName())
-                .fantasyName(providerSupplierRequestDto.getFantasyName())
+                .corporateName(providerSupplierRequestDto.getCorporateName())
                 .email(providerSupplierRequestDto.getEmail())
                 .cep(providerSupplierRequestDto.getCep())
                 .state(providerSupplierRequestDto.getState())
@@ -70,9 +67,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
-                .companyName(savedProviderSupplier.getCompanyName())
                 .tradeName(savedProviderSupplier.getTradeName())
-                .fantasyName(savedProviderSupplier.getFantasyName())
+                .corporateName(savedProviderSupplier.getCorporateName())
                 .email(savedProviderSupplier.getEmail())
                 .cep(savedProviderSupplier.getCep())
                 .state(savedProviderSupplier.getState())
@@ -100,9 +96,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
                 .idProvider(providerSupplier.getIdProvider())
                 .cnpj(providerSupplier.getCnpj())
-                .companyName(providerSupplier.getCompanyName())
                 .tradeName(providerSupplier.getTradeName())
-                .fantasyName(providerSupplier.getFantasyName())
+                .corporateName(providerSupplier.getCorporateName())
                 .email(providerSupplier.getEmail())
                 .cep(providerSupplier.getCep())
                 .state(providerSupplier.getState())
@@ -136,9 +131,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                     return ProviderResponseDto.builder()
                             .idProvider(providerSupplier.getIdProvider())
                             .cnpj(providerSupplier.getCnpj())
-                            .companyName(providerSupplier.getCompanyName())
                             .tradeName(providerSupplier.getTradeName())
-                            .fantasyName(providerSupplier.getFantasyName())
+                            .corporateName(providerSupplier.getCorporateName())
                             .logoData(fileDocument != null ? fileDocument.getData() : null)
                             .email(providerSupplier.getEmail())
                             .cep(providerSupplier.getCep())
@@ -174,9 +168,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         }
 
         providerSupplier.setCnpj(providerSupplierRequestDto.getCnpj() != null ? providerSupplierRequestDto.getCnpj() : providerSupplier.getCnpj());
-        providerSupplier.setCompanyName(providerSupplierRequestDto.getCompanyName() != null ? providerSupplierRequestDto.getCompanyName() : providerSupplier.getCompanyName());
         providerSupplier.setTradeName(providerSupplierRequestDto.getTradeName() != null ? providerSupplierRequestDto.getTradeName() : providerSupplier.getTradeName());
-        providerSupplier.setFantasyName(providerSupplierRequestDto.getFantasyName() != null ? providerSupplierRequestDto.getFantasyName() : providerSupplier.getFantasyName());
+        providerSupplier.setCorporateName(providerSupplierRequestDto.getCorporateName() != null ? providerSupplierRequestDto.getCorporateName() : providerSupplier.getCorporateName());
         providerSupplier.setEmail(providerSupplierRequestDto.getEmail() != null ? providerSupplierRequestDto.getEmail() : providerSupplier.getEmail());
         providerSupplier.setCep(providerSupplierRequestDto.getCep() != null ? providerSupplierRequestDto.getCep() : providerSupplier.getCep());
         providerSupplier.setState(providerSupplierRequestDto.getState() != null ? providerSupplierRequestDto.getState() : providerSupplier.getState());
@@ -191,9 +184,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
-                .companyName(savedProviderSupplier.getCompanyName())
                 .tradeName(savedProviderSupplier.getTradeName())
-                .fantasyName(savedProviderSupplier.getFantasyName())
+                .corporateName(savedProviderSupplier.getCorporateName())
                 .email(savedProviderSupplier.getEmail())
                 .cep(savedProviderSupplier.getCep())
                 .state(savedProviderSupplier.getState())
@@ -226,9 +218,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                     return ProviderResponseDto.builder()
                             .idProvider(providerSupplier.getIdProvider())
                             .cnpj(providerSupplier.getCnpj())
-                            .companyName(providerSupplier.getCompanyName())
                             .tradeName(providerSupplier.getTradeName())
-                            .fantasyName(providerSupplier.getFantasyName())
+                            .corporateName(providerSupplier.getCorporateName())
                             .logoData(fileDocument != null ? fileDocument.getData() : null)
                             .email(providerSupplier.getEmail())
                             .cep(providerSupplier.getCep())

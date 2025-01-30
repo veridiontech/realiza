@@ -25,7 +25,7 @@ public class Contact {
     private String telephone;
     private Boolean mainContact;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 

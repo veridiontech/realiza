@@ -1,8 +1,10 @@
 package bl.tech.realiza.services.documentProcessing;
 
+import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,103 +14,146 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class DocumentProcessingService {
 
-    public String processFile(MultipartFile file) throws IOException, TesseractException {
-        String extractedText;
+    public enum DocType {
+        RG,
+        CPF,
+        CNH
+    }
 
-        // Verifica se o arquivo é um PDF
-        if (file.getOriginalFilename().endsWith(".pdf")) {
+    public String processFile(File file, DocType docType) throws IOException, TesseractException {
+        String extractedText = null;
+        String response = null;
+        try {
             extractedText = extractTextFromPDFImages(file);
-        } else {
-            // Assume que é uma imagem
-            extractedText = extractTextFromImage(file);
+        } catch (IOException | TesseractException e) {
+            throw new RuntimeException("Erro na extração do texto do documento: ",e);
         }
-
-        return extractedText;
-    }
-
-    private String extractTextFromPDFImages(MultipartFile file) throws IOException, TesseractException {
-        try (PDDocument document = PDDocument.load(file.getInputStream())) {
-            PDFRenderer pdfRenderer = new PDFRenderer(document);
-            Tesseract tesseract = new Tesseract();
-            tesseract.setDatapath("C:/Program Files/Tesseract-OCR/tessdata");
-            tesseract.setLanguage("por");
-            tesseract.setTessVariable("user_defined_dpi", "300");
-
-            StringBuilder extractedText = new StringBuilder();
-
-            // Itera sobre as páginas do PDF
-            for (int page = 0; page < document.getNumberOfPages(); page++) {
-                BufferedImage image = pdfRenderer.renderImageWithDPI(page, 300); // Melhor resolução para OCR
-                BufferedImage preprocessedImage = preprocessImage(image); // Pré-processa a imagem
-                extractedText.append(tesseract.doOCR(preprocessedImage));
+        switch (docType) {
+            case RG: {
+                String extractedRg = null;
+                try {
+                    extractedRg = extractRg(extractedText);
+                } catch (Exception e) {
+                    throw new RuntimeException("Erro na extração do Rg do texto extraído: ",e);
+                }
+                try {
+                    if (validateRg(extractedRg)) {
+                        response = "Rg válido!\n" + extractedRg;
+                    } else {
+                        response = "Rg inválido";
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Erro na validação do Rg: ",e);
+                }
             }
-
-            return extractedText.toString();
         }
+        return response;
     }
 
-    private String extractTextFromImage(MultipartFile file) throws IOException, TesseractException {
-        // Converte o arquivo para uma imagem processada
-        File tempFile = File.createTempFile("upload-", ".tmp");
-        file.transferTo(tempFile);
-
-        BufferedImage image = ImageIO.read(tempFile);
-        BufferedImage preprocessedImage = preprocessImage(image);
-
-        Tesseract tesseract = new Tesseract();
-        tesseract.setDatapath("C:/Program Files/Tesseract-OCR/tessdata");
+    private String extractTextFromPDFImages(File pdfFile) throws IOException, TesseractException {
+        PDDocument document = PDDocument.load(pdfFile);
+        PDFRenderer renderer = new PDFRenderer(document);
+        ITesseract tesseract = new Tesseract();
+        tesseract.setDatapath("src/main/resources/tesseractLanguages");
         tesseract.setLanguage("por");
-        tesseract.setTessVariable("user_defined_dpi", "300");
-        tesseract.setTessVariable("preserve_interword_spaces", "1");
 
-        try {
-            return tesseract.doOCR(preprocessedImage);
-        } finally {
-            tempFile.delete(); // Remove o arquivo temporário
+        StringBuilder extractedText = new StringBuilder();
+        for (int i = 0; i < document.getNumberOfPages(); i++) {
+            BufferedImage image = renderer.renderImageWithDPI(i, 300, ImageType.RGB);
+            extractedText.append(tesseract.doOCR(image)).append("\n");
         }
+
+        document.close();
+        return extractedText.toString();
     }
 
-    private BufferedImage preprocessImage(BufferedImage image) {
-        // Converte para preto e branco
-        BufferedImage grayscaleImage = new BufferedImage(
-                image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
-
-        Graphics2D graphics = grayscaleImage.createGraphics();
-        graphics.drawImage(image, 0, 0, Color.WHITE, null);
-        graphics.dispose();
-
-        return grayscaleImage;
+    // Regex para CPF, RG e CNH
+    private static String extractCpf(String text) {
+        Pattern pattern = Pattern.compile("(\\d{3}\\.\\d{3}\\.\\d{3}-[\\dXx]{2})");
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1) : "CPF não encontrado";
     }
 
-    public boolean containsKeyword(String text, String keyword) {
-        return text.toLowerCase().contains(keyword.toLowerCase());
+    private static String extractRg(String text) {
+        Pattern pattern = Pattern.compile("(\\d{2}\\.\\d{3}\\.\\d{3}-\\d{1})");
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1) : "RG não encontrado";
     }
 
-    public String extractText(MultipartFile file) throws IOException, TesseractException {
-        String extractedText;
-        try {
-            extractedText = processFile(file);
-        } catch (IOException | TesseractException e) {
-            throw new RuntimeException("Erro ao processar o documento", e);
+    private static String extractCnh(String text) {
+        Pattern pattern = Pattern.compile("(\\d{11})"); // CNH geralmente tem 11 dígitos
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1) : "CNH não encontrada";
+    }
+
+    // Validação de CPF
+    private static boolean validateCpf(String cpf) {
+        cpf = cpf.replaceAll("[^\\d]", ""); // Remove pontos e traços
+        if (cpf.length() != 11 || cpf.matches("(\\d)\\1{10}")) return false;
+
+        int[] weights1 = {10, 9, 8, 7, 6, 5, 4, 3, 2};
+        int[] weights2 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
+
+        int d1 = calculateDigit(cpf, weights1);
+        int d2 = calculateDigit(cpf, weights2);
+
+        return d1 == Character.getNumericValue(cpf.charAt(9)) &&
+                d2 == Character.getNumericValue(cpf.charAt(10));
+    }
+
+    private static int calculateDigit(String str, int[] weights) {
+        int sum = 0;
+        for (int i = 0; i < weights.length; i++)
+            sum += (str.charAt(i) - '0') * weights[i];
+        int remainder = sum % 11;
+        return remainder < 2 ? 0 : 11 - remainder;
+    }
+
+    // Validação de RG (Módulo 11)
+    public static boolean validateRg(String rg) {
+        // Remove pontos e traços
+        rg = rg.replaceAll("[^\\dX]", "");
+
+        // Verifica se tem pelo menos 9 caracteres (8 números + 1 dígito verificador)
+        if (rg.length() != 9) {
+            return false;
         }
-        return extractedText;
-    }
 
-    public String findKeyword(MultipartFile file, String keyword) throws IOException, TesseractException {
-        try {
-            String extractedText = processFile(file);
-            boolean containsKeyword = containsKeyword(extractedText, keyword);
-            if (containsKeyword) {
-                return ("Palavra-chave encontrada no documento!");
-            } else {
-                return ("Palavra-chave não encontrada.");
-            }
-        } catch (IOException | TesseractException e) {
-            throw new RuntimeException("Erro ao processar o documento", e);
+        // Converte os 8 primeiros caracteres em números
+        int[] numbers = new int[8];
+        for (int i = 0; i < 8; i++) {
+            numbers[i] = Character.getNumericValue(rg.charAt(i));
         }
+
+        // Obtém o dígito verificador (pode ser número ou "X")
+        char lastChar = rg.charAt(8);
+        int expectedDigit = (lastChar == 'X') ? 10 : Character.getNumericValue(lastChar);
+
+        // Cálculo do dígito verificador usando módulo 11
+        int sum = 0;
+        int weight = 2;
+        for (int i = 7; i >= 0; i--) {
+            sum += numbers[i] * weight;
+            weight++;
+        }
+
+        int calculatedDigit = 11 - (sum % 11);
+        if (calculatedDigit >= 10) {
+            calculatedDigit = 0; // Se for 10 ou 11, considera-se 0
+        }
+
+        // Comparar o dígito calculado com o informado
+        return calculatedDigit == expectedDigit;
+        }
+
+    // Validação de CNH (Simples)
+    private static boolean validateCnh(String cnh) {
+        return cnh.matches("\\d{11}");
     }
 }

@@ -18,6 +18,7 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorValue("SUPPLIER")
 public class ContractProviderSupplier extends Contract {
+    private Boolean subcontractPermission;
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier providerSupplier;
     @ManyToOne(cascade = CascadeType.REMOVE)

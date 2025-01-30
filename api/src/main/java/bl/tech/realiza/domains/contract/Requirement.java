@@ -20,7 +20,7 @@ public class Requirement {
     private String idRequirement;
     private String title;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 }

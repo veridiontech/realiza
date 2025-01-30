@@ -6,8 +6,7 @@ import lombok.Data;
 public class ClientRequestDto {
     private String cnpj;
     private String tradeName;
-    private String fantasyName;
-    private String companyName;
+    private String corporateName;
     private String email;
     private String telephone;
     private String cep;
