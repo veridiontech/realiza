@@ -31,8 +31,8 @@ import { Branch } from "./pages/auth/realizaProfile/branchs/branch";
 import { UserProvider } from "./context/user-provider";
 import { CreateUserRealiza } from "./pages/auth/realizaProfile/createUserRealiza/create-user-realiza";
 import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeToContract";
-import ClientTest from "./pages/auth/clientProfile/home";
 import { ClientAppLayout } from "./_layouts/clientApp";
+import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +73,9 @@ export const router = createBrowserRouter([
         <ClientAppLayout />
       </UserProvider>
     ),
+    children: [
+      { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
+    ],
   },
   {
     path: "/",
@@ -86,7 +89,6 @@ export const router = createBrowserRouter([
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "new-password", element: <NewPassword /> },
       { path: "new-password2", element: <NewPassword2 /> },
-      { path: "client-test", element: <ClientTest /> },
     ],
   },
   {

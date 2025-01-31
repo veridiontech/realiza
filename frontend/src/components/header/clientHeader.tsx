@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
-import { LateralMenu } from "./lateralMenu";
+import { ClientLateralMenu } from "./clientLateralMenu";
 import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
 import { ProfilePic } from "./profile-pic";
@@ -41,7 +41,7 @@ export function Header() {
                 <ChartNoAxesGantt className="text-white" />
               </Button>
             </SheetTrigger>
-            <LateralMenu />
+            <ClientLateralMenu />
           </Sheet>
           <Link to={`/sistema/select-client/${getIdUser}`}>
             <img src={realizaLogo} alt="" className="w-[6vw]" />
