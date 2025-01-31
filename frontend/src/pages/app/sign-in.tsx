@@ -22,9 +22,8 @@ export function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
-  const { user } = useUser();
 
   const {
     register,
@@ -59,7 +58,7 @@ export function SignIn() {
       localStorage.setItem("userId", userData.idUser);
       setUser(userData);
 
-      console.log(userData);
+      console.log('dados:',userData);
 
       setShowSplash(true);
 
