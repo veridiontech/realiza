@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.UserClient;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
@@ -12,7 +13,6 @@ import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseD
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -46,7 +46,7 @@ public class CrudClientImpl implements CrudClient {
                         .build();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new NotFoundException("Could not build logo file");
             }
 
             try {
@@ -54,7 +54,7 @@ public class CrudClientImpl implements CrudClient {
                 fileDocumentId = savedFileDocument.getIdDocumentAsString();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new NotFoundException("Could not save logo file");
             }
         }
 
@@ -97,11 +97,11 @@ public class CrudClientImpl implements CrudClient {
         FileDocument fileDocument = null;
 
         Optional<Client> clientOptional = clientRepository.findById(id);
-        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         if (client.getLogo() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
         }
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
@@ -157,7 +157,7 @@ public class CrudClientImpl implements CrudClient {
     @Override
     public Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto) {
         Optional<Client> clientOptional = clientRepository.findById(id);
-        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         client.setCnpj(clientRequestDto.getCnpj() != null ? clientRequestDto.getCnpj() : client.getCnpj());
         client.setTradeName(clientRequestDto.getTradeName() != null ? clientRequestDto.getTradeName() : client.getTradeName());
@@ -244,7 +244,7 @@ public class CrudClientImpl implements CrudClient {
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
         Optional<Client> clientOptional = clientRepository.findById(id);
-        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

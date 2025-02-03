@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.provider;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -30,6 +31,13 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Invalid file");
+        }
+        if (documentProviderSubcontractorRequestDto.getSubcontractor() == null || documentProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
+            throw new BadRequestException("Invalid subcontractor");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
 

@@ -6,6 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface ProviderSupplierRepository extends JpaRepository<ProviderSupplier, String> {
     Page<ProviderSupplier> findAllByClient_IdClient(String idSearch, Pageable pageable);
+    Optional<ProviderSupplier> findByCnpj(String cnpj);
 }

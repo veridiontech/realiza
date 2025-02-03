@@ -23,6 +23,7 @@ public class ContractRequestDto {
     private List<String> activities;
     private List<String> requirements;
     private Boolean isActive;
+    private String cnpj;
 
     // supplier
     private String providerSupplier; // also for subcontractor
