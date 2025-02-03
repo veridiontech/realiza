@@ -40,13 +40,14 @@ public abstract class User {
     private String telephone;
     private String cellphone;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Role {
         ROLE_ADMIN,
-        ROLE_MANAGER,
+        ROLE_REALIZA_PLUS,
+        ROLE_REALIZA_BASIC,
         ROLE_CLIENT_RESPONSIBLE,
         ROLE_CLIENT_MANAGER,
         ROLE_SUPPLIER_RESPONSIBLE,

@@ -61,8 +61,7 @@ public class CrudClientImpl implements CrudClient {
         Client newClient = Client.builder()
                 .cnpj(clientRequestDto.getCnpj())
                 .tradeName(clientRequestDto.getTradeName())
-                .companyName(clientRequestDto.getCompanyName())
-                .fantasyName(clientRequestDto.getFantasyName())
+                .corporateName(clientRequestDto.getCorporateName())
                 .logo(fileDocumentId)
                 .email(clientRequestDto.getEmail())
                 .telephone(clientRequestDto.getTelephone())
@@ -79,8 +78,7 @@ public class CrudClientImpl implements CrudClient {
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
-                .companyName(savedClient.getCompanyName())
-                .fantasyName(savedClient.getFantasyName())
+                .corporateName(savedClient.getCorporateName())
                 .logoId(savedClient.getLogo())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
@@ -110,8 +108,7 @@ public class CrudClientImpl implements CrudClient {
                 .idClient(client.getIdClient())
                 .cnpj(client.getCnpj())
                 .tradeName(client.getTradeName())
-                .companyName(client.getCompanyName())
-                .fantasyName(client.getFantasyName())
+                .corporateName(client.getCorporateName())
                 .logoData(fileDocument != null ? fileDocument.getData() : null)
                 .email(client.getEmail())
                 .telephone(client.getTelephone())
@@ -141,8 +138,7 @@ public class CrudClientImpl implements CrudClient {
                             .idClient(client.getIdClient())
                             .cnpj(client.getCnpj())
                             .tradeName(client.getTradeName())
-                            .companyName(client.getCompanyName())
-                            .fantasyName(client.getFantasyName())
+                            .corporateName(client.getCorporateName())
                             .email(client.getEmail())
                             .logoData(fileDocument != null ? fileDocument.getData() : null)
                             .telephone(client.getTelephone())
@@ -165,7 +161,7 @@ public class CrudClientImpl implements CrudClient {
 
         client.setCnpj(clientRequestDto.getCnpj() != null ? clientRequestDto.getCnpj() : client.getCnpj());
         client.setTradeName(clientRequestDto.getTradeName() != null ? clientRequestDto.getTradeName() : client.getTradeName());
-        client.setCompanyName(clientRequestDto.getCompanyName() != null ? clientRequestDto.getCompanyName() : client.getCompanyName());
+        client.setCorporateName(clientRequestDto.getCorporateName() != null ? clientRequestDto.getCorporateName() : client.getCorporateName());
         client.setEmail(clientRequestDto.getEmail() != null ? clientRequestDto.getEmail() : client.getEmail());
         client.setTelephone(clientRequestDto.getTelephone() != null ? clientRequestDto.getTelephone() : client.getTelephone());
         client.setCep(clientRequestDto.getCep() != null ? clientRequestDto.getCep() : client.getCep());
@@ -181,8 +177,7 @@ public class CrudClientImpl implements CrudClient {
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
-                .companyName(savedClient.getCompanyName())
-                .fantasyName(savedClient.getFantasyName())
+                .corporateName(savedClient.getCorporateName())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
                 .cep(savedClient.getCep())
@@ -204,8 +199,8 @@ public class CrudClientImpl implements CrudClient {
     public EnterpriseAndUserResponseDto saveBoth(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
         Client newClient = Client.builder()
                 .cnpj(enterpriseAndUserRequestDto.getCnpj())
-                .tradeName(enterpriseAndUserRequestDto.getNameEnterprise())
-                .companyName(enterpriseAndUserRequestDto.getSocialReason())
+                .tradeName(enterpriseAndUserRequestDto.getTradeName())
+                .corporateName(enterpriseAndUserRequestDto.getCorporateName())
                 .email(enterpriseAndUserRequestDto.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
                 .build();
@@ -232,7 +227,7 @@ public class CrudClientImpl implements CrudClient {
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
-                .companyName(savedClient.getCompanyName())
+                .corporateName(savedClient.getCorporateName())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
                 .idUser(savedUserClient.getIdUser())

@@ -164,7 +164,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         documentBranch.setTitle(documentBranchRequestDto.getTitle() != null ? documentBranchRequestDto.getTitle() : documentBranch.getTitle());
         documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
-        documentBranch.setIsActive(documentBranchRequestDto.getIsActive() != null ? documentBranchRequestDto.getIsActive() : documentBranch.getIsActive());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 

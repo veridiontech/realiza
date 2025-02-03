@@ -19,7 +19,7 @@ public class Branch {
     private String idBranch;
     private String name;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 

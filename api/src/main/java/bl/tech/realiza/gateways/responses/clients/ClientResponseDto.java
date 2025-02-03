@@ -10,9 +10,8 @@ import lombok.Data;
 public class ClientResponseDto {
     private String idClient;
     private String cnpj;
-    private String companyName;
     private String tradeName;
-    private String fantasyName;
+    private String corporateName;
     private String logoId;
     private byte[] logoData;
     private String telephone;
