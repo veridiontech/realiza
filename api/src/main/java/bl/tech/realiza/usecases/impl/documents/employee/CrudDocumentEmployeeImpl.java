@@ -30,7 +30,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final EmployeeRepository employeeRepository;
     private final FileRepository fileRepository;
-    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
@@ -165,7 +164,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         documentEmployee.setTitle(documentEmployeeRequestDto.getTitle() != null ? documentEmployeeRequestDto.getTitle() : documentEmployee.getTitle());
         documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
-        documentEmployee.setIsActive(documentEmployeeRequestDto.getIsActive() != null ? documentEmployeeRequestDto.getIsActive() : documentEmployee.getIsActive());
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
