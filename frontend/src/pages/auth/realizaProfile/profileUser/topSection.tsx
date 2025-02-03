@@ -5,12 +5,9 @@ import { useUser } from "@/context/user-provider";
 export function TopSection() {
   const { user } = useUser();
 
-  console.log(user);
-  
-
   return (
     <div className="flex items-center">
-      <ProfilePic className="bg-realizaBlue rounded-full p-7 text-[30px] text-white" />
+      <ProfilePic className="bg-realizaBlue rounded-full p-7 text-[30px] text-white cursor-pointer" />
       <div className="ml-6 flex flex-col gap-2">
         <div className="text-lg font-bold">
           {user ? (

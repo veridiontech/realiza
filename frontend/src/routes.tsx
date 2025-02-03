@@ -7,30 +7,32 @@ import { ForgotPassword } from "./pages/app/forgot-password";
 import { NewPassword } from "./pages/app/new-password";
 import { NewPassword2 } from "./pages/app/new-password2";
 import { SignIn } from "./pages/app/sign-in";
-import MonittoringBis from "./pages/auth/bis";
-import { Collaborators } from "./pages/auth/collaborators";
-import { Dashboard } from "./pages/auth/dashboard";
-import { Enterprise } from "./pages/auth/enterprises/enterprise";
-import { MonittoringTable } from "./pages/auth/monittoringTable";
-import { ProfileClient } from "./pages/auth/profileClient";
-import { EditProfile } from "./pages/auth/profileEdit";
-import { ProfileUser } from "./pages/auth/profileUser/__profileUser";
-import { SelectClient } from "./pages/auth/selectClient";
-import { RealizaHome } from "./pages/auth/userRealiza/realizaHome";
-import { ServiceProvider } from "./pages/auth/serviceProviders/ServiceProviders";
-import ContractsTable from "./pages/auth/contracts/contracts";
-import { EmployeesTable } from "./pages/auth/employee/employees";
+import MonittoringBis from "./pages/auth/realizaProfile/bis";
+import { Collaborators } from "./pages/auth/realizaProfile/collaborators";
+import { Dashboard } from "./pages/auth/realizaProfile/dashboard";
+import { Enterprise } from "./pages/auth/realizaProfile/enterprises/enterprise";
+import { MonittoringTable } from "./pages/auth/realizaProfile/monittoringTable";
+import { ProfileClient } from "./pages/auth/realizaProfile/profileClient";
+import { EditProfile } from "./pages/auth/realizaProfile/profileEdit";
+import { ProfileUser } from "./pages/auth/realizaProfile/profileUser/__profileUser";
+import { SelectClient } from "./pages/auth/realizaProfile/selectClient";
+import { RealizaHome } from "./pages/auth/realizaProfile/userRealiza/realizaHome";
+import { ServiceProvider } from "./pages/auth/realizaProfile/serviceProviders/ServiceProviders";
+import ContractsTable from "./pages/auth/realizaProfile/contracts/contracts";
+import { EmployeesTable } from "./pages/auth/realizaProfile/employee/employees";
 import { EmailLayout } from "./_layouts/email";
-import { SignUpPageEmail } from "./pages/auth/emailPages/signUpPageEmail";
-import { EnterprisePageEmail } from "./pages/auth/emailPages/enterprisePageEmail";
-import { DetailsEmployee } from "./pages/auth/employee/detailsEmployee";
-import { ProfileEnterpriseReprise } from "./pages/auth/profileEnterprise/__profile-enterprise";
+import { SignUpPageEmail } from "./pages/auth/realizaProfile/emailPages/signUpPageEmail";
+import { EnterprisePageEmail } from "./pages/auth/realizaProfile/emailPages/enterprisePageEmail";
+import { DetailsEmployee } from "./pages/auth/realizaProfile/employee/detailsEmployee";
+import { ProfileEnterpriseReprise } from "./pages/auth/realizaProfile/profileEnterprise/__profile-enterprise";
 // import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
-import { AtualizationPage } from "./pages/auth/atualizationsPage";
-import { Branch } from "./pages/auth/branchs/branch";
+import { AtualizationPage } from "./pages/auth/realizaProfile/atualizationsPage";
+import { Branch } from "./pages/auth/realizaProfile/branchs/branch";
 import { UserProvider } from "./context/user-provider";
-import { CreateUserRealiza } from "./pages/auth/createUserRealiza/create-user-realiza";
-import EmployeeToContract from "./pages/auth/contracts/employeeToContract";
+import { CreateUserRealiza } from "./pages/auth/realizaProfile/createUserRealiza/create-user-realiza";
+import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeToContract";
+import { ClientAppLayout } from "./_layouts/clientApp";
+import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +64,17 @@ export const router = createBrowserRouter([
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
+    ],
+  },
+  {
+    path: "/cliente",
+    element: (
+      <UserProvider>
+        <ClientAppLayout />
+      </UserProvider>
+    ),
+    children: [
+      { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
     ],
   },
   {

@@ -1,19 +1,19 @@
-import { Search } from 'lucide-react'
-import { Helmet } from 'react-helmet-async'
-import { NavLink } from 'react-router-dom'
+import { Search } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { NavLink } from "react-router-dom";
 
-import CardCollaborator from '@/components/cardCollaborator/cardCollaborator'
-import { Button } from '@/components/ui/button'
+import CardCollaborator from "@/components/cardCollaborator/cardCollaborator";
+import { Button } from "@/components/ui/button";
 
-import collaboratorsIcon from '../../assets/collaborators.svg'
-import plusRed from '../../assets/plusRed.svg'
+import collaboratorsIcon from "@/assets/collaborators.svg";
+import plusRed from "@/assets/plusRed.svg";
 
 export function Collaborators() {
   return (
     <>
       <Helmet title="collaborators" />
       <section className="mx-20">
-        <div className="mt-10 flex h-[244px] w-full flex-row justify-between bg-white p-[48px] shadow-custom-blue">
+        <div className="shadow-custom-blue mt-10 flex h-[244px] w-full flex-row justify-between bg-white p-[48px]">
           <div className="flex flex-col gap-[60px]">
             <div className="flex flex-row">
               <h1>Meus colaboradores -</h1>
@@ -39,11 +39,11 @@ export function Collaborators() {
               </span>
             </div>
             <NavLink to="/monittoring">
-              <Button >Ver tabela de monitoramento</Button>
+              <Button>Ver tabela de monitoramento</Button>
             </NavLink>
           </div>
         </div>
-        <div className="mt-[26px] flex w-full flex-col items-center justify-center gap-[80px] bg-white px-[53px] py-[76px] shadow-custom-blue">
+        <div className="shadow-custom-blue mt-[26px] flex w-full flex-col items-center justify-center gap-[80px] bg-white px-[53px] py-[76px]">
           <div className="flex gap-[80px]">
             <CardCollaborator />
             <CardCollaborator />
@@ -71,5 +71,5 @@ export function Collaborators() {
         </div>
       </section>
     </>
-  )
+  );
 }

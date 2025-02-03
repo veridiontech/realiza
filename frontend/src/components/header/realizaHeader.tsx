@@ -13,7 +13,7 @@ import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 // import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
-import { LateralMenu } from "./lateralMenu";
+import { LateralMenu } from "./realizaLateralMenu";
 import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
 import axios from "axios";
@@ -159,7 +159,10 @@ export function Header() {
                       </div>
                     </DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem onClick={logout} className="cursor-pointer hover:bg-gray-200">
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer hover:bg-gray-200"
+                  >
                     <div className="flex items-center gap-1">
                       <LogOut />
                       <p>Sair</p>
