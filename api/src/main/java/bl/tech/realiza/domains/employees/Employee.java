@@ -56,7 +56,7 @@ public abstract class Employee {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "client_id_client", referencedColumnName = "idClient")

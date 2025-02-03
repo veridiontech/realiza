@@ -26,6 +26,8 @@ public class ContractResponseDto {
     private Contract.ExpenseType expenseType;
     private Date startDate;
     private Date endDate;
+    private Boolean subcontractPermission;
+    private String contractSupplierId;
     private List<Activity> activities;
     private List<Requirement> requirements;
 

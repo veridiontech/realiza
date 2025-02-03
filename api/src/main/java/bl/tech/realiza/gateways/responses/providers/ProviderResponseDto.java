@@ -13,9 +13,8 @@ public class ProviderResponseDto {
     // provider
     private String idProvider;
     private String cnpj;
-    private String companyName;
     private String tradeName;
-    private String fantasyName;
+    private String corporateName;
     private String logoId;
     private byte[] logoData;
     private String email;

@@ -1,6 +1,5 @@
 package bl.tech.realiza.usecases.impl.providers;
 
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
@@ -16,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,9 +62,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
                 .cnpj(providerSubcontractorRequestDto.getCnpj())
-                .companyName(providerSubcontractorRequestDto.getCompanyName())
+                .corporateName(providerSubcontractorRequestDto.getCorporateName())
                 .tradeName(providerSubcontractorRequestDto.getTradeName())
-                .fantasyName(providerSubcontractorRequestDto.getFantasyName())
                 .logo(fileDocumentId)
                 .email(providerSubcontractorRequestDto.getEmail())
                 .cep(providerSubcontractorRequestDto.getCep())
@@ -83,9 +79,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
-                .companyName(savedProviderSubcontractor.getCompanyName())
                 .tradeName(savedProviderSubcontractor.getTradeName())
-                .fantasyName(savedProviderSubcontractor.getFantasyName())
+                .corporateName(savedProviderSubcontractor.getCorporateName())
                 .logoId(savedProviderSubcontractor.getLogo())
                 .email(savedProviderSubcontractor.getEmail())
                 .cep(savedProviderSubcontractor.getCep())
@@ -114,9 +109,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(providerSubcontractor.getIdProvider())
                 .cnpj(providerSubcontractor.getCnpj())
-                .companyName(providerSubcontractor.getCompanyName())
                 .tradeName(providerSubcontractor.getTradeName())
-                .fantasyName(providerSubcontractor.getFantasyName())
+                .corporateName(providerSubcontractor.getCorporateName())
                 .logoData(fileDocument != null ? fileDocument.getData() : null)
                 .email(providerSubcontractor.getEmail())
                 .cep(providerSubcontractor.getCep())
@@ -145,9 +139,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                     return ProviderResponseDto.builder()
                             .idProvider(providerSubcontractor.getIdProvider())
                             .cnpj(providerSubcontractor.getCnpj())
-                            .companyName(providerSubcontractor.getCompanyName())
                             .tradeName(providerSubcontractor.getTradeName())
-                            .fantasyName(providerSubcontractor.getFantasyName())
+                            .corporateName(providerSubcontractor.getCorporateName())
                             .logoData(fileDocument != null ? fileDocument.getData() : null)
                             .email(providerSubcontractor.getEmail())
                             .cep(providerSubcontractor.getCep())
@@ -170,15 +163,14 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Provider subcontractor not found"));
 
         providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
-        providerSubcontractor.setCompanyName(providerSubcontractorRequestDto.getCompanyName());
-        providerSubcontractor.setTradeName(providerSubcontractorRequestDto.getTradeName());
-        providerSubcontractor.setFantasyName(providerSubcontractorRequestDto.getFantasyName());
-        providerSubcontractor.setEmail(providerSubcontractorRequestDto.getEmail());
-        providerSubcontractor.setCep(providerSubcontractorRequestDto.getCep());
-        providerSubcontractor.setState(providerSubcontractorRequestDto.getState());
-        providerSubcontractor.setCity(providerSubcontractorRequestDto.getCity());
-        providerSubcontractor.setAddress(providerSubcontractorRequestDto.getAddress());
-        providerSubcontractor.setNumber(providerSubcontractorRequestDto.getNumber());
+        providerSubcontractor.setTradeName(providerSubcontractorRequestDto.getTradeName() != null ? providerSubcontractorRequestDto.getTradeName() : providerSubcontractor.getTradeName());
+        providerSubcontractor.setCorporateName(providerSubcontractorRequestDto.getCorporateName() != null ? providerSubcontractorRequestDto.getCorporateName() : providerSubcontractor.getCorporateName());
+        providerSubcontractor.setEmail(providerSubcontractorRequestDto.getEmail() != null ? providerSubcontractorRequestDto.getEmail() : providerSubcontractor.getEmail());
+        providerSubcontractor.setCep(providerSubcontractorRequestDto.getCep() != null ? providerSubcontractorRequestDto.getCep() : providerSubcontractor.getCep());
+        providerSubcontractor.setState(providerSubcontractorRequestDto.getState() != null ? providerSubcontractorRequestDto.getState() : providerSubcontractor.getState());
+        providerSubcontractor.setCity(providerSubcontractorRequestDto.getCity() != null ? providerSubcontractorRequestDto.getCity() : providerSubcontractor.getCity());
+        providerSubcontractor.setAddress(providerSubcontractorRequestDto.getAddress() != null ? providerSubcontractorRequestDto.getAddress() : providerSubcontractor.getAddress());
+        providerSubcontractor.setNumber(providerSubcontractorRequestDto.getNumber() != null ? providerSubcontractorRequestDto.getNumber() : providerSubcontractor.getNumber());
 
         providerSubcontractor.setIsActive(providerSubcontractorRequestDto.getIsActive() != null ? providerSubcontractorRequestDto.getIsActive() : providerSubcontractor.getIsActive());
 
@@ -187,9 +179,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
-                .companyName(savedProviderSubcontractor.getCompanyName())
                 .tradeName(savedProviderSubcontractor.getTradeName())
-                .fantasyName(savedProviderSubcontractor.getFantasyName())
+                .corporateName(savedProviderSubcontractor.getCorporateName())
                 .email(savedProviderSubcontractor.getEmail())
                 .cep(savedProviderSubcontractor.getCep())
                 .state(savedProviderSubcontractor.getState())
@@ -222,9 +213,8 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                     return ProviderResponseDto.builder()
                             .idProvider(providerSubcontractor.getIdProvider())
                             .cnpj(providerSubcontractor.getCnpj())
-                            .companyName(providerSubcontractor.getCompanyName())
                             .tradeName(providerSubcontractor.getTradeName())
-                            .fantasyName(providerSubcontractor.getFantasyName())
+                            .corporateName(providerSubcontractor.getCorporateName())
                             .logoData(fileDocument != null ? fileDocument.getData() : null)
                             .email(providerSubcontractor.getEmail())
                             .cep(providerSubcontractor.getCep())

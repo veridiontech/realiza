@@ -162,7 +162,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         documentSupplier.setTitle(documentProviderSupplierRequestDto.getTitle() != null ? documentProviderSupplierRequestDto.getTitle() : documentSupplier.getTitle());
         documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
-        documentSupplier.setIsActive(documentProviderSupplierRequestDto.getIsActive() != null ? documentProviderSupplierRequestDto.getIsActive() : documentSupplier.getIsActive());
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 

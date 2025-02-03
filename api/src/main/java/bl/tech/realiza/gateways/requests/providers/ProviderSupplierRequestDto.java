@@ -1,6 +1,5 @@
 package bl.tech.realiza.gateways.requests.providers;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.List;
@@ -8,9 +7,8 @@ import java.util.List;
 @Data
 public class ProviderSupplierRequestDto {
     private String cnpj;
-    private String companyName;
     private String tradeName;
-    private String fantasyName;
+    private String corporateName;
     private String email;
     private String cep;
     private String state;
