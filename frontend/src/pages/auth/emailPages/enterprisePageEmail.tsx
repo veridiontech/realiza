@@ -12,7 +12,6 @@ import { z } from "zod";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
-  nameEnterprise: z.string().nonempty("O nome da empresa obrigatório"),
   fantasyName: z.string().nonempty("O nome fantasia é obrigatório"),
   socialReason: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
@@ -65,7 +64,7 @@ export function EnterprisePageEmail() {
       const payload = {
         ...data,
         idCompany: findIdCompany || "",
-        company: findCompany 
+        company: findCompany,
       }
       console.log("teste",payload);
       
@@ -89,15 +88,6 @@ export function EnterprisePageEmail() {
       <div>
         <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex items-center gap-5">
-            <div>
-              <Label>Nome da empresa</Label>
-              <Input
-                type="text"
-                placeholder="Nome Empresa / Grupo terceiro"
-                className="w-[13vw]"
-                {...register('nameEnterprise')}
-              />
-            </div>
             <div>
               <Label>Nome fantasia</Label>
               <Input
