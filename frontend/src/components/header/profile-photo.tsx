@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { Button } from "../ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 const profilePicFormSchema = z.object({
@@ -35,7 +35,6 @@ type ProfilePictureFormSchema = z.infer<typeof profilePicFormSchema>;
 export function ProfilePhoto() {
   const { user } = useUser();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imageConverter, setImageConverter] = useState<string | null>(null);
 
   const {
     handleSubmit,
