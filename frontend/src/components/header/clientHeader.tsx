@@ -13,7 +13,6 @@ import { Sheet, SheetTrigger } from "../ui/sheet";
 import { ClientLateralMenu } from "./clientLateralMenu";
 import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
-import { ProfilePic } from "./profile-pic";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ProfilePhoto } from "./profile-photo";
 
 export function Header() {
   const { user, logout } = useUser();
@@ -74,7 +74,7 @@ export function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <ProfilePic className="bg-realizaBlue rounded-full p-2 text-white" />
+                  <ProfilePhoto />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>

@@ -23,6 +23,7 @@ import bgModalRealiza from "@/assets/modalBG.jpeg";
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email valido"),
   company: z.string().default("SUPPLIER"),
+  cnpj: z.string().nonempty("Insira o cnpj"),
   idCompany: z.string().nonempty("Selecione um cliente"),
 });
 
@@ -68,6 +69,7 @@ export function ModalTesteSendSupplier() {
   const [activities, setActivities] = useState<any>([]);
   const [requirements, setRequirements] = useState<any>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
+  const [ pushCnpj, setPushCnpj ] = useState()
 
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
@@ -137,9 +139,13 @@ export function ModalTesteSendSupplier() {
   };
 
   const createContract = async (data: ContractFormSchema) => {
+    const payload = {
+      ...data,
+      cnpj: ""
+    }
     try {
       console.log("Criando contrato:", data);
-      await axios.post(`${ip}/contract/supplier`);
+      await axios.post(`${ip}/contract/supplier`, payload);
       console.log("sucesso");
     } catch (err) {
       console.log("erro ao criar contrato", err);
