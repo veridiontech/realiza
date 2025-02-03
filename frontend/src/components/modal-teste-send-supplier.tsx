@@ -369,8 +369,8 @@ export function ModalTesteSendSupplier() {
                         <option value="" disabled>
                           Selecione uma opção
                         </option>
-                        <option>Capex</option>
-                        <option>Opex</option>
+                        <option>CAPEX</option>
+                        <option>OPEX</option>
                         <option value="">Nenhuma</option>
                       </select>
                       {errorsContract.serviceTypeExpense && (

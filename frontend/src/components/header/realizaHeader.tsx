@@ -21,7 +21,6 @@ import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useClient } from "@/context/Client-Provider";
 import { propsClient } from "@/types/interfaces";
-import { ProfilePic } from "./profile-pic";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,7 +95,7 @@ export function Header() {
               {/* Placeholder */}
               {clients.map((client) => (
                 <option key={client.idClient} value={client.idClient}>
-                  {client.companyName}
+                  {client.tradeName}
                 </option>
               ))}
             </select>
