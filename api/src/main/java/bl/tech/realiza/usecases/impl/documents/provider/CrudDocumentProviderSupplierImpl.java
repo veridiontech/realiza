@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.provider;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -30,6 +31,13 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Invalid file");
+        }
+        if (documentProviderSupplierRequestDto.getSupplier() == null || documentProviderSupplierRequestDto.getSupplier().isEmpty()) {
+            throw new BadRequestException("Invalid supplier");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument = null;

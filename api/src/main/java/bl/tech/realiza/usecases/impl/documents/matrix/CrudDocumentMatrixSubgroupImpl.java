@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.documents.matrix;
 
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixGroup;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixGroupRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubgroupRepository;
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixSubgroupRequestDto;
@@ -24,6 +25,9 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
 
     @Override
     public DocumentMatrixResponseDto save(DocumentMatrixSubgroupRequestDto documentMatrixSubgroupRequest) {
+        if (documentMatrixSubgroupRequest.getGroup() == null || documentMatrixSubgroupRequest.getGroup().isEmpty()) {
+            throw new BadRequestException("Invalid group");
+        }
 
         Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(documentMatrixSubgroupRequest.getGroup());
 

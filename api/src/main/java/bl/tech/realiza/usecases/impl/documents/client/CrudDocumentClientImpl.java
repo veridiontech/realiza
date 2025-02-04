@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.client;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentClientRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -30,6 +31,13 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Invalid file");
+        }
+        if (documentClientRequestDto.getClient() == null || documentClientRequestDto.getClient().isEmpty()) {
+            throw new BadRequestException("Invalid client");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
