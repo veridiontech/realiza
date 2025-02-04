@@ -59,11 +59,12 @@ export function SignIn() {
       localStorage.setItem("userId", userData.idUser);
       setUser(userData);
 
-      console.log(userData);
+      console.log("Dados do usuário após login:", userData);
 
       setShowSplash(true);
 
       setTimeout(() => {
+        console.log("Redirecionando para:", userData.role);
         switch (userData.role) {
           case "ROLE_ADMIN":
             navigate(`/sistema/select-client/${userData.idUser}`);
@@ -75,13 +76,13 @@ export function SignIn() {
             navigate(`/sistema/select-client/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_RESPONSIBLE":
-            navigate(`/client-test`);
+            navigate(`/cliente/contracts/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_MANAGER":
             navigate(`/client-test`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/client-test`);
+            navigate(`/fornecedor/contracts/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
             navigate(`/client-test`);
