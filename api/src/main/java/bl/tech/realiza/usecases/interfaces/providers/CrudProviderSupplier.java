@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public interface CrudProviderSupplier {
@@ -19,4 +20,5 @@ public interface CrudProviderSupplier {
     void delete(String id);
     Page<ProviderResponseDto> findAllByClient(String idSearch, Pageable pageable);
     String changeLogo(String id, MultipartFile file) throws IOException;
+    String addBranch(String providerId, List<String> idBranch);
 }

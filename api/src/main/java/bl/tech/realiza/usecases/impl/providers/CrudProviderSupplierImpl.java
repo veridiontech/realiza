@@ -1,7 +1,6 @@
 package bl.tech.realiza.usecases.impl.providers;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -30,22 +29,17 @@ import java.util.stream.Collectors;
 public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     private final ProviderSupplierRepository providerSupplierRepository;
-    private final ClientRepository clientRepository;
     private final BranchRepository branchRepository;
     private final FileRepository fileRepository;
 
     @Override
     public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file) {
-        if (providerSupplierRequestDto.getClient() == null || providerSupplierRequestDto.getClient().isEmpty()) {
+        if (providerSupplierRequestDto.getBranches() == null || providerSupplierRequestDto.getBranches().isEmpty()) {
+            throw new BadRequestException("Invalid branches");
         }
-
-        List<Branch> branches = List.of();
-
-        if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
-            branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
-            if (branches.isEmpty()) {
-                throw new NotFoundException("Branches not found");
-            }
+        List<Branch> branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
+        if (branches.isEmpty()) {
+            throw new NotFoundException("Branches not found");
         }
 
         ProviderSupplier newProviderSupplier = ProviderSupplier.builder()
@@ -151,16 +145,13 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public Optional<ProviderResponseDto> update(String id, ProviderSupplierRequestDto providerSupplierRequestDto) {
-        List<Branch> branches = List.of();
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
 
+        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider not found"));
 
-        if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
-            branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
-            if (branches.isEmpty()) {
-                throw new NotFoundException("Branches not found");
-            }
+        List<Branch> branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
+        if (branches.isEmpty()) {
+            throw new NotFoundException("Branches not found");
         }
 
         providerSupplier.setCnpj(providerSupplierRequestDto.getCnpj() != null ? providerSupplierRequestDto.getCnpj() : providerSupplier.getCnpj());
@@ -256,5 +247,29 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         providerSupplierRepository.save(providerSupplier);
 
         return "Logo updated successfully";
+    }
+
+    @Override
+    public String addBranch(String providerId, List<String> idBranch) {
+        if (idBranch == null || idBranch.isEmpty()) {
+            throw new BadRequestException("Invalid branch");
+        }
+        if (providerId == null || providerId.isEmpty()) {
+            throw new BadRequestException("Invalid provider");
+        }
+
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(providerId)
+                .orElseThrow(() -> new NotFoundException("Provider not found"));
+
+        List<Branch> branches = branchRepository.findAllById(idBranch);
+        if (branches.isEmpty()) {
+            throw new NotFoundException("Branches not found");
+        }
+
+        providerSupplier.getBranches().addAll(branches);
+
+        providerSupplierRepository.save(providerSupplier);
+
+        return "Branches added successfully to provider";
     }
 }

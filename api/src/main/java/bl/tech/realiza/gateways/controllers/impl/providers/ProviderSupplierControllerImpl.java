@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -106,5 +107,15 @@ public class ProviderSupplierControllerImpl implements ProviderSupplierControlle
         Page<ProviderResponseDto> pageProviderSupplier = crudProviderSupplier.findAllByClient(idSearch, pageable);
 
         return ResponseEntity.ok(pageProviderSupplier);
+    }
+
+    @PostMapping("/add-branches/{providerId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> addBranchesToSupplier(@PathVariable String providerId, List<String> branches) {
+
+        String providerSupplierResponse = crudProviderSupplier.addBranch(providerId, branches);
+
+        return ResponseEntity.ok(providerSupplierResponse);
     }
 }
