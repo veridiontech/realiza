@@ -33,6 +33,7 @@ import { CreateUserRealiza } from "./pages/auth/realizaProfile/createUserRealiza
 import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeToContract";
 import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
+import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 
 export const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
+      {path: "documents/:id", element: <DocumentPage />},
     ],
   },
   {

@@ -3,6 +3,7 @@ import {
   Bell,
   ChartNoAxesGantt,
   LogOut,
+  Paperclip,
   Plus,
   Search,
   User,
@@ -148,6 +149,14 @@ export function Header() {
                       <div className="flex items-center gap-1">
                         <User />
                         <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to={`/sistema/documents/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <Paperclip />
+                        <p>Gestão de documentos</p>
                       </div>
                     </DropdownMenuItem>
                   </Link>

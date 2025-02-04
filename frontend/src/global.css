@@ -92,3 +92,7 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+.input {
+  @apply border-none focus:outline-none focus:ring-0 focus:border-none;
+}
