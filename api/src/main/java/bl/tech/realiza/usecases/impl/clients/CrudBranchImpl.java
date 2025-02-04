@@ -2,12 +2,12 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +26,7 @@ public class CrudBranchImpl implements CrudBranch {
 
         Optional<Client> clientOptional = clientRepository.findById(branchRequestDto.getClient());
 
-        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         Branch newBranch = Branch.builder()
                 .name(branchRequestDto.getName())
@@ -48,7 +48,7 @@ public class CrudBranchImpl implements CrudBranch {
     public Optional<BranchResponseDto> findOne(String id) {
         Optional<Branch> branchOptional = branchRepository.findById(id);
 
-        Branch branch = branchOptional.orElseThrow(() -> new EntityNotFoundException("Branch not found"));
+        Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
         BranchResponseDto branchResponse = BranchResponseDto.builder()
                 .idBranch(branch.getIdBranch())
@@ -78,7 +78,7 @@ public class CrudBranchImpl implements CrudBranch {
     public Optional<BranchResponseDto> update(String id, BranchRequestDto branchRequestDto) {
         Optional<Branch> branchOptional = branchRepository.findById(id);
 
-        Branch branch = branchOptional.orElseThrow(() -> new EntityNotFoundException("Branch not found"));
+        Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
         branch.setName(branchRequestDto.getName() != null ? branchRequestDto.getName() : branch.getName());
         branch.setIsActive(branchRequestDto.getIsActive() != null ? branchRequestDto.getIsActive() : branch.getIsActive());

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,50 +56,54 @@ export function SignIn() {
 
       const userData = userResponse.data;
       localStorage.setItem("userId", userData.idUser);
-      setUser(userData);
-
-      console.log("Dados do usuário após login:", userData);
-
+      console.log("enviando dados:", userResponse);
+      
+      setUser(userResponse.data);
       setShowSplash(true);
+      console.log("usuaior:", user);
+      
 
       setTimeout(() => {
         console.log("Redirecionando para:", userData.role);
-        switch (userData.role) {
-          case "ROLE_ADMIN":
-            navigate(`/sistema/select-client/${userData.idUser}`);
-            break;
-          case "ROLE_REALIZA_PLUS":
-            navigate(`/sistema/select-client/${userData.idUser}`);
-            break;
-          case "ROLE_REALIZA_BASIC":
-            navigate(`/sistema/select-client/${userData.idUser}`);
-            break;
-          case "ROLE_CLIENT_RESPONSIBLE":
-            navigate(`/cliente/contracts/${userData.idUser}`);
-            break;
-          case "ROLE_CLIENT_MANAGER":
-            navigate(`/client-test`);
-            break;
-          case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/contracts/${userData.idUser}`);
-            break;
-          case "ROLE_SUPPLIER_MANAGER":
-            navigate(`/client-test`);
-            break;
-          case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
-            navigate(`/client-test`);
-            break;
-          case "ROLE_SUBCONTRACTOR_MANAGER":
-            navigate(`/client-test`);
-            break;
-          case "ROLE_VIEWER":
-            navigate(`/client-test`);
-            break;
-          default:
-            navigate(`/`);
-            alert("Usuário sem ROLE");
-            break;
+        if(user?.role === "ROLE_ADMIN"){
+          navigate(`/sistema/select-client/${userData.idUser}`);
         }
+        // switch (userData.role) {
+        //   case "ROLE_ADMIN":
+        //     navigate(`/sistema/select-client/${userData.idUser}`);
+        //     break;
+        //   case "ROLE_REALIZA_PLUS":
+        //     navigate(`/sistema/select-client/${userData.idUser}`);
+        //     break;
+        //   case "ROLE_REALIZA_BASIC":
+        //     navigate(`/sistema/select-client/${userData.idUser}`);
+        //     break;
+        //   case "ROLE_CLIENT_RESPONSIBLE":
+        //     navigate(`/cliente/contracts/${userData.idUser}`);
+        //     break;
+        //   case "ROLE_CLIENT_MANAGER":
+        //     navigate(`/client-test`);
+        //     break;
+        //   case "ROLE_SUPPLIER_RESPONSIBLE":
+        //     navigate(`/fornecedor/contracts/${userData.idUser}`);
+        //     break;
+        //   case "ROLE_SUPPLIER_MANAGER":
+        //     navigate(`/client-test`);
+        //     break;
+        //   case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+        //     navigate(`/client-test`);
+        //     break;
+        //   case "ROLE_SUBCONTRACTOR_MANAGER":
+        //     navigate(`/client-test`);
+        //     break;
+        //   case "ROLE_VIEWER":
+        //     navigate(`/client-test`);
+        //     break;
+        //   default:
+        //     navigate(`/`);
+        //     alert("Usuário sem ROLE");
+        //     break;
+        // }
         window.location.reload();
       }, 6000);
       console.log(userData);
@@ -109,6 +113,12 @@ export function SignIn() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      console.log("Usuário atualizado:", user);
+    }
+  }, [user]);
 
   if (showSplash) {
     return (

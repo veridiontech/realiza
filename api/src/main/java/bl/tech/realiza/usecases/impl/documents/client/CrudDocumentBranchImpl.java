@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.client;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -30,6 +31,13 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Invalid file");
+        }
+        if (documentBranchRequestDto.getBranch() == null || documentBranchRequestDto.getBranch().isEmpty()) {
+            throw new BadRequestException("Invalid branch");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
 

@@ -5,6 +5,8 @@ import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
+import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
@@ -12,7 +14,6 @@ import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -34,9 +35,16 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
-        Optional<Client> clientOptional = clientRepository.findById(userClientRequestDto.getClient());
 
-        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        if (userClientRequestDto.getPassword() == null || !userClientRequestDto.getPassword().isEmpty()) {
+            throw new BadRequestException("Invalid password");
+        }
+        if (userClientRequestDto.getClient() == null || !userClientRequestDto.getClient().isEmpty()) {
+            throw new BadRequestException("Invalid client");
+        }
+
+        Optional<Client> clientOptional = clientRepository.findById(userClientRequestDto.getClient());
+        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword());
 
@@ -82,11 +90,11 @@ public class CrudUserClientImpl implements CrudUserClient {
         FileDocument fileDocument = null;
 
         Optional<UserClient> userClientOptional = userClientRepository.findById(id);
-        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (userClient.getProfilePicture() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
@@ -147,7 +155,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     public Optional<UserResponseDto> update(String id, UserClientRequestDto userClientRequestDto) {
         Optional<UserClient> userClientOptional = userClientRepository.findById(id);
 
-        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
         userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());
@@ -226,7 +234,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     public String changePassword(String id, UserClientRequestDto userClientRequestDto) {
         Optional<UserClient> userClientOptional = userClientRepository.findById(id);
 
-        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!passwordEncryptionService.matches(userClientRequestDto.getPassword(), userClient.getPassword())) {
             throw new IllegalArgumentException("Invalid data");
@@ -242,7 +250,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
         Optional<UserClient> userClientOptional = userClientRepository.findById(id);
-        UserClient userClient = userClientOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()
