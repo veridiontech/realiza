@@ -5,6 +5,8 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
+import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
@@ -13,7 +15,6 @@ import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springdoc.core.parsers.ReturnTypeParser;
@@ -37,9 +38,14 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
+        if (userProviderSupplierRequestDto.getPassword() == null || !userProviderSupplierRequestDto.getPassword().isEmpty()) {
+            throw new BadRequestException("Invalid password");
+        }
+        if (userProviderSupplierRequestDto.getSupplier() == null || !userProviderSupplierRequestDto.getSupplier().isEmpty()) {
+            throw new BadRequestException("Invalid supplier");
+        }
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier());
-
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword());
 
@@ -84,11 +90,11 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         FileDocument fileDocument = null;
 
         Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
-        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (userProvider.getProfilePicture() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }
 
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
@@ -145,7 +151,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public Optional<UserResponseDto> update(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
         Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
 
-        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
         userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());
@@ -220,7 +226,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public String changePassword(String id, UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
         Optional<UserProviderSupplier> userProviderSupplierOptional = userSupplierRepository.findById(id);
 
-        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!passwordEncryptionService.matches(userProviderSupplierRequestDto.getPassword(), userProviderSupplier.getPassword())) {
             throw new IllegalArgumentException("Invalid data");
@@ -236,7 +242,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
         Optional<UserProviderSupplier> userProviderSupplierOptional = userSupplierRepository.findById(id);
-        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

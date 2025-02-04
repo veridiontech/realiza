@@ -7,6 +7,7 @@ import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
@@ -16,7 +17,6 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeForeigner;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -54,23 +54,23 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
             if (contracts.isEmpty()) {
-                throw new EntityNotFoundException("Contracts not found");
+                throw new NotFoundException("Contracts not found");
             }
         }
         
         if (employeeForeignerRequestDto.getClient() != null) {
             Optional<Client> clientOptional = clientRepository.findById(employeeForeignerRequestDto.getClient());
 
-            client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+            client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
         } else if (employeeForeignerRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier());
 
-            providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+            providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         } else if(employeeForeignerRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract());
 
-            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
         }
 
         if (file != null && !file.isEmpty()) {
@@ -82,7 +82,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                         .build();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new NotFoundException("Could not build profile picture file");
             }
 
             try {
@@ -90,7 +90,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new NotFoundException("Could not save profile picture file");
             }
         }
 
@@ -182,11 +182,11 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         FileDocument fileDocument = null;
 
         Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
-        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new EntityNotFoundException("Employee Foreigner not found"));
+        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new NotFoundException("Employee Foreigner not found"));
 
         if (employeeForeigner.getProfilePicture() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
@@ -241,7 +241,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         Page<EmployeeResponseDto> employeeForeignerResponseDtoPage = employeeForeignerPage.map(
                 employeeForeigner -> {
                     FileDocument fileDocument = null;
-                    if (employeeForeigner.getProfilePicture() != null && employeeForeigner.getProfilePicture() != null) {
+                    if (employeeForeigner.getProfilePicture() != null && !employeeForeigner.getProfilePicture().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -298,12 +298,12 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         
         Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
 
-        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new EntityNotFoundException("Employee Foreigner not found"));
+        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new NotFoundException("Employee Foreigner not found"));
 
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
             if (contracts.isEmpty()) {
-                throw new EntityNotFoundException("Contracts not found");
+                throw new NotFoundException("Contracts not found");
             }
         }
         
@@ -392,7 +392,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
         Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
-        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

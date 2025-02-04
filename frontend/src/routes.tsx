@@ -33,6 +33,7 @@ import { CreateUserRealiza } from "./pages/auth/realizaProfile/createUserRealiza
 import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeToContract";
 import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
+import { ProtectedRoute } from "./protectedRoutes";
 import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 
 export const router = createBrowserRouter([
@@ -72,11 +73,38 @@ export const router = createBrowserRouter([
     path: "/cliente",
     element: (
       <UserProvider>
-        <ClientAppLayout />
+        <ProtectedRoute
+          allowedRoles={["ROLE_CLIENT_RESPONSIBLE", "ROLE_CLIENT_MANAGER"]}
+        >
+          <ClientAppLayout />
+        </ProtectedRoute>
       </UserProvider>
     ),
     children: [
       { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
+      { path: "contracts/:id", element: <ContractsTable /> },
+      { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
+      { path: "branch/:id", element: <Branch /> },
+      { path: "employees/:id", element: <EmployeesTable /> },
+    ],
+  },
+  {
+    path: "/fornecedor",
+    element: (
+      <UserProvider>
+        <ProtectedRoute
+          allowedRoles={["ROLE_SUPPLIER_RESPONSIBLE", "ROLE_SUPPLIER_MANAGER"]}
+        >
+          <ClientAppLayout />
+        </ProtectedRoute>
+      </UserProvider>
+    ),
+    children: [
+      { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
+      { path: "contracts/:id", element: <ContractsTable /> },
+      { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
+      { path: "branch/:id", element: <Branch /> },
+      { path: "employees/:id", element: <EmployeesTable /> },
     ],
   },
   {

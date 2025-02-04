@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.employee;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -33,6 +34,13 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Invalid file");
+        }
+        if (documentEmployeeRequestDto.getEmployee() == null || documentEmployeeRequestDto.getEmployee().isEmpty()) {
+            throw new BadRequestException("Invalid employee");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
 

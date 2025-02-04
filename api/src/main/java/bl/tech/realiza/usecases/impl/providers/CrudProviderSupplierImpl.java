@@ -4,6 +4,8 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -11,7 +13,6 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -35,16 +36,20 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file) {
+        if (providerSupplierRequestDto.getClient() == null || providerSupplierRequestDto.getClient().isEmpty()) {
+            throw new BadRequestException("Invalid client");
+        }
+
         List<Branch> branches = List.of();
 
         Optional<Client> clientOptional = clientRepository.findById(providerSupplierRequestDto.getClient());
 
-        Client client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
             branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
             if (branches.isEmpty()) {
-                throw new EntityNotFoundException("Branches not found");
+                throw new NotFoundException("Branches not found");
             }
         }
 
@@ -91,7 +96,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     public Optional<ProviderResponseDto> findOne(String id) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider not found"));
 
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
                 .idProvider(providerSupplier.getIdProvider())
@@ -123,7 +128,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
                 providerSupplier -> {
                     FileDocument fileDocument = null;
-                    if (providerSupplier.getLogo() != null && providerSupplier.getLogo() != null) {
+                    if (providerSupplier.getLogo() != null && !providerSupplier.getLogo().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSupplier.getLogo()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -158,12 +163,12 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         List<Branch> branches = List.of();
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider not found"));
 
         if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
             branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
             if (branches.isEmpty()) {
-                throw new EntityNotFoundException("Branches not found");
+                throw new NotFoundException("Branches not found");
             }
         }
 
@@ -210,7 +215,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
                 providerSupplier -> {
                     FileDocument fileDocument = null;
-                    if (providerSupplier.getLogo() != null && providerSupplier.getLogo() != null) {
+                    if (providerSupplier.getLogo() != null && !providerSupplier.getLogo().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSupplier.getLogo()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -243,7 +248,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

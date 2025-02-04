@@ -6,6 +6,7 @@ import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
@@ -15,7 +16,6 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeBrazilian;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -53,24 +53,24 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
             if (contracts.isEmpty()) {
-                throw new EntityNotFoundException("Contracts not found");
+                throw new NotFoundException("Contracts not found");
             }
         }
 
         if (employeeBrazilianRequestDto.getClient() != null) {
             Optional<Client> clientOptional = clientRepository.findById(employeeBrazilianRequestDto.getClient());
 
-            client = clientOptional.orElseThrow(() -> new EntityNotFoundException("Client not found"));
+            client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         } else if (employeeBrazilianRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
 
-            providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+            providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         } else if(employeeBrazilianRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeBrazilianRequestDto.getSubcontract());
 
-            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
             if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
                 contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -86,7 +86,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                         .build();
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new NotFoundException("Could not build profile picture file");
             }
 
             try {
@@ -94,7 +94,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new NotFoundException("Could not save profile picture file");
             }
         }
 
@@ -184,11 +184,11 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         FileDocument fileDocument = null;
 
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (employeeBrazilian.getProfilePicture() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
@@ -242,7 +242,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         Page<EmployeeResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
                 employeeBrazilian -> {
                     FileDocument fileDocument = null;
-                    if (employeeBrazilian.getProfilePicture() != null && employeeBrazilian.getProfilePicture() != null) {
+                    if (employeeBrazilian.getProfilePicture() != null && !employeeBrazilian.getProfilePicture().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -299,12 +299,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
 
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
             if (contracts.isEmpty()) {
-                throw new EntityNotFoundException("Contracts not found");
+                throw new NotFoundException("Contracts not found");
             }
         }
 
@@ -391,7 +391,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

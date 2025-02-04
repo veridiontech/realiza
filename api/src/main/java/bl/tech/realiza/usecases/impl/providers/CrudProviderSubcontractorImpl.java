@@ -3,6 +3,8 @@ package bl.tech.realiza.usecases.impl.providers;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -10,7 +12,6 @@ import bl.tech.realiza.gateways.requests.providers.ProviderSubcontractorRequestD
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSubcontractor;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -32,39 +33,18 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto, MultipartFile file) {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+        if (providerSubcontractorRequestDto.getSupplier() == null || providerSubcontractorRequestDto.getSupplier().isEmpty()) {
+            throw new BadRequestException("Invalid supplier");
+        }
 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider supplier not found"));
 
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-        }
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
                 .cnpj(providerSubcontractorRequestDto.getCnpj())
                 .corporateName(providerSubcontractorRequestDto.getCorporateName())
                 .tradeName(providerSubcontractorRequestDto.getTradeName())
-                .logo(fileDocumentId)
                 .email(providerSubcontractorRequestDto.getEmail())
                 .cep(providerSubcontractorRequestDto.getCep())
                 .state(providerSubcontractorRequestDto.getState())
@@ -81,7 +61,6 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                 .cnpj(savedProviderSubcontractor.getCnpj())
                 .tradeName(savedProviderSubcontractor.getTradeName())
                 .corporateName(savedProviderSubcontractor.getCorporateName())
-                .logoId(savedProviderSubcontractor.getLogo())
                 .email(savedProviderSubcontractor.getEmail())
                 .cep(savedProviderSubcontractor.getCep())
                 .state(savedProviderSubcontractor.getState())
@@ -99,11 +78,11 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         FileDocument fileDocument = null;
 
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Provider subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Provider subcontractor not found"));
 
         if (providerSubcontractor.getLogo() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Logo not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
         }
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
@@ -131,7 +110,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
                 providerSubcontractor -> {
                     FileDocument fileDocument = null;
-                    if (providerSubcontractor.getLogo() != null && providerSubcontractor.getLogo() != null) {
+                    if (providerSubcontractor.getLogo() != null && !providerSubcontractor.getLogo().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -160,7 +139,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     public Optional<ProviderResponseDto> update(String id, ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Provider subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Provider subcontractor not found"));
 
         providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
         providerSubcontractor.setTradeName(providerSubcontractorRequestDto.getTradeName() != null ? providerSubcontractorRequestDto.getTradeName() : providerSubcontractor.getTradeName());
@@ -205,7 +184,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
                 providerSubcontractor -> {
                     FileDocument fileDocument = null;
-                    if (providerSubcontractor.getLogo() != null && providerSubcontractor.getLogo() != null) {
+                    if (providerSubcontractor.getLogo() != null && !providerSubcontractor.getLogo().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -233,7 +212,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
         Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

@@ -14,9 +14,6 @@ const newBranchSchema = z.object({
   state: z.string().min(1, "O estado é obrigatório."),
   city: z.string().min(1, "A cidade é obrigatória."),
   address: z.string().min(1, "O endereço é obrigatório."),
-  responsiblePerson: z.string().min(1, "O responsável é obrigatório."),
-  phone1: z.string().min(1, "O telefone principal é obrigatório."),
-  phone2: z.string().optional(),
   logo: z.any().optional(),
 });
 
@@ -97,26 +94,6 @@ export function NewBranchModal({ onClose, onSubmit }: NewBranchModalProps) {
           type: "text",
           placeholder: "Exemplo: Rua Principal, 123",
           required: true,
-        },
-        {
-          name: "responsiblePerson",
-          label: "* Responsável pela Unidade",
-          type: "text",
-          placeholder: "Nome completo do responsável",
-          required: true,
-        },
-        {
-          name: "phone1",
-          label: "* Telefone",
-          type: "text",
-          placeholder: "(XX) XXXX-XXXX",
-          required: true,
-        },
-        {
-          name: "phone2",
-          label: "Telefone 2",
-          type: "text",
-          placeholder: "(XX) XXXX-XXXX",
         },
         {
           name: "logo",

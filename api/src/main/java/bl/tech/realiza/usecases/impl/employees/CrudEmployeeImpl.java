@@ -57,7 +57,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
         combinedResults.addAll(employeeBrazilianPage.map(
                 employeeBrazilian -> {
                     FileDocument fileDocument = null;
-                    if (employeeBrazilian.getProfilePicture() != null && employeeBrazilian.getProfilePicture() != null) {
+                    if (employeeBrazilian.getProfilePicture() != null && !employeeBrazilian.getProfilePicture().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }
@@ -108,7 +108,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
         combinedResults.addAll(employeeForeignerPage.map(
                 employeeForeigner -> {
                     FileDocument fileDocument = null;
-                    if (employeeForeigner.getProfilePicture() != null && employeeForeigner.getProfilePicture() != null) {
+                    if (employeeForeigner.getProfilePicture() != null && !employeeForeigner.getProfilePicture().isEmpty()) {
                         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
                         fileDocument = fileDocumentOptional.orElse(null);
                     }

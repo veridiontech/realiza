@@ -5,6 +5,8 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
+import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
@@ -14,7 +16,6 @@ import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -38,9 +39,15 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor());
+        if (userProviderSubcontractorRequestDto.getPassword() == null || !userProviderSubcontractorRequestDto.getPassword().isEmpty()) {
+            throw new BadRequestException("Invalid password");
+        }
+        if (userProviderSubcontractorRequestDto.getSubcontractor() == null || !userProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
+            throw new BadRequestException("Invalid subcontractor");
+        }
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor());
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword());
 
@@ -85,11 +92,11 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         FileDocument fileDocument = null;
 
         Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
-        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (userSubcontractor.getProfilePicture() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }
 
         UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
@@ -148,7 +155,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public Optional<UserResponseDto> update(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
         Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
 
-        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
         userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());
@@ -225,7 +232,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public String changePassword(String id, UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
         Optional<UserProviderSubcontractor> userProviderSubcontractorOptional = userSubcontractorRepository.findById(id);
 
-        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!passwordEncryptionService.matches(userProviderSubcontractorRequestDto.getPassword(), userProviderSubcontractor.getPassword())) {
             throw new IllegalArgumentException("Invalid data");
@@ -241,7 +248,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
         Optional<UserProviderSubcontractor> userProviderSubcontractorOptional = userSubcontractorRepository.findById(id);
-        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()

@@ -5,6 +5,8 @@ import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserManager;
+import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
@@ -13,7 +15,6 @@ import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,11 @@ public class CrudUserManagerImpl implements CrudUserManager {
     
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto) {
+
+        if (userManagerRequestDto.getPassword() == null || !userManagerRequestDto.getPassword().isEmpty()) {
+            throw new BadRequestException("Invalid password");
+        }
+
         String encryptedPassword = passwordEncryptionService.encryptPassword(userManagerRequestDto.getPassword());
 
         UserManager newUserManager = UserManager.builder()
@@ -76,11 +82,11 @@ public class CrudUserManagerImpl implements CrudUserManager {
         FileDocument fileDocument = null;
 
         Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
-        UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (userManager.getProfilePicture() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("Profile Picture not found"));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }
 
         UserResponseDto userManagerResponse = UserResponseDto.builder()
@@ -136,7 +142,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     public Optional<UserResponseDto> update(String id, UserManagerRequestDto userManagerRequestDto) {
         Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
 
-        UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         userManager.setCpf(userManagerRequestDto.getCpf() != null ? userManagerRequestDto.getCpf() : userManager.getCpf());
         userManager.setDescription(userManagerRequestDto.getDescription() != null ? userManagerRequestDto.getDescription() : userManager.getDescription());
@@ -180,7 +186,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     public String changePassword(String id, UserManagerRequestDto userManagerRequestDto) {
         Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
 
-        UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!passwordEncryptionService.matches(userManagerRequestDto.getPassword(), userManager.getPassword())) {
             throw new IllegalArgumentException("Invalid data");
@@ -196,7 +202,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
         Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
-        UserManager userManager = userManagerOptional.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
             FileDocument fileDocument = FileDocument.builder()
