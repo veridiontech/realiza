@@ -1,18 +1,14 @@
 package bl.tech.realiza.usecases.impl.employees;
 
-import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.services.FileDocument;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -92,7 +88,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .situation(employeeBrazilian.getSituation())
                             .rg(employeeBrazilian.getRg())
                             .admissionDate(employeeBrazilian.getAdmissionDate())
-                            .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
+                            .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                             .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
                             .contracts(employeeBrazilian.getContracts().stream().map(
@@ -143,7 +139,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                             .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                             .passport(employeeForeigner.getPassport())
-                            .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
+                            .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
                             .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
                             .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
                             .contracts(employeeForeigner.getContracts().stream().map(

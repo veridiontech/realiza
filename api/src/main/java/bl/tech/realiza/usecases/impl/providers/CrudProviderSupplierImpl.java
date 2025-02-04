@@ -37,14 +37,9 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     @Override
     public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file) {
         if (providerSupplierRequestDto.getClient() == null || providerSupplierRequestDto.getClient().isEmpty()) {
-            throw new BadRequestException("Invalid client");
         }
 
         List<Branch> branches = List.of();
-
-        Optional<Client> clientOptional = clientRepository.findById(providerSupplierRequestDto.getClient());
-
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
         if (providerSupplierRequestDto.getBranches() != null && !providerSupplierRequestDto.getBranches().isEmpty()) {
             branches = branchRepository.findAllById(providerSupplierRequestDto.getBranches());
@@ -63,7 +58,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                 .city(providerSupplierRequestDto.getCity())
                 .address(providerSupplierRequestDto.getAddress())
                 .number(providerSupplierRequestDto.getNumber())
-                .client(client)
                 .branches(branches)
                 .build();
 
@@ -80,7 +74,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                 .city(savedProviderSupplier.getCity())
                 .address(savedProviderSupplier.getAddress())
                 .number(savedProviderSupplier.getNumber())
-                .client(savedProviderSupplier.getClient().getIdClient())
                 .branches(savedProviderSupplier.getBranches().stream().map(
                         branch -> ProviderResponseDto.BranchDto.builder()
                                 .idBranch(branch.getIdBranch())
@@ -109,7 +102,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                 .city(providerSupplier.getCity())
                 .address(providerSupplier.getAddress())
                 .number(providerSupplier.getNumber())
-                .client(providerSupplier.getClient().getIdClient())
                 .branches(providerSupplier.getBranches().stream().map(
                                 branch -> ProviderResponseDto.BranchDto.builder()
                                         .idBranch(branch.getIdBranch())
@@ -145,7 +137,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                             .city(providerSupplier.getCity())
                             .address(providerSupplier.getAddress())
                             .number(providerSupplier.getNumber())
-                            .client(providerSupplier.getClient().getIdClient())
                             .branches(providerSupplier.getBranches().stream().map(
                                             branch -> ProviderResponseDto.BranchDto.builder()
                                                     .idBranch(branch.getIdBranch())
@@ -197,7 +188,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                 .city(savedProviderSupplier.getCity())
                 .address(savedProviderSupplier.getAddress())
                 .number(savedProviderSupplier.getNumber())
-                .client(savedProviderSupplier.getClient().getIdClient())
                 .build();
 
         return Optional.of(providerSupplierResponse);
@@ -232,7 +222,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                             .city(providerSupplier.getCity())
                             .address(providerSupplier.getAddress())
                             .number(providerSupplier.getNumber())
-                            .client(providerSupplier.getClient().getIdClient())
                             .branches(providerSupplier.getBranches().stream().map(
                                             branch -> ProviderResponseDto.BranchDto.builder()
                                                     .idBranch(branch.getIdBranch())

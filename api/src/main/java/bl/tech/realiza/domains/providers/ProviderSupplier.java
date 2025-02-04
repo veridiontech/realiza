@@ -24,9 +24,6 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class ProviderSupplier extends Provider {
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    private Client client;
-
     @ManyToMany
     @JoinTable(
             name = "SUPPLIER_BRANCHS",

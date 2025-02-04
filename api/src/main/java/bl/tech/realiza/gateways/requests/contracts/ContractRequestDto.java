@@ -27,7 +27,7 @@ public class ContractRequestDto {
 
     // supplier
     private String providerSupplier; // also for subcontractor
-    private String client;
+    private String branch;
 
     // subcontractor
     private String providerSubcontractor;

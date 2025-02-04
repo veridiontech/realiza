@@ -36,7 +36,7 @@ public class EmployeeForeignerRequestDto {
     private String rneRnmFederalPoliceProtocol;
     private Date brazilEntryDate;
     private String passport;
-    private String client;
+    private String branch;
     private String supplier;
     private String subcontract;
     private Boolean isActive;

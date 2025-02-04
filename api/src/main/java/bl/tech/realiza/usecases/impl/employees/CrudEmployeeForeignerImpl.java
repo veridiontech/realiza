@@ -1,13 +1,14 @@
 package bl.tech.realiza.usecases.impl.employees;
 
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
@@ -39,12 +40,13 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final ClientRepository clientRepository;
     private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto, MultipartFile file) {
         List<Contract> contracts = List.of();
         EmployeeForeigner newEmployeeForeigner = null;
-        Client client = null;
+        Branch branch = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
         FileDocument fileDocument = null;
@@ -58,10 +60,10 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             }
         }
         
-        if (employeeForeignerRequestDto.getClient() != null) {
-            Optional<Client> clientOptional = clientRepository.findById(employeeForeignerRequestDto.getClient());
+        if (employeeForeignerRequestDto.getBranch() != null) {
+            Optional<Branch> branchOptional = branchRepository.findById(employeeForeignerRequestDto.getBranch());
 
-            client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+            branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
         } else if (employeeForeignerRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier());
 
@@ -125,7 +127,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .brazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate())
                 .passport(employeeForeignerRequestDto.getPassport())
                 .contracts(contracts)
-                .client(client)
+                .branch(branch)
                 .supplier(providerSupplier)
                 .subcontract(providerSubcontractor)
                 .build();
@@ -163,7 +165,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
                 .passport(savedEmployeeForeigner.getPassport())
-                .client(savedEmployeeForeigner.getClient() != null ? savedEmployeeForeigner.getClient().getIdClient() : null)
+                .branch(savedEmployeeForeigner.getBranch() != null ? savedEmployeeForeigner.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeForeigner.getSupplier() != null ? savedEmployeeForeigner.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeForeigner.getSubcontract() != null ? savedEmployeeForeigner.getSubcontract().getIdProvider() : null)
                 .contracts(savedEmployeeForeigner.getContracts().stream().map(
@@ -220,7 +222,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                 .passport(employeeForeigner.getPassport())
-                .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
+                .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
                 .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
                 .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
                 .contracts(employeeForeigner.getContracts().stream().map(
@@ -276,7 +278,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                             .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                             .passport(employeeForeigner.getPassport())
-                            .client(employeeForeigner.getClient() != null ? employeeForeigner.getClient().getIdClient() : null)
+                            .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
                             .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
                             .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
                             .contracts(employeeForeigner.getContracts().stream().map(
@@ -370,7 +372,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
                 .passport(savedEmployeeForeigner.getPassport())
-                .client(savedEmployeeForeigner.getClient().getIdClient())
+                .branch(savedEmployeeForeigner.getBranch().getIdBranch())
                 .supplier(savedEmployeeForeigner.getSupplier().getIdProvider())
                 .subcontract(savedEmployeeForeigner.getSubcontract().getIdProvider())
                 .contracts(savedEmployeeForeigner.getContracts().stream().map(

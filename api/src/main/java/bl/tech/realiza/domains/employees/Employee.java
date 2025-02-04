@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.employees;
 
-import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -60,7 +60,7 @@ public abstract class Employee {
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "client_id_client", referencedColumnName = "idClient")
-    private Client client;
+    private Branch branch;
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier supplier;
     @ManyToOne(cascade = CascadeType.REMOVE)

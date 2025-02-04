@@ -10,4 +10,5 @@ import java.util.Optional;
 
 public interface BranchRepository extends JpaRepository<Branch, String> {
     Page<Branch> findAllByClient_IdClient(String client, Pageable pageable);
+    Optional<Branch> findByCnpj(String cnpj);
 }

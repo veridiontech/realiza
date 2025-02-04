@@ -1,15 +1,15 @@
 package bl.tech.realiza.domains.clients;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder

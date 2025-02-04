@@ -1,9 +1,12 @@
 package bl.tech.realiza.usecases.impl.clients;
 
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.exceptions.UnprocessableEntityException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
@@ -30,9 +33,16 @@ public class CrudClientImpl implements CrudClient {
     private final UserClientRepository userClientRepository;
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto, MultipartFile file) {
+
+        Optional<Client> clientOptional = clientRepository.findByCnpj(clientRequestDto.getCnpj());
+        if (clientOptional.isPresent()) {
+            throw new UnprocessableEntityException("CNPJ already exists");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
@@ -73,6 +83,21 @@ public class CrudClientImpl implements CrudClient {
                 .build();
 
         Client savedClient = clientRepository.save(newClient);
+
+        Branch newBranch = Branch.builder()
+                .name(clientRequestDto.getCorporateName() + " Matriz")
+                .cnpj(clientRequestDto.getCnpj())
+                .cep(clientRequestDto.getCep())
+                .state(clientRequestDto.getState())
+                .city(clientRequestDto.getCity())
+                .email(clientRequestDto.getEmail())
+                .telephone(clientRequestDto.getTelephone())
+                .address(clientRequestDto.getAddress())
+                .number(clientRequestDto.getNumber())
+                .client(savedClient)
+                .build();
+
+        branchRepository.save(newBranch);
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())

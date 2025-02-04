@@ -29,7 +29,7 @@ public class UserResponseDto {
     private String cellphone;
 
     // client
-    private String client;
+    private String branch;
 
     // subcontractor
     private String subcontractor;
