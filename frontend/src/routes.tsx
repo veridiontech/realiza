@@ -34,6 +34,7 @@ import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeTo
 import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
 import { ProtectedRoute } from "./protectedRoutes";
+import ChatPage from "./pages/auth/realizaProfile/chat";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
+      { path: "chat", element: <ChatPage /> },
     ],
   },
   {
