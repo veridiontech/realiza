@@ -37,7 +37,6 @@ import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 
-
 export const router = createBrowserRouter([
   {
     path: "/sistema",
@@ -67,9 +66,9 @@ export const router = createBrowserRouter([
       },
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
-      { path: "create-new-user/:id", element: <CreateUserRealiza /> }
+      { path: "create-new-user/:id", element: <CreateUserRealiza /> },
       { path: "chat", element: <ChatPage /> },
-      {path: "documents/:id", element: <DocumentPage />},
+      { path: "documents/:id", element: <DocumentPage /> },
     ],
   },
   {
