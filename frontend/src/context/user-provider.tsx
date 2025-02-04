@@ -28,8 +28,8 @@ export function useUser() {
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState(false);
   const [user, setUser] = useState<propsUser | null>(null);
-  const location = useLocation(); 
-  const navigate = useNavigate()
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     validateTokenAndFetchUser();
@@ -53,22 +53,75 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     if (token && isTokenValid(token) && userId) {
       try {
-        const res = await axios.get(`${ip}/user/manager/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        switch (user?.role) {
+          case "ROLE_ADMIN":
+            const res = await axios.get(`${ip}/user/manager/${userId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            console.log("Dados do usuário ADMIN:", res.data);
 
-        if (res.data) {
-          setUser(res.data);
-          setAuthUser(true);
-        } else {
-          console.error("Usuário não encontrado.");
-          logout();
+            if (res.data) {
+              setUser(res.data);
+              setAuthUser(true);
+            } else {
+              console.error("Usuário não encontrado.");
+              logout();
+            }
+            break;
+          case "ROLE_REALIZA_PLUS":
+            break;
+          case "ROLE_REALIZA_BASIC":
+            break;
+          case "ROLE_CLIENT_RESPONSIBLE":
+            const resClient = await axios.get(`${ip}/user/client/${userId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            console.log("Dados do usuário CLIENT_RESPONSIBLE:", resClient.data);
+            if (resClient.data) {
+              setUser(resClient.data);
+              setAuthUser(true);
+            } else {
+              console.error("Usuário não encontrado.");
+              logout();
+            }
+            break;
+          case "ROLE_CLIENT_MANAGER":
+            break;
+          case "ROLE_SUPPLIER_RESPONSIBLE":
+            const resSupplier = await axios.get(
+              `${ip}/user/supplier/${userId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+            console.log(resSupplier.data);
+
+            if (resSupplier.data) {
+              setUser(resSupplier.data);
+              setAuthUser(true);
+            } else {
+              console.error("Usuário não encontrado.");
+              logout();
+            }
+            break;
+          case "ROLE_SUPPLIER_MANAGER":
+            break;
+          case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+            break;
+          case "ROLE_SUBCONTRACTOR_MANAGER":
+            break;
+          case "ROLE_VIEWER":
+            break;
         }
       } catch (error) {
         console.error("Erro ao buscar usuário:", error);
-        logout()
+        logout();
       }
     } else {
       if (location.pathname === "/") {
@@ -76,15 +129,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       }
       toast("Sua sessão expirou. Faça seu Login novamente", {
         action: (
-          <Button
-            className="bg-realizaBlue"
-            onClick={() => navigate("/")}
-          >
+          <Button className="bg-realizaBlue" onClick={() => navigate("/")}>
             Entendido
           </Button>
         ),
       });
-      
     }
   };
 
@@ -95,7 +144,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("hasShownToast");
       setUser(null);
       setAuthUser(false);
-      navigate("/")
+      navigate("/");
     } catch (error) {
       console.error(`Erro ao deslogar: ${error}`);
     }
