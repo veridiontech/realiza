@@ -37,7 +37,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const isTokenValid = (token: string): boolean => {
     try {
-      // throw new Error()
       const decoded: any = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
       return decoded.exp > currentTime;
@@ -51,82 +50,86 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem("tokenClient");
     const userId = localStorage.getItem("userId");
 
+    
+    
+
     if (token && isTokenValid(token) && userId) {
-      try {
-        switch (user?.role) {
-          case "ROLE_ADMIN":
-            const res = await axios.get(`${ip}/user/manager/${userId}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            console.log("Dados do usuário ADMIN:", res.data);
+         try {
+          const res = await axios.get(`${ip}/user/manager/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log("Dados do usuário ADMIN:", );
 
-            if (res.data) {
-              setUser(res.data);
-              setAuthUser(true);
-            } else {
-              console.error("Usuário não encontrado.");
-              logout();
-            }
-            break;
-          case "ROLE_REALIZA_PLUS":
-            break;
-          case "ROLE_REALIZA_BASIC":
-            break;
-          case "ROLE_CLIENT_RESPONSIBLE":
-            const resClient = await axios.get(`${ip}/user/client/${userId}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            console.log("Dados do usuário CLIENT_RESPONSIBLE:", resClient.data);
-            if (resClient.data) {
-              setUser(resClient.data);
-              setAuthUser(true);
-            } else {
-              console.error("Usuário não encontrado.");
-              logout();
-            }
-            break;
-          case "ROLE_CLIENT_MANAGER":
-            break;
-          case "ROLE_SUPPLIER_RESPONSIBLE":
-            const resSupplier = await axios.get(
-              `${ip}/user/supplier/${userId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-            console.log(resSupplier.data);
+          if (res.data) {
+            setUser(res.data);
+            setAuthUser(true);
+          } else {
+            console.error("Usuário não encontrado.");
+            logout();
+          }
+        
+        // switch (user?.role) {
+        //   case "ROLE_ADMIN":
+        //     console.log("provider teste:",user.idUser);
+            
+            
+        //     break;
+        //   case "ROLE_REALIZA_PLUS":
+        //     break;
+        //   case "ROLE_REALIZA_BASIC":
+        //     break;
+        //   case "ROLE_CLIENT_RESPONSIBLE":
+        //     const resClient = await axios.get(`${ip}/user/client/${userId}`, {
+        //       headers: {
+        //         Authorization: `Bearer ${token}`,
+        //       },
+        //     });
+        //     console.log("Dados do usuário CLIENT_RESPONSIBLE:", resClient.data);
+        //     if (resClient.data) {
+        //       setUser(resClient.data);
+        //       setAuthUser(true);
+        //     } else {
+        //       console.error("Usuário não encontrado.");
+        //       logout();
+        //     }
+        //     break;
+        //   case "ROLE_CLIENT_MANAGER":
+        //     break;
+        //   case "ROLE_SUPPLIER_RESPONSIBLE":
+        //     const resSupplier = await axios.get(
+        //       `${ip}/user/supplier/${userId}`,
+        //       {
+        //         headers: {
+        //           Authorization: `Bearer ${token}`,
+        //         },
+        //       },
+        //     );
+        //     console.log(resSupplier.data);
 
-            if (resSupplier.data) {
-              setUser(resSupplier.data);
-              setAuthUser(true);
-            } else {
-              console.error("Usuário não encontrado.");
-              logout();
-            }
-            break;
-          case "ROLE_SUPPLIER_MANAGER":
-            break;
-          case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
-            break;
-          case "ROLE_SUBCONTRACTOR_MANAGER":
-            break;
-          case "ROLE_VIEWER":
-            break;
-        }
+        //     if (resSupplier.data) {
+        //       setUser(resSupplier.data);
+        //       setAuthUser(true);
+        //     } else {
+        //       console.error("Usuário não encontrado.");
+        //       logout();
+        //     }
+        //     break;
+        //   case "ROLE_SUPPLIER_MANAGER":
+        //     break;
+        //   case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+        //     break;
+        //   case "ROLE_SUBCONTRACTOR_MANAGER":
+        //     break;
+        //   case "ROLE_VIEWER":
+        //     break;
+        // }
       } catch (error) {
         console.error("Erro ao buscar usuário:", error);
         logout();
       }
     } else {
-      if (location.pathname === "/") {
-        return;
-      }
       toast("Sua sessão expirou. Faça seu Login novamente", {
         action: (
           <Button className="bg-realizaBlue" onClick={() => navigate("/")}>
@@ -134,8 +137,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           </Button>
         ),
       });
-    }
-  };
+      }
+    };
 
   const logout = () => {
     try {

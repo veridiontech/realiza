@@ -20,6 +20,9 @@ export function SelectClient() {
   const navigate = useNavigate();
   const { user } = useUser();
 
+  console.log("usuario:", user);
+  
+
   const getClient = async () => {
     setIsLoading(true);
     try {
