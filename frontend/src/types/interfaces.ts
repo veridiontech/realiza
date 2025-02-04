@@ -8,6 +8,7 @@ export interface propsUser {
   phone: string; 
   firstName: string; 
   surname: string; 
+  profilePicture: string;
   cpf: string; 
   position: string;
   role: string

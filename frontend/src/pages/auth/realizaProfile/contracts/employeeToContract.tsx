@@ -18,7 +18,6 @@ export default function EmployeeToContract() {
       console.error("Nenhum ID de contrato foi passado na URL.");
       return;
     }
-
     if (client?.idClient) {
       fetchEmployees(10, 0, "CLIENT", client.idClient);
     }
@@ -30,13 +29,11 @@ export default function EmployeeToContract() {
       alert("Erro: Nenhum contrato selecionado.");
       return;
     }
-
     setUpdating(true);
     try {
       console.log(
         `Associando funcionário ${employee.id} ao contrato ${contractId}`,
       );
-
       const updatedEmployee = {
         ...employee,
         idContracts: [...(employee.idContracts ?? []), contractId], // Garante que idContracts seja sempre um array
@@ -46,7 +43,6 @@ export default function EmployeeToContract() {
         `${ip}/employee/brazilian/${employee.id}`,
         updatedEmployee,
       );
-
       alert("Funcionário associado ao contrato com sucesso!");
     } catch (error) {
       console.error("Erro ao associar funcionário:", error);

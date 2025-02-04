@@ -21,7 +21,6 @@ import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useClient } from "@/context/Client-Provider";
 import { propsClient } from "@/types/interfaces";
-import { ProfilePic } from "./profile-pic";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ProfilePhoto } from "./profile-photo";
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
@@ -95,7 +95,7 @@ export function Header() {
               {/* Placeholder */}
               {clients.map((client) => (
                 <option key={client.idClient} value={client.idClient}>
-                  {client.companyName}
+                  {client.tradeName}
                 </option>
               ))}
             </select>
@@ -136,7 +136,7 @@ export function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <ProfilePic className="bg-realizaBlue rounded-full p-2 text-white" />
+                  <ProfilePhoto />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>

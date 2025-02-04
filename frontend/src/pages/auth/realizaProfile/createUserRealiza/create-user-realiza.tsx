@@ -15,6 +15,7 @@ const createUserRealizaSchema = z.object({
   email: z.string().email("Insira um email valido"),
   cpf: z.string(),
   telephone: z.string(),
+  password: z.string().nonempty("Insira uma senha")
   // profilePicture: z.string().optional(),
 });
 
@@ -34,7 +35,6 @@ export function CreateUserRealiza() {
     const payload = {
       ...data,
       role: "ROLE_MANAGER",
-      password: "teste123",
     };
     console.log("Função createUser chamada com os dados:", payload);
     try {

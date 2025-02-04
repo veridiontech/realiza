@@ -37,7 +37,7 @@ public abstract class Contract {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
 
     @ManyToMany
     @JoinTable(

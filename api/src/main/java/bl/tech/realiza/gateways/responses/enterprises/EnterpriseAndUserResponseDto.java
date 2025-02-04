@@ -14,7 +14,7 @@ public class EnterpriseAndUserResponseDto {
     private String idClient;
     private String cnpj;
     private String tradeName;
-    private String companyName;
+    private String corporateName;
     private String staff;
     private String customers;
     private String idUser;

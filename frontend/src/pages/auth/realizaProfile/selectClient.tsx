@@ -88,7 +88,7 @@ export function SelectClient() {
               <select className="h-[5vh] w-[20vw] rounded-md border text-black p-1">
                 {getClients.map((client: any) => (
                   <option key={client.idClient} value={client.idClient}>
-                    {client.companyName}
+                    {client.tradeName}
                   </option>
                 ))}
               </select>
