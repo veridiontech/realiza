@@ -8,6 +8,7 @@ import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
@@ -44,6 +45,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         List<Requirement> requirements = List.of();
         ProviderSubcontractor providerSubcontractor = null;
 
+        Optional<ContractProviderSupplier> contractProviderSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getSupplierContractId());
+        ContractProviderSupplier contractProviderSupplier = contractProviderSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier Contract not found"));
+
+        if (!contractProviderSupplier.getSubcontractPermission()) {
+            throw new UnprocessableEntityException("Contract can't get subcontracted");
+        }
+
         if (contractProviderSubcontractorRequestDto.getProviderSubcontractor() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(contractProviderSubcontractorRequestDto.getProviderSubcontractor());
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
@@ -59,9 +67,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(contractProviderSubcontractorRequestDto.getProviderSupplier());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
-
-        Optional<ContractProviderSupplier> contractProviderSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getSupplierContractId());
-        ContractProviderSupplier contractProviderSupplier = contractProviderSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier Contract not found"));
 
         if (contractProviderSubcontractorRequestDto.getActivities() != null && !contractProviderSubcontractorRequestDto.getActivities().isEmpty()) {
             activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getActivities());

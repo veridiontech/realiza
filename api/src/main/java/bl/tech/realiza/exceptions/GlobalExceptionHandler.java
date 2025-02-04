@@ -22,15 +22,10 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-//    @ExceptionHandler(UnauthorizedException.class)
-//    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex) {
-//        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(ValidationException.class)
-//    public ResponseEntity<Map<String, Object>> handleValidationException(ValidationException ex) {
-//        return buildErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-//    }
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<Map<String, Object>> handleUnprocessableEntity(UnprocessableEntityException ex) {
+        return buildErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
