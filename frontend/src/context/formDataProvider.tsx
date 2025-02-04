@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState } from "react";
 
 interface EnterpriseFormData {
   cnpj: string;
-  nameEnterprise: string;
   fantasyName: string;
   socialReason: string;
   email: string;

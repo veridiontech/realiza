@@ -77,6 +77,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(contractProviderSupplierRequestDto.getExpenseType())
                 .startDate(contractProviderSupplierRequestDto.getStartDate())
                 .endDate(contractProviderSupplierRequestDto.getEndDate())
+                .subcontractPermission(contractProviderSupplierRequestDto.getSubcontractPermission())
                 .activities(activities)
                 .requirements(requirements)
                 .providerSupplier(providerSupplier)
@@ -97,12 +98,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
+                .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
                 .activities(savedContractProviderSupplier.getActivities())
                 .requirements(savedContractProviderSupplier.getRequirements())
                 .providerSupplier(savedContractProviderSupplier.getProviderSupplier().getIdProvider())
-                .providerSupplierName(savedContractProviderSupplier.getProviderSupplier().getFantasyName())
+                .providerSupplierName(savedContractProviderSupplier.getProviderSupplier().getCorporateName())
                 .client(savedContractProviderSupplier.getClient().getIdClient())
-                .clientName(savedContractProviderSupplier.getClient().getFantasyName())
+                .clientName(savedContractProviderSupplier.getClient().getCorporateName())
                 .build();
 
         return contractResponseDto;
@@ -126,12 +128,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(contractProviderSupplier.getExpenseType())
                 .startDate(contractProviderSupplier.getStartDate())
                 .endDate(contractProviderSupplier.getEndDate())
+                .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                 .activities(contractProviderSupplier.getActivities())
                 .requirements(contractProviderSupplier.getRequirements())
                 .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
-                .providerSupplierName(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                 .client(contractProviderSupplier.getClient().getIdClient())
-                .clientName(contractProviderSupplier.getClient().getFantasyName())
+                .clientName(contractProviderSupplier.getClient().getCorporateName())
                 .build();
 
         return Optional.of(contractResponseDto);
@@ -154,12 +157,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .startDate(contractProviderSupplier.getStartDate())
                         .endDate(contractProviderSupplier.getEndDate())
+                        .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                         .activities(contractProviderSupplier.getActivities())
                         .requirements(contractProviderSupplier.getRequirements())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
-                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                         .client(contractProviderSupplier.getClient().getIdClient())
-                        .clientName(contractProviderSupplier.getClient().getFantasyName())
+                        .clientName(contractProviderSupplier.getClient().getCorporateName())
                         .build()
         );
 
@@ -221,12 +225,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getStartDate())
                 .endDate(savedContractProviderSupplier.getEndDate())
+                .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
                 .activities(savedContractProviderSupplier.getActivities())
                 .requirements(savedContractProviderSupplier.getRequirements())
                 .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
-                .providerSupplierName(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                 .client(contractProviderSupplier.getClient().getIdClient())
-                .clientName(contractProviderSupplier.getClient().getFantasyName())
+                .clientName(contractProviderSupplier.getClient().getCorporateName())
                 .build();
 
         return Optional.of(contractResponseDto);
@@ -253,12 +258,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .startDate(contractProviderSupplier.getStartDate())
                         .endDate(contractProviderSupplier.getEndDate())
+                        .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                         .activities(contractProviderSupplier.getActivities())
                         .requirements(contractProviderSupplier.getRequirements())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
-                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                         .client(contractProviderSupplier.getClient().getIdClient())
-                        .clientName(contractProviderSupplier.getClient().getFantasyName())
+                        .clientName(contractProviderSupplier.getClient().getCorporateName())
                         .build()
         );
 
@@ -281,12 +287,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .startDate(contractProviderSupplier.getStartDate())
                         .endDate(contractProviderSupplier.getEndDate())
+                        .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                         .activities(contractProviderSupplier.getActivities())
                         .requirements(contractProviderSupplier.getRequirements())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
-                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getFantasyName())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                         .client(contractProviderSupplier.getClient().getIdClient())
-                        .clientName(contractProviderSupplier.getClient().getFantasyName())
+                        .clientName(contractProviderSupplier.getClient().getCorporateName())
                         .build()
         );
 

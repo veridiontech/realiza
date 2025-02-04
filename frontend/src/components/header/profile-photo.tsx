@@ -15,7 +15,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+
 
 const profilePicFormSchema = z.object({
   file: z
@@ -32,7 +32,7 @@ const profilePicFormSchema = z.object({
 
 type ProfilePictureFormSchema = z.infer<typeof profilePicFormSchema>;
 
-export function ProfilePic() {
+export function ProfilePhoto() {
   const { user } = useUser();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -67,7 +67,6 @@ export function ProfilePic() {
       );
 
       console.log("Imagem enviada com sucesso!", response.data);
-      window.location.reload()
     } catch (error) {
       console.error("Erro ao enviar imagem:", error);
     }
@@ -92,14 +91,11 @@ export function ProfilePic() {
   return (
     <Dialog>
       <DialogTrigger>
-        <div >
+        <div>
           {base64Image ? (
-            <div>
-            <img src={base64Image} className="w-[10vw] rounded-full h-[20vh] object-cover hover:bg-gray-600" alt="Foto de perfil" />
-            <Pencil className="relative bottom-[5.5vw] left-[4.5vw] text-gray-300 hover:text-gray-500"/>
-            </div>
+            <img src={base64Image} className="w-[3vw] h-[6vh] rounded-full object-cover " alt="Foto de perfil" />
           ) : user ? (
-            <div className="flex items-center justify-center bg-gray-300 text-black font-bold text-xl rounded-full">
+            <div className="bg-realizaBlue rounded-full w-[3vw] h-[5vh]">
               {getNameUser}
               {getSurnameUser}
             </div>
@@ -112,19 +108,19 @@ export function ProfilePic() {
         <DialogHeader>
           <DialogTitle>Alterar foto de perfil</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-center">
+        <div>
           {base64Image ? (
-            <img src={base64Image} className="w-[10vw] h-[20vh] rounded-full object-cover" alt="Foto atual" />
+            <img src={base64Image} className="w-[3vw] h-[5vh]" alt="Foto atual" />
           ) : (
             <p>Nenhuma foto encontrada.</p>
           )}
         </div>
-        <form onSubmit={handleSubmit(handleFileUpload)} className="flex flex-col gap-1">
+        <form onSubmit={handleSubmit(handleFileUpload)}>
           <div>
-            <Input type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer"/>
+            <Input type="file" accept="image/*" onChange={handleFileChange} />
             {errors.file && <p className="text-red-500">{errors.file.message}</p>}
           </div>
-          <Button type="submit" className="bg-realizaBlue">Enviar</Button>
+          <Button type="submit">Enviar</Button>
         </form>
       </DialogContent>
     </Dialog>

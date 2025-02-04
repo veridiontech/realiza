@@ -163,7 +163,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
         documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
         documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
-        documentClient.setIsActive(documentClientRequestDto.getIsActive() != null ? documentClientRequestDto.getIsActive() : documentClient.getIsActive());
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 

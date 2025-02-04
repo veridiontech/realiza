@@ -43,13 +43,13 @@ public class EmailSender {
             case SUPPLIER -> {
                 var supplier = clientRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
-                companyName = supplier.getCompanyName();
+                companyName = supplier.getCorporateName();
                 idCompany = supplier.getIdClient();
             }
             case SUBCONTRACTOR -> {
                 var subcontractor = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
-                companyName = subcontractor.getCompanyName();
+                companyName = subcontractor.getCorporateName();
                 idCompany = subcontractor.getIdProvider();
             }
         }

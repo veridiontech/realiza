@@ -22,8 +22,7 @@ public abstract class Provider {
     private String idProvider;
     private String cnpj;
     private String tradeName;
-    private String companyName;
-    private String fantasyName;
+    private String corporateName;
     private String logo;
     private String email;
     private String telephone;
@@ -33,7 +32,7 @@ public abstract class Provider {
     private String address;
     private String number;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 

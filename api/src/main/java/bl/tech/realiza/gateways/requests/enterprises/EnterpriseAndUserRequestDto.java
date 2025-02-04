@@ -7,9 +7,8 @@ import lombok.Data;
 @Data
 public class EnterpriseAndUserRequestDto {
     private String cnpj;
-    private String nameEnterprise;
-    private String fantasyName;
-    private String socialReason;
+    private String tradeName;
+    private String corporateName;
     private String email;
     private String phone;
     private String cpf;
