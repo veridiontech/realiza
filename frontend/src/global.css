@@ -96,3 +96,7 @@
 .input {
   @apply border-none focus:outline-none focus:ring-0 focus:border-none;
 }
+
+.flip-horizontal {
+  transform: scaleX(-1);
+}

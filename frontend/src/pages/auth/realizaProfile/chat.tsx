@@ -121,11 +121,17 @@ export default function ChatPage() {
               {messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`rounded-lg p-2 ${msg.sender === "user" ? 
-                    "bg-realizaBlue w-auto self-end text-white flex flex-row-reverse items-center gap-1" : 
-                    "w-auto self-start bg-gray-200 text-end text-black flex items-center gap-1"}`}
+                  className={`rounded-lg p-2 ${
+                    msg.sender === "user"
+                      ? "bg-realizaBlue flex w-auto flex-row-reverse items-center gap-1 self-end text-white"
+                      : "flex w-auto items-start gap-1 self-start bg-gray-200 text-end text-black"
+                  }`}
                 >
-                  {msg.sender === "user" ? (<User size={20}/>):(<Bot size={20}/>)}
+                  {msg.sender === "user" ? (
+                    <User className="h-5 w-5 flex-shrink-0" />
+                  ) : (
+                    <Bot className="h-5 w-5 flex-shrink-0" />
+                  )}
                   {msg.isLink ? (
                     <a
                       href={msg.text}
