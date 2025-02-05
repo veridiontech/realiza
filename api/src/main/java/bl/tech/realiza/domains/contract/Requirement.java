@@ -20,5 +20,7 @@ public class Requirement {
     private String idRequirement;
     private String title;
     @Builder.Default
+    private Boolean deleteRequest = false;
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 }

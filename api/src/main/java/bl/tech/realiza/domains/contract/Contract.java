@@ -38,6 +38,8 @@ public abstract class Contract {
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
     private Boolean isActive = false;
+    @Builder.Default
+    private Boolean deleteRequest = false;
 
     @ManyToMany
     @JoinTable(

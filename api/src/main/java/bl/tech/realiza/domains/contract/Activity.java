@@ -20,5 +20,7 @@ public class Activity {
     private String idActivity;
     private String title;
     @Builder.Default
+    private Boolean deleteRequest = false;
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 }

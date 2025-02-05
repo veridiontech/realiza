@@ -19,6 +19,9 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ItemManagementService {
@@ -70,6 +73,33 @@ public class ItemManagementService {
                 throw new BadRequestException("Invalid entity");
             }
         }
+    }
+
+    public List<Object> getInactiveItems() {
+        List<Object> inactiveItems = new ArrayList<>();
+
+        inactiveItems.addAll(branchRepository.findAllByIsActive(false));
+        inactiveItems.addAll(clientRepository.findAllByIsActive(false));
+        inactiveItems.addAll(contractRepository.findAllByIsActive(false));
+        inactiveItems.addAll(providerRepository.findAllByIsActive(false));
+        inactiveItems.addAll(userRepository.findAllByIsActive(false));
+
+        return inactiveItems;
+    }
+
+    public List<Object> getDeleteItemRequest() {
+        List<Object> deleteItemSolicitations = new ArrayList<>();
+
+        deleteItemSolicitations.addAll(contractRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(clientRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(providerRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(userRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(activityRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(requirementRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(documentRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(employeeRepository.findAllByDeleteRequest(true));
+
+        return deleteItemSolicitations;
     }
 
     public void deleteItem(String id, DeleteItemType item) {

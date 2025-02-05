@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/item-management")
@@ -36,5 +39,23 @@ public class ItemManagementControllerImpl implements ItemManagementController {
         itemManagementService.deleteItem(id,item);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/innactive-items")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Collection<Object>> getInnactiveItems() {
+        Collection<Object> items = itemManagementService.getInactiveItems();
+
+        return ResponseEntity.of(Optional.ofNullable(items));
+    }
+
+    @GetMapping("/delete-requests")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Collection<Object>> getDeleteRequests() {
+        Collection<Object> items = itemManagementService.getInactiveItems();
+
+        return ResponseEntity.of(Optional.ofNullable(items));
     }
 }
