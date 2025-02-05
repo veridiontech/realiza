@@ -1,5 +1,5 @@
 // ProtectedRoute.tsx
-import React, { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";

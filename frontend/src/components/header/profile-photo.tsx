@@ -95,7 +95,7 @@ export function ProfilePhoto() {
           {base64Image ? (
             <img src={base64Image} className="w-[3vw] h-[6vh] rounded-full object-cover " alt="Foto de perfil" />
           ) : user ? (
-            <div className="bg-realizaBlue rounded-full w-[3vw] h-[5vh]">
+            <div className="bg-realizaBlue rounded-full w-[3vw] h-[6vh] flex items-center justify-center text-white">
               {getNameUser}
               {getSurnameUser}
             </div>

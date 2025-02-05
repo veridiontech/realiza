@@ -12,7 +12,7 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [logs, setLogs] = useState([
+  const [logs] = useState([
     {
       id: 1,
       usuario: "monica",

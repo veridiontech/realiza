@@ -1,12 +1,20 @@
+// DocumentSelectedBox.tsx
+
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useState } from "react";
+import { useDocument } from "@/context/Document-provider"; // Importe o hook do contexto
+// import { useState } from "react";
 
 export function DocumentSelectedBox() {
-    const [isLoading, setIsLoading] = useState(false)
+  const { document } = useDocument(); // Acesse o documento do contexto
+  // const [isLoading, setIsLoading] = useState(false);
 
-    if(isLoading) {
-        
-    }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-full">
+  //       {/* Aqui você pode usar um componente de loading */}
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="w-[30vw] rounded-md border p-2 shadow-md">
@@ -15,9 +23,22 @@ export function DocumentSelectedBox() {
           <option value="" disabled>
             Selecionados
           </option>
+          {document && (
+            <option value={document.idDocumentMatrix}>{document.name}</option>
+          )}
         </select>
       </div>
-      <ScrollArea className="h-[25vh] w-full"></ScrollArea>
+      <ScrollArea className="h-[25vh] w-full">
+        <div className="flex flex-col gap-3">
+          {document ? (
+            <div>
+              <h3>{document.name}</h3>
+            </div>
+          ) : (
+            <p>Nenhum documento selecionado.</p>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

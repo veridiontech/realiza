@@ -26,3 +26,11 @@ export interface propsClient {
   telephone: string;
   tradeName: string;
 }
+
+export interface propsDocument {
+  doesBlock: boolean; 
+  idDocumentMatrix: string;
+  idDocumentSubgroup: string;
+  name: string;
+  type:  string; 
+}

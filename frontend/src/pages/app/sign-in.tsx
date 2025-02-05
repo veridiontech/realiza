@@ -40,10 +40,10 @@ export function SignIn() {
         email: data.email,
         password: data.password,
       });
-
+  
       const token = res.data.token;
       localStorage.setItem("tokenClient", token);
-
+  
       const userResponse = await axios.post(
         `${ip}/login/extract-token`,
         token,
@@ -53,66 +53,51 @@ export function SignIn() {
           },
         },
       );
-
+  
       const userData = userResponse.data;
       localStorage.setItem("userId", userData.idUser);
-      console.log("enviando dados:", userResponse);
-      
+      localStorage.setItem("role", userData.role)
       setUser(userResponse.data);
       setShowSplash(true);
-      console.log("usuaior:", user);
-      
-
+  
+      console.log("usuário:", user);
+  
       setTimeout(() => {
         console.log("Redirecionando para:", userData.role);
-        if(user?.role === "ROLE_ADMIN"){
-          navigate(`/sistema/select-client/${userData.idUser}`);
+        switch (userData.role) {
+          case "ROLE_ADMIN":
+          case "ROLE_REALIZA_PLUS":
+          case "ROLE_REALIZA_BASIC":
+            navigate(`/sistema/select-client/${userData.idUser}`);
+            break;
+          case "ROLE_CLIENT_RESPONSIBLE":
+            navigate(`/cliente/contracts/${userData.idUser}`);
+            break;
+          case "ROLE_CLIENT_MANAGER":
+            navigate(`/client-test`);
+            break;
+          case "ROLE_SUPPLIER_RESPONSIBLE":
+            navigate(`/fornecedor/contracts/${userData.idUser}`);
+            break;
+          case "ROLE_SUPPLIER_MANAGER":
+          case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+          case "ROLE_SUBCONTRACTOR_MANAGER":
+          case "ROLE_VIEWER":
+            navigate(`/client-test`);
+            break;
+          default:
+            navigate(`/`);
+            alert("Usuário sem ROLE");
+            break;
         }
-        // switch (userData.role) {
-        //   case "ROLE_ADMIN":
-        //     navigate(`/sistema/select-client/${userData.idUser}`);
-        //     break;
-        //   case "ROLE_REALIZA_PLUS":
-        //     navigate(`/sistema/select-client/${userData.idUser}`);
-        //     break;
-        //   case "ROLE_REALIZA_BASIC":
-        //     navigate(`/sistema/select-client/${userData.idUser}`);
-        //     break;
-        //   case "ROLE_CLIENT_RESPONSIBLE":
-        //     navigate(`/cliente/contracts/${userData.idUser}`);
-        //     break;
-        //   case "ROLE_CLIENT_MANAGER":
-        //     navigate(`/client-test`);
-        //     break;
-        //   case "ROLE_SUPPLIER_RESPONSIBLE":
-        //     navigate(`/fornecedor/contracts/${userData.idUser}`);
-        //     break;
-        //   case "ROLE_SUPPLIER_MANAGER":
-        //     navigate(`/client-test`);
-        //     break;
-        //   case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
-        //     navigate(`/client-test`);
-        //     break;
-        //   case "ROLE_SUBCONTRACTOR_MANAGER":
-        //     navigate(`/client-test`);
-        //     break;
-        //   case "ROLE_VIEWER":
-        //     navigate(`/client-test`);
-        //     break;
-        //   default:
-        //     navigate(`/`);
-        //     alert("Usuário sem ROLE");
-        //     break;
-        // }
         window.location.reload();
-      }, 6000);
-      console.log(userData);
+      }, 3000);
     } catch (err) {
       console.error("Erro ao buscar usuário:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     if (user) {

@@ -16,6 +16,7 @@ import { DocumentSelectedBox } from "./document-selected-box";
 export function DocumentPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [documents, setDocuments] = useState([]);
+  // const [subcontractors, setSubContractors] = useState([])
 
   const getDocuments = async () => {
     setIsLoading(true);
@@ -31,10 +32,25 @@ export function DocumentPage() {
     }
   };
 
+  // const getDocumentsSubcontractor = async () => {
+  //   setIsLoading(true);
+  //   try {
+      
+  //     const res = await axios.get(`${ip}/document/subcontractor`);
+  //     setSubContractors(res.data.content);
+  //     console.log("sucesso");
+  //   } catch (err) {
+  //     console.log(err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   console.log("documentos:", documents);
 
   useEffect(() => {
     getDocuments();
+    // getDocumentsSubcontractor()
   }, []);
 
   return (
