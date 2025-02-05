@@ -3,9 +3,8 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bot, Send, User } from "lucide-react";
+import { Send } from "lucide-react";
 import CHATGPT_PROMPT from "@/prompt";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   sender: "user" | "bot";
@@ -13,7 +12,7 @@ interface Message {
   isLink?: boolean;
 }
 
-export default function ChatPage() {
+export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,12 +71,9 @@ export default function ChatPage() {
           .toLowerCase()
           .includes("me mande um excel dos colaboradores")
       ) {
-        const response = await axios.post(
-          "https://chat-ia-realiza.onrender.com/pergunta",
-          {
-            question: processedQuestion,
-          },
-        );
+        const response = await axios.post("http://localhost:3001/pergunta", {
+          question: processedQuestion,
+        });
 
         if (response.data.link) {
           const botMessage: Message = {
@@ -94,6 +90,7 @@ export default function ChatPage() {
           setMessages((prev) => [...prev, botMessage]);
         }
       } else {
+        // Se a pergunta não for reformulada, exibe a resposta do ChatGPT
         const botMessage: Message = {
           sender: "bot",
           text: processedQuestion,
@@ -116,32 +113,27 @@ export default function ChatPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-2xl shadow-lg">
         <CardContent className="space-y-4 p-4">
-          <ScrollArea className="flex h-[55vh] flex-col gap-5 border-b border-gray-300 p-3">
-            <div className="flex flex-col gap-10">
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`rounded-lg p-2 ${msg.sender === "user" ? 
-                    "bg-realizaBlue w-auto self-end text-white flex flex-row-reverse items-center gap-1" : 
-                    "w-auto self-start bg-gray-200 text-end text-black flex items-center gap-1"}`}
-                >
-                  {msg.sender === "user" ? (<User size={20}/>):(<Bot size={20}/>)}
-                  {msg.isLink ? (
-                    <a
-                      href={msg.text}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      Baixar Excel
-                    </a>
-                  ) : (
-                    msg.text
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="h-96 overflow-y-auto border-b border-gray-300 p-2">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`rounded-lg p-2 ${msg.sender === "user" ? "self-end bg-realizaBlue text-white" : "self-start bg-gray-200 text-black"}`}
+              >
+                {msg.isLink ? (
+                  <a
+                    href={msg.text}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    Baixar Excel
+                  </a>
+                ) : (
+                  msg.text
+                )}
+              </div>
+            ))}
+          </div>
           <div className="flex gap-2">
             <Input
               value={input}
@@ -149,11 +141,7 @@ export default function ChatPage() {
               placeholder="Faça sua pergunta..."
               className="flex-1"
             />
-            <Button
-              onClick={handleSend}
-              disabled={loading}
-              className="bg-realizaBlue"
-            >
+            <Button onClick={handleSend} disabled={loading}>
               <Send className="h-5 w-5" />
             </Button>
           </div>
