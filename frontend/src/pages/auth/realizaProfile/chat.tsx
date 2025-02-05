@@ -71,9 +71,12 @@ export default function ChatPage() {
           .toLowerCase()
           .includes("me mande um excel dos colaboradores")
       ) {
-        const response = await axios.post("http://localhost:3001/pergunta", {
-          question: processedQuestion,
-        });
+        const response = await axios.post(
+          "https://chat-ia-realiza.onrender.com/pergunta",
+          {
+            question: processedQuestion,
+          },
+        );
 
         if (response.data.link) {
           const botMessage: Message = {
@@ -90,7 +93,6 @@ export default function ChatPage() {
           setMessages((prev) => [...prev, botMessage]);
         }
       } else {
-        // Se a pergunta não for reformulada, exibe a resposta do ChatGPT
         const botMessage: Message = {
           sender: "bot",
           text: processedQuestion,
