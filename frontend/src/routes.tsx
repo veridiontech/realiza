@@ -67,7 +67,7 @@ export const router = createBrowserRouter([
       { path: "branch/:id", element: <Branch /> },
       { path: "new-features/:id", element: <AtualizationPage /> },
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
-      { path: "chat", element: <ChatPage /> },
+      { path: "chat/:id", element: <ChatPage /> },
       { path: "documents/:id", element: <DocumentPage /> },
     ],
   },
