@@ -11,10 +11,11 @@ public class ActivationService {
     NEED APPROVATION
     branch
     client
-    contract
+    contract <- user realiza já faz aprovação
     supplier
     subcontractor
     user (any)
+    todas remoções <- perfil Monica/Gabriela
 
     DON'T NEED APPROVATION (remove isActive)
     contact

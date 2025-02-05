@@ -1,14 +1,12 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
@@ -199,7 +197,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClientAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {

@@ -37,8 +37,8 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
         switch (company) {
             case CLIENT -> {
-                employeeBrazilianPage = employeeBrazilianRepository.findAllByClient_IdClient(idSearch, pageable);
-                employeeForeignerPage = employeeForeignerRepository.findAllByClient_IdClient(idSearch, pageable);
+                employeeBrazilianPage = employeeBrazilianRepository.findAllByBranch_IdBranch(idSearch, pageable);
+                employeeForeignerPage = employeeForeignerRepository.findAllByBranch_IdBranch(idSearch, pageable);
             }
             case SUPPLIER -> {
                 employeeBrazilianPage = employeeBrazilianRepository.findAllBySupplier_IdProvider(idSearch, pageable);

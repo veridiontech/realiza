@@ -6,7 +6,6 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
@@ -191,7 +190,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public Page<ProviderResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByClient_IdClient(idSearch, pageable);
+        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByBranches_IdBranch(idSearch, pageable);
 
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
                 providerSupplier -> {

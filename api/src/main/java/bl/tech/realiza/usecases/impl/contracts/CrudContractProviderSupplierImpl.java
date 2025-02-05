@@ -1,7 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
@@ -281,7 +280,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByClient_IdClient(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranch(idSearch, pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()

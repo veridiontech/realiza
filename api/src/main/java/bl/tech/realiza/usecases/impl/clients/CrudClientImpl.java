@@ -221,52 +221,6 @@ public class CrudClientImpl implements CrudClient {
     }
 
     @Override
-    public EnterpriseAndUserResponseDto saveBoth(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
-        Client newClient = Client.builder()
-                .cnpj(enterpriseAndUserRequestDto.getCnpj())
-                .tradeName(enterpriseAndUserRequestDto.getTradeName())
-                .corporateName(enterpriseAndUserRequestDto.getCorporateName())
-                .email(enterpriseAndUserRequestDto.getEmail())
-                .telephone(enterpriseAndUserRequestDto.getPhone())
-                .build();
-
-        Client savedClient = clientRepository.save(newClient);
-
-        String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
-
-        UserClient newUserClient = UserClient.builder()
-                .cpf(enterpriseAndUserRequestDto.getCpf())
-                .password(encryptedPassword)
-                .position(enterpriseAndUserRequestDto.getPosition())
-                .role(enterpriseAndUserRequestDto.getRole())
-                .firstName(enterpriseAndUserRequestDto.getName())
-                .surname(enterpriseAndUserRequestDto.getSurname())
-                .email(enterpriseAndUserRequestDto.getEmail())
-                .telephone(enterpriseAndUserRequestDto.getPhone())
-                .client(savedClient)
-                .build();
-
-        UserClient savedUserClient = userClientRepository.save(newUserClient);
-
-        EnterpriseAndUserResponseDto enterpriseAndUserResponseDto = EnterpriseAndUserResponseDto.builder()
-                .idClient(savedClient.getIdClient())
-                .cnpj(savedClient.getCnpj())
-                .tradeName(savedClient.getTradeName())
-                .corporateName(savedClient.getCorporateName())
-                .email(savedClient.getEmail())
-                .telephone(savedClient.getTelephone())
-                .idUser(savedUserClient.getIdUser())
-                .cpf(savedUserClient.getCpf())
-                .position(savedUserClient.getPosition())
-                .role(savedUserClient.getRole())
-                .firstName(savedUserClient.getFirstName())
-                .surname(savedUserClient.getSurname())
-                .build();
-
-        return enterpriseAndUserResponseDto;
-    }
-
-    @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
         Optional<Client> clientOptional = clientRepository.findById(id);
         Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));

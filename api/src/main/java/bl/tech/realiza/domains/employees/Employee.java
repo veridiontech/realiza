@@ -59,7 +59,7 @@ public abstract class Employee {
     private Boolean isActive = false;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "client_id_client", referencedColumnName = "idClient")
+    @JoinColumn(name = "branch_id_branch", referencedColumnName = "idBranch")
     private Branch branch;
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier supplier;
