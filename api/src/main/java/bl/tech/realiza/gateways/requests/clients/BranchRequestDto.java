@@ -15,5 +15,4 @@ public class BranchRequestDto {
     private String address;
     private String number;
     private String client;
-    private Boolean isActive;
 }

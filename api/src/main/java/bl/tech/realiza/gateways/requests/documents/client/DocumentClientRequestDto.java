@@ -14,5 +14,4 @@ public class DocumentClientRequestDto {
     private Date versionDate;
     private Date expirationDate;
     private String client;
-    private Boolean isActive;
 }

@@ -163,7 +163,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         providerSupplier.setAddress(providerSupplierRequestDto.getAddress() != null ? providerSupplierRequestDto.getAddress() : providerSupplier.getAddress());
         providerSupplier.setNumber(providerSupplierRequestDto.getNumber() != null ? providerSupplierRequestDto.getNumber() : providerSupplier.getNumber());
         providerSupplier.setBranches(providerSupplierRequestDto.getBranches() != null ? branches : providerSupplier.getBranches());
-        providerSupplier.setIsActive(providerSupplierRequestDto.getIsActive() != null ? providerSupplierRequestDto.getIsActive() : providerSupplier.getIsActive());
 
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(providerSupplier);
 

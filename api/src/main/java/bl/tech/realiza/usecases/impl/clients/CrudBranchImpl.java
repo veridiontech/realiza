@@ -118,7 +118,15 @@ public class CrudBranchImpl implements CrudBranch {
         Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
         branch.setName(branchRequestDto.getName() != null ? branchRequestDto.getName() : branch.getName());
-        branch.setIsActive(branchRequestDto.getIsActive() != null ? branchRequestDto.getIsActive() : branch.getIsActive());
+        branch.setCnpj(branchRequestDto.getCnpj() != null ? branchRequestDto.getCnpj() : branch.getCnpj());
+        branch.setCep(branchRequestDto.getCep() != null ? branchRequestDto.getCep() : branch.getCep());
+        branch.setState(branchRequestDto.getState() != null ? branchRequestDto.getState() : branch.getState());
+        branch.setCity(branchRequestDto.getCity() != null ? branchRequestDto.getCity() : branch.getCity());
+        branch.setEmail(branchRequestDto.getEmail() != null ? branchRequestDto.getEmail() : branch.getEmail());
+        branch.setTelephone(branchRequestDto.getTelephone() != null ? branchRequestDto.getTelephone() : branch.getTelephone());
+        branch.setAddress(branchRequestDto.getAddress() != null ? branchRequestDto.getAddress() : branch.getAddress());
+        branch.setNumber(branchRequestDto.getNumber() != null ? branchRequestDto.getNumber() : branch.getNumber());
+
 
         Branch savedBranch = branchRepository.save(branch);
 

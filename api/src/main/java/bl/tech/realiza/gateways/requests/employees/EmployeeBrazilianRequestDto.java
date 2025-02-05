@@ -38,6 +38,5 @@ public class EmployeeBrazilianRequestDto {
     private String branch;
     private String supplier;
     private String subcontract;
-    private Boolean isActive;
     private List<String> idContracts;
 }

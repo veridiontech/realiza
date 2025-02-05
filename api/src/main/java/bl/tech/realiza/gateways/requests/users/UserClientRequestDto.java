@@ -21,5 +21,4 @@ public class UserClientRequestDto {
     private String telephone;
     private String cellphone;
     private String branch;
-    private Boolean isActive;
 }

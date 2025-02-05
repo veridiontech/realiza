@@ -168,7 +168,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         userSubcontractor.setProfilePicture(userProviderSubcontractorRequestDto.getProfilePicture() != null ? userProviderSubcontractorRequestDto.getProfilePicture() : userSubcontractor.getProfilePicture());
         userSubcontractor.setTelephone(userProviderSubcontractorRequestDto.getTelephone() != null ? userProviderSubcontractorRequestDto.getTelephone() : userSubcontractor.getTelephone());
         userSubcontractor.setCellphone(userProviderSubcontractorRequestDto.getCellphone() != null ? userProviderSubcontractorRequestDto.getCellphone() : userSubcontractor.getCellphone());
-        userSubcontractor.setIsActive(userProviderSubcontractorRequestDto.getIsActive() != null ? userProviderSubcontractorRequestDto.getIsActive() : userSubcontractor.getIsActive());
 
         UserProviderSubcontractor savedUserSubcontractor = userSubcontractorRepository.save(userSubcontractor);
 

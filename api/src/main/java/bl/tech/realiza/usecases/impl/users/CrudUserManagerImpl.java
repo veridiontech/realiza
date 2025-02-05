@@ -155,7 +155,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
         userManager.setProfilePicture(userManagerRequestDto.getProfilePicture() != null ? userManagerRequestDto.getProfilePicture() : userManager.getProfilePicture());
         userManager.setTelephone(userManagerRequestDto.getTelephone() != null ? userManagerRequestDto.getTelephone() : userManager.getTelephone());
         userManager.setCellphone(userManagerRequestDto.getCellphone() != null ? userManagerRequestDto.getCellphone() : userManager.getCellphone());
-        userManager.setIsActive(userManagerRequestDto.getIsActive() != null ? userManagerRequestDto.getIsActive() : userManager.getIsActive());
 
         UserManager savedUserManager = userManagerRepository.save(userManager);
 

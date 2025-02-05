@@ -17,5 +17,4 @@ public class DocumentProviderSupplierRequestDto {
     private Date versionDate;
     private Date expirationDate;
     private String supplier;
-    private Boolean isActive;
 }

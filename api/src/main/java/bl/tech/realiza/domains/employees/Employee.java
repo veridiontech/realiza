@@ -55,9 +55,6 @@ public abstract class Employee {
     private Situation situation = Situation.DESALOCADO;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @Builder.Default
-    private Boolean isActive = false;
-
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "branch_id_branch", referencedColumnName = "idBranch")
     private Branch branch;

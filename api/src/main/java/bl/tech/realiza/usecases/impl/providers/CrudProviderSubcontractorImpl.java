@@ -151,8 +151,6 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         providerSubcontractor.setAddress(providerSubcontractorRequestDto.getAddress() != null ? providerSubcontractorRequestDto.getAddress() : providerSubcontractor.getAddress());
         providerSubcontractor.setNumber(providerSubcontractorRequestDto.getNumber() != null ? providerSubcontractorRequestDto.getNumber() : providerSubcontractor.getNumber());
 
-        providerSubcontractor.setIsActive(providerSubcontractorRequestDto.getIsActive() != null ? providerSubcontractorRequestDto.getIsActive() : providerSubcontractor.getIsActive());
-
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(providerSubcontractor);
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()

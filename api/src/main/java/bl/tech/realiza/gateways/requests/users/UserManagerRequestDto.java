@@ -20,5 +20,4 @@ public class UserManagerRequestDto {
     private String profilePicture;
     private String telephone;
     private String cellphone;
-    private Boolean isActive;
 }

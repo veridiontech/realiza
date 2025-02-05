@@ -16,6 +16,5 @@ public class ProviderSubcontractorRequestDto {
     private String address;
     private String number;
     private String supplier;
-    private Boolean isActive;
     private List<String> branches;
 }

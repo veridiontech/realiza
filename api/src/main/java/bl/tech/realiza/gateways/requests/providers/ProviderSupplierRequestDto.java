@@ -16,6 +16,5 @@ public class ProviderSupplierRequestDto {
     private String address;
     private String number;
     private String branch;
-    private Boolean isActive;
     private List<String> branches;
 }

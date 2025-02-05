@@ -10,5 +10,4 @@ public class NotificationRequestDto {
     private String description;
     private Boolean isRead;
     private String user;
-    private Boolean isActive;
 }

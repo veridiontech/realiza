@@ -22,5 +22,4 @@ public class UserProviderSubcontractorRequestDto {
     private String telephone;
     private String cellphone;
     private String subcontractor;
-    private Boolean isActive;
 }

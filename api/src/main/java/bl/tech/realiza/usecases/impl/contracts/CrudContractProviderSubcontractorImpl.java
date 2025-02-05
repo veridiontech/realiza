@@ -223,7 +223,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         contractProviderSubcontractor.setEndDate(contractProviderSubcontractorRequestDto.getEndDate() != null ? contractProviderSubcontractorRequestDto.getEndDate() : contractProviderSubcontractor.getEndDate());
         contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getActivities() != null ? activities : contractProviderSubcontractor.getActivities());
         contractProviderSubcontractor.setRequirements(contractProviderSubcontractorRequestDto.getRequirements() != null ? requirements : contractProviderSubcontractor.getRequirements());
-        contractProviderSubcontractor.setIsActive(contractProviderSubcontractorRequestDto.getIsActive() != null ? contractProviderSubcontractorRequestDto.getIsActive() : contractProviderSubcontractor.getIsActive());
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
 
