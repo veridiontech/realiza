@@ -14,5 +14,7 @@ RUN apt-get update && apt-get install -y tesseract-ocr
 RUN apt-get update && apt-get install -y telnet
 
 COPY --from=build /app/target/realiza-0.0.1-SNAPSHOT.jar app.jar
+COPY .env /app/.env
+
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
