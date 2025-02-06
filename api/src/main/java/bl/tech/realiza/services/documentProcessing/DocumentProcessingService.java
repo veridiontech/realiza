@@ -24,9 +24,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DocumentProcessingService {
 
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String OPENAI_API_URL = dotenv.get("OPENAI_API_URL");
-    private static final String OPENAI_API_KEY = dotenv.get("OPENAI_API_KEY");
+    private final Dotenv dotenv = Dotenv.load();
+    private final String OPENAI_API_URL = dotenv.get("OPENAI_API_URL");
+    private final String OPENAI_API_KEY = dotenv.get("OPENAI_API_KEY");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
