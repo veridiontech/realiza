@@ -95,7 +95,6 @@ public class CrudNotificationImpl implements CrudNotification {
         notification.setTitle(notificationRequestDto.getTitle() != null ? notificationRequestDto.getTitle() : notification.getTitle());
         notification.setDescription(notificationRequestDto.getDescription() != null ? notificationRequestDto.getDescription() : notification.getDescription());
         notification.setIsRead(notificationRequestDto.getIsRead() != null ? notificationRequestDto.getIsRead() : notification.getIsRead());
-        notification.setIsActive(notificationRequestDto.getIsActive() != null ? notificationRequestDto.getIsActive() : notification.getIsActive());
 
         Notification savedNotification = notificationRepository.save(notification);
 

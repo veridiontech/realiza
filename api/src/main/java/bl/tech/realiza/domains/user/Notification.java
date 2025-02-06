@@ -22,8 +22,6 @@ public class Notification {
     private String description;
     private Boolean isRead;
     @Builder.Default
-    private Boolean isActive = true;
-    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @ManyToOne(cascade = CascadeType.REMOVE)

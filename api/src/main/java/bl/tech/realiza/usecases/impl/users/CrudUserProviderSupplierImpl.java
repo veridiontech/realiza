@@ -164,7 +164,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         userProvider.setProfilePicture(userProviderSupplierRequestDto.getProfilePicture() != null ? userProviderSupplierRequestDto.getProfilePicture() : userProvider.getProfilePicture());
         userProvider.setTelephone(userProviderSupplierRequestDto.getTelephone() != null ? userProviderSupplierRequestDto.getTelephone() : userProvider.getTelephone());
         userProvider.setCellphone(userProviderSupplierRequestDto.getCellphone() != null ? userProviderSupplierRequestDto.getCellphone() : userProvider.getCellphone());
-        userProvider.setIsActive(userProviderSupplierRequestDto.getIsActive() != null ? userProviderSupplierRequestDto.getIsActive() : userProvider.getIsActive());
 
         UserProviderSupplier savedUserSupplier = userSupplierRepository.save(userProvider);
 

@@ -1,12 +1,13 @@
 package bl.tech.realiza.usecases.impl.employees;
 
-import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
@@ -38,12 +39,13 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final ClientRepository clientRepository;
     private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto, MultipartFile file) {
         List<Contract> contracts = List.of();
         EmployeeBrazilian newEmployeeBrazilian = null;
-        Client client = null;
+        Branch branch = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
         FileDocument fileDocument = null;
@@ -57,10 +59,10 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
             }
         }
 
-        if (employeeBrazilianRequestDto.getClient() != null) {
-            Optional<Client> clientOptional = clientRepository.findById(employeeBrazilianRequestDto.getClient());
+        if (employeeBrazilianRequestDto.getBranch() != null) {
+            Optional<Branch> branchOptional = branchRepository.findById(employeeBrazilianRequestDto.getBranch());
 
-            client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+            branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
         } else if (employeeBrazilianRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
@@ -127,7 +129,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(employeeBrazilianRequestDto.getSituation())
                 .rg(employeeBrazilianRequestDto.getRg())
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
-                .client(client)
+                .branch(branch)
                 .supplier(providerSupplier)
                 .subcontract(providerSubcontractor)
                 .contracts(contracts)
@@ -165,7 +167,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(savedEmployeeBrazilian.getSituation())
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
-                .client(savedEmployeeBrazilian.getClient() != null ? savedEmployeeBrazilian.getClient().getIdClient() : null)
+                .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
                 .contracts(savedEmployeeBrazilian.getContracts().stream().map(
@@ -221,7 +223,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(employeeBrazilian.getSituation())
                 .rg(employeeBrazilian.getRg())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
-                .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
+                .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
                 .contracts(employeeBrazilian.getContracts().stream().map(
@@ -277,7 +279,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .situation(employeeBrazilian.getSituation())
                             .rg(employeeBrazilian.getRg())
                             .admissionDate(employeeBrazilian.getAdmissionDate())
-                            .client(employeeBrazilian.getClient() != null ? employeeBrazilian.getClient().getIdClient() : null)
+                            .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                             .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
                             .contracts(employeeBrazilian.getContracts().stream().map(
@@ -335,7 +337,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null ? employeeBrazilianRequestDto.getSituation() : employeeBrazilian.getSituation());
         employeeBrazilian.setRg(employeeBrazilianRequestDto.getRg() != null ? employeeBrazilianRequestDto.getRg() : employeeBrazilian.getRg());
         employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
-        employeeBrazilian.setIsActive(employeeBrazilianRequestDto.getIsActive() != null ? employeeBrazilianRequestDto.getIsActive() : employeeBrazilian.getIsActive());
         employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null ? contracts : employeeBrazilian.getContracts());
 
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(employeeBrazilian);
@@ -369,7 +370,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(savedEmployeeBrazilian.getSituation())
                 .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
-                .client(savedEmployeeBrazilian.getClient() != null ? savedEmployeeBrazilian.getClient().getIdClient() : null)
+                .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
                 .contracts(savedEmployeeBrazilian.getContracts().stream().map(

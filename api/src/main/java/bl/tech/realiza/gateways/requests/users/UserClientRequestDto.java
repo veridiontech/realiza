@@ -1,7 +1,6 @@
 package bl.tech.realiza.gateways.requests.users;
 
 import bl.tech.realiza.domains.user.User;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.TimeZone;
@@ -21,6 +20,5 @@ public class UserClientRequestDto {
     private String profilePicture;
     private String telephone;
     private String cellphone;
-    private String client;
-    private Boolean isActive;
+    private String branch;
 }

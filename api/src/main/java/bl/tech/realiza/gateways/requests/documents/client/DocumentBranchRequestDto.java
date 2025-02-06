@@ -14,5 +14,4 @@ public class DocumentBranchRequestDto {
     private Date versionDate;
     private Date expirationDate;
     private String branch;
-    private Boolean isActive;
 }

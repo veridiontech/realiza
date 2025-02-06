@@ -15,7 +15,6 @@ public class ProviderSupplierRequestDto {
     private String city;
     private String address;
     private String number;
-    private String client;
-    private Boolean isActive;
+    private String branch;
     private List<String> branches;
 }

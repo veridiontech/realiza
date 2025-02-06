@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl;
 
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -8,6 +9,7 @@ import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -21,6 +23,7 @@ import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,6 +36,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final PasswordEncryptionService passwordEncryptionService;
+    private final BranchRepository branchRepository;
 
     @Override
     public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
@@ -60,6 +64,15 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
 
         Client savedClient = clientRepository.save(client);
 
+        Branch newBranch = Branch.builder()
+                .name(enterpriseAndUserRequestDto.getCorporateName() + " Matriz")
+                .cnpj(enterpriseAndUserRequestDto.getCnpj())
+                .email(enterpriseAndUserRequestDto.getEmail())
+                .client(savedClient)
+                .build();
+
+        Branch savedBranch = branchRepository.save(newBranch);
+
         String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
         UserClient newUserClient = UserClient.builder()
@@ -71,7 +84,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .surname(enterpriseAndUserRequestDto.getSurname())
                 .email(enterpriseAndUserRequestDto.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
-                .client(savedClient)
+                .branch(savedBranch)
                 .build();
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);
@@ -104,21 +117,22 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findByCnpj(enterpriseAndUserRequestDto.getCnpj());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElse(null);
 
-        Optional<Client> clientOptional = clientRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+        Optional<Branch> branchOptional = branchRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
+        Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
+        List<Branch> branchList = List.of(branch);
 
         if (providerSupplierOptional.isPresent()) {
             providerSupplier.setTradeName(enterpriseAndUserRequestDto.getTradeName() != null ? enterpriseAndUserRequestDto.getTradeName() : providerSupplier.getTradeName());
             providerSupplier.setCorporateName(enterpriseAndUserRequestDto.getCorporateName() != null ? enterpriseAndUserRequestDto.getCorporateName() : providerSupplier.getCorporateName());
             providerSupplier.setEmail(enterpriseAndUserRequestDto.getEmail() != null ? enterpriseAndUserRequestDto.getEmail() : providerSupplier.getEmail());
-            providerSupplier.setClient(client);
+            providerSupplier.setBranches(branchList);
         } else {
             providerSupplier = ProviderSupplier.builder()
                     .cnpj(enterpriseAndUserRequestDto.getCnpj())
                     .tradeName(enterpriseAndUserRequestDto.getTradeName())
                     .corporateName(enterpriseAndUserRequestDto.getCorporateName())
                     .email(enterpriseAndUserRequestDto.getEmail())
-                    .client(client)
+                    .branches(branchList)
                     .build();
         }
 

@@ -10,5 +10,4 @@ public class ContactRequestDto {
     private String telephone;
     private Boolean mainContact;
     private String client;
-    private Boolean isActive;
 }

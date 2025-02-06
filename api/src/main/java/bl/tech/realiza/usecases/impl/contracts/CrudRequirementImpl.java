@@ -70,7 +70,6 @@ public class CrudRequirementImpl implements CrudRequirement {
         Requirement requirement = requirementOptional.orElseThrow(() -> new NotFoundException("Requirement not found"));
 
         requirement.setTitle(requirementRequestDto.getTitle() != null ? requirementRequestDto.getTitle() : requirement.getTitle());
-        requirement.setIsActive(requirementRequestDto.getIsActive() != null ? requirementRequestDto.getIsActive() : requirement.getIsActive());
 
         Requirement savedRequirement = requirementRepository.save(requirement);
 

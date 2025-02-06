@@ -22,5 +22,4 @@ public class UserProviderSupplierRequestDto {
     private String telephone;
     private String cellphone;
     private String supplier;
-    private Boolean isActive;
 }

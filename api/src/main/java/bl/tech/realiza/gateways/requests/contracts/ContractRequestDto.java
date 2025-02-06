@@ -22,12 +22,11 @@ public class ContractRequestDto {
     private String supplierContractId;
     private List<String> activities;
     private List<String> requirements;
-    private Boolean isActive;
     private String cnpj;
 
     // supplier
     private String providerSupplier; // also for subcontractor
-    private String client;
+    private String branch;
 
     // subcontractor
     private String providerSubcontractor;

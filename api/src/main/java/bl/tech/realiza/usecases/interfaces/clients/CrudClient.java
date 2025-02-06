@@ -17,6 +17,5 @@ public interface CrudClient {
     Page<ClientResponseDto> findAll(Pageable pageable);
     Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto);
     void delete(String id);
-    EnterpriseAndUserResponseDto saveBoth(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto);
     String changeLogo(String id, MultipartFile file) throws IOException;
 }

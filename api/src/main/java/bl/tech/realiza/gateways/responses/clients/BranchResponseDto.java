@@ -10,5 +10,13 @@ import lombok.Data;
 public class BranchResponseDto {
     private String idBranch;
     private String name;
+    private String cnpj;
+    private String email;
+    private String telephone;
+    private String cep;
+    private String state;
+    private String city;
+    private String address;
+    private String number;
     private String client;
 }

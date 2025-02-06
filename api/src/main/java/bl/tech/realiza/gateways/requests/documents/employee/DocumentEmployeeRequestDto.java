@@ -14,5 +14,4 @@ public class DocumentEmployeeRequestDto {
     private Date versionDate;
     private Date expirationDate;
     private String employee;
-    private Boolean isActive;
 }

@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.employees;
 
-import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -54,13 +54,12 @@ public abstract class Employee {
     @Builder.Default
     private Situation situation = Situation.DESALOCADO;
     @Builder.Default
-    private LocalDateTime creationDate = LocalDateTime.now();
+    private Boolean deleteRequest = false;
     @Builder.Default
-    private Boolean isActive = false;
-
+    private LocalDateTime creationDate = LocalDateTime.now();
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "client_id_client", referencedColumnName = "idClient")
-    private Client client;
+    @JoinColumn(name = "branch_id_branch", referencedColumnName = "idBranch")
+    private Branch branch;
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier supplier;
     @ManyToOne(cascade = CascadeType.REMOVE)

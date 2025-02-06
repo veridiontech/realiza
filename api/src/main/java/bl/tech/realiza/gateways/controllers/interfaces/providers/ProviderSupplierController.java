@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProviderSupplierController {
@@ -17,4 +18,5 @@ public interface ProviderSupplierController {
     ResponseEntity<String> updateProviderSupplierLogo(String id, MultipartFile file);
     ResponseEntity<Void> deleteProviderSupplier(String id);
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplierByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<String> addBranchesToSupplier(String providerId, List<String> branches);
 }

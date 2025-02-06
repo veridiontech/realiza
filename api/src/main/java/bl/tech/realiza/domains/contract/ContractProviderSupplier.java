@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.contract;
 
-import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,5 +22,5 @@ public class ContractProviderSupplier extends Contract {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier providerSupplier;
     @ManyToOne(cascade = CascadeType.REMOVE)
-    private Client client;
+    private Branch branch;
 }

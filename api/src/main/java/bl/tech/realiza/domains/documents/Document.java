@@ -28,6 +28,8 @@ public abstract class Document {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
+    @Builder.Default
+    private Boolean deleteRequest = false;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Client documentInMatrix;

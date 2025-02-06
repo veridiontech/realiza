@@ -35,9 +35,8 @@ public class EmployeeBrazilianRequestDto {
     private Employee.Situation situation;
     private String rg;
     private Date admissionDate;
-    private String client;
+    private String branch;
     private String supplier;
     private String subcontract;
-    private Boolean isActive;
     private List<String> idContracts;
 }

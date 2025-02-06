@@ -1,13 +1,12 @@
 package bl.tech.realiza.usecases.impl.users;
 
-import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.employees.EmployeeBrazilian;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
@@ -29,9 +28,9 @@ import java.util.Optional;
 public class CrudUserClientImpl implements CrudUserClient {
 
     private final UserClientRepository userClientRepository;
-    private final ClientRepository clientRepository;
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -39,12 +38,12 @@ public class CrudUserClientImpl implements CrudUserClient {
         if (userClientRequestDto.getPassword() == null || !userClientRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userClientRequestDto.getClient() == null || !userClientRequestDto.getClient().isEmpty()) {
-            throw new BadRequestException("Invalid client");
+        if (userClientRequestDto.getBranch() == null || !userClientRequestDto.getBranch().isEmpty()) {
+            throw new BadRequestException("Invalid branch");
         }
 
-        Optional<Client> clientOptional = clientRepository.findById(userClientRequestDto.getClient());
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+        Optional<Branch> branchOptional = branchRepository.findById(userClientRequestDto.getBranch());
+        Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword());
 
@@ -61,7 +60,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .profilePicture(userClientRequestDto.getProfilePicture())
                 .telephone(userClientRequestDto.getTelephone())
                 .cellphone(userClientRequestDto.getCellphone())
-                .client(client)
+                .branch(branch)
                 .build();
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);
@@ -79,7 +78,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .profilePicture(savedUserClient.getProfilePicture())
                 .telephone(savedUserClient.getTelephone())
                 .cellphone(savedUserClient.getCellphone())
-                .client(savedUserClient.getClient().getIdClient())
+                .branch(savedUserClient.getBranch().getIdBranch())
                 .build();
 
         return userClientResponse;
@@ -111,7 +110,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .profilePicture(userClient.getProfilePicture())
                 .telephone(userClient.getTelephone())
                 .cellphone(userClient.getCellphone())
-                .client(userClient.getClient().getIdClient())
+                .branch(userClient.getBranch().getIdBranch())
                 .build();
 
         return Optional.of(userClientResponse);
@@ -143,7 +142,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .profilePicture(userClient.getProfilePicture())
                             .telephone(userClient.getTelephone())
                             .cellphone(userClient.getCellphone())
-                            .client(userClient.getClient().getIdClient())
+                            .branch(userClient.getBranch().getIdBranch())
                             .build();
                 }
         );
@@ -168,7 +167,6 @@ public class CrudUserClientImpl implements CrudUserClient {
         userClient.setProfilePicture(userClientRequestDto.getProfilePicture() != null ? userClientRequestDto.getProfilePicture() : userClient.getProfilePicture());
         userClient.setTelephone(userClientRequestDto.getTelephone() != null ? userClientRequestDto.getTelephone() : userClient.getTelephone());
         userClient.setCellphone(userClientRequestDto.getCellphone() != null ? userClientRequestDto.getCellphone() : userClient.getCellphone());
-        userClient.setIsActive(userClientRequestDto.getIsActive() != null ? userClientRequestDto.getIsActive() : userClient.getIsActive());
 
         UserClient savedUserClient = userClientRepository.save(userClient);
 
@@ -185,7 +183,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .profilePicture(savedUserClient.getProfilePicture())
                 .telephone(savedUserClient.getTelephone())
                 .cellphone(savedUserClient.getCellphone())
-                .client(savedUserClient.getClient().getIdClient())
+                .branch(savedUserClient.getBranch().getIdBranch())
                 .build();
 
         return Optional.of(userClientResponse);
@@ -198,7 +196,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAllByClient_IdClientAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {
@@ -222,7 +220,7 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .profilePicture(userClient.getProfilePicture())
                             .telephone(userClient.getTelephone())
                             .cellphone(userClient.getCellphone())
-                            .client(userClient.getClient().getIdClient())
+                            .branch(userClient.getBranch().getIdBranch())
                             .build();
                 }
         );

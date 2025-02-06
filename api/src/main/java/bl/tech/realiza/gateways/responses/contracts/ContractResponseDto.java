@@ -32,8 +32,8 @@ public class ContractResponseDto {
     private List<Requirement> requirements;
 
     // client
-    private String clientName;
-    private String client;
+    private String branchName;
+    private String branch;
 
     // supplier
     private String providerSupplierName;

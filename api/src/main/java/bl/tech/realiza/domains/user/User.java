@@ -42,6 +42,8 @@ public abstract class User {
     @Builder.Default
     private Boolean isActive = false;
     @Builder.Default
+    private Boolean deleteRequest = false;
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Role {

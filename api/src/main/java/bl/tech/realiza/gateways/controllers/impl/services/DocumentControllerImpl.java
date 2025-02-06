@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
 import bl.tech.realiza.gateways.controllers.interfaces.services.DocumentController;
+import bl.tech.realiza.gateways.responses.services.DocumentResponse;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +22,11 @@ public class DocumentControllerImpl implements DocumentController {
 
     private final DocumentProcessingService documentProcessingService;
 
-    @GetMapping
+    @PostMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<String> extractTextDocument(@RequestPart(value = "file") MultipartFile multipartFile, @RequestParam DocumentProcessingService.DocType docType) {
-        if (multipartFile.isEmpty()) {
-            return ResponseEntity.badRequest().body("File is empty");
-        }
-
-        File file = new File(System.getProperty("java.io.tmpdir") + "/" + multipartFile.getOriginalFilename());
-        try {
-            multipartFile.transferTo(file); // Convert MultipartFile to File
-            String extractedText = documentProcessingService.processFile(file, docType);
-            return ResponseEntity.ok(extractedText);
-        } catch (IOException | TesseractException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing file: " + e.getMessage());
-        } finally {
-            file.delete(); // Cleanup temporary file
-        }
+    public ResponseEntity<DocumentResponse> validateDocument(@RequestParam("file") MultipartFile file) throws IOException {
+        DocumentResponse response = documentProcessingService.processDocument(file);
+        return ResponseEntity.ok(response);
     }
 }

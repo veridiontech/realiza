@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeBrazilianRepository extends JpaRepository<EmployeeBrazilian, String> {
-    Page<EmployeeBrazilian> findAllByClient_IdClient(String client, Pageable pageable);
+    Page<EmployeeBrazilian> findAllByBranch_IdBranch(String branch, Pageable pageable);
     Page<EmployeeBrazilian> findAllBySupplier_IdProvider(String supplier, Pageable pageable);
     Page<EmployeeBrazilian> findAllBySubcontract_IdProvider(String subcontractor, Pageable pageable);
 }

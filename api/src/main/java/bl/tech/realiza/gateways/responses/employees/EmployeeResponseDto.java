@@ -53,7 +53,7 @@ public class EmployeeResponseDto {
     private String passport;
 
     // client
-    private String client;
+    private String branch;
 
     // subcontractor
     private String subcontract;
