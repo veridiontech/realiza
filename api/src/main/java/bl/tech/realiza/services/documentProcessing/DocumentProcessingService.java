@@ -2,7 +2,6 @@ package bl.tech.realiza.services.documentProcessing;
 
 import bl.tech.realiza.gateways.responses.services.DocumentResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -24,9 +23,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DocumentProcessingService {
 
-    private final Dotenv dotenv = Dotenv.load();
-    private final String OPENAI_API_URL = dotenv.get("OPENAI_API_URL");
-    private final String OPENAI_API_KEY = dotenv.get("OPENAI_API_KEY");
+    private final String OPENAI_API_URL = System.getenv("OPENAI_API_URL");
+    private final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
