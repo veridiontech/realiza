@@ -194,7 +194,6 @@ public class CrudClientImpl implements CrudClient {
         client.setCity(client.getCity() != null ? clientRequestDto.getCity() : client.getCity());
         client.setAddress(client.getAddress() != null ? clientRequestDto.getAddress() : client.getAddress());
         client.setNumber(client.getNumber() != null ? clientRequestDto.getNumber() : client.getNumber());
-        client.setIsActive(clientRequestDto.getIsActive() != null ? clientRequestDto.getIsActive() : client.getIsActive());
 
         Client savedClient = clientRepository.save(client);
 
