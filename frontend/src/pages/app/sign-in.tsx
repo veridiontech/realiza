@@ -58,6 +58,7 @@ export function SignIn() {
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role)
       setUser(userResponse.data);
+      console.log("identificando role client", user?.role);
       setShowSplash(true);
   
       console.log("usuário:", user);

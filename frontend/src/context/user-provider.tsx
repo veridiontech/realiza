@@ -5,7 +5,7 @@ import { propsUser } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface UserContextProps {
   user: propsUser | null;
@@ -28,7 +28,6 @@ export function useUser() {
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState(false);
   const [user, setUser] = useState<propsUser | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,41 +48,196 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const validateTokenAndFetchUser = async () => {
     const token = localStorage.getItem("tokenClient");
     const userId = localStorage.getItem("userId");
-    const roleUser = localStorage.getItem("role")
+    const roleUser = localStorage.getItem("role");
 
-    if (token && isTokenValid(token) && userId && roleUser)  {
-         try {
-          if(roleUser === "ROLE_ADMIN") {
-            const res = await axios.get(`${ip}/user/manager/${userId}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            if (res.data) {
-              setUser(res.data);
-              setAuthUser(true);
-            } else {
-              console.error("Usuário não encontrado.");
+    if (token && isTokenValid(token) && userId && roleUser) {
+      try {
+        switch (roleUser) {
+          case "ROLE_ADMIN":
+          case "ROLE_REALIZA_PLUS":
+          case "ROLE_REALIZA_BASIC":
+            try {
+              const res = await axios.get(`${ip}/user/manager/${userId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (res.data) {
+                setUser(res.data);
+                setAuthUser(true);
+              } else {
+                console.error("Usuário não encontrado.");
+                logout();
+              }
+            } catch (error) {
+              console.error("Erro ao buscar usuário:", error);
               logout();
             }
-          }
-          // if(roleUser === "ROLE_CLIENT_RESPONSIBLE") {
-          //   const res = await axios.get(`${ip}/user/client/${userId}`, {
-          //     headers: {
-          //       Authorization: `Bearer ${token}`,
-          //     },
-          //   });
-          //   if (res.data) {
-          //     setUser(res.data);
-          //     setAuthUser(true);
-          //   } else {
-          //     console.error("Usuário não encontrado.");
-          //     logout();
-          //   }
-          // }
+            break;
+          case "ROLE_CLIENT_MANAGER":
+          case "ROLE_CLIENT_RESPONSIBLE":
+            try {
+              const res = await axios.get(`${ip}/user/client/${userId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (res.data) {
+                setUser(res.data);
+                setAuthUser(true);
+              } else {
+                console.error("Usuário não encontrado.");
+                logout();
+              }
+            } catch (error) {
+              console.error("Erro ao buscar usuário:", error);
+              logout();
+            }
+            break;
+          case "ROLE_SUPPLIER_MANAGER":
+          case "ROLE_SUPPLIER_RESPONSIBLE":
+            try {
+              const res = await axios.get(`${ip}/user/supplier/${userId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (res.data) {
+                setUser(res.data);
+                setAuthUser(true);
+              } else {
+                console.error("Usuário não encontrado.");
+                logout();
+              }
+            } catch (error) {
+              console.error("Erro ao buscar usuário:", error);
+              logout();
+            }
+            break;
+          case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+          case "ROLE_SUBCONTRACTOR_MANAGER":
+            try {
+              const res = await axios.get(
+                `${ip}/user/subcontractor/${userId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                },
+              );
+
+              if (res.data) {
+                setUser(res.data);
+                setAuthUser(true);
+              } else {
+                console.error("Usuário não encontrado.");
+                logout();
+              }
+            } catch (error) {
+              console.error("Erro ao buscar usuário:", error);
+              logout();
+            }
+            break;
+          case "ROLE_VIEWER":
+            try {
+              const resClient = await axios.get(`${ip}user/client`);
+              if (resClient.data?.content) {
+                const dataClient = resClient.data.content;
+                if (dataClient.branch) {
+                  const resUser = await axios.get(
+                    `${ip}/user/client/${userId}`,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    },
+                  );
+
+                  if (resUser.data) {
+                    setUser(resUser.data);
+                    setAuthUser(true);
+                  } else {
+                    console.error("Usuário não encontrado.");
+                    logout();
+                  }
+                }
+              }else {
+                logout()
+              }
+              const resSupplier = await axios.get(`${ip}/user/supplier`);
+              if (resSupplier.data.content) {
+                const dataSupplier = resSupplier.data.content;
+                if (dataSupplier.supplier) {
+                  try {
+                    const res = await axios.get(
+                      `${ip}/user/supplier/${userId}`,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                        },
+                      },
+                    );
+
+                    if (res.data) {
+                      setUser(res.data);
+                      setAuthUser(true);
+                    } else {
+                      console.error("Usuário não encontrado.");
+                      logout();
+                    }
+                  } catch (error) {
+                    console.error("Erro ao buscar usuário:", error);
+                    logout();
+                  }
+                }
+              }else {
+                logout()
+              }
+              const resSubcontractor = await axios.get(
+                `${ip}/user/subcontractor`,
+              );
+              if (resSubcontractor.data.content) {
+                const dataSubcontractor = resSubcontractor.data.content;
+                if (dataSubcontractor.subcontrator) {
+                  try {
+                    const res = await axios.get(
+                      `${ip}/user/subcontractor/${userId}`,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                        },
+                      },
+                    );
+
+                    if (res.data) {
+                      setUser(res.data);
+                      setAuthUser(true);
+                    } else {
+                      console.error("Usuário não encontrado.");
+                      logout();
+                    }
+                  } catch (error) {
+                    console.error("Erro ao buscar usuário:", error);
+                    logout();
+                  }
+                } 
+              } else {
+                logout()
+              }
+            } catch (error) {
+              console.error("Erro ao buscar usuário:", error);
+              logout();
+            }
+            break;
+          default:
+            console.log("Função não definida para este tipo de usuário.");
+        }
       } catch (error) {
         console.log("erro ao logar usuario", error);
-        
+
         logout();
       }
     } else {
@@ -94,8 +248,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           </Button>
         ),
       });
-      }
-    };
+    }
+  };
 
   const logout = () => {
     try {
