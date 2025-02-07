@@ -43,15 +43,12 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final BranchRepository branchRepository;
 
     @Override
-    public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto, MultipartFile file) {
+    public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         List<Contract> contracts = List.of();
         EmployeeForeigner newEmployeeForeigner = null;
         Branch branch = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
 
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
@@ -75,26 +72,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
         }
 
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not build profile picture file");
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not save profile picture file");
-            }
-        }
 
         newEmployeeForeigner = EmployeeForeigner.builder()
                 .pis(employeeForeignerRequestDto.getPis())
@@ -103,7 +80,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .cep(employeeForeignerRequestDto.getCep())
                 .name(employeeForeignerRequestDto.getName())
                 .surname(employeeForeignerRequestDto.getSurname())
-                .profilePicture(fileDocumentId)
                 .address(employeeForeignerRequestDto.getAddress())
                 .country(employeeForeignerRequestDto.getCountry())
                 .acronym(employeeForeignerRequestDto.getAcronym())
@@ -142,7 +118,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .cep(savedEmployeeForeigner.getCep())
                 .name(savedEmployeeForeigner.getName())
                 .surname(savedEmployeeForeigner.getSurname())
-                .profilePictureId(savedEmployeeForeigner.getProfilePicture())
                 .address(savedEmployeeForeigner.getAddress())
                 .country(savedEmployeeForeigner.getCountry())
                 .acronym(savedEmployeeForeigner.getAcronym())

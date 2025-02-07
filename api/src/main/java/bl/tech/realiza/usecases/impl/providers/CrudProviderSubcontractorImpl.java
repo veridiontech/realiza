@@ -32,7 +32,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     private final FileRepository fileRepository;
 
     @Override
-    public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto, MultipartFile file) {
+    public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
         if (providerSubcontractorRequestDto.getSupplier() == null || providerSubcontractorRequestDto.getSupplier().isEmpty()) {
             throw new BadRequestException("Invalid supplier");
         }

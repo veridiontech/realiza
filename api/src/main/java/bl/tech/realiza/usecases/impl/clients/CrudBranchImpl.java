@@ -174,4 +174,9 @@ public class CrudBranchImpl implements CrudBranch {
 
         return pageBranchResponse;
     }
+
+    @Override
+    public Optional<BranchResponseDto> updateDocuments(String id, BranchRequestDto branchRequestDto) {
+        return Optional.empty();
+    }
 }

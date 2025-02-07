@@ -32,7 +32,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     private final FileRepository fileRepository;
 
     @Override
-    public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file) {
+    public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto) {
         if (providerSupplierRequestDto.getBranches() == null || providerSupplierRequestDto.getBranches().isEmpty()) {
             throw new BadRequestException("Invalid branches");
         }

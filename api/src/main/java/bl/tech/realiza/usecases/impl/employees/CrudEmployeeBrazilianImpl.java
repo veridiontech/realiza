@@ -42,15 +42,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final BranchRepository branchRepository;
 
     @Override
-    public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto, MultipartFile file) {
+    public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         List<Contract> contracts = List.of();
         EmployeeBrazilian newEmployeeBrazilian = null;
         Branch branch = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -79,27 +76,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
             }
         }
 
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not build profile picture file");
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not save profile picture file");
-            }
-        }
-
         newEmployeeBrazilian = EmployeeBrazilian.builder()
                 .pis(employeeBrazilianRequestDto.getPis())
                 .maritalStatus(employeeBrazilianRequestDto.getMaritalStatus())
@@ -107,7 +83,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(employeeBrazilianRequestDto.getCep())
                 .name(employeeBrazilianRequestDto.getName())
                 .surname(employeeBrazilianRequestDto.getSurname())
-                .profilePicture(fileDocumentId)
                 .address(employeeBrazilianRequestDto.getAddress())
                 .country(employeeBrazilianRequestDto.getCountry())
                 .acronym(employeeBrazilianRequestDto.getAcronym())
@@ -145,7 +120,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(savedEmployeeBrazilian.getCep())
                 .name(savedEmployeeBrazilian.getName())
                 .surname(savedEmployeeBrazilian.getSurname())
-                .profilePictureId(savedEmployeeBrazilian.getProfilePicture())
                 .address(savedEmployeeBrazilian.getAddress())
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())

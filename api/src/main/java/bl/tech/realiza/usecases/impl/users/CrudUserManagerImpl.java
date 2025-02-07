@@ -34,10 +34,35 @@ public class CrudUserManagerImpl implements CrudUserManager {
     private final FileRepository fileRepository;
     
     @Override
-    public UserResponseDto save(UserManagerRequestDto userManagerRequestDto) {
+    public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
 
         if (userManagerRequestDto.getPassword() == null || userManagerRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
+        }
+
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new NotFoundException("Could not build logo file");
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new NotFoundException("Could not save logo file");
+            }
         }
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userManagerRequestDto.getPassword());
@@ -49,7 +74,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .position(userManagerRequestDto.getPosition())
                 .role(userManagerRequestDto.getRole())
                 .firstName(userManagerRequestDto.getFirstName())
-                .timeZone(userManagerRequestDto.getTimeZone())
+                .profilePicture(fileDocumentId)
                 .surname(userManagerRequestDto.getSurname())
                 .email(userManagerRequestDto.getEmail())
                 .profilePicture(userManagerRequestDto.getProfilePicture())
@@ -66,7 +91,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .position(savedUserManager.getPosition())
                 .role(savedUserManager.getRole())
                 .firstName(savedUserManager.getFirstName())
-                .timeZone(savedUserManager.getTimeZone())
+                .profilePictureId(savedUserManager.getProfilePicture())
                 .surname(savedUserManager.getSurname())
                 .email(savedUserManager.getEmail())
                 .profilePicture(savedUserManager.getProfilePicture())

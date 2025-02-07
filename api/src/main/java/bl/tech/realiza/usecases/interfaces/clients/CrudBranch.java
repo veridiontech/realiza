@@ -14,4 +14,5 @@ public interface CrudBranch {
     Optional<BranchResponseDto> update(String id, BranchRequestDto branchRequestDto);
     void delete(String id);
     Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable);
+    Optional<BranchResponseDto> updateDocuments(String id, BranchRequestDto branchRequestDto);
 }

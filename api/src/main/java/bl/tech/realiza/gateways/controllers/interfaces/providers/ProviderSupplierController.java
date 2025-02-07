@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProviderSupplierController {
-    ResponseEntity<ProviderResponseDto> createProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file);
+    ResponseEntity<ProviderResponseDto> createProviderSupplier(ProviderSupplierRequestDto providerSupplierRequestDto);
     ResponseEntity<Optional<ProviderResponseDto>> getOneProviderSupplier(String id);
     ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSupplier(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ProviderResponseDto>> updateProviderSupplier(String id, ProviderSupplierRequestDto providerSupplierRequestDto);
