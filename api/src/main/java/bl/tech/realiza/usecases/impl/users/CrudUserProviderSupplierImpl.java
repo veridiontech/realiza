@@ -38,10 +38,10 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
-        if (userProviderSupplierRequestDto.getPassword() == null || !userProviderSupplierRequestDto.getPassword().isEmpty()) {
+        if (userProviderSupplierRequestDto.getPassword() == null || userProviderSupplierRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userProviderSupplierRequestDto.getSupplier() == null || !userProviderSupplierRequestDto.getSupplier().isEmpty()) {
+        if (userProviderSupplierRequestDto.getSupplier() == null || userProviderSupplierRequestDto.getSupplier().isEmpty()) {
             throw new BadRequestException("Invalid supplier");
         }
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier());

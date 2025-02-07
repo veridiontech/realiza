@@ -36,7 +36,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto) {
 
-        if (userManagerRequestDto.getPassword() == null || !userManagerRequestDto.getPassword().isEmpty()) {
+        if (userManagerRequestDto.getPassword() == null || userManagerRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
 

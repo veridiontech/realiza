@@ -35,10 +35,10 @@ public class CrudUserClientImpl implements CrudUserClient {
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
 
-        if (userClientRequestDto.getPassword() == null || !userClientRequestDto.getPassword().isEmpty()) {
+        if (userClientRequestDto.getPassword() == null || userClientRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userClientRequestDto.getBranch() == null || !userClientRequestDto.getBranch().isEmpty()) {
+        if (userClientRequestDto.getBranch() == null || userClientRequestDto.getBranch().isEmpty()) {
             throw new BadRequestException("Invalid branch");
         }
 

@@ -39,10 +39,10 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
-        if (userProviderSubcontractorRequestDto.getPassword() == null || !userProviderSubcontractorRequestDto.getPassword().isEmpty()) {
+        if (userProviderSubcontractorRequestDto.getPassword() == null || userProviderSubcontractorRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userProviderSubcontractorRequestDto.getSubcontractor() == null || !userProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
+        if (userProviderSubcontractorRequestDto.getSubcontractor() == null || userProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
             throw new BadRequestException("Invalid subcontractor");
         }
 
