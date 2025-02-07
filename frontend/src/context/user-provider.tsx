@@ -82,7 +82,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           //   }
           // }
       } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
+        console.log("erro ao logar usuario", error);
+        
         logout();
       }
     } else {
