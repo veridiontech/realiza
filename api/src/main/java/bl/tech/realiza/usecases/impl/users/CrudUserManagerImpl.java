@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -36,6 +37,10 @@ public class CrudUserManagerImpl implements CrudUserManager {
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
 
+        if (Arrays.stream(UserManagerRequestDto.Role.values())
+                .noneMatch(role -> role.name().equals(userManagerRequestDto.getRole().name()))) {
+            throw new BadRequestException("Invalid Role");
+        }
         if (userManagerRequestDto.getPassword() == null || userManagerRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }

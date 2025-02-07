@@ -22,4 +22,10 @@ public class UserProviderSupplierRequestDto {
     private String telephone;
     private String cellphone;
     private String supplier;
+
+    public enum Role {
+        ROLE_SUPPLIER_RESPONSIBLE,
+        ROLE_SUPPLIER_MANAGER,
+        ROLE_VIEWER
+    }
 }
