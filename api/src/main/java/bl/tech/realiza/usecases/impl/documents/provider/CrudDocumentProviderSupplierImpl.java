@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -235,8 +233,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
         DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
-                .selectedDocuments(selectedDocuments)
-                .nonSelectedDocuments(nonSelectedDocuments)
+                .selectedDocumentsEnterprise(selectedDocuments)
+                .nonSelectedDocumentsEnterprise(nonSelectedDocuments)
                 .build();
 
         return employeeResponse;

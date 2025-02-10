@@ -9,12 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class RealizaApplication {
 
 	@Autowired
-	private Dotenv dotenv;  // Usa o bean DotenvConfig
+	private Dotenv dotenv;
 
 	public static void main(String[] args) {
 		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
-		// Definir variáveis do .env como propriedades do sistema
 		dotenv.entries().forEach(entry -> {
 			if (System.getenv(entry.getKey()) == null) {
 				System.setProperty(entry.getKey(), entry.getValue());
@@ -22,7 +21,4 @@ public class RealizaApplication {
 		});
 		SpringApplication.run(RealizaApplication.class, args);
 	}
-
-
-
 }
