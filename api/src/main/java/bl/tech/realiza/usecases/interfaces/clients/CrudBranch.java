@@ -1,10 +1,13 @@
 package bl.tech.realiza.usecases.interfaces.clients;
 
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface CrudBranch {
@@ -14,4 +17,5 @@ public interface CrudBranch {
     Optional<BranchResponseDto> update(String id, BranchRequestDto branchRequestDto);
     void delete(String id);
     Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable);
+
 }

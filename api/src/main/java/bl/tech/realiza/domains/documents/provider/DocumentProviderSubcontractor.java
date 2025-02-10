@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.documents.provider;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;

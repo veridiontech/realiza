@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public interface CrudDocumentProviderSupplier {
@@ -20,4 +21,6 @@ public interface CrudDocumentProviderSupplier {
     Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
     void delete(String id);
     Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
+    DocumentResponseDto findAllSelectedDocuments (String id);
+    String updateDocumentRequests(String id, List<String> documentCollection);
 }

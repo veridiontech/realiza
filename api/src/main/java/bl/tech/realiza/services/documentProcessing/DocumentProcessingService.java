@@ -2,11 +2,14 @@ package bl.tech.realiza.services.documentProcessing;
 
 import bl.tech.realiza.gateways.responses.services.DocumentResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,12 +23,32 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class DocumentProcessingService {
 
-    private final String OPENAI_API_URL = System.getenv("OPENAI_API_URL");
-    private final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY");
+    private final Dotenv dotenv;
+    private final String OPENAI_API_URL;
+    private final String OPENAI_API_KEY;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public DocumentProcessingService(Dotenv dotenv1, Dotenv dotenv) {
+        this.dotenv = dotenv1;
+
+        this.OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null
+                ? System.getenv("OPENAI_API_URL")
+                : (dotenv != null ? dotenv.get("OPENAI_API_URL") : null);
+
+        this.OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null
+                ? System.getenv("OPENAI_API_KEY")
+                : (dotenv != null ? dotenv.get("OPENAI_API_KEY") : null);
+
+        if (this.OPENAI_API_URL == null || this.OPENAI_API_URL.isEmpty()) {
+            throw new IllegalArgumentException("OPENAI_API_URL is missing.");
+        }
+
+        if (this.OPENAI_API_KEY == null || this.OPENAI_API_KEY.isEmpty()) {
+            throw new IllegalArgumentException("OPENAI_API_KEY is missing.");
+        }
+    }
 
 
     public DocumentResponse processDocument(MultipartFile file) throws IOException {
@@ -63,6 +86,7 @@ public class DocumentProcessingService {
 
         DocumentResponse documentResponse = DocumentResponse.builder()
                 .documentType("CPF")
+                .reason("O documento pode ser validado e está de acordo.")
                 .autoValidate(true)
                 .valid(true)
                 .build();
@@ -74,16 +98,35 @@ public class DocumentProcessingService {
             throw new RuntimeException("Erro ao converter o objeto para JSON.", e);
         }
 
+        String prompt = "Você é um assistente especializado na análise de documentos. "
+                + "Sua tarefa é identificar o tipo do documento e validar sua autenticidade e validade com base nas informações fornecidas. "
+                + "Sempre retorne a resposta no formato JSON puro, sem explicações adicionais. "
+                + "Aqui estão as diretrizes para cada campo no JSON de resposta: "
+                + "1️⃣ documentType: O tipo do documento detectado, como 'CPF', 'CNH', 'RG', 'Passaporte', etc. "
+                + "2️⃣ autoValidate: true se todas as informações necessárias para validar o documento estão presentes e são suficientes para um julgamento definitivo. Caso contrário, false. "
+                + "3️⃣ isValid: true se o documento for válido, respeitando as regras abaixo. Caso contrário, false. "
+                + "4️⃣ reason: Explique por que o documento é inválido, se aplicável. "
+                + "Se o autoValidate for false, a reason deve indicar o motivo pelo qual o documento não pode ser validado. "
+                + "Se o isValid for false, a reason deve indicar a razão específica da invalidez. "
+                + "❗IMPORTANTE❗ Regras para documentos: "
+                + "- **CPF**: Verifique se a sequência numérica é válida e se não está na lista de CPFs inválidos conhecidos (como 000.000.000-00). Caso tenha data de validade, verifique se não está vencida. "
+                + "- **CNH**: Verifique a data de validade e se a CNH está vencida. Caso esteja, o isValid deve ser false e a reason deve ser 'CNH vencida'. "
+                + "- **RG**: Se houver data de emissão, considere inválido se for muito antigo (>10 anos). "
+                + "- **Passaporte**: Verifique a data de expiração. Passaportes vencidos não são válidos. "
+                + "🔍 Exemplo de resposta correta: "
+                + "{ "
+                + "\"documentType\": \"CNH\", "
+                + "\"autoValidate\": true, "
+                + "\"isValid\": false, "
+                + "\"reason\": \"CNH vencida em 23/05/2023\" "
+                + "} ";
+
         Map<String, Object> requestBody = Map.of(
                 "model", "chatgpt-4o-latest",
                 "messages", List.of(
                         Map.of("role", "system", "content", "Você é um assistente especializado em reconhecimento de documentos."),
                         Map.of("role", "user", "content", List.of(
-                                Map.of("type", "text", "text", "Identifique o documento baseado na seguinte imagem. Responda estritamente apenas com JSON sem explicações ou comentários. " +
-                                        "O campo autoValidade indica se você pode validar automaticamente o documento e o campo valid indica se o documento é valido." +
-                                        "Se não tiver certeza, retorne autoValidate: false, mas se os dados do documento forem suficientes para determinar a validade, retorne autoValidate: true." +
-                                        "Verifique qual o tipo de documento primeiro e como ele deve ser validado" +
-                                        " O formato esperado é: " + jsonExample),
+                                Map.of("type", "text", "text", prompt),
                                 Map.of("type", "image_url", "image_url", Map.of("url", "data:image/png;base64," + imageBase64))
                         ))
                 ),
@@ -101,7 +144,7 @@ public class DocumentProcessingService {
      */
     private DocumentResponse parseResponse(Map<String, Object> responseBody) {
         if (responseBody == null || !responseBody.containsKey("choices")) {
-            return new DocumentResponse("Desconhecido", false, false);
+            return new DocumentResponse("Desconhecido", "Documento não identificado", false, false);
         }
 
         Map<String, Object> firstChoice = (Map<String, Object>) ((List<?>) responseBody.get("choices")).get(0);
@@ -119,7 +162,7 @@ public class DocumentProcessingService {
             return objectMapper.readValue(responseContent, DocumentResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
-            return new DocumentResponse("Erro", false, false);
+            return new DocumentResponse("Erro", "Erro interno do servidor, por favor aguarde e tente novamente mais tarde",false, false);
         }
     }
 }

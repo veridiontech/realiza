@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.documents.client;
 
 import bl.tech.realiza.gateways.controllers.interfaces.documents.client.DocumentBranchControlller;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentBranchImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -108,5 +110,22 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         Page<DocumentResponseDto> pageDocumentBranch = crudDocumentBranch.findAllByBranch(idSearch, pageable);
 
         return ResponseEntity.ok(pageDocumentBranch);
+    }
+
+    @GetMapping("/{id}/document-matrix")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<DocumentResponseDto> getBranchDocuments(@PathVariable String id) {
+        DocumentResponseDto branchResponse = crudDocumentBranch.findAllSelectedDocuments(id);
+
+        return ResponseEntity.ok(branchResponse);
+    }
+
+    @PutMapping("/{id}/document-matrix")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateBranchDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
+        String response = crudDocumentBranch.updateDocumentRequests(id, documentList);
+        return ResponseEntity.ok(response);
     }
 }

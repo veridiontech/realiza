@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.responses.employees;
 
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -42,6 +43,7 @@ public class EmployeeResponseDto {
     private String cbo;
     private Employee.Situation situation;
     private List<ContractDto> contracts;
+    private List<DocumentMatrix> documents;
 
     // brazilian
     private String rg;

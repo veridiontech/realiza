@@ -1,11 +1,15 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
@@ -19,13 +23,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     private final DocumentBranchRepository documentBranchRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
     private final BranchRepository branchRepository;
     private final FileRepository fileRepository;
 
@@ -40,10 +49,11 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         FileDocument fileDocument = null;
         String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
 
-        Optional<Branch> branchOptional = branchRepository.findById(documentBranchRequestDto.getBranch());
+        Branch branch = branchRepository.findById(documentBranchRequestDto.getBranch()).orElseThrow(() -> new EntityNotFoundException("Branch not found"));
 
-        Branch branch = branchOptional.orElseThrow(() -> new EntityNotFoundException("Branch not found"));
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentBranchRequestDto.getMatrixDocumentId()).orElseThrow(() -> new EntityNotFoundException("Document not found in matrix"));
 
         try {
             fileDocument = FileDocument.builder()
@@ -56,7 +66,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             throw new EntityNotFoundException(e);
         }
 
-        FileDocument savedFileDocument= null;
         try {
             savedFileDocument = fileRepository.save(fileDocument);
             fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
@@ -66,7 +75,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         }
 
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
-                .title(documentBranchRequestDto.getTitle())
+                .title(documentMatrix.getName())
                 .status(documentBranchRequestDto.getStatus())
                 .documentation(fileDocumentId)
                 .branch(branch)
@@ -170,7 +179,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             documentBranch.setDocumentation(fileDocumentId);
         }
 
-        documentBranch.setTitle(documentBranchRequestDto.getTitle() != null ? documentBranchRequestDto.getTitle() : documentBranch.getTitle());
         documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
@@ -217,5 +225,81 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         );
 
         return documentBranchResponseDtoPage;
+    }
+
+    @Override
+    public DocumentResponseDto findAllSelectedDocuments(String id) {
+        branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(id);
+        List<DocumentMatrix> selectedDocumentsEnterprise = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .filter(doc -> "Documento empresa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+        List<DocumentMatrix> selectedDocumentsPersonal = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+        List<DocumentMatrix> selectedDocumentsService = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .filter(doc -> "Documento empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+        List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
+        List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa");
+        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
+        List<DocumentMatrix> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
+        List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
+        List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
+        nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
+        DocumentResponseDto branchResponse = DocumentResponseDto.builder()
+                .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
+                .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)
+                .selectedDocumentsPersonal(selectedDocumentsPersonal)
+                .nonSelectedDocumentsPersonal(nonSelectedDocumentsPersonal)
+                .selectedDocumentsService(selectedDocumentsService)
+                .nonSelectedDocumentsService(nonSelectedDocumentsService)
+                .build();
+
+        return branchResponse;
+    }
+
+    @Override
+    public String updateDocumentRequests(String id, List<String> documentCollection) {
+        if (documentCollection == null || documentCollection.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+
+        Branch branch = branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAllById(documentCollection);
+        if (documentMatrixList.isEmpty()) {
+            throw new NotFoundException("Documents not found");
+        }
+
+        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranch(id);
+
+        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        List<DocumentBranch> newDocumentBranches = documentMatrixList.stream()
+                .filter(doc -> !existingDocuments.contains(doc))
+                .map(doc -> DocumentBranch.builder()
+                        .title(doc.getName())
+                        .status(Document.Status.PENDENTE)
+                        .branch(branch)
+                        .documentMatrix(doc)
+                        .build())
+                .collect(Collectors.toList());
+
+        List<DocumentBranch> documentsToRemove = existingDocumentBranches.stream()
+                .filter(db -> !documentMatrixList.contains(db.getDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        if (!documentsToRemove.isEmpty()) {
+            documentBranchRepository.deleteAll(documentsToRemove);
+        }
+
+        if (!newDocumentBranches.isEmpty()) {
+            documentBranchRepository.saveAll(newDocumentBranches);
+        }
+
+        return "Documents updated successfully";
     }
 }

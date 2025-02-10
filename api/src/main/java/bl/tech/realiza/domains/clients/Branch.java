@@ -35,12 +35,4 @@ public class Branch {
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Client client;
-
-    @ManyToMany
-    @JoinTable(
-            name = "BRANCH_DOCUMENT_MATRIX",
-            joinColumns = @JoinColumn(name = "idBranch"),
-            inverseJoinColumns = @JoinColumn(name = "idDocument")
-    )
-    private List<DocumentMatrix> documents;
 }

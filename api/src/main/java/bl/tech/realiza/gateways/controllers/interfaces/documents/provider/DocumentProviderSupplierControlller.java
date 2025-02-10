@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DocumentProviderSupplierControlller {
@@ -16,4 +17,6 @@ public interface DocumentProviderSupplierControlller {
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderSupplier(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplierBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<DocumentResponseDto> getSupplierDocuments(String id);
+    ResponseEntity<String> updateSupplierDocuments(String id, List<String> documentList);
 }

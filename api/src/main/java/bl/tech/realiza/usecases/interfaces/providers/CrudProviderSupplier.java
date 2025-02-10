@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrudProviderSupplier {
-    ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto, MultipartFile file) throws IOException;
+    ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto);
     Optional<ProviderResponseDto> findOne(String id);
     Page<ProviderResponseDto> findAll(Pageable pageable);
     Optional<ProviderResponseDto> update(String id, ProviderSupplierRequestDto providerSupplierRequestDto);
