@@ -1,30 +1,22 @@
 package bl.tech.realiza.usecases.impl.documents.employee;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
-import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
-import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 
-import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import net.sourceforge.tess4j.TesseractException;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -241,8 +233,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
         DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
-                .selectedDocuments(selectedDocuments)
-                .nonSelectedDocuments(nonSelectedDocuments)
+                .selectedDocumentsEnterprise(selectedDocuments)
+                .nonSelectedDocumentsEnterprise(nonSelectedDocuments)
                 .build();
 
         return employeeResponse;

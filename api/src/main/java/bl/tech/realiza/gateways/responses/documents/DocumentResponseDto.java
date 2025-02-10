@@ -25,8 +25,12 @@ public class DocumentResponseDto {
     private LocalDateTime creationDate;
     private Date versionDate;
     private Date expirationDate;
-    private List<DocumentMatrix> selectedDocuments;
-    private List<DocumentMatrix> nonSelectedDocuments;
+    private List<DocumentMatrix> selectedDocumentsEnterprise;
+    private List<DocumentMatrix> selectedDocumentsPersonal;
+    private List<DocumentMatrix> selectedDocumentsService;
+    private List<DocumentMatrix> nonSelectedDocumentsEnterprise;
+    private List<DocumentMatrix> nonSelectedDocumentsPersonal;
+    private List<DocumentMatrix> nonSelectedDocumentsService;
 
     // branch
     private String branch;

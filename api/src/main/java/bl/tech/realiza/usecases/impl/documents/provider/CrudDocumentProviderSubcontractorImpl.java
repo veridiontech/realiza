@@ -3,9 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.provider;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
-import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -236,8 +234,8 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
         DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
-                .selectedDocuments(selectedDocuments)
-                .nonSelectedDocuments(nonSelectedDocuments)
+                .selectedDocumentsEnterprise(selectedDocuments)
+                .nonSelectedDocumentsEnterprise(nonSelectedDocuments)
                 .build();
 
         return employeeResponse;

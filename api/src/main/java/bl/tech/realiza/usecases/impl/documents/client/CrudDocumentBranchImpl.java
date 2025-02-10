@@ -12,7 +12,6 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
@@ -232,13 +231,29 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
         List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(id);
-        List<DocumentMatrix> selectedDocuments = documentBranch.stream().map(DocumentBranch::getDocumentMatrix).collect(Collectors.toList());
-        List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
-        List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
-        nonSelectedDocuments.removeAll(selectedDocuments);
+        List<DocumentMatrix> selectedDocumentsEnterprise = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .filter(doc -> "Documento empresa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+        List<DocumentMatrix> selectedDocumentsPersonal = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+        List<DocumentMatrix> selectedDocumentsService = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .filter(doc -> "Documento empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+        List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
+        List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa");
+        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
+        List<DocumentMatrix> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
+        List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
+        List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
+        nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
         DocumentResponseDto branchResponse = DocumentResponseDto.builder()
-                .selectedDocuments(selectedDocuments)
-                .nonSelectedDocuments(nonSelectedDocuments)
+                .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
+                .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)
+                .selectedDocumentsPersonal(selectedDocumentsPersonal)
+                .nonSelectedDocumentsPersonal(nonSelectedDocumentsPersonal)
+                .selectedDocumentsService(selectedDocumentsService)
+                .nonSelectedDocumentsService(nonSelectedDocumentsService)
                 .build();
 
         return branchResponse;
