@@ -1,6 +1,6 @@
 package bl.tech.realiza.services.auth;
 
-import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.domains.user.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -36,6 +36,101 @@ public class JwtService {
         }
     }
 
+
+    public String generateTokenManager(UserManager user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("idUser", user.getIdUser());
+        claims.put("cpf", user.getCpf());
+        claims.put("description", user.getDescription());
+        claims.put("password", user.getPassword());
+        claims.put("position", user.getPosition());
+        claims.put("role", user.getRole().name());
+        claims.put("firstName", user.getFirstName());
+        claims.put("surname", user.getSurname());
+        claims.put("email", user.getEmail());
+        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("telephone", user.getTelephone());
+        claims.put("cellphone", user.getCellphone());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(user.getEmail())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+    public String generateTokenClient(UserClient user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("idUser", user.getIdUser());
+        claims.put("idBranch",user.getBranch().getIdBranch());
+        claims.put("cpf", user.getCpf());
+        claims.put("description", user.getDescription());
+        claims.put("password", user.getPassword());
+        claims.put("position", user.getPosition());
+        claims.put("role", user.getRole().name());
+        claims.put("firstName", user.getFirstName());
+        claims.put("surname", user.getSurname());
+        claims.put("email", user.getEmail());
+        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("telephone", user.getTelephone());
+        claims.put("cellphone", user.getCellphone());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(user.getEmail())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+    public String generateTokenSupplier(UserProviderSupplier user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("idUser", user.getIdUser());
+        claims.put("idSupplier",user.getProviderSupplier().getIdProvider());
+        claims.put("cpf", user.getCpf());
+        claims.put("description", user.getDescription());
+        claims.put("password", user.getPassword());
+        claims.put("position", user.getPosition());
+        claims.put("role", user.getRole().name());
+        claims.put("firstName", user.getFirstName());
+        claims.put("surname", user.getSurname());
+        claims.put("email", user.getEmail());
+        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("telephone", user.getTelephone());
+        claims.put("cellphone", user.getCellphone());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(user.getEmail())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+    public String generateTokenSubcontractor(UserProviderSubcontractor user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("idUser", user.getIdUser());
+        claims.put("idSubcontracator",user.getProviderSubcontractor().getIdProvider());
+        claims.put("cpf", user.getCpf());
+        claims.put("description", user.getDescription());
+        claims.put("password", user.getPassword());
+        claims.put("position", user.getPosition());
+        claims.put("role", user.getRole().name());
+        claims.put("firstName", user.getFirstName());
+        claims.put("surname", user.getSurname());
+        claims.put("email", user.getEmail());
+        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("telephone", user.getTelephone());
+        claims.put("cellphone", user.getCellphone());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(user.getEmail())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
