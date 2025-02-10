@@ -41,7 +41,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     @Override
     public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
 
-        if (enterpriseAndUserRequestDto.getPassword() == null || !enterpriseAndUserRequestDto.getPassword().isEmpty()) {
+        if (enterpriseAndUserRequestDto.getPassword() == null || enterpriseAndUserRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
 
@@ -110,7 +110,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     @Override
     public EnterpriseAndUserResponseDto saveBothSupplier(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
 
-        if (enterpriseAndUserRequestDto.getPassword() == null || !enterpriseAndUserRequestDto.getPassword().isEmpty()) {
+        if (enterpriseAndUserRequestDto.getPassword() == null || enterpriseAndUserRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
 
@@ -175,7 +175,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     @Override
     public EnterpriseAndUserResponseDto saveBothSubcontractor(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
 
-        if (enterpriseAndUserRequestDto.getPassword() == null || !enterpriseAndUserRequestDto.getPassword().isEmpty()) {
+        if (enterpriseAndUserRequestDto.getPassword() == null || enterpriseAndUserRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
 
