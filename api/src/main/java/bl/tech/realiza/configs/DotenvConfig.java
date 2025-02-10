@@ -7,15 +7,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DotenvConfig {
 
+    private static final boolean IS_LOCAL = isRunningLocally();
+
     @Bean
     public Dotenv dotenv() {
-        if (isRunningLocally()) {
+        if (IS_LOCAL) {
+            // Carrega o .env apenas se estiver em ambiente LOCAL
             System.out.println("🚀 Executando em LOCALHOST. Carregando variáveis do .env...");
             Dotenv dotenv = Dotenv.configure()
-                    .directory("./")
-                    .ignoreIfMissing()
+                    .directory("./") // Caminho do .env localmente
+                    .ignoreIfMissing() // Ignora erro se não encontrar
                     .load();
 
+            // Configura as variáveis de ambiente manualmente caso não existam no sistema
             dotenv.entries().forEach(entry -> {
                 if (System.getenv(entry.getKey()) == null) {
                     System.setProperty(entry.getKey(), entry.getValue());
@@ -23,14 +27,16 @@ public class DotenvConfig {
             });
 
             return dotenv;
-        } else {
-            System.out.println("🌍 Executando na RENDER. Variáveis de ambiente do sistema serão usadas.");
-            return null; // Retorna null na produção, pois as variáveis vêm do painel da Render
         }
+
+        // Em produção, as variáveis de ambiente do sistema serão usadas automaticamente
+        System.out.println("🌍 Executando na RENDER. Variáveis de ambiente do sistema serão usadas.");
+        return null; // Retorna null para evitar carregar o Dotenv em produção
     }
 
-    private boolean isRunningLocally() {
-        String env = System.getenv("ENVIRONMENT");
-        return env == null || env.equalsIgnoreCase("LOCAL");
+    // Verifica se está executando em ambiente local
+    private static boolean isRunningLocally() {
+        String env = System.getenv("SPRING_ACTIVE_DATABASE");
+        return env == null || env.equalsIgnoreCase("local");
     }
 }
