@@ -23,13 +23,32 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class DocumentProcessingService {
 
-    private final Dotenv dotenv = Dotenv.load();
-    private final String OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null ? System.getenv("OPENAI_API_URL") : (dotenv != null ? dotenv.get("OPENAI_API_URL") : null);
-    private final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null ? System.getenv("OPENAI_API_KEY") : (dotenv != null ? dotenv.get("OPENAI_API_KEY") : null);
+    private final Dotenv dotenv;
+    private final String OPENAI_API_URL;
+    private final String OPENAI_API_KEY;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public DocumentProcessingService(Dotenv dotenv1, Dotenv dotenv) {
+        this.dotenv = dotenv1;
+
+        this.OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null
+                ? System.getenv("OPENAI_API_URL")
+                : (dotenv != null ? dotenv.get("OPENAI_API_URL") : null);
+
+        this.OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null
+                ? System.getenv("OPENAI_API_KEY")
+                : (dotenv != null ? dotenv.get("OPENAI_API_KEY") : null);
+
+        if (this.OPENAI_API_URL == null || this.OPENAI_API_URL.isEmpty()) {
+            throw new IllegalArgumentException("OPENAI_API_URL is missing.");
+        }
+
+        if (this.OPENAI_API_KEY == null || this.OPENAI_API_KEY.isEmpty()) {
+            throw new IllegalArgumentException("OPENAI_API_KEY is missing.");
+        }
+    }
 
 
     public DocumentResponse processDocument(MultipartFile file) throws IOException {
