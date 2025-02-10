@@ -100,6 +100,17 @@ export function EnterprisePageEmail() {
         idCompany: findIdCompany || "",
         company: findCompany,
       };
+      if(findCompany === "SUPPLIER") {
+        const payloadCompanySupplier = {
+          ...data,
+          branches: {
+            idCompany: findIdCompany || "",
+            idBranch: ""
+          },
+        }
+      }
+      console.log("idCompany:", findCompany);
+      
       console.log("Enviando dados:", payload);
 
       setEnterpriseData(payload);

@@ -1,7 +1,6 @@
 // DocumentBox.tsx
 
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useDocument } from "@/context/Document-provider"; // Importe o hook do contexto
 import { Search } from "lucide-react";
 import { Blocks } from "react-loader-spinner";
 
@@ -11,10 +10,9 @@ interface DocumentBoxProps {
 }
 
 export function DocumentBox({ documents, isLoading }: DocumentBoxProps) {
-  const { setDocument } = useDocument(); // Acessa a função do contexto para atualizar o documento
 
   const handleClickDocument = (doc: { idDocumentMatrix: string; name: string }) => {
-    setDocument(doc); // Atualiza o documento no contexto
+    
   };
 
   if (isLoading) {
@@ -55,11 +53,15 @@ export function DocumentBox({ documents, isLoading }: DocumentBoxProps) {
       </div>
       <ScrollArea className="h-[25vh] w-full">
         <div className="flex flex-col gap-3">
-          {documents.map((doc) => (
-            <div key={doc.idDocumentMatrix} onClick={() => handleClickDocument(doc)} className="cursor-pointer">
-              <h3>{doc.name}</h3>
+          {documents ? (
+            <div>
+              
             </div>
-          ))}
+          ):(
+            <div>
+
+            </div>
+          ) }
         </div>
       </ScrollArea>
     </div>

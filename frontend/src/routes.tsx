@@ -36,7 +36,6 @@ import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProvide
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
-import path from "path";
 
 export const router = createBrowserRouter([
   {

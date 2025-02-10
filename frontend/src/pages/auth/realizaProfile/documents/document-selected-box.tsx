@@ -5,7 +5,6 @@ import { useDocument } from "@/context/Document-provider"; // Importe o hook do 
 // import { useState } from "react";
 
 export function DocumentSelectedBox() {
-  const { document } = useDocument(); // Acesse o documento do contexto
   // const [isLoading, setIsLoading] = useState(false);
 
   // if (isLoading) {

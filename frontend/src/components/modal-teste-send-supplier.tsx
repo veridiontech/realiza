@@ -221,7 +221,7 @@ export function ModalTesteSendSupplier() {
                 </option>
                 {clients.map((client) => (
                   <option key={client.idClient} value={client.idClient}>
-                    {client.companyName}
+                    {client.tradeName}
                   </option>
                 ))}
               </select>
