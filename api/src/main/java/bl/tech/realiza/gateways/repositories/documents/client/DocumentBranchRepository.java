@@ -6,6 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, String> {
     Page<DocumentBranch> findAllByBranch_IdBranch(String idSearch, Pageable pageable);
+    List<DocumentBranch> findAllByBranch_IdBranch(String idSearch);
 }

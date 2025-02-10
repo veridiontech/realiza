@@ -2,10 +2,12 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
@@ -14,13 +16,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
     public BranchResponseDto save(BranchRequestDto branchRequestDto) {
@@ -173,10 +177,5 @@ public class CrudBranchImpl implements CrudBranch {
         );
 
         return pageBranchResponse;
-    }
-
-    @Override
-    public Optional<BranchResponseDto> updateDocuments(String id, BranchRequestDto branchRequestDto) {
-        return Optional.empty();
     }
 }

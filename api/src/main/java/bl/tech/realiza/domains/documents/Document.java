@@ -22,15 +22,24 @@ public abstract class Document {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocumentation;
     private String title;
-    private String status;
+    private Status status;
     private String documentation;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    private LocalDateTime versionDate;
+    @Builder.Default
+    private LocalDateTime versionDate = LocalDateTime.now();
     private LocalDateTime expirationDate;
     @Builder.Default
     private Boolean deleteRequest = false;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Client documentInMatrix;
+
+    public enum Status {
+        PENDENTE,
+        EM_ANALISE,
+        REPROVADO,
+        APROVADO,
+        VENCIDO
+    }
 }

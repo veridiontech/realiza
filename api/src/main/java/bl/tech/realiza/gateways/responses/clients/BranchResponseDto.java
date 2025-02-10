@@ -1,11 +1,8 @@
 package bl.tech.realiza.gateways.responses.clients;
 
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -22,5 +19,4 @@ public class BranchResponseDto {
     private String address;
     private String number;
     private String client;
-    private List<DocumentMatrix> documents;
 }

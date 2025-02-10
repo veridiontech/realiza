@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.documents.employee;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
@@ -22,4 +23,7 @@ import lombok.experimental.SuperBuilder;
 public class DocumentEmployee extends Document {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Employee employee;
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    private DocumentMatrix documentMatrix;
 }

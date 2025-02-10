@@ -170,7 +170,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
             documentEmployee.setDocumentation(fileDocumentId);
         }
 
-        documentEmployee.setTitle(documentEmployeeRequestDto.getTitle() != null ? documentEmployeeRequestDto.getTitle() : documentEmployee.getTitle());
         documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
