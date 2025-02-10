@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table } from "@/components/ui/table";
+import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import {
   useFetchServiceProviders,

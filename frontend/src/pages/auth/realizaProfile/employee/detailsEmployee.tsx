@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Table } from "@/components/ui/table";
+import { Table } from "@/components/ui/tableVanila";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { AddDocument } from "./modals/addDocument";
 import { useParams } from "react-router-dom";

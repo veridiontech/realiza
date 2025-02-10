@@ -4,10 +4,12 @@ import bl.tech.realiza.gateways.responses.services.DocumentResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +23,32 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class DocumentProcessingService {
 
-    private final Dotenv dotenv = Dotenv.load();
-    private final String OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null ? System.getenv("OPENAI_API_URL") : dotenv.get("OPENAI_API_URL");;
-    private final String OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null ? System.getenv("OPENAI_API_KEY") : dotenv.get("OPENAI_API_KEY");;
+    private final Dotenv dotenv;
+    private final String OPENAI_API_URL;
+    private final String OPENAI_API_KEY;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public DocumentProcessingService(Dotenv dotenv1, Dotenv dotenv) {
+        this.dotenv = dotenv1;
+
+        this.OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null
+                ? System.getenv("OPENAI_API_URL")
+                : (dotenv != null ? dotenv.get("OPENAI_API_URL") : null);
+
+        this.OPENAI_API_KEY = System.getenv("OPENAI_API_KEY") != null
+                ? System.getenv("OPENAI_API_KEY")
+                : (dotenv != null ? dotenv.get("OPENAI_API_KEY") : null);
+
+        if (this.OPENAI_API_URL == null || this.OPENAI_API_URL.isEmpty()) {
+            throw new IllegalArgumentException("OPENAI_API_URL is missing.");
+        }
+
+        if (this.OPENAI_API_KEY == null || this.OPENAI_API_KEY.isEmpty()) {
+            throw new IllegalArgumentException("OPENAI_API_KEY is missing.");
+        }
+    }
 
 
     public DocumentResponse processDocument(MultipartFile file) throws IOException {

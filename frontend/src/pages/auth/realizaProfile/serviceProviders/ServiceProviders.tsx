@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Table } from "@/components/ui/table";
+import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import {
   useFetchServiceProviders,
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
-import {NotebookPen } from "lucide-react";
+import { NotebookPen } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
 import { useClient } from "@/context/Client-Provider";
 

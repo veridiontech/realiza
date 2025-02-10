@@ -3,7 +3,7 @@ import { SearchCnpjModal } from "./modals/newBranchStepOne";
 import { NewBranchModal } from "./modals/newBranchStepTwo";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { Pagination } from "@/components/ui/pagination";
-import { Table } from "@/components/ui/table";
+import { Table } from "@/components/ui/tableVanila";
 import axios from "axios";
 import { Puff } from "react-loader-spinner";
 import { ip } from "@/utils/ip";
@@ -26,7 +26,7 @@ const columns: {
   {
     key: "idBranch",
     label: "Ações",
-    render: ( row) => (
+    render: (row) => (
       <button
         className="ml-4 text-blue-500 hover:underline"
         onClick={() => console.log(`Editar: ${row.name}`)} // Atualizado para "name"
@@ -47,7 +47,7 @@ export function Branch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-//   const itemsPerPage = 10;
+  //   const itemsPerPage = 10;
 
   const fetchBranches = async () => {
     setLoading(true);
