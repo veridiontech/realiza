@@ -6,7 +6,7 @@ import {
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
 import { NotebookPen } from "lucide-react";
-import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
+import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 import { useClient } from "@/context/Client-Provider";
 
 export function ClientServiceProvider() {

@@ -1,19 +1,20 @@
 export interface propsUser {
   idUser: string;
-  cnpj: string; 
+  branch: string;
+  cnpj: string;
   nameEnterprise: string;
-  fantasyName: string; 
-  socialReason: string; 
-  email: string; 
-  phone: string; 
-  firstName: string; 
-  surname: string; 
+  fantasyName: string;
+  socialReason: string;
+  email: string;
+  phone: string;
+  firstName: string;
+  surname: string;
   profilePicture: string;
-  cpf: string; 
+  cpf: string;
   position: string;
-  role: string
-  password: string; 
-  company: string; 
+  role: string;
+  password: string;
+  company: string;
   telephone: string;
   description: string;
 }
@@ -28,9 +29,9 @@ export interface propsClient {
 }
 
 export interface propsDocument {
-  doesBlock: boolean; 
+  doesBlock: boolean;
   idDocumentMatrix: string;
   idDocumentSubgroup: string;
   name: string;
-  type:  string; 
+  type: string;
 }
