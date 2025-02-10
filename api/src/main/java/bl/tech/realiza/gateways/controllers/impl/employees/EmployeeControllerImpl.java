@@ -52,14 +52,12 @@ public class EmployeeControllerImpl implements EmployeeController {
     @PostMapping(value = "/brazilian", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(
-            @RequestPart("employeeBrazilianRequestDto") @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+    public ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(@RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
 
         EmployeeResponseDto employeeBrazilian = null;
 
         try {
-            employeeBrazilian= crudEmployeeBrazilian.save(employeeBrazilianRequestDto, file);
+            employeeBrazilian= crudEmployeeBrazilian.save(employeeBrazilianRequestDto);
         } catch (Exception e) {
             throw new RuntimeException("Error saving employee",e);
         }
@@ -132,12 +130,10 @@ public class EmployeeControllerImpl implements EmployeeController {
     @PostMapping(value = "/foreigner", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(
-            @RequestPart("employeeForeignerRequestDto") @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+    public ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(@RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         EmployeeResponseDto employeeForeigner = null;
         try {
-            employeeForeigner = crudEmployeeForeigner.save(employeeForeignerRequestDto, file);
+            employeeForeigner = crudEmployeeForeigner.save(employeeForeignerRequestDto);
         } catch (Exception e) {
             throw new RuntimeException("Error saving employee",e);
         }

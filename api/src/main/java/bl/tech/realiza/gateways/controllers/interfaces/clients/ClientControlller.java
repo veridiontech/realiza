@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 public interface ClientControlller {
-    ResponseEntity<ClientResponseDto> createClient(ClientRequestDto clientRequestDto, MultipartFile file);
+    ResponseEntity<ClientResponseDto> createClient(ClientRequestDto clientRequestDto);
     ResponseEntity<Optional<ClientResponseDto>> getOneClient(String id);
     ResponseEntity<Page<ClientResponseDto>> getAllClients(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ClientResponseDto>> updateClient(String id, ClientRequestDto clientRequestDto);

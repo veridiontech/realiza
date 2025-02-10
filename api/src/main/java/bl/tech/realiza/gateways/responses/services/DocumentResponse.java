@@ -9,7 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 public class DocumentResponse {
     private String documentType;
+    private String reason;
     private boolean autoValidate;
-    @JsonProperty("isValid")  // Mapeia "isValid" para "valid"
+    @JsonProperty("isValid")
     private boolean valid;
 }

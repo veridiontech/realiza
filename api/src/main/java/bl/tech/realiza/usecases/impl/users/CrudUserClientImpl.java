@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 
 @Service
@@ -35,10 +37,14 @@ public class CrudUserClientImpl implements CrudUserClient {
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
 
-        if (userClientRequestDto.getPassword() == null || !userClientRequestDto.getPassword().isEmpty()) {
+        if (Arrays.stream(UserClientRequestDto.Role.values())
+                .noneMatch(role -> role.name().equals(userClientRequestDto.getRole().name()))) {
+            throw new BadRequestException("Invalid Role");
+        }
+        if (userClientRequestDto.getPassword() == null || userClientRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userClientRequestDto.getBranch() == null || !userClientRequestDto.getBranch().isEmpty()) {
+        if (userClientRequestDto.getBranch() == null || userClientRequestDto.getBranch().isEmpty()) {
             throw new BadRequestException("Invalid branch");
         }
 

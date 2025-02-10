@@ -36,43 +36,17 @@ public class CrudClientImpl implements CrudClient {
     private final BranchRepository branchRepository;
 
     @Override
-    public ClientResponseDto save(ClientRequestDto clientRequestDto, MultipartFile file) {
+    public ClientResponseDto save(ClientRequestDto clientRequestDto) {
 
         Optional<Client> clientOptional = clientRepository.findByCnpj(clientRequestDto.getCnpj());
         if (clientOptional.isPresent()) {
             throw new UnprocessableEntityException("CNPJ already exists");
         }
 
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not build logo file");
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not save logo file");
-            }
-        }
-
         Client newClient = Client.builder()
                 .cnpj(clientRequestDto.getCnpj())
                 .tradeName(clientRequestDto.getTradeName())
                 .corporateName(clientRequestDto.getCorporateName())
-                .logo(fileDocumentId)
                 .email(clientRequestDto.getEmail())
                 .telephone(clientRequestDto.getTelephone())
                 .cep(clientRequestDto.getCep())
@@ -104,7 +78,6 @@ public class CrudClientImpl implements CrudClient {
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
                 .corporateName(savedClient.getCorporateName())
-                .logoId(savedClient.getLogo())
                 .email(savedClient.getEmail())
                 .telephone(savedClient.getTelephone())
                 .cep(savedClient.getCep())

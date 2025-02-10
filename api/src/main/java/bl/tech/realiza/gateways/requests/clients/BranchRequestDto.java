@@ -3,6 +3,8 @@ package bl.tech.realiza.gateways.requests.clients;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class BranchRequestDto {
     private String name;
@@ -15,4 +17,5 @@ public class BranchRequestDto {
     private String address;
     private String number;
     private String client;
+    private List<String> documents;
 }

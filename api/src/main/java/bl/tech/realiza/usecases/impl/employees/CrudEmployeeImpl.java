@@ -155,4 +155,14 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
         return new PageImpl<>(combinedResults, pageable, combinedResults.size());
     }
+
+    @Override
+    public EmployeeResponseDto findAllSelectedDocuments(String id) {
+        return null;
+    }
+
+    @Override
+    public String updateDocumentRequests(String id, List<String> documentCollection) {
+        return "";
+    }
 }

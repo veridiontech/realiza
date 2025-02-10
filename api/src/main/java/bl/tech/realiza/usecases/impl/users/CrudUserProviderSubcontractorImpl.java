@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -39,10 +40,14 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
-        if (userProviderSubcontractorRequestDto.getPassword() == null || !userProviderSubcontractorRequestDto.getPassword().isEmpty()) {
+        if (Arrays.stream(UserProviderSubcontractorRequestDto.Role.values())
+                .noneMatch(role -> role.name().equals(userProviderSubcontractorRequestDto.getRole().name()))) {
+            throw new BadRequestException("Invalid Role");
+        }
+        if (userProviderSubcontractorRequestDto.getPassword() == null || userProviderSubcontractorRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userProviderSubcontractorRequestDto.getSubcontractor() == null || !userProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
+        if (userProviderSubcontractorRequestDto.getSubcontractor() == null || userProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
             throw new BadRequestException("Invalid subcontractor");
         }
 

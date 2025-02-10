@@ -15,7 +15,7 @@ public interface EmployeeController {
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByEnterprise(int page, int size, String sort, Sort.Direction direction, Provider.Company company, String idSearch);
 
     // brazilian
-    ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto, MultipartFile file);
+    ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
     ResponseEntity<Optional<EmployeeResponseDto>> getOneEmployeeBrazilian(String id);
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesBrazilian(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeBrazilian(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto);
@@ -23,7 +23,7 @@ public interface EmployeeController {
     ResponseEntity<Void> deleteEmployeeBrazilian(String id);
 
     // foreigner
-    ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto, MultipartFile file);
+    ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     ResponseEntity<Optional<EmployeeResponseDto>> getOneEmployeeForeigner(String id);
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesForeigner(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<EmployeeResponseDto>> updateEmployeeForeigner(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto);
