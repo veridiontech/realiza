@@ -1,9 +1,15 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -19,7 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +38,8 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     private final DocumentProviderSubcontractorRepository documentSubcontractorRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final FileRepository fileRepository;
+    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
     public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
@@ -168,7 +180,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             documentSubcontractor.setDocumentation(fileDocumentId);
         }
 
-        documentSubcontractor.setTitle(documentProviderSubcontractorRequestDto.getTitle() != null ? documentProviderSubcontractorRequestDto.getTitle() : documentSubcontractor.getTitle());
         documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
@@ -214,5 +225,65 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         );
 
         return documentSubcontractorResponseDtoPage;
+    }
+
+    @Override
+    public DocumentResponseDto findAllSelectedDocuments(String id) {
+        documentSubcontractorRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+        List<DocumentProviderSubcontractor> documentSubcontractor = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
+        List<DocumentMatrix> selectedDocuments = documentSubcontractor.stream().map(DocumentProviderSubcontractor::getDocumentMatrix).collect(Collectors.toList());
+        List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
+        List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
+        nonSelectedDocuments.removeAll(selectedDocuments);
+        DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
+                .selectedDocuments(selectedDocuments)
+                .nonSelectedDocuments(nonSelectedDocuments)
+                .build();
+
+        return employeeResponse;
+    }
+
+    @Override
+    public String updateDocumentRequests(String id, List<String> documentCollection) {
+        if (documentCollection == null || documentCollection.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAllById(documentCollection);
+        if (documentMatrixList.isEmpty()) {
+            throw new NotFoundException("Documents not found");
+        }
+
+        List<DocumentProviderSubcontractor> existingDocumentSubcontractors = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
+
+        Set<DocumentMatrix> existingDocuments = existingDocumentSubcontractors.stream()
+                .map(DocumentProviderSubcontractor::getDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        List<DocumentProviderSubcontractor> newDocumentSubcontractors = documentMatrixList.stream()
+                .filter(doc -> !existingDocuments.contains(doc))
+                .map(doc -> DocumentProviderSubcontractor.builder()
+                        .title(doc.getName())
+                        .status(Document.Status.PENDENTE)
+                        .providerSubcontractor(providerSubcontractor)
+                        .documentMatrix(doc)
+                        .build())
+                .collect(Collectors.toList());
+
+        List<DocumentProviderSubcontractor> documentsToRemove = existingDocumentSubcontractors.stream()
+                .filter(db -> !documentMatrixList.contains(db.getDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        if (!documentsToRemove.isEmpty()) {
+            documentSubcontractorRepository.deleteAll(documentsToRemove);
+        }
+
+        if (!newDocumentSubcontractors.isEmpty()) {
+            documentSubcontractorRepository.saveAll(newDocumentSubcontractors);
+        }
+
+        return "Documents updated successfully";
     }
 }

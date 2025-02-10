@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -38,10 +39,14 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
-        if (userProviderSupplierRequestDto.getPassword() == null || !userProviderSupplierRequestDto.getPassword().isEmpty()) {
+        if (Arrays.stream(UserProviderSupplierRequestDto.Role.values())
+                .noneMatch(role -> role.name().equals(userProviderSupplierRequestDto.getRole().name()))) {
+            throw new BadRequestException("Invalid Role");
+        }
+        if (userProviderSupplierRequestDto.getPassword() == null || userProviderSupplierRequestDto.getPassword().isEmpty()) {
             throw new BadRequestException("Invalid password");
         }
-        if (userProviderSupplierRequestDto.getSupplier() == null || !userProviderSupplierRequestDto.getSupplier().isEmpty()) {
+        if (userProviderSupplierRequestDto.getSupplier() == null || userProviderSupplierRequestDto.getSupplier().isEmpty()) {
             throw new BadRequestException("Invalid supplier");
         }
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier());

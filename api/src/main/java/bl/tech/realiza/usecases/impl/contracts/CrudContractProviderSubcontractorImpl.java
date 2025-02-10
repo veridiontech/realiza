@@ -62,8 +62,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             providerSubcontractor = providerSubcontractorRepository.save(newSubcontractor);
         }
 
-        Optional<UserProviderSupplier> userProviderSupplierOptional = userProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getProviderSupplier());
-        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+        Optional<UserProviderSupplier> userProviderSupplierOptional = userProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getResponsible());
+        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new NotFoundException("User supplier not found"));
 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(contractProviderSubcontractorRequestDto.getProviderSupplier());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));

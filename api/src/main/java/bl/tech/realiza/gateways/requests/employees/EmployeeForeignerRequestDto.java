@@ -40,4 +40,5 @@ public class EmployeeForeignerRequestDto {
     private String supplier;
     private String subcontract;
     private List<String> idContracts;
+    private List<String> documents;
 }

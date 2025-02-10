@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public interface CrudProviderSubcontractor {
-    ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto, MultipartFile file) throws IOException;
+    ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto);
     Optional<ProviderResponseDto> findOne(String id);
     Page<ProviderResponseDto> findAll(Pageable pageable);
     Optional<ProviderResponseDto> update(String id, ProviderSubcontractorRequestDto providerSubcontractorRequestDto);

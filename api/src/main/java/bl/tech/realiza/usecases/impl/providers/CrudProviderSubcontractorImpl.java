@@ -1,10 +1,19 @@
 package bl.tech.realiza.usecases.impl.providers;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -20,7 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +41,12 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     private final ProviderSupplierRepository providerSupplierRepository;
     private final EmailSender emailSender;
     private final FileRepository fileRepository;
+    private final DocumentBranchRepository documentBranchRepository;
+    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
 
     @Override
-    public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto, MultipartFile file) {
+    public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
         if (providerSubcontractorRequestDto.getSupplier() == null || providerSubcontractorRequestDto.getSupplier().isEmpty()) {
             throw new BadRequestException("Invalid supplier");
         }
@@ -40,6 +54,10 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider supplier not found"));
 
+        List<DocumentProviderSupplier> documentSupplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(providerSubcontractorRequestDto.getSupplier(),"Documento pessoa");
+        List<DocumentMatrix> documentMatrixList = documentSupplier.stream()
+                .map(DocumentProviderSupplier::getDocumentMatrix)
+                .toList();
 
         ProviderSubcontractor newProviderSubcontractor = ProviderSubcontractor.builder()
                 .cnpj(providerSubcontractorRequestDto.getCnpj())
@@ -55,6 +73,17 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                 .build();
 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(newProviderSubcontractor);
+
+        List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentMatrixList.stream()
+                .map(docMatrix -> DocumentProviderSubcontractor.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .providerSubcontractor(savedProviderSubcontractor)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentProviderSubcontractorRepository.saveAll(documentProviderSubcontractors);
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSubcontractor.getIdProvider())

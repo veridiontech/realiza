@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.employees;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
@@ -72,6 +73,14 @@ public abstract class Employee {
             inverseJoinColumns = @JoinColumn(name = "idContract")
     )
     private List<Contract> contracts;
+
+    @ManyToMany
+    @JoinTable(
+            name = "EMPLOYEE_DOCUMENT_MATRIX",
+            joinColumns = @JoinColumn(name = "idEmployee"),
+            inverseJoinColumns = @JoinColumn(name = "idDocument")
+    )
+    private List<DocumentMatrix> documents;
 
     public enum Situation {
         ALOCADO,

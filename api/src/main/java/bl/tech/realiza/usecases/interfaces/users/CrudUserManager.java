@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public interface CrudUserManager {
-    UserResponseDto save(UserManagerRequestDto userManagerRequestDto);
+    UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) throws IOException;
     Optional<UserResponseDto> findOne(String id);
     Page<UserResponseDto> findAll(Pageable pageable);
     Optional<UserResponseDto> update(String id, UserManagerRequestDto userManagerRequestDto);

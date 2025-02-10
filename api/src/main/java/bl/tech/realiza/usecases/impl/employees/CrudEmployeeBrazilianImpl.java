@@ -2,6 +2,12 @@ package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -10,6 +16,10 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -27,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,17 +51,19 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
+    private final DocumentBranchRepository documentBranchRepository;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
+    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
     @Override
-    public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto, MultipartFile file) {
+    public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         List<Contract> contracts = List.of();
         EmployeeBrazilian newEmployeeBrazilian = null;
         Branch branch = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+        List<DocumentMatrix> documentMatrixList = List.of();
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -61,43 +74,34 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         if (employeeBrazilianRequestDto.getBranch() != null) {
             Optional<Branch> branchOptional = branchRepository.findById(employeeBrazilianRequestDto.getBranch());
-
             branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
+
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(employeeBrazilianRequestDto.getBranch(), "Documento pessoa");
+
+            documentMatrixList = documentBranches.stream()
+                    .map(DocumentBranch::getDocumentMatrix)
+                    .toList();
 
         } else if (employeeBrazilianRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
-
             providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+
+            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeBrazilianRequestDto.getSupplier(), "Documento pessoa");
+
+            documentMatrixList = documentProviderSuppliers.stream()
+                    .map(DocumentProviderSupplier::getDocumentMatrix)
+                    .toList();
 
         } else if(employeeBrazilianRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeBrazilianRequestDto.getSubcontract());
 
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
-            if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
-                contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
-            }
-        }
+            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeBrazilianRequestDto.getSubcontract(), "Documento pessoa");
 
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not build profile picture file");
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not save profile picture file");
-            }
+            documentMatrixList = documentProviderSubcontractors.stream()
+                    .map(DocumentProviderSubcontractor::getDocumentMatrix)
+                    .toList();
         }
 
         newEmployeeBrazilian = EmployeeBrazilian.builder()
@@ -107,7 +111,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(employeeBrazilianRequestDto.getCep())
                 .name(employeeBrazilianRequestDto.getName())
                 .surname(employeeBrazilianRequestDto.getSurname())
-                .profilePicture(fileDocumentId)
                 .address(employeeBrazilianRequestDto.getAddress())
                 .country(employeeBrazilianRequestDto.getCountry())
                 .acronym(employeeBrazilianRequestDto.getAcronym())
@@ -137,6 +140,17 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(newEmployeeBrazilian);
 
+        List<DocumentEmployee> documentEmployeeList = documentMatrixList.stream()
+                .map(docMatrix -> DocumentEmployee.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .employee(savedEmployeeBrazilian)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentEmployeeRepository.saveAll(documentEmployeeList);
+
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
                 .idEmployee(savedEmployeeBrazilian.getIdEmployee())
                 .pis(savedEmployeeBrazilian.getPis())
@@ -145,7 +159,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(savedEmployeeBrazilian.getCep())
                 .name(savedEmployeeBrazilian.getName())
                 .surname(savedEmployeeBrazilian.getSurname())
-                .profilePictureId(savedEmployeeBrazilian.getProfilePicture())
                 .address(savedEmployeeBrazilian.getAddress())
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())

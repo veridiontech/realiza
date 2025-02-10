@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public interface CrudEmployeeForeigner {
-    EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto, MultipartFile file) throws IOException;
+    EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto);
     Optional<EmployeeResponseDto> findOne(String id);
     Page<EmployeeResponseDto> findAll(Pageable pageable);
     Optional<EmployeeResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto);

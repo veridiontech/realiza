@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DocumentEmployeeControlller {
@@ -16,4 +17,6 @@ public interface DocumentEmployeeControlller {
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(String id, DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentEmployee(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployeeByEmployee(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<DocumentResponseDto> getEmployeeDocuments(String id);
+    ResponseEntity<String> updateEmployeeDocuments(String id, List<String> documentList);
 }

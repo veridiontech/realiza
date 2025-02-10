@@ -169,7 +169,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             documentClient.setDocumentation(fileDocumentId);
         }
 
-        documentClient.setTitle(documentClientRequestDto.getTitle() != null ? documentClientRequestDto.getTitle() : documentClient.getTitle());
         documentClient.setStatus(documentClientRequestDto.getStatus() != null ? documentClientRequestDto.getStatus() : documentClient.getStatus());
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);

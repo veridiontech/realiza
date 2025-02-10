@@ -2,15 +2,15 @@ package bl.tech.realiza.domains.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 
 @EqualsAndHashCode(callSuper = true)

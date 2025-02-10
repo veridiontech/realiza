@@ -20,4 +20,11 @@ public class UserManagerRequestDto {
     private String profilePicture;
     private String telephone;
     private String cellphone;
+
+    public enum Role {
+        ROLE_ADMIN,
+        ROLE_REALIZA_PLUS,
+        ROLE_REALIZA_BASIC,
+        ROLE_VIEWER
+    }
 }

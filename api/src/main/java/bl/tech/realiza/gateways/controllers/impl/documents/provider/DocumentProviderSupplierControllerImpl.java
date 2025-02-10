@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -106,5 +107,22 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
         Page<DocumentResponseDto> pageDocumentSupplier = crudDocumentSupplier.findAllBySupplier(idSearch, pageable);
 
         return ResponseEntity.ok(pageDocumentSupplier);
+    }
+
+    @GetMapping("/{id}/document-matrix")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<DocumentResponseDto> getSupplierDocuments(@PathVariable String id) {
+        DocumentResponseDto branchResponse = crudDocumentSupplier.findAllSelectedDocuments(id);
+
+        return ResponseEntity.ok(branchResponse);
+    }
+
+    @PutMapping("/{id}/document-matrix")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateSupplierDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
+        String response = crudDocumentSupplier.updateDocumentRequests(id, documentList);
+        return ResponseEntity.ok(response);
     }
 }

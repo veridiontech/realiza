@@ -32,8 +32,9 @@ public class UserManagerControllerImpl implements UserManagerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<UserResponseDto> createUserManager(@RequestBody @Valid UserManagerRequestDto userManagerRequestDto) {
-        UserResponseDto userManager = crudUserManager.save(userManagerRequestDto);
+    public ResponseEntity<UserResponseDto> createUserManager(@RequestPart("userManagerRequestDto") @Valid UserManagerRequestDto userManagerRequestDto,
+                                                             @RequestPart(value = "file", required = false) MultipartFile file) {
+        UserResponseDto userManager = crudUserManager.save(userManagerRequestDto, file);
 
         return ResponseEntity.of(Optional.of(userManager));
     }
