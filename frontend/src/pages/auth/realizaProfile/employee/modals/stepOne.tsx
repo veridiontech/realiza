@@ -22,7 +22,7 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
     try {
       const response = await axios.post(`${ip}/employee/brazilian`, payload);
       console.log("Colaborador criado com sucesso:", response.data);
-      onSubmit(response.data); // Retorna os dados para o componente pai
+      onSubmit(response.data);
     } catch (error: any) {
       console.error(
         "Erro ao criar Colaborador:",
