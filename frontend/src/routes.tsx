@@ -36,6 +36,7 @@ import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProvide
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
+import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
       { path: "chat/:id", element: <ChatPage /> },
       { path: "documents/:id", element: <DocumentPage /> },
+      { path: "risk-matriz/:id", element: <RiskMatriz /> },
     ],
   },
   {

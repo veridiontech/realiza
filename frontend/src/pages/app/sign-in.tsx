@@ -40,10 +40,10 @@ export function SignIn() {
         email: data.email,
         password: data.password,
       });
-  
+
       const token = res.data.token;
       localStorage.setItem("tokenClient", token);
-  
+
       const userResponse = await axios.post(
         `${ip}/login/extract-token`,
         token,
@@ -53,15 +53,15 @@ export function SignIn() {
           },
         },
       );
-  
+
       const userData = userResponse.data;
       localStorage.setItem("userId", userData.idUser);
-      localStorage.setItem("role", userData.role)
+      localStorage.setItem("role", userData.role);
       setUser(userResponse.data);
       setShowSplash(true);
-  
+
       console.log("usuário:", user);
-  
+
       setTimeout(() => {
         console.log("Redirecionando para:", userData.role);
         switch (userData.role) {
@@ -71,17 +71,23 @@ export function SignIn() {
             navigate(`/sistema/select-client/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_RESPONSIBLE":
-            navigate(`/cliente/contracts/${userData.idUser}`);
+            navigate(`/cliente/branch/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_MANAGER":
-            navigate(`/client-test`);
+            navigate(`/cliente/contracts/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/contracts/${userData.idUser}`);
+            navigate(`/fornecedor/branch/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
+            navigate(`/fornecedor/contracts/${userData.idUser}`);
+            break;
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+            navigate(`/sub/employees/${userData.idUser}`);
+            break;
           case "ROLE_SUBCONTRACTOR_MANAGER":
+            navigate(`/sub/contracts/${userData.idUser}`);
+            break;
           case "ROLE_VIEWER":
             navigate(`/client-test`);
             break;
@@ -97,7 +103,7 @@ export function SignIn() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (user) {

@@ -100,3 +100,7 @@
 .flip-horizontal {
   transform: scaleX(-1);
 }
+
+.separador {
+  border-left: 4px solid white !important;
+}
