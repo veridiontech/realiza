@@ -3,6 +3,12 @@ package bl.tech.realiza.usecases.impl.employees;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -11,6 +17,10 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -41,6 +51,10 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
+    private final DocumentBranchRepository documentBranchRepository;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
+    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
@@ -49,6 +63,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         Branch branch = null;
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
+        List<DocumentMatrix> documentMatrixList = List.of();
 
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
@@ -59,17 +74,32 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         
         if (employeeForeignerRequestDto.getBranch() != null) {
             Optional<Branch> branchOptional = branchRepository.findById(employeeForeignerRequestDto.getBranch());
-
             branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
+
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(employeeForeignerRequestDto.getBranch(), "Documento pessoa");
+
+            documentMatrixList = documentBranches.stream()
+                    .map(DocumentBranch::getDocumentMatrix)
+                    .toList();
         } else if (employeeForeignerRequestDto.getSupplier() != null) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier());
-
             providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+
+            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeForeignerRequestDto.getSupplier(), "Documento pessoa");
+
+            documentMatrixList = documentProviderSuppliers.stream()
+                    .map(DocumentProviderSupplier::getDocumentMatrix)
+                    .toList();
 
         } else if(employeeForeignerRequestDto.getSubcontract() != null) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract());
-
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+
+            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeForeignerRequestDto.getSubcontract(), "Documento pessoa");
+
+            documentMatrixList = documentProviderSubcontractors.stream()
+                    .map(DocumentProviderSubcontractor::getDocumentMatrix)
+                    .toList();
         }
 
 
@@ -109,6 +139,17 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .build();
 
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(newEmployeeForeigner);
+
+        List<DocumentEmployee> documentEmployeeList = documentMatrixList.stream()
+                .map(docMatrix -> DocumentEmployee.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .employee(savedEmployeeForeigner)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentEmployeeRepository.saveAll(documentEmployeeList);
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
                 .idEmployee(savedEmployeeForeigner.getIdEmployee())

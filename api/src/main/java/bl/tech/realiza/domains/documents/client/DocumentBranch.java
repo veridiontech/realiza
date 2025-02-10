@@ -23,7 +23,4 @@ import java.util.List;
 public class DocumentBranch extends Document {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Branch branch;
-
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    private DocumentMatrix documentMatrix;
 }

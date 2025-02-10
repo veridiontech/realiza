@@ -1,11 +1,18 @@
 package bl.tech.realiza.usecases.impl.providers;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
@@ -30,6 +37,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     private final ProviderSupplierRepository providerSupplierRepository;
     private final BranchRepository branchRepository;
     private final FileRepository fileRepository;
+    private final DocumentBranchRepository documentBranchRepository;
+    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
 
     @Override
     public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto) {
@@ -40,6 +49,11 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         if (branches.isEmpty()) {
             throw new NotFoundException("Branches not found");
         }
+
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(providerSupplierRequestDto.getBranch(), "Documento pessoa");
+        List<DocumentMatrix> documentMatrixList = documentBranch.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .toList();
 
         ProviderSupplier newProviderSupplier = ProviderSupplier.builder()
                 .cnpj(providerSupplierRequestDto.getCnpj())
@@ -55,6 +69,17 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                 .build();
 
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(newProviderSupplier);
+
+        List<DocumentProviderSupplier> documentProviderSuppliers = documentMatrixList.stream()
+                .map(docMatrix -> DocumentProviderSupplier.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .providerSupplier(savedProviderSupplier)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentProviderSupplierRepository.saveAll(documentProviderSuppliers);
 
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
                 .idProvider(savedProviderSupplier.getIdProvider())

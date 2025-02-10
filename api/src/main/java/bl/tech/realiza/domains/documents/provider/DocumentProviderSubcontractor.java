@@ -23,7 +23,4 @@ import lombok.experimental.SuperBuilder;
 public class DocumentProviderSubcontractor extends Document {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSubcontractor providerSubcontractor;
-
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    private DocumentMatrix documentMatrix;
 }

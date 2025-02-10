@@ -112,7 +112,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.ok(pageDocumentBranch);
     }
 
-    @GetMapping("/{id}/documents")
+    @GetMapping("/{id}/document-matrix")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<DocumentResponseDto> getBranchDocuments(@PathVariable String id) {
@@ -121,7 +121,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.ok(branchResponse);
     }
 
-    @PutMapping("/{id}/documents")
+    @PutMapping("/{id}/document-matrix")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateBranchDocuments(@PathVariable String id, @RequestBody List<String> documentList) {

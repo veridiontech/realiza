@@ -17,8 +17,6 @@ public interface CrudDocumentBranch {
     Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
     void delete(String id);
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
-    // tem que puxar os docs dessa empresa e docs nao selecionados
     DocumentResponseDto findAllSelectedDocuments (String id);
-    // tem que dar update nos docs, imagino um put completo com o objeto inteiro
     String updateDocumentRequests(String id, List<String> documentCollection);
 }

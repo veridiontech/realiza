@@ -1,9 +1,15 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -19,7 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +38,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     private final DocumentProviderSupplierRepository documentSupplierRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final FileRepository fileRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
@@ -213,5 +224,65 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         );
 
         return documentSupplierResponseDtoPage;
+    }
+
+    @Override
+    public DocumentResponseDto findAllSelectedDocuments(String id) {
+        providerSupplierRepository.findById(id).orElseThrow(() -> new NotFoundException("Supplier not found"));
+        List<DocumentProviderSupplier> documentSupplier = documentSupplierRepository.findAllByProviderSupplier_IdProvider(id);
+        List<DocumentMatrix> selectedDocuments = documentSupplier.stream().map(DocumentProviderSupplier::getDocumentMatrix).collect(Collectors.toList());
+        List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
+        List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
+        nonSelectedDocuments.removeAll(selectedDocuments);
+        DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
+                .selectedDocuments(selectedDocuments)
+                .nonSelectedDocuments(nonSelectedDocuments)
+                .build();
+
+        return employeeResponse;
+    }
+
+    @Override
+    public String updateDocumentRequests(String id, List<String> documentCollection) {
+        if (documentCollection == null || documentCollection.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(id).orElseThrow(() -> new NotFoundException("Supplier not found"));
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAllById(documentCollection);
+        if (documentMatrixList.isEmpty()) {
+            throw new NotFoundException("Documents not found");
+        }
+
+        List<DocumentProviderSupplier> existingDocumentSuppliers = documentSupplierRepository.findAllByProviderSupplier_IdProvider(id);
+
+        Set<DocumentMatrix> existingDocuments = existingDocumentSuppliers.stream()
+                .map(DocumentProviderSupplier::getDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        List<DocumentProviderSupplier> newDocumentSuppliers = documentMatrixList.stream()
+                .filter(doc -> !existingDocuments.contains(doc))
+                .map(doc -> DocumentProviderSupplier.builder()
+                        .title(doc.getName())
+                        .status(Document.Status.PENDENTE)
+                        .providerSupplier(providerSupplier)
+                        .documentMatrix(doc)
+                        .build())
+                .collect(Collectors.toList());
+
+        List<DocumentProviderSupplier> documentsToRemove = existingDocumentSuppliers.stream()
+                .filter(db -> !documentMatrixList.contains(db.getDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        if (!documentsToRemove.isEmpty()) {
+            documentSupplierRepository.deleteAll(documentsToRemove);
+        }
+
+        if (!newDocumentSuppliers.isEmpty()) {
+            documentSupplierRepository.saveAll(newDocumentSuppliers);
+        }
+
+        return "Documents updated successfully";
     }
 }

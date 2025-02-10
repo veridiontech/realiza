@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.documents;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +34,7 @@ public abstract class Document {
     private Boolean deleteRequest = false;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    private Client documentInMatrix;
+    private DocumentMatrix documentMatrix;
 
     public enum Status {
         PENDENTE,

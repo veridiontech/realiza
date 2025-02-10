@@ -11,4 +11,5 @@ import java.util.List;
 public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, String> {
     Page<DocumentBranch> findAllByBranch_IdBranch(String idSearch, Pageable pageable);
     List<DocumentBranch> findAllByBranch_IdBranch(String idSearch);
+    List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, String groupName);
 }

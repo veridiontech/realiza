@@ -23,7 +23,4 @@ import lombok.experimental.SuperBuilder;
 public class DocumentEmployee extends Document {
     @ManyToOne(cascade = CascadeType.REMOVE)
     private Employee employee;
-
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    private DocumentMatrix documentMatrix;
 }
