@@ -1,5 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.documents.client;
 
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.controllers.interfaces.documents.client.DocumentBranchControlller;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
@@ -126,5 +128,21 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     public ResponseEntity<String> updateBranchDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
         String response = crudDocumentBranch.updateRequiredDocuments(id, documentList);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/document-matrix/risk")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateBranchDocumentsRisk(@PathVariable String id, @RequestBody List<DocumentBranch> documentList) {
+        String response = crudDocumentBranch.updateSelectedDocuments(id, documentList);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/document-matrix-by-risk")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<DocumentResponseDto>> getDocumentBranchByIdAndRisk(@PathVariable String id, @RequestParam Document.Risk risk) {
+        List<DocumentResponseDto> documentResponseDto = crudDocumentBranch.findAllSelectedDocumentsByRisk(id, risk);
+        return ResponseEntity.ok(documentResponseDto);
     }
 }

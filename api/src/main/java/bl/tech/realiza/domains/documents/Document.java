@@ -27,8 +27,26 @@ public abstract class Document {
     @Builder.Default
     private LocalDateTime versionDate = LocalDateTime.now();
     private LocalDateTime expirationDate;
-    @Enumerated(EnumType.STRING)
-    private Risk risk;
+    @Builder.Default
+    private Boolean lowLessThan8h = false;
+    @Builder.Default
+    private Boolean lowLessThan1m = false;
+    @Builder.Default
+    private Boolean lowLessThan6m = false;
+    @Builder.Default
+    private Boolean lowMoreThan6m = false;
+    @Builder.Default
+    private Boolean mediumLessThan1m = false;
+    @Builder.Default
+    private Boolean mediumLessThan6m = false;
+    @Builder.Default
+    private Boolean mediumMoreThan6m = false;
+    @Builder.Default
+    private Boolean highLessThan1m = false;
+    @Builder.Default
+    private Boolean highLessThan6m = false;
+    @Builder.Default
+    private Boolean highMoreThan6m = false;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;
@@ -51,16 +69,15 @@ public abstract class Document {
     }
 
     public enum Risk {
-        LOW_LESS_8H,
-        LOW_LESS_1M,
-        LOW_LESS_6M,
-        LOW_MORE_6M,
-        MEDIUM_LESS_1M,
-        MEDIUM_LESS_6M,
-        MEDIUM_MORE_6M,
-        HIGH_LESS_1M,
-        HIGH_LESS_6M,
-        HIGH_MORE_6M
+        LOW_LESS_THAN_8H,
+        LOW_LESS_THAN_1M,
+        LOW_LESS_THAN_6M,
+        LOW_MORE_THAN_6M,
+        MEDIUM_LESS_THAN_1M,
+        MEDIUM_LESS_THAN_6M,
+        MEDIUM_MORE_THAN_6M,
+        HIGH_LESS_THAN_1M,
+        HIGH_LESS_THAN_6M,
+        HIGH_MORE_THAN_6M
     }
-
 }
