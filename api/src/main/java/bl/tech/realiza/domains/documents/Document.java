@@ -67,4 +67,17 @@ public abstract class Document {
         DELETE,
         ADD
     }
+
+    public enum Risk {
+        LOW_LESS_THAN_8H,
+        LOW_LESS_THAN_1M,
+        LOW_LESS_THAN_6M,
+        LOW_MORE_THAN_6M,
+        MEDIUM_LESS_THAN_1M,
+        MEDIUM_LESS_THAN_6M,
+        MEDIUM_MORE_THAN_6M,
+        HIGH_LESS_THAN_1M,
+        HIGH_LESS_THAN_6M,
+        HIGH_MORE_THAN_6M
+    }
 }

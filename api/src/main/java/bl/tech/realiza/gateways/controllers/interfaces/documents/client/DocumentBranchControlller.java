@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.interfaces.documents.client;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
@@ -22,4 +23,5 @@ public interface DocumentBranchControlller {
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);
     ResponseEntity<String> updateBranchDocuments(String id, List<String> documentList);
     ResponseEntity<String> updateBranchDocumentsRisk(String id, List<DocumentBranch> documentList);
+    ResponseEntity<List<DocumentResponseDto>> getDocumentBranchByIdAndRisk(String id, Document.Risk risk);
 }

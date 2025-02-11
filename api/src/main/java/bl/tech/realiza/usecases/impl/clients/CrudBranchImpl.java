@@ -2,10 +2,14 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
@@ -16,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
+    private final DocumentBranchRepository documentBranchRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
@@ -50,6 +56,19 @@ public class CrudBranchImpl implements CrudBranch {
                 .build();
 
         Branch savedBranch = branchRepository.save(newBranch);
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
+
+        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
+                .map(docMatrix -> DocumentBranch.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .branch(savedBranch)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentBranchRepository.saveAll(documentBranchList);
 
         BranchResponseDto branchResponseDto = BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())

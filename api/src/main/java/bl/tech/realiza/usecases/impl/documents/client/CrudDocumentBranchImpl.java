@@ -338,4 +338,115 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         }
         return "Documents risks updated successfully";
     }
+
+    @Override
+    public List<DocumentResponseDto> findAllSelectedDocumentsByRisk(String id, Document.Risk risk) {
+        List<DocumentBranch> documentBranchList = List.of();
+        List<DocumentResponseDto> documentResponseDto = List.of();
+        switch (risk) {
+            case LOW_LESS_THAN_8H -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndLowLessThan8hIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case LOW_LESS_THAN_1M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndLowLessThan1mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case LOW_LESS_THAN_6M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndLowLessThan6mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case LOW_MORE_THAN_6M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndLowMoreThan6mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case MEDIUM_LESS_THAN_1M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndMediumLessThan1mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case MEDIUM_LESS_THAN_6M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndMediumLessThan6mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case MEDIUM_MORE_THAN_6M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndMediumMoreThan6mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case HIGH_LESS_THAN_1M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndHighLessThan1mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case HIGH_LESS_THAN_6M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndHighLessThan6mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            case HIGH_MORE_THAN_6M -> {
+                documentBranchList = documentBranchRepository.findAllByBranch_IdBranchAndHighMoreThan6mIsTrue(id);
+                documentResponseDto = documentBranchList.stream().map(
+                        documentBranch -> DocumentResponseDto.builder()
+                                .title(documentBranch.getTitle())
+                                .idDocumentation(documentBranch.getIdDocumentation())
+                                .build()
+                ).toList();
+                return documentResponseDto;
+            }
+            default -> {
+                throw new BadRequestException("Invalid risk");
+            }
+        }
+    }
 }

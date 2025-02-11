@@ -49,7 +49,7 @@ public class EmployeeControllerImpl implements EmployeeController {
         return ResponseEntity.ok(pageEmployeeForeigner);
     }
 
-    @PostMapping(value = "/brazilian", consumes = "multipart/form-data")
+    @PostMapping("/brazilian")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(@RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
@@ -127,7 +127,7 @@ public class EmployeeControllerImpl implements EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/foreigner", consumes = "multipart/form-data")
+    @PostMapping( "/foreigner")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<EmployeeResponseDto> createEmployeeForeigner(@RequestBody @Valid EmployeeForeignerRequestDto employeeForeignerRequestDto) {
