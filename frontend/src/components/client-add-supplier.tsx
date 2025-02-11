@@ -105,11 +105,12 @@ export function ModalTesteSendSupplier() {
   const createClient = async (data: ModalSendEmailFormSchema) => {
     console.log("Enviando dados:", data);
     setIsLoading(true);
+    console.log(user?.branch);
+
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: user?.client_id,
-        idBranch: user?.branch, // Passa o "branch" do usuário logado
+        idCompany: user?.branch,
         company: data.company,
         cnpj: data.cnpj,
       });
@@ -118,7 +119,7 @@ export function ModalTesteSendSupplier() {
       setNextModal(true);
       try {
         const res = await axios.get(
-          `${ip}/user/client/filtered-client?idSearch=${branch}`,
+          `${ip}/user/client/filtered-client?idSearch=${user?.branch}`,
         );
         setManagers(res.data.content);
       } catch (err) {
@@ -135,7 +136,7 @@ export function ModalTesteSendSupplier() {
   const createContract = async (data: ContractFormSchema) => {
     const payload = {
       ...data,
-      cnpj: "", // Ajuste conforme necessário
+      cnpj: "",
     };
     try {
       console.log("Criando contrato:", data);
