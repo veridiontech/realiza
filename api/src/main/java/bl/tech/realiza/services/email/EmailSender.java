@@ -2,6 +2,7 @@ package bl.tech.realiza.services.email;
 
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -31,6 +32,7 @@ public class EmailSender {
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ClientRepository clientRepository;
     private final TokenManagerService tokenManagerService;
+    private final BranchRepository branchRepository;
 
     public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
@@ -41,14 +43,14 @@ public class EmailSender {
                 companyName = "Realiza Assessoria Empresarial Ltda";
             }
             case SUPPLIER -> {
-                var supplier = clientRepository.findById(emailInviteRequestDto.getIdCompany())
-                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
-                companyName = supplier.getCorporateName();
-                idCompany = supplier.getIdClient();
+                var supplier = branchRepository.findById(emailInviteRequestDto.getIdCompany())
+                        .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+                companyName = supplier.getClient().getCorporateName();
+                idCompany = supplier.getIdBranch();
             }
             case SUBCONTRACTOR -> {
                 var subcontractor = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
-                        .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = subcontractor.getCorporateName();
                 idCompany = subcontractor.getIdProvider();
             }
