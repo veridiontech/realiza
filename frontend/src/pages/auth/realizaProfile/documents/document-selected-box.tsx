@@ -1,7 +1,7 @@
 // DocumentSelectedBox.tsx
 
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useDocument } from "@/context/Document-provider"; // Importe o hook do contexto
+// import { useDocument } from "@/context/Document-provider"; // Importe o hook do contexto
 // import { useState } from "react";
 
 export function DocumentSelectedBox() {

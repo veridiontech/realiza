@@ -12,34 +12,49 @@ import { useEffect, useState } from "react";
 import { DocumentBox } from "./document-box";
 import { DocumentSelectedBox } from "./document-selected-box";
 import { useClient } from "@/context/Client-Provider";
-import { propsDocument } from "@/types/interfaces";
+import { propsBranch} from "@/types/interfaces";
+import { userBranch } from "@/context/Branch-provider";
 
 export function DocumentPage() {
-  const {client} = useClient()
+  const { client } = useClient();
   const [isLoading, setIsLoading] = useState(false);
-  const [branchs, setBranchs] = useState([]);
-  const [documents, setDocuments] = useState<propsDocument[]>([])
+  const [branchs, setBranchs] = useState<propsBranch[]>([]);
+  // const [documents, setDocuments] = useState<propsDocument[]>([]);
+  const { setBranch } = userBranch();
+
   // const [subcontractors, setSubContractors] = useState([])
 
-  const getBranchClient = async() => {
-    setIsLoading(true)
-    try{
-      const res = await axios.get(`${ip}/branch/filtered-client/${client?.idClient}`)
-      setBranchs(res.data.content)
-      console.log(res.data.content);
-      
-    }catch(err) {
-      console.log("erro ao buscar filial do cliente",err);
-      
-    }finally{
-      setIsLoading(false)
+  const getBranchClient = async () => {
+    if (!client?.idClient) return;
+    setIsLoading(true);
+    try {
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${client.idClient}`,
+      );
+      setBranchs(res.data.content);
+      console.log("Filiais:", res.data.content);
+    } catch (err) {
+      console.log("Erro ao buscar filial do cliente", err);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
+  const getUniqueBranch = async (idBranch: string) => {
+    try {
+      const res = await axios.get(`${ip}/branch/${idBranch}`);
+      console.log("dados das filiais", res.data);
+      setBranch(res.data);
+    } catch (err) {
+      console.log("erro ao buscar filial", err);
+    }
+  };
 
   useEffect(() => {
-    getBranchClient()
-  }, []);
+    if (client) {
+      getBranchClient();
+    }
+  }, [client]);
 
   return (
     <div className="px-56 py-16">
@@ -66,12 +81,17 @@ export function DocumentPage() {
               <div className="w-[15vw]">
                 {/* /branch/idDoCliente */}
                 <select
-                  className="h-[3vh] w-full border p-1 rounded-md"
+                  className="h-[3vh] w-full rounded-md border"
                   defaultValue=""
+                  onChange={(e) => getUniqueBranch(e.target.value)}
                 >
-                  <option value="" disabled>Selecione a filial do cliente</option>
+                  <option value="" disabled>
+                    Selecione a filial do cliente
+                  </option>
                   {branchs.map((branch) => (
-                    <option value="" key={branch.idBranch}>{branch.name}</option>
+                    <option value={branch.idBranch} key={branch.idBranch}>
+                      {branch.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -85,7 +105,7 @@ export function DocumentPage() {
                 </h2>
               </div>
               <div className="flex items-center justify-around">
-                <DocumentBox isLoading={isLoading} documents={documents} />
+                <DocumentBox isLoading={isLoading} />
                 <DocumentSelectedBox />
               </div>
             </div>
@@ -96,7 +116,7 @@ export function DocumentPage() {
                 </h2>
               </div>
               <div className="flex items-center justify-around">
-                <DocumentBox isLoading={isLoading} documents={documents} />
+                <DocumentBox isLoading={isLoading} />
                 <DocumentSelectedBox />
               </div>
             </div>
@@ -105,7 +125,7 @@ export function DocumentPage() {
                 <h2 className="text-[20px] underline">Treinamentos</h2>
               </div>
               <div className="flex items-center justify-around">
-                <DocumentBox isLoading={isLoading} documents={documents} />
+                <DocumentBox isLoading={isLoading} />
                 <DocumentSelectedBox />
               </div>
             </div>

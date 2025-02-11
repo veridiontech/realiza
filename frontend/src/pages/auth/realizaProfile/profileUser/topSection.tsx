@@ -7,7 +7,7 @@ export function TopSection() {
 
   return (
     <div className="flex items-center">
-      <ProfilePic className="bg-realizaBlue rounded-full p-7 text-[30px] text-white cursor-pointer" />
+      <ProfilePic />
       <div className="ml-6 flex flex-col gap-2">
         <div className="text-lg font-bold">
           {user ? (

@@ -34,3 +34,8 @@ export interface propsDocument {
   name: string;
   type:  string; 
 }
+
+export interface propsBranch {
+  idBranch: string,
+  name: string
+}

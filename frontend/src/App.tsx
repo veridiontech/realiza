@@ -9,6 +9,7 @@ import { ThemeProvider } from "./context/Theme-Provider";
 import { Toaster } from "sonner";
 import { ClientProvider } from "./context/Client-Provider";
 import { DocumentProvider } from "./context/Document-provider";
+import { BranchProvider } from "./context/Branch-provider";
 
 const queryClient = new QueryClient();
 
@@ -25,11 +26,13 @@ export function App() {
               className="w-[20vw]"
             />
             <Helmet titleTemplate="%s | realiza" />
-            <DocumentProvider>
-              <ClientProvider>
-                <RouterProvider router={router} />
-              </ClientProvider>
-            </DocumentProvider>
+            <BranchProvider>
+              <DocumentProvider>
+                <ClientProvider>
+                  <RouterProvider router={router} />
+                </ClientProvider>
+              </DocumentProvider>
+            </BranchProvider>
           </HelmetProvider>
         </FormDataProvider>
       </QueryClientProvider>
