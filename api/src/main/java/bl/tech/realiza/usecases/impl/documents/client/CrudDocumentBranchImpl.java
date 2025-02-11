@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -301,5 +298,44 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         }
 
         return "Documents updated successfully";
+    }
+
+    @Override
+    public String updateSelectedDocuments(String id, List<DocumentBranch> documentCollection) {
+        branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+        List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranch(id);
+
+        Map<String,DocumentBranch> existingMap = documentBranches.stream()
+                .collect(Collectors.toMap(Document::getIdDocumentation, doc -> doc));
+
+        List<DocumentBranch> toUpdateOrInsert = new ArrayList<>();
+
+        for (DocumentBranch newDoc : documentCollection) {
+            if (existingMap.containsKey(newDoc.getIdDocumentation())) {
+                DocumentBranch existingDoc = existingMap.get(newDoc.getIdDocumentation());
+                // low
+                existingDoc.setLowLessThan8h(newDoc.getLowLessThan8h());
+                existingDoc.setLowLessThan1m(newDoc.getLowLessThan1m());
+                existingDoc.setLowLessThan6m(newDoc.getLowLessThan6m());
+                existingDoc.setLowMoreThan6m(newDoc.getLowMoreThan6m());
+                // medium
+                existingDoc.setMediumLessThan1m(newDoc.getMediumLessThan1m());
+                existingDoc.setMediumLessThan6m(newDoc.getMediumLessThan6m());
+                existingDoc.setMediumMoreThan6m(newDoc.getMediumMoreThan6m());
+                // high
+                existingDoc.setHighLessThan1m(newDoc.getHighLessThan1m());
+                existingDoc.setHighLessThan6m(newDoc.getHighLessThan6m());
+                existingDoc.setHighMoreThan6m(newDoc.getHighMoreThan6m());
+
+                toUpdateOrInsert.add(existingDoc);
+            }
+        }
+
+        try {
+            documentBranchRepository.saveAll(toUpdateOrInsert);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return "Documents risks updated successfully";
     }
 }

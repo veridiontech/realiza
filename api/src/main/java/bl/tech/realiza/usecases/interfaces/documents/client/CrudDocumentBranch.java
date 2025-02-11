@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.documents.client;
 
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import org.springframework.data.domain.Page;
@@ -19,4 +20,5 @@ public interface CrudDocumentBranch {
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
     String updateRequiredDocuments(String id, List<String> documentCollection);
+    String updateSelectedDocuments(String id, List<DocumentBranch> documentCollection);
 }
