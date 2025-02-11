@@ -15,14 +15,11 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { Radio } from "react-loader-spinner";
-import { propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useUser } from "@/context/user-provider";
 
-// Atualizamos o schema removendo o campo "idCompany"
-// pois o cliente logado não pode selecionar um cliente, usaremos o valor vindo do usuário.
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   company: z.string().default("SUPPLIER"),
@@ -67,7 +64,6 @@ type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
-  // Estado para armazenar dados complementares do modal
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
   const [requirements, setRequirements] = useState<any>([]);
@@ -76,9 +72,7 @@ export function ModalTesteSendSupplier() {
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
 
-  // Usamos o hook para obter os dados do usuário logado.
-  // Suponho que o contexto retorne um objeto com a propriedade "branch".
-  const { branch } = useUser();
+  const { user } = useUser();
 
   const {
     register,
@@ -114,7 +108,8 @@ export function ModalTesteSendSupplier() {
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: branch, // Passa o "branch" do usuário logado
+        idCompany: user?.client_id,
+        idBranch: user?.branch, // Passa o "branch" do usuário logado
         company: data.company,
         cnpj: data.cnpj,
       });
@@ -225,7 +220,7 @@ export function ModalTesteSendSupplier() {
               )}
             </div>
           </form>
-          {/* <Dialog open={nextModal} onOpenChange={setNextModal}>
+          <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent
               className="max-w-[45vw] border-none"
               style={{
@@ -427,7 +422,7 @@ export function ModalTesteSendSupplier() {
                 </div>
               </ScrollArea>
             </DialogContent>
-          </Dialog> */}
+          </Dialog>
         </div>
       </DialogContent>
     </Dialog>
