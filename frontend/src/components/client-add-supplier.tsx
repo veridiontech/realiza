@@ -15,12 +15,14 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { Radio } from "react-loader-spinner";
+import { propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useUser } from "@/context/user-provider";
 
 // Atualizamos o schema removendo o campo "idCompany"
+// pois o cliente logado não pode selecionar um cliente, usaremos o valor vindo do usuário.
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   company: z.string().default("SUPPLIER"),
@@ -65,16 +67,18 @@ type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
-  // Como não utilizaremos a lista de clientes, removemos o estado "clients"
+  // Estado para armazenar dados complementares do modal
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
   const [requirements, setRequirements] = useState<any>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
-  const branch = useUser();
-
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
+
+  // Usamos o hook para obter os dados do usuário logado.
+  // Suponho que o contexto retorne um objeto com a propriedade "branch".
+  const { branch } = useUser();
 
   const {
     register,
@@ -92,6 +96,7 @@ export function ModalTesteSendSupplier() {
     resolver: zodResolver(contractFormSchema),
   });
 
+  // (Opcional) Se precisar buscar outras informações, como atividades e gestores
   const getActivities = async () => {
     try {
       const activitieData = await axios.get(`${ip}/contract/activity`);
@@ -99,17 +104,17 @@ export function ModalTesteSendSupplier() {
       setActivities(activitieData.data.content);
       setRequirements(requirementData.data.content);
     } catch (err) {
-      console.log(err);
+      console.log("Erro ao buscar atividades/requisitos:", err);
     }
   };
 
   const createClient = async (data: ModalSendEmailFormSchema) => {
-    console.log("enviando dados:", data);
+    console.log("Enviando dados:", data);
     setIsLoading(true);
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: branch,
+        idCompany: branch, // Passa o "branch" do usuário logado
         company: data.company,
         cnpj: data.cnpj,
       });
@@ -117,17 +122,15 @@ export function ModalTesteSendSupplier() {
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
       try {
-        console.log("teste");
-
         const res = await axios.get(
-          `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
+          `${ip}/user/client/filtered-client?idSearch=${branch}`,
         );
         setManagers(res.data.content);
       } catch (err) {
-        console.log("erro ao buscar gestores", err);
+        console.log("Erro ao buscar gestores:", err);
       }
     } catch (err) {
-      console.log("erro ao enviar email para usuário", err);
+      console.log("Erro ao enviar email para usuário:", err);
       toast.error("Erro ao enviar email. Tente novamente");
     } finally {
       setIsLoading(false);
@@ -137,14 +140,14 @@ export function ModalTesteSendSupplier() {
   const createContract = async (data: ContractFormSchema) => {
     const payload = {
       ...data,
-      cnpj: "", // conforme sua lógica original
+      cnpj: "", // Ajuste conforme necessário
     };
     try {
       console.log("Criando contrato:", data);
       await axios.post(`${ip}/contract/supplier`, payload);
-      console.log("sucesso");
+      console.log("Contrato criado com sucesso");
     } catch (err) {
-      console.log("erro ao criar contrato", err);
+      console.log("Erro ao criar contrato:", err);
     }
   };
 
@@ -184,7 +187,7 @@ export function ModalTesteSendSupplier() {
               <Label className="text-white">Email</Label>
               <Input
                 type="email"
-                placeholder="Digite o email do novo cliente"
+                placeholder="Digite o email do novo prestador"
                 {...register("email")}
                 className="w-full"
               />
@@ -196,14 +199,13 @@ export function ModalTesteSendSupplier() {
               <Label className="text-white">Cnpj</Label>
               <Input
                 type="text"
-                placeholder="Insira o cnpj do cliente..."
+                placeholder="Insira o cnpj do prestador..."
                 {...register("cnpj")}
               />
               {errors.cnpj && (
                 <span className="text-red-600">{errors.cnpj.message}</span>
               )}
             </div>
-            {/* Removido o select de cliente */}
             <div className="flex justify-end">
               {isLoading ? (
                 <Button>
@@ -223,7 +225,7 @@ export function ModalTesteSendSupplier() {
               )}
             </div>
           </form>
-          <Dialog open={nextModal} onOpenChange={setNextModal}>
+          {/* <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent
               className="max-w-[45vw] border-none"
               style={{
@@ -251,7 +253,9 @@ export function ModalTesteSendSupplier() {
                           value={pushCnpj || "erro ao puxar cnpj"}
                         />
                         {errorsContract.cnpj && (
-                          <span>{errorsContract.cnpj?.message}</span>
+                          <span className="text-red-600">
+                            {errorsContract.cnpj.message}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -303,7 +307,7 @@ export function ModalTesteSendSupplier() {
                           Selecione um gestor
                         </option>
                         {Array.isArray(managers) &&
-                          managers.map((manager) => (
+                          managers.map((manager: any) => (
                             <option key={manager.idUser}>
                               {manager.firstName} {manager.surname}
                             </option>
@@ -416,60 +420,6 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    {shouldShowServiceType && (
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Atividades</Label>
-                        <select
-                          {...registerContract("activities")}
-                          key={activities.idActivity}
-                          className="rounded-md border p-2"
-                          defaultValue=""
-                        >
-                          <option value="" disabled>
-                            Selecione aqui
-                          </option>
-                          {activities.map((activity: any) => (
-                            <option
-                              key={activity.idActivity}
-                              value={activity.title}
-                            >
-                              {activity.title}
-                            </option>
-                          ))}
-                        </select>
-                        {errorsContract.activities && (
-                          <span className="text-red-500">
-                            {errorsContract.activities.message}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-1">
-                      <Label className="text-white">Requisitos</Label>
-                      <select
-                        {...registerContract("requirements")}
-                        key={requirements.idRequeriment}
-                        defaultValue=""
-                        className="rounded-md border p-2"
-                      >
-                        <option value="" disabled>
-                          Selecione aqui
-                        </option>
-                        {requirements.map((requirement: any) => (
-                          <option
-                            key={requirement.idRequeriment}
-                            value={requirement.title}
-                          >
-                            {requirement.title}
-                          </option>
-                        ))}
-                      </select>
-                      {errorsContract.requirements && (
-                        <span className="text-red-500">
-                          {errorsContract.requirements.message}
-                        </span>
-                      )}
-                    </div>
                     <Button className="bg-realizaBlue" type="submit">
                       Criar contrato
                     </Button>
@@ -477,7 +427,7 @@ export function ModalTesteSendSupplier() {
                 </div>
               </ScrollArea>
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </div>
       </DialogContent>
     </Dialog>

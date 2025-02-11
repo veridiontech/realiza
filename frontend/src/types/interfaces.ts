@@ -15,6 +15,7 @@ export interface propsUser {
   role: string;
   password: string;
   company: string;
+  idCompany: string;
   telephone: string;
   description: string;
 }
@@ -22,6 +23,7 @@ export interface propsUser {
 export interface propsClient {
   cnpj: string;
   companyName: string;
+  idCompany: string;
   email: string;
   idClient: string;
   telephone: string;
