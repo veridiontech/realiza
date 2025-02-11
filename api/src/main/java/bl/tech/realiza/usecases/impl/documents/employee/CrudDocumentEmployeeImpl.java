@@ -241,7 +241,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     }
 
     @Override
-    public String updateDocumentRequests(String id, List<String> documentCollection) {
+    public String updateRequiredDocuments(String id, List<String> documentCollection) {
         if (documentCollection == null || documentCollection.isEmpty()) {
             throw new NotFoundException("Invalid documents");
         }
@@ -282,5 +282,27 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         }
 
         return "Documents updated successfully";
+    }
+
+    @Override
+    public String solicitateNewRequiredDocument(String id, String documentId) {
+        if (documentId == null || documentId.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentId).orElseThrow(() -> new NotFoundException("Document not found"));
+
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new NotFoundException("Employee not found"));
+
+        DocumentEmployee documentEmployee = DocumentEmployee.builder()
+                .employee(employee)
+                .documentMatrix(documentMatrix)
+                .request(Document.Request.ADD)
+                .title(documentMatrix.getName())
+                .build();
+
+        documentEmployeeRepository.save(documentEmployee);
+
+        return "Document requested successfully";
     }
 }

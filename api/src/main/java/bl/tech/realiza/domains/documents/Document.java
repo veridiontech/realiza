@@ -1,12 +1,8 @@
 package bl.tech.realiza.domains.documents;
 
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -23,6 +19,7 @@ public abstract class Document {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocumentation;
     private String title;
+    @Enumerated(EnumType.STRING)
     private Status status;
     private String documentation;
     @Builder.Default
@@ -30,8 +27,11 @@ public abstract class Document {
     @Builder.Default
     private LocalDateTime versionDate = LocalDateTime.now();
     private LocalDateTime expirationDate;
+    @Enumerated(EnumType.STRING)
+    private Risk risk;
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Boolean deleteRequest = false;
+    private Request request = Request.NONE;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentMatrix documentMatrix;
@@ -43,4 +43,24 @@ public abstract class Document {
         APROVADO,
         VENCIDO
     }
+
+    public enum Request {
+        NONE,
+        DELETE,
+        ADD
+    }
+
+    public enum Risk {
+        LOW_LESS_8H,
+        LOW_LESS_1M,
+        LOW_LESS_6M,
+        LOW_MORE_6M,
+        MEDIUM_LESS_1M,
+        MEDIUM_LESS_6M,
+        MEDIUM_MORE_6M,
+        HIGH_LESS_1M,
+        HIGH_LESS_6M,
+        HIGH_MORE_6M
+    }
+
 }

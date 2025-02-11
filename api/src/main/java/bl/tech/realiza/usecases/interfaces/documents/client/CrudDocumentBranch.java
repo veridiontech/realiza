@@ -18,5 +18,5 @@ public interface CrudDocumentBranch {
     void delete(String id);
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
-    String updateDocumentRequests(String id, List<String> documentCollection);
+    String updateRequiredDocuments(String id, List<String> documentCollection);
 }

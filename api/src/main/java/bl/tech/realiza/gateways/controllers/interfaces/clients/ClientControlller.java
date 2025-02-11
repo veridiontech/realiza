@@ -1,8 +1,6 @@
 package bl.tech.realiza.gateways.controllers.interfaces.clients;
 
-import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
-import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
-import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseDto;
+import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
