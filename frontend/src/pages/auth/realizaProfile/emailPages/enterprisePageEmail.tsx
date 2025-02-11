@@ -78,9 +78,6 @@ export function EnterprisePageEmail() {
       const res = await axios.get(
         `https://www.receitaws.com.br/v1/cnpj/${cnpj}`,
       );
-
-      console.log(res.data);
-
       if (res.data) {
         setValue("corporateName", res.data.nome);
         setValue("tradeName", res.data.fantasia || "Sem nome fantasia");
