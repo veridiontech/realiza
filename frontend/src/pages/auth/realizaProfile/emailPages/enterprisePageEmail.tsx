@@ -101,6 +101,8 @@ export function EnterprisePageEmail() {
         ...data,
         idCompany: findIdCompany || "",
         company: findCompany || null,
+        fantasyName: data.tradeName,
+        socialReason: data.corporateName,
       };
   
       console.log("Enviando dados:", payload);
