@@ -1,7 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.clients;
 
 import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchControlller;
-import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
+import bl.tech.realiza.gateways.requests.clients.branch.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudBranchImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController

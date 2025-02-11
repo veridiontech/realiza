@@ -1,9 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.clients;
 
 import bl.tech.realiza.gateways.controllers.interfaces.clients.ClientControlller;
-import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
-import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
-import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseDto;
+import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;

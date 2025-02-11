@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.requests.clients;
+package bl.tech.realiza.gateways.requests.clients.client;
 
 import lombok.Data;
 

@@ -3,6 +3,8 @@ package bl.tech.realiza.services;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -13,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
@@ -35,6 +38,7 @@ public class ItemManagementService {
     private final RequirementRepository requirementRepository;
     private final DocumentRepository documentRepository;
     private final EmployeeRepository employeeRepository;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
 
 
     public String activateItem(String id, ActivationItemType item) {
@@ -96,7 +100,7 @@ public class ItemManagementService {
         deleteItemSolicitations.addAll(userRepository.findAllByDeleteRequest(true));
         deleteItemSolicitations.addAll(activityRepository.findAllByDeleteRequest(true));
         deleteItemSolicitations.addAll(requirementRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(documentRepository.findAllByDeleteRequest(true));
+        deleteItemSolicitations.addAll(documentRepository.findAllByRequestIs(Document.Request.DELETE));
         deleteItemSolicitations.addAll(employeeRepository.findAllByDeleteRequest(true));
 
         return deleteItemSolicitations;
@@ -135,6 +139,19 @@ public class ItemManagementService {
                 throw new BadRequestException("Invalid entity");
             }
         }
+    }
+
+    public String approveNewDocumentEmployee(String idDocument) {
+        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(idDocument).orElseThrow(() -> new NotFoundException("Document not found"));
+
+        documentEmployee.setRequest(Document.Request.NONE);
+
+        return documentEmployee.getTitle() + " successfully approved";
+    }
+
+    public List<DocumentEmployee> getAddRequestDocumentEmployees() {
+        List<DocumentEmployee> addRequestDocumentEmployees = documentEmployeeRepository.findAllByRequest(Document.Request.ADD);
+        return addRequestDocumentEmployees;
     }
 
     public enum ActivationItemType {

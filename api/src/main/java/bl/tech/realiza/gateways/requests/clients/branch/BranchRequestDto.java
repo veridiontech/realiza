@@ -1,6 +1,5 @@
-package bl.tech.realiza.gateways.requests.clients;
+package bl.tech.realiza.gateways.requests.clients.branch;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.List;

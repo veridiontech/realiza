@@ -1,6 +1,5 @@
 package bl.tech.realiza.domains.documents;
 
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,6 +22,7 @@ public abstract class Document {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocumentation;
     private String title;
+    @Enumerated(EnumType.STRING)
     private Status status;
     private String documentation;
     @Builder.Default
@@ -30,8 +30,9 @@ public abstract class Document {
     @Builder.Default
     private LocalDateTime versionDate = LocalDateTime.now();
     private LocalDateTime expirationDate;
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Boolean deleteRequest = false;
+    private Request request = Request.NONE;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentMatrix documentMatrix;
@@ -42,5 +43,11 @@ public abstract class Document {
         REPROVADO,
         APROVADO,
         VENCIDO
+    }
+
+    public enum Request {
+        NONE,
+        DELETE,
+        ADD
     }
 }

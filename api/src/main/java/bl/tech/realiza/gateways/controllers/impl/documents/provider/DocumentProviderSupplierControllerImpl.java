@@ -122,7 +122,7 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateSupplierDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentSupplier.updateDocumentRequests(id, documentList);
+        String response = crudDocumentSupplier.updateRequiredDocuments(id, documentList);
         return ResponseEntity.ok(response);
     }
 }

@@ -1,12 +1,11 @@
 package bl.tech.realiza.gateways.controllers.interfaces.clients;
 
-import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
+import bl.tech.realiza.gateways.requests.clients.branch.BranchRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface BranchControlller {
