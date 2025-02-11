@@ -16,6 +16,7 @@ export interface propsUser {
   company: string; 
   telephone: string;
   description: string;
+  profilePictureData: string;
 }
 
 export interface propsClient {
