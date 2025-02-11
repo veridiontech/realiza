@@ -13,10 +13,12 @@ import { z } from "zod";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
-  fantasyName: z.string().nonempty("O nome fantasia é obrigatório"),
-  socialReason: z.string().nonempty("A razão social é obrigatória"),
+  tradeName: z.string().nonempty("O nome fantasia é obrigatório"),
+  corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
   phone: z.string().nonempty("O telefone é obrigatório"),
+  idCompany: z.string().optional(),
+  company: z.string().nullable().optional(),
 });
 
 type EnterprisePageEmailFormSchema = z.infer<
@@ -80,8 +82,8 @@ export function EnterprisePageEmail() {
       console.log(res.data);
 
       if (res.data) {
-        setValue("socialReason", res.data.nome);
-        setValue("fantasyName", res.data.fantasia || "Sem nome fantasia");
+        setValue("corporateName", res.data.nome);
+        setValue("tradeName", res.data.fantasia || "Sem nome fantasia");
         setValue("email", res.data.email);
         setValue("phone", res.data.telefone);
       }
@@ -98,20 +100,10 @@ export function EnterprisePageEmail() {
       const payload = {
         ...data,
         idCompany: findIdCompany || "",
-        company: findCompany,
+        company: findCompany || null,
       };
-      // if(findCompany === "SUPPLIER") {
-      //   const payloadCompanySupplier = {
-      //     ...data,
-      //     branches: {
-      //       idCompany: findIdCompany || "",
-      //     },
-      //   }
-      // }
-      console.log("idCompany:", findCompany);
-      
+  
       console.log("Enviando dados:", payload);
-
       setEnterpriseData(payload);
       navigate(`/email/Sign-up`);
     } catch (err) {
@@ -192,7 +184,7 @@ export function EnterprisePageEmail() {
                 type="text"
                 placeholder="Nome Fantasia"
                 className="w-[13vw]"
-                {...register("fantasyName")}
+                {...register("tradeName")}
               />
             </div>
             <div>
@@ -201,7 +193,7 @@ export function EnterprisePageEmail() {
                 type="text"
                 placeholder="*Razão social"
                 className="w-[13vw]"
-                {...register("socialReason")}
+                {...register("corporateName")}
               />
             </div>
           </div>
