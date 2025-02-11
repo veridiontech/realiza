@@ -2,7 +2,6 @@ package bl.tech.realiza.gateways.controllers.impl.documents.client;
 
 import bl.tech.realiza.gateways.controllers.interfaces.documents.client.DocumentBranchControlller;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentBranchImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -125,7 +124,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateBranchDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentBranch.updateDocumentRequests(id, documentList);
+        String response = crudDocumentBranch.updateRequiredDocuments(id, documentList);
         return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.interfaces.services;
 
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.services.ItemManagementService;
 import org.springframework.http.ResponseEntity;
 
@@ -10,4 +11,6 @@ public interface ItemManagementController {
     ResponseEntity<Void> deleteItem(String id, ItemManagementService.DeleteItemType item);
     ResponseEntity<Collection<Object>> getInnactiveItems();
     ResponseEntity<Collection<Object>> getDeleteRequests();
+    ResponseEntity<String> approveDocumentEmployee(String id);
+    ResponseEntity<Collection<DocumentEmployee>> getApproveRequests();
 }

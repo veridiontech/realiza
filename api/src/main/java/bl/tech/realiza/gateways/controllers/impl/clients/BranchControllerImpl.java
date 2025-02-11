@@ -1,7 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.clients;
 
 import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchControlller;
-import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
+import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudBranchImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -29,8 +28,8 @@ public class BranchControllerImpl implements BranchControlller {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<BranchResponseDto> createBranch(@RequestBody @Valid BranchRequestDto branchRequestDto) {
-        BranchResponseDto branch = crudBranch.save(branchRequestDto);
+    public ResponseEntity<BranchResponseDto> createBranch(@RequestBody @Valid BranchCreateRequestDto branchCreateRequestDto) {
+        BranchResponseDto branch = crudBranch.save(branchCreateRequestDto);
 
         return ResponseEntity.of(Optional.of(branch));
     }
@@ -61,8 +60,8 @@ public class BranchControllerImpl implements BranchControlller {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<BranchResponseDto>> updateBranch(@PathVariable String id, @RequestBody @Valid BranchRequestDto branchRequestDto) {
-        Optional<BranchResponseDto> branch = crudBranch.update(id, branchRequestDto);
+    public ResponseEntity<Optional<BranchResponseDto>> updateBranch(@PathVariable String id, @RequestBody @Valid BranchCreateRequestDto branchCreateRequestDto) {
+        Optional<BranchResponseDto> branch = crudBranch.update(id, branchCreateRequestDto);
 
         return ResponseEntity.of(Optional.of(branch));
     }

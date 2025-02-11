@@ -7,4 +7,7 @@ import java.util.Collection;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
     Collection<Employee> findAllByDeleteRequest(boolean b);
+    Long countAllByBranch_IdBranch(String branchId);
+    Long countAllBySupplier_IdProvider(String supplierId);
+    Long countAllBySubcontract_IdProvider(String subcontractId);
 }

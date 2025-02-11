@@ -241,7 +241,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     }
 
     @Override
-    public String updateDocumentRequests(String id, List<String> documentCollection) {
+    public String updateRequiredDocuments(String id, List<String> documentCollection) {
         if (documentCollection == null || documentCollection.isEmpty()) {
             throw new NotFoundException("Invalid documents");
         }

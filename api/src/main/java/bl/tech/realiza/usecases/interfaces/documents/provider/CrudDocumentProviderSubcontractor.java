@@ -1,10 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.documents.provider;
 
-import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
-import bl.tech.realiza.gateways.requests.documents.client.DocumentClientRequestDto;
-import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
-import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,5 +18,5 @@ public interface CrudDocumentProviderSubcontractor {
     void delete(String id);
     Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
-    String updateDocumentRequests(String id, List<String> documentCollection);
+    String updateRequiredDocuments(String id, List<String> documentCollection);
 }
