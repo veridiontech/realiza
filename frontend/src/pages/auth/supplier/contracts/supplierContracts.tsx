@@ -10,7 +10,7 @@ import { useUser } from "@/context/user-provider";
 import { Contract } from "@/types/contracts";
 import { ip } from "@/utils/ip";
 
-export default function ContractsTable() {
+export default function SupplierContracts() {
   const navigate = useNavigate();
   const { user } = useUser();
   const clientId = user?.idClient;
