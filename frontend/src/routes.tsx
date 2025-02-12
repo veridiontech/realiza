@@ -37,9 +37,9 @@ import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
-import path from "path";
 import { Quartered } from "./pages/auth/supplier/quartered/quartered";
 import { ProviderAppLayout } from "./_layouts/providerApp";
+import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
 
 export const router = createBrowserRouter([
   {
@@ -122,7 +122,7 @@ export const router = createBrowserRouter([
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
-      { path: "employees/:id", element: <EmployeesTable /> },
+      { path: "employees/:id", element: <SupplierEmployee /> },
     ],
   },
   {
