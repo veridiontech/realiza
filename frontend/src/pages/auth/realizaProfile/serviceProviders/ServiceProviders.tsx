@@ -4,7 +4,7 @@ import { Pagination } from "@/components/ui/pagination";
 import {
   useFetchServiceProviders,
   ServiceProviderProps,
-} from "@/hooks/gets/useServiceProviders";
+} from "@/hooks/gets/realiza/useServiceProviders";
 import { NotebookPen } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/realiza-add-supplier";
 import { useClient } from "@/context/Client-Provider";

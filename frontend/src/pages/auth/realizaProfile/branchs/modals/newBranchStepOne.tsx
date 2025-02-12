@@ -1,7 +1,7 @@
 import { Modal } from "@/components/modal";
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { fetchCompanyByCNPJ } from "@/hooks/gets/useCnpjApi";
+import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 interface SearchCnpjModalProps {
   onClose: () => void;

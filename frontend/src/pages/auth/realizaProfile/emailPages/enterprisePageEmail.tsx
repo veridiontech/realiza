@@ -94,16 +94,29 @@ export function EnterprisePageEmail() {
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
     try {
-      const payload = {
-        ...data,
-        idCompany: findIdCompany || "",
-        company: findCompany || null,
-        fantasyName: data.tradeName,
-        socialReason: data.corporateName,
-      };
-  
-      console.log("Enviando dados:", payload);
-      setEnterpriseData(payload);
+      if(findCompany === "CLIENT") {
+        const payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || null,
+          fantasyName: data.tradeName,
+          socialReason: data.corporateName,
+          role: "ROLE_CLIENT_RESPONSIBLE"
+        };
+        console.log("Enviando dados:", payload);
+        setEnterpriseData(payload);
+      } if( findCompany === "SUPPLIER") {
+        const payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || null,
+          fantasyName: data.tradeName,
+          socialReason: data.corporateName,
+          role: "ROLE_SUPPLIER_RESPONSIBLE"
+        };
+        console.log("Enviando dados:", payload);
+        setEnterpriseData(payload);
+      }
       navigate(`/email/Sign-up`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
