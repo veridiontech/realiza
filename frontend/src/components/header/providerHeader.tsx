@@ -1,4 +1,12 @@
-import { Bell, ChartNoAxesGantt, LogOut, Search, User } from "lucide-react";
+import {
+  Bell,
+  ChartNoAxesGantt,
+  LogOut,
+  Paperclip,
+  Plus,
+  Search,
+  User,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
@@ -6,7 +14,6 @@ import { Sheet, SheetTrigger } from "../ui/sheet";
 import { ProviderLateralMenu } from "./providerLateralMenu";
 import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
-import { ProfilePic } from "./profile-pic";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +22,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ProfilePic } from "./profile-pic";
+import { ProfilePhoto } from "./profile-photo";
 
 export function HeaderProvider() {
   const { user, logout } = useUser();
 
   const getIdUser = user?.idUser;
+  console.log("teste id:", user?.idUser);
+  
 
   return (
     <header className="dark:bg-primary relative p-5">
@@ -58,14 +69,11 @@ export function HeaderProvider() {
               >
                 <Bell size={24} />
               </Button>
-              {/* <Link to={`/profile-user`}>
-                    <Avatar>
-                      <AvatarImage src="https://github.com/shadcn.png" />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                  </Link> */}
 
               <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <ProfilePhoto />
+                </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
                     {user?.firstName} {user?.surname}

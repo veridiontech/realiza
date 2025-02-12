@@ -47,17 +47,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const validateTokenAndFetchUser = async () => {
     const token = localStorage.getItem("tokenClient");
-    const userId = localStorage.getItem("userId");
+    const idUser = localStorage.getItem("idUser");
     const roleUser = localStorage.getItem("role");
 
-    if (token && isTokenValid(token) && userId && roleUser) {
+    if (token && isTokenValid(token) && idUser && roleUser) {
       try {
         switch (roleUser) {
           case "ROLE_ADMIN":
           case "ROLE_REALIZA_PLUS":
           case "ROLE_REALIZA_BASIC":
             try {
-              const res = await axios.get(`${ip}/user/manager/${userId}`, {
+              const res = await axios.get(`${ip}/user/manager/${idUser}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -78,7 +78,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_CLIENT_MANAGER":
           case "ROLE_CLIENT_RESPONSIBLE":
             try {
-              const res = await axios.get(`${ip}/user/client/${userId}`, {
+              const res = await axios.get(`${ip}/user/client/${idUser}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -99,12 +99,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUPPLIER_MANAGER":
           case "ROLE_SUPPLIER_RESPONSIBLE":
             try {
-              const res = await axios.get(`${ip}/user/supplier/${userId}`, {
+              const res = await axios.get(`${ip}/user/supplier/${idUser}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
               });
-
+              console.log("resultad:", res.data);
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -121,7 +121,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
               const res = await axios.get(
-                `${ip}/user/subcontractor/${userId}`,
+                `${ip}/user/subcontractor/${idUser}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 const dataClient = resClient.data.content;
                 if (dataClient.branch) {
                   const resUser = await axios.get(
-                    `${ip}/user/client/${userId}`,
+                    `${ip}/user/client/${idUser}`,
                     {
                       headers: {
                         Authorization: `Bearer ${token}`,
@@ -173,7 +173,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 if (dataSupplier.supplier) {
                   try {
                     const res = await axios.get(
-                      `${ip}/user/supplier/${userId}`,
+                      `${ip}/user/supplier/${idUser}`,
                       {
                         headers: {
                           Authorization: `Bearer ${token}`,
@@ -204,7 +204,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 if (dataSubcontractor.subcontrator) {
                   try {
                     const res = await axios.get(
-                      `${ip}/user/subcontractor/${userId}`,
+                      `${ip}/user/subcontractor/${idUser}`,
                       {
                         headers: {
                           Authorization: `Bearer ${token}`,
@@ -255,7 +255,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem("userId");
       localStorage.removeItem("tokenClient");
-      localStorage.removeItem("hasShownToast");
+      localStorage.removeItem("role")
       setUser(null);
       setAuthUser(false);
       navigate("/");
