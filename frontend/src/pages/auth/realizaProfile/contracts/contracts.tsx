@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
-import { useContracts } from "@/hooks/gets/useContracts";
+import { useContracts } from "@/hooks/gets/realiza/useContracts";
 import { useClient } from "@/context/Client-Provider";
 import { Contract } from "@/types/contracts";
 import { NotebookPen, Users } from "lucide-react";

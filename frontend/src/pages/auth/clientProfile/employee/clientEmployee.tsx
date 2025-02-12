@@ -1,29 +1,27 @@
 import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
-import { useEmployees } from "@/hooks/gets/realiza/useEmployees";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
-import { StepOneEmployee } from "./modals/stepOne";
+import { StepOneEmployee } from "./modals/clientAddEmployee";
 import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Employee } from "@/types/employee";
-import { useClient } from "@/context/Client-Provider";
+import { useUser } from "@/context/user-provider";
+import { clientGetEmployee } from "@/hooks/gets/client/clientGetEmployee";
 
-export const EmployeesTable = (): JSX.Element => {
+export const ClientEmployee = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
-
-  const { client } = useClient();
-
+  const { user } = useUser();
   const { employees, totalPages, loading, error, fetchEmployees } =
-    useEmployees();
+    clientGetEmployee();
 
   useEffect(() => {
-    if (client?.idClient) {
-      fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT", client?.idClient);
+    if (user?.branch) {
+      fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT");
     }
-  }, [currentPage, client?.idClient]);
+  }, [currentPage, user?.branch]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -99,7 +97,6 @@ export const EmployeesTable = (): JSX.Element => {
           </div>
         )}
       </div>
-
       {isModalOpen && (
         <StepOneEmployee
           onClose={() => setIsModalOpen(false)}

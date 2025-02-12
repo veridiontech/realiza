@@ -90,7 +90,6 @@ export function ModalTesteSendSupplier() {
     resolver: zodResolver(contractFormSchema),
   });
 
-  // (Opcional) Se precisar buscar outras informações, como atividades e gestores
   const getActivities = async () => {
     try {
       const activitieData = await axios.get(`${ip}/contract/activity`);
