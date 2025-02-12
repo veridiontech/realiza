@@ -55,15 +55,16 @@ export function SignIn() {
       );
 
       const userData = userResponse.data;
-      localStorage.setItem("userId", userData.idUser);
-      localStorage.setItem("role", userData.role);
-      console.log("enviando dados:", userResponse.data);
-      
-      setUser(userResponse.data);
-      console.log("identificando role client:", user?.role);
-      setShowSplash(true);
 
-      console.log("usuário:", user);
+      // Para usuários supplier, o backend pode retornar o id no campo "supplier"
+      const id = userData.idUser || userData.supplier;
+
+      localStorage.setItem("userId", id);
+      localStorage.setItem("role", userData.role);
+      console.log("Dados recebidos:", userData);
+
+      setUser(userData);
+      setShowSplash(true);
 
       setTimeout(() => {
         console.log("Redirecionando para:", userData.role);
@@ -71,25 +72,25 @@ export function SignIn() {
           case "ROLE_ADMIN":
           case "ROLE_REALIZA_PLUS":
           case "ROLE_REALIZA_BASIC":
-            navigate(`/sistema/select-client/${userData.idUser}`);
+            navigate(`/sistema/select-client/${id}`);
             break;
           case "ROLE_CLIENT_RESPONSIBLE":
-            navigate(`/cliente/branch/${userData.idUser}`);
+            navigate(`/cliente/branch/${id}`);
             break;
           case "ROLE_CLIENT_MANAGER":
-            navigate(`/cliente/contracts/${userData.idUser}`);
+            navigate(`/cliente/contracts/${id}`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/quartered/${userData.idUser}`);
+            navigate(`/fornecedor/quartered/${id}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
-            navigate(`/fornecedor/contracts/${userData.idUser}`);
+            navigate(`/fornecedor/contracts/${id}`);
             break;
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
-            navigate(`/sub/employees/${userData.idUser}`);
+            navigate(`/sub/employees/${id}`);
             break;
           case "ROLE_SUBCONTRACTOR_MANAGER":
-            navigate(`/sub/contracts/${userData.idUser}`);
+            navigate(`/sub/contracts/${id}`);
             break;
           case "ROLE_VIEWER":
             navigate(`/client-test`);
