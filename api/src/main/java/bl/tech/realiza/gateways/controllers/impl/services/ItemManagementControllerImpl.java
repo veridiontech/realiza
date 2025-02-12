@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
 import bl.tech.realiza.services.ItemManagementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,8 +55,25 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Collection<Object>> getDeleteRequests() {
-        Collection<Object> items = itemManagementService.getInactiveItems();
+        Collection<Object> items = itemManagementService.getDeleteItemRequest();
 
         return ResponseEntity.of(Optional.ofNullable(items));
+    }
+
+    @PatchMapping("/approve-employee-document")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> approveDocumentEmployee(@RequestParam String idDocument) {
+        String response = itemManagementService.approveNewDocumentEmployee(idDocument);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/employee-document-request")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Collection<DocumentEmployee>> getApproveRequests() {
+        Collection<DocumentEmployee> documentEmployees = itemManagementService.getAddRequestDocumentEmployees();
+        return ResponseEntity.ok(documentEmployees);
     }
 }

@@ -2,13 +2,16 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
-import bl.tech.realiza.gateways.requests.clients.BranchRequestDto;
+import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,33 +28,47 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
+    private final DocumentBranchRepository documentBranchRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
-    public BranchResponseDto save(BranchRequestDto branchRequestDto) {
+    public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
 
-        Optional<Client> clientOptional = clientRepository.findById(branchRequestDto.getClient());
+        Optional<Client> clientOptional = clientRepository.findById(branchCreateRequestDto.getClient());
         Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
-        Optional<Branch> branchOptional = branchRepository.findByCnpj(branchRequestDto.getCnpj());
+        Optional<Branch> branchOptional = branchRepository.findByCnpj(branchCreateRequestDto.getCnpj());
         if (branchOptional.isPresent()) {
             throw new UnprocessableEntityException("CNPJ already exists");
         }
 
         Branch newBranch = Branch.builder()
-                .name(branchRequestDto.getName())
-                .cnpj(branchRequestDto.getCnpj())
-                .cep(branchRequestDto.getCep())
-                .state(branchRequestDto.getState())
-                .city(branchRequestDto.getCity())
-                .email(branchRequestDto.getEmail())
-                .telephone(branchRequestDto.getTelephone())
-                .address(branchRequestDto.getAddress())
-                .number(branchRequestDto.getNumber())
+                .name(branchCreateRequestDto.getName())
+                .cnpj(branchCreateRequestDto.getCnpj())
+                .cep(branchCreateRequestDto.getCep())
+                .state(branchCreateRequestDto.getState())
+                .city(branchCreateRequestDto.getCity())
+                .email(branchCreateRequestDto.getEmail())
+                .telephone(branchCreateRequestDto.getTelephone())
+                .address(branchCreateRequestDto.getAddress())
+                .number(branchCreateRequestDto.getNumber())
                 .client(client)
                 .build();
 
         Branch savedBranch = branchRepository.save(newBranch);
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
+
+        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
+                .map(docMatrix -> DocumentBranch.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .branch(savedBranch)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentBranchRepository.saveAll(documentBranchList);
 
         BranchResponseDto branchResponseDto = BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
@@ -116,20 +134,20 @@ public class CrudBranchImpl implements CrudBranch {
     }
 
     @Override
-    public Optional<BranchResponseDto> update(String id, BranchRequestDto branchRequestDto) {
+    public Optional<BranchResponseDto> update(String id, BranchCreateRequestDto branchCreateRequestDto) {
         Optional<Branch> branchOptional = branchRepository.findById(id);
 
         Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        branch.setName(branchRequestDto.getName() != null ? branchRequestDto.getName() : branch.getName());
-        branch.setCnpj(branchRequestDto.getCnpj() != null ? branchRequestDto.getCnpj() : branch.getCnpj());
-        branch.setCep(branchRequestDto.getCep() != null ? branchRequestDto.getCep() : branch.getCep());
-        branch.setState(branchRequestDto.getState() != null ? branchRequestDto.getState() : branch.getState());
-        branch.setCity(branchRequestDto.getCity() != null ? branchRequestDto.getCity() : branch.getCity());
-        branch.setEmail(branchRequestDto.getEmail() != null ? branchRequestDto.getEmail() : branch.getEmail());
-        branch.setTelephone(branchRequestDto.getTelephone() != null ? branchRequestDto.getTelephone() : branch.getTelephone());
-        branch.setAddress(branchRequestDto.getAddress() != null ? branchRequestDto.getAddress() : branch.getAddress());
-        branch.setNumber(branchRequestDto.getNumber() != null ? branchRequestDto.getNumber() : branch.getNumber());
+        branch.setName(branchCreateRequestDto.getName() != null ? branchCreateRequestDto.getName() : branch.getName());
+        branch.setCnpj(branchCreateRequestDto.getCnpj() != null ? branchCreateRequestDto.getCnpj() : branch.getCnpj());
+        branch.setCep(branchCreateRequestDto.getCep() != null ? branchCreateRequestDto.getCep() : branch.getCep());
+        branch.setState(branchCreateRequestDto.getState() != null ? branchCreateRequestDto.getState() : branch.getState());
+        branch.setCity(branchCreateRequestDto.getCity() != null ? branchCreateRequestDto.getCity() : branch.getCity());
+        branch.setEmail(branchCreateRequestDto.getEmail() != null ? branchCreateRequestDto.getEmail() : branch.getEmail());
+        branch.setTelephone(branchCreateRequestDto.getTelephone() != null ? branchCreateRequestDto.getTelephone() : branch.getTelephone());
+        branch.setAddress(branchCreateRequestDto.getAddress() != null ? branchCreateRequestDto.getAddress() : branch.getAddress());
+        branch.setNumber(branchCreateRequestDto.getNumber() != null ? branchCreateRequestDto.getNumber() : branch.getNumber());
 
 
         Branch savedBranch = branchRepository.save(branch);

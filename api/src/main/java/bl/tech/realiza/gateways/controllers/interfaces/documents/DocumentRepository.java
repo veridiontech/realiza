@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Collection;
 
 public interface DocumentRepository extends JpaRepository<Document, String> {
-    Collection<Document> findAllByDeleteRequest(boolean b);
+    Collection<Document> findAllByRequestIs(Document.Request request);
 }

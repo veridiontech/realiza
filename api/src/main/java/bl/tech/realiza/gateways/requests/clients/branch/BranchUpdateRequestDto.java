@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.requests.clients;
+package bl.tech.realiza.gateways.requests.clients.branch;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class BranchRequestDto {
+public class BranchUpdateRequestDto {
     private String name;
     private String cnpj;
     private String email;
@@ -16,6 +16,5 @@ public class BranchRequestDto {
     private String city;
     private String address;
     private String number;
-    private String client;
     private List<String> documents;
 }

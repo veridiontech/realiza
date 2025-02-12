@@ -8,6 +8,7 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Oval } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
@@ -17,11 +18,15 @@ const signUpEmailFormSchema = z
     surname: z.string().nonempty("Sobrenome é obrigatório"),
     phone: z.string().nonempty("Celular é obrigatório"),
     cpf: z.string().nonempty("Cpf é obrigatório"),
-    email: z.string().email("Formato de email inválido").nonempty("Email é obrigatório"),
+    email: z
+      .string()
+      .email("Formato de email inválido")
+      .nonempty("Email é obrigatório"),
     position: z.string().nonempty("Seu cargo é obrigatório"),
-    role: z.string().default("ROLE_ADMIN"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
-    confirmPassword: z.string().min(6, "Confirmação de senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z
+      .string()
+      .min(6, "Confirmação de senha deve ter pelo menos 6 caracteres"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem",
@@ -32,6 +37,7 @@ type SignUpEmailFormSchema = z.infer<typeof signUpEmailFormSchema>;
 export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -43,18 +49,21 @@ export function SignUpPageEmail() {
     mode: "onChange",
   });
 
-  const onSubmit = async(data: SignUpEmailFormSchema) => {
-    try{
+  const onSubmit = async (data: SignUpEmailFormSchema) => {
+    setIsLoading(true);
+    try {
       setUserData(data);
       const allDatas = {
         ...enterpriseData,
         ...data,
       };
-      console.log("enviando dados:",allDatas);
-      await axios.post(`${ip}/sign-enterprise`, allDatas)
-      navigate("/")
-    }catch(err) {
+      console.log("enviando dados:", allDatas);
+      await axios.post(`${ip}/sign-enterprise`, allDatas);
+      navigate("/");
+    } catch (err) {
       console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,12 +173,14 @@ export function SignUpPageEmail() {
                 />
               )}
             </div>
-            {errors.password && <span className="text-red-600">{errors.password.message}</span>}
+            {errors.password && (
+              <span className="text-red-600">{errors.password.message}</span>
+            )}
           </div>
         </div>
         <div>
           <Label>Confirme sua senha</Label>
-          <div className="flex flex-col ">
+          <div className="flex flex-col">
             <Input
               type={isOpenEye ? "text" : "password"}
               className=""
@@ -183,9 +194,24 @@ export function SignUpPageEmail() {
             )}
           </div>
         </div>
-        <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
-          Cadastrar
-        </Button>
+        {isLoading ? (
+          <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
+            Cadastrar
+          </Button>
+        ) : (
+          <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
+            <Oval
+            visible={true}
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="oval-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+          </Button>
+          
+        )}
       </form>
     </div>
   );

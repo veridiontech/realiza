@@ -1,6 +1,5 @@
+import { Header } from "@/components/header/realizaHeader";
 import { Outlet } from "react-router-dom";
-
-import { Header } from "@/components/header/providerHeader";
 
 export function ProviderAppLayout() {
   return (

@@ -19,4 +19,5 @@ public interface DocumentEmployeeControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployeeByEmployee(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getEmployeeDocuments(String id);
     ResponseEntity<String> updateEmployeeDocuments(String id, List<String> documentList);
+    ResponseEntity<String> solicitateNewRequiredDocument(String idEmployee, String idDocument);
 }

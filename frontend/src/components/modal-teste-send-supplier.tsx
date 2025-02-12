@@ -15,7 +15,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { Radio } from "react-loader-spinner";
-import { propsClient } from "@/types/interfaces";
+import { propsBranch, propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
@@ -25,6 +25,7 @@ const modalSendEmailFormSchema = z.object({
   company: z.string().default("SUPPLIER"),
   cnpj: z.string().nonempty("Insira o cnpj"),
   idCompany: z.string().nonempty("Selecione um cliente"),
+  idBranch: z.string().nonempty("Selecione uma filial")
 });
 
 const contractFormSchema = z.object({
@@ -62,15 +63,16 @@ const contractFormSchema = z.object({
   responsible: z.string().nonempty("O responsável é obrigatório"),
 });
 
-type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
-type ContractFormSchema = z.infer<typeof contractFormSchema>;
+type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>
+type ContractFormSchema = z.infer<typeof contractFormSchema>
 export function ModalTesteSendSupplier() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
   const [requirements, setRequirements] = useState<any>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
-  const [pushCnpj, setPushCnpj] = useState<string | null>(null);
+  const [pushCnpj, setPushCnpj] = useState<string | null>(null)
+  const [branches, setBranches] = useState<propsBranch[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
@@ -100,6 +102,17 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const getBranches = async (clientId: string) => {
+    try {
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${clientId}`,
+      );
+      setBranches(res.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const getActivities = async () => {
     try {
       const activitieData = await axios.get(`${ip}/contract/activity`);
@@ -111,13 +124,18 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const onSelectClient = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    getBranches(id);
+  };
+
   const createClient = async (data: ModalSendEmailFormSchema) => {
     console.log("enviando dados:", data);
     setIsLoading(true);
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: data.idCompany,
+        idCompany: data.idBranch,
         company: data.company,
         cnpj: data.cnpj,
       });
@@ -125,11 +143,12 @@ export function ModalTesteSendSupplier() {
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
       try {
-        console.log("teste");
         const res = await axios.get(
           `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
         );
         setManagers(res.data.content);
+        console.log("gestores da empresa:", res.data.content);
+        
       } catch (err) {
         console.log("erro ao buscar gestores", err);
       }
@@ -209,25 +228,52 @@ export function ModalTesteSendSupplier() {
                 {...register("cnpj")}
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <Label className="text-white">Selecione um cliente</Label>
-              <select
-                className="rounded-md border p-2"
-                defaultValue=""
-                {...register("idCompany")}
-              >
-                <option value="" disabled>
-                  Selecione um cliente
-                </option>
-                {clients.map((client) => (
-                  <option key={client.idClient} value={client.idClient}>
-                    {client.companyName}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <Label className="text-white">Selecione um cliente</Label>
+                <select
+                  className="rounded-md border p-2"
+                  defaultValue=""
+                  {...register("idCompany")}
+                  onChange={onSelectClient} // Alterado para onChange
+                >
+                  <option value="" disabled>
+                    Selecione um cliente
                   </option>
-                ))}
-              </select>
-              {errors.idCompany && (
-                <span className="text-red-600">{errors.idCompany.message}</span>
-              )}
+                  {clients.map((client) => (
+                    <option key={client.idClient} value={client.idClient}>
+                      {client.tradeName}
+                    </option>
+                  ))}
+                </select>
+                {errors.idCompany && (
+                  <span className="text-red-600">
+                    {errors.idCompany.message}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label className="text-white">Filiais do cliente</Label>
+                <select
+                  className="rounded-md border p-2"
+                  defaultValue=""
+                  {...register("idBranch")}
+                >
+                  <option value="" disabled>
+                    Selecione uma filial
+                  </option>
+                  {branches.map((branch) => (
+                    <option key={branch.idBranch} value={branch.idBranch}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.idBranch && (
+                  <span className="text-red-600">
+                    {errors.idBranch.message}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex justify-end">
               {isLoading ? (

@@ -15,7 +15,6 @@ interface UserFormData {
   cpf: string;
   email: string;
   position: string;
-  role: string;
 };
 
 interface FormDataContextType {

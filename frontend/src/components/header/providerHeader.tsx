@@ -73,7 +73,7 @@ export function HeaderProvider() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <ProfilePic className="bg-realizaBlue rounded-full p-2 text-white" />
+                  <ProfilePic />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
