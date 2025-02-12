@@ -269,7 +269,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     <UserContext.Provider
       value={{
         user,
-        branch: user?.branch || "",
         authUser,
         setUser,
         setAuthUser,

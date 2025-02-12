@@ -40,6 +40,7 @@ export function SignIn() {
         email: data.email,
         password: data.password,
       });
+      console.log("token: ", res.data);
 
       const token = res.data.token;
       localStorage.setItem("tokenClient", token);
@@ -55,6 +56,7 @@ export function SignIn() {
       );
 
       const userData = userResponse.data;
+      console.log("colentando dados:", userResponse.data);
 
       // Para usuários supplier, o backend pode retornar o id no campo "supplier"
       const id = userData.idUser || userData.supplier;
