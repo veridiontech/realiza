@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 interface UserContextProps {
   user: propsUser | null;
+  branch: string;
   authUser: boolean;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
@@ -47,17 +48,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const validateTokenAndFetchUser = async () => {
     const token = localStorage.getItem("tokenClient");
-    const idUser = localStorage.getItem("idUser");
+    const userId = localStorage.getItem("userId");
     const roleUser = localStorage.getItem("role");
 
-    if (token && isTokenValid(token) && idUser && roleUser) {
+    if (token && isTokenValid(token) && userId && roleUser) {
       try {
         switch (roleUser) {
           case "ROLE_ADMIN":
           case "ROLE_REALIZA_PLUS":
           case "ROLE_REALIZA_BASIC":
             try {
-              const res = await axios.get(`${ip}/user/manager/${idUser}`, {
+              const res = await axios.get(`${ip}/user/manager/${userId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -78,7 +79,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_CLIENT_MANAGER":
           case "ROLE_CLIENT_RESPONSIBLE":
             try {
-              const res = await axios.get(`${ip}/user/client/${idUser}`, {
+              const res = await axios.get(`${ip}/user/client/${userId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -99,12 +100,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUPPLIER_MANAGER":
           case "ROLE_SUPPLIER_RESPONSIBLE":
             try {
-              const res = await axios.get(`${ip}/user/supplier/${idUser}`, {
+              const res = await axios.get(`${ip}/user/supplier/${userId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
               });
-              console.log("resultad:", res.data);
+
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -121,7 +122,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
               const res = await axios.get(
-                `${ip}/user/subcontractor/${idUser}`,
+                `${ip}/user/subcontractor/${userId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`,
@@ -148,7 +149,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 const dataClient = resClient.data.content;
                 if (dataClient.branch) {
                   const resUser = await axios.get(
-                    `${ip}/user/client/${idUser}`,
+                    `${ip}/user/client/${userId}`,
                     {
                       headers: {
                         Authorization: `Bearer ${token}`,
@@ -173,7 +174,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 if (dataSupplier.supplier) {
                   try {
                     const res = await axios.get(
-                      `${ip}/user/supplier/${idUser}`,
+                      `${ip}/user/supplier/${userId}`,
                       {
                         headers: {
                           Authorization: `Bearer ${token}`,
@@ -204,7 +205,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 if (dataSubcontractor.subcontrator) {
                   try {
                     const res = await axios.get(
-                      `${ip}/user/subcontractor/${idUser}`,
+                      `${ip}/user/subcontractor/${userId}`,
                       {
                         headers: {
                           Authorization: `Bearer ${token}`,
@@ -255,7 +256,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem("userId");
       localStorage.removeItem("tokenClient");
-      localStorage.removeItem("role")
+      localStorage.removeItem("hasShownToast");
       setUser(null);
       setAuthUser(false);
       navigate("/");
