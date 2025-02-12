@@ -18,6 +18,7 @@ export interface propsUser {
   idCompany: string;
   telephone: string;
   description: string;
+  profilePictureData: string;
   supplier: string;
 }
 
@@ -37,4 +38,9 @@ export interface propsDocument {
   idDocumentSubgroup: string;
   name: string;
   type: string;
+}
+
+export interface propsBranch {
+  idBranch: string;
+  name: string;
 }

@@ -1,12 +1,14 @@
 // DocumentSelectedBox.tsx
 
+import { propsDocument } from "@/types/interfaces";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useDocument } from "@/context/Document-provider"; // Importe o hook do contexto
+import { useState } from "react";
+// import { useDocument } from "@/context/Document-provider";
 // import { useState } from "react";
 
 export function DocumentSelectedBox() {
-  const { document } = useDocument(); // Acesse o documento do contexto
   // const [isLoading, setIsLoading] = useState(false);
+  const [document] = useState<propsDocument[]>([])
 
   // if (isLoading) {
   //   return (
@@ -23,17 +25,21 @@ export function DocumentSelectedBox() {
           <option value="" disabled>
             Selecionados
           </option>
-          {document && (
-            <option value={document.idDocumentMatrix}>{document.name}</option>
-          )}
+          {document.map((doc) => (
+            <option key={doc.idDocumentMatrix} value={doc.idDocumentMatrix}>
+              {doc.name}
+            </option>
+          ))}
         </select>
       </div>
       <ScrollArea className="h-[25vh] w-full">
         <div className="flex flex-col gap-3">
-          {document ? (
-            <div>
-              <h3>{document.name}</h3>
-            </div>
+          {document.length > 0 ? (
+            document.map((doc) => (
+              <div key={doc.idDocumentMatrix}>
+                <h3>{doc.name}</h3>
+              </div>
+            ))
           ) : (
             <p>Nenhum documento selecionado.</p>
           )}

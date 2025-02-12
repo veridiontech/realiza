@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contract;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,6 +35,8 @@ public abstract class Contract {
     private User responsible;
     private Date startDate;
     private Date endDate;
+    @Builder.Default
+    private Document.Risk risk = Document.Risk.LOW_LESS_THAN_1M;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default

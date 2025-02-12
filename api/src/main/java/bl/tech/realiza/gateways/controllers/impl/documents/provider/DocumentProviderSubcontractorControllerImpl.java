@@ -4,7 +4,6 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.provider.Docume
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.provider.CrudDocumentProviderSubcontractorImpl;
-import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -123,7 +122,7 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateSubcontractorDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentSubcontractor.updateDocumentRequests(id, documentList);
+        String response = crudDocumentSubcontractor.updateRequiredDocuments(id, documentList);
         return ResponseEntity.ok(response);
     }
 }

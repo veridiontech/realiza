@@ -2,17 +2,20 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
-import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
-import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
-import bl.tech.realiza.gateways.requests.clients.ClientRequestDto;
-import bl.tech.realiza.gateways.responses.enterprises.EnterpriseAndUserResponseDto;
+import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
@@ -24,7 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CrudClientImpl implements CrudClient {
@@ -34,6 +40,8 @@ public class CrudClientImpl implements CrudClient {
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentBranchRepository documentBranchRepository;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -71,7 +79,20 @@ public class CrudClientImpl implements CrudClient {
                 .client(savedClient)
                 .build();
 
-        branchRepository.save(newBranch);
+        Branch savedBranch = branchRepository.save(newBranch);
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
+
+        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
+                .map(docMatrix -> DocumentBranch.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .branch(savedBranch)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentBranchRepository.saveAll(documentBranchList);
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())

@@ -1,21 +1,37 @@
-// DocumentBox.tsx
-
+import { userBranch } from "@/context/Branch-provider";
+import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useDocument } from "@/context/Document-provider"; // Importe o hook do contexto
+import axios from "axios";
 import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Blocks } from "react-loader-spinner";
 
 interface DocumentBoxProps {
-  documents: { idDocumentMatrix: string; name: string }[];
   isLoading: boolean;
 }
 
-export function DocumentBox({ documents, isLoading }: DocumentBoxProps) {
-  const { setDocument } = useDocument(); // Acessa a função do contexto para atualizar o documento
+export function DocumentBox({ isLoading }: DocumentBoxProps) {
+  const { branch } = userBranch();
+  const [documents, setDocuments] = useState<{ idDocument: string; title: string }[]>([]);
 
-  const handleClickDocument = (doc: { idDocumentMatrix: string; name: string }) => {
-    setDocument(doc); // Atualiza o documento no contexto
+  const getDocuments = async () => {
+    if (!branch?.idBranch) return;
+
+    try {
+      const res = await axios.get(`${ip}/document/branch/${branch.idBranch}/document-matrix`);
+      setDocuments(res.data || []);
+      console.log("documentos da filial", res.data);
+    } catch (err) {
+      console.log("erro ao filtrar documentos:", err);
+    }
   };
+  
+  useEffect(() => {
+    if (branch?.idBranch) {
+      getDocuments();
+    }
+  }, [branch?.idBranch]);
+  
 
   if (isLoading) {
     return (
@@ -28,17 +44,7 @@ export function DocumentBox({ documents, isLoading }: DocumentBoxProps) {
           />
         </div>
         <ScrollArea className="flex h-[25vh] w-full items-center justify-center">
-          <div className="flex items-center justify-center">
-          <Blocks
-              height="60"
-              width="60"
-              color="#4fa94d"
-              ariaLabel="blocks-loading"
-              wrapperStyle={{}}
-              wrapperClass="blocks-wrapper"
-              visible={true}
-            />
-          </div>
+          <Blocks height="60" width="60" color="#4fa94d" visible />
         </ScrollArea>
       </div>
     );
@@ -55,11 +61,13 @@ export function DocumentBox({ documents, isLoading }: DocumentBoxProps) {
       </div>
       <ScrollArea className="h-[25vh] w-full">
         <div className="flex flex-col gap-3">
-          {documents.map((doc) => (
-            <div key={doc.idDocumentMatrix} onClick={() => handleClickDocument(doc)} className="cursor-pointer">
-              <h3>{doc.name}</h3>
-            </div>
-          ))}
+          {documents.length > 0 ? (
+            documents.map((document) => (
+              <div key={document.idDocument}>{document.title}</div>
+            ))
+          ) : (
+            <p className="text-gray-500">Nenhum documento encontrado.</p>
+          )}
         </div>
       </ScrollArea>
     </div>

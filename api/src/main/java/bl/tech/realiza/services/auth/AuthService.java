@@ -1,7 +1,9 @@
 package bl.tech.realiza.services.auth;
 
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.gateways.repositories.users.UserRepository;
+import bl.tech.realiza.domains.user.UserClient;
+import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.users.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +11,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
+    private final UserManagerRepository userManagerRepository;
+    private final UserClientRepository userClientRepository;
+    private final UserProviderSupplierRepository userProviderSupplierRepository;
+    private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final PasswordEncryptionService passwordService;
     private final JwtService jwtService;
 
@@ -18,7 +24,17 @@ public class AuthService {
         if (user == null || !passwordService.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
-
-        return jwtService.generateToken(user);
+        switch (user.getClass().getSimpleName()) {
+            case "UserManager":
+                return jwtService.generateTokenManager(userManagerRepository.findById(user.getIdUser()).orElseThrow(() ->  new NotFoundException("User not found")));
+            case "UserClient":
+                return jwtService.generateTokenClient(userClientRepository.findById(user.getIdUser()).orElseThrow(() ->  new NotFoundException("User not found")));
+            case "UserProviderSupplier":
+                return jwtService.generateTokenSupplier(userProviderSupplierRepository.findById(user.getIdUser()).orElseThrow(() ->  new NotFoundException("User not found")));
+            case "UserProviderSubcontractor":
+                return jwtService.generateTokenSubcontractor((userProviderSubcontractorRepository.findById(user.getIdUser()).orElseThrow(() ->  new NotFoundException("User not found"))));
+            default:
+                return jwtService.generateToken(user);
+        }
     }
 }

@@ -122,7 +122,15 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateEmployeeDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentEmployeeImpl.updateDocumentRequests(id, documentList);
+        String response = crudDocumentEmployeeImpl.updateRequiredDocuments(id, documentList);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/solicitation")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> solicitateNewRequiredDocument(@PathVariable String idEmployee, @RequestParam String idDocument) {
+        String response = crudDocumentEmployeeImpl.solicitateNewRequiredDocument(idEmployee, idDocument);
         return ResponseEntity.ok(response);
     }
 }
