@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
-import { useEmployees } from "@/hooks/gets/useEmployees";
+import { clientGetEmployee } from "@/hooks/gets/client/clientGetEmployee";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { SupplierAddEmployee } from "./modal/supplierAddEmployee";
 import { Settings2 } from "lucide-react";
@@ -17,11 +17,11 @@ export const SupplierEmployee = (): JSX.Element => {
   const { client } = useClient();
 
   const { employees, totalPages, loading, error, fetchEmployees } =
-    useEmployees();
+    clientGetEmployee();
 
   useEffect(() => {
     if (client?.idClient) {
-      fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT", client?.idClient);
+      fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT");
     }
   }, [currentPage, client?.idClient]);
 

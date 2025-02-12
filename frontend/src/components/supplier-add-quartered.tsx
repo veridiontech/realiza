@@ -1,5 +1,5 @@
 import axios from "axios";
-import { fetchCompanyByCNPJ } from "@/hooks/gets/useCnpjApi"; // ajuste o caminho conforme sua estrutura
+import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi"; // ajuste o caminho conforme sua estrutura
 import {
   Dialog,
   DialogContent,
