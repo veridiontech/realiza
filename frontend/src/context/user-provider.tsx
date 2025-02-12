@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 interface UserContextProps {
   user: propsUser | null;
+  branch: string;
   authUser: boolean;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
@@ -164,8 +165,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     logout();
                   }
                 }
-              }else {
-                logout()
+              } else {
+                logout();
               }
               const resSupplier = await axios.get(`${ip}/user/supplier`);
               if (resSupplier.data.content) {
@@ -193,8 +194,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     logout();
                   }
                 }
-              }else {
-                logout()
+              } else {
+                logout();
               }
               const resSubcontractor = await axios.get(
                 `${ip}/user/subcontractor`,
@@ -223,9 +224,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     console.error("Erro ao buscar usuário:", error);
                     logout();
                   }
-                } 
+                }
               } else {
-                logout()
+                logout();
               }
             } catch (error) {
               console.error("Erro ao buscar usuário:", error);

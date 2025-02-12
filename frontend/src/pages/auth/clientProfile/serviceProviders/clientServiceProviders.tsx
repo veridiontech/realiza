@@ -4,9 +4,9 @@ import { Pagination } from "@/components/ui/pagination";
 import {
   useFetchServiceProviders,
   ServiceProviderProps,
-} from "@/hooks/gets/useServiceProviders";
+} from "@/hooks/gets/realiza/useServiceProviders";
 import { NotebookPen } from "lucide-react";
-import { ModalTesteSendSupplier } from "@/components/modal-teste-send-supplier";
+import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 import { useClient } from "@/context/Client-Provider";
 
 export function ClientServiceProvider() {

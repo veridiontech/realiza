@@ -144,7 +144,7 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
               Aprovar
             </button>
             <button className="h-12 w-[10rem] rounded-full bg-yellow-400 font-bold text-white hover:bg-yellow-300">
-              Desaprovar
+              Reprovar
             </button>
             <button className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-red-300">
               Bloquear
