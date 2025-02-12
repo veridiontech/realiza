@@ -104,7 +104,6 @@ export function ModalTesteSendSupplier() {
 
   const getBranches = async (clientId: string) => {
     try {
-      console.log("id cliente:", clientId);
       const res = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${clientId}`,
       );
@@ -127,7 +126,6 @@ export function ModalTesteSendSupplier() {
 
   const onSelectClient = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
-    console.log("id do cliente selecionado:", id);
     getBranches(id);
   };
 
@@ -137,8 +135,7 @@ export function ModalTesteSendSupplier() {
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: data.idCompany,
-        idBranch: data.idBranch,
+        idCompany: data.idBranch,
         company: data.company,
         cnpj: data.cnpj,
       });
@@ -146,7 +143,6 @@ export function ModalTesteSendSupplier() {
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
       try {
-        console.log("teste");
         const res = await axios.get(
           `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
         );

@@ -23,7 +23,6 @@ const signUpEmailFormSchema = z
       .email("Formato de email inválido")
       .nonempty("Email é obrigatório"),
     position: z.string().nonempty("Seu cargo é obrigatório"),
-    role: z.string().default("ROLE_CLIENT_RESPONSIBLE"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
     confirmPassword: z
       .string()
