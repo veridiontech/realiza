@@ -19,6 +19,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class UserProviderSupplier extends User {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     private ProviderSupplier providerSupplier;
 }

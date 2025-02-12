@@ -19,6 +19,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CLIENT")
 public class UserClient extends User {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Branch branch;
 }

@@ -21,6 +21,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("EMPLOYEE")
 public class DocumentEmployee extends Document {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Employee employee;
 }
