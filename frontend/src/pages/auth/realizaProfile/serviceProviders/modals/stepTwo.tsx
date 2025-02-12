@@ -1,7 +1,10 @@
 import { Modal } from "@/components/modal";
 import * as z from "zod";
-import { useActivities, Activity } from "@/hooks/gets/useActivities";
-import { useRequirements, Requirement } from "@/hooks/gets/useRequirements";
+import { useActivities, Activity } from "@/hooks/gets/realiza/useActivities";
+import {
+  useRequirements,
+  Requirement,
+} from "@/hooks/gets/realiza/useRequirements";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 

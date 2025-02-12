@@ -21,6 +21,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CLIENT")
 public class DocumentClient extends Document {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Client client;
 }

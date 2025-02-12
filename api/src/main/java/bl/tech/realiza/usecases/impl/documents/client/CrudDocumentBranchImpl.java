@@ -244,6 +244,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
         List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
         nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
+        nonSelectedDocumentsPersonal.removeAll(selectedDocumentsPersonal);
+        nonSelectedDocumentsService.removeAll(selectedDocumentsService);
         DocumentResponseDto branchResponse = DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)

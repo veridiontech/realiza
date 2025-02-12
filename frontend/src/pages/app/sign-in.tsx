@@ -108,7 +108,6 @@ export function SignIn() {
 
   useEffect(() => {
     if (user) {
-      console.log("Usuário atualizado:", user);
     }
   }, [user]);
 

@@ -58,12 +58,12 @@ public abstract class Employee {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "branch_id_branch", referencedColumnName = "idBranch")
     private Branch branch;
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     private ProviderSupplier supplier;
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(cascade = CascadeType.ALL)
     private ProviderSubcontractor subcontract;
 
     @ManyToMany
