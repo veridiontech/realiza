@@ -57,8 +57,10 @@ export function SignIn() {
       const userData = userResponse.data;
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
+      console.log("enviando dados:", userResponse.data);
+      
       setUser(userResponse.data);
-      console.log("identificando role client", user?.role);
+      console.log("identificando role client:", user?.role);
       setShowSplash(true);
 
       console.log("usuário:", user);
