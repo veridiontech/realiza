@@ -39,6 +39,9 @@ import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-pa
 import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
 import path from "path";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
+import { Quartered } from "./pages/auth/supplier/quartered/quartered";
+import { ProviderAppLayout } from "./_layouts/providerApp";
+import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
 
 export const router = createBrowserRouter([
   {
@@ -112,15 +115,16 @@ export const router = createBrowserRouter([
         <ProtectedRoute
           allowedRoles={["ROLE_SUPPLIER_RESPONSIBLE", "ROLE_SUPPLIER_MANAGER"]}
         >
-          <ClientAppLayout />
+          <ProviderAppLayout />
         </ProtectedRoute>
       </UserProvider>
     ),
     children: [
-      { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
+      { path: "quartered/:id", element: <Quartered /> },
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
+      { path: "employees/:id", element: <EmployeesTable /> },
     ],
   },
   {

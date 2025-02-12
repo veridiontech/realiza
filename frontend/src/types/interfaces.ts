@@ -19,6 +19,7 @@ export interface propsUser {
   telephone: string;
   description: string;
   profilePictureData: string;
+  supplier: string;
 }
 
 export interface propsClient {
@@ -40,6 +41,6 @@ export interface propsDocument {
 }
 
 export interface propsBranch {
-  idBranch: string,
-  name: string
+  idBranch: string;
+  name: string;
 }

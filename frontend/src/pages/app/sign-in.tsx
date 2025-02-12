@@ -78,7 +78,7 @@ export function SignIn() {
             navigate(`/cliente/contracts/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/branch/${userData.idUser}`);
+            navigate(`/fornecedor/quartered/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
             navigate(`/fornecedor/contracts/${userData.idUser}`);
