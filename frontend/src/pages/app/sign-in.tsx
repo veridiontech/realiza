@@ -40,7 +40,8 @@ export function SignIn() {
         email: data.email,
         password: data.password,
       });
-
+      console.log("token: ",res.data);
+      
       const token = res.data.token;
       localStorage.setItem("tokenClient", token);
 
@@ -55,6 +56,8 @@ export function SignIn() {
       );
 
       const userData = userResponse.data;
+      console.log("colentando dados:",userResponse.data);
+      
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
       console.log("enviando dados:", userResponse.data);
