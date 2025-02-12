@@ -12,8 +12,12 @@ export async function fetchCompanyByCNPJ(cnpj: string) {
     return {
       razaoSocial: data.razao_social,
       nomeFantasia: data.nome_fantasia,
-      email: data.email,
-      telefone: data.telefone,
+      cep: String(data.cep), // Converter para string, se necessário
+      state: data.uf,
+      city: data.municipio,
+      address: data.logradouro,
+      number: data.numero,
+      telefone: data.ddd_telefone_1, // opcional, caso precise
     };
   } catch (error) {
     throw new Error("Erro ao consultar CNPJ. Verifique o número inserido.");

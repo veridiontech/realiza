@@ -35,9 +35,11 @@ import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
-import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page"
+import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
 import path from "path";
+import { Quartered } from "./pages/auth/supplier/quartered/quartered";
+import { ProviderAppLayout } from "./_layouts/providerApp";
 
 export const router = createBrowserRouter([
   {
@@ -77,12 +79,12 @@ export const router = createBrowserRouter([
 
   {
     path: "/viewer",
-    element:(<UserProvider >
-      <AppLayout />
-    </UserProvider>),
-    children: [
-      {path: "teste"}
-    ]
+    element: (
+      <UserProvider>
+        <AppLayout />
+      </UserProvider>
+    ),
+    children: [{ path: "teste" }],
   },
 
   {
@@ -111,12 +113,12 @@ export const router = createBrowserRouter([
         <ProtectedRoute
           allowedRoles={["ROLE_SUPPLIER_RESPONSIBLE", "ROLE_SUPPLIER_MANAGER"]}
         >
-          <ClientAppLayout />
+          <ProviderAppLayout />
         </ProtectedRoute>
       </UserProvider>
     ),
     children: [
-      { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
+      { path: "quartered/:id", element: <Quartered /> },
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },

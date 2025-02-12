@@ -6,10 +6,10 @@ import {
   ServiceProviderProps,
 } from "@/hooks/gets/useServiceProviders";
 import { NotebookPen } from "lucide-react";
-import { ModalTesteSendSupplier } from "@/components/realiza-add-supplier";
+import SupplierAddQuartered from "@/components/supplier-add-quartered";
 import { useClient } from "@/context/Client-Provider";
 
-export function ServiceProvider() {
+export function Quartered() {
   const { client } = useClient();
   console.log(client);
 
@@ -23,13 +23,10 @@ export function ServiceProvider() {
   } = useFetchServiceProviders();
 
   const [currentPage, setCurrentPage] = useState(0);
-  // const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
-  // const [providerData] = useState<Record<string, any> | null>(null);
-
-  // Pegando o ID do cliente para o filtro
 
   useEffect(() => {
-    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient); // Adicionando o id para filtrar pelo cliente
+    // Filtra os fornecedores pelo id do cliente, se existir.
+    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient);
   }, [currentPage, client?.idClient]);
 
   const handlePageChange = (newPage: number) => {
@@ -51,14 +48,6 @@ export function ServiceProvider() {
           >
             <NotebookPen />
           </button>
-          {/* <button
-            onClick={() => {
-              setIsStepTwoModalOpen(true);
-            }}
-            className="ml-2 text-blue-500 hover:underline"
-          >
-            <FilePlus2 />
-          </button> */}
         </div>
       ),
     },
@@ -71,7 +60,7 @@ export function ServiceProvider() {
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
-        <h1 className="m-8">Prestadores de Serviço</h1>
+        <h1 className="m-8 text-2xl">Quarteirizados</h1>
 
         <div className="flex w-[90rem] flex-row justify-between px-10">
           <div className="relative mb-4">
@@ -82,7 +71,7 @@ export function ServiceProvider() {
               onChange={() => {}}
             />
           </div>
-          <ModalTesteSendSupplier />
+          <SupplierAddQuartered />
         </div>
 
         {error ? (

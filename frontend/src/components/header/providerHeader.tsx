@@ -1,15 +1,9 @@
-import {
-  Bell,
-  ChartNoAxesGantt,
-  LogOut,
-  Search,
-  User,
-} from "lucide-react";
+import { Bell, ChartNoAxesGantt, LogOut, Search, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger } from "../ui/sheet";
-import { ClientLateralMenu } from "./clientLateralMenu";
+import { ProviderLateralMenu } from "./providerLateralMenu";
 import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
 import { ProfilePic } from "./profile-pic";
@@ -40,7 +34,7 @@ export function HeaderProvider() {
                 <ChartNoAxesGantt className="text-white" />
               </Button>
             </SheetTrigger>
-            <ClientLateralMenu />
+            <ProviderLateralMenu />
           </Sheet>
           <Link to={`/fornecedor/contracts/${getIdUser}`}>
             <img src={realizaLogo} alt="" className="w-[6vw]" />
@@ -72,9 +66,6 @@ export function HeaderProvider() {
                   </Link> */}
 
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <ProfilePic className="bg-realizaBlue rounded-full p-2 text-white" />
-                </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
                     {user?.firstName} {user?.surname}

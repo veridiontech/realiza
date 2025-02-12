@@ -18,6 +18,7 @@ export interface propsUser {
   idCompany: string;
   telephone: string;
   description: string;
+  supplier: string;
 }
 
 export interface propsClient {
