@@ -1,37 +1,36 @@
-import { userBranch } from "@/context/Branch-provider";
+import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Blocks } from "react-loader-spinner";
+import { toast } from "sonner";
 
 interface DocumentBoxProps {
   isLoading: boolean;
+  documents: { idDocument: string; name: string }[] | undefined;
 }
 
-export function DocumentBox({ isLoading }: DocumentBoxProps) {
-  const { branch } = userBranch();
-  const [documents, setDocuments] = useState<{ idDocument: string; title: string }[]>([]);
+export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
+  const { branch } = useBranch();
+  const [searchBar, setSearchBar] = useState<string>("");
 
-  const getDocuments = async () => {
-    if (!branch?.idBranch) return;
-
+  const selectDocument = async () => {
     try {
-      const res = await axios.get(`${ip}/document/branch/${branch.idBranch}/document-matrix`);
-      setDocuments(res.data || []);
-      console.log("documentos da filial", res.data);
+      await axios.put(
+        `${ip}/document/branch/${branch?.idBranch}/document-matrix`,
+      );
+      toast.success("documento selecionado enviado com sucesso");
     } catch (err) {
-      console.log("erro ao filtrar documentos:", err);
+      console.log("erro ao selecionar documento", err);
+      toast.error("Erro ao selecionar documento");
     }
   };
-  
-  useEffect(() => {
-    if (branch?.idBranch) {
-      getDocuments();
-    }
-  }, [branch?.idBranch]);
-  
+
+  const filterDocument = documents.filter((document) =>
+    document.name.toLowerCase().includes(searchBar.toLowerCase()),
+  );
 
   if (isLoading) {
     return (
@@ -59,14 +58,22 @@ export function DocumentBox({ isLoading }: DocumentBoxProps) {
           placeholder="Pesquisar Documento"
         />
       </div>
-      <ScrollArea className="h-[25vh] w-full">
-        <div className="flex flex-col gap-3">
-          {documents.length > 0 ? (
+      <ScrollArea className="h-[25vh] w-full overflow-auto">
+        <div className="flex flex-col gap-3 p-2">
+          {Array.isArray(documents) && documents.length > 0 ? (
             documents.map((document) => (
-              <div key={document.idDocument}>{document.title}</div>
+              <div
+                key={document.idDocument}
+                onClick={selectDocument}
+                className="cursor-pointer rounded-sm p-1 hover:bg-gray-200"
+              >
+                <span>{document.name}</span>
+              </div>
             ))
           ) : (
-            <p className="text-gray-500">Nenhum documento encontrado.</p>
+            <p className="text-sm text-gray-500">
+              Nenhum documento encontrado.
+            </p>
           )}
         </div>
       </ScrollArea>
