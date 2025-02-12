@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 interface UserContextProps {
   user: propsUser | null;
-  branch: string;
   authUser: boolean;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
