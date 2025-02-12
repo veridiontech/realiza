@@ -24,6 +24,7 @@ export function ProviderLateralMenu() {
   const { user } = useUser();
 
   const getIdUser = user?.idUser;
+  console.log("a porra do", getIdUser);
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>

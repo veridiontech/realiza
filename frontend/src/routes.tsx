@@ -41,6 +41,7 @@ import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmploy
 import { Quartered } from "./pages/auth/supplier/quartered/quartered";
 import { ProviderAppLayout } from "./_layouts/providerApp";
 import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
+import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts";
 
 export const router = createBrowserRouter([
   {
@@ -120,7 +121,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "quartered/:id", element: <Quartered /> },
-      { path: "contracts/:id", element: <ContractsTable /> },
+      { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
