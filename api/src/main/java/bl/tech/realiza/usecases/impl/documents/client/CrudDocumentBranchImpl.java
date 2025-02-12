@@ -234,25 +234,25 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         List<DocumentMatrix> selectedDocumentsPersonal = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
                 .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsService = documentBranch.stream()
+        List<DocumentMatrix> selectedDocumentsTrainning = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+                .filter(doc -> "Treinamentos e certificações".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
         List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
         List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa");
-        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
+        List<DocumentMatrix> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
         List<DocumentMatrix> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
         List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
-        List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
+        List<DocumentMatrix> nonSelectedDocumentsTrainning = new ArrayList<>(allDocumentsTrainning);
         nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
         nonSelectedDocumentsPersonal.removeAll(selectedDocumentsPersonal);
-        nonSelectedDocumentsService.removeAll(selectedDocumentsService);
+        nonSelectedDocumentsTrainning.removeAll(selectedDocumentsTrainning);
         DocumentResponseDto branchResponse = DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)
                 .selectedDocumentsPersonal(selectedDocumentsPersonal)
                 .nonSelectedDocumentsPersonal(nonSelectedDocumentsPersonal)
-                .selectedDocumentsService(selectedDocumentsService)
-                .nonSelectedDocumentsService(nonSelectedDocumentsService)
+                .selectedDocumentsTrainning(selectedDocumentsTrainning)
+                .nonSelectedDocumentsTrainning(nonSelectedDocumentsTrainning)
                 .build();
 
         return branchResponse;
