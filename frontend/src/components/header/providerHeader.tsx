@@ -21,7 +21,6 @@ export function HeaderProvider() {
 
   const getIdUser = user?.idUser;
   console.log("teste id:", user?.idUser);
-  console.log("é o arrombado do", user);
 
   return (
     <header className="dark:bg-primary relative p-5">

@@ -126,7 +126,7 @@ export const router = createBrowserRouter([
       { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
-      { path: "employees/:id", element: <EmployeesTable /> },
+      { path: "employees/:id", element: <SupplierEmployee /> },
     ],
   },
   {

@@ -1,3 +1,4 @@
+// src/context/user-provider.ts
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -59,11 +60,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_REALIZA_BASIC":
             try {
               const res = await axios.get(`${ip}/user/manager/${userId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
-
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -80,11 +78,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_CLIENT_RESPONSIBLE":
             try {
               const res = await axios.get(`${ip}/user/client/${userId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
-
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -101,14 +96,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUPPLIER_RESPONSIBLE":
             try {
               const res = await axios.get(`${ip}/user/supplier/${userId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
-
               if (res.data) {
                 const supplierData = res.data;
-                // Normaliza os dados: garante que idUser exista, mesmo que esteja no campo "supplier"
+                // Garante que o campo idUser esteja definido (usando supplier, se necessário)
                 setUser({
                   ...supplierData,
                   idUser: supplierData.idUser || supplierData.supplier,
@@ -123,19 +115,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
-
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
               const res = await axios.get(
                 `${ip}/user/subcontractor/${userId}`,
                 {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
+                  headers: { Authorization: `Bearer ${token}` },
                 },
               );
-
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -150,19 +138,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             break;
           case "ROLE_VIEWER":
             try {
-              const resClient = await axios.get(`${ip}user/client`);
+              const resClient = await axios.get(`${ip}/user/client`);
               if (resClient.data?.content) {
                 const dataClient = resClient.data.content;
                 if (dataClient.branch) {
                   const resUser = await axios.get(
                     `${ip}/user/client/${userId}`,
                     {
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
+                      headers: { Authorization: `Bearer ${token}` },
                     },
                   );
-
                   if (resUser.data) {
                     setUser(resUser.data);
                     setAuthUser(true);
@@ -182,12 +167,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/supplier/${userId}`,
                       {
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
+                        headers: { Authorization: `Bearer ${token}` },
                       },
                     );
-
                     if (res.data) {
                       setUser(res.data);
                       setAuthUser(true);
@@ -213,12 +195,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/subcontractor/${userId}`,
                       {
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
+                        headers: { Authorization: `Bearer ${token}` },
                       },
                     );
-
                     if (res.data) {
                       setUser(res.data);
                       setAuthUser(true);
@@ -244,7 +223,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.log("erro ao logar usuario", error);
-
         logout();
       }
     } else {

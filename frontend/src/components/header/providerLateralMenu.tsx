@@ -11,7 +11,6 @@ import {
   MessageSquare,
   Users2,
   Building2,
-  Factory,
   PersonStanding,
 } from "lucide-react";
 
@@ -24,7 +23,6 @@ export function ProviderLateralMenu() {
   const { user } = useUser();
 
   const getIdUser = user?.idUser;
-  console.log("a porra do", getIdUser);
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
@@ -86,17 +84,7 @@ export function ProviderLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={`/fornecedor/branch/${getIdUser}`}>
-        <Button
-          variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2"
-        >
-          <Factory className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
-            Filiais
-          </span>
-        </Button>
-      </Link>
+
       <Link to={`/fornecedor/employees/${getIdUser}`}>
         <Button
           variant={"ghost"}
