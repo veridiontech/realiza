@@ -14,10 +14,13 @@ interface DocumentBoxProps {
 export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
   const { branch } = useBranch();
 
-  const selectDocument = async () => {
+  const selectDocument = async (documentId: string) => {
+    console.log("documentoId: ",documentId);
+    console.log("idBranch:", branch?.idBranch);
+    
     try {
-      await axios.put(
-        `${ip}/document/branch/${branch?.idBranch}/document-matrix`,
+      await axios.post(
+        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentMatrixId=${documentId}`,
       );
       toast.success("documento selecionado enviado com sucesso");
     } catch (err) {
@@ -58,7 +61,7 @@ export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
             documents.map((document) => (
               <div
                 key={document.idDocument}
-                onClick={selectDocument}
+                onClick={() => selectDocument(document.idDocument)}
                 className="cursor-pointer rounded-sm p-1 hover:bg-gray-200"
               >
                 <span>{document.name}</span>

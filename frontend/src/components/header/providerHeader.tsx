@@ -1,4 +1,4 @@
-import { Bell, ChartNoAxesGantt, LogOut, Search, User } from "lucide-react";
+import { Bell, ChartNoAxesGantt, LogOut, Plus, Search, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
@@ -74,6 +74,14 @@ export function HeaderProvider() {
                       <div className="flex items-center gap-1">
                         <User />
                         <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to={`/fornecedor/create-manager/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <Plus />
+                        <p>Criar gerente</p>
                       </div>
                     </DropdownMenuItem>
                   </Link>
