@@ -122,7 +122,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
               const res = await axios.get(
-                `${ip}/user/subcontractor/${userId}`,
+                `${ip}/user/subcontractor/${user?.supplier}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`,
@@ -270,6 +270,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         authUser,
+        branch: user?.branch || "",
         setUser,
         setAuthUser,
         logout,

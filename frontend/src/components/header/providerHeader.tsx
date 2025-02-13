@@ -30,6 +30,8 @@ export function HeaderProvider() {
 
   const getIdUser = user?.idUser;
   console.log("teste id:", user?.idUser);
+  console.log("teste idProvider:", user?.supplier);
+  
   
 
   return (
