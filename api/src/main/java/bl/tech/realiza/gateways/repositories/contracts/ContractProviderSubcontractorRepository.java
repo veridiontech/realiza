@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContractProviderSubcontractorRepository extends JpaRepository<ContractProviderSubcontractor, String> {
     Page<ContractProviderSubcontractor> findAllByProviderSubcontractor_IdProvider(String idSearch, Pageable pageable);
+    Page<ContractProviderSubcontractor> findAllByProviderSupplier_IdProvider(String idSearch, Pageable pageable);
 }
