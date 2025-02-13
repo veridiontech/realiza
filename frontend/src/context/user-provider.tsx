@@ -255,7 +255,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         user,
         branch: user?.branch || "",
         authUser,
-        branch: user?.branch || "",
         setUser,
         setAuthUser,
         logout,

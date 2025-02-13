@@ -44,6 +44,7 @@ import { ProviderAppLayout } from "./_layouts/providerApp";
 import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts";
 import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";
+import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
 
 export const router = createBrowserRouter([
   {
