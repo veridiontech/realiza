@@ -3,7 +3,6 @@ package bl.tech.realiza.gateways.controllers.interfaces.documents.client;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -22,6 +21,8 @@ public interface DocumentBranchControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranchByBranch(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);
     ResponseEntity<String> updateBranchDocuments(String id, List<String> documentList);
+    ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
+    ResponseEntity<Void> removeRequiredDocument(String documentId);
     ResponseEntity<String> updateBranchDocumentsRisk(String id, List<DocumentBranch> documentList);
     ResponseEntity<List<DocumentResponseDto>> getDocumentBranchByIdAndRisk(String id, Document.Risk risk);
 }

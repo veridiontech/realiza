@@ -133,7 +133,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public Page<ProviderResponseDto> findAll(Pageable pageable) {
-        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAll(pageable);
+        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
                 providerSupplier -> {
@@ -214,7 +214,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
     @Override
     public Page<ProviderResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByBranches_IdBranch(idSearch, pageable);
+        Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByBranches_IdBranchAndIsActiveIsTrue(idSearch, pageable);
 
         Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
                 providerSupplier -> {

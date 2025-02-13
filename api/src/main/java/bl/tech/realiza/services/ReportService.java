@@ -1,7 +1,6 @@
 package bl.tech.realiza.services;
 
 import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -12,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +18,6 @@ public class ReportService {
 
     private final ProviderSupplierRepository providerRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
-    private final BranchRepository branchRepository;
     private final EmployeeRepository employeeRepository;
 
     public Long countSuppliersByBranch(String branchId) {

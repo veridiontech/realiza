@@ -90,4 +90,19 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
 
         return ResponseEntity.ok(pageContractSubcontractor);
     }
+
+    @GetMapping("/filtered-by-supplier")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<ContractResponseDto>> getAllBySupplier(@RequestParam(defaultValue = "0") int page,
+                                                                      @RequestParam(defaultValue = "5") int size,
+                                                                      @RequestParam(defaultValue = "idContract") String sort,
+                                                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                      @RequestParam String idSupplier) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ContractResponseDto> pageContractSubcontractor = crudSubcontractor.findAllBySupplier(idSupplier, pageable);
+
+        return ResponseEntity.ok(pageContractSubcontractor);
+    }
 }

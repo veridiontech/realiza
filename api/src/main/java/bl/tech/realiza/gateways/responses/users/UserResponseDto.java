@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.TimeZone;
 
 @Data
@@ -27,6 +28,7 @@ public class UserResponseDto {
     private String profilePicture;
     private String telephone;
     private String cellphone;
+    private List<String> branches;
 
     // client
     private String branch;

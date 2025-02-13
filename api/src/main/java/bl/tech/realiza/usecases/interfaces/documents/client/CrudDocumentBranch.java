@@ -20,7 +20,9 @@ public interface CrudDocumentBranch {
     void delete(String id);
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
-    String updateRequiredDocuments(String id, List<String> documentCollection);
+    String updateRequiredDocumentsByList(String id, List<String> documentCollection);
+    String addRequiredDocument(String idEnterprise, String documentMatrixId);
+    void removeRequiredDocument(String documentId);
     String updateSelectedDocuments(String id, List<DocumentBranch> documentCollection);
     List<DocumentResponseDto> findAllSelectedDocumentsByRisk(String id, Document.Risk risk);
 }

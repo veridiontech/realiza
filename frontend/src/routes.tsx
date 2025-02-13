@@ -40,7 +40,7 @@ import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
 import { Quartered } from "./pages/auth/supplier/quartered/quartered";
 import { ProviderAppLayout } from "./_layouts/providerApp";
-import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
+// import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
 import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts";
 import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";

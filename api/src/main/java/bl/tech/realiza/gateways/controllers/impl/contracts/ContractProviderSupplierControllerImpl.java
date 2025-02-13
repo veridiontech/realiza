@@ -104,4 +104,20 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
 
         return ResponseEntity.ok(pageContractSupplier);
     }
+
+    @GetMapping("/filtered-client-and-supplier")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<ContractResponseDto>> getAllBySupplierAndBranch(@RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "5") int size,
+                                                                               @RequestParam(defaultValue = "idContract") String sort,
+                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                               @RequestParam String idBranch,
+                                                                               @RequestParam String idSupplier) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<ContractResponseDto> contractResponse = crudSupplier.findAllBySupplierAndBranch(idSupplier, idBranch, pageable);
+
+        return ResponseEntity.ok(contractResponse);
+    }
 }
