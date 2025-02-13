@@ -57,11 +57,7 @@ export function SignIn() {
 
       const userData = userResponse.data;
       console.log("colentando dados:", userResponse.data);
-
-      // Para usuários supplier, o backend pode retornar o id no campo "supplier"
-      const id = userData.idUser || userData.supplier;
-
-      localStorage.setItem("userId", id);
+      localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
       console.log("Dados recebidos:", userData);
 
@@ -74,25 +70,25 @@ export function SignIn() {
           case "ROLE_ADMIN":
           case "ROLE_REALIZA_PLUS":
           case "ROLE_REALIZA_BASIC":
-            navigate(`/sistema/select-client/${id}`);
+            navigate(`/sistema/select-client/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_RESPONSIBLE":
-            navigate(`/cliente/branch/${id}`);
+            navigate(`/cliente/branch/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_MANAGER":
-            navigate(`/cliente/contracts/${id}`);
+            navigate(`/cliente/contracts/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/quartered/${id}`);
+            navigate(`/fornecedor/quartered/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
-            navigate(`/fornecedor/contracts/${id}`);
+            navigate(`/fornecedor/contracts/${userData.idUser}`);
             break;
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
-            navigate(`/sub/employees/${id}`);
+            navigate(`/sub/employees/${userData.idUser}`);
             break;
           case "ROLE_SUBCONTRACTOR_MANAGER":
-            navigate(`/sub/contracts/${id}`);
+            navigate(`/sub/contracts/${userData.idUser}`);
             break;
           case "ROLE_VIEWER":
             navigate(`/client-test`);

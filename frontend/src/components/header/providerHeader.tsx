@@ -1,12 +1,4 @@
-import {
-  Bell,
-  ChartNoAxesGantt,
-  LogOut,
-  Paperclip,
-  Plus,
-  Search,
-  User,
-} from "lucide-react";
+import { Bell, ChartNoAxesGantt, LogOut, Search, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
@@ -22,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ProfilePic } from "./profile-pic";
 import { ProfilePhoto } from "./profile-photo";
 
 export function HeaderProvider() {
@@ -30,7 +21,7 @@ export function HeaderProvider() {
 
   const getIdUser = user?.idUser;
   console.log("teste id:", user?.idUser);
-  
+  console.log("é o arrombado do", user);
 
   return (
     <header className="dark:bg-primary relative p-5">

@@ -107,7 +107,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               });
 
               if (res.data) {
-                setUser(res.data);
+                const supplierData = res.data;
+                // Normaliza os dados: garante que idUser exista, mesmo que esteja no campo "supplier"
+                setUser({
+                  ...supplierData,
+                  idUser: supplierData.idUser || supplierData.supplier,
+                });
                 setAuthUser(true);
               } else {
                 console.error("Usuário não encontrado.");
@@ -118,6 +123,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
+
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
@@ -269,6 +275,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     <UserContext.Provider
       value={{
         user,
+        branch: user?.branch || "",
         authUser,
         setUser,
         setAuthUser,

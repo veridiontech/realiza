@@ -6,7 +6,7 @@ import { useClient } from "@/context/Client-Provider";
 import { Contract } from "@/types/contracts";
 import { NotebookPen, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { ModalAddContract } from "@/components/modal-add-contract";
+import { ModalAddContract } from "@/components/realizaAddContract";
 
 export default function SubContracts() {
   const { client } = useClient();
