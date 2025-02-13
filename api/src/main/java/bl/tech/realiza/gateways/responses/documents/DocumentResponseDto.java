@@ -48,4 +48,7 @@ public class DocumentResponseDto {
 
     // supplier
     private String supplier;
+
+    // contract
+    private String contract;
 }

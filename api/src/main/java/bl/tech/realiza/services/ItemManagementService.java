@@ -9,7 +9,7 @@ import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.controllers.interfaces.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;

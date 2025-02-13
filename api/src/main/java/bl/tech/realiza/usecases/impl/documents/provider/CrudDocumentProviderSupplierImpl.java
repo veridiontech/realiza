@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -282,5 +284,41 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         }
 
         return "Documents updated successfully";
+    }
+
+    @Override
+    public String addRequiredDocument(String idEnterprise, String documentMatrixId) {
+        if (documentMatrixId == null || documentMatrixId.isEmpty()) {
+            throw new BadRequestException("Invalid documents");
+        }
+
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Supplier not found"));
+
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
+
+        List<DocumentProviderSupplier> existingDocumentBranches = documentSupplierRepository.findAllByProviderSupplier_IdProvider(idEnterprise);
+
+        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
+                .map(DocumentProviderSupplier::getDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        DocumentProviderSupplier newDocumentBranch = DocumentProviderSupplier.builder()
+                .title(documentMatrix.getName())
+                .status(Document.Status.PENDENTE)
+                .providerSupplier(providerSupplier)
+                .documentMatrix(documentMatrix)
+                .build();
+
+        documentSupplierRepository.save(newDocumentBranch);
+
+        return "Document updated successfully";
+    }
+
+    @Override
+    public void removeRequiredDocument(String documentId) {
+        if (documentId == null || documentId.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+        documentSupplierRepository.deleteById(documentId);
     }
 }
