@@ -140,7 +140,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
     @Override
     public Page<UserResponseDto> findAll(Pageable pageable) {
-        Page<UserManager> userManagerPage = userManagerRepository.findAll(pageable);
+        Page<UserManager> userManagerPage = userManagerRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<UserResponseDto> userManagerResponseDtoPage = userManagerPage.map(
                 userManager -> {

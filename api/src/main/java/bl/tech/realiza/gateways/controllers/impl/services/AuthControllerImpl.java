@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,21 +42,8 @@ public class AuthControllerImpl implements AuthController {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<UserResponseDto> extract(@RequestBody ExtractTokenRequestDto extractTokenRequestDto) {
-        // Extrai todas as claims do token
-        Map<String, Object> claims = jwtService.extractAllClaims(extractTokenRequestDto.getToken());
 
-        // Constrói o objeto de resposta com os dados das claims
-        UserResponseDto userResponseDto = UserResponseDto.builder()
-                .idUser((String) claims.getOrDefault("idUser", ""))
-                .cpf((String) claims.getOrDefault("cpf", ""))
-                .position((String) claims.getOrDefault("position", ""))
-                .role(User.Role.valueOf((String) claims.getOrDefault("role", "")))
-                .firstName((String) claims.getOrDefault("firstName", ""))
-                .surname((String) claims.getOrDefault("surname", ""))
-                .email((String) claims.getOrDefault("email", ""))
-                .telephone((String) claims.getOrDefault("telephone", ""))
-                .cellphone((String) claims.getOrDefault("cellphone", ""))
-                .build();
+        UserResponseDto userResponseDto = jwtService.extractAllClaims(extractTokenRequestDto.getToken());
 
         return ResponseEntity.ok(userResponseDto);
     }

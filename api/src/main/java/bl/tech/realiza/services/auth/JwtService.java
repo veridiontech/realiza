@@ -1,6 +1,12 @@
 package bl.tech.realiza.services.auth;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.*;
+import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -8,7 +14,10 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -16,8 +25,10 @@ public class JwtService {
     private final Dotenv dotenv;
     private final String SECRET_KEY;
     private final long EXPIRATION_TIME;
+    private final BranchRepository branchRepository;
+    private final ProviderSupplierRepository providerSupplierRepository;
 
-    public JwtService(Dotenv dotenv1, Dotenv dotenv) {
+    public JwtService(Dotenv dotenv1, Dotenv dotenv, BranchRepository branchRepository, ProviderSupplierRepository providerSupplierRepository) {
         this.dotenv = dotenv1;
         this.SECRET_KEY = dotenv.get("SECRET_KEY");
         if (this.SECRET_KEY == null || this.SECRET_KEY.isEmpty()) {
@@ -34,6 +45,8 @@ public class JwtService {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("EXPIRATION_TIME must be a valid long value.");
         }
+        this.branchRepository = branchRepository;
+        this.providerSupplierRepository = providerSupplierRepository;
     }
 
 
@@ -86,6 +99,10 @@ public class JwtService {
 
     public String generateTokenSupplier(UserProviderSupplier user) {
         Map<String, Object> claims = new HashMap<>();
+
+        ProviderSupplier supplier = providerSupplierRepository.findById(user.getProviderSupplier().getIdProvider()).orElseThrow(() -> new NotFoundException("Branch not found"));
+        List<String> branchesIds = supplier.getBranches().stream().map(Branch::getIdBranch).toList();
+
         claims.put("idUser", user.getIdUser());
         claims.put("idSupplier",user.getProviderSupplier().getIdProvider());
         claims.put("cpf", user.getCpf());
@@ -99,6 +116,7 @@ public class JwtService {
         claims.put("profilePicture", user.getProfilePicture());
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
+        claims.put("branches", branchesIds);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -111,7 +129,7 @@ public class JwtService {
     public String generateTokenSubcontractor(UserProviderSubcontractor user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("idUser", user.getIdUser());
-        claims.put("idSubcontracator",user.getProviderSubcontractor().getIdProvider());
+        claims.put("idSubcontractor",user.getProviderSubcontractor().getIdProvider());
         claims.put("cpf", user.getCpf());
         claims.put("description", user.getDescription());
         claims.put("password", user.getPassword());
@@ -155,11 +173,36 @@ public class JwtService {
                 .compact();
     }
 
-    public Map<String, Object> extractAllClaims(String token) {
-        return Jwts.parser()
+    public UserResponseDto extractAllClaims(String token) {
+        Map<String, Object> claims =  Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody();
+
+        Object branchesObject = claims.get("branches");
+        List<String> branchesIds = (branchesObject instanceof List<?>)
+                ? ((List<?>) branchesObject).stream()
+                .map(Object::toString)
+                .collect(Collectors.toList())
+                : List.of();
+
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .idUser((String) claims.getOrDefault("idUser", ""))
+                .branch((String) claims.getOrDefault("idBranch", ""))
+                .supplier((String) claims.getOrDefault("idSupplier", ""))
+                .subcontractor((String) claims.getOrDefault("idSubcontractor", ""))
+                .cpf((String) claims.getOrDefault("cpf", ""))
+                .position((String) claims.getOrDefault("position", ""))
+                .role(User.Role.valueOf((String) claims.getOrDefault("role", "")))
+                .firstName((String) claims.getOrDefault("firstName", ""))
+                .surname((String) claims.getOrDefault("surname", ""))
+                .email((String) claims.getOrDefault("email", ""))
+                .telephone((String) claims.getOrDefault("telephone", ""))
+                .cellphone((String) claims.getOrDefault("cellphone", ""))
+                .branches(branchesIds)
+                .build();
+
+        return userResponseDto;
     }
 
     public String extractEmail(String token) {

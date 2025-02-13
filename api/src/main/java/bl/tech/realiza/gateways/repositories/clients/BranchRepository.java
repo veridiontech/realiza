@@ -10,7 +10,8 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface BranchRepository extends JpaRepository<Branch, String> {
-    Page<Branch> findAllByClient_IdClient(String client, Pageable pageable);
+    Page<Branch> findAllByClient_IdClientAndIsActiveIsTrue(String client, Pageable pageable);
+    Page<Branch> findAllByIsActiveIsTrue(Pageable pageable);
     Optional<Branch> findByCnpj(String cnpj);
     Collection<Branch> findAllByIsActive(boolean b);
 }

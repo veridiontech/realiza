@@ -149,7 +149,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAll(Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAll(pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -250,7 +250,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(idSearch, pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -279,7 +279,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranch(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(idSearch, pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -308,7 +308,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProvider(idBranch,idSupplier, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(idBranch,idSupplier, pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
