@@ -1,5 +1,5 @@
 import axios from "axios";
-import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi"; // ajuste o caminho conforme sua estrutura
+// import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi"; // Removido devido ao erro
 import {
   Dialog,
   DialogContent,
@@ -142,15 +142,6 @@ export default function SupplierAddQuartered() {
   const onSubmitInvite = async (data: SubcontractorInviteSchema) => {
     setIsLoading(true);
     try {
-      // Opcional: buscar informações da empresa via API de CNPJ
-      try {
-        const companyInfo = await fetchCompanyByCNPJ(data.cnpj);
-        // Você pode pré-preencher dados no contrato, se desejar
-      } catch (apiError) {
-        toast.warning(
-          "Não foi possível buscar informações do CNPJ. Preencha os dados manualmente.",
-        );
-      }
       // Envia o convite por email
       await axios.post(`${ip}/invite`, {
         email: data.email,

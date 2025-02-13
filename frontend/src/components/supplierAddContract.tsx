@@ -59,7 +59,6 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function SupplierAddContract() {
   const { user } = useUser();
-  const [clients, setClients] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [requirements, setRequirements] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
@@ -73,16 +72,6 @@ export function SupplierAddContract() {
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
   });
-
-  // Carrega os clientes (se necessário)
-  const getClients = async () => {
-    try {
-      const res = await axios.get(`${ip}/client`);
-      setClients(res.data.content);
-    } catch (err) {
-      console.error("Erro ao buscar clientes", err);
-    }
-  };
 
   // Carrega atividades e requisitos
   const getActivitiesAndRequirements = async () => {
@@ -132,7 +121,6 @@ export function SupplierAddContract() {
   };
 
   useEffect(() => {
-    getClients();
     getActivitiesAndRequirements();
   }, []);
 
