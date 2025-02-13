@@ -1,49 +1,49 @@
+// Arquivo: /components/Quartered.tsx (ou onde estiver seu componente)
 import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import {
-  useFetchServiceProviders,
-  ServiceProviderProps,
-} from "@/hooks/gets/realiza/useServiceProviders";
+  useSupplierQuartereds,
+  QuarteredProps,
+} from "@/hooks/gets/supplier/supplierGetQuartereds";
 import { NotebookPen } from "lucide-react";
 import SupplierAddQuartered from "@/components/supplier-add-quartered";
-import { useClient } from "@/context/Client-Provider";
+import { useUser } from "@/context/user-provider";
 
 export function Quartered() {
-  const { client } = useClient();
-  console.log(client);
+  const { user } = useUser();
+  console.log(user);
 
   const itemsPerPage = 5;
 
-  const {
-    serviceProviders = [],
-    totalPages = 0,
-    error,
-    fetchServiceProviders,
-  } = useFetchServiceProviders();
+  // Use o hook para obter os dados
+  const { quartereds, totalPages, error, fetchQuartereds } =
+    useSupplierQuartereds();
 
   const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
-    // Filtra os fornecedores pelo id do cliente, se existir.
-    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient);
-  }, [currentPage, client?.idClient]);
+    // Filtra os subcontratados pelo ID do supplier (obtido do contexto do usuário)
+    fetchQuartereds(itemsPerPage, currentPage, user?.idUser);
+  }, [currentPage, user?.idUser]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
   const columns = [
-    { key: "companyName", label: "Nome do Fornecedor" },
+    { key: "companyName", label: "Nome do Subcontratado" },
     { key: "cnpj", label: "CNPJ" },
     { key: "branches", label: "Filiais que atua" },
     {
       key: "idProvider",
       label: "Ações",
-      render: (value: string) => (
+      render: (_value: string | undefined, row: QuarteredProps) => (
         <div>
           <button
-            onClick={() => console.log("Ação para o fornecedor:", value)}
+            onClick={() =>
+              console.log("Ação para o subcontratado:", row.idProvider)
+            }
             className="text-blue-500 hover:underline"
           >
             <NotebookPen />
@@ -52,9 +52,13 @@ export function Quartered() {
       ),
     },
   ] as {
-    key: keyof ServiceProviderProps;
+    key: keyof QuarteredProps;
     label: string;
-    render?: (value: string) => React.ReactNode;
+    className?: string;
+    render?: (
+      value: string | undefined,
+      row: QuarteredProps,
+    ) => React.ReactNode;
   }[];
 
   return (
@@ -66,7 +70,7 @@ export function Quartered() {
           <div className="relative mb-4">
             <input
               type="text"
-              placeholder="🔍 Pesquisar fornecedor..."
+              placeholder="🔍 Pesquisar subcontratado..."
               className="w-[34rem] rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
               onChange={() => {}}
             />
@@ -79,10 +83,7 @@ export function Quartered() {
             Erro ao carregar os dados: {error}
           </p>
         ) : (
-          <Table<ServiceProviderProps>
-            data={serviceProviders}
-            columns={columns}
-          />
+          <Table<QuarteredProps> data={quartereds} columns={columns} />
         )}
 
         <Pagination

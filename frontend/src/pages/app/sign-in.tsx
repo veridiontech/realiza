@@ -40,8 +40,8 @@ export function SignIn() {
         email: data.email,
         password: data.password,
       });
-      console.log("token: ",res.data);
-      
+      console.log("token: ", res.data);
+
       const token = res.data.token;
       localStorage.setItem("tokenClient", token);
 
@@ -56,17 +56,13 @@ export function SignIn() {
       );
 
       const userData = userResponse.data;
-      console.log("colentando dados:",userResponse.data);
-      
+      console.log("colentando dados:", userResponse.data);
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
-      console.log("enviando dados:", userResponse.data);
-      
-      setUser(userResponse.data);
-      console.log("identificando role client:", user?.role);
-      setShowSplash(true);
+      console.log("Dados recebidos:", userData);
 
-      console.log("usuário:", user);
+      setUser(userData);
+      setShowSplash(true);
 
       setTimeout(() => {
         console.log("Redirecionando para:", userData.role);

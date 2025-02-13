@@ -5,7 +5,7 @@ import { NotebookPen, Users } from "lucide-react";
 
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
-import { ModalAddContract } from "@/components/modal-add-contract";
+import { SupplierAddContract } from "@/components/supplierAddContract";
 import { useUser } from "@/context/user-provider";
 import { Contract } from "@/types/contracts";
 import { ip } from "@/utils/ip";
@@ -132,7 +132,7 @@ export default function SupplierContracts() {
         {/* Cabeçalho com o título e botão para adicionar contrato */}
         <div className="m-8 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Tabela de Contratos</h1>
-          <ModalAddContract />
+          <SupplierAddContract />
         </div>
 
         {/* Navegação por abas */}

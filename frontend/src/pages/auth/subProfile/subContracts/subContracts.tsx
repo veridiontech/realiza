@@ -8,7 +8,7 @@ import { NotebookPen, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ModalAddContract } from "@/components/realizaAddContract";
 
-export default function ContractsTable() {
+export default function SubContracts() {
   const { client } = useClient();
   const itemsPerPage = 10;
   const navigate = useNavigate();

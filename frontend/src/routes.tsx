@@ -42,6 +42,8 @@ import { Quartered } from "./pages/auth/supplier/quartered/quartered";
 import { ProviderAppLayout } from "./_layouts/providerApp";
 // import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
 import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts";
+import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
+import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 
 export const router = createBrowserRouter([
   {
@@ -121,6 +123,28 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "quartered/:id", element: <Quartered /> },
+      { path: "contracts/:id", element: <SupplierContracts /> },
+      { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
+      { path: "branch/:id", element: <Branch /> },
+      { path: "employees/:id", element: <EmployeesTable /> },
+    ],
+  },
+  {
+    path: "/sub",
+    element: (
+      <UserProvider>
+        <ProtectedRoute
+          allowedRoles={[
+            "ROLE_SUBCONTRACTOR_RESPONSIBLE",
+            "ROLE_SUBCONTRACTOR_MANAGER",
+          ]}
+        >
+          <SubContractorAppLayout />
+        </ProtectedRoute>
+      </UserProvider>
+    ),
+    children: [
+      { path: "contracts/:id", element: <SubContracts /> },
       { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
