@@ -267,9 +267,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public String updateRequiredDocuments(String id, List<String> documentCollection) {
+    public String updateRequiredDocumentsByList(String id, List<String> documentCollection) {
         if (documentCollection == null || documentCollection.isEmpty()) {
-            throw new NotFoundException("Invalid documents");
+            throw new BadRequestException("Invalid documents");
         }
 
         Branch branch = branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
@@ -308,6 +308,42 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         }
 
         return "Documents updated successfully";
+    }
+
+    @Override
+    public String addRequiredDocument(String idEnterprise, String documentMatrixId) {
+        if (documentMatrixId == null || documentMatrixId.isEmpty()) {
+            throw new BadRequestException("Invalid documents");
+        }
+
+        Branch branch = branchRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
+
+        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranch(idEnterprise);
+
+        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
+                .map(DocumentBranch::getDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        DocumentBranch newDocumentBranch = DocumentBranch.builder()
+                        .title(documentMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .branch(branch)
+                        .documentMatrix(documentMatrix)
+                        .build();
+
+        documentBranchRepository.save(newDocumentBranch);
+
+        return "Document updated successfully";
+    }
+
+    @Override
+    public void removeRequiredDocument(String documentId) {
+        if (documentId == null || documentId.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+        documentBranchRepository.deleteById(documentId);
     }
 
     @Override
