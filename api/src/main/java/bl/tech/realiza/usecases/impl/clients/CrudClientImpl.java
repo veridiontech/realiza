@@ -143,7 +143,7 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public Page<ClientResponseDto> findAll(Pageable pageable) {
-        Page<Client> clientPage = clientRepository.findAll(pageable);
+        Page<Client> clientPage = clientRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<ClientResponseDto> clientResponseDtoPage = clientPage.map(
                 client -> {

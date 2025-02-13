@@ -19,4 +19,6 @@ public interface DocumentProviderSubcontractorControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getSubcontractorDocuments(String id);
     ResponseEntity<String> updateSubcontractorDocuments(String id, List<String> documentList);
+    ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
+    ResponseEntity<Void> removeRequiredDocument(String documentId);
 }

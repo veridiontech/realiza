@@ -1,7 +1,8 @@
+// src/components/SupplierEmployee.tsx
 import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
-import { clientGetEmployee } from "@/hooks/gets/client/clientGetEmployee";
+import { SupplierGetEmployee } from "@/hooks/gets/supplier/supplierGetEmployee";
 import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { SupplierAddEmployee } from "./modal/supplierAddEmployee";
 import { Settings2 } from "lucide-react";
@@ -17,11 +18,14 @@ export const SupplierEmployee = (): JSX.Element => {
   const { client } = useClient();
 
   const { employees, totalPages, loading, error, fetchEmployees } =
-    clientGetEmployee();
+    SupplierGetEmployee();
 
   useEffect(() => {
+    // Se existir client.idClient, usa enterprise "CLIENT", senão usa "SUPPLIER"
     if (client?.idClient) {
       fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT");
+    } else {
+      fetchEmployees(itemsPerPage, currentPage - 1, "SUPPLIER");
     }
   }, [currentPage, client?.idClient]);
 

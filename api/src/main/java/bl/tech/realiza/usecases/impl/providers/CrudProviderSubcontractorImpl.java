@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.impl.providers;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
@@ -54,7 +52,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider supplier not found"));
 
-        List<DocumentProviderSupplier> documentSupplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(providerSubcontractorRequestDto.getSupplier(),"Documento empresa");
+        List<DocumentProviderSupplier> documentSupplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProvider(providerSubcontractorRequestDto.getSupplier());
         List<DocumentMatrix> documentMatrixList = documentSupplier.stream()
                 .map(DocumentProviderSupplier::getDocumentMatrix)
                 .toList();
@@ -134,7 +132,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public Page<ProviderResponseDto> findAll(Pageable pageable) {
-        Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAll(pageable);
+        Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
                 providerSubcontractor -> {
@@ -206,7 +204,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public Page<ProviderResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+        Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(idSearch, pageable);
 
         Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
                 providerSubcontractor -> {

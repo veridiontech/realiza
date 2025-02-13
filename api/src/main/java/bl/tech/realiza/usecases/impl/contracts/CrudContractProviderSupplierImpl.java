@@ -149,7 +149,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAll(Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAll(pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -250,7 +250,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(idSearch, pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -279,7 +279,36 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranch(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(idSearch, pageable);
+
+        Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
+                contractProviderSupplier -> ContractResponseDto.builder()
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceDuration(contractProviderSupplier.getServiceDuration())
+                        .serviceName(contractProviderSupplier.getServiceName())
+                        .contractReference(contractProviderSupplier.getContractReference())
+                        .description(contractProviderSupplier.getDescription())
+                        .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .expenseType(contractProviderSupplier.getExpenseType())
+                        .startDate(contractProviderSupplier.getStartDate())
+                        .endDate(contractProviderSupplier.getEndDate())
+                        .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
+                        .activities(contractProviderSupplier.getActivities())
+                        .requirements(contractProviderSupplier.getRequirements())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
+                        .branch(contractProviderSupplier.getBranch().getIdBranch())
+                        .branchName(contractProviderSupplier.getBranch().getName())
+                        .build()
+        );
+
+        return providerResponseDtoPage;
+    }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable) {
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(idBranch,idSupplier, pageable);
 
         Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()

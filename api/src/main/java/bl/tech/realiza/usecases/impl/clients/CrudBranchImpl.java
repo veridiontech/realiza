@@ -112,7 +112,7 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public Page<BranchResponseDto> findAll(Pageable pageable) {
-        Page<Branch> pageBranch = branchRepository.findAll(pageable);
+        Page<Branch> pageBranch = branchRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<BranchResponseDto> pageBranchResponse = pageBranch.map(
                 branch -> BranchResponseDto.builder()
@@ -176,7 +176,7 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<Branch> pageBranch = branchRepository.findAllByClient_IdClient(idSearch, pageable);
+        Page<Branch> pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
 
         Page<BranchResponseDto> pageBranchResponse = pageBranch.map(
                 branch -> BranchResponseDto.builder()

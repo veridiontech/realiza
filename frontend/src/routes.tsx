@@ -44,6 +44,7 @@ import { ProviderAppLayout } from "./_layouts/providerApp";
 import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts";
 import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";
+import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
 import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
 
@@ -130,7 +131,6 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      {path: "create-manager/:id", element: <CreateNewManagerSupplier />}
     ],
   },
   {

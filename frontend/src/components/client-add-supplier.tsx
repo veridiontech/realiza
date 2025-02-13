@@ -65,8 +65,8 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
   const [managers, setManagers] = useState<any>([]);
-  const [activities, setActivities] = useState<any>([]);
-  const [requirements, setRequirements] = useState<any>([]);
+  const [setActivities] = useState<any>([]);
+  const [setRequirements] = useState<any>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);

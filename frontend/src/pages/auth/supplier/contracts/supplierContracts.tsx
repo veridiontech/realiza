@@ -13,7 +13,6 @@ import { ip } from "@/utils/ip";
 export default function SupplierContracts() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const clientId = user?.idClient;
   const supplierId = user?.supplier;
 
   const itemsPerPage = 10;
@@ -69,7 +68,7 @@ export default function SupplierContracts() {
 
   // Chamada para buscar os contratos filtrados por cliente (rota: filtered-client)
   useEffect(() => {
-    if (activeTab === "client" && clientId) {
+    if (activeTab === "supplier" && supplierId) {
       setClientLoading(true);
       axios
         .get(`${ip}/contract/supplier/filtered-client`, {
@@ -78,7 +77,7 @@ export default function SupplierContracts() {
             size: itemsPerPage,
             sort: "idContract",
             direction: "ASC",
-            idSearch: clientId,
+            idSearch: supplierId,
           },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
@@ -95,7 +94,7 @@ export default function SupplierContracts() {
           setClientLoading(false);
         });
     }
-  }, [activeTab, clientId, clientCurrentPage]);
+  }, [activeTab, supplierId, clientCurrentPage]);
 
   // Chamada para buscar os contratos filtrados por fornecedor (rota: filtered-supplier)
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +59,6 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function SupplierAddContract() {
   const { user } = useUser();
-  const [clients, setClients] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [requirements, setRequirements] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
@@ -73,16 +72,6 @@ export function SupplierAddContract() {
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
   });
-
-  // Exemplo de carregamento de clientes (se necessário)
-  const getClients = async () => {
-    try {
-      const res = await axios.get(`${ip}/client`);
-      setClients(res.data.content);
-    } catch (err) {
-      console.error("Erro ao buscar clientes", err);
-    }
-  };
 
   // Carrega atividades e requisitos
   const getActivitiesAndRequirements = async () => {
@@ -98,11 +87,11 @@ export function SupplierAddContract() {
     }
   };
 
-  // Exemplo para carregar gestores a partir do cliente selecionado
-  const getManagers = async (clientId: string) => {
+  // Busca os gestores usando o ID do fornecedor
+  const getManagers = async (supplier: string) => {
     try {
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${clientId}`,
+        `${ip}/user/supplier/filtered-supplier?idSearch=${supplier}`,
       );
       setManagers(res.data.content);
     } catch (err) {
@@ -113,16 +102,14 @@ export function SupplierAddContract() {
   const createContract = async (data: ContractFormSchema) => {
     setIsLoading(true);
     try {
-      // Mescla os dados do formulário com os dados do contexto do usuário
-      // providerSupplier e branch são obtidos do usuário supplier atual
+      // Monta o payload com os dados do formulário e o supplier obtido do contexto
       const payload = {
         ...data,
         subcontractPermission: true, // sempre true para contrato de subcontratado
-        providerSupplier: user?.idUser, // obtido do contexto
+        providerSupplier: user?.idUser, // pode ser ajustado conforme necessário
       };
 
       console.log("Criando contrato de subcontratado:", payload);
-      // Envia para o endpoint de subcontratados
       await axios.post(`${ip}/contract/subcontractor`, payload);
       toast.success("Contrato criado com sucesso!");
     } catch (err) {
@@ -134,11 +121,22 @@ export function SupplierAddContract() {
   };
 
   useEffect(() => {
-    getClients();
     getActivitiesAndRequirements();
-    // Se necessário, carregue gestores a partir de um cliente selecionado
-    // getManagers("algumIdDeCliente");
   }, []);
+
+  // Assim que os dados do usuário forem carregados, busque os gestores.
+  // Use o campo `supplier` se existir; caso contrário, use `idUser`
+  useEffect(() => {
+    if (user) {
+      console.log("Dados do usuário no contexto:", user);
+      const supplierId = user.supplier ? user.supplier : user.idUser;
+      if (supplierId) {
+        getManagers(supplierId);
+      } else {
+        console.error("ID do fornecedor não definido no usuário.");
+      }
+    }
+  }, [user]);
 
   return (
     <Dialog>

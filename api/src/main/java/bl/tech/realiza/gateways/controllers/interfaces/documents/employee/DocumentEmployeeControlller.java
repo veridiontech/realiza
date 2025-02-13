@@ -20,4 +20,6 @@ public interface DocumentEmployeeControlller {
     ResponseEntity<DocumentResponseDto> getEmployeeDocuments(String id);
     ResponseEntity<String> updateEmployeeDocuments(String id, List<String> documentList);
     ResponseEntity<String> solicitateNewRequiredDocument(String idEmployee, String idDocument);
+    ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
+    ResponseEntity<Void> removeRequiredDocument(String documentId);
 }

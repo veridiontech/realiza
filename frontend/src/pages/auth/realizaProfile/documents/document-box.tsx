@@ -3,7 +3,6 @@ import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios";
 import { Search } from "lucide-react";
-import { useState } from "react";
 import { Blocks } from "react-loader-spinner";
 import { toast } from "sonner";
 
@@ -14,7 +13,6 @@ interface DocumentBoxProps {
 
 export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
   const { branch } = useBranch();
-  const [searchBar, setSearchBar] = useState<string>("");
 
   const selectDocument = async (documentId: string) => {
     console.log("documentoId: ",documentId);
@@ -30,10 +28,6 @@ export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
       toast.error("Erro ao selecionar documento");
     }
   };
-
-  const filterDocument = documents.filter((document) =>
-    document.name.toLowerCase().includes(searchBar.toLowerCase()),
-  );
 
   if (isLoading) {
     return (

@@ -72,8 +72,10 @@ export function EnterprisePageEmail() {
   const validateCnpj = async () => {
     setIsLoading(true);
     const cnpj = getValues("cnpj").replace(/\D/g, "");
-    if (cnpj.length !== 14) return;
-
+    if (cnpj.length !== 14) {
+      setIsLoading(false);
+      return;
+    }
     try {
       const res = await axios.get(
         `https://www.receitaws.com.br/v1/cnpj/${cnpj}`,
@@ -94,28 +96,47 @@ export function EnterprisePageEmail() {
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
     try {
-      if(findCompany === "CLIENT") {
-        const payload = {
-          ...data,
-          idCompany: findIdCompany || "",
-          company: findCompany || null,
-          fantasyName: data.tradeName,
-          socialReason: data.corporateName,
-          role: "ROLE_CLIENT_RESPONSIBLE"
-        };
-        console.log("Enviando dados:", payload);
-        setEnterpriseData(payload);
-      } if( findCompany === "SUPPLIER") {
-        const payload = {
-          ...data,
-          idCompany: findIdCompany || "",
-          company: findCompany || null,
-          fantasyName: data.tradeName,
-          socialReason: data.corporateName,
-          role: "ROLE_SUPPLIER_RESPONSIBLE"
-        };
-        console.log("Enviando dados:", payload);
-        setEnterpriseData(payload);
+      let payload;
+      switch (findCompany) {
+        case "SUBCONTRACTOR":
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+            role: "ROLE_SUPPLIER_RESPONSIBLE",
+          };
+          break;
+        case "CLIENT":
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+            role: "ROLE_CLIENT_RESPONSIBLE",
+          };
+          break;
+        case "SUPPLIER":
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+            role: "ROLE_SUPPLIER_RESPONSIBLE",
+          };
+          break;
+        default:
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+          };
+          break;
       }
       
       navigate(`/email/Sign-up`);
@@ -180,7 +201,6 @@ export function EnterprisePageEmail() {
               />
             </div>
           </div>
-
           <div>
             <Label>Email corporativo</Label>
             <Input
