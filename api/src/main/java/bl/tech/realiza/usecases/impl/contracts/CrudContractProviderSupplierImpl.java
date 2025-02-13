@@ -305,4 +305,33 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         return providerResponseDtoPage;
     }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable) {
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProvider(idBranch,idSupplier, pageable);
+
+        Page<ContractResponseDto> providerResponseDtoPage = contractProviderSupplierPage.map(
+                contractProviderSupplier -> ContractResponseDto.builder()
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceDuration(contractProviderSupplier.getServiceDuration())
+                        .serviceName(contractProviderSupplier.getServiceName())
+                        .contractReference(contractProviderSupplier.getContractReference())
+                        .description(contractProviderSupplier.getDescription())
+                        .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
+                        .expenseType(contractProviderSupplier.getExpenseType())
+                        .startDate(contractProviderSupplier.getStartDate())
+                        .endDate(contractProviderSupplier.getEndDate())
+                        .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
+                        .activities(contractProviderSupplier.getActivities())
+                        .requirements(contractProviderSupplier.getRequirements())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
+                        .branch(contractProviderSupplier.getBranch().getIdBranch())
+                        .branchName(contractProviderSupplier.getBranch().getName())
+                        .build()
+        );
+
+        return providerResponseDtoPage;
+    }
 }
