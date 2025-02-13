@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.controllers.interfaces.documents;
+package bl.tech.realiza.gateways.repositories.documents;
 
 import bl.tech.realiza.domains.documents.Document;
 import org.springframework.data.jpa.repository.JpaRepository;

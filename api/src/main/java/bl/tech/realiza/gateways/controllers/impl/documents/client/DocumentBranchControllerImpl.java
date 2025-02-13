@@ -130,7 +130,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/document-matrix")
+    @PostMapping("/{idEnterprise}/document-matrix")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
@@ -142,7 +142,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @DeleteMapping("/document-matrix")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
-    public ResponseEntity<Void> removeRequiredDocument(@PathVariable String documentId) {
+    public ResponseEntity<Void> removeRequiredDocument(@RequestParam String documentId) {
         crudDocumentBranch.removeRequiredDocument(documentId);
 
         return ResponseEntity.noContent().build();

@@ -126,11 +126,29 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/solicitation")
+    @PatchMapping("/{idEmployee}/solicitation")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> solicitateNewRequiredDocument(@PathVariable String idEmployee, @RequestParam String idDocument) {
         String response = crudDocumentEmployeeImpl.solicitateNewRequiredDocument(idEmployee, idDocument);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/document-matrix")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<String> addRequiredDocument(@PathVariable String idEmployee, @RequestParam String documentMatrixId) {
+        String response = crudDocumentEmployeeImpl.addRequiredDocument(documentMatrixId, idEmployee);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/document-matrix")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
+    public ResponseEntity<Void> removeRequiredDocument(@RequestParam String documentId) {
+        crudDocumentEmployeeImpl.removeRequiredDocument(documentId);
+
+        return ResponseEntity.noContent().build();
     }
 }

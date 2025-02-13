@@ -1,9 +1,10 @@
-package bl.tech.realiza.gateways.controllers.impl.documents.provider;
+package bl.tech.realiza.gateways.controllers.impl.documents.contract;
 
-import bl.tech.realiza.gateways.controllers.interfaces.documents.provider.DocumentProviderSubcontractorControlller;
-import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
+import bl.tech.realiza.domains.documents.contract.DocumentContract;
+import bl.tech.realiza.gateways.controllers.interfaces.documents.contract.DocumentContractController;
+import bl.tech.realiza.gateways.requests.documents.contract.DocumentContractRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
-import bl.tech.realiza.usecases.impl.documents.provider.CrudDocumentProviderSubcontractorImpl;
+import bl.tech.realiza.usecases.impl.documents.contract.CrudDocumentContractImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,74 +23,74 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/document/subcontractor")
-@Tag(name = "Document Subcontractor")
-public class DocumentProviderSubcontractorControllerImpl implements DocumentProviderSubcontractorControlller {
+@RequestMapping("/document/contract")
+@Tag(name = "Document Contract")
+public class DocumentContractControllerImpl implements DocumentContractController {
 
-    private final CrudDocumentProviderSubcontractorImpl crudDocumentSubcontractor;
+    private final CrudDocumentContractImpl crudDocumentContract;
 
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(
-            @RequestPart("documentSubcontractorRequestDto") @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
+    public ResponseEntity<DocumentResponseDto> createDocumentProviderContract(
+            @RequestPart("documentContractRequestDto") @Valid DocumentContractRequestDto documentContractRequestDto,
             @RequestParam("file") MultipartFile file) {
-        DocumentResponseDto documentSubcontractor = null;
+        DocumentResponseDto documentContract = null;
         try {
-            documentSubcontractor = crudDocumentSubcontractor.save(documentSubcontractorRequestDto, file);
+            documentContract = crudDocumentContract.save(documentContractRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return ResponseEntity.of(Optional.of(documentSubcontractor));
+        return ResponseEntity.of(Optional.of(documentContract));
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderSubcontractor(@PathVariable String id) {
-        Optional<DocumentResponseDto> documentSubcontractor = crudDocumentSubcontractor.findOne(id);
+    public ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderContract(@PathVariable String id) {
+        Optional<DocumentResponseDto> documentContract = crudDocumentContract.findOne(id);
 
-        return ResponseEntity.of(Optional.of(documentSubcontractor));
+        return ResponseEntity.of(Optional.of(documentContract));
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractor(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderContract(@RequestParam(defaultValue = "0") int page,
                                                                                           @RequestParam(defaultValue = "5") int size,
                                                                                           @RequestParam(defaultValue = "idDocumentation") String sort,
                                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<DocumentResponseDto> pageDocumentSubcontractor = crudDocumentSubcontractor.findAll(pageable);
+        Page<DocumentResponseDto> pageDocumentContract = crudDocumentContract.findAll(pageable);
 
-        return ResponseEntity.ok(pageDocumentSubcontractor);
+        return ResponseEntity.ok(pageDocumentContract);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(
+    public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderContract(
             @PathVariable String id,
-            @RequestPart("documentSubcontractorRequestDto")
-            @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
+            @RequestPart("documentContractRequestDto")
+            @Valid DocumentContractRequestDto documentContractRequestDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
-        Optional<DocumentResponseDto> documentSubcontractor = null;
+        Optional<DocumentResponseDto> documentContract = null;
         try {
-            documentSubcontractor = crudDocumentSubcontractor.update(id, documentSubcontractorRequestDto, file);
+            documentContract = crudDocumentContract.update(id, documentContractRequestDto, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return ResponseEntity.of(Optional.of(documentSubcontractor));
+        return ResponseEntity.of(Optional.of(documentContract));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
-    public ResponseEntity<Void> deleteDocumentProviderSubcontractor(@PathVariable String id) {
-        crudDocumentSubcontractor.delete(id);
+    public ResponseEntity<Void> deleteDocumentProviderContract(@PathVariable String id) {
+        crudDocumentContract.delete(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -97,23 +98,23 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @GetMapping("/filtered-subcontractor")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderContractBySubContractor(@RequestParam(defaultValue = "0") int page,
                                                                                                          @RequestParam(defaultValue = "5") int size,
                                                                                                          @RequestParam(defaultValue = "idDocumentation") String sort,
                                                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                                          @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<DocumentResponseDto> pageDocumentSubcontractor = crudDocumentSubcontractor.findAllBySubcontractor(idSearch, pageable);
+        Page<DocumentResponseDto> pageDocumentContract = crudDocumentContract.findAllByContract(idSearch, pageable);
 
-        return ResponseEntity.ok(pageDocumentSubcontractor);
+        return ResponseEntity.ok(pageDocumentContract);
     }
 
     @GetMapping("/{id}/document-matrix")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<DocumentResponseDto> getSubcontractorDocuments(@PathVariable String id) {
-        DocumentResponseDto branchResponse = crudDocumentSubcontractor.findAllSelectedDocuments(id);
+    public ResponseEntity<DocumentResponseDto> getContractDocuments(@PathVariable String id) {
+        DocumentResponseDto branchResponse = crudDocumentContract.findAllSelectedDocuments(id);
 
         return ResponseEntity.ok(branchResponse);
     }
@@ -121,16 +122,16 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @PutMapping("/{id}/document-matrix")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<String> updateSubcontractorDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentSubcontractor.updateRequiredDocuments(id, documentList);
+    public ResponseEntity<String> updateContractDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
+        String response = crudDocumentContract.updateRequiredDocuments(id, documentList);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{idEnterprise}/document-matrix")
+    @PostMapping("/{idContract}/document-matrix")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
-        String response = crudDocumentSubcontractor.addRequiredDocument(documentMatrixId, idEnterprise);
+    public ResponseEntity<String> addRequiredDocument(@PathVariable String idContract, @RequestParam String documentMatrixId) {
+        String response = crudDocumentContract.addRequiredDocument(documentMatrixId, idContract);
 
         return ResponseEntity.ok(response);
     }
@@ -139,7 +140,7 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
     public ResponseEntity<Void> removeRequiredDocument(@RequestParam String documentId) {
-        crudDocumentSubcontractor.removeRequiredDocument(documentId);
+        crudDocumentContract.removeRequiredDocument(documentId);
 
         return ResponseEntity.noContent().build();
     }

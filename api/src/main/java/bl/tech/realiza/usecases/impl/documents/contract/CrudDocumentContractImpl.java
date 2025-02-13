@@ -1,21 +1,21 @@
-package bl.tech.realiza.usecases.impl.documents.provider;
+package bl.tech.realiza.usecases.impl.documents.contract;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
-import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.documents.contract.DocumentContract;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
-import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.documents.contract.DocumentContractRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
-import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
+import bl.tech.realiza.gateways.requests.documents.contract.DocumentContractRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
-import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
+import bl.tech.realiza.usecases.interfaces.documents.contract.CrudDocumentContract;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -33,29 +33,27 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProviderSubcontractor {
-
-    private final DocumentProviderSubcontractorRepository documentSubcontractorRepository;
-    private final ProviderSubcontractorRepository providerSubcontractorRepository;
+public class CrudDocumentContractImpl implements CrudDocumentContract {
+    private final DocumentContractRepository documentContractRepository;
+    private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
-    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
-    public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
+    public DocumentResponseDto save(DocumentContractRequestDto documentContractRequestDto, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Invalid file");
         }
-        if (documentProviderSubcontractorRequestDto.getSubcontractor() == null || documentProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
-            throw new BadRequestException("Invalid subcontractor");
+        if (documentContractRequestDto.getContract() == null || documentContractRequestDto.getContract().isEmpty()) {
+            throw new BadRequestException("Invalid contract");
         }
 
         FileDocument fileDocument = null;
         String fileDocumentId = null;
 
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getSubcontractor());
+        Optional<Contract> contractOptional = contractRepository.findById(documentContractRequestDto.getContract());
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        Contract contract = contractOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         try {
             fileDocument = FileDocument.builder()
@@ -77,14 +75,14 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             throw new EntityNotFoundException(e);
         }
 
-        DocumentProviderSubcontractor newDocumentSubcontractor = DocumentProviderSubcontractor.builder()
-                .title(documentProviderSubcontractorRequestDto.getTitle())
-                .status(documentProviderSubcontractorRequestDto.getStatus())
+        DocumentContract newDocumentSubcontractor = DocumentContract.builder()
+                .title(documentContractRequestDto.getTitle())
+                .status(documentContractRequestDto.getStatus())
                 .documentation(fileDocumentId)
-                .providerSubcontractor(providerSubcontractor)
+                .contract(contract)
                 .build();
 
-        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(newDocumentSubcontractor);
+        DocumentContract savedDocumentSubcontractor = documentContractRepository.save(newDocumentSubcontractor);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentSubcontractor.getDocumentation())
@@ -92,7 +90,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .contract(savedDocumentSubcontractor.getContract().getIdContract())
                 .build();
 
         return documentSubcontractorResponse;
@@ -100,23 +98,23 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
-        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
+        Optional<DocumentContract> documentContractOptional = documentContractRepository.findById(id);
 
-        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        DocumentContract documentContract = documentContractOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
+        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentContract.getDocumentation()));
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocumentation(documentSubcontractor.getDocumentation())
-                .title(documentSubcontractor.getTitle())
-                .status(documentSubcontractor.getStatus())
-                .documentation(documentSubcontractor.getDocumentation())
+                .idDocumentation(documentContract.getDocumentation())
+                .title(documentContract.getTitle())
+                .status(documentContract.getStatus())
+                .documentation(documentContract.getDocumentation())
                 .fileName(fileDocument.getName())
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
-                .creationDate(documentSubcontractor.getCreationDate())
-                .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .creationDate(documentContract.getCreationDate())
+                .contract(documentContract.getContract().getIdContract())
                 .build();
 
         return Optional.of(documentSubcontractorResponse);
@@ -124,23 +122,23 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Page<DocumentResponseDto> findAll(Pageable pageable) {
-        Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAll(pageable);
+        Page<DocumentContract> documentSubcontractorPage = documentContractRepository.findAll(pageable);
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
-                documentSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
+                documentContract -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentContract.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentSubcontractor.getDocumentation())
-                            .title(documentSubcontractor.getTitle())
-                            .status(documentSubcontractor.getStatus())
-                            .documentation(documentSubcontractor.getDocumentation())
+                            .idDocumentation(documentContract.getDocumentation())
+                            .title(documentContract.getTitle())
+                            .status(documentContract.getStatus())
+                            .documentation(documentContract.getDocumentation())
                             .fileName(fileDocument.getName())
                             .fileContentType(fileDocument.getContentType())
                             .fileData(fileDocument.getData())
-                            .creationDate(documentSubcontractor.getCreationDate())
-                            .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .creationDate(documentContract.getCreationDate())
+                            .contract(documentContract.getContract().getIdContract())
                             .build();
                 }
         );
@@ -149,14 +147,14 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
+    public Optional<DocumentResponseDto> update(String id, DocumentContractRequestDto documentContractRequestDto, MultipartFile file) throws IOException {
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
 
-        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
+        Optional<DocumentContract> documentContractOptional = documentContractRepository.findById(id);
 
-        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        DocumentContract documentContract = documentContractOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
@@ -177,12 +175,12 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 System.out.println(e.getMessage());
                 throw new EntityNotFoundException(e);
             }
-            documentSubcontractor.setDocumentation(fileDocumentId);
+            documentContract.setDocumentation(fileDocumentId);
         }
 
-        documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
+        documentContract.setStatus(documentContractRequestDto.getStatus() != null ? documentContractRequestDto.getStatus() : documentContract.getStatus());
 
-        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
+        DocumentContract savedDocumentSubcontractor = documentContractRepository.save(documentContract);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocumentation(savedDocumentSubcontractor.getDocumentation())
@@ -190,7 +188,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .contract(savedDocumentSubcontractor.getContract().getIdContract())
                 .build();
 
         return Optional.of(documentSubcontractorResponse);
@@ -198,28 +196,28 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public void delete(String id) {
-        documentSubcontractorRepository.deleteById(id);
+        documentContractRepository.deleteById(id);
     }
 
     @Override
-    public Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
-        Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+    public Page<DocumentResponseDto> findAllByContract(String idSearch, Pageable pageable) {
+        Page<DocumentContract> documentSubcontractorPage = documentContractRepository.findAllByContract_IdContract(idSearch, pageable);
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
-                documentSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
+                documentContract -> {
+                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentContract.getDocumentation()));
                     FileDocument fileDocument = fileDocumentOptional.orElse(null);
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentSubcontractor.getDocumentation())
-                            .title(documentSubcontractor.getTitle())
-                            .status(documentSubcontractor.getStatus())
-                            .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
-                            .creationDate(documentSubcontractor.getCreationDate())
-                            .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .idDocumentation(documentContract.getDocumentation())
+                            .title(documentContract.getTitle())
+                            .status(documentContract.getStatus())
+                            .documentation(documentContract.getDocumentation())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .creationDate(documentContract.getCreationDate())
+                            .contract(documentContract.getContract().getIdContract())
                             .build();
                 }
         );
@@ -229,9 +227,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public DocumentResponseDto findAllSelectedDocuments(String id) {
-        documentSubcontractorRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
-        List<DocumentProviderSubcontractor> documentSubcontractor = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
-        List<DocumentMatrix> selectedDocuments = documentSubcontractor.stream().map(DocumentProviderSubcontractor::getDocumentMatrix).collect(Collectors.toList());
+        documentContractRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+        List<DocumentContract> documentContract = documentContractRepository.findAllByContract_IdContract(id);
+        List<DocumentMatrix> selectedDocuments = documentContract.stream().map(DocumentContract::getDocumentMatrix).collect(Collectors.toList());
         List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
         List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
@@ -249,39 +247,39 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             throw new NotFoundException("Invalid documents");
         }
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NotFoundException("Contract not found"));
 
         List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAllById(documentCollection);
         if (documentMatrixList.isEmpty()) {
             throw new NotFoundException("Documents not found");
         }
 
-        List<DocumentProviderSubcontractor> existingDocumentSubcontractors = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
+        List<DocumentContract> existingDocumentSubcontractors = documentContractRepository.findAllByContract_IdContract(id);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentSubcontractors.stream()
-                .map(DocumentProviderSubcontractor::getDocumentMatrix)
+                .map(DocumentContract::getDocumentMatrix)
                 .collect(Collectors.toSet());
 
-        List<DocumentProviderSubcontractor> newDocumentSubcontractors = documentMatrixList.stream()
+        List<DocumentContract> newDocumentSubcontractors = documentMatrixList.stream()
                 .filter(doc -> !existingDocuments.contains(doc))
-                .map(doc -> DocumentProviderSubcontractor.builder()
+                .map(doc -> DocumentContract.builder()
                         .title(doc.getName())
                         .status(Document.Status.PENDENTE)
-                        .providerSubcontractor(providerSubcontractor)
+                        .contract(contract)
                         .documentMatrix(doc)
                         .build())
                 .collect(Collectors.toList());
 
-        List<DocumentProviderSubcontractor> documentsToRemove = existingDocumentSubcontractors.stream()
+        List<DocumentContract> documentsToRemove = existingDocumentSubcontractors.stream()
                 .filter(db -> !documentMatrixList.contains(db.getDocumentMatrix()))
                 .collect(Collectors.toList());
 
         if (!documentsToRemove.isEmpty()) {
-            documentSubcontractorRepository.deleteAll(documentsToRemove);
+            documentContractRepository.deleteAll(documentsToRemove);
         }
 
         if (!newDocumentSubcontractors.isEmpty()) {
-            documentSubcontractorRepository.saveAll(newDocumentSubcontractors);
+            documentContractRepository.saveAll(newDocumentSubcontractors);
         }
 
         return "Documents updated successfully";
@@ -293,24 +291,24 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             throw new BadRequestException("Invalid documents");
         }
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+        Contract contract = contractRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Contract not found"));
 
         DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
 
-        List<DocumentProviderSubcontractor> existingDocumentBranches = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idEnterprise);
+        List<DocumentContract> existingDocumentBranches = documentContractRepository.findAllByContract_IdContract(idEnterprise);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
-                .map(DocumentProviderSubcontractor::getDocumentMatrix)
+                .map(DocumentContract::getDocumentMatrix)
                 .collect(Collectors.toSet());
 
-        DocumentProviderSubcontractor newDocumentBranch = DocumentProviderSubcontractor.builder()
+        DocumentContract newDocumentBranch = DocumentContract.builder()
                 .title(documentMatrix.getName())
                 .status(Document.Status.PENDENTE)
-                .providerSubcontractor(providerSubcontractor)
+                .contract(contract)
                 .documentMatrix(documentMatrix)
                 .build();
 
-        documentSubcontractorRepository.save(newDocumentBranch);
+        documentContractRepository.save(newDocumentBranch);
 
         return "Document updated successfully";
     }
@@ -320,6 +318,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         if (documentId == null || documentId.isEmpty()) {
             throw new NotFoundException("Invalid documents");
         }
-        documentSubcontractorRepository.deleteById(documentId);
+        documentContractRepository.deleteById(documentId);
     }
 }
+
