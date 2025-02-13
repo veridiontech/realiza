@@ -27,9 +27,11 @@ public class DocumentResponseDto {
     private Date expirationDate;
     private List<DocumentMatrix> selectedDocumentsEnterprise;
     private List<DocumentMatrix> selectedDocumentsPersonal;
+    private List<DocumentMatrix> selectedDocumentsTrainning;
     private List<DocumentMatrix> selectedDocumentsService;
     private List<DocumentMatrix> nonSelectedDocumentsEnterprise;
     private List<DocumentMatrix> nonSelectedDocumentsPersonal;
+    private List<DocumentMatrix> nonSelectedDocumentsTrainning;
     private List<DocumentMatrix> nonSelectedDocumentsService;
 
     // branch

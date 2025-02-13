@@ -283,4 +283,33 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         return contractProviderResponseDtoPage;
     }
+
+    @Override
+    public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
+        Page<ContractProviderSubcontractor> contractProviderSubcontractorPage = contractProviderSubcontractorRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+
+        Page<ContractResponseDto> contractProviderResponseDtoPage = contractProviderSubcontractorPage.map(
+                contractProviderSubcontractor -> ContractResponseDto.builder()
+                        .idContract(contractProviderSubcontractor.getIdContract())
+                        .serviceType(contractProviderSubcontractor.getServiceType())
+                        .serviceDuration(contractProviderSubcontractor.getServiceDuration())
+                        .serviceName(contractProviderSubcontractor.getServiceName())
+                        .contractReference(contractProviderSubcontractor.getContractReference())
+                        .description(contractProviderSubcontractor.getDescription())
+                        .allocatedLimit(contractProviderSubcontractor.getAllocatedLimit())
+                        .expenseType(contractProviderSubcontractor.getExpenseType())
+                        .startDate(contractProviderSubcontractor.getStartDate())
+                        .endDate(contractProviderSubcontractor.getEndDate())
+                        .activities(contractProviderSubcontractor.getActivities())
+                        .requirements(contractProviderSubcontractor.getRequirements())
+                        .contractSupplierId(contractProviderSubcontractor.getContractProviderSupplier().getIdContract())
+                        .providerSubcontractor(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider())
+                        .providerSubcontractorName(contractProviderSubcontractor.getProviderSubcontractor().getCorporateName())
+                        .providerSupplier(contractProviderSubcontractor.getProviderSupplier().getIdProvider())
+                        .providerSupplierName(contractProviderSubcontractor.getProviderSupplier().getCorporateName())
+                        .build()
+        );
+
+        return contractProviderResponseDtoPage;
+    }
 }
