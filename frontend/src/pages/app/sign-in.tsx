@@ -42,15 +42,18 @@ export function SignIn() {
       });
       console.log("token: ", res.data);
 
-      const token = res.data.token;
-      localStorage.setItem("tokenClient", token);
+
+      const obj = {
+        token: res.data.token
+      }
+      localStorage.setItem("tokenClient", res.data.token);
 
       const userResponse = await axios.post(
         `${ip}/login/extract-token`,
-        token,
+        obj,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${res.data.token}`,
           },
         },
       );

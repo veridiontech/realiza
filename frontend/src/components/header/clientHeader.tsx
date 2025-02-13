@@ -2,6 +2,7 @@ import {
   Bell,
   ChartNoAxesGantt,
   LogOut,
+  Plus,
   Search,
   User,
 } from "lucide-react";
@@ -85,6 +86,14 @@ export function HeaderClient() {
                       <div className="flex items-center gap-1">
                         <User />
                         <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to={`/cliente/create-manager/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <Plus />
+                        <p>Criar gerente</p>
                       </div>
                     </DropdownMenuItem>
                   </Link>

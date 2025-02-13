@@ -117,6 +117,7 @@ export function EnterprisePageEmail() {
         console.log("Enviando dados:", payload);
         setEnterpriseData(payload);
       }
+      
       navigate(`/email/Sign-up`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);

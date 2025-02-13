@@ -171,7 +171,7 @@ export function ModalAddContract() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-white">É uma subcontratação?</Label>
+              <Label className="text-white">Permitido subcontratação?</Label>
               <div className="flex items-center gap-1">
                 <Label className="text-white" htmlFor="subcontratacao-sim">
                   Sim
