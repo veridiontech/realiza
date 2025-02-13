@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 interface UserContextProps {
   user: propsUser | null;
   branch: string;
+  branches: string[];
   authUser: boolean;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
@@ -100,9 +101,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               });
               if (res.data) {
                 const supplierData = res.data;
-                // Garante que o campo idUser esteja definido (usando supplier, se necessário)
+                console.log("Dados do supplier:", res.data);
+                const storedBranches = JSON.parse(
+                  localStorage.getItem("userBranches") || "[]",
+                );
                 setUser({
                   ...supplierData,
+                  branches: storedBranches,
                   idUser: supplierData.idUser || supplierData.supplier,
                 });
                 setAuthUser(true);
@@ -241,6 +246,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("userId");
       localStorage.removeItem("tokenClient");
       localStorage.removeItem("hasShownToast");
+      localStorage.removeItem("userBranches");
+      localStorage.removeItem("userFullData");
       setUser(null);
       setAuthUser(false);
       navigate("/");
@@ -254,6 +261,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         branch: user?.branch || "",
+        branches: user?.branches || [],
         authUser,
         setUser,
         setAuthUser,
