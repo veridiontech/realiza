@@ -14,4 +14,6 @@ public interface ProviderSubcontractorRepository extends JpaRepository<ProviderS
     List<ProviderSubcontractor> findAllByProviderSupplier_IdProvider(String idSearch);
     Long countByProviderSupplier_IdProviderIn(List<String> idSearch);
     Long countByProviderSupplier_IdProvider(String idSearch);
+    Page<ProviderSubcontractor> findAllByIsActiveIsTrue(Pageable pageable);
+    Page<ProviderSubcontractor> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch, Pageable pageable);
 }

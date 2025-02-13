@@ -125,7 +125,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public Page<UserResponseDto> findAll(Pageable pageable) {
-        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAll(pageable);
+        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
                 userSubcontractor -> {
@@ -201,7 +201,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
-        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRole(idSearch, User.Role.ROLE_SUBCONTRACTOR_MANAGER, pageable);
+        Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRoleAndIsActiveIsTrue(idSearch, User.Role.ROLE_SUBCONTRACTOR_MANAGER, pageable);
 
         Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
                 userSubcontractor -> {

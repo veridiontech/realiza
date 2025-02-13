@@ -124,7 +124,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAll(Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAll(pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByIsActiveIsTrue(pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {
@@ -202,7 +202,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRole(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRoleAndIsActiveIsTrue(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {
