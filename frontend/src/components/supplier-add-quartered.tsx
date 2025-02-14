@@ -1,5 +1,4 @@
 import axios from "axios";
-// import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi"; // Removido devido ao erro
 import {
   Dialog,
   DialogContent,
@@ -12,7 +11,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { ip } from "@/utils/ip";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -20,19 +19,17 @@ import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useUser } from "@/context/user-provider";
 
-// ───────────────────────────────────────────────
 // Schema do convite (primeiro modal)
 const subcontractorInviteSchema = z.object({
   email: z.string().email("Insira um email válido"),
   cnpj: z.string().nonempty("Insira o CNPJ"),
 });
 
-// ───────────────────────────────────────────────
 // Schema do contrato (segundo modal)
-// Conforme o Swagger, o payload precisa conter:
-// serviceType, serviceDuration, serviceName, contractReference, description,
-// allocatedLimit, responsible, expenseType, startDate, endDate, supplierContractId,
-// activities, requirements, branch, além de cnpj, providerSupplier, providerSubcontractor e subcontractPermission.
+// Observe que:
+// - o campo "cnpj" virá do convite e é preenchido automaticamente;
+// - "responsible" é exigido e deve ser um id válido (não pode ser vazio);
+// - "activities" e "requirements" são arrays.
 const contractFormSchema = z.object({
   cnpj: z.string().nonempty("CNPJ obrigatório"),
   serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
@@ -45,7 +42,7 @@ const contractFormSchema = z.object({
   allocatedLimit: z
     .string()
     .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
-  responsible: z.string().nonempty("O responsável é obrigatório"),
+  responsible: z.string().nonempty("Selecione um gestor"),
   expenseType: z.string().nonempty("O tipo de despesa é obrigatório"),
   startDate: z
     .string()
@@ -62,37 +59,30 @@ const contractFormSchema = z.object({
   supplierContractId: z
     .string()
     .nonempty("O ID do contrato do fornecedor é obrigatório"),
-  branch: z.string().nonempty("O branch é obrigatório"),
   activities: z
     .array(z.string())
     .min(1, "Pelo menos uma atividade é obrigatória"),
   requirements: z
     .array(z.string())
     .min(1, "Pelo menos um requisito é obrigatória"),
-  // Este campo é opcional: se informado, o backend tentará buscá-lo; caso contrário, criará um novo subcontratado
-  providerSubcontractor: z.string().optional(),
 });
 
 type SubcontractorInviteSchema = z.infer<typeof subcontractorInviteSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
-// ───────────────────────────────────────────────
-// Componente principal
 export default function SupplierAddQuartered() {
-  // O provider fornece o ID do fornecedor (supplier)
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
-  // Guarda os dados do convite para uso no contrato
   const [inviteData, setInviteData] =
     useState<SubcontractorInviteSchema | null>(null);
-  // Estados para gestores, atividades e requisitos (usados no contrato)
   const [managers, setManagers] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [requirements, setRequirements] = useState<any[]>([]);
+  const [supplierContracts, setSupplierContracts] = useState<any[]>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
 
-  // ── Formulário do convite (primeiro modal)
+  // Formulário do convite
   const {
     register: registerInvite,
     handleSubmit: handleSubmitInvite,
@@ -101,16 +91,31 @@ export default function SupplierAddQuartered() {
     resolver: zodResolver(subcontractorInviteSchema),
   });
 
-  // ── Formulário do contrato (segundo modal)
+  // Formulário do contrato
   const {
     register: registerContract,
     handleSubmit: handleSubmitContract,
+    setValue,
+    control,
     formState: { errors: errorsContract },
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
+    defaultValues: {
+      cnpj: "",
+      responsible: "",
+      activities: [],
+      requirements: [],
+    },
   });
 
-  // Função para buscar atividades e requisitos
+  // Quando os dados do convite chegam, preenche o campo "cnpj" do contrato
+  useEffect(() => {
+    if (inviteData) {
+      setValue("cnpj", inviteData.cnpj);
+    }
+  }, [inviteData, setValue]);
+
+  // Busca atividades e requisitos
   const getActivitiesAndRequirements = async () => {
     try {
       const activitieData = await axios.get(`${ip}/contract/activity`);
@@ -122,7 +127,7 @@ export default function SupplierAddQuartered() {
     }
   };
 
-  // Função para buscar gestores (no exemplo, filtramos pelo ID do fornecedor)
+  // Busca gestores (filtrando pelo id do fornecedor)
   const getManagers = async () => {
     try {
       const res = await axios.get(
@@ -134,24 +139,40 @@ export default function SupplierAddQuartered() {
     }
   };
 
+  // Busca contratos do fornecedor
+  const getSupplierContracts = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/contract/supplier/filtered-supplier?idSearch=${user?.supplier}`,
+      );
+      setSupplierContracts(res.data.content);
+    } catch (err) {
+      console.error("Erro ao buscar contratos do fornecedor", err);
+    }
+  };
+
   useEffect(() => {
     getActivitiesAndRequirements();
   }, []);
 
-  // ── Envio do convite (primeiro modal)
+  useEffect(() => {
+    if (user?.supplier) {
+      getSupplierContracts();
+    }
+  }, [user]);
+
+  // Envio do convite
   const onSubmitInvite = async (data: SubcontractorInviteSchema) => {
     setIsLoading(true);
     try {
-      // Envia o convite por email
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: user?.supplier, // ID do fornecedor
-        company: "SUBCONTRACTOR", // identifica o tipo de convite
+        idCompany: user?.supplier,
+        company: "SUBCONTRACTOR",
         cnpj: data.cnpj,
       });
       toast.success("Email de cadastro enviado para novo subcontratado");
       setInviteData(data);
-      // Busca gestores para preencher o select no contrato (se necessário)
       await getManagers();
       setNextModal(true);
     } catch (error) {
@@ -162,7 +183,7 @@ export default function SupplierAddQuartered() {
     }
   };
 
-  // ── Envio do contrato (segundo modal)
+  // Envio do contrato
   const onSubmitContract = async (data: ContractFormSchema) => {
     if (!inviteData) {
       toast.error("Dados do convite não encontrados");
@@ -170,14 +191,18 @@ export default function SupplierAddQuartered() {
     }
     setIsLoading(true);
     try {
-      // Monta o payload incluindo o CNPJ do convite, o fornecedor (provider) e define a flag de subcontratação
       const payload = {
         ...data,
+        // Força o valor de cnpj a vir do convite
         cnpj: inviteData.cnpj,
-        supplier: user?.supplier, // ID do fornecedor
         subcontractPermission: true,
+        // Se não houver um subcontratado pré-selecionado, enviamos null para disparar a criação
+        providerSubcontractor: null,
+        providerSupplier: user?.supplier,
+        branch: user?.branch,
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: new Date(data.endDate).toISOString(),
       };
-      // Chama o endpoint de criação do contrato para subcontratados
       await axios.post(`${ip}/contract/subcontractor`, payload);
       toast.success("Contrato criado com sucesso");
     } catch (error) {
@@ -188,12 +213,11 @@ export default function SupplierAddQuartered() {
     }
   };
 
-  // ── Lógica para os radio buttons (se necessário)
+  // Lógica para os radio buttons (se necessário)
   const handleRadioClick = (value: string) => {
     setSelectedRadio(value);
   };
 
-  // Se “Não” ou nenhum for selecionado, mostra o campo “Tipo do Serviço”
   const shouldShowServiceType =
     selectedRadio === null || selectedRadio === "nao";
 
@@ -271,48 +295,20 @@ export default function SupplierAddQuartered() {
               onSubmit={handleSubmitContract(onSubmitContract)}
               className="flex flex-col gap-4 p-4"
             >
-              {/* Campo de CNPJ (puxado do convite) */}
+              {/* CNPJ (apenas leitura, vindo do convite) */}
               <div>
                 <Label className="text-white">CNPJ do subcontratado</Label>
                 <Input
                   type="text"
-                  value={inviteData?.cnpj || "Erro ao puxar CNPJ"}
                   readOnly
+                  {...registerContract("cnpj")}
+                  value={inviteData?.cnpj || "Erro ao puxar CNPJ"}
                 />
                 {errorsContract.cnpj && (
                   <span className="text-red-600">
                     {errorsContract.cnpj.message}
                   </span>
                 )}
-              </div>
-
-              {/* Radio para definir se é subcontratação (opcional) */}
-              <div className="flex flex-col gap-2">
-                <Label className="text-white">É uma subcontratação?</Label>
-                <div className="flex items-center gap-1">
-                  <Label className="text-white" htmlFor="subcontratacao-sim">
-                    Sim
-                  </Label>
-                  <input
-                    type="radio"
-                    id="subcontratacao-sim"
-                    name="subcontratacao"
-                    value="sim"
-                    onClick={() => handleRadioClick("sim")}
-                  />
-                </div>
-                <div className="flex items-center gap-1">
-                  <Label className="text-white" htmlFor="subcontratacao-nao">
-                    Não
-                  </Label>
-                  <input
-                    type="radio"
-                    id="subcontratacao-nao"
-                    name="subcontratacao"
-                    value="nao"
-                    onClick={() => handleRadioClick("nao")}
-                  />
-                </div>
               </div>
 
               {/* Seleção do gestor */}
@@ -328,10 +324,7 @@ export default function SupplierAddQuartered() {
                   </option>
                   {Array.isArray(managers) &&
                     managers.map((manager: any) => (
-                      <option
-                        key={manager.idUser}
-                        value={`${manager.firstName} ${manager.surname}`}
-                      >
+                      <option key={manager.idUser} value={manager.idUser}>
                         {manager.firstName} {manager.surname}
                       </option>
                     ))}
@@ -354,7 +347,7 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* Campo “Tipo do Serviço” – exibido conforme a seleção do radio */}
+              {/* Tipo do Serviço (condicional) */}
               {shouldShowServiceType && (
                 <div>
                   <Label className="text-white">Tipo do Serviço</Label>
@@ -411,7 +404,7 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* Escopo/descrição do serviço */}
+              {/* Escopo/Descrição do Serviço */}
               <div className="flex flex-col gap-1">
                 <Label className="text-white">Escopo do serviço</Label>
                 <textarea
@@ -438,7 +431,7 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* Datas de início e término */}
+              {/* Datas de Início e Término */}
               <div>
                 <Label className="text-white">Data de início</Label>
                 <Input type="date" {...registerContract("startDate")} />
@@ -458,15 +451,26 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* ID do Contrato do Fornecedor */}
+              {/* Contrato do Fornecedor */}
               <div>
-                <Label className="text-white">
-                  ID do Contrato do Fornecedor
-                </Label>
-                <Input
+                <Label className="text-white">Contrato do Fornecedor</Label>
+                <select
                   {...registerContract("supplierContractId")}
-                  placeholder="Insira o ID do contrato do fornecedor"
-                />
+                  className="rounded-md border p-2"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Selecione um contrato
+                  </option>
+                  {supplierContracts.map((contract: any) => (
+                    <option
+                      key={contract.idContract}
+                      value={contract.idContract}
+                    >
+                      {contract.contractReference} - {contract.serviceName}
+                    </option>
+                  ))}
+                </select>
                 {errorsContract.supplierContractId && (
                   <span className="text-red-600">
                     {errorsContract.supplierContractId.message}
@@ -474,37 +478,36 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* Branch */}
-              <div>
-                <Label className="text-white">Branch</Label>
-                <Input
-                  {...registerContract("branch")}
-                  placeholder="Insira o branch"
-                />
-                {errorsContract.branch && (
-                  <span className="text-red-600">
-                    {errorsContract.branch.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Atividades */}
+              {/* Atividades - múltipla seleção */}
               <div className="flex flex-col gap-1">
                 <Label className="text-white">Atividades</Label>
-                <select
-                  {...registerContract("activities")}
-                  className="rounded-md border p-2"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Selecione uma atividade
-                  </option>
-                  {activities.map((activity: any) => (
-                    <option key={activity.idActivity} value={activity.title}>
-                      {activity.title}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  name="activities"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      multiple
+                      className="rounded-md border p-2"
+                      value={field.value}
+                      onChange={(e) => {
+                        const selected = Array.from(
+                          e.target.selectedOptions,
+                          (option) => option.value,
+                        );
+                        field.onChange(selected);
+                      }}
+                    >
+                      {activities.map((activity: any) => (
+                        <option
+                          key={activity.idActivity}
+                          value={activity.idActivity}
+                        >
+                          {activity.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                />
                 {errorsContract.activities && (
                   <span className="text-red-600">
                     {errorsContract.activities.message}
@@ -512,26 +515,36 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* Requisitos */}
+              {/* Requisitos - múltipla seleção */}
               <div className="flex flex-col gap-1">
                 <Label className="text-white">Requisitos</Label>
-                <select
-                  {...registerContract("requirements")}
-                  className="rounded-md border p-2"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Selecione um requisito
-                  </option>
-                  {requirements.map((requirement: any) => (
-                    <option
-                      key={requirement.idRequeriment}
-                      value={requirement.title}
+                <Controller
+                  name="requirements"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      multiple
+                      className="rounded-md border p-2"
+                      value={field.value}
+                      onChange={(e) => {
+                        const selected = Array.from(
+                          e.target.selectedOptions,
+                          (option) => option.value,
+                        );
+                        field.onChange(selected);
+                      }}
                     >
-                      {requirement.title}
-                    </option>
-                  ))}
-                </select>
+                      {requirements.map((requirement: any) => (
+                        <option
+                          key={requirement.idRequeriment}
+                          value={requirement.idRequeriment}
+                        >
+                          {requirement.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                />
                 {errorsContract.requirements && (
                   <span className="text-red-600">
                     {errorsContract.requirements.message}
@@ -539,7 +552,6 @@ export default function SupplierAddQuartered() {
                 )}
               </div>
 
-              {/* Botão de envio */}
               <div className="flex justify-end">
                 {isLoading ? (
                   <Button disabled>Carregando...</Button>
