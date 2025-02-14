@@ -134,7 +134,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
-        String response = crudDocumentBranch.addRequiredDocument(documentMatrixId, idEnterprise);
+        String response = crudDocumentBranch.addRequiredDocument(idEnterprise, documentMatrixId);
 
         return ResponseEntity.ok(response);
     }
