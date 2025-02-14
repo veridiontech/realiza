@@ -1,6 +1,7 @@
 export interface propsUser {
   idUser: string;
   branch: string;
+  branches: string[];
   cnpj: string;
   nameEnterprise: string;
   fantasyName: string;
