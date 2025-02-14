@@ -125,4 +125,22 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
         String response = crudDocumentSubcontractor.updateRequiredDocuments(id, documentList);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{idEnterprise}/document-matrix")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
+        String response = crudDocumentSubcontractor.addRequiredDocument(documentMatrixId, idEnterprise);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/document-matrix")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
+    public ResponseEntity<Void> removeRequiredDocument(@RequestParam String documentId) {
+        crudDocumentSubcontractor.removeRequiredDocument(documentId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

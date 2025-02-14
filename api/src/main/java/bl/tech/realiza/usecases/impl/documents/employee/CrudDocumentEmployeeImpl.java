@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.impl.documents.employee;
 
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
@@ -304,5 +306,41 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         documentEmployeeRepository.save(documentEmployee);
 
         return "Document requested successfully";
+    }
+
+    @Override
+    public String addRequiredDocument(String idEnterprise, String documentMatrixId) {
+        if (documentMatrixId == null || documentMatrixId.isEmpty()) {
+            throw new BadRequestException("Invalid documents");
+        }
+
+        Employee employee = employeeRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Employee not found"));
+
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
+
+        List<DocumentEmployee> existingDocumentBranches = documentEmployeeRepository.findAllByEmployee_IdEmployee(idEnterprise);
+
+        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
+                .map(DocumentEmployee::getDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        DocumentEmployee newDocumentBranch = DocumentEmployee.builder()
+                .title(documentMatrix.getName())
+                .status(Document.Status.PENDENTE)
+                .employee(employee)
+                .documentMatrix(documentMatrix)
+                .build();
+
+        documentEmployeeRepository.save(newDocumentBranch);
+
+        return "Document updated successfully";
+    }
+
+    @Override
+    public void removeRequiredDocument(String documentId) {
+        if (documentId == null || documentId.isEmpty()) {
+            throw new NotFoundException("Invalid documents");
+        }
+        documentEmployeeRepository.deleteById(documentId);
     }
 }

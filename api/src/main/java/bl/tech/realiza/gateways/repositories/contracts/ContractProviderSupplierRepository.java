@@ -8,4 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ContractProviderSupplierRepository extends JpaRepository<ContractProviderSupplier, String> {
     Page<ContractProviderSupplier> findAllByProviderSupplier_IdProvider(String idSearch, Pageable pageable);
     Page<ContractProviderSupplier> findAllByBranch_IdBranch(String idSearch, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndProviderSupplier_IdProvider(String idBranch, String idSupplier, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByIsActiveIsTrue(Pageable pageable);
+    Page<ContractProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(String idBranch, String idSupplier, Pageable pageable);
 }

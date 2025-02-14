@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserClientRepository extends JpaRepository<UserClient, String> {
     Page<UserClient> findAllByBranch_IdBranchAndRole(String idSearch, User.Role role, Pageable pageable);
+    Page<UserClient> findAllByIsActiveIsTrue(Pageable pageable);
+    Page<UserClient> findAllByBranch_IdBranchAndRoleAndIsActiveIsTrue(String idSearch, User.Role role, Pageable pageable);
 }

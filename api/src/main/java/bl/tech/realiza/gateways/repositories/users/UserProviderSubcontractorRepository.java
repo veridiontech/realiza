@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserProviderSubcontractorRepository extends JpaRepository<UserProviderSubcontractor, String> {
     Page<UserProviderSubcontractor> findAllByProviderSubcontractor_IdProviderAndRole(String idSearch, User.Role role, Pageable pageable);
+    Page<UserProviderSubcontractor> findAllByIsActiveIsTrue(Pageable pageable);
+    Page<UserProviderSubcontractor> findAllByProviderSubcontractor_IdProviderAndRoleAndIsActiveIsTrue(String idSearch, User.Role role, Pageable pageable);
 }

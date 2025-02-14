@@ -2,7 +2,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
 
@@ -22,9 +21,8 @@ export function ProtectedRoute({
     async function fetchUser() {
       const token = localStorage.getItem("tokenClient");
       const userId = localStorage.getItem("userId");
-      if (token && userId) {
-        const decoded: any = jwtDecode(token);
-        const role = decoded.role;
+      const role = localStorage.getItem("role")
+      if (token && userId && role) {
         let url = "";
         switch (role) {
           case "ROLE_ADMIN":

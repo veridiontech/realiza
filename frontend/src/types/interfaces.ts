@@ -1,6 +1,7 @@
 export interface propsUser {
   idUser: string;
   branch: string;
+  branches: string[];
   cnpj: string;
   nameEnterprise: string;
   fantasyName: string;
@@ -19,11 +20,12 @@ export interface propsUser {
   telephone: string;
   description: string;
   profilePictureData: string;
+  supplier: string;
 }
 
 export interface propsClient {
   cnpj: string;
-  companyName: string;
+  corporateName: string;
   idCompany: string;
   email: string;
   idClient: string;
@@ -40,6 +42,6 @@ export interface propsDocument {
 }
 
 export interface propsBranch {
-  idBranch: string,
-  name: string
+  idBranch: string;
+  name: string;
 }

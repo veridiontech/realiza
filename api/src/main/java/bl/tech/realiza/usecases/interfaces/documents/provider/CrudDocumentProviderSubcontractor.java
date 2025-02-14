@@ -19,4 +19,6 @@ public interface CrudDocumentProviderSubcontractor {
     Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
     String updateRequiredDocuments(String id, List<String> documentCollection);
+    String addRequiredDocument(String idEnterprise, String documentMatrixId);
+    void removeRequiredDocument(String documentId);
 }

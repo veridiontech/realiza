@@ -144,8 +144,8 @@ export function ModalTesteSendSupplier() {
       setNextModal(true);
       try {
         const res = await axios.get(
-          `${ip}/user/client/filtered-client?idSearch=${data.idCompany}`,
-        );
+          `${ip}/user/client/filtered-client?idSearch=${data.idBranch}`,
+        );      
         setManagers(res.data.content);
         console.log("gestores da empresa:", res.data.content);
         

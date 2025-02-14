@@ -11,7 +11,6 @@ import {
   MessageSquare,
   Users2,
   Building2,
-  Factory,
   PersonStanding,
 } from "lucide-react";
 
@@ -20,7 +19,7 @@ import { SheetContent } from "../ui/sheet";
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 
-export function ClientLateralMenu() {
+export function ProviderLateralMenu() {
   const { user } = useUser();
 
   const getIdUser = user?.idUser;
@@ -37,7 +36,7 @@ export function ClientLateralMenu() {
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>
-      <Link to={`/cliente/serviceProviders/${getIdUser}`}>
+      <Link to={`/fornecedor/quartered/${getIdUser}`}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -48,7 +47,7 @@ export function ClientLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={`/cliente/dashboard/${getIdUser}`}>
+      <Link to={`/fornecedor/dashboard/${getIdUser}`}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -62,7 +61,7 @@ export function ClientLateralMenu() {
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Colaboradores e contratos
       </h3>
-      <Link to={`/cliente/contracts/${getIdUser}`}>
+      <Link to={`/fornecedor/contracts/${getIdUser}`}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -74,7 +73,7 @@ export function ClientLateralMenu() {
         </Button>
       </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
-      <Link to={`/cliente/profile/${getIdUser}`}>
+      <Link to={`/fornecedor/profile/${getIdUser}`}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -85,18 +84,8 @@ export function ClientLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={`/cliente/branch/${getIdUser}`}>
-        <Button
-          variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2"
-        >
-          <Factory className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
-            Filiais
-          </span>
-        </Button>
-      </Link>
-      <Link to={`/cliente/employees/${getIdUser}`}>
+
+      <Link to={`/fornecedor/employees/${getIdUser}`}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"

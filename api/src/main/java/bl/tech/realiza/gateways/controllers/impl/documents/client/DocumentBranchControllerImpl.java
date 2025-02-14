@@ -126,8 +126,26 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> updateBranchDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentBranch.updateRequiredDocuments(id, documentList);
+        String response = crudDocumentBranch.updateRequiredDocumentsByList(id, documentList);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{idEnterprise}/document-matrix")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
+        String response = crudDocumentBranch.addRequiredDocument(documentMatrixId, idEnterprise);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/document-matrix")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
+    public ResponseEntity<Void> removeRequiredDocument(@RequestParam String documentId) {
+        crudDocumentBranch.removeRequiredDocument(documentId);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/document-matrix/risk")

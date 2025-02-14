@@ -40,28 +40,34 @@ export function SignIn() {
         email: data.email,
         password: data.password,
       });
+      console.log("token: ", res.data);
 
-      const token = res.data.token;
-      localStorage.setItem("tokenClient", token);
+
+      const obj = {
+        token: res.data.token
+      }
+      localStorage.setItem("tokenClient", res.data.token);
 
       const userResponse = await axios.post(
         `${ip}/login/extract-token`,
-        token,
+        obj,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${res.data.token}`,
           },
         },
       );
 
       const userData = userResponse.data;
+      localStorage.setItem("userBranches", JSON.stringify(userData.branches));
+      localStorage.setItem("userFullData", JSON.stringify(userData));
+      console.log("colentando dados:", userResponse.data);
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
-      setUser(userResponse.data);
-      console.log("identificando role client", user?.role);
-      setShowSplash(true);
+      console.log("Dados recebidos:", userData);
 
-      console.log("usuário:", user);
+      setUser(userData);
+      setShowSplash(true);
 
       setTimeout(() => {
         console.log("Redirecionando para:", userData.role);
@@ -78,7 +84,7 @@ export function SignIn() {
             navigate(`/cliente/contracts/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/branch/${userData.idUser}`);
+            navigate(`/fornecedor/quartered/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
             navigate(`/fornecedor/contracts/${userData.idUser}`);

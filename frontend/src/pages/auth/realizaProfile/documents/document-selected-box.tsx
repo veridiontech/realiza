@@ -1,22 +1,37 @@
-// DocumentSelectedBox.tsx
-
 import { propsDocument } from "@/types/interfaces";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { useState } from "react";
-// import { useDocument } from "@/context/Document-provider";
-// import { useState } from "react";
+import { Blocks } from "react-loader-spinner";
 
-export function DocumentSelectedBox() {
-  // const [isLoading, setIsLoading] = useState(false);
-  const [document] = useState<propsDocument[]>([])
+interface DocumentSelectedBoxProps {
+  selectedDocuments: propsDocument[];
+  isLoading: boolean;
+}
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-full">
-  //       {/* Aqui você pode usar um componente de loading */}
-  //     </div>
-  //   );
-  // }
+export function DocumentSelectedBox({
+  selectedDocuments,
+  isLoading,
+}: DocumentSelectedBoxProps) {
+  if (isLoading) {
+    return (
+      <div className="w-[30vw] rounded-md border p-2 shadow-md">
+        <div className="flex h-[3vh] w-full items-center gap-1 rounded-md border p-1">
+          <select className="w-full border-none focus:border-none focus:outline-none focus:ring-0">
+            <option value="" disabled>
+              Selecionados
+            </option>
+            {selectedDocuments.map((doc) => (
+              <option key={doc.idDocumentMatrix} value={doc.idDocumentMatrix}>
+                {doc.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <ScrollArea className="flex h-[25vh] w-full items-center justify-center">
+          <Blocks height="60" width="60" color="#4fa94d" visible />
+        </ScrollArea>
+      </div>
+    );
+  }
 
   return (
     <div className="w-[30vw] rounded-md border p-2 shadow-md">
@@ -25,17 +40,17 @@ export function DocumentSelectedBox() {
           <option value="" disabled>
             Selecionados
           </option>
-          {document.map((doc) => (
+          {selectedDocuments.map((doc) => (
             <option key={doc.idDocumentMatrix} value={doc.idDocumentMatrix}>
               {doc.name}
             </option>
           ))}
         </select>
       </div>
-      <ScrollArea className="h-[25vh] w-full">
-        <div className="flex flex-col gap-3">
-          {document.length > 0 ? (
-            document.map((doc) => (
+      <ScrollArea className="h-[25vh] w-full overflow-auto">
+        <div className="flex flex-col gap-3 p-5">
+          {selectedDocuments.length > 0 ? (
+            selectedDocuments.map((doc) => (
               <div key={doc.idDocumentMatrix}>
                 <h3>{doc.name}</h3>
               </div>

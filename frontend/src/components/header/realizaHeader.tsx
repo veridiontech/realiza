@@ -1,5 +1,4 @@
 import {
-  ArrowLeftRight,
   Bell,
   ChartNoAxesGantt,
   LogOut,
@@ -101,14 +100,6 @@ export function Header() {
               ))}
             </select>
           </span>
-          <button
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 hover:bg-blue-600"
-            title="Trocar"
-          >
-            <Link to={`/sistema/select-client/${getIdUser}`}>
-              <ArrowLeftRight className="h-6 w-6 hover:text-white" />
-            </Link>
-          </button>
         </div>
 
         <div className="hidden items-center md:flex">

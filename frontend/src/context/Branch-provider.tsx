@@ -10,7 +10,7 @@ interface BranchContextProps {
 
 const BranchContext = createContext<BranchContextProps | undefined>(undefined);
 
-export function userBranch() {
+export function useBranch() {
   const context = useContext(BranchContext);
   if (!context) {
     throw new Error("O BranchProvider não está configurado corretamente");

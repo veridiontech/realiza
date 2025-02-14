@@ -40,6 +40,14 @@ import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
 import { ControlPanel } from "./pages/auth/realizaProfile/panelControl";
 
+import { Quartered } from "./pages/auth/supplier/quartered/quartered";
+import { ProviderAppLayout } from "./_layouts/providerApp";
+// import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
+import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts";
+import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
+import { SubContractorAppLayout } from "./_layouts/subContractorApp";
+import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
+
 export const router = createBrowserRouter([
   {
     path: "/sistema",
@@ -104,6 +112,7 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <ClientEmployee /> },
+      { path: "create-manager/:id", element: <CreateNewManagerClient />}
     ],
   },
   {
@@ -113,15 +122,38 @@ export const router = createBrowserRouter([
         <ProtectedRoute
           allowedRoles={["ROLE_SUPPLIER_RESPONSIBLE", "ROLE_SUPPLIER_MANAGER"]}
         >
-          <ClientAppLayout />
+          <ProviderAppLayout />
         </ProtectedRoute>
       </UserProvider>
     ),
     children: [
-      { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
-      { path: "contracts/:id", element: <ContractsTable /> },
+      { path: "quartered/:id", element: <Quartered /> },
+      { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
+      { path: "employees/:id", element: <EmployeesTable /> },
+    ],
+  },
+  {
+    path: "/sub",
+    element: (
+      <UserProvider>
+        <ProtectedRoute
+          allowedRoles={[
+            "ROLE_SUBCONTRACTOR_RESPONSIBLE",
+            "ROLE_SUBCONTRACTOR_MANAGER",
+          ]}
+        >
+          <SubContractorAppLayout />
+        </ProtectedRoute>
+      </UserProvider>
+    ),
+    children: [
+      { path: "contracts/:id", element: <SubContracts /> },
+      { path: "contracts/:id", element: <SupplierContracts /> },
+      { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
+      { path: "branch/:id", element: <Branch /> },
+      { path: "employees/:id", element: <EmployeesTable /> },
     ],
   },
   {

@@ -19,4 +19,6 @@ public interface DocumentProviderSupplierControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplierBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getSupplierDocuments(String id);
     ResponseEntity<String> updateSupplierDocuments(String id, List<String> documentList);
+    ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
+    ResponseEntity<Void> removeRequiredDocument(String documentId);
 }

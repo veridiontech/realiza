@@ -1,3 +1,4 @@
+// src/context/user-provider.ts
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 interface UserContextProps {
   user: propsUser | null;
   branch: string;
+  branches: string[];
   authUser: boolean;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
@@ -59,11 +61,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_REALIZA_BASIC":
             try {
               const res = await axios.get(`${ip}/user/manager/${userId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
-
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -80,11 +79,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_CLIENT_RESPONSIBLE":
             try {
               const res = await axios.get(`${ip}/user/client/${userId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
-
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -101,13 +97,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUPPLIER_RESPONSIBLE":
             try {
               const res = await axios.get(`${ip}/user/supplier/${userId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
-
               if (res.data) {
-                setUser(res.data);
+                const supplierData = res.data;
+                console.log("Dados do supplier:", res.data);
+                const storedBranches = JSON.parse(
+                  localStorage.getItem("userBranches") || "[]",
+                );
+                setUser({
+                  ...supplierData,
+                  branches: storedBranches,
+                  idUser: supplierData.idUser || supplierData.supplier,
+                });
                 setAuthUser(true);
               } else {
                 console.error("Usuário não encontrado.");
@@ -122,14 +124,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
               const res = await axios.get(
-                `${ip}/user/subcontractor/${userId}`,
+                `${ip}/user/subcontractor/${user?.supplier}`,
                 {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
+                  headers: { Authorization: `Bearer ${token}` },
                 },
               );
-
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -144,19 +143,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             break;
           case "ROLE_VIEWER":
             try {
-              const resClient = await axios.get(`${ip}user/client`);
+              const resClient = await axios.get(`${ip}/user/client`);
               if (resClient.data?.content) {
                 const dataClient = resClient.data.content;
                 if (dataClient.branch) {
                   const resUser = await axios.get(
                     `${ip}/user/client/${userId}`,
                     {
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
+                      headers: { Authorization: `Bearer ${token}` },
                     },
                   );
-
                   if (resUser.data) {
                     setUser(resUser.data);
                     setAuthUser(true);
@@ -176,12 +172,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/supplier/${userId}`,
                       {
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
+                        headers: { Authorization: `Bearer ${token}` },
                       },
                     );
-
                     if (res.data) {
                       setUser(res.data);
                       setAuthUser(true);
@@ -207,12 +200,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/subcontractor/${userId}`,
                       {
-                        headers: {
-                          Authorization: `Bearer ${token}`,
-                        },
+                        headers: { Authorization: `Bearer ${token}` },
                       },
                     );
-
                     if (res.data) {
                       setUser(res.data);
                       setAuthUser(true);
@@ -238,7 +228,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.log("erro ao logar usuario", error);
-
         logout();
       }
     } else {
@@ -257,6 +246,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("userId");
       localStorage.removeItem("tokenClient");
       localStorage.removeItem("hasShownToast");
+      localStorage.removeItem("userBranches");
+      localStorage.removeItem("userFullData");
       setUser(null);
       setAuthUser(false);
       navigate("/");
@@ -269,6 +260,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     <UserContext.Provider
       value={{
         user,
+        branch: user?.branch || "",
+        branches: user?.branches || [],
         authUser,
         setUser,
         setAuthUser,
