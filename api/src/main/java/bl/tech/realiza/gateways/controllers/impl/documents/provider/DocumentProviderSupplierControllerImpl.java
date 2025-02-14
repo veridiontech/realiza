@@ -130,7 +130,7 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
-        String response = crudDocumentSupplier.addRequiredDocument(documentMatrixId, idEnterprise);
+        String response = crudDocumentSupplier.addRequiredDocument(idEnterprise, documentMatrixId);
 
         return ResponseEntity.ok(response);
     }
