@@ -17,7 +17,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`rounded-md border px-4 py-2 ${
             currentPage === 1
               ? "cursor-not-allowed text-gray-400"
-              : "text-blue-500 hover:bg-blue-100"
+              : "text-realizaBlue hover:bg-realizaBlue"
           }`}
         >
           {"<"}
@@ -28,7 +28,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`rounded-md border px-4 py-2 ${
             currentPage === totalPages
               ? "cursor-not-allowed text-gray-400"
-              : "text-blue-500 hover:bg-blue-100"
+              : "text-realizaBlue hover:bg-realizaBlue"
           }`}
         >
           {">"}

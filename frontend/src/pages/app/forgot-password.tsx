@@ -26,31 +26,33 @@ export function ForgotPassword() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="flex flex-col justify-center max-w-md w-full px-6">
-        <h1 className="text-center font-bold text-3xl mb-4">
+    <div className="flex h-screen items-center justify-center">
+      <div className="flex w-full max-w-md flex-col justify-center px-6">
+        <h1 className="mb-4 text-center text-3xl font-bold">
           Esqueceu sua senha?
         </h1>
         <span className="text-center text-gray-600">
-          Insira seu e-mail abaixo para que possamos enviar um código de 4 dígitos para redefinir sua senha.
+          Insira seu e-mail abaixo para que possamos enviar um código de 4
+          dígitos para redefinir sua senha.
         </span>
-        <Form
-          className="flex flex-col mt-8"
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <Form className="mt-8 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
           <label className="mb-2" htmlFor="email">
             E-mail
           </label>
           <input
-            className="mb-6 block w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="focus:ring-realizaBlue mb-6 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
             placeholder="email@gmail.com"
             type="email"
             {...register("email")}
           />
-          {errors.email && <span className="text-red-500 text-sm mb-4">{errors.email.message}</span>}
+          {errors.email && (
+            <span className="mb-4 text-sm text-red-500">
+              {errors.email.message}
+            </span>
+          )}
 
           <button
-            className="bg-realizaBlue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 font-bold text-white"
             type="submit"
           >
             Enviar

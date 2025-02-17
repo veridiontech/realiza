@@ -59,12 +59,9 @@
 //     }
 //   };
 
-  
-
 //   const getIdUniqueClient = client?.idClient
-  
+
 //   console.log(getIdUniqueClient);
-  
 
 //   const handleSubmit = async (data: ProviderSchema) => {
 //     const payload = {
@@ -74,12 +71,12 @@
 //     };
 //     try {
 //       console.log('teste envio');
-      
+
 //       await axios.post(`${ip}/invite`, payload)
 //       // console.log(res.data);
-      
+
 //       console.log('sucesso');
-      
+
 //     } catch (error) {
 //       if (error instanceof z.ZodError) {
 //         setError(error.errors[0]?.message || "Erro de validação.");
@@ -109,12 +106,12 @@
 //     //               }}
 //     //               placeholder="00.000.000/0001-01"
 //     //               required
-//     //               className="flex-1 rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+//     //               className="flex-1 rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-realizaBlue focus:ring-realizaBlue"
 //     //             />
 //     //             <button
 //     //               type="button"
 //     //               onClick={handleSearchCNPJ}
-//     //               className="rounded-md bg-blue-600 px-3 py-2 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+//     //               className="rounded-md bg-realizaBlue px-3 py-2 text-white shadow-sm hover:bg-realizaBlue focus:outline-none focus:ring-2 focus:ring-realizaBlue focus:ring-offset-2"
 //     //               disabled={loading}
 //     //             >
 //     //               {loading ? "Buscando..." : <Search className="h-5 w-5" />}

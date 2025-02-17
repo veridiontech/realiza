@@ -69,7 +69,7 @@ export function Header() {
             <SheetTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="mr-5 w-fit rounded bg-blue-600 p-2 hover:bg-blue-500/80"
+                className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
               >
                 <ChartNoAxesGantt className="text-white" />
               </Button>
@@ -82,7 +82,7 @@ export function Header() {
         </div>
         <div className="flex items-center gap-4">
           <span>
-            <span className="mr-4 text-xl text-blue-600">
+            <span className="text-realizaBlue mr-4 text-xl">
               Cliente Selecionado:
             </span>
             <select

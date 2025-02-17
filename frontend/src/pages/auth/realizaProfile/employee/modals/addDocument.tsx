@@ -103,7 +103,7 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
               />
               <label
                 htmlFor="file-upload"
-                className="cursor-pointer rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                className="bg-realizaBlue hover:bg-realizaBlue cursor-pointer rounded px-4 py-2 text-white"
               >
                 {selectedFile ? selectedFile.name : "Escolher Arquivo"}
               </label>

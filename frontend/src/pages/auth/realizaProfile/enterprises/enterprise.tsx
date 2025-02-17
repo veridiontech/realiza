@@ -19,7 +19,7 @@ import { Modal } from "@/components/modal";
 export function Enterprise() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // const { 
+  // const {
   //   register,
   //   handleSubmit,
   //   formState
@@ -62,7 +62,7 @@ export function Enterprise() {
 
   return (
     <div className="ml-4 flex h-auto w-full max-w-screen-2xl flex-col bg-white p-6">
-      <h1 className="border-b-2 pb-6 text-2xl font-semibold text-blue-600">
+      <h1 className="text-realizaBlue border-b-2 pb-6 text-2xl font-semibold">
         Empresa
       </h1>
       <div className="flex">
@@ -87,7 +87,7 @@ export function Enterprise() {
           <div className="flex h-auto w-1/3 items-center justify-center">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="rounded-md border-2 border-blue-300 px-10 py-2 text-black hover:border-blue-600 hover:bg-blue-300 hover:text-white"
+              className="border-realizaBlue hover:bg-realizaBlue hover:border-realizaBlue rounded-md border-2 px-10 py-2 text-black hover:text-white"
             >
               Editar ✏️
             </button>

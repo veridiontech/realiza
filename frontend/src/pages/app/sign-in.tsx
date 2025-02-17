@@ -42,25 +42,23 @@ export function SignIn() {
       });
       console.log("token: ", res.data);
 
-
       const obj = {
-        token: res.data.token
-      }
+        token: res.data.token,
+      };
       localStorage.setItem("tokenClient", res.data.token);
 
-      const userResponse = await axios.post(
-        `${ip}/login/extract-token`,
-        obj,
-        {
-          headers: {
-            Authorization: `Bearer ${res.data.token}`,
-          },
+      const userResponse = await axios.post(`${ip}/login/extract-token`, obj, {
+        headers: {
+          Authorization: `Bearer ${res.data.token}`,
         },
-      );
+      });
 
       const userData = userResponse.data;
       localStorage.setItem("userBranches", JSON.stringify(userData.branches));
-      localStorage.setItem("userSubcontractor", JSON.stringify(userData.subcontractor));
+      localStorage.setItem(
+        "userSubcontractor",
+        JSON.stringify(userData.subcontractor),
+      );
       console.log("colentando dados:", userResponse.data);
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
@@ -143,7 +141,7 @@ export function SignIn() {
         >
           <label htmlFor="email">E-mail</label>
           <input
-            className="mb-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="focus:ring-realizaBlue mb-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
             placeholder="email@gmail.com"
             type="email"
             {...register("email")}
@@ -153,7 +151,7 @@ export function SignIn() {
           <label htmlFor="password">Senha</label>
           <div className="relative">
             <input
-              className="mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="focus:ring-realizaBlue mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
               type={showPassword ? "text" : "password"}
               {...register("password")}
             />
@@ -171,13 +169,13 @@ export function SignIn() {
             Esqueceu a senha?{" "}
             <Link
               to="/forgot-password"
-              className="text-blue-600 hover:underline"
+              className="text-realizaBlue hover:underline"
             >
               Recupere-a aqui!
             </Link>
           </span>
           <button
-            className="bg-realizaBlue rounded px-4 py-2 font-bold text-white hover:bg-blue-700"
+            className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 font-bold text-white"
             type="submit"
             disabled={loading}
           >

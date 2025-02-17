@@ -62,7 +62,7 @@ function RiskMatriz() {
       <table className="min-w-full border-collapse">
         {/* Cabeçalho */}
         <thead>
-          <tr className="bg-blue-100 text-left">
+          <tr className="bg-realizaBlue text-left">
             <th className="w-40 border p-2 text-center">Descrição</th>
             <th className="w-20 border p-2 text-center">Validade</th>
             <th className="border bg-green-100 p-2 text-center" colSpan={3}>

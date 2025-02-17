@@ -132,7 +132,7 @@ export function ModalAddContract() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-green-600">Novo Contrato</Button>
+        <Button className="bg-realizaBlue">Novo Contrato</Button>
       </DialogTrigger>
       <DialogContent
         style={{

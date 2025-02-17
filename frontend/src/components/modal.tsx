@@ -177,7 +177,7 @@ export function Modal({
               </button>
               <button
                 type="submit"
-                className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
               >
                 Enviar
               </button>

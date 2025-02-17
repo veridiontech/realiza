@@ -13,7 +13,7 @@ export function ProfileClient() {
       <Helmet title="profile" />
       <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
         <div className="mb-10">
-          <div className="mt-6 min-h-[220px] w-full rounded-t-xl bg-blue-800" />
+          <div className="bg-realizaBlue mt-6 min-h-[220px] w-full rounded-t-xl" />
           <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
               <div className="relative bottom-10 left-1 flex items-center gap-4">
@@ -34,7 +34,7 @@ export function ProfileClient() {
               </div>
               <div>
                 <NavLink to="/editProfile">
-                  <Button className="bg-blue-700">Editar perfil</Button>
+                  <Button className="bg-realizaBlue">Editar perfil</Button>
                 </NavLink>
               </div>
             </div>
@@ -111,7 +111,7 @@ export function ProfileClient() {
                 </div>
               </div>
             </div>
-            <Button className="w-full bg-blue-700 md:w-40">
+            <Button className="bg-realizaBlue w-full md:w-40">
               Adicionar serviços
             </Button>
           </div>
@@ -208,7 +208,7 @@ export function ProfileClient() {
               </div>
             </div>
             <Link to="/collaborators">
-              <Button className="w-full bg-blue-700 md:w-40">
+              <Button className="bg-realizaBlue w-full md:w-40">
                 Ver colaboradores
               </Button>
             </Link>

@@ -7,7 +7,7 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
   return (
     <div className="mx-10 overflow-hidden rounded-lg border border-gray-300 shadow-md">
       <table className="w-full table-auto border-collapse">
-        <thead className="bg-blue-100 text-blue-800">
+        <thead className="text-realizaBlue bg-blue-100">
           <tr>
             {columns.map((col) => (
               <th key={String(col.key)} className="px-4 py-2 text-left">

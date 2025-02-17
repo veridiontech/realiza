@@ -28,7 +28,7 @@ const columns: {
     label: "Ações",
     render: (row) => (
       <button
-        className="ml-4 text-blue-500 hover:underline"
+        className="text-realizaBlue ml-4 hover:underline"
         onClick={() => console.log(`Editar: ${row.name}`)} // Atualizado para "name"
       >
         Editar
@@ -81,7 +81,7 @@ export function Branch() {
       <div className="m-4 flex justify-center">
         <div className="flex w-[90rem] flex-col rounded-lg bg-white p-4 shadow-md">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="mb-6 text-xl font-semibold">Filiais</h1>
+            <h1 className="m-8 text-2xl">Filiais</h1>
             <ButtonBlue onClick={() => setIsSearchModalOpen(true)}>
               Adicionar Filial
             </ButtonBlue>

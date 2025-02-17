@@ -44,7 +44,7 @@ export default function ContractsTable() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => console.log("Contrato Selecionado:", row)}
-            className="text-blue-500 hover:underline"
+            className="text-realizaBlue hover:underline"
           >
             <NotebookPen />
           </button>
@@ -71,7 +71,7 @@ export default function ContractsTable() {
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
         {/* Cabeçalho com o título e botão para adicionar contrato */}
         <div className="m-8 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Tabela de Contratos</h1>
+          <h1 className="text-2xl">Contratos</h1>
           <ModalAddContract /> {/* Botão Novo Contrato */}
         </div>
 

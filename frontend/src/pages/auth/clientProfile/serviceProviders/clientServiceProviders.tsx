@@ -43,7 +43,7 @@ export function ClientServiceProvider() {
         <div>
           <button
             onClick={() => console.log("Ação para o fornecedor:", value)}
-            className="text-blue-500 hover:underline"
+            className="text-realizaBlue hover:underline"
           >
             <NotebookPen />
           </button>
@@ -66,7 +66,7 @@ export function ClientServiceProvider() {
             <input
               type="text"
               placeholder="🔍 Pesquisar fornecedor..."
-              className="w-[34rem] rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
+              className="focus:outline-realizaBlue w-[34rem] rounded-lg border border-gray-300 p-2"
               onChange={() => {}}
             />
           </div>

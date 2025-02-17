@@ -31,7 +31,7 @@ export function ClientLateralMenu() {
         variant={"ghost"}
         className="w-full justify-start bg-zinc-100 px-4 py-2"
       >
-        <Home className="size-4 text-blue-600" />
+        <Home className="text-realizaBlue size-4" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
       </Button>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">

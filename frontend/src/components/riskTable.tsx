@@ -42,7 +42,7 @@ export function RiskTable({ documents }: RiskTableProps) {
       <table className="w-full border-collapse">
         {/* Cabeçalho */}
         <thead>
-          <tr className="bg-blue-100 text-left">
+          <tr className="bg-realizaBlue text-left">
             <th className="w-[150px] border p-2 text-center">Descrição</th>
             <th className="w-[100px] border p-2 text-center">Validade</th>
             <th

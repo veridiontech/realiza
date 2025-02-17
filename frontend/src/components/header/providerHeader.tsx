@@ -1,4 +1,11 @@
-import { Bell, ChartNoAxesGantt, LogOut, Plus, Search, User } from "lucide-react";
+import {
+  Bell,
+  ChartNoAxesGantt,
+  LogOut,
+  Plus,
+  Search,
+  User,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
@@ -30,7 +37,7 @@ export function HeaderProvider() {
             <SheetTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="mr-5 w-fit rounded bg-blue-600 p-2 hover:bg-blue-500/80"
+                className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
               >
                 <ChartNoAxesGantt className="text-white" />
               </Button>

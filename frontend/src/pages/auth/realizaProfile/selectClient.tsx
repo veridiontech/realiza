@@ -21,7 +21,6 @@ export function SelectClient() {
   const { user } = useUser();
 
   console.log("usuario:", user);
-  
 
   const getClient = async () => {
     setIsLoading(true);
@@ -32,18 +31,17 @@ export function SelectClient() {
       console.log("erro ao buscar clientes", err);
     } finally {
       setIsLoading(false);
-     
     }
   };
 
   useEffect(() => {
     getClient();
     setTimeout(() => {
-      if( user?.idUser) {
+      if (user?.idUser) {
         toast("Você está na versão 1.0.2 do sistema realiza", {
           action: (
             <Button
-              className="bg-realizaBlue dark:bg-white dark:border-realizaBlue border dark:hover:bg-gray-400"
+              className="bg-realizaBlue dark:border-realizaBlue border dark:bg-white dark:hover:bg-gray-400"
               onClick={() => navigate(`/sistema/new-features/${user.idUser}`)}
             >
               Visualizar novas funções
@@ -51,31 +49,31 @@ export function SelectClient() {
           ),
         });
       }
-    }, 3000)
+    }, 3000);
   }, [user, navigate]);
 
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary border-realizaBlue flex h-[30rem] w-[80rem] justify-between rounded-lg border bg-white shadow-md dark:border-white">
         <div className="ml-10 mt-4">
-          <h1 className="text-2xl font-semibold">Escolha seu ambiente</h1>
+          <h1 className="text-2xl">Escolha seu ambiente</h1>
 
           <div className="dark:bg-primary-foreground my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
             <div className="flex items-start justify-between">
-              <h2 className="mb-4 text-xl font-medium">Selecione um Cliente</h2>
+              <h2 className="mb-4 text-xl">Selecione um Cliente</h2>
               <ModalSendEmail />
             </div>
             <div className="relative mb-4">
               <input
                 type="text"
                 placeholder="🔍 Procure por clientes cadastrados aqui..."
-                className="w-full rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
+                className="focus:outline-realizaBlue w-full rounded-lg border border-gray-300 p-2"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             {loading ? (
-              <div className="flex items-center gap-4 justify-start border p-2 rounded-md w-[20vw] dark:bg-white">
+              <div className="flex w-[20vw] items-center justify-start gap-4 rounded-md border p-2 dark:bg-white">
                 <Puff
                   visible={true}
                   height="30"
@@ -88,7 +86,7 @@ export function SelectClient() {
             ) : getClients.length === 0 ? (
               <p className="text-gray-500">Nenhum cliente encontrado.</p>
             ) : (
-              <select className="h-[5vh] w-[20vw] rounded-md border text-black p-1">
+              <select className="h-[5vh] w-[20vw] rounded-md border p-1 text-black">
                 {getClients.map((client: any) => (
                   <option key={client.idClient} value={client.idClient}>
                     {client.tradeName}
@@ -100,7 +98,7 @@ export function SelectClient() {
             {/* 
             {loading ? (
               <div className="flex items-center justify-center p-4">
-                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-realizaBlue"></div>
                 <span className="ml-2 text-gray-500">Carregando...</span>
               </div>
             ) : error ? (

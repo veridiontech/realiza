@@ -115,7 +115,7 @@ export function EditModalEnterprise() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-blue-700">Editar perfil</Button>
+        <Button className="bg-realizaBlue">Editar perfil</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

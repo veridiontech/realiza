@@ -25,7 +25,7 @@ const modalSendEmailFormSchema = z.object({
   company: z.string().default("SUPPLIER"),
   cnpj: z.string().nonempty("Insira o cnpj"),
   idCompany: z.string().nonempty("Selecione um cliente"),
-  idBranch: z.string().nonempty("Selecione uma filial")
+  idBranch: z.string().nonempty("Selecione uma filial"),
 });
 
 const contractFormSchema = z.object({
@@ -63,15 +63,15 @@ const contractFormSchema = z.object({
   responsible: z.string().nonempty("O responsável é obrigatório"),
 });
 
-type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>
-type ContractFormSchema = z.infer<typeof contractFormSchema>
+type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
+type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ModalTesteSendSupplier() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
   const [requirements, setRequirements] = useState<any>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
-  const [pushCnpj, setPushCnpj] = useState<string | null>(null)
+  const [pushCnpj, setPushCnpj] = useState<string | null>(null);
   const [branches, setBranches] = useState<propsBranch[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -145,10 +145,9 @@ export function ModalTesteSendSupplier() {
       try {
         const res = await axios.get(
           `${ip}/user/client/filtered-client?idSearch=${data.idBranch}`,
-        );      
+        );
         setManagers(res.data.content);
         console.log("gestores da empresa:", res.data.content);
-        
       } catch (err) {
         console.log("erro ao buscar gestores", err);
       }
@@ -189,7 +188,7 @@ export function ModalTesteSendSupplier() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-sky-700">Cadastrar novo prestador</Button>
+        <Button className="bg-realizaBlue">Cadastrar novo prestador</Button>
       </DialogTrigger>
       <DialogContent
         style={{

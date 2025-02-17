@@ -30,7 +30,6 @@ export function ChatBot() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-  
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -160,7 +159,7 @@ export function ChatBot() {
                         href={msg.text}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 underline"
+                        className="text-realizaBlue underline"
                       >
                         Baixar Excel
                       </a>
@@ -170,7 +169,7 @@ export function ChatBot() {
                   </div>
                 ))}
                 {loading && (
-                  <div className="flex items-center gap-2 ">
+                  <div className="flex items-center gap-2">
                     <BotMessageSquareIcon className="h-5 w-5 flex-shrink-0" />
                     <div className="flip-horizontal">
                       <Comment
