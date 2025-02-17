@@ -20,7 +20,7 @@ export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
     
     try {
       await axios.post(
-        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentMatrixId=${documentId}`,
+        `${ip}/document/branch/${branch?.idBranch}/document-matrix/${documentId}`,
       );
       toast.success("documento selecionado enviado com sucesso");
     } catch (err) {
