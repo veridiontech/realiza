@@ -41,7 +41,19 @@ public class ReportControllerImpl implements ReportController {
     @GetMapping("/employee-by-enterprise")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Long> countEmployeeByEnterprise(@RequestParam String enterpriseId, @RequestParam Provider.Company companyDegree) {
-        return ResponseEntity.ok(reportService.countEmployeesByEnterprise(enterpriseId, companyDegree));
+    public ResponseEntity<Long> countEmployeeByEnterprise(@RequestParam String idEnterprise, @RequestParam Provider.Company companyDegree) {
+        return ResponseEntity.ok(reportService.countEmployeesByEnterprise(idEnterprise, companyDegree));
+    }
+
+    @GetMapping("/adherece/{idEnterprise}")
+    @Override
+    public ResponseEntity<Long> countAdherenceByEnterprise(String idEnterprise, Provider.Company companyDegree) {
+        return null;
+    }
+
+    @GetMapping("/accordance/{idEnterprise}")
+    @Override
+    public ResponseEntity<Long> countAccordanceByEnterprise(String idEnterprise, Provider.Company companyDegree) {
+        return null;
     }
 }
