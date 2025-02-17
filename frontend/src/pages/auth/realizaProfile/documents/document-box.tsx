@@ -26,7 +26,7 @@ export function DocumentBox({
     try {
       console.log("selecionando documento");
       await axios.post(
-        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentMatrixId=${documentId}`,
+        `${ip}/document/branch/${branch?.idBranch}/document-matrix/${documentId}`,
       );
       console.log("documento selecionado com sucesso");
       toast.success("Documento selecionado enviado com sucesso");

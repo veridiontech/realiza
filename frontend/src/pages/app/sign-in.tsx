@@ -60,7 +60,7 @@ export function SignIn() {
 
       const userData = userResponse.data;
       localStorage.setItem("userBranches", JSON.stringify(userData.branches));
-      localStorage.setItem("userFullData", JSON.stringify(userData));
+      localStorage.setItem("userSubcontractor", JSON.stringify(userData.subcontractor));
       console.log("colentando dados:", userResponse.data);
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
