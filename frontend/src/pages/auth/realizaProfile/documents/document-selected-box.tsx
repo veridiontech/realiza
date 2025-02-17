@@ -20,7 +20,7 @@ export function DocumentSelectedBox({
               Selecionados
             </option>
             {selectedDocuments.map((doc) => (
-              <option key={doc.idDocumentMatrix} value={doc.idDocumentMatrix}>
+              <option key={doc.idDocument} value={doc.idDocument}>
                 {doc.name}
               </option>
             ))}
@@ -34,14 +34,15 @@ export function DocumentSelectedBox({
   }
 
   return (
-    <div className="w-[30vw] rounded-md border p-2 shadow-md">
+    <div className="h-[45vh] w-[30vw] rounded-md border p-2 shadow-md">
+      <h2 className="text-realizaBlue m-1 pb-2 text-lg">Acompanhando:</h2>
       <div className="flex h-[3vh] w-full items-center gap-1 rounded-md border p-1">
         <select className="w-full border-none focus:border-none focus:outline-none focus:ring-0">
           <option value="" disabled>
             Selecionados
           </option>
           {selectedDocuments.map((doc) => (
-            <option key={doc.idDocumentMatrix} value={doc.idDocumentMatrix}>
+            <option key={doc.idDocument} value={doc.idDocument}>
               {doc.name}
             </option>
           ))}
@@ -51,7 +52,7 @@ export function DocumentSelectedBox({
         <div className="flex flex-col gap-3 p-5">
           {selectedDocuments.length > 0 ? (
             selectedDocuments.map((doc) => (
-              <div key={doc.idDocumentMatrix}>
+              <div key={doc.idDocument}>
                 <h3>{doc.name}</h3>
               </div>
             ))

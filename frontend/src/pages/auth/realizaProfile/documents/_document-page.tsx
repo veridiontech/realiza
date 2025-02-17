@@ -14,24 +14,27 @@ import { DocumentSelectedBox } from "./document-selected-box";
 import { useClient } from "@/context/Client-Provider";
 import { propsBranch } from "@/types/interfaces";
 import { useBranch } from "@/context/Branch-provider";
+import { Link } from "react-router-dom";
+import { useUser } from "@/context/user-provider";
 
 export function DocumentPage() {
   const { client } = useClient();
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [branchs, setBranchs] = useState<propsBranch[]>([]);
   const { branch, setBranch } = useBranch();
   const [documents, setDocuments] = useState<
     { idDocument: string; name: string }[]
   >([]);
-  const [selectedDocuments, setSelectedDocuments] = useState([]);
-  const [servicesDocuments, setServiceDocuments] = useState([]);
-  const [nonSelectedDocumentsService, setNonSeletedDocumentsService] = useState(
-    [],
-  );
+  const [selectedDocuments, setSelectedDocuments] = useState<any[]>([]);
+  const [servicesDocuments, setServiceDocuments] = useState<any[]>([]);
+  const [nonSelectedDocumentsService, setNonSeletedDocumentsService] = useState<
+    any[]
+  >([]);
   const [nonSelectedDocumentsEnterprise, setnonSelectedDocumentsEnterprise] =
-    useState([]);
+    useState<any[]>([]);
   const [nonSeletedDocumentsPersonal, setNonSeletedDocumentsPersonal] =
-    useState([]);
+    useState<any[]>([]);
 
   const getBranchClient = async () => {
     if (!client?.idClient) return;
@@ -59,9 +62,13 @@ export function DocumentPage() {
     }
   };
 
-  const getDocuments = async(idBranch: string) => {
+  const getDocuments = async (idBranch: string) => {
     if (!idBranch) return;
     setIsLoading(true);
+
+    setNonSeletedDocumentsService([]);
+    setNonSeletedDocumentsPersonal([]);
+    setnonSelectedDocumentsEnterprise([]);
     try {
       const res = await axios.get(
         `${ip}/document/branch/${idBranch}/document-matrix`,
@@ -94,6 +101,13 @@ export function DocumentPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Função para remover um documento do array após a seleção
+  const removeDocument = (documentId: string) => {
+    setDocuments((prevDocs) =>
+      prevDocs.filter((doc) => doc.idDocument !== documentId),
+    );
   };
 
   useEffect(() => {
@@ -162,7 +176,11 @@ export function DocumentPage() {
                 Documentos Empresa Terceiro
               </h2>
               <div className="flex items-center justify-around">
-                <DocumentBox isLoading={isLoading} documents={documents} />
+                <DocumentBox
+                  isLoading={isLoading}
+                  documents={documents}
+                  onSelectDocument={removeDocument}
+                />
                 <DocumentSelectedBox
                   isLoading={isLoading}
                   selectedDocuments={nonSelectedDocumentsEnterprise}
@@ -177,6 +195,11 @@ export function DocumentPage() {
                 <DocumentBox
                   isLoading={isLoading}
                   documents={selectedDocuments}
+                  onSelectDocument={(docId) => {
+                    setSelectedDocuments((prev) =>
+                      prev.filter((doc) => doc.idDocument !== docId),
+                    );
+                  }}
                 />
                 <DocumentSelectedBox
                   isLoading={isLoading}
@@ -190,6 +213,11 @@ export function DocumentPage() {
                 <DocumentBox
                   isLoading={isLoading}
                   documents={servicesDocuments}
+                  onSelectDocument={(docId) => {
+                    setServiceDocuments((prev) =>
+                      prev.filter((doc) => doc.idDocument !== docId),
+                    );
+                  }}
                 />
                 <DocumentSelectedBox
                   isLoading={isLoading}
@@ -198,11 +226,18 @@ export function DocumentPage() {
               </div>
             </div>
             <div className="flex flex-col gap-5 rounded-md border border-sky-700 p-5">
-              <h2 className="text-[20px] underline">Outras exigências por serviço</h2>
+              <h2 className="text-[20px] underline">
+                Outras exigências por serviço
+              </h2>
               <div className="flex items-center justify-around">
                 <DocumentBox
                   isLoading={isLoading}
                   documents={servicesDocuments}
+                  onSelectDocument={(docId) => {
+                    setServiceDocuments((prev) =>
+                      prev.filter((doc) => doc.idDocument !== docId),
+                    );
+                  }}
                 />
                 <DocumentSelectedBox
                   isLoading={isLoading}
@@ -211,6 +246,11 @@ export function DocumentPage() {
               </div>
             </div>
           </div>
+        </div>
+        <div className="flex justify-end">
+          <Link to={`/sistema/risk-matriz/${user?.idUser}`}>
+            <Button className="bg-realizaBlue w-[20rem]">Próximo passo</Button>
+          </Link>
         </div>
       </div>
     </div>

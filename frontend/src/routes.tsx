@@ -36,7 +36,7 @@ import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProvide
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
-import { RiskMatriz } from "./pages/auth/realizaProfile/documents/risk-matriz";
+import RiskMatriz from "./pages/auth/realizaProfile/documents/risk-matriz";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
 import { ControlPanel } from "./pages/auth/realizaProfile/panelControl";
 
@@ -47,6 +47,7 @@ import SupplierContracts from "./pages/auth/supplier/contracts/supplierContracts
 import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
+import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
 
 export const router = createBrowserRouter([
   {
@@ -81,7 +82,7 @@ export const router = createBrowserRouter([
       { path: "chat/:id", element: <ChatPage /> },
       { path: "documents/:id", element: <DocumentPage /> },
       { path: "risk-matriz/:id", element: <RiskMatriz /> },
-      { path: "controlPanel", element: <ControlPanel /> },
+      { path: "controlPanel/:id", element: <ControlPanel /> },
     ],
   },
 
@@ -112,7 +113,7 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <ClientEmployee /> },
-      { path: "create-manager/:id", element: <CreateNewManagerClient />}
+      { path: "create-manager/:id", element: <CreateNewManagerClient /> },
     ],
   },
   {
@@ -132,6 +133,7 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
+      { path: "create-manager/:id", element: <CreateNewManagerSupplier /> },
     ],
   },
   {
