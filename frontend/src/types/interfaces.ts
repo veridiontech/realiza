@@ -26,6 +26,7 @@ export interface propsUser {
 export interface propsClient {
   cnpj: string;
   corporateName: string;
+  companyName: string;
   idCompany: string;
   email: string;
   idClient: string;

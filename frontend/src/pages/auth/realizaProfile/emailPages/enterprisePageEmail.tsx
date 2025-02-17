@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFormDataContext } from "@/context/formDataProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Search } from "lucide-react";
@@ -26,7 +25,6 @@ type EnterprisePageEmailFormSchema = z.infer<
 >;
 
 export function EnterprisePageEmail() {
-  const { setEnterpriseData } = useFormDataContext();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
@@ -138,7 +136,11 @@ export function EnterprisePageEmail() {
           };
           break;
       }
-      
+
+      await axios.post(
+        "https://realiza-1.onrender.com/email/Enterprise-sign-up",
+        payload,
+      );
       navigate(`/email/Sign-up`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
