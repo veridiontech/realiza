@@ -1,11 +1,15 @@
 import { NavLink } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export function MenuNav() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   return (
     <div>
       <nav className="flex items-center">
         <NavLink
-          to={"/email/Enterprise-sign-up/validate"}
+          to={`/email/Enterprise-sign-up/validate?token=${token}`}
           className={({ isActive }) =>
             `flex h-[6vh] w-[10vw] items-center justify-center rounded-l-md bg-gray-300 ${
               isActive
