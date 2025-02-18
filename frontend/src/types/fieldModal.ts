@@ -1,5 +1,6 @@
 export type FieldType =
   | "text"
+  | "password"
   | "radio"
   | "number"
   | "email"

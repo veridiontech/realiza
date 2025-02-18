@@ -24,6 +24,7 @@ const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   company: z.string().default("SUPPLIER"),
   cnpj: z.string().nonempty("Insira o cnpj"),
+  nomeFantasia: z.string().optional(), // campo opcional para Empresa
 });
 
 const contractFormSchema = z.object({
@@ -71,6 +72,7 @@ export function ModalTesteSendSupplier() {
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<"empresa" | "cliente">("empresa");
 
   const { user } = useUser();
 
@@ -110,8 +112,9 @@ export function ModalTesteSendSupplier() {
       await axios.post(`${ip}/invite`, {
         email: data.email,
         idCompany: user?.branch,
-        company: data.company,
+        company: activeTab === "cliente" ? "CLIENT" : data.company,
         cnpj: data.cnpj,
+        nomeFantasia: data.nomeFantasia, // enviado se existir (apenas para Empresa)
       });
       setPushCnpj(data.cnpj);
       toast.success("Email de cadastro enviado para novo prestador");
@@ -141,6 +144,8 @@ export function ModalTesteSendSupplier() {
       console.log("Criando contrato:", data);
       await axios.post(`${ip}/contract/supplier`, payload);
       console.log("Contrato criado com sucesso");
+      // Redireciona para a URL solicitada
+      window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
       console.log("Erro ao criar contrato:", err);
     }
@@ -170,10 +175,37 @@ export function ModalTesteSendSupplier() {
       >
         <DialogHeader>
           <DialogTitle className="text-white">
-            Cadastrar novo prestador
+            {activeTab === "empresa"
+              ? "Cadastrar nova Empresa"
+              : "Cadastrar novo Cliente"}
           </DialogTitle>
         </DialogHeader>
         <div>
+          {/* Aba para alternar entre Empresa e Cliente */}
+          <div className="mb-4 flex gap-4">
+            <button
+              type="button"
+              className={`rounded px-4 py-2 ${
+                activeTab === "empresa"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setActiveTab("empresa")}
+            >
+              Empresa
+            </button>
+            <button
+              type="button"
+              className={`rounded px-4 py-2 ${
+                activeTab === "cliente"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setActiveTab("cliente")}
+            >
+              Cliente
+            </button>
+          </div>
           <form
             onSubmit={handleSubmit(createClient)}
             className="flex flex-col gap-4"
@@ -201,6 +233,16 @@ export function ModalTesteSendSupplier() {
                 <span className="text-red-600">{errors.cnpj.message}</span>
               )}
             </div>
+            {activeTab === "empresa" && (
+              <div>
+                <Label className="text-white">Nome Fantasia (opcional)</Label>
+                <Input
+                  type="text"
+                  placeholder="Insira o nome fantasia..."
+                  {...register("nomeFantasia")}
+                />
+              </div>
+            )}
             <div className="flex justify-end">
               {isLoading ? (
                 <Button>

@@ -14,7 +14,6 @@ import {
   Factory,
   PersonStanding,
 } from "lucide-react";
-
 import { Button } from "../ui/button";
 import { SheetContent } from "../ui/sheet";
 import { Link } from "react-router-dom";
@@ -22,18 +21,19 @@ import { useUser } from "@/context/user-provider";
 
 export function LateralMenu() {
   const { user } = useUser();
-
   const getIdUser = user?.idUser;
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
-      <Button
-        variant={"ghost"}
-        className="w-full justify-start bg-zinc-100 px-4 py-2"
-      >
-        <Home className="text-realizaBlue size-4" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
-      </Button>
+      <Link to="/sistema/home">
+        <Button
+          variant={"ghost"}
+          className="w-full justify-start bg-zinc-100 px-4 py-2"
+        >
+          <Home className="text-realizaBlue size-4" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
+        </Button>
+      </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>
