@@ -12,18 +12,30 @@ import {
 import { Link } from "react-router-dom";
 import { ip } from "@/utils/ip";
 
+// Definindo o tipo para os itens inativos (que podem vir com diferentes propriedades de id)
+interface InactiveItem {
+  idBranch?: number;
+  idClient?: number;
+  idProvider?: number;
+  idUser?: number;
+  nome?: string;
+  tipo?: string;
+  detalhes?: string;
+  data?: string;
+}
+
 export function ControlPanel() {
-  // Estado para armazenar os itens inativos vindos da API
-  const [inactiveItems, setInactiveItems] = useState([]);
+  // Estado tipado como InactiveItem[]
+  const [inactiveItems, setInactiveItems] = useState<InactiveItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<Error | null>(null);
 
   // Lógica de paginação
   const itemsPerPage = 12;
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    // Faz a requisição para a rota de itens inativos usando axios
+    // Requisição para buscar itens inativos
     axios
       .get(`${ip}/item-management/innactive-items`)
       .then((res) => {
@@ -94,19 +106,24 @@ export function ControlPanel() {
 
       <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-          {currentItems.map((item, index) => (
-            // Usamos um id único conforme as propriedades disponíveis (idBranch, idClient, idProvider ou idUser)
-            <CardPanelControl
-              key={
-                item.idBranch ||
-                item.idClient ||
-                item.idProvider ||
-                item.idUser ||
-                index
-              }
-              data={item}
-            />
-          ))}
+          {currentItems.map((item, index) => {
+            // Define um id a partir das propriedades disponíveis
+            const id =
+              item.idBranch ||
+              item.idClient ||
+              item.idProvider ||
+              item.idUser ||
+              index;
+            // Transforma o objeto em um objeto do tipo Solicitacao
+            const solicitacao = {
+              id,
+              nome: item.nome || "Sem nome",
+              tipo: item.tipo || "Sem tipo",
+              detalhes: item.detalhes || "Sem detalhes",
+              data: item.data || "Sem data",
+            };
+            return <CardPanelControl key={id} data={solicitacao} />;
+          })}
         </div>
 
         <div className="flex w-full flex-row items-center justify-between gap-4 px-4">

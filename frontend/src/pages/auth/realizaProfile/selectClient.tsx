@@ -38,7 +38,7 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
     number: "",
   });
 
-  const [userForm, setUserForm] = useState({
+  const [, setUserForm] = useState({
     cpf: "",
     firstName: "",
     surname: "",
