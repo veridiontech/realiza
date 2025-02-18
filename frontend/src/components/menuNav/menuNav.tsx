@@ -5,7 +5,7 @@ export function MenuNav() {
     <div>
       <nav className="flex items-center">
         <NavLink
-          to={"/email/Enterprise-sign-up"}
+          to={"/email/Enterprise-sign-up/validate"}
           className={({ isActive }) =>
             `flex h-[6vh] w-[10vw] items-center justify-center rounded-l-md bg-gray-300 ${
               isActive
