@@ -12,7 +12,8 @@ import { z } from "zod";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
-  tradeName: z.string().nonempty("O nome fantasia é obrigatório"),
+  // Agora tradeName (Nome fantasia) é opcional
+  tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
   phone: z.string().nonempty("O telefone é obrigatório"),
@@ -80,7 +81,8 @@ export function EnterprisePageEmail() {
       );
       if (res.data) {
         setValue("corporateName", res.data.nome);
-        setValue("tradeName", res.data.fantasia || "Sem nome fantasia");
+        // Se não houver nome fantasia, define como string vazia (não obrigatório)
+        setValue("tradeName", res.data.fantasia || "");
         setValue("email", res.data.email);
         setValue("phone", res.data.telefone);
       }
@@ -141,6 +143,7 @@ export function EnterprisePageEmail() {
         "https://realiza-1.onrender.com/email/Enterprise-sign-up",
         payload,
       );
+      // Após cadastrar a empresa, redireciona para a página de cadastro individual
       navigate(`/email/Sign-up`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);

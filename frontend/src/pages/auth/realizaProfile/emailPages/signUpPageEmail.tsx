@@ -26,8 +26,6 @@ const signUpEmailFormSchema = z
     confirmPassword: z
       .string()
       .min(6, "Confirmação de senha deve ter pelo menos 6 caracteres"),
-    // Campo opcional para Nome Fantasia (apenas para Empresa)
-    nomeFantasia: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem",
@@ -38,7 +36,6 @@ type SignUpEmailFormSchema = z.infer<typeof signUpEmailFormSchema>;
 
 export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
-  const [activeTab, setActiveTab] = useState<"empresa" | "cliente">("empresa");
   const [isOpenEye, setIsOpenEye] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,7 +55,6 @@ export function SignUpPageEmail() {
       const allDatas = {
         ...enterpriseData,
         ...data,
-        accountType: activeTab,
       };
       console.log("enviando dados:", allDatas);
       await axios.post(`${ip}/sign-enterprise`, allDatas);
@@ -77,47 +73,10 @@ export function SignUpPageEmail() {
 
   return (
     <div>
-      {/* Tab de alternância entre Empresa e Cliente */}
-      <div className="mb-4 flex justify-center">
-        <button
-          type="button"
-          className={`rounded-l px-4 py-2 ${
-            activeTab === "empresa"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-black"
-          }`}
-          onClick={() => setActiveTab("empresa")}
-        >
-          Empresa
-        </button>
-        <button
-          type="button"
-          className={`rounded-r px-4 py-2 ${
-            activeTab === "cliente"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-black"
-          }`}
-          onClick={() => setActiveTab("cliente")}
-        >
-          Cliente
-        </button>
-      </div>
       <div className="flex justify-center">
         <h1 className="text-[40px]">Cadastro</h1>
       </div>
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-        {/* Exibe o campo Nome Fantasia apenas na aba Empresa */}
-        {activeTab === "empresa" && (
-          <div>
-            <Label>Nome Fantasia</Label>
-            <Input
-              type="text"
-              placeholder="Nome Fantasia (opcional)"
-              className="w-[27vw]"
-              {...register("nomeFantasia")}
-            />
-          </div>
-        )}
         <div className="flex items-center gap-5">
           <div>
             <Label>Nome</Label>
