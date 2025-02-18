@@ -49,7 +49,6 @@ public class JwtService {
         this.providerSupplierRepository = providerSupplierRepository;
     }
 
-
     public String generateTokenManager(UserManager user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("idUser", user.getIdUser());
@@ -203,21 +202,5 @@ public class JwtService {
                 .build();
 
         return userResponseDto;
-    }
-
-    public String extractEmail(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    public String extractRole(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
     }
 }
