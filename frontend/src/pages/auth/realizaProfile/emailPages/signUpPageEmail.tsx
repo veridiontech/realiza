@@ -9,7 +9,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const signUpEmailFormSchema = z
@@ -27,6 +26,8 @@ const signUpEmailFormSchema = z
     confirmPassword: z
       .string()
       .min(6, "Confirmação de senha deve ter pelo menos 6 caracteres"),
+    // Campo opcional para Nome Fantasia (apenas para Empresa)
+    nomeFantasia: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem",
@@ -34,11 +35,12 @@ const signUpEmailFormSchema = z
   });
 
 type SignUpEmailFormSchema = z.infer<typeof signUpEmailFormSchema>;
+
 export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
+  const [activeTab, setActiveTab] = useState<"empresa" | "cliente">("empresa");
   const [isOpenEye, setIsOpenEye] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const {
     register,
@@ -56,10 +58,12 @@ export function SignUpPageEmail() {
       const allDatas = {
         ...enterpriseData,
         ...data,
+        accountType: activeTab,
       };
       console.log("enviando dados:", allDatas);
       await axios.post(`${ip}/sign-enterprise`, allDatas);
-      navigate("/");
+      // Redireciona para a URL solicitada
+      window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
       console.log(err);
     } finally {
@@ -73,10 +77,47 @@ export function SignUpPageEmail() {
 
   return (
     <div>
+      {/* Tab de alternância entre Empresa e Cliente */}
+      <div className="mb-4 flex justify-center">
+        <button
+          type="button"
+          className={`rounded-l px-4 py-2 ${
+            activeTab === "empresa"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+          onClick={() => setActiveTab("empresa")}
+        >
+          Empresa
+        </button>
+        <button
+          type="button"
+          className={`rounded-r px-4 py-2 ${
+            activeTab === "cliente"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+          onClick={() => setActiveTab("cliente")}
+        >
+          Cliente
+        </button>
+      </div>
       <div className="flex justify-center">
         <h1 className="text-[40px]">Cadastro</h1>
       </div>
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
+        {/* Exibe o campo Nome Fantasia apenas na aba Empresa */}
+        {activeTab === "empresa" && (
+          <div>
+            <Label>Nome Fantasia</Label>
+            <Input
+              type="text"
+              placeholder="Nome Fantasia (opcional)"
+              className="w-[27vw]"
+              {...register("nomeFantasia")}
+            />
+          </div>
+        )}
         <div className="flex items-center gap-5">
           <div>
             <Label>Nome</Label>
@@ -183,8 +224,7 @@ export function SignUpPageEmail() {
           <div className="flex flex-col">
             <Input
               type={isOpenEye ? "text" : "password"}
-              className=""
-              placeholder="Confirme sua senha "
+              placeholder="Confirme sua senha"
               {...register("confirmPassword")}
             />
             {errors.confirmPassword && (
@@ -201,16 +241,15 @@ export function SignUpPageEmail() {
         ) : (
           <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
             <Oval
-            visible={true}
-            height="80"
-            width="80"
-            color="#4fa94d"
-            ariaLabel="oval-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-          />
+              visible={true}
+              height="80"
+              width="80"
+              color="#4fa94d"
+              ariaLabel="oval-loading"
+              wrapperStyle={{}}
+              wrapperClass=""
+            />
           </Button>
-          
         )}
       </form>
     </div>
