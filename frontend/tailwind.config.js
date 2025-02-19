@@ -40,7 +40,7 @@ export default {
       colors: {
         realizaBlue: '#34495D',
         border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
+        input: 'hsl(var(--input))  @apply border-none focus:outline-none focus:ring-0 focus:border-none;',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -82,7 +82,9 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        
       },
+      
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

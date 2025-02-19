@@ -1,0 +1,79 @@
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { LockKeyhole } from "lucide-react";
+// import { useUser } from "@/context/user-provider";
+
+const profileSchema = z.object({
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
+
+export function BottomSection() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+  });
+
+  const onSubmit = () => {
+    alert("Dados salvos com sucesso!");
+  };
+
+  return (
+    <div className="mt-6 flex flex-col rounded-lg bg-white p-6 shadow">
+      <div className="flex flex-row gap-2">
+        <LockKeyhole className="text-realizaBlue h-7 w-7" />
+        <h2 className="text-realizaBlue text-lg">Segurança</h2>
+      </div>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex w-full flex-col gap-4"
+      >
+        <div className="relative">
+          <label
+            htmlFor="password"
+            className="mt-8 block text-sm font-medium text-gray-700"
+          >
+            Nova Senha
+          </label>
+          <input
+            type={showPassword ? "text" : "password"}
+            id="password"
+            {...register("password")}
+            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
+              errors.password
+                ? "border-red-500 focus:ring-red-500"
+                : "focus:ring-realizaBlue border-gray-300"
+            }`}
+            placeholder="Digite sua nova senha"
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-3 mt-12 flex items-center text-gray-500 hover:text-gray-700"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁️"}
+          </button>
+        </div>
+        {errors.password && (
+          <p className="text-sm text-red-500">{errors.password.message}</p>
+        )}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="bg-realizaBlue hover:bg-realizaBlue w-[20vw] rounded p-3 text-white"
+          >
+            Alterar Senha
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

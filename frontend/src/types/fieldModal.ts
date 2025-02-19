@@ -1,5 +1,6 @@
 export type FieldType =
   | "text"
+  | "password"
   | "radio"
   | "number"
   | "email"
@@ -9,4 +10,5 @@ export type FieldType =
   | "date"
   | "file"
   | "custom"
+  | "radio"
   | "multiselect";

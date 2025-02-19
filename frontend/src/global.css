@@ -92,3 +92,15 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+.input {
+  @apply border-none focus:outline-none focus:ring-0 focus:border-none;
+}
+
+.flip-horizontal {
+  transform: scaleX(-1);
+}
+
+.separador {
+  border-left: 4px solid white !important;
+}

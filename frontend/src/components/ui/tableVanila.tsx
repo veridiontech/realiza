@@ -1,0 +1,54 @@
+import { TableProps } from "@/types/table";
+import { ReactNode } from "react";
+
+export const Table = <T,>({ data, columns }: TableProps<T>) => {
+  const hasData = data && data.length > 0;
+
+  return (
+    <div className="mx-10 overflow-hidden rounded-lg border border-gray-300 shadow-md">
+      <table className="w-full table-auto border-collapse">
+        <thead className="text-realizaBlue bg-blue-100">
+          <tr>
+            {columns.map((col) => (
+              <th key={String(col.key)} className="px-4 py-2 text-left">
+                {col.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {hasData ? (
+            data.map((row, index) => (
+              <tr
+                key={index}
+                className={`border-t ${
+                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                }`}
+              >
+                {columns.map((col) => (
+                  <td
+                    key={String(col.key)}
+                    className={`px-4 py-2 ${col.className || ""}`}
+                  >
+                    {col.render
+                      ? col.render(row[col.key as keyof T], row)
+                      : (row[col.key as keyof T] as ReactNode)}
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="px-4 py-2 text-center text-gray-500 text-red-600"
+              >
+                Nenhum dado disponível
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};

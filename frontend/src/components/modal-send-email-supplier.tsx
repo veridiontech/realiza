@@ -68,7 +68,7 @@ export function ModalSendEmailSupplier() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-sky-700">Cadastrar cliente</Button>
+        <Button className="bg-realizaBlue mb-4">Cadastrar cliente</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -86,7 +86,7 @@ export function ModalSendEmailSupplier() {
                 type="email"
                 placeholder="Digite o email do novo cliente"
                 {...register("email")}
-                className="w-full"
+                className="mt-2 w-full"
               />
             </div>
             <div className="flex justify-end">

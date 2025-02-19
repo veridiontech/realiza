@@ -11,7 +11,7 @@ export const LabelWithInput: React.FC<LabelWithInputProps> = ({
   return (
     <div>
       <div className="mb-4">
-        <label className="mb-1 block text-blue-600" htmlFor={name}>
+        <label className="text-realizaBlue mb-1 block" htmlFor={name}>
           {label}
         </label>
         <input
