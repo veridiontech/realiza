@@ -5,9 +5,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,7 +16,7 @@ import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { Radio } from "react-loader-spinner";
 import { toast } from "sonner";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useUser } from "@/context/user-provider";
 
@@ -24,6 +24,7 @@ const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   company: z.string().default("SUPPLIER"),
   cnpj: z.string().nonempty("Insira o cnpj"),
+  idClient: z.string(),
 });
 
 const contractFormSchema = z.object({
@@ -58,16 +59,13 @@ const contractFormSchema = z.object({
     .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
   client: z.string().nonempty("O cliente é obrigatório"),
   responsible: z.string().nonempty("O responsável é obrigatório"),
-  // Novo campo para as branches que a empresa atuará:
-  branches: z.array(z.string()).min(1, "Selecione pelo menos uma branch"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
-  // Renomeamos o estado de "managers" para "branchesList" para armazenar as branches do client
-  const [branchesList, setBranchesList] = useState<any>([]);
+  const [managers, setManagers] = useState<any>([]);
   const [setActivities] = useState<any>([]);
   const [setRequirements] = useState<any>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
@@ -107,27 +105,26 @@ export function ModalTesteSendSupplier() {
   const createClient = async (data: ModalSendEmailFormSchema) => {
     console.log("Enviando dados:", data);
     setIsLoading(true);
-    console.log("idClient:", user?.idClient);
+    console.log(user?.branch);
 
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        // Usa o idClient do usuário atual do user-provider
-        idCompany: user?.idClient,
+        idCompany: user?.branch,
         company: data.company,
+        idClient: data.idClient,
         cnpj: data.cnpj,
       });
       setPushCnpj(data.cnpj);
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
       try {
-        // Agora usamos a rota /branch/filtered-client com idSearch = idClient
         const res = await axios.get(
-          `${ip}/branch/filtered-client?idSearch=${user?.idClient}`,
+          `${ip}/user/client/filtered-client?idSearch=${user?.branch}`,
         );
-        setBranchesList(res.data.content);
+        setManagers(res.data.content);
       } catch (err) {
-        console.log("Erro ao buscar branches:", err);
+        console.log("Erro ao buscar gestores:", err);
       }
     } catch (err) {
       console.log("Erro ao enviar email para usuário:", err);
@@ -259,24 +256,57 @@ export function ModalTesteSendSupplier() {
                         )}
                       </div>
                     </div>
-                    {/* Novo select para as branches do client */}
                     <div className="flex flex-col gap-2">
                       <Label className="text-white">
-                        Selecione as branches
+                        É uma subcontratação?
                       </Label>
+                      <div className="flex items-center gap-1">
+                        <Label
+                          className="text-white"
+                          htmlFor="subcontratacao-sim"
+                        >
+                          Sim
+                        </Label>
+                        <input
+                          type="radio"
+                          id="subcontratacao-sim"
+                          name="subcontratacao"
+                          value="sim"
+                          onClick={() => handleRadioClick("sim")}
+                          className="text-white"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Label
+                          className="text-white"
+                          htmlFor="subcontratacao-nao"
+                        >
+                          Não
+                        </Label>
+                        <input
+                          type="radio"
+                          id="subcontratacao-nao"
+                          name="subcontratacao"
+                          value="nao"
+                          onClick={() => handleRadioClick("nao")}
+                          className="text-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-white">Gestor do serviço</Label>
                       <select
-                        multiple
-                        {...registerContract("branches")}
+                        key={managers.idUser}
                         className="rounded-md border p-2"
-                        defaultValue={[]}
+                        defaultValue=""
                       >
-                        {Array.isArray(branchesList) &&
-                          branchesList.map((branch: any) => (
-                            <option
-                              key={branch.idBranch}
-                              value={branch.idBranch}
-                            >
-                              {branch.nameBranch}
+                        <option value="" disabled>
+                          Selecione um gestor
+                        </option>
+                        {Array.isArray(managers) &&
+                          managers.map((manager: any) => (
+                            <option key={manager.idUser}>
+                              {manager.firstName} {manager.surname}
                             </option>
                           ))}
                       </select>
