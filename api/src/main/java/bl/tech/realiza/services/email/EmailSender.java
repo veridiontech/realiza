@@ -71,6 +71,11 @@ public class EmailSender {
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
                         .replace("#COMPANY_PLACEHOLDER#",company.name());
+                if (emailInviteRequestDto.getIdClient() != null) {
+                    emailBody = emailBody.replace("#ID_CLIENT#", emailInviteRequestDto.getIdClient());
+                } else {
+                    emailBody = emailBody.replace("&idClient=#ID_CLIENT#", "");
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Failed to generate email", e);
             }

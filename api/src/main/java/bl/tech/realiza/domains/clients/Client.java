@@ -32,7 +32,7 @@ public class Client {
     private String address;
     private String number;
     @Builder.Default
-    private Boolean isActive = false;
+    private Boolean isActive = true;
     @Builder.Default
     private Boolean deleteRequest = false;
     @Builder.Default
