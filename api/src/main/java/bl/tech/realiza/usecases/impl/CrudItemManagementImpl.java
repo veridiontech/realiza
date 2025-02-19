@@ -1,11 +1,7 @@
 package bl.tech.realiza.usecases.impl;
 
-import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
-import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
@@ -29,10 +25,10 @@ import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.ItemManagementRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.ItemManagementResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +39,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CrudItemManagementImpl {
+public class CrudItemManagementImpl implements CrudItemManagement {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
@@ -61,45 +57,26 @@ public class CrudItemManagementImpl {
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
 
 
-    public String activateItem(String id, ActivationItemType item) {
-        switch (item) {
-            case BRANCH ->  {
-                Branch branch = branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
-                branch.setIsActive(true);
-                branchRepository.save(branch);
-                return "Branch activated successfully";
-            }
-            case CLIENT -> {
-                Client client = clientRepository.findById(id).orElseThrow(() -> new NotFoundException("Client not found"));
-                client.setIsActive(true);
-                clientRepository.save(client);
-                return "Client activated successfully";
-            }
-            case CONTRACT -> {
-                Contract contract = contractRepository.findById(id).orElseThrow(() -> new NotFoundException("Contract not found"));
-                contract.setIsActive(true);
-                contractRepository.save(contract);
-                return "Contract activated successfully";
-            }
-            case PROVIDER -> {
-                Provider provider = providerRepository.findById(id).orElseThrow(() -> new NotFoundException("Provider not found"));
-                provider.setIsActive(true);
-                providerRepository.save(provider);
-                return "Provider activated successfully";
-            }
-            case USER -> {
-                User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
-                user.setIsActive(true);
-                userRepository.save(user);
-                return "User activated successfully";
-            }
-            default -> {
-                throw new BadRequestException("Invalid entity");
-            }
-        }
+    public String approveUserSolicitation(String id) {
+        ItemManagement itemManagement = itemManagementRepository.findById(id).orElseThrow(() -> new NotFoundException("Solicitation not found"));
+        String userId = itemManagement.getNewUser().getIdUser();
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        user.setIsActive(true);
+        userRepository.save(user);
+        deleteUserSolicitation(id); // delete the solicitation
+        return "User activated successfully";
     }
 
-    public ItemManagementResponseDto createSolicitation(ItemManagementRequestDto itemManagementRequestDto) {
+    public String denyUserSolicitation(String id) {
+        ItemManagement itemManagement = itemManagementRepository.findById(id).orElseThrow(() -> new NotFoundException("Solicitation not found"));
+        String userId = itemManagement.getNewUser().getIdUser();
+        deleteUserSolicitation(id); // delete the solicitation
+        userRepository.deleteById(userId);
+        return "Solicitation denied successfully";
+    }
+
+    @Override
+    public ItemManagementResponseDto saveUserSolicitation(ItemManagementRequestDto itemManagementRequestDto) {
         if (itemManagementRequestDto.getIdRequester() == null || itemManagementRequestDto.getIdRequester().isEmpty()) {
             throw new BadRequestException("Invalid requester");
         }
@@ -170,16 +147,13 @@ public class CrudItemManagementImpl {
         return itemManagementResponseDto;
     }
 
-    public Page<ItemManagementResponseDto> findAllAddSolicitations(Pageable pageable) {
-        UserResponseDto userResponseDto;
-        ProviderResponseDto providerResponseDto;
-        ContractResponseDto contractResponseDto;
-
+    @Override
+    public Page<ItemManagementResponseDto> findAllUserSolicitation(Pageable pageable) {
         Page<ItemManagement> inactiveItemsPage = itemManagementRepository.findAll(pageable);
 
         Page<ItemManagementResponseDto> itemManagementResponsePage = inactiveItemsPage.map(
                 itemManagement -> ItemManagementResponseDto.builder()
-                        .idUpdateDataRequest(itemManagement.getIdUpdateDataRequest())
+                        .idSolicitation(itemManagement.getIdSolicitation())
                         .title(itemManagement.getTitle())
                         .creationDate(itemManagement.getCreationDate())
                         .requester(UserResponseDto.builder()
@@ -187,13 +161,17 @@ public class CrudItemManagementImpl {
                                 .firstName(itemManagement.getRequester().getFirstName())
                                 .surname(itemManagement.getRequester().getSurname())
                                 .build())
-                        .newUser(itemManagement.getNewUser() != null ?
-                                UserResponseDto.builder()
+                        .newUser(UserResponseDto.builder()
                                         .idUser(itemManagement.getNewUser().getIdUser())
-                                        .build() : null)
+                                        .build())
                         .build()
         );
         return itemManagementResponsePage;
+    }
+
+    @Override
+    public void deleteUserSolicitation(String id) {
+        itemManagementRepository.deleteById(id);
     }
 
     public List<Object> getDeleteItemRequest() {

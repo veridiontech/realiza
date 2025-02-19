@@ -1,7 +1,5 @@
 package bl.tech.realiza.gateways.responses.services;
 
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -13,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ItemManagementResponseDto {
-    private String idUpdateDataRequest;
+    private String idSolicitation;
     private String title;
     private String details;
     private LocalDateTime creationDate;

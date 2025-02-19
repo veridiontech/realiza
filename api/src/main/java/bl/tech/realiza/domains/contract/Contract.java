@@ -40,7 +40,7 @@ public abstract class Contract {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
-    private Boolean isActive = false;
+    private Boolean isActive = true;
     @Builder.Default
     private Boolean deleteRequest = false;
 

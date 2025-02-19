@@ -227,31 +227,51 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     @Override
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        Comparator<DocumentMatrix> byName = Comparator.comparing(DocumentMatrix::getName);
+
         List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(id);
+
         List<DocumentMatrix> selectedDocumentsEnterprise = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento empresa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+                .filter(doc -> "Documento empresa".equals(doc.getSubGroup().getGroup().getGroupName()))
+                .sorted(byName)
+                .collect(Collectors.toList());
         List<DocumentMatrix> selectedDocumentsPersonal = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+                .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName()))
+                .sorted(byName)
+                .collect(Collectors.toList());
         List<DocumentMatrix> selectedDocumentsService = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documentos empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
+                .filter(doc -> "Documentos empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName()))
+                .sorted(byName)
+                .collect(Collectors.toList());
         List<DocumentMatrix> selectedDocumentsTrainning = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Treinamentos e certificações".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
-        List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
-        List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa");
-        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
-        List<DocumentMatrix> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações");
+                .filter(doc -> "Treinamentos e certificações".equals(doc.getSubGroup().getGroup().getGroupName()))
+                .sorted(byName)
+                .collect(Collectors.toList());
+
+        List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
+                .stream().sorted(byName).toList();;
+        List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa")
+                .stream().sorted(byName).toList();;
+        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
+                .stream().sorted(byName).toList();;
+        List<DocumentMatrix> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
+                .stream().sorted(byName).toList();;
+
         List<DocumentMatrix> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
         List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
         List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
         List<DocumentMatrix> nonSelectedDocumentsTrainning = new ArrayList<>(allDocumentsTrainning);
+
         nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
         nonSelectedDocumentsPersonal.removeAll(selectedDocumentsPersonal);
         nonSelectedDocumentsService.removeAll(selectedDocumentsService);
         nonSelectedDocumentsTrainning.removeAll(selectedDocumentsTrainning);
+
         DocumentResponseDto branchResponse = DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)

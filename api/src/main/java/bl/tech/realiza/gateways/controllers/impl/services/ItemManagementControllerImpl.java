@@ -2,9 +2,12 @@ package bl.tech.realiza.gateways.controllers.impl.services;
 
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
+import bl.tech.realiza.gateways.requests.services.ItemManagementRequestDto;
 import bl.tech.realiza.gateways.responses.services.ItemManagementResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,45 +23,63 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/item-management")
-@Tag(name = "Activate or Delete item")
+@Tag(name = "Item Management")
 public class ItemManagementControllerImpl implements ItemManagementController {
 
     private final CrudItemManagementImpl crudItemManagementImpl;
 
-    // apenas REALIZA_BASIC+ pode acessar
-    @PatchMapping("/activate")
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/new")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Cria uma solicitação para adicionar um usuário")
     @Override
-    public ResponseEntity<String> activateItem(@RequestParam String id, @RequestParam CrudItemManagementImpl.ActivationItemType item) {
+    public ResponseEntity<ItemManagementResponseDto> createSolicitations(@RequestBody @Valid ItemManagementRequestDto itemManagementRequestDto) {
+        ItemManagementResponseDto itemManagementResponseDto = crudItemManagementImpl.saveUserSolicitation(itemManagementRequestDto);
 
-        String response = crudItemManagementImpl.activateItem(id,item);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(itemManagementResponseDto);
     }
 
-    // apenas REALIZA_PLUS+ pode acessar
-    @DeleteMapping("/delete")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @GetMapping("/new")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca todas as solicitações para adicionar usuários")
     @Override
-    public ResponseEntity<Void> deleteItem(@RequestParam String id, @RequestParam CrudItemManagementImpl.DeleteItemType item) {
+    public ResponseEntity<Page<ItemManagementResponseDto>> getSolicitations(@RequestParam(defaultValue = "0") int page,
+                                                                            @RequestParam(defaultValue = "10") int size,
+                                                                            @RequestParam(defaultValue = "idSolicitation") String sort,
+                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        crudItemManagementImpl.deleteItem(id,item);
+        Page<ItemManagementResponseDto> itemManagementResponse = crudItemManagementImpl.findAllUserSolicitation(pageable);
+
+        return ResponseEntity.ok(itemManagementResponse);
+    }
+
+    @DeleteMapping("/new/{idSolicitation}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Apaga uma solicitação para adicionar usuário")
+    @Override
+    public ResponseEntity<Void> deleteSolicitation(@PathVariable String idSolicitation) {
+        crudItemManagementImpl.deleteUserSolicitation(idSolicitation);
 
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/innactive-items")
+    @PatchMapping("/new/{idSolicitation}/approve")
     @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Aprova uma solicitação para adicionar usuário")
     @Override
-    public ResponseEntity<Page<ItemManagementResponseDto>> getInnactiveItems(@RequestParam(defaultValue = "0") int page,
-                                                                                   @RequestParam(defaultValue = "10") int size,
-                                                                                   @RequestParam(defaultValue = "idUpdateDataRequest") String sort,
-                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+    public ResponseEntity<String> approveSolicitation(@PathVariable String idSolicitation) {
+        String response = crudItemManagementImpl.approveUserSolicitation(idSolicitation);
 
-        Page<ItemManagementResponseDto> items = crudItemManagementImpl.findAllAddSolicitations(pageable);
+        return ResponseEntity.ok(response);
+    }
 
-        return ResponseEntity.ok(items);
+    @DeleteMapping("/new/{idSolicitation}/deny")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Nega uma solicitação para adicionar usuário")
+    @Override
+    public ResponseEntity<String> denySolicitation(@PathVariable String idSolicitation) {
+        String response = crudItemManagementImpl.denyUserSolicitation(idSolicitation);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/delete-requests")
