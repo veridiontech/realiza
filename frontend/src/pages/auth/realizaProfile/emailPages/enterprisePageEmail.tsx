@@ -9,10 +9,11 @@ import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
+import { useUser } from "@/context/user-provider";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
-  // Agora tradeName (Nome fantasia) é opcional
+  // tradeName (Nome fantasia) é opcional
   tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
@@ -28,11 +29,19 @@ type EnterprisePageEmailFormSchema = z.infer<
 export function EnterprisePageEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  const tokenFromUrl = searchParams.get("token");
+  const { token, setToken } = useUser(); // Usa o contexto para obter e setar o token
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Se o token vier pela URL, armazena-o no contexto
+  useEffect(() => {
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl);
+    }
+  }, [tokenFromUrl, setToken]);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -81,7 +90,7 @@ export function EnterprisePageEmail() {
       );
       if (res.data) {
         setValue("corporateName", res.data.nome);
-        // Se não houver nome fantasia, define como string vazia (não obrigatório)
+        // Se não houver nome fantasia, define como string vazia
         setValue("tradeName", res.data.fantasia || "");
         setValue("email", res.data.email);
         setValue("phone", res.data.telefone);
@@ -144,7 +153,7 @@ export function EnterprisePageEmail() {
         payload,
       );
       // Após cadastrar a empresa, redireciona para a página de cadastro individual
-      navigate(`/email/Sign-up`);
+      navigate(`/email/Sign-Up?token=${token}`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
     } finally {

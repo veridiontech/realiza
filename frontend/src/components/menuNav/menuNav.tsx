@@ -1,9 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
+import { useUser } from "@/context/user-provider";
 
 export function MenuNav() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  const { token } = useUser();
 
   return (
     <div>
@@ -21,7 +20,7 @@ export function MenuNav() {
           Empresa
         </NavLink>
         <NavLink
-          to={"/email/Sign-Up"}
+          to={`/email/Sign-Up?token=${token}`}
           className={({ isActive }) =>
             `flex h-[6vh] w-[10vw] items-center justify-center bg-gray-300 ${
               isActive
