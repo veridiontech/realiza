@@ -67,42 +67,42 @@ export function SignIn() {
       setUser(userData);
       setShowSplash(true);
 
-      // setTimeout(() => {
-      //   console.log("Redirecionando para:", userData.role);
-      //   switch (userData.role) {
-      //     case "ROLE_ADMIN":
-      //     case "ROLE_REALIZA_PLUS":
-      //     case "ROLE_REALIZA_BASIC":
-      //       navigate(`/sistema/select-client/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_CLIENT_RESPONSIBLE":
-      //       navigate(`/cliente/branch/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_CLIENT_MANAGER":
-      //       navigate(`/cliente/contracts/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_SUPPLIER_RESPONSIBLE":
-      //       navigate(`/fornecedor/quartered/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_SUPPLIER_MANAGER":
-      //       navigate(`/fornecedor/contracts/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
-      //       navigate(`/sub/employees/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_SUBCONTRACTOR_MANAGER":
-      //       navigate(`/sub/contracts/${userData.idUser}`);
-      //       break;
-      //     case "ROLE_VIEWER":
-      //       navigate(`/client-test`);
-      //       break;
-      //     default:
-      //       navigate(`/`);
-      //       alert("Usuário sem ROLE");
-      //       break;
-      //   }
-      //   window.location.reload();
-      // }, 3000);
+      setTimeout(() => {
+        console.log("Redirecionando para:", userData.role);
+        switch (userData.role) {
+          case "ROLE_ADMIN":
+          case "ROLE_REALIZA_PLUS":
+          case "ROLE_REALIZA_BASIC":
+            navigate(`/sistema/select-client/${userData.idUser}`);
+            break;
+          case "ROLE_CLIENT_RESPONSIBLE":
+            navigate(`/cliente/branch/${userData.idUser}`);
+            break;
+          case "ROLE_CLIENT_MANAGER":
+            navigate(`/cliente/contracts/${userData.idUser}`);
+            break;
+          case "ROLE_SUPPLIER_RESPONSIBLE":
+            navigate(`/fornecedor/quartered/${userData.idUser}`);
+            break;
+          case "ROLE_SUPPLIER_MANAGER":
+            navigate(`/fornecedor/contracts/${userData.idUser}`);
+            break;
+          case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
+            navigate(`/sub/employees/${userData.idUser}`);
+            break;
+          case "ROLE_SUBCONTRACTOR_MANAGER":
+            navigate(`/sub/contracts/${userData.idUser}`);
+            break;
+          case "ROLE_VIEWER":
+            navigate(`/client-test`);
+            break;
+          default:
+            navigate(`/`);
+            alert("Usuário sem ROLE");
+            break;
+        }
+        window.location.reload();
+      }, 3000);
     } catch (err) {
       console.error("Erro ao buscar usuário:", err);
     } finally {
