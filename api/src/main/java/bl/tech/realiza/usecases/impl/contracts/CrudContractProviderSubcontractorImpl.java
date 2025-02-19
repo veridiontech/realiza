@@ -4,6 +4,11 @@ import bl.tech.realiza.domains.contract.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.contract.DocumentContract;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
@@ -13,6 +18,8 @@ import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
+import bl.tech.realiza.gateways.repositories.documents.contract.DocumentContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
@@ -26,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +46,15 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final UserProviderSupplierRepository userProviderSupplierRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
+    private final DocumentContractRepository documentContractRepository;
+    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
 
     @Override
     public ContractResponseDto save(ContractRequestDto contractProviderSubcontractorRequestDto) {
         List<Activity> activities = List.of();
         List<Requirement> requirements = List.of();
         ProviderSubcontractor providerSubcontractor = null;
+        List<DocumentProviderSupplier> documentSuplier = List.of();
 
         Optional<ContractProviderSupplier> contractProviderSupplierOptional = contractProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getSupplierContractId());
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier Contract not found"));
@@ -82,6 +93,52 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             }
         }
 
+        switch (contractProviderSubcontractorRequestDto.getRisk()) {
+            case LOW_LESS_THAN_8H -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan8hIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+            }
+            case LOW_LESS_THAN_1M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan1mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case LOW_LESS_THAN_6M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case LOW_MORE_THAN_6M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowMoreThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case MEDIUM_LESS_THAN_1M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan1mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case MEDIUM_LESS_THAN_6M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case MEDIUM_MORE_THAN_6M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumMoreThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case HIGH_LESS_THAN_1M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan1mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case HIGH_LESS_THAN_6M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+            case HIGH_MORE_THAN_6M -> {
+                documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighMoreThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
+
+            }
+        }
+
+        List<DocumentMatrix> documentMatrixList = documentSuplier.stream()
+                .map(DocumentProviderSupplier::getDocumentMatrix)
+                .toList();
+
         ContractProviderSubcontractor newContractSubcontractor = ContractProviderSubcontractor.builder()
                 .serviceType(contractProviderSubcontractorRequestDto.getServiceType())
                 .serviceDuration(contractProviderSubcontractorRequestDto.getServiceDuration())
@@ -101,6 +158,17 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .build();
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(newContractSubcontractor);
+
+        List<DocumentContract> documentProviderSuppliers = documentMatrixList.stream()
+                .map(docMatrix -> DocumentContract.builder()
+                        .title(docMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .contract(savedContractSubcontractor)
+                        .documentMatrix(docMatrix)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentContractRepository.saveAll(documentProviderSuppliers);
 
         ContractResponseDto contractSubcontractorResponse = ContractResponseDto.builder()
                 .idContract(savedContractSubcontractor.getIdContract())

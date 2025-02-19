@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.documents.provider;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import org.springframework.data.domain.Page;
@@ -12,4 +13,17 @@ public interface DocumentProviderSupplierRepository extends JpaRepository<Docume
     Page<DocumentProviderSupplier> findAllByProviderSupplier_IdProvider(String idSearch, Pageable pageable);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProvider(String idSearch);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan8hIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan1mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan6mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowMoreThan6mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan1mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan6mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumMoreThan6mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan1mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan6mIsTrue(String idSearch, String groupName);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighMoreThan6mIsTrue(String idSearch, String groupName);
+    Long countByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, String documentoEmprgroupNameesa);
+    Long countByProviderSupplier_IdProviderAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, String groupName);
+    Long countByProviderSupplier_IdProviderAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, Document.Status status, String documentoEmprgroupNameesa);
 }
