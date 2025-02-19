@@ -320,12 +320,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
 
-        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranch(idEnterprise);
-
-        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .collect(Collectors.toSet());
-
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
                         .title(documentMatrix.getName())
                         .status(Document.Status.PENDENTE)

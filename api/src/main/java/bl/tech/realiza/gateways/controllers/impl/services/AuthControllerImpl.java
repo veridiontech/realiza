@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.responses.services.LoginResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.AuthService;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.services.auth.PasswordRecoveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class AuthControllerImpl implements AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+    private final PasswordRecoveryService passwordRecoveryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
@@ -48,6 +50,14 @@ public class AuthControllerImpl implements AuthController {
         return ResponseEntity.ok(userResponseDto);
     }
 
+    @PostMapping("/change-my-password/{idUser}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> changePassword(@PathVariable String idUser, @RequestParam String newPassword) {
 
+        String response = passwordRecoveryService.changePassword(idUser, newPassword);
+
+        return ResponseEntity.ok(response);
+    }
 
 }

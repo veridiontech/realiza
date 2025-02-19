@@ -4,52 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atualização Realiza Sistema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .email-wrapper {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #34495D;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .header h2 {
+            font-size: 20px;
+            margin: 10px 0 0;
+            color: #dcdcdc;
+        }
+        .content {
+            padding: 20px;
+            text-align: left;
+            color: #333;
+        }
+        .content p, .content ul {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .content ul {
+            padding-left: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #34495D;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer {
+            padding: 20px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #dcdcdc;
+        }
+        .footer a {
+            color: #34495D;
+            text-decoration: none;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;">
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 0; padding: 0; width: 100%; background-color: #f9f9f9;">
-    <tr>
-        <td align="center" style="padding: 20px 0;">
-            <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #333333; color: #ffffff; border-radius: 8px; max-width: 600px; width: 100%;">
-                <!-- Header -->
-                <tr>
-                    <td style="padding: 20px; text-align: center;">
-                        <h1 style="margin: 0; color: #ffffff; font-size: 24px;">#TITLE#</h1>
-                        <h2 style="margin: 0; margin-top: 10px; color: #ffffff; font-size: 20px;">Realiza Sistema</h2>
-                    </td>
-                </tr>
-                <!-- Description -->
-                <tr>
-                    <td style="padding: 20px; text-align: left;">
-                        <p style="color: #dcdcdc; font-size: 16px; line-height: 1.6; margin: 0;">
-                            #DESCRIPTION#
-                        </p>
-                    </td>
-                </tr>
-                <!-- Sections -->
-                <tr>
-                    <td style="padding: 20px; text-align: left;">
-                        <ul style="color: #dcdcdc; font-size: 16px; line-height: 1.6; margin: 20px 0 0; padding-left: 20px;">
-                            #SECTIONS#
-                        </ul>
-                    </td>
-                </tr>
-                <!-- Access Button -->
-                <tr>
-                    <td align="center" style="padding: 20px;">
-                        <a href="https://realiza-1.onrender.com" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #34495D; border-radius: 8px; text-decoration: none; font-weight: bold;">Acessar Realiza*</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 20px; text-align: center; border-top: 1px solid #444444;">
-                        <p style="color: #aaaaaa; font-size: 12px; margin: 0;">
-                            Qualquer dúvida entre em contato com o nosso time,
-                            <a href="mailto:contato@realizaassessoria.com.br" style="color: #34495D; text-decoration: none;">contato@realizaassessoria.com.br</a>
-                        </p>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
+<body>
+<div class="container">
+    <table class="email-wrapper">
+        <!-- Header -->
+        <tr>
+            <td class="header">
+                <h1>#TITLE#</h1>
+                <h2>Realiza Sistema</h2>
+            </td>
+        </tr>
+        <!-- Description -->
+        <tr>
+            <td class="content">
+                <p>#DESCRIPTION#</p>
+            </td>
+        </tr>
+        <!-- Sections -->
+        <tr>
+            <td class="content">
+                <ul>#SECTIONS#</ul>
+            </td>
+        </tr>
+        <!-- Access Button -->
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <a href="https://realiza-1.onrender.com" class="button">Acessar Realiza</a>
+            </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+            <td class="footer">
+                <p>Dúvidas? Entre em contato: <a href="mailto:contato@realizaassessoria.com.br" >contato@realizaassessoria.com.br</a></p>
+            </td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

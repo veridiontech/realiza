@@ -1,11 +1,13 @@
 package bl.tech.realiza.services.email;
 
 import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
 import bl.tech.realiza.gateways.requests.services.email.EmailUpdateRequestDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
@@ -17,10 +19,8 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -33,6 +33,7 @@ public class EmailSender {
     private final ClientRepository clientRepository;
     private final TokenManagerService tokenManagerService;
     private final BranchRepository branchRepository;
+    private final UserRepository userRepository;
 
     public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
@@ -70,6 +71,11 @@ public class EmailSender {
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
                         .replace("#COMPANY_PLACEHOLDER#",company.name());
+                if (emailInviteRequestDto.getIdClient() != null) {
+                    emailBody = emailBody.replace("#ID_CLIENT#", emailInviteRequestDto.getIdClient());
+                } else {
+                    emailBody = emailBody.replace("&idClient=#ID_CLIENT#", "");
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Failed to generate email", e);
             }
@@ -129,5 +135,41 @@ public class EmailSender {
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate or send email", e);
         }
+    }
+
+    public void sendPasswordRecoveryEmail(String email) {
+        User user = userRepository.findByEmail(email);
+
+        try {
+            // Generating a unique token
+            String token = tokenManagerService.generateToken();
+            String emailBody;
+
+            try (var inputStream = Objects.requireNonNull(
+                    EmailControllerImpl.class.getResourceAsStream("/templates/email-password-recovery.html"))) {
+                emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+                        .replace("#TOKEN_PLACEHOLDER#", token)
+                        .replace("#ID_PLACEHOLDER#",user.getIdUser());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to generate email", e);
+            }
+
+            // Creating and sending the email
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(dotenv.get("GMAIL_EMAIL"));
+            helper.setTo(user.getEmail());
+            helper.setSubject("Recuperação de acesso a plataforma Realiza");
+            helper.setText(emailBody, true); // Enable HTML format
+
+            try {
+                mailSender.send(message);
+            } catch (MailException e) {
+                throw new RuntimeException("Failed to send the email", e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate email", e);
+        }
+
     }
 }

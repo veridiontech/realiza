@@ -1,6 +1,8 @@
 package bl.tech.realiza.gateways.responses.users;
 
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -32,10 +34,12 @@ public class UserResponseDto {
 
     // client
     private String branch;
+    private BranchResponseDto branchResponse;
 
     // subcontractor
     private String subcontractor;
 
     // supplier
     private String supplier;
+    private ProviderResponseDto providerResponseDto;
 }

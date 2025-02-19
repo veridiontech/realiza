@@ -7,5 +7,6 @@ import lombok.Data;
 public class EmailInviteRequestDto {
     private String email;
     private Provider.Company company; // o nível da empresa que quer criar
-    private String idCompany; // o id do "pai" onde vai se ligar
+    private String idCompany;
+    private String idClient;
 }
