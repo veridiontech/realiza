@@ -189,7 +189,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/email",
-    element: <EmailLayout />,
+    element: (
+      <UserProvider>
+        <EmailLayout />
+      </UserProvider>
+    ),
     children: [
       { path: "Sign-Up", element: <SignUpPageEmail /> },
       //{ path: "Login", element: <LoginPageEmail /> },
