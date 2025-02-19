@@ -87,6 +87,7 @@ public class JwtService {
         claims.put("profilePicture", user.getProfilePicture());
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
+        claims.put("idClient", user.getBranch().getClient().getIdClient());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -116,6 +117,7 @@ public class JwtService {
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
         claims.put("branches", branchesIds);
+        claims.put("idClient", user.getProviderSupplier().getBranches().get(0).getClient().getIdClient());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -198,6 +200,7 @@ public class JwtService {
                 .email((String) claims.getOrDefault("email", ""))
                 .telephone((String) claims.getOrDefault("telephone", ""))
                 .cellphone((String) claims.getOrDefault("cellphone", ""))
+                .idClient((String) claims.getOrDefault("idClient", ""))
                 .branches(branchesIds)
                 .build();
 
