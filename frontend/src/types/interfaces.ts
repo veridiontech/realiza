@@ -21,6 +21,7 @@ export interface propsUser {
   description: string;
   profilePictureData: string;
   supplier: string;
+  idClient: string;
 }
 
 export interface propsClient {

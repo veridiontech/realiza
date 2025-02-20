@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,13 +53,18 @@ export function SignIn() {
         },
       });
 
+      // Extração do idClient do token após a chamada ao extract-token
+      const token = res.data.token;
+      const payload = JSON.parse(window.atob(token.split(".")[1]));
+      console.log("idClient extraído do token:", payload.idClient);
+
       const userData = userResponse.data;
       localStorage.setItem("userBranches", JSON.stringify(userData.branches));
       localStorage.setItem(
         "userSubcontractor",
         JSON.stringify(userData.subcontractor),
       );
-      console.log("colentando dados:", userResponse.data);
+      console.log("Coletando dados:", userResponse.data);
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
       console.log("Dados recebidos:", userData);
@@ -109,11 +114,6 @@ export function SignIn() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user) {
-    }
-  }, [user]);
 
   if (showSplash) {
     return (
