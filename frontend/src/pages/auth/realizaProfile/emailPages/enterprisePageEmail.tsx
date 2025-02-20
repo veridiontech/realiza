@@ -11,12 +11,14 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
+import { useFormDataContext } from "@/context/formDataProvider";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
   tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
+  phone: z.string().nonempty("O telefone é obrigatório"),
   idCompany: z.string().optional(),
   company: z.string().nullable().optional(),
   branches: z.array(z.string()).nonempty("A branch é obrigatória"),
@@ -31,6 +33,7 @@ export function EnterprisePageEmail() {
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
   const { token, setToken } = useUser();
+  const { setEnterpriseData } = useFormDataContext();
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
@@ -120,54 +123,51 @@ export function EnterprisePageEmail() {
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
-    try {
-      let payload;
-      switch (findCompany) {
-        case "SUBCONTRACTOR":
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-            role: "ROLE_SUPPLIER_RESPONSIBLE",
-          };
-          break;
-        case "CLIENT":
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-            role: "ROLE_CLIENT_RESPONSIBLE",
-          };
-          break;
-        case "SUPPLIER":
-          payload = {
-            ...data,
-            branches: data.branches,
-            tradeName: data.tradeName,
-            corporateName: data.corporateName,
-          };
-          break;
-        default:
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-          };
-          break;
-      }
-      await axios.post(`${ip}/supplier`, payload);
-      navigate(`/email/Sign-Up?token=${token}`);
-    } catch (err) {
-      console.error("Erro ao enviar os dados:", err);
-    } finally {
-      setIsLoading(false);
+    let payload;
+    switch (findCompany) {
+      case "SUBCONTRACTOR":
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+          role: "ROLE_SUPPLIER_RESPONSIBLE",
+        };
+        break;
+      case "CLIENT":
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+          role: "ROLE_CLIENT_RESPONSIBLE",
+        };
+        break;
+      case "SUPPLIER":
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+          branches: data.branches,
+        };
+        break;
+      default:
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+        };
+        break;
     }
+    setEnterpriseData(payload);
+    navigate(`/email/Sign-Up?token=${token}`);
+    setIsLoading(false);
   };
 
   if (!isValidToken) {
@@ -222,6 +222,15 @@ export function EnterprisePageEmail() {
               placeholder="Digite o seu email"
               className="w-[27vw]"
               {...register("email")}
+            />
+          </div>
+          <div>
+            <Label>Telefone</Label>
+            <Input
+              type="text"
+              placeholder="Digite o telefone"
+              className="w-[27vw]"
+              {...register("phone")}
             />
           </div>
           <div className="flex items-center gap-5">

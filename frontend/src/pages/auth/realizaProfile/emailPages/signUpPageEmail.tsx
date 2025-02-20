@@ -1,3 +1,4 @@
+// SignUpPageEmail.tsx
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +39,6 @@ export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -55,10 +55,10 @@ export function SignUpPageEmail() {
       const allDatas = {
         ...enterpriseData,
         ...data,
+        role: "ROLE_ADMIN",
+        company: "CLIENT",
       };
-      console.log("enviando dados:", allDatas);
       await axios.post(`${ip}/sign-enterprise`, allDatas);
-      // Redireciona para a URL solicitada
       window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
       console.log(err);
@@ -153,30 +153,28 @@ export function SignUpPageEmail() {
         </div>
         <div>
           <Label>Senha</Label>
-          <div>
-            <div className="flex w-[27vw] items-center rounded border border-gray-300">
-              <Input
-                type={isOpenEye ? "text" : "password"}
-                className="flex-1 border-none focus:ring-0"
-                placeholder="Digite sua senha"
-                {...register("password")}
+          <div className="flex w-[27vw] items-center rounded border border-gray-300">
+            <Input
+              type={isOpenEye ? "text" : "password"}
+              className="flex-1 border-none focus:ring-0"
+              placeholder="Digite sua senha"
+              {...register("password")}
+            />
+            {isOpenEye ? (
+              <Eye
+                className="mx-3 cursor-pointer text-gray-400"
+                onClick={togglePasswordVisibility}
               />
-              {isOpenEye ? (
-                <Eye
-                  className="mx-3 cursor-pointer text-gray-400"
-                  onClick={togglePasswordVisibility}
-                />
-              ) : (
-                <EyeOff
-                  className="mx-3 cursor-pointer text-gray-400"
-                  onClick={togglePasswordVisibility}
-                />
-              )}
-            </div>
-            {errors.password && (
-              <span className="text-red-600">{errors.password.message}</span>
+            ) : (
+              <EyeOff
+                className="mx-3 cursor-pointer text-gray-400"
+                onClick={togglePasswordVisibility}
+              />
             )}
           </div>
+          {errors.password && (
+            <span className="text-red-600">{errors.password.message}</span>
+          )}
         </div>
         <div>
           <Label>Confirme sua senha</Label>
