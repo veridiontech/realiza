@@ -161,10 +161,7 @@ export function EnterprisePageEmail() {
           };
           break;
       }
-      await axios.post(
-        "https://realiza-1.onrender.com/email/Enterprise-sign-up",
-        payload,
-      );
+      await axios.post(`${ip}/supplier`, payload);
       navigate(`/email/Sign-Up?token=${token}`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
