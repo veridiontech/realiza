@@ -33,7 +33,11 @@ export function EnterprisePageEmail() {
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
+  const idClient = searchParams.get("idClient"); // Novo parâmetro idClient vindo da URL
   const [isLoading, setIsLoading] = useState(false);
+
+  // Novo estado para armazenar as branches do client
+  const [branches, setBranches] = useState<any[]>([]);
 
   // Se o token vier pela URL, armazena-o no contexto
   useEffect(() => {
@@ -64,6 +68,23 @@ export function EnterprisePageEmail() {
       console.log("Token não encontrado.");
     }
   }, [token]);
+
+  // Nova lógica: se o idClient existir, busca as branches do client
+  useEffect(() => {
+    if (idClient) {
+      axios
+        .get(
+          `https://realiza-1.onrender.com/branch/filtered-client?idSearch=${idClient}`,
+        )
+        .then((res) => {
+          // Supondo que a resposta contenha as branches no campo "content"
+          setBranches(res.data.content || res.data);
+        })
+        .catch((err) => {
+          console.error("Erro ao buscar branches:", err);
+        });
+    }
+  }, [idClient]);
 
   const {
     register,
@@ -243,6 +264,19 @@ export function EnterprisePageEmail() {
               />
             </div>
           </div>
+          {/* Nova lógica: exibição das branches do client */}
+          {branches && branches.length > 0 && (
+            <div>
+              <Label>Selecione a Branch</Label>
+              <select className="w-[27vw] rounded border p-2">
+                {branches.map((branch: any) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {isLoading ? (
             <Button className="bg-realizaBlue h-[5vh]">
               <Oval

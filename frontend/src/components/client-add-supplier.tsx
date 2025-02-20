@@ -192,7 +192,7 @@ export function ModalTesteSendSupplier() {
             onSubmit={handleSubmit(createClient)}
             className="flex flex-col gap-4"
           >
-            <div>
+            <div className="mb-1">
               <Label className="text-white">Email</Label>
               <Input
                 type="email"
