@@ -36,7 +36,7 @@ export function EnterprisePageEmail() {
   const idClient = searchParams.get("idClient"); // Novo parâmetro idClient vindo da URL
   const [isLoading, setIsLoading] = useState(false);
 
-  // Novo estado para armazenar as branches do client
+  // Estado para armazenar as branches do client (inicialmente como array vazio)
   const [branches, setBranches] = useState<any[]>([]);
 
   // Se o token vier pela URL, armazena-o no contexto
@@ -69,7 +69,7 @@ export function EnterprisePageEmail() {
     }
   }, [token]);
 
-  // Nova lógica: se o idClient existir, busca as branches do client
+  // Nova lógica: busca das branches do client usando o idClient
   useEffect(() => {
     if (idClient) {
       axios
@@ -77,8 +77,11 @@ export function EnterprisePageEmail() {
           `https://realiza-1.onrender.com/branch/filtered-client?idSearch=${idClient}`,
         )
         .then((res) => {
-          // Supondo que a resposta contenha as branches no campo "content"
-          setBranches(res.data.content || res.data);
+          // Supondo que a resposta possa vir no campo "content"
+          const data = res.data.content || res.data;
+          // Se "data" não for um array, converte-o em array ou define como vazio
+          const branchesArray = Array.isArray(data) ? data : data ? [data] : [];
+          setBranches(branchesArray);
         })
         .catch((err) => {
           console.error("Erro ao buscar branches:", err);
