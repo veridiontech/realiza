@@ -10,6 +10,7 @@ import { Oval } from "react-loader-spinner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
+import { ip } from "@/utils/ip";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
@@ -75,7 +76,7 @@ export function EnterprisePageEmail() {
       // Adicionando parâmetros de paginação para garantir o formato Page com "content"
       axios
         .get(
-          `https://realiza-1.onrender.com/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
+          `${ip}/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
         )
         .then((res) => {
           console.log("Resposta da API de branches:", res.data);
