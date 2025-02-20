@@ -85,6 +85,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .profilePicture(userManagerRequestDto.getProfilePicture())
                 .telephone(userManagerRequestDto.getTelephone())
                 .cellphone(userManagerRequestDto.getCellphone())
+                .isActive(true)
                 .build();
 
         UserManager savedUserManager = userManagerRepository.save(newUserManager);
@@ -99,7 +100,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .profilePictureId(savedUserManager.getProfilePicture())
                 .surname(savedUserManager.getSurname())
                 .email(savedUserManager.getEmail())
-                .profilePicture(savedUserManager.getProfilePicture())
+                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .telephone(savedUserManager.getTelephone())
                 .cellphone(savedUserManager.getCellphone())
                 .build();
@@ -130,7 +131,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .surname(userManager.getSurname())
                 .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userManager.getEmail())
-                .profilePicture(userManager.getProfilePicture())
                 .telephone(userManager.getTelephone())
                 .cellphone(userManager.getCellphone())
                 .build();
@@ -158,8 +158,8 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userManager.getFirstName())
                             .timeZone(userManager.getTimeZone())
                             .surname(userManager.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userManager.getEmail())
-                            .profilePicture(userManager.getProfilePicture())
                             .telephone(userManager.getTelephone())
                             .cellphone(userManager.getCellphone())
                             .build();
