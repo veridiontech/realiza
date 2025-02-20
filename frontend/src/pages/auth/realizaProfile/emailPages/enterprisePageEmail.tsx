@@ -12,7 +12,7 @@ import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
 
-// Definição do schema com todos os campos exigidos pelo Swagger para supplier
+// Schema conforme o contrato do Swagger para supplier
 const supplierFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
   tradeName: z.string().optional(),
@@ -37,6 +37,8 @@ export function EnterprisePageEmail() {
   const tokenFromUrl = searchParams.get("token");
   const { token, setToken } = useUser();
   const [isValidToken, setIsValidToken] = useState(false);
+  // Novo estado para saber se a validação do token já foi concluída
+  const [isTokenChecked, setIsTokenChecked] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const idClient = searchParams.get("idClient"); // idClient passado na URL
@@ -67,11 +69,16 @@ export function EnterprisePageEmail() {
         .catch((err) => {
           console.error("Erro ao validar token", err);
           setIsValidToken(false);
+        })
+        .finally(() => {
+          setIsTokenChecked(true);
         });
+    } else {
+      setIsTokenChecked(true);
     }
   }, [token]);
 
-  // Nova lógica: busca das branches do client usando o idClient
+  // Lógica: busca das branches do client usando o idClient
   useEffect(() => {
     if (idClient) {
       // Adiciona parâmetros de paginação para garantir o formato Page com o campo "content"
@@ -121,7 +128,7 @@ export function EnterprisePageEmail() {
         // Se não houver nome fantasia, define como string vazia
         setValue("tradeName", res.data.fantasia || "");
         setValue("email", res.data.email);
-        // Opcional: se a API fornecer CEP, estado, cidade, endereço, número, você pode preenchê-los aqui
+        // Opcional: preencher CEP, estado, cidade, endereço, número se disponíveis
       }
     } catch (err) {
       console.error("Erro ao buscar CNPJ:", err);
@@ -134,7 +141,7 @@ export function EnterprisePageEmail() {
   const onSubmit = async (data: SupplierFormSchema) => {
     setIsLoading(true);
     try {
-      // Constrói o payload conforme necessário. Campos adicionais idCompany e company podem ser incluídos se necessário.
+      // Constrói o payload conforme necessário.
       let payload = {
         ...data,
         idCompany: findIdCompany || "",
@@ -152,6 +159,11 @@ export function EnterprisePageEmail() {
     }
   };
 
+  // Enquanto o token não tiver sido validado, mostramos um loading
+  if (!isTokenChecked) {
+    return <div>Carregando...</div>;
+  }
+  // Se a validação concluir e o token for inválido, mostra mensagem de erro
   if (!isValidToken) {
     return (
       <div className="text-red-600">
@@ -265,7 +277,7 @@ export function EnterprisePageEmail() {
         {branches && branches.length > 0 && (
           <div className="flex flex-col gap-2">
             <Label>Selecione a Branch</Label>
-            {/* Aqui usamos um <select> simples. Se necessário, pode ser um multi-select */}
+            {/* Usando um <select> simples; se precisar de multi-select, ajuste conforme necessário */}
             <select
               {...register("branches")}
               className="w-[27vw] rounded border p-2"
