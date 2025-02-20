@@ -69,17 +69,19 @@ export function EnterprisePageEmail() {
     }
   }, [token]);
 
-  // Nova lógica: busca das branches do client usando o idClient
+  // NOVA LÓGICA: Busca das branches do client usando o idClient
   useEffect(() => {
     if (idClient) {
+      // Adicionando parâmetros de paginação para garantir o formato Page com "content"
       axios
         .get(
-          `https://realiza-1.onrender.com/branch/filtered-client?idSearch=${idClient}`,
+          `https://realiza-1.onrender.com/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
         )
         .then((res) => {
-          // Supondo que a resposta possa vir no campo "content"
+          console.log("Resposta da API de branches:", res.data);
+          // Se a resposta tiver o campo "content", usamos ele; senão, tentamos usar res.data
           const data = res.data.content || res.data;
-          // Se "data" não for um array, converte-o em array ou define como vazio
+          // Garante que data seja um array
           const branchesArray = Array.isArray(data) ? data : data ? [data] : [];
           setBranches(branchesArray);
         })
@@ -267,13 +269,16 @@ export function EnterprisePageEmail() {
               />
             </div>
           </div>
-          {/* Nova lógica: exibição das branches do client */}
+          {/* NOVA LÓGICA: exibição das branches do client */}
           {branches && branches.length > 0 && (
             <div>
               <Label>Selecione a Branch</Label>
               <select className="w-[27vw] rounded border p-2">
                 {branches.map((branch: any) => (
-                  <option key={branch.id} value={branch.id}>
+                  <option
+                    key={branch.idBranch || branch.id}
+                    value={branch.idBranch || branch.id}
+                  >
                     {branch.name}
                   </option>
                 ))}
