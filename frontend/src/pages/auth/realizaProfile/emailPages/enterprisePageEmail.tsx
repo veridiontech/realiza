@@ -12,39 +12,32 @@ import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
 
-// Schema conforme o contrato do Swagger para supplier
-const supplierFormSchema = z.object({
+const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
   tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
-  cep: z.string().nonempty("O CEP é obrigatório"),
-  state: z.string().nonempty("O estado é obrigatório"),
-  city: z.string().nonempty("A cidade é obrigatória"),
-  address: z.string().nonempty("O endereço é obrigatório"),
-  number: z.string().nonempty("O número é obrigatório"),
-  // Campo branches: array de strings com pelo menos um item
-  branches: z
-    .array(z.string())
-    .nonempty("Pelo menos uma branch deve ser selecionada"),
+  phone: z.string().nonempty("O telefone é obrigatório"),
+  idCompany: z.string().optional(),
+  company: z.string().nullable().optional(),
 });
 
-type SupplierFormSchema = z.infer<typeof supplierFormSchema>;
+type EnterprisePageEmailFormSchema = z.infer<
+  typeof enterprisePageEmailFormSchema
+>;
 
 export function EnterprisePageEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
-  const { token, setToken } = useUser();
+  const { token, setToken } = useUser(); // Usa o contexto para obter e setar o token
   const [isValidToken, setIsValidToken] = useState(false);
-  // Novo estado para saber se a validação do token já foi concluída
-  const [isTokenChecked, setIsTokenChecked] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
-  const idClient = searchParams.get("idClient"); // idClient passado na URL
+  const idClient = searchParams.get("idClient"); // Novo parâmetro idClient vindo da URL
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estado para armazenar as branches do client
+  // Estado para armazenar as branches do client (inicialmente como array vazio)
   const [branches, setBranches] = useState<any[]>([]);
 
   // Se o token vier pela URL, armazena-o no contexto
@@ -54,41 +47,40 @@ export function EnterprisePageEmail() {
     }
   }, [tokenFromUrl, setToken]);
 
-  // Validação do token usando a rota de validação
   useEffect(() => {
+    const validateToken = async () => {
+      try {
+        const res = await axios.get(
+          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${token}`,
+        );
+        if (res.status === 200) {
+          setIsValidToken(true);
+        } else {
+          console.log("Erro ao validar token.");
+        }
+      } catch (err) {
+        console.log("Não foi possível validar o token", err);
+        setIsValidToken(false);
+      }
+    };
     if (token) {
-      axios
-        .get(`${ip}/email/Enterprise-sign-up/validate?token=${token}`)
-        .then((res) => {
-          if (res.status === 200) {
-            setIsValidToken(true);
-          } else {
-            setIsValidToken(false);
-          }
-        })
-        .catch((err) => {
-          console.error("Erro ao validar token", err);
-          setIsValidToken(false);
-        })
-        .finally(() => {
-          setIsTokenChecked(true);
-        });
+      validateToken();
     } else {
-      setIsTokenChecked(true);
+      console.log("Token não encontrado.");
     }
   }, [token]);
 
-  // Lógica: busca das branches do client usando o idClient
+  // NOVA LÓGICA: Busca das branches do client usando o idClient
   useEffect(() => {
     if (idClient) {
-      // Adiciona parâmetros de paginação para garantir o formato Page com o campo "content"
+      // Adicionando parâmetros de paginação para garantir o formato Page com "content"
       axios
         .get(
           `${ip}/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
         )
         .then((res) => {
           console.log("Resposta da API de branches:", res.data);
-          // Se a resposta tiver o campo "content", usamos ele; senão, usamos res.data
+          // Se a resposta tiver o campo "content", usamos ele; senão, tentamos usar res.data
           const data = res.data.content || res.data;
           // Garante que data seja um array
           const branchesArray = Array.isArray(data) ? data : data ? [data] : [];
@@ -106,12 +98,11 @@ export function EnterprisePageEmail() {
     setValue,
     getValues,
     formState: { isValid },
-  } = useForm<SupplierFormSchema>({
-    resolver: zodResolver(supplierFormSchema),
+  } = useForm<EnterprisePageEmailFormSchema>({
+    resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange",
   });
 
-  // Função para validar CNPJ usando uma API externa
   const validateCnpj = async () => {
     setIsLoading(true);
     const cnpj = getValues("cnpj").replace(/\D/g, "");
@@ -128,30 +119,67 @@ export function EnterprisePageEmail() {
         // Se não houver nome fantasia, define como string vazia
         setValue("tradeName", res.data.fantasia || "");
         setValue("email", res.data.email);
-        // Opcional: preencher CEP, estado, cidade, endereço, número se disponíveis
+        setValue("phone", res.data.telefone);
       }
     } catch (err) {
-      console.error("Erro ao buscar CNPJ:", err);
+      console.log("Erro ao buscar CNPJ:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Função para enviar os dados do formulário para o cadastro do supplier
-  const onSubmit = async (data: SupplierFormSchema) => {
+  const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
     try {
-      // Constrói o payload conforme necessário.
-      let payload = {
-        ...data,
-        idCompany: findIdCompany || "",
-        company: findCompany || "",
-        // Note: não enviamos o campo "branch", somente "branches"
-      };
+      let payload;
+      switch (findCompany) {
+        case "SUBCONTRACTOR":
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+            role: "ROLE_SUPPLIER_RESPONSIBLE",
+          };
+          break;
+        case "CLIENT":
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+            role: "ROLE_CLIENT_RESPONSIBLE",
+          };
+          break;
+        case "SUPPLIER":
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+            role: "ROLE_SUPPLIER_RESPONSIBLE",
+          };
+          break;
+        default:
+          payload = {
+            ...data,
+            idCompany: findIdCompany || "",
+            company: findCompany || "",
+            fantasyName: data.tradeName,
+            socialReason: data.corporateName,
+          };
+          break;
+      }
 
-      await axios.post(`${ip}/supplier`, payload);
-      // Após o cadastro, redireciona para a página de dashboard ou outro fluxo
-      navigate(`/supplier/dashboard?token=${token}`);
+      await axios.post(
+        "https://realiza-1.onrender.com/email/Enterprise-sign-up",
+        payload,
+      );
+      // Após cadastrar a empresa, redireciona para a página de cadastro individual
+      navigate(`/email/Sign-Up?token=${token}`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
     } finally {
@@ -159,11 +187,6 @@ export function EnterprisePageEmail() {
     }
   };
 
-  // Enquanto o token não tiver sido validado, mostramos um loading
-  if (!isTokenChecked) {
-    return <div>Carregando...</div>;
-  }
-  // Se a validação concluir e o token for inválido, mostra mensagem de erro
   if (!isValidToken) {
     return (
       <div className="text-red-600">
@@ -175,147 +198,117 @@ export function EnterprisePageEmail() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-center">
-        <h1 className="text-[40px]">Cadastro de Supplier</h1>
+        <h1 className="text-[40px]">Cadastrar Empresa</h1>
       </div>
-      <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
-        {/* Campo CNPJ com botão para validação */}
-        <div className="flex flex-col gap-2">
-          <Label>CNPJ</Label>
-          <div className="flex items-center gap-2">
+      <div>
+        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex items-center gap-5">
+            <div>
+              <Label>CNPJ</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder="CNPJ: __.___.___/____-__"
+                  className="w-[10vw]"
+                  {...register("cnpj")}
+                />
+                {isLoading ? (
+                  <Button type="button" onClick={validateCnpj}>
+                    <Oval
+                      visible={true}
+                      height="80"
+                      width="80"
+                      color="#4fa94d"
+                      ariaLabel="oval-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={validateCnpj}>
+                    <Search />
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div>
+              <Label>Telefone</Label>
+              <Input
+                type="text"
+                placeholder="Telefone"
+                className="w-[13vw]"
+                {...register("phone")}
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Email corporativo</Label>
             <Input
-              type="text"
-              placeholder="CNPJ: __.___.___/____-__"
-              {...register("cnpj")}
-              className="w-[10vw]"
+              type="email"
+              placeholder="Digite o seu email"
+              className="w-[27vw]"
+              {...register("email")}
             />
-            <Button type="button" onClick={validateCnpj}>
-              <Search />
+          </div>
+          <div className="flex items-center gap-5">
+            <div>
+              <Label>Nome fantasia</Label>
+              <Input
+                type="text"
+                placeholder="Nome Fantasia"
+                className="w-[13vw]"
+                {...register("tradeName")}
+              />
+            </div>
+            <div>
+              <Label>Razão social</Label>
+              <Input
+                type="text"
+                placeholder="*Razão social"
+                className="w-[13vw]"
+                {...register("corporateName")}
+              />
+            </div>
+          </div>
+          {/* NOVA LÓGICA: exibição das branches do client */}
+          {branches && branches.length > 0 && (
+            <div>
+              <Label>Selecione a Branch</Label>
+              <select className="w-[27vw] rounded border p-2">
+                {branches.map((branch: any) => (
+                  <option
+                    key={branch.idBranch || branch.id}
+                    value={branch.idBranch || branch.id}
+                  >
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {isLoading ? (
+            <Button className="bg-realizaBlue h-[5vh]">
+              <Oval
+                visible={true}
+                height="80"
+                width="80"
+                color="#4fa94d"
+                ariaLabel="oval-loading"
+                wrapperStyle={{}}
+                wrapperClass=""
+              />
             </Button>
-          </div>
-        </div>
-        {/* Campo Email corporativo */}
-        <div className="flex flex-col gap-2">
-          <Label>Email corporativo</Label>
-          <Input
-            type="email"
-            placeholder="Digite o email corporativo"
-            {...register("email")}
-            className="w-[27vw]"
-          />
-        </div>
-        {/* Campo Nome fantasia */}
-        <div className="flex flex-col gap-2">
-          <Label>Nome fantasia</Label>
-          <Input
-            type="text"
-            placeholder="Nome Fantasia"
-            {...register("tradeName")}
-            className="w-[27vw]"
-          />
-        </div>
-        {/* Campo Razão social */}
-        <div className="flex flex-col gap-2">
-          <Label>Razão social</Label>
-          <Input
-            type="text"
-            placeholder="Razão social"
-            {...register("corporateName")}
-            className="w-[27vw]"
-          />
-        </div>
-        {/* Campo CEP */}
-        <div className="flex flex-col gap-2">
-          <Label>CEP</Label>
-          <Input
-            type="text"
-            placeholder="CEP"
-            {...register("cep")}
-            className="w-[10vw]"
-          />
-        </div>
-        {/* Campo Estado */}
-        <div className="flex flex-col gap-2">
-          <Label>Estado</Label>
-          <Input
-            type="text"
-            placeholder="Estado"
-            {...register("state")}
-            className="w-[10vw]"
-          />
-        </div>
-        {/* Campo Cidade */}
-        <div className="flex flex-col gap-2">
-          <Label>Cidade</Label>
-          <Input
-            type="text"
-            placeholder="Cidade"
-            {...register("city")}
-            className="w-[10vw]"
-          />
-        </div>
-        {/* Campo Endereço */}
-        <div className="flex flex-col gap-2">
-          <Label>Endereço</Label>
-          <Input
-            type="text"
-            placeholder="Endereço"
-            {...register("address")}
-            className="w-[27vw]"
-          />
-        </div>
-        {/* Campo Número */}
-        <div className="flex flex-col gap-2">
-          <Label>Número</Label>
-          <Input
-            type="text"
-            placeholder="Número"
-            {...register("number")}
-            className="w-[10vw]"
-          />
-        </div>
-        {/* Seleção das Branches do client */}
-        {branches && branches.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <Label>Selecione a Branch</Label>
-            {/* Usando um <select> simples; se precisar de multi-select, ajuste conforme necessário */}
-            <select
-              {...register("branches")}
-              className="w-[27vw] rounded border p-2"
+          ) : (
+            <Button
+              className="bg-realizaBlue h-[5vh]"
+              type="submit"
+              disabled={!isValid}
             >
-              {branches.map((branch: any) => (
-                <option
-                  key={branch.idBranch || branch.id}
-                  value={branch.idBranch || branch.id}
-                >
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {/* Botão de envio */}
-        {isLoading ? (
-          <Button className="bg-realizaBlue h-[5vh]">
-            <Oval
-              visible={true}
-              height="80"
-              width="80"
-              color="#4fa94d"
-              ariaLabel="oval-loading"
-              wrapperStyle={{}}
-              wrapperClass=""
-            />
-          </Button>
-        ) : (
-          <Button
-            className="bg-realizaBlue h-[5vh]"
-            type="submit"
-            disabled={!isValid}
-          >
-            Cadastrar Supplier
-          </Button>
-        )}
-      </form>
+              Cadastrar empresa
+            </Button>
+          )}
+        </form>
+      </div>
     </div>
   );
 }
