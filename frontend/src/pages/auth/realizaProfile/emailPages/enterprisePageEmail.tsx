@@ -31,7 +31,7 @@ const supplierFormSchema = z.object({
 
 type SupplierFormSchema = z.infer<typeof supplierFormSchema>;
 
-export function SupplierRegistration() {
+export function EnterprisePageEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
