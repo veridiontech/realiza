@@ -51,7 +51,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
         }
 
 //        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(providerSupplierRequestDto.getBranch(), "Documento empresa");
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(providerSupplierRequestDto.getBranch());
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(providerSupplierRequestDto.getBranches().get(0));
         List<DocumentMatrix> documentMatrixList = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
                 .toList();

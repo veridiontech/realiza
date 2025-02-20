@@ -86,6 +86,12 @@ public abstract class Employee {
         ALOCADO,
         DESALOCADO,
         DEMITIDO,
-        AFASTADO
+        AFASTADO,
+        LICENCA_MATERNIDADE,
+        LICENCA_MEDICA,
+        LICENCA_MILITAR,
+        FERIAS,
+        ALISTAMENTO_MILITAR,
+        APOSENTADORIA_POR_INVALIDEZ
     }
 }

@@ -1,15 +1,12 @@
 package bl.tech.realiza.services.documentProcessing;
 
-import bl.tech.realiza.gateways.responses.services.DocumentResponse;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +48,7 @@ public class DocumentProcessingService {
     }
 
 
-    public DocumentResponse processDocument(MultipartFile file) throws IOException {
+    public DocumentIAValidationResponse processDocument(MultipartFile file) throws IOException {
         String imageBase64 = convertPdfToImageBase64(file);
 
         if (imageBase64 == null) {
@@ -78,13 +75,13 @@ public class DocumentProcessingService {
     /**
      * Envia a imagem Base64 para a OpenAI e retorna a resposta processada.
      */
-    private DocumentResponse identifyDocumentType(String imageBase64) {
+    private DocumentIAValidationResponse identifyDocumentType(String imageBase64) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + OPENAI_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        DocumentResponse documentResponse = DocumentResponse.builder()
+        DocumentIAValidationResponse documentIAValidationResponse = DocumentIAValidationResponse.builder()
                 .documentType("CPF")
                 .reason("O documento pode ser validado e está de acordo.")
                 .autoValidate(true)
@@ -93,7 +90,7 @@ public class DocumentProcessingService {
 
         String jsonExample;
         try {
-            jsonExample = objectMapper.writeValueAsString(documentResponse);
+            jsonExample = objectMapper.writeValueAsString(documentIAValidationResponse);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao converter o objeto para JSON.", e);
         }
@@ -142,9 +139,9 @@ public class DocumentProcessingService {
     /**
      * Processa a resposta da OpenAI e converte para um objeto DocumentResponse.
      */
-    private DocumentResponse parseResponse(Map<String, Object> responseBody) {
+    private DocumentIAValidationResponse parseResponse(Map<String, Object> responseBody) {
         if (responseBody == null || !responseBody.containsKey("choices")) {
-            return new DocumentResponse("Desconhecido", "Documento não identificado", false, false);
+            return new DocumentIAValidationResponse("Desconhecido", "Documento não identificado", false, false);
         }
 
         Map<String, Object> firstChoice = (Map<String, Object>) ((List<?>) responseBody.get("choices")).get(0);
@@ -159,10 +156,10 @@ public class DocumentProcessingService {
         // Aqui você pode usar uma biblioteca como Jackson para converter a String JSON para um objeto Java
         try {
             // Converter JSON String para DocumentResponse
-            return objectMapper.readValue(responseContent, DocumentResponse.class);
+            return objectMapper.readValue(responseContent, DocumentIAValidationResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
-            return new DocumentResponse("Erro", "Erro interno do servidor, por favor aguarde e tente novamente mais tarde",false, false);
+            return new DocumentIAValidationResponse("Erro", "Erro interno do servidor, por favor aguarde e tente novamente mais tarde",false, false);
         }
     }
 }

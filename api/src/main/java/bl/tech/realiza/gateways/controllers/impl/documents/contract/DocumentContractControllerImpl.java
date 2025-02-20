@@ -95,6 +95,21 @@ public class DocumentContractControllerImpl implements DocumentContractControlle
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentContract(@PathVariable String id,
+                                                                              @RequestPart(value = "file") MultipartFile file) {
+        Optional<DocumentResponseDto> documentContract = null;
+        try {
+            documentContract = crudDocumentContract.upload(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.of(Optional.of(documentContract));
+    }
+
     @GetMapping("/filtered-subcontractor")
     @ResponseStatus(HttpStatus.OK)
     @Override

@@ -97,6 +97,21 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentBranch(@PathVariable String id,
+                                                                              @RequestPart(value = "file") MultipartFile file) {
+        Optional<DocumentResponseDto> documentBranch = null;
+        try {
+            documentBranch = crudDocumentBranch.upload(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.of(Optional.of(documentBranch));
+    }
+
     @GetMapping("/filtered-branch")
     @ResponseStatus(HttpStatus.OK)
     @Override

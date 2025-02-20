@@ -15,6 +15,5 @@ public class ProviderSupplierRequestDto {
     private String city;
     private String address;
     private String number;
-    private String branch;
     private List<String> branches;
 }

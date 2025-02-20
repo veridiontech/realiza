@@ -24,8 +24,7 @@ public abstract class Document {
     private String documentation;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @Builder.Default
-    private LocalDateTime versionDate = LocalDateTime.now();
+    private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
     private Boolean lowLessThan8h = false;

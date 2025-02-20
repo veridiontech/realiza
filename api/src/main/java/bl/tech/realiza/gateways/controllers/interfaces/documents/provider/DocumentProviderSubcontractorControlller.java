@@ -16,6 +16,7 @@ public interface DocumentProviderSubcontractorControlller {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractor(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderSubcontractor(String id);
+    ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentProviderSubcontractor(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getSubcontractorDocuments(String id);
     ResponseEntity<String> updateSubcontractorDocuments(String id, List<String> documentList);
