@@ -17,9 +17,9 @@ const enterprisePageEmailFormSchema = z.object({
   tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
-  phone: z.string().nonempty("O telefone é obrigatório"),
   idCompany: z.string().optional(),
   company: z.string().nullable().optional(),
+  branches: z.array(z.string()).nonempty("A branch é obrigatória"),
 });
 
 type EnterprisePageEmailFormSchema = z.infer<
@@ -30,17 +30,14 @@ export function EnterprisePageEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
-  const { token, setToken } = useUser(); // Usa o contexto para obter e setar o token
+  const { token, setToken } = useUser();
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
-  const idClient = searchParams.get("idClient"); // Novo parâmetro idClient vindo da URL
+  const idClient = searchParams.get("idClient");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Estado para armazenar as branches do client (inicialmente como array vazio)
   const [branches, setBranches] = useState<any[]>([]);
 
-  // Se o token vier pela URL, armazena-o no contexto
   useEffect(() => {
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
@@ -70,19 +67,14 @@ export function EnterprisePageEmail() {
     }
   }, [token]);
 
-  // NOVA LÓGICA: Busca das branches do client usando o idClient
   useEffect(() => {
     if (idClient) {
-      // Adicionando parâmetros de paginação para garantir o formato Page com "content"
       axios
         .get(
           `${ip}/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
         )
         .then((res) => {
-          console.log("Resposta da API de branches:", res.data);
-          // Se a resposta tiver o campo "content", usamos ele; senão, tentamos usar res.data
           const data = res.data.content || res.data;
-          // Garante que data seja um array
           const branchesArray = Array.isArray(data) ? data : data ? [data] : [];
           setBranches(branchesArray);
         })
@@ -116,10 +108,8 @@ export function EnterprisePageEmail() {
       );
       if (res.data) {
         setValue("corporateName", res.data.nome);
-        // Se não houver nome fantasia, define como string vazia
         setValue("tradeName", res.data.fantasia || "");
         setValue("email", res.data.email);
-        setValue("phone", res.data.telefone);
       }
     } catch (err) {
       console.log("Erro ao buscar CNPJ:", err);
@@ -156,10 +146,9 @@ export function EnterprisePageEmail() {
         case "SUPPLIER":
           payload = {
             ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
+            branches: data.branches,
+            tradeName: data.tradeName,
+            corporateName: data.corporateName,
             role: "ROLE_SUPPLIER_RESPONSIBLE",
           };
           break;
@@ -173,12 +162,10 @@ export function EnterprisePageEmail() {
           };
           break;
       }
-
       await axios.post(
         "https://realiza-1.onrender.com/email/Enterprise-sign-up",
         payload,
       );
-      // Após cadastrar a empresa, redireciona para a página de cadastro individual
       navigate(`/email/Sign-Up?token=${token}`);
     } catch (err) {
       console.error("Erro ao enviar os dados:", err);
@@ -231,15 +218,6 @@ export function EnterprisePageEmail() {
                 )}
               </div>
             </div>
-            <div>
-              <Label>Telefone</Label>
-              <Input
-                type="text"
-                placeholder="Telefone"
-                className="w-[13vw]"
-                {...register("phone")}
-              />
-            </div>
           </div>
           <div>
             <Label>Email corporativo</Label>
@@ -270,11 +248,14 @@ export function EnterprisePageEmail() {
               />
             </div>
           </div>
-          {/* NOVA LÓGICA: exibição das branches do client */}
           {branches && branches.length > 0 && (
             <div>
               <Label>Selecione a Branch</Label>
-              <select className="w-[27vw] rounded border p-2">
+              <select
+                multiple
+                className="w-[27vw] rounded border p-2"
+                {...register("branches")}
+              >
                 {branches.map((branch: any) => (
                   <option
                     key={branch.idBranch || branch.id}
