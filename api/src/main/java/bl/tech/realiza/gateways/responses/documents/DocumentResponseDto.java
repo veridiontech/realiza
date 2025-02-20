@@ -2,7 +2,9 @@ package bl.tech.realiza.gateways.responses.documents;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -33,6 +35,9 @@ public class DocumentResponseDto {
     private List<DocumentMatrix> nonSelectedDocumentsPersonal;
     private List<DocumentMatrix> nonSelectedDocumentsTrainning;
     private List<DocumentMatrix> nonSelectedDocumentsService;
+
+    // gpt validation
+    private DocumentIAValidationResponse documentIAValidationResponse;
 
     // branch
     private String branch;

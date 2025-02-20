@@ -94,6 +94,21 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentProviderSupplier(@PathVariable String id,
+                                                                              @RequestPart(value = "file") MultipartFile file) {
+        Optional<DocumentResponseDto> documentSupplier = null;
+        try {
+            documentSupplier = crudDocumentSupplier.upload(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.of(Optional.of(documentSupplier));
+    }
+
     @GetMapping("/filtered-supplier")
     @ResponseStatus(HttpStatus.OK)
     @Override

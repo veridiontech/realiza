@@ -18,6 +18,7 @@ public interface CrudDocumentBranch {
     Page<DocumentResponseDto> findAll(Pageable pageable);
     Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
     void delete(String id);
+    Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
     String updateRequiredDocumentsByList(String id, List<String> documentCollection);

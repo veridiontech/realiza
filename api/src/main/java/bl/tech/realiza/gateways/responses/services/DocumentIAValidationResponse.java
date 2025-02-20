@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocumentResponse {
+public class DocumentIAValidationResponse {
     private String documentType;
     private String reason;
     private boolean autoValidate;
