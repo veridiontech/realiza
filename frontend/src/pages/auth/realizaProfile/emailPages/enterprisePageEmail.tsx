@@ -149,7 +149,6 @@ export function EnterprisePageEmail() {
             branches: data.branches,
             tradeName: data.tradeName,
             corporateName: data.corporateName,
-            role: "ROLE_SUPPLIER_RESPONSIBLE",
           };
           break;
         default:
