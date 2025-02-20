@@ -1,4 +1,3 @@
-// SignUpPageEmail.tsx
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,15 +47,25 @@ export function SignUpPageEmail() {
     mode: "onChange",
   });
 
+  if (!enterpriseData) {
+    return <div>Dados da empresa não encontrados.</div>;
+  }
+
   const onSubmit = async (data: SignUpEmailFormSchema) => {
     setIsLoading(true);
     try {
       setUserData(data);
+      const role =
+        enterpriseData.company === "CLIENT"
+          ? "ROLE_CLIENT_RESPONSIBLE"
+          : enterpriseData.company === "SUPPLIER"
+            ? "ROLE_SUPPLIER_RESPONSIBLE"
+            : "ROLE_ADMIN";
       const allDatas = {
         ...enterpriseData,
         ...data,
-        role: "ROLE_ADMIN",
-        company: "CLIENT",
+        role,
+        company: enterpriseData.company,
       };
       await axios.post(`${ip}/sign-enterprise`, allDatas);
       window.location.href = "https://realiza-1.onrender.com/";
