@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { CardPanelControl } from "@/components/cardPanelControl";
+import { Link } from "react-router-dom";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,73 +9,101 @@ import {
   PencilLine,
   TriangleAlert,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { ip } from "@/utils/ip";
+import { CardPanelControl } from "@/components/cardPanelControl";
 
-// Definindo o tipo para os itens inativos (que podem vir com diferentes propriedades de id)
-interface InactiveItem {
-  idBranch?: number;
-  idClient?: number;
-  idProvider?: number;
-  idUser?: number;
-  nome?: string;
-  tipo?: string;
-  detalhes?: string;
-  data?: string;
+interface Requester {
+  idUser: string;
+  firstName: string;
+  surname: string;
+}
+
+export interface Solicitation {
+  idSolicitation: string;
+  title: string;
+  details: string;
+  creationDate: string;
+  requester: Requester;
+  newUser: {
+    idUser: string;
+  };
+}
+
+interface ApiResponse {
+  content: Solicitation[];
+  totalPages: number;
+  // outros campos da paginação se necessário
 }
 
 export function ControlPanel() {
-  // Estado tipado como InactiveItem[]
-  const [inactiveItems, setInactiveItems] = useState<InactiveItem[]>([]);
+  const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Lógica de paginação
+  // Configurações de paginação
   const itemsPerPage = 12;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchSolicitations = async (pageNumber: number) => {
+    setLoading(true);
+    try {
+      const response = await axios.get<ApiResponse>(
+        `${ip}/item-management/new`,
+        {
+          params: {
+            page: pageNumber,
+            size: itemsPerPage,
+            sort: "idSolicitation",
+            direction: "ASC",
+          },
+        },
+      );
+      setSolicitations(response.data.content);
+      setTotalPages(response.data.totalPages);
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Requisição para buscar itens inativos
-    axios
-      .get(`${ip}/item-management/innactive-items`)
-      .then((res) => {
-        setInactiveItems(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <div>Carregando...</div>;
-  if (error) return <div>Erro ao carregar os itens inativos.</div>;
-
-  const totalPages = Math.ceil(inactiveItems.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = inactiveItems.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
+    fetchSolicitations(page);
+  }, [page]);
 
   const goToNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    if (page < totalPages - 1) {
+      setPage(page + 1);
+    }
   };
 
   const goToPreviousPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
+    if (page > 0) {
+      setPage(page - 1);
+    }
   };
+
+  // Callback para remover o item aprovado ou negado da lista
+  const removeSolicitation = (idSolicitation: string) => {
+    setSolicitations((prev) =>
+      prev.filter((s) => s.idSolicitation !== idSolicitation),
+    );
+  };
+
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>Erro ao carregar as solicitações.</div>;
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
+      {/* Cabeçalho */}
       <div className="flex w-full flex-col items-center justify-center gap-9 rounded-md bg-white p-4 shadow-sm">
         <div className="flex w-full flex-row items-center justify-start gap-4">
           <h2 className="text-center text-lg font-semibold">
             Painel de Controle
           </h2>
-          <p className="text-[#2563EB]">{inactiveItems.length} Solicitações</p>
+          <p className="text-[#2563EB]">{solicitations.length} Solicitações</p>
         </div>
-
         <div className="flex w-full flex-row flex-wrap items-center justify-center gap-4 border-t border-[#7CA1F333] pb-4 pt-7">
           <Link
             to={"#"}
@@ -104,43 +132,34 @@ export function ControlPanel() {
         </div>
       </div>
 
+      {/* Listagem de Solicitações */}
       <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-          {currentItems.map((item, index) => {
-            // Define um id a partir das propriedades disponíveis
-            const id =
-              item.idBranch ||
-              item.idClient ||
-              item.idProvider ||
-              item.idUser ||
-              index;
-            // Transforma o objeto em um objeto do tipo Solicitacao
-            const solicitacao = {
-              id,
-              nome: item.nome || "Sem nome",
-              tipo: item.tipo || "Sem tipo",
-              detalhes: item.detalhes || "Sem detalhes",
-              data: item.data || "Sem data",
-            };
-            return <CardPanelControl key={id} data={solicitacao} />;
-          })}
+          {solicitations.map((solicitation) => (
+            <CardPanelControl
+              key={solicitation.idSolicitation}
+              data={solicitation}
+              onActionCompleted={removeSolicitation}
+            />
+          ))}
         </div>
 
+        {/* Controles de Paginação */}
         <div className="flex w-full flex-row items-center justify-between gap-4 px-4">
           <span className="text-[#7CA1F3]">
-            Página {currentPage} de {totalPages}
+            Página {page + 1} de {totalPages}
           </span>
           <div className="flex flex-row items-center justify-center gap-2">
             <button
               onClick={goToPreviousPage}
-              disabled={currentPage === 1}
+              disabled={page === 0}
               className="rounded border-[2px] border-[#2563EB] bg-white px-1 py-1 disabled:opacity-50"
             >
               <ChevronLeft color="#2563EB" />
             </button>
             <button
               onClick={goToNextPage}
-              disabled={currentPage === totalPages}
+              disabled={page === totalPages - 1}
               className="rounded border-[2px] border-[#2563EB] bg-[#2563EB] px-1 py-1 disabled:opacity-50"
             >
               <ChevronRight color="#fff" />

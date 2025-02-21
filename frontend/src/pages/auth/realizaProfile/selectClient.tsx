@@ -105,8 +105,10 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
       });
       toast.success("Cliente cadastrado com sucesso!");
       setUserForm((prev) => ({ ...prev, branch: response.data.idClient }));
-      setStep(3);
-      onClose();
+      // Em vez de avançar para step 3, feche o modal após um pequeno delay
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
       toast.error("Erro ao cadastrar cliente!");
