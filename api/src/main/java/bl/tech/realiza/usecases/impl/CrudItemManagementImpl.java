@@ -156,6 +156,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .idSolicitation(itemManagement.getIdSolicitation())
                         .title(itemManagement.getTitle())
                         .creationDate(itemManagement.getCreationDate())
+                        .details(itemManagement.getDetails())
                         .requester(UserResponseDto.builder()
                                 .idUser(itemManagement.getRequester().getIdUser())
                                 .firstName(itemManagement.getRequester().getFirstName())

@@ -13,6 +13,8 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final DocumentMatrixRepository documentMatrixRepository;
     private final BranchRepository branchRepository;
     private final FileRepository fileRepository;
+    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
@@ -123,8 +127,11 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
                 documentBranch -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentBranch.getDocumentation() != null && ObjectId.isValid(documentBranch.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentBranch.getIdDocumentation())
@@ -198,13 +205,77 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
+    public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
+
+        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentBranch.setDocumentation(fileDocumentId);
+        }
+
+        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
+
+        if (documentIAValidation.isAutoValidate()) {
+            if (documentIAValidation.isValid()) {
+                documentBranch.setStatus(Document.Status.APROVADO);
+            } else {
+                documentBranch.setStatus(Document.Status.REPROVADO);
+            }
+        } else {
+            documentBranch.setStatus(Document.Status.EM_ANALISE);
+        }
+
+        documentBranch.setVersionDate(LocalDateTime.now());
+
+        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
+
+        DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
+                .idDocumentation(savedDocumentBranch.getIdDocumentation())
+                .title(savedDocumentBranch.getTitle())
+                .status(savedDocumentBranch.getStatus())
+                .documentation(savedDocumentBranch.getDocumentation())
+                .creationDate(savedDocumentBranch.getCreationDate())
+                .branch(savedDocumentBranch.getBranch().getIdBranch())
+                .documentIAValidationResponse(documentIAValidation)
+                .build();
+
+        return Optional.of(documentBranchResponse);
+    }
+
+    @Override
     public Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable) {
         Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAllByBranch_IdBranch(idSearch, pageable);
 
         Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
                 documentBranch -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentBranch.getDocumentation() != null && ObjectId.isValid(documentBranch.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentBranch.getIdDocumentation())

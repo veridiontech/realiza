@@ -15,6 +15,8 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +42,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     private final ProviderSupplierRepository providerSupplierRepository;
     private final FileRepository fileRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
@@ -127,17 +131,20 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentSupplier.getDocumentation() != null && ObjectId.isValid(documentSupplier.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentSupplier.getDocumentation())
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentSupplier.getCreationDate())
                             .supplier(documentSupplier.getProviderSupplier().getIdProvider())
                             .build();
@@ -201,22 +208,84 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     }
 
     @Override
+    public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        DocumentProviderSupplier documentSupplier = documentSupplierRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentSupplier.setDocumentation(fileDocumentId);
+        }
+
+        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
+
+        if (documentIAValidation.isAutoValidate()) {
+            if (documentIAValidation.isValid()) {
+                documentSupplier.setStatus(Document.Status.APROVADO);
+            } else {
+                documentSupplier.setStatus(Document.Status.REPROVADO);
+            }
+        } else {
+            documentSupplier.setStatus(Document.Status.EM_ANALISE);
+        }
+
+        documentSupplier.setVersionDate(LocalDateTime.now());
+
+        DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
+
+        DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
+                .idDocumentation(savedDocumentSupplier.getIdDocumentation())
+                .title(savedDocumentSupplier.getTitle())
+                .status(savedDocumentSupplier.getStatus())
+                .documentation(savedDocumentSupplier.getDocumentation())
+                .creationDate(savedDocumentSupplier.getCreationDate())
+                .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
+                .documentIAValidationResponse(documentIAValidation)
+                .build();
+
+        return Optional.of(documentSupplierResponse);
+    }
+
+    @Override
     public Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
         Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentSupplier.getDocumentation() != null && ObjectId.isValid(documentSupplier.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentSupplier.getDocumentation())
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentSupplier.getCreationDate())
                             .supplier(documentSupplier.getProviderSupplier().getIdProvider())
                             .build();

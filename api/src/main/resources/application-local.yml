@@ -17,3 +17,6 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017
       database: mydatabase
+logging:
+  level:
+    root: debug

@@ -16,6 +16,7 @@ public interface DocumentContractController {
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderContract(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderContract(String id, DocumentContractRequestDto documentContractRequestDto, MultipartFile file);
     ResponseEntity<Void> deleteDocumentProviderContract(String id);
+    ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentContract(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderContractBySubContractor(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getContractDocuments(String id);
     ResponseEntity<String> updateContractDocuments(String id, List<String> documentList);
