@@ -73,6 +73,10 @@ export function DocumentPage() {
       const res = await axios.get(
         `${ip}/document/branch/${idBranch}/document-matrix`,
       );
+      console.log("selecionados:", res.data.selectedDocumentsEnterprise);
+      
+      console.log("nao selecionados:",res.data.nonSelectedDocumentsEnterprise);
+      
       if (Array.isArray(res.data.nonSelectedDocumentsService)) {
         setNonSeletedDocumentsService(res.data.nonSelectedDocumentsService);
       }
@@ -80,6 +84,8 @@ export function DocumentPage() {
         setnonSelectedDocumentsEnterprise(
           res.data.nonSelectedDocumentsEnterprise,
         );
+        console.log("documentos nao selecionados da matriz:", res.data.nonSelectedDocumentsEnterprise,);
+        
       }
       if (Array.isArray(res.data.nonSelectedDocumentsPersonal)) {
         setNonSeletedDocumentsPersonal(res.data.nonSelectedDocumentsPersonal);
@@ -178,12 +184,12 @@ export function DocumentPage() {
               <div className="flex items-center justify-around">
                 <DocumentBox
                   isLoading={isLoading}
-                  documents={documents}
+                  documents={nonSelectedDocumentsEnterprise}
                   onSelectDocument={removeDocument}
                 />
                 <DocumentSelectedBox
                   isLoading={isLoading}
-                  selectedDocuments={nonSelectedDocumentsEnterprise}
+                  selectedDocuments={documents}
                 />
               </div>
             </div>
