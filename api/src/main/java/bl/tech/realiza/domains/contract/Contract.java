@@ -31,7 +31,7 @@ public abstract class Contract {
     private String description;
     private String allocatedLimit;
     private ExpenseType expenseType;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.REMOVE)
     private User responsible;
     private Date startDate;
     private Date endDate;

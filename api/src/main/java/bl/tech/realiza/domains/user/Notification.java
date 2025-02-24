@@ -24,6 +24,6 @@ public class Notification {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private User user;
 }

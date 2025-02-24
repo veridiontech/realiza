@@ -1,6 +1,6 @@
-package bl.tech.realiza.domains.user;
+package bl.tech.realiza.domains.records.denied;
 
-import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Entity
 @DiscriminatorValue("SUPPLIER")
-public class UserProviderSupplier extends User {
+public class DocumentRecordSupplier extends DocumentRecord {
     @ManyToOne(cascade = CascadeType.REMOVE)
-    private ProviderSupplier providerSupplier;
+    private DocumentProviderSupplier supplier;
 }

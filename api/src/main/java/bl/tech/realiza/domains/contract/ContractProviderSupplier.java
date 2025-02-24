@@ -19,8 +19,8 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorValue("SUPPLIER")
 public class ContractProviderSupplier extends Contract {
     private Boolean subcontractPermission;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private ProviderSupplier providerSupplier;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Branch branch;
 }

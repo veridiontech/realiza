@@ -33,6 +33,6 @@ public class Branch {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private Client client;
 }
