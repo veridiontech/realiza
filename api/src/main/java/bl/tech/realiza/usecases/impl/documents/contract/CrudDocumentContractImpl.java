@@ -14,6 +14,7 @@ import bl.tech.realiza.gateways.repositories.documents.contract.DocumentContract
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.contract.DocumentContractRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
@@ -28,10 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -298,16 +296,38 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         documentContractRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
         List<DocumentContract> documentContract = documentContractRepository.findAllByContract_IdContract(id);
-        List<DocumentMatrix> selectedDocuments = documentContract.stream().map(DocumentContract::getDocumentMatrix).collect(Collectors.toList());
-        List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
-        List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
+        List<DocumentMatrixResponseDto> selectedDocuments = documentContract.stream()
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+        List<DocumentMatrixResponseDto> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
-        DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
+        DocumentResponseDto contractResponse = DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocuments)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocuments)
                 .build();
 
-        return employeeResponse;
+        return contractResponse;
     }
 
     @Override

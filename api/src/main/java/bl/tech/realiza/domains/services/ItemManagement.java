@@ -20,10 +20,10 @@ public class ItemManagement {
     private String idSolicitation;
     private String title;
     private String details;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private User requester;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REMOVE)
     private User newUser;
 }

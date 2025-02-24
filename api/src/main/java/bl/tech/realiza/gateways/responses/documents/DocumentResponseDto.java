@@ -27,14 +27,14 @@ public class DocumentResponseDto {
     private LocalDateTime creationDate;
     private Date versionDate;
     private Date expirationDate;
-    private List<DocumentMatrix> selectedDocumentsEnterprise;
-    private List<DocumentMatrix> selectedDocumentsPersonal;
-    private List<DocumentMatrix> selectedDocumentsTrainning;
-    private List<DocumentMatrix> selectedDocumentsService;
-    private List<DocumentMatrix> nonSelectedDocumentsEnterprise;
-    private List<DocumentMatrix> nonSelectedDocumentsPersonal;
-    private List<DocumentMatrix> nonSelectedDocumentsTrainning;
-    private List<DocumentMatrix> nonSelectedDocumentsService;
+    private List<DocumentMatrixResponseDto> selectedDocumentsEnterprise;
+    private List<DocumentMatrixResponseDto> selectedDocumentsPersonal;
+    private List<DocumentMatrixResponseDto> selectedDocumentsTrainning;
+    private List<DocumentMatrixResponseDto> selectedDocumentsService;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsService;
 
     // gpt validation
     private DocumentIAValidationResponse documentIAValidationResponse;

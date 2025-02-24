@@ -12,6 +12,7 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
@@ -303,47 +304,119 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(id);
 
-        List<DocumentMatrix> selectedDocumentsEnterprise = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento empresa".equals(doc.getSubGroup().getGroup().getGroupName()))
-                .sorted(byName)
+        List<DocumentMatrixResponseDto> selectedDocumentsEnterprise = documentBranch.stream()
+                .filter(doc -> "Documento empresa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
                 .collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsPersonal = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName()))
-                .sorted(byName)
+        List<DocumentMatrixResponseDto> selectedDocumentsPersonal = documentBranch.stream()
+                .filter(doc -> "Documento pessoa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
                 .collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsService = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documentos empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName()))
-                .sorted(byName)
+        List<DocumentMatrixResponseDto> selectedDocumentsService = documentBranch.stream()
+                .filter(doc -> "Documentos empresa-serviço".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
                 .collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsTrainning = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Treinamentos e certificações".equals(doc.getSubGroup().getGroup().getGroupName()))
-                .sorted(byName)
+        List<DocumentMatrixResponseDto> selectedDocumentsTrainning = documentBranch.stream()
+                .filter(doc -> "Treinamentos e certificações".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
                 .collect(Collectors.toList());
 
-        List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
-                .stream().sorted(byName).toList();;
-        List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa")
-                .stream().sorted(byName).toList();;
-        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
-                .stream().sorted(byName).toList();;
-        List<DocumentMatrix> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
-                .stream().sorted(byName).toList();;
+        List<DocumentMatrixResponseDto> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
 
-        List<DocumentMatrix> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
-        List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
-        List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
-        List<DocumentMatrix> nonSelectedDocumentsTrainning = new ArrayList<>(allDocumentsTrainning);
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning = new ArrayList<>(allDocumentsTrainning);
 
         nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
         nonSelectedDocumentsPersonal.removeAll(selectedDocumentsPersonal);
         nonSelectedDocumentsService.removeAll(selectedDocumentsService);
         nonSelectedDocumentsTrainning.removeAll(selectedDocumentsTrainning);
 
-        DocumentResponseDto branchResponse = DocumentResponseDto.builder()
+        return DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)
                 .selectedDocumentsPersonal(selectedDocumentsPersonal)
@@ -353,8 +426,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .selectedDocumentsTrainning(selectedDocumentsTrainning)
                 .nonSelectedDocumentsTrainning(nonSelectedDocumentsTrainning)
                 .build();
-
-        return branchResponse;
     }
 
     @Override
