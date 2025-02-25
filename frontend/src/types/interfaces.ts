@@ -36,11 +36,13 @@ export interface propsClient {
 }
 
 export interface propsDocument {
-  doesBlock: boolean;
+  documentId?: string;
   idDocument: string;
-  idDocumentSubgroup: string;
   name: string;
-  type: string;
+  doesBlock?: boolean;
+  idDocumentSubgroup?: string;
+  typets?: string;
+  idDocumentMatrix?: string;
 }
 
 export interface propsBranch {
