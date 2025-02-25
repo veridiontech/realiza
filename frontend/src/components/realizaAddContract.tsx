@@ -18,10 +18,12 @@ import { Radio } from "react-loader-spinner";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import { propsClient } from "@/types/interfaces";
+import { propsBranch, propsClient } from "@/types/interfaces";
 
 const contractFormSchema = z.object({
   serviceName: z.string().nonempty("O nome do serviço é obrigatório"),
+  clientSelect: z.string().nonempty("Selecione um cliente"),
+  id_branch: z.string().nonempty("Selecione uma filial"),
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
@@ -57,6 +59,7 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalAddContract() {
   const [clients, setClients] = useState<propsClient[]>([]);
+  const [branches, setBranches] = useState<propsBranch[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [requirements, setRequirements] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
@@ -79,6 +82,22 @@ export function ModalAddContract() {
     } catch (err) {
       console.error("Erro ao buscar clientes", err);
     }
+  };
+
+  const getBranches = async (clientId: string) => {
+    try {
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${clientId}`,
+      );
+      setBranches(res.data.content);
+      console.log("Filiais do cliente:", res.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    getBranches(e.target.value);
   };
 
   const getActivities = async () => {
@@ -154,19 +173,40 @@ export function ModalAddContract() {
                 className="w-full rounded-md border p-2"
                 {...register("client")}
                 defaultValue=""
-                onChange={(e) => getManagers(e.target.value)}
+                onChange={(e) => {
+                  register("clientSelect").onChange(e);
+                  handleClientChange(e);
+                  getManagers(e.target.value);
+                }}
               >
                 <option value="" disabled>
                   Selecione um cliente
                 </option>
                 {clients.map((client) => (
                   <option key={client.idClient} value={client.idClient}>
-                    {client.companyName}
+                    {client.tradeName}
                   </option>
                 ))}
               </select>
               {errors.client && (
                 <span className="text-red-600">{errors.client.message}</span>
+              )}
+            </div>
+            <div>
+              <Label className="text-white">Filiais do cliente</Label>
+              <select
+                {...register("id_branch")}
+                className="flex flex-col rounded-md border p-2"
+              >
+                <option value="">Selecione uma filial</option>
+                {branches.map((branch) => (
+                  <option key={branch.id_branch} value={branch.id_branch}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+              {errors.id_branch && (
+                <span className="text-red-600">{errors.id_branch.message}</span>
               )}
             </div>
 

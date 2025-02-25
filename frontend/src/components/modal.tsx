@@ -1,3 +1,4 @@
+// Modal.tsx
 import React from "react";
 import bgImage from "@/assets/modalBG.jpeg";
 import { FieldType } from "@/types/fieldModal";
@@ -11,6 +12,7 @@ interface Field {
   required?: boolean;
   defaultValue?: any;
   accept?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   render?: (props: {
     value: any;
     onChange: (value: any) => void;
@@ -34,10 +36,7 @@ export function Modal({
 }: ModalProps) {
   const [formData, setFormData] = React.useState<Record<string, any>>(
     fields.reduce(
-      (acc, field) => ({
-        ...acc,
-        [field.name]: field.defaultValue || "",
-      }),
+      (acc, field) => ({ ...acc, [field.name]: field.defaultValue || "" }),
       {},
     ),
   );
@@ -48,6 +47,15 @@ export function Modal({
       document.body.style.overflow = "auto";
     };
   }, []);
+
+  React.useEffect(() => {
+    setFormData(
+      fields.reduce(
+        (acc, field) => ({ ...acc, [field.name]: field.defaultValue || "" }),
+        {},
+      ),
+    );
+  }, [fields]);
 
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -67,10 +75,7 @@ export function Modal({
     >
       <div
         className="relative w-[90%] max-w-[40rem] overflow-hidden rounded-lg bg-cover bg-no-repeat p-6 text-white shadow-lg"
-        style={{
-          backgroundImage: `url(${bgImage})`,
-          maxHeight: "90vh",
-        }}
+        style={{ backgroundImage: `url(${bgImage})`, maxHeight: "90vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -81,8 +86,7 @@ export function Modal({
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <style>
-            {`
+          <style>{`
               .content-container::-webkit-scrollbar {
                 width: 0px;
                 background: transparent;
@@ -90,8 +94,7 @@ export function Modal({
               .content-container {
                 scrollbar-width: none;
               }
-            `}
-          </style>
+            `}</style>
           <h2 className="mb-4 text-xl font-semibold text-yellow-400">
             {title}
           </h2>
@@ -118,7 +121,10 @@ export function Modal({
                     id={field.name}
                     name={field.name}
                     value={formData[field.name]}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    onChange={(e) => {
+                      handleChange(field.name, e.target.value);
+                      if (field.onChange) field.onChange(e);
+                    }}
                     className="rounded border border-gray-300 bg-white p-2 text-black"
                     required={field.required}
                   >
@@ -145,7 +151,7 @@ export function Modal({
                     onChange={(e) =>
                       handleChange(field.name, e.target.files?.[0])
                     }
-                    className="hidden" // Esconde o input
+                    className="hidden"
                   />
                 ) : field.render ? (
                   field.render({
