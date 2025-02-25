@@ -43,12 +43,6 @@ export function EnterprisePageEmail() {
   const [branches, setBranches] = useState<any[]>([]);
 
   useEffect(() => {
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-    }
-  }, [tokenFromUrl, setToken]);
-
-  useEffect(() => {
     const validateToken = async () => {
       try {
         const res = await axios.get(
@@ -64,12 +58,13 @@ export function EnterprisePageEmail() {
         setIsValidToken(false);
       }
     };
-    if (token) {
+
+    if (tokenFromUrl) {
       validateToken();
     } else {
       console.log("Token não encontrado.");
     }
-  }, [token]);
+  }, [tokenFromUrl]);
 
   useEffect(() => {
     if (idClient) {
