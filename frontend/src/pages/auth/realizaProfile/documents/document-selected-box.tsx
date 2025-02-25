@@ -1,7 +1,6 @@
 import { propsDocument } from "@/types/interfaces";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Blocks } from "react-loader-spinner";
-import { toast } from "sonner";
 
 interface DocumentSelectedBoxProps {
   selectedDocuments: propsDocument[];
@@ -12,17 +11,6 @@ export function DocumentSelectedBox({
   selectedDocuments,
   isLoading,
 }: DocumentSelectedBoxProps) {
-
-  const deleteMoveDocument = async() => {
-    try{
-      
-    }catch(err) {
-      toast.error("Erro ao mover documento")
-      console.log("erro ao mover documento:", err);
-      
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="w-[30vw] rounded-md border p-2 shadow-md">

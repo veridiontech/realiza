@@ -74,9 +74,9 @@ export function DocumentPage() {
         `${ip}/document/branch/${idBranch}/document-matrix`,
       );
       console.log("selecionados:", res.data.selectedDocumentsEnterprise);
-      
-      console.log("nao selecionados:",res.data.nonSelectedDocumentsEnterprise);
-      
+
+      console.log("nao selecionados:", res.data.nonSelectedDocumentsEnterprise);
+
       if (Array.isArray(res.data.nonSelectedDocumentsService)) {
         setNonSeletedDocumentsService(res.data.nonSelectedDocumentsService);
       }
@@ -84,8 +84,10 @@ export function DocumentPage() {
         setnonSelectedDocumentsEnterprise(
           res.data.nonSelectedDocumentsEnterprise,
         );
-        console.log("documentos nao selecionados da matriz:", res.data.nonSelectedDocumentsEnterprise,);
-        
+        console.log(
+          "documentos nao selecionados da matriz:",
+          res.data.nonSelectedDocumentsEnterprise,
+        );
       }
       if (Array.isArray(res.data.nonSelectedDocumentsPersonal)) {
         setNonSeletedDocumentsPersonal(res.data.nonSelectedDocumentsPersonal);

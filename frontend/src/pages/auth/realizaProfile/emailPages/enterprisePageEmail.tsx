@@ -52,7 +52,7 @@ export function EnterprisePageEmail() {
     const validateToken = async () => {
       try {
         const res = await axios.get(
-          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${token}`,
+          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${tokenFromUrl}`,
         );
         if (res.status === 200) {
           setIsValidToken(true);
