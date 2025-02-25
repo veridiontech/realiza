@@ -29,6 +29,7 @@ export function SignIn() {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<loginFormData>({
     resolver: zodResolver(loginFormSchema),
   });
@@ -108,7 +109,13 @@ export function SignIn() {
         }
         window.location.reload();
       }, 3000);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response && err.response.status === 500) {
+        setError("email", {
+          type: "manual",
+          message: "Usuário não encontrado. Verifique suas credenciais",
+        });
+      }
       console.error("Erro ao buscar usuário:", err);
     } finally {
       setLoading(false);
@@ -119,7 +126,7 @@ export function SignIn() {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#34495e]">
         <SplashPage
-          nome={`${user?.firstName} ${user?.surname}`}
+          nome={`${user?.firstName}${user?.surname ? ' ' + user.surname : ''}`}
           onComplete={() => setShowSplash(false)}
         />
       </div>
@@ -141,12 +148,14 @@ export function SignIn() {
         >
           <label htmlFor="email">E-mail</label>
           <input
-            className="focus:ring-realizaBlue mb-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
+            className="focus:ring-realizaBlue mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
             placeholder="email@gmail.com"
             type="email"
             {...register("email")}
           />
-          {errors.email && <span>{errors.email.message}</span>}
+          {errors.email && (
+            <span className="text-red-500 text-sm">{errors.email.message}</span>
+          )}
 
           <label htmlFor="password">Senha</label>
           <div className="relative">
@@ -163,7 +172,9 @@ export function SignIn() {
               {showPassword ? "🙈" : "👁️"}
             </button>
           </div>
-          {errors.password && <span>{errors.password.message}</span>}
+          {errors.password && (
+            <span className="text-red-500 text-sm">{errors.password.message}</span>
+          )}
 
           <span className="mb-16 text-xs font-light text-gray-600">
             Esqueceu a senha?{" "}

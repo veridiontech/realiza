@@ -1,4 +1,5 @@
 import { useBranch } from "@/context/Branch-provider";
+import { propsDocument } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios";
@@ -8,8 +9,8 @@ import { toast } from "sonner";
 
 interface DocumentBoxProps {
   isLoading: boolean;
-  documents: { idDocument: string; name: string }[] | undefined;
-  onSelectDocument: (documentId: string) => void; // Função para remover o documento selecionado
+  documents: propsDocument[]
+  onSelectDocument: (documentId: string) => void; 
 }
 
 export function DocumentBox({
@@ -20,18 +21,15 @@ export function DocumentBox({
   const { branch } = useBranch();
 
   const selectDocument = async (documentId: string) => {
-    console.log("documentoId: ", documentId);
-    console.log("idBranch:", branch?.idBranch);
-
     try {
       console.log("selecionando documento");
       await axios.post(
-        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentMatrix=${documentId}`,
+        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentMatrixId=${documentId}`,
       );
       console.log("documento selecionado com sucesso");
       toast.success("Documento selecionado enviado com sucesso");
 
-      // Remove o documento do array após a confirmação do post
+
       onSelectDocument(documentId);
     } catch (err) {
       console.log("erro ao selecionar documento", err);
@@ -72,7 +70,11 @@ export function DocumentBox({
             documents.map((document) => (
               <div
                 key={document.idDocument}
-                onClick={() => selectDocument(document.idDocument)}
+                onClick={() => {
+                  if(document.idDocumentMatrix) {
+                    selectDocument(document.idDocumentMatrix);
+                  }
+                }}
                 className="cursor-pointer rounded-sm p-1 hover:bg-gray-200"
               >
                 <span>{document.name}</span>
