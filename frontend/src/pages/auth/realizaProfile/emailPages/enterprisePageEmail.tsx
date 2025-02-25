@@ -33,7 +33,7 @@ export function EnterprisePageEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
-  const { token, setToken } = useUser();
+  const { token } = useUser();
   const { setEnterpriseData } = useFormDataContext();
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
