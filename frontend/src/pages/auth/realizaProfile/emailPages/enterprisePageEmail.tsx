@@ -12,6 +12,7 @@ import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
@@ -106,14 +107,10 @@ export function EnterprisePageEmail() {
       return;
     }
     try {
-      const res = await axios.get(
-        `https://www.receitaws.com.br/v1/cnpj/${cnpj}`,
-      );
-      if (res.data) {
-        setValue("corporateName", res.data.nome);
-        setValue("tradeName", res.data.fantasia || "");
-        setValue("email", res.data.email);
-      }
+      const data = await fetchCompanyByCNPJ(cnpj);
+      setValue("corporateName", data.razaoSocial);
+      setValue("tradeName", data.nomeFantasia || "");
+      setValue("email", "");
     } catch (err) {
       console.log("Erro ao buscar CNPJ:", err);
     } finally {

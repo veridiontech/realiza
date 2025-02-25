@@ -25,7 +25,7 @@ export function LateralMenu() {
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
-      <Link to="/sistema/home">
+      <Link to={`/sistema/select-client/${getIdUser}`}>
         <Button
           variant={"ghost"}
           className="w-full justify-start bg-zinc-100 px-4 py-2"
