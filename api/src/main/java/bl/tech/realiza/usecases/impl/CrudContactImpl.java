@@ -1,10 +1,11 @@
 package bl.tech.realiza.usecases.impl;
 
-import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Contact;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.services.ContactRepository;
 import bl.tech.realiza.gateways.requests.services.ContactRequestDto;
@@ -23,16 +24,16 @@ public class CrudContactImpl implements CrudContact {
 
     private final ContactRepository contactRepository;
     private final ClientRepository clientRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     public ContactResponseDto save(ContactRequestDto contactRequestDto) {
 
         if (contactRequestDto.getClient() == null || contactRequestDto.getClient().isEmpty()) {
-            throw new BadRequestException("Invalid client");
+            throw new BadRequestException("Invalid Branch");
         }
 
-        Optional<Client> clientOptional = clientRepository.findById(contactRequestDto.getClient());
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+        Branch branch = branchRepository.findById(contactRequestDto.getClient()).orElseThrow(() -> new NotFoundException("Branch not found"));
 
         Contact newContact = Contact.builder()
                 .department(contactRequestDto.getDepartment())
@@ -40,7 +41,7 @@ public class CrudContactImpl implements CrudContact {
                 .country(contactRequestDto.getCountry())
                 .telephone(contactRequestDto.getTelephone())
                 .mainContact(contactRequestDto.getMainContact())
-                .client(client)
+                .branch(branch)
                 .build();
 
         Contact savedContact = contactRepository.save(newContact);
@@ -52,7 +53,7 @@ public class CrudContactImpl implements CrudContact {
                 .country(savedContact.getCountry())
                 .telephone(savedContact.getTelephone())
                 .mainContact(savedContact.getMainContact())
-                .client(savedContact.getClient().getIdClient())
+                .branch(savedContact.getBranch().getIdBranch())
                 .build();
 
         return contactResponse;
@@ -71,7 +72,7 @@ public class CrudContactImpl implements CrudContact {
                 .country(contact.getCountry())
                 .telephone(contact.getTelephone())
                 .mainContact(contact.getMainContact())
-                .client(contact.getClient().getIdClient())
+                .branch(contact.getBranch().getIdBranch())
                 .build();
 
         return Optional.of(contactResponse);
@@ -89,7 +90,7 @@ public class CrudContactImpl implements CrudContact {
                         .country(contact.getCountry())
                         .telephone(contact.getTelephone())
                         .mainContact(contact.getMainContact())
-                        .client(contact.getClient().getIdClient())
+                        .branch(contact.getBranch().getIdBranch())
                         .build()
         );
 
@@ -117,7 +118,7 @@ public class CrudContactImpl implements CrudContact {
                 .country(savedContact.getCountry())
                 .telephone(savedContact.getTelephone())
                 .mainContact(savedContact.getMainContact())
-                .client(savedContact.getClient().getIdClient())
+                .branch(savedContact.getBranch().getIdBranch())
                 .build();
 
         return Optional.of(contactResponse);
@@ -130,7 +131,7 @@ public class CrudContactImpl implements CrudContact {
 
     @Override
     public Page<ContactResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable) {
-        Page<Contact> contactPage = contactRepository.findAllByClient_IdClient(idSearch, pageable);
+        Page<Contact> contactPage = contactRepository.findAllByBranch_IdBranch(idSearch, pageable);
 
         Page<ContactResponseDto> contactResponseDtoPage = contactPage.map(
                 contact -> ContactResponseDto.builder()
@@ -140,7 +141,7 @@ public class CrudContactImpl implements CrudContact {
                         .country(contact.getCountry())
                         .telephone(contact.getTelephone())
                         .mainContact(contact.getMainContact())
-                        .client(contact.getClient().getIdClient())
+                        .branch(contact.getBranch().getIdBranch())
                         .build()
         );
 

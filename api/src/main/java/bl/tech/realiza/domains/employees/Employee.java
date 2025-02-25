@@ -2,6 +2,8 @@ package bl.tech.realiza.domains.employees;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -58,19 +60,24 @@ public abstract class Employee {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "branch_id_branch", referencedColumnName = "idBranch")
+
+    @ManyToOne
+    @JoinColumn(name = "idBranch", nullable = false)
     private Branch branch;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne
+    @JoinColumn(name = "idProviderSupplier", nullable = false)
     private ProviderSupplier supplier;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne
+    @JoinColumn(name = "idProviderSubcontractor", nullable = false)
     private ProviderSubcontractor subcontract;
 
     @ManyToMany
     @JoinTable(
             name = "EMPLOYEE_CONTRACT",
             joinColumns = @JoinColumn(name = "idEmployee"),
-            inverseJoinColumns = @JoinColumn(name = "idContract")
+            inverseJoinColumns = @JoinColumn(name = "idContract", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
     )
     private List<Contract> contracts;
 
@@ -78,9 +85,12 @@ public abstract class Employee {
     @JoinTable(
             name = "EMPLOYEE_DOCUMENT_MATRIX",
             joinColumns = @JoinColumn(name = "idEmployee"),
-            inverseJoinColumns = @JoinColumn(name = "idDocument")
+            inverseJoinColumns = @JoinColumn(name = "idDocument", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
     )
     private List<DocumentMatrix> documents;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<DocumentEmployee> documentEmployees;
 
     public enum Situation {
         ALOCADO,

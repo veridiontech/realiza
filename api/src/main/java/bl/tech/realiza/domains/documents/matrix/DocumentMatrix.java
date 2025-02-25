@@ -1,5 +1,9 @@
 package bl.tech.realiza.domains.documents.matrix;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentClient;
+import bl.tech.realiza.domains.employees.Employee;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -29,6 +34,11 @@ public class DocumentMatrix {
     private Boolean isActive = true;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @ManyToOne(cascade = CascadeType.REMOVE)
+
+    @ManyToOne
+    @JoinColumn(name = "idDocumentSubgroup", nullable = false)
     private DocumentMatrixSubgroup subGroup;
+
+    @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.DETACH, orphanRemoval = true)
+    private List<Document> documents;
 }

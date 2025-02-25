@@ -14,5 +14,5 @@ public class ContactResponseDto {
     private String country;
     private String telephone;
     private Boolean mainContact;
-    private String client;
+    private String branch;
 }

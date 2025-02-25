@@ -12,6 +12,7 @@ import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
@@ -32,7 +33,7 @@ export function EnterprisePageEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
-  const { token, setToken } = useUser();
+  const { token } = useUser();
   const { setEnterpriseData } = useFormDataContext();
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
@@ -42,16 +43,10 @@ export function EnterprisePageEmail() {
   const [branches, setBranches] = useState<any[]>([]);
 
   useEffect(() => {
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-    }
-  }, [tokenFromUrl, setToken]);
-
-  useEffect(() => {
     const validateToken = async () => {
       try {
         const res = await axios.get(
-          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${token}`,
+          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${tokenFromUrl}`,
         );
         if (res.status === 200) {
           setIsValidToken(true);
@@ -63,12 +58,13 @@ export function EnterprisePageEmail() {
         setIsValidToken(false);
       }
     };
-    if (token) {
+
+    if (tokenFromUrl) {
       validateToken();
     } else {
       console.log("Token não encontrado.");
     }
-  }, [token]);
+  }, [tokenFromUrl]);
 
   useEffect(() => {
     if (idClient) {
@@ -106,14 +102,10 @@ export function EnterprisePageEmail() {
       return;
     }
     try {
-      const res = await axios.get(
-        `https://www.receitaws.com.br/v1/cnpj/${cnpj}`,
-      );
-      if (res.data) {
-        setValue("corporateName", res.data.nome);
-        setValue("tradeName", res.data.fantasia || "");
-        setValue("email", res.data.email);
-      }
+      const data = await fetchCompanyByCNPJ(cnpj);
+      setValue("corporateName", data.razaoSocial);
+      setValue("tradeName", data.nomeFantasia || "");
+      setValue("email", "");
     } catch (err) {
       console.log("Erro ao buscar CNPJ:", err);
     } finally {

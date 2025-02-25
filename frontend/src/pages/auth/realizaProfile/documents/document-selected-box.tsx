@@ -4,7 +4,6 @@ import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios";
 import { Blocks } from "react-loader-spinner";
-import { toast } from "sonner";
 
 interface DocumentSelectedBoxProps {
   selectedDocuments: propsDocument[];
