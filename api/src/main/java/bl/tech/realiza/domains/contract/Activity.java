@@ -23,4 +23,8 @@ public class Activity {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    @ManyToMany(mappedBy = "activities")
+    private List<Contract> contracts;
+
 }

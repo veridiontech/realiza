@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.services;
 
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,10 +21,15 @@ public class ItemManagement {
     private String idSolicitation;
     private String title;
     private String details;
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    private User requester;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @ManyToOne(cascade = CascadeType.REMOVE)
+
+    @ManyToOne
+    @JoinColumn(name = "requester_id", nullable = false)
+    private User requester;
+
+    @OneToOne
+    @JoinColumn(name = "new_user_id", nullable = false)
     private User newUser;
+
 }

@@ -23,4 +23,7 @@ public class Requirement {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    @ManyToMany(mappedBy = "requirements")
+    private List<Contract> contracts;
 }

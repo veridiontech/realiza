@@ -19,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class DocumentRecordSupplier extends DocumentRecord {
+    // alterar relacionamento
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentProviderSupplier supplier;
 }

@@ -1,10 +1,7 @@
 package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.providers.ProviderSupplier;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class UserProviderSupplier extends User {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
+    @JoinColumn(name = "idProviderSupplier", nullable = false)
     private ProviderSupplier providerSupplier;
 }
