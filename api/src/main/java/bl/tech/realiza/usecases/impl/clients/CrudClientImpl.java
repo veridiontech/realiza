@@ -79,20 +79,7 @@ public class CrudClientImpl implements CrudClient {
                 .client(savedClient)
                 .build();
 
-        Branch savedBranch = branchRepository.save(newBranch);
-
-        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
-
-        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
-                .map(docMatrix -> DocumentBranch.builder()
-                        .title(docMatrix.getName())
-                        .status(Document.Status.PENDENTE)
-                        .branch(savedBranch)
-                        .documentMatrix(docMatrix)
-                        .build())
-                .collect(Collectors.toList());
-
-        documentBranchRepository.saveAll(documentBranchList);
+        branchRepository.save(newBranch);
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())

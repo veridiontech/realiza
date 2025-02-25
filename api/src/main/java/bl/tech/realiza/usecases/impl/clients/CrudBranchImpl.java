@@ -57,19 +57,6 @@ public class CrudBranchImpl implements CrudBranch {
 
         Branch savedBranch = branchRepository.save(newBranch);
 
-        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
-
-        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
-                .map(docMatrix -> DocumentBranch.builder()
-                        .title(docMatrix.getName())
-                        .status(Document.Status.PENDENTE)
-                        .branch(savedBranch)
-                        .documentMatrix(docMatrix)
-                        .build())
-                .collect(Collectors.toList());
-
-        documentBranchRepository.saveAll(documentBranchList);
-
         BranchResponseDto branchResponseDto = BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
                 .name(savedBranch.getName())
