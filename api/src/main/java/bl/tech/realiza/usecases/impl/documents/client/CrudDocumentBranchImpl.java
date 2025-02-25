@@ -406,15 +406,37 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .build())
                 .toList();
 
-        List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
-        List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
-        List<DocumentMatrixResponseDto> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
-        List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning = new ArrayList<>(allDocumentsTrainning);
+        Set<String> selectedDocumentEnterpriseIds = selectedDocumentsEnterprise.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
 
-        nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
-        nonSelectedDocumentsPersonal.removeAll(selectedDocumentsPersonal);
-        nonSelectedDocumentsService.removeAll(selectedDocumentsService);
-        nonSelectedDocumentsTrainning.removeAll(selectedDocumentsTrainning);
+        Set<String> selectedDocumentPersonalIds = selectedDocumentsPersonal.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        Set<String> selectedDocumentServiceIds = selectedDocumentsService.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        Set<String> selectedDocumentTrainningIds = selectedDocumentsTrainning.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise = allDocumentsEnterprise.stream()
+                .filter(doc -> !selectedDocumentEnterpriseIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal = allDocumentsPersonal.stream()
+                .filter(doc -> !selectedDocumentPersonalIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsService = allDocumentsService.stream()
+                .filter(doc -> !selectedDocumentServiceIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning = allDocumentsTrainning.stream()
+                .filter(doc -> !selectedDocumentTrainningIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
 
         return DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocumentsEnterprise)

@@ -19,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CLIENT")
 public class DocumentRecordClient extends DocumentRecord {
+    // alterar relacionamento
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentClient client;
 }

@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.documents.matrix;
 
+import bl.tech.realiza.domains.documents.Document;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,4 +25,7 @@ public class DocumentMatrixGroup {
     private String groupName;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<DocumentMatrixSubgroup> subgroups;
 }

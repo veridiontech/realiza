@@ -19,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("BRANCH")
 public class DocumentRecordBranch extends DocumentRecord {
+    // alterar relacionamento
     @ManyToOne(cascade = CascadeType.REMOVE)
     private DocumentBranch branch;
 }

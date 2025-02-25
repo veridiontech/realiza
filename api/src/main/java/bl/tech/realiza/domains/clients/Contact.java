@@ -28,11 +28,14 @@ public class Contact {
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    private Client client;
+    @JoinColumn(name = "idBranch", nullable = false)
+    private Branch branch;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "idProviderSupplier", nullable = false)
     private ProviderSupplier supplier;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "idProviderSubcontractor", nullable = false)
     private ProviderSubcontractor subcontractor;
 }

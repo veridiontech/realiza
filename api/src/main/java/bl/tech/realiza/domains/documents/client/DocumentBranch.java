@@ -21,6 +21,7 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("BRANCH")
 public class DocumentBranch extends Document {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
+    @JoinColumn(name = "id_branch", nullable = false)
     private Branch branch;
 }

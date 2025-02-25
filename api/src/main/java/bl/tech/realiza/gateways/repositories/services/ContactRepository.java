@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContactRepository extends JpaRepository<Contact, String> {
-    Page<Contact> findAllByClient_IdClient(String client, Pageable pageable);
+    Page<Contact> findAllByBranch_IdBranch(String client, Pageable pageable);
     Page<Contact> findAllBySupplier_IdProvider(String supplier, Pageable pageable);
     Page<Contact> findAllBySubcontractor_IdProvider(String subcontractor, Pageable pageable);
 }
