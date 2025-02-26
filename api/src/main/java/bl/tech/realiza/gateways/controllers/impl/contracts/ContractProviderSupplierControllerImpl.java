@@ -1,7 +1,9 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProviderSupplierControlller;
+import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudContractProviderSupplierImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -119,5 +121,15 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
         Page<ContractResponseDto> contractResponse = crudSupplier.findAllBySupplierAndBranch(idSupplier, idBranch, pageable);
 
         return ResponseEntity.ok(contractResponse);
+    }
+
+    @PostMapping("/new-supplier")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<ContractAndSupplierCreateResponseDto> createContractAndSupplier(@RequestBody @Valid ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto) {
+
+        ContractAndSupplierCreateResponseDto supplier = crudSupplier.saveContractAndSupplier(contractAndSupplierCreateRequestDto);
+
+        return ResponseEntity.of(Optional.of(supplier));
     }
 }

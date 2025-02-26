@@ -37,11 +37,6 @@ public class CrudBranchImpl implements CrudBranch {
         Optional<Client> clientOptional = clientRepository.findById(branchCreateRequestDto.getClient());
         Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
-        Optional<Branch> branchOptional = branchRepository.findByCnpj(branchCreateRequestDto.getCnpj());
-        if (branchOptional.isPresent()) {
-            throw new UnprocessableEntityException("CNPJ already exists");
-        }
-
         Branch newBranch = Branch.builder()
                 .name(branchCreateRequestDto.getName())
                 .cnpj(branchCreateRequestDto.getCnpj())
