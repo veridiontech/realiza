@@ -60,8 +60,8 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ModalAddContract() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [branches, setBranches] = useState<propsBranch[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [requirements, setRequirements] = useState<any[]>([]);
+  // const [activities, setActivities] = useState<any[]>([]);
+  // const [requirements, setRequirements] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +70,7 @@ export function ModalAddContract() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
+    // setValue,
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
   });
@@ -102,10 +102,10 @@ export function ModalAddContract() {
 
   const getActivities = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
-      const requirementData = await axios.get(`${ip}/contract/requirement`);
-      setActivities(activitieData.data.content);
-      setRequirements(requirementData.data.content);
+      // const activitieData = await axios.get(`${ip}/contract/activity`);
+      // const requirementData = await axios.get(`${ip}/contract/requirement`);
+      // setActivities(activitieData.data.content);
+      // setRequirements(requirementData.data.content);
     } catch (err) {
       console.error("Erro ao buscar atividades e requisitos", err);
     }
