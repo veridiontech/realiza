@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.interfaces.contracts;
 
+import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,4 +18,5 @@ public interface CrudContractProviderSupplier {
     Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
     Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable);
     Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable);
+    ContractAndSupplierCreateResponseDto saveContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto);
 }
