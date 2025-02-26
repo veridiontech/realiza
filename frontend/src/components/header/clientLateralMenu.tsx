@@ -1,14 +1,7 @@
 import {
   ChartPie,
-  CheckSquare,
   File,
-  FileSearch,
-  FileStack,
-  FileX2,
-  Flag,
   Home,
-  Info,
-  MessageSquare,
   Users2,
   Building2,
   Factory,
@@ -107,7 +100,7 @@ export function ClientLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
+      {/* <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <MessageSquare className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Mensagens
@@ -148,7 +141,7 @@ export function ClientLateralMenu() {
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Relatório de conformidade
         </span>
-      </Button>
+      </Button> */}
     </SheetContent>
   );
 }
