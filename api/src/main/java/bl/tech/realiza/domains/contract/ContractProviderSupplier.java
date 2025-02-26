@@ -26,7 +26,7 @@ public class ContractProviderSupplier extends Contract {
     @JoinColumn(name = "idProviderSuppllier", nullable = false)
     private ProviderSupplier providerSupplier;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "idBranch", nullable = false)
     private Branch branch;
 

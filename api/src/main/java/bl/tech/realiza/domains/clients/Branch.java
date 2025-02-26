@@ -55,7 +55,7 @@ public class Branch {
     @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Employee> employees;
 
-    @ManyToMany(mappedBy = "branches")
+    @ManyToMany(mappedBy = "branches", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProviderSupplier> providerSuppliers;
 
     @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
