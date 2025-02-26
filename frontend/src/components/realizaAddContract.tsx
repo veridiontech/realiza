@@ -377,7 +377,7 @@ export function ModalAddContract() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1">
+            {/* <div className="flex flex-col gap-1">
               <Label className="text-white">Atividades</Label>
               <select
                 className="w-full rounded-md border p-2"
@@ -401,8 +401,8 @@ export function ModalAddContract() {
                   {errors.activities.message}
                 </span>
               )}
-            </div>
-
+            </div> */}
+{/* 
             <div className="flex flex-col gap-1">
               <Label className="text-white">Requisitos</Label>
               <select
@@ -430,7 +430,7 @@ export function ModalAddContract() {
                   {errors.requirements.message}
                 </span>
               )}
-            </div>
+            </div> */}
 
             <div className="flex justify-end">
               {isLoading ? (
