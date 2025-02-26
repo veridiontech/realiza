@@ -4,6 +4,7 @@ import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios";
 import { Blocks } from "react-loader-spinner";
+import { toast } from "sonner";
 
 interface DocumentSelectedBoxProps {
   selectedDocuments: propsDocument[];
@@ -85,9 +86,9 @@ export function DocumentSelectedBox({
                 className="cursor-pointer rounded-md p-2 hover:bg-gray-200"
                 key={doc.idDocument}
                 onClick={() => {
-
+                  if (doc.documentId) {
                     deleteMoveDocument(doc.documentId);
-                  
+                  }
                 }}
               >
                 <h3>{doc.name}</h3>
