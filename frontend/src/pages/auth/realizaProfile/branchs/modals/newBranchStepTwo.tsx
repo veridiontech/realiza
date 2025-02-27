@@ -1,6 +1,7 @@
 import { Modal } from "@/components/modal";
 import * as z from "zod";
 import axios from "axios";
+import { ip } from "@/utils/ip";
 
 interface NewBranchModalProps {
   onClose: () => void;
@@ -30,7 +31,7 @@ export function NewBranchModal({ onClose, onSubmit }: NewBranchModalProps) {
       });
 
       const response = await axios.post(
-        "https://api.example.com/branches",
+       `${ip}/branche`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
