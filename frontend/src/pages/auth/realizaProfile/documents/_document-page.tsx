@@ -123,16 +123,6 @@ export function DocumentPage() {
       <div className="flex flex-col gap-5 rounded-md bg-white p-10 shadow-md">
         <div className="flex items-center justify-between">
           <h1 className="text-[20px]">Visão geral</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-realizaBlue">Adicionar documento</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicione mais documentos</DialogTitle>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
         </div>
         <div className="flex flex-col gap-8 rounded-md border border-gray-300 px-10 py-5 shadow-md">
           <div className="flex items-center gap-2">
