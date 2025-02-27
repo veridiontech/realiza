@@ -48,6 +48,7 @@ import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
 import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
+import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
 
 export const router = createBrowserRouter([
   {
@@ -81,8 +82,8 @@ export const router = createBrowserRouter([
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
       { path: "chat/:id", element: <ChatPage /> },
       { path: "documents/:id", element: <DocumentPage /> },
-      { path: "risk-matriz/:id", element: <RiskMatriz /> },
-      { path: "controlPanel/:id", element: <ControlPanel /> },
+      { path: "\/:id", element: <RiskMatriz /> },
+      { path: "controlPanel", element: <ControlPanel /> },
     ],
   },
 
@@ -133,7 +134,7 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      { path: "create-manager/:id", element: <CreateNewManagerSupplier /> },
+      {path: "create-manager/:id", element: <CreateNewManagerSupplier />}
     ],
   },
   {

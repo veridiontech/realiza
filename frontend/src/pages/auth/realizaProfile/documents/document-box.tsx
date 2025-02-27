@@ -24,7 +24,7 @@ export function DocumentBox({
     try {
       console.log("selecionando documento");
       await axios.post(
-        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentMatrixId=${documentId}`,
+        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentId=${documentId}`,
       );
       console.log("documento selecionado com sucesso");
       toast.success("Documento selecionado enviado com sucesso");
@@ -32,7 +32,7 @@ export function DocumentBox({
 
       onSelectDocument(documentId);
     } catch (err) {
-      console.log("erro ao selecionar documento", err);
+      console.log("erro ao selecionar documento", err); 
       toast.error("Erro ao selecionar documento");
     }
   };

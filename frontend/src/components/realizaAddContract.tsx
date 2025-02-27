@@ -60,8 +60,8 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ModalAddContract() {
   const [clients, setClients] = useState<propsClient[]>([]);
   const [branches, setBranches] = useState<propsBranch[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [requirements, setRequirements] = useState<any[]>([]);
+  // const [activities, setActivities] = useState<any[]>([]);
+  // const [requirements, setRequirements] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +70,7 @@ export function ModalAddContract() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
+    // setValue,
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
   });
@@ -102,10 +102,10 @@ export function ModalAddContract() {
 
   const getActivities = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
-      const requirementData = await axios.get(`${ip}/contract/requirement`);
-      setActivities(activitieData.data.content);
-      setRequirements(requirementData.data.content);
+      // const activitieData = await axios.get(`${ip}/contract/activity`);
+      // const requirementData = await axios.get(`${ip}/contract/requirement`);
+      // setActivities(activitieData.data.content);
+      // setRequirements(requirementData.data.content);
     } catch (err) {
       console.error("Erro ao buscar atividades e requisitos", err);
     }
@@ -377,7 +377,7 @@ export function ModalAddContract() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1">
+            {/* <div className="flex flex-col gap-1">
               <Label className="text-white">Atividades</Label>
               <select
                 className="w-full rounded-md border p-2"
@@ -401,8 +401,8 @@ export function ModalAddContract() {
                   {errors.activities.message}
                 </span>
               )}
-            </div>
-
+            </div> */}
+{/* 
             <div className="flex flex-col gap-1">
               <Label className="text-white">Requisitos</Label>
               <select
@@ -430,7 +430,7 @@ export function ModalAddContract() {
                   {errors.requirements.message}
                 </span>
               )}
-            </div>
+            </div> */}
 
             <div className="flex justify-end">
               {isLoading ? (

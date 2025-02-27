@@ -1,14 +1,7 @@
 import {
   ChartPie,
-  CheckSquare,
   File,
-  FileSearch,
-  FileStack,
-  FileX2,
-  Flag,
   Home,
-  Info,
-  MessageSquare,
   Users2,
   Building2,
   PersonStanding,
@@ -96,17 +89,17 @@ export function ProviderLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
+      {/* <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <MessageSquare className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Mensagens
         </span>
-      </Button>
-      <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
+      </Button> */}
+      {/* <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
         <Info className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Suporte</span>
-      </Button>
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Documentos</h3>
+      </Button> */}
+      {/* <h3 className="pl-4 pt-6 text-xs text-zinc-800">Documentos</h3>
       <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <FileStack className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
@@ -137,7 +130,7 @@ export function ProviderLateralMenu() {
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Relatório de conformidade
         </span>
-      </Button>
+      </Button> */}
     </SheetContent>
   );
 }
