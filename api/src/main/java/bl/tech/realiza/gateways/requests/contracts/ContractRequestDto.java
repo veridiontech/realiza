@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.Document;
 import lombok.Data;
 
 import java.sql.Date;
@@ -23,6 +24,7 @@ public class ContractRequestDto {
     private List<String> activities;
     private List<String> requirements;
     private String cnpj;
+    private Document.Risk risk;
 
     // supplier
     private String providerSupplier; // also for subcontractor

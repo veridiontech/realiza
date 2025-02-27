@@ -49,7 +49,6 @@ public class JwtService {
         this.providerSupplierRepository = providerSupplierRepository;
     }
 
-
     public String generateTokenManager(UserManager user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("idUser", user.getIdUser());
@@ -88,6 +87,7 @@ public class JwtService {
         claims.put("profilePicture", user.getProfilePicture());
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
+        claims.put("idClient", user.getBranch().getClient().getIdClient());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -117,6 +117,7 @@ public class JwtService {
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
         claims.put("branches", branchesIds);
+        claims.put("idClient", user.getProviderSupplier().getBranches().get(0).getClient().getIdClient());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -199,25 +200,10 @@ public class JwtService {
                 .email((String) claims.getOrDefault("email", ""))
                 .telephone((String) claims.getOrDefault("telephone", ""))
                 .cellphone((String) claims.getOrDefault("cellphone", ""))
+                .idClient((String) claims.getOrDefault("idClient", ""))
                 .branches(branchesIds)
                 .build();
 
         return userResponseDto;
-    }
-
-    public String extractEmail(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    public String extractRole(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
     }
 }

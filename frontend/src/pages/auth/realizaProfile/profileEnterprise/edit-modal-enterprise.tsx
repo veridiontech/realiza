@@ -16,6 +16,7 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface adressProps {
   city: string;
@@ -115,114 +116,116 @@ export function EditModalEnterprise() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-blue-700">Editar perfil</Button>
+        <Button className="bg-realizaBlue">Editar perfil</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar empresa</DialogTitle>
         </DialogHeader>
-        <div>
-          <form
-            action=""
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-2"
-          >
-            <div>
-              <Label>CNPJ</Label>
-              <Input
-                placeholder="CNPJ: __.___.___/____-__"
-                {...register("cnpj")}
-              />
-            </div>
-            <div className="flex items-center gap-1">
+        <div className="">
+          <ScrollArea className="h-[60vh] pr-5">
+            <form
+              action=""
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex flex-col gap-2"
+            >
               <div>
-                <Label>Nome da empresa</Label>
-                <Input className="w-[12vw]" {...register("nameEnterprise")} />
-              </div>
-              <div>
-                <Label>Nome fantasia</Label>
-                <Input className="w-[12vw]" {...register("fantasyName")} />
-              </div>
-            </div>
-            <div>
-              <Label>Razão social</Label>
-              <Input {...register("socialReason")} />
-            </div>
-            <div>
-              <Label>Email corporativo</Label>
-              <Input {...register("email")} />
-            </div>
-            <div>
-              <Label>Telefone</Label>
-              <Input {...register("phone")} />
-            </div>
-            <div className="flex items-end gap-3">
-              <div>
-                <Label>CEP</Label>
+                <Label>CNPJ</Label>
                 <Input
-                  className="w-[21vw]"
-                  {...register("cep")}
-                  onChange={(e) => setCep(e.target.value)}
+                  placeholder="CNPJ: __.___.___/____-__"
+                  {...register("cnpj")}
                 />
               </div>
-              <Button
-                className="bg-realizaBlue"
-                onClick={(e) => {
-                  e.preventDefault();
-                  findCep();
-                }}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Puff
-                    visible={true}
-                    height="80"
-                    width="80"
-                    color="white"
-                    ariaLabel="puff-loading"
-                  />
-                ) : (
-                  <Search />
-                )}
-              </Button>
-            </div>
-            <div>
-              <Label>Estado</Label>
-              <Input
-                {...register("state")}
-                readOnly
-                placeholder="Preencha o CEP"
-              />
-            </div>
-            <div>
-              <Label>Cidade</Label>
-              <Input
-                {...register("city")}
-                readOnly
-                placeholder="Preencha o CEP"
-              />
-            </div>
-            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <div>
+                  <Label>Nome da empresa</Label>
+                  <Input className="w-[12vw]" {...register("nameEnterprise")} />
+                </div>
+                <div>
+                  <Label>Nome fantasia</Label>
+                  <Input className="w-[12vw]" {...register("fantasyName")} />
+                </div>
+              </div>
               <div>
-                <Label>Endereço</Label>
+                <Label>Razão social</Label>
+                <Input {...register("socialReason")} />
+              </div>
+              <div>
+                <Label>Email corporativo</Label>
+                <Input {...register("email")} />
+              </div>
+              <div>
+                <Label>Telefone</Label>
+                <Input {...register("phone")} />
+              </div>
+              <div className="flex items-end gap-3">
+                <div>
+                  <Label>CEP</Label>
+                  <Input
+                    className="w-[21vw]"
+                    {...register("cep")}
+                    onChange={(e) => setCep(e.target.value)}
+                  />
+                </div>
+                <Button
+                  className="bg-realizaBlue"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    findCep();
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Puff
+                      visible={true}
+                      height="80"
+                      width="80"
+                      color="white"
+                      ariaLabel="puff-loading"
+                    />
+                  ) : (
+                    <Search />
+                  )}
+                </Button>
+              </div>
+              <div>
+                <Label>Estado</Label>
                 <Input
-                  {...register("adress")}
+                  {...register("state")}
                   readOnly
                   placeholder="Preencha o CEP"
-                  className="w-[20.6vw]"
                 />
               </div>
               <div>
-                <Label>Número</Label>
-                <Input className="w-[3vw]" {...register("number")} />
+                <Label>Cidade</Label>
+                <Input
+                  {...register("city")}
+                  readOnly
+                  placeholder="Preencha o CEP"
+                />
               </div>
-            </div>
-            <div>
-              <Label>Responsável pela unidade</Label>
-              <Input />
-            </div>
-            <Button className="bg-realizaBlue">Confirmar edição</Button>
-          </form>
+              <div className="flex items-center gap-3">
+                <div>
+                  <Label>Endereço</Label>
+                  <Input
+                    {...register("adress")}
+                    readOnly
+                    placeholder="Preencha o CEP"
+                    className="w-[20.6vw]"
+                  />
+                </div>
+                <div>
+                  <Label>Número</Label>
+                  <Input className="w-[3vw]" {...register("number")} />
+                </div>
+              </div>
+              <div>
+                <Label>Responsável pela unidade</Label>
+                <Input />
+              </div>
+              <Button className="bg-realizaBlue">Confirmar edição</Button>
+            </form>
+          </ScrollArea>
         </div>
       </DialogContent>
     </Dialog>

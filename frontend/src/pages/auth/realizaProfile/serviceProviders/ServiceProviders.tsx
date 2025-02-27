@@ -47,7 +47,7 @@ export function ServiceProvider() {
         <div>
           <button
             onClick={() => console.log("Ação para o fornecedor:", value)}
-            className="text-blue-500 hover:underline"
+            className="text-realizaBlue hover:underline"
           >
             <NotebookPen />
           </button>
@@ -55,7 +55,7 @@ export function ServiceProvider() {
             onClick={() => {
               setIsStepTwoModalOpen(true);
             }}
-            className="ml-2 text-blue-500 hover:underline"
+            className="ml-2 text-realizaBlue hover:underline"
           >
             <FilePlus2 />
           </button> */}
@@ -71,14 +71,14 @@ export function ServiceProvider() {
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
-        <h1 className="m-8">Prestadores de Serviço</h1>
+        <h1 className="m-8 text-2xl">Prestadores de Serviço</h1>
 
         <div className="flex w-[90rem] flex-row justify-between px-10">
           <div className="relative mb-4">
             <input
               type="text"
               placeholder="🔍 Pesquisar fornecedor..."
-              className="w-[34rem] rounded-lg border border-gray-300 p-2 focus:outline-blue-400"
+              className="focus:outline-realizaBlue w-[34rem] rounded-lg border border-gray-300 p-2"
               onChange={() => {}}
             />
           </div>

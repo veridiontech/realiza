@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,6 +29,7 @@ export function SignIn() {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<loginFormData>({
     resolver: zodResolver(loginFormSchema),
   });
@@ -42,26 +43,29 @@ export function SignIn() {
       });
       console.log("token: ", res.data);
 
-
       const obj = {
-        token: res.data.token
-      }
+        token: res.data.token,
+      };
       localStorage.setItem("tokenClient", res.data.token);
 
-      const userResponse = await axios.post(
-        `${ip}/login/extract-token`,
-        obj,
-        {
-          headers: {
-            Authorization: `Bearer ${res.data.token}`,
-          },
+      const userResponse = await axios.post(`${ip}/login/extract-token`, obj, {
+        headers: {
+          Authorization: `Bearer ${res.data.token}`,
         },
-      );
+      });
+
+      // Extração do idClient do token após a chamada ao extract-token
+      const token = res.data.token;
+      const payload = JSON.parse(window.atob(token.split(".")[1]));
+      console.log("idClient extraído do token:", payload.idClient);
 
       const userData = userResponse.data;
       localStorage.setItem("userBranches", JSON.stringify(userData.branches));
-      localStorage.setItem("userFullData", JSON.stringify(userData));
-      console.log("colentando dados:", userResponse.data);
+      localStorage.setItem(
+        "userSubcontractor",
+        JSON.stringify(userData.subcontractor),
+      );
+      console.log("Coletando dados:", userResponse.data);
       localStorage.setItem("userId", userData.idUser);
       localStorage.setItem("role", userData.role);
       console.log("Dados recebidos:", userData);
@@ -105,23 +109,24 @@ export function SignIn() {
         }
         window.location.reload();
       }, 3000);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response && err.response.status === 500) {
+        setError("email", {
+          type: "manual",
+          message: "Usuário não encontrado. Verifique suas credenciais",
+        });
+      }
       console.error("Erro ao buscar usuário:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (user) {
-    }
-  }, [user]);
-
   if (showSplash) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#34495e]">
         <SplashPage
-          nome={`${user?.firstName} ${user?.surname}`}
+          nome={`${user?.firstName}${user?.surname ? ' ' + user.surname : ''}`}
           onComplete={() => setShowSplash(false)}
         />
       </div>
@@ -143,17 +148,19 @@ export function SignIn() {
         >
           <label htmlFor="email">E-mail</label>
           <input
-            className="mb-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="focus:ring-realizaBlue mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
             placeholder="email@gmail.com"
             type="email"
             {...register("email")}
           />
-          {errors.email && <span>{errors.email.message}</span>}
+          {errors.email && (
+            <span className="text-red-500 text-sm">{errors.email.message}</span>
+          )}
 
           <label htmlFor="password">Senha</label>
           <div className="relative">
             <input
-              className="mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="focus:ring-realizaBlue mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
               type={showPassword ? "text" : "password"}
               {...register("password")}
             />
@@ -165,19 +172,21 @@ export function SignIn() {
               {showPassword ? "🙈" : "👁️"}
             </button>
           </div>
-          {errors.password && <span>{errors.password.message}</span>}
+          {errors.password && (
+            <span className="text-red-500 text-sm">{errors.password.message}</span>
+          )}
 
           <span className="mb-16 text-xs font-light text-gray-600">
             Esqueceu a senha?{" "}
             <Link
               to="/forgot-password"
-              className="text-blue-600 hover:underline"
+              className="text-realizaBlue hover:underline"
             >
               Recupere-a aqui!
             </Link>
           </span>
           <button
-            className="bg-realizaBlue rounded px-4 py-2 font-bold text-white hover:bg-blue-700"
+            className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 font-bold text-white"
             type="submit"
             disabled={loading}
           >

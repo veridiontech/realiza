@@ -14,8 +14,11 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +41,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     private final EmployeeRepository employeeRepository;
     private final FileRepository fileRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
@@ -127,17 +129,20 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
                 documentEmployee -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentEmployee.getDocumentation() != null && ObjectId.isValid(documentEmployee.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
                             .status(documentEmployee.getStatus())
                             .documentation(documentEmployee.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentEmployee.getCreationDate())
                             .employee(documentEmployee.getEmployee().getIdEmployee())
                             .build();
@@ -201,22 +206,84 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     }
 
     @Override
+    public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Document employee not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentEmployee.setDocumentation(fileDocumentId);
+        }
+
+        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
+
+        if (documentIAValidation.isAutoValidate()) {
+            if (documentIAValidation.isValid()) {
+                documentEmployee.setStatus(Document.Status.APROVADO);
+            } else {
+                documentEmployee.setStatus(Document.Status.REPROVADO);
+            }
+        } else {
+            documentEmployee.setStatus(Document.Status.EM_ANALISE);
+        }
+
+        documentEmployee.setVersionDate(LocalDateTime.now());
+
+        DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
+
+        DocumentResponseDto documentEmployeeResponse = DocumentResponseDto.builder()
+                .idDocumentation(savedDocumentEmployee.getIdDocumentation())
+                .title(savedDocumentEmployee.getTitle())
+                .status(savedDocumentEmployee.getStatus())
+                .documentation(savedDocumentEmployee.getDocumentation())
+                .creationDate(savedDocumentEmployee.getCreationDate())
+                .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
+                .documentIAValidationResponse(documentIAValidation)
+                .build();
+
+        return Optional.of(documentEmployeeResponse);
+    }
+
+    @Override
     public Page<DocumentResponseDto> findAllByEmployee(String idSearch, Pageable pageable) {
         Page<DocumentEmployee> documentEmployeePage = documentEmployeeRepository.findAllByEmployee_IdEmployee(idSearch, pageable);
 
         Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
                 documentEmployee -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentEmployee.getDocumentation() != null && ObjectId.isValid(documentEmployee.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
                             .status(documentEmployee.getStatus())
                             .documentation(documentEmployee.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentEmployee.getCreationDate())
                             .employee(documentEmployee.getEmployee().getIdEmployee())
                             .build();
@@ -230,9 +297,31 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         employeeRepository.findById(id).orElseThrow(() -> new NotFoundException("Employee not found"));
         List<DocumentEmployee> documentEmployee = documentEmployeeRepository.findAllByEmployee_IdEmployee(id);
-        List<DocumentMatrix> selectedDocuments = documentEmployee.stream().map(DocumentEmployee::getDocumentMatrix).collect(Collectors.toList());
-        List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
-        List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
+        List<DocumentMatrixResponseDto> selectedDocuments = documentEmployee.stream()
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+        List<DocumentMatrixResponseDto> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
         DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocuments)

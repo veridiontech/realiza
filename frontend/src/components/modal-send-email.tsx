@@ -22,7 +22,7 @@ const modalSendEmailFormSchema = z.object({
   company: z.string().default("CLIENT"),
 });
 
-type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;                       
+type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 
 export function ModalSendEmail() {
   const [isLoading, setIsLoading] = useState(false);
@@ -43,9 +43,9 @@ export function ModalSendEmail() {
         email: data.email,
         company: data.company,
       });
-      toast.success("Email enviado ao novo cliente")
+      toast.success("Email enviado ao novo cliente");
     } catch (err) {
-      toast.error("Erro ao enviar email. Tente novamente")
+      toast.error("Erro ao enviar email. Tente novamente");
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +54,7 @@ export function ModalSendEmail() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-sky-700">Cadastrar cliente</Button>
+        <Button className="bg-realizaBlue mb-4">Cadastrar cliente</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -67,12 +67,12 @@ export function ModalSendEmail() {
             className="flex flex-col gap-2"
           >
             <div>
-              <Label>Email</Label>
+              <Label className="">Email</Label>
               <Input
                 type="email"
                 placeholder="Digite o email do novo cliente"
                 {...register("email")}
-                className="w-full"
+                className="mt-2 w-full"
               />
               {errors.email && (
                 <span className="text-red-600">{errors.email.message}</span>

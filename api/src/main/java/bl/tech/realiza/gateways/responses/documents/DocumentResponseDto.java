@@ -2,7 +2,9 @@ package bl.tech.realiza.gateways.responses.documents;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,14 +27,17 @@ public class DocumentResponseDto {
     private LocalDateTime creationDate;
     private Date versionDate;
     private Date expirationDate;
-    private List<DocumentMatrix> selectedDocumentsEnterprise;
-    private List<DocumentMatrix> selectedDocumentsPersonal;
-    private List<DocumentMatrix> selectedDocumentsTrainning;
-    private List<DocumentMatrix> selectedDocumentsService;
-    private List<DocumentMatrix> nonSelectedDocumentsEnterprise;
-    private List<DocumentMatrix> nonSelectedDocumentsPersonal;
-    private List<DocumentMatrix> nonSelectedDocumentsTrainning;
-    private List<DocumentMatrix> nonSelectedDocumentsService;
+    private List<DocumentMatrixResponseDto> selectedDocumentsEnterprise;
+    private List<DocumentMatrixResponseDto> selectedDocumentsPersonal;
+    private List<DocumentMatrixResponseDto> selectedDocumentsTrainning;
+    private List<DocumentMatrixResponseDto> selectedDocumentsService;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsService;
+
+    // gpt validation
+    private DocumentIAValidationResponse documentIAValidationResponse;
 
     // branch
     private String branch;

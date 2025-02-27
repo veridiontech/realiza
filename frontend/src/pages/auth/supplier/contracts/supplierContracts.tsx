@@ -44,7 +44,7 @@ export default function SupplierContracts() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => console.log("Contrato Selecionado:", row)}
-            className="text-blue-500 hover:underline"
+            className="text-realizaBlue hover:underline"
           >
             <NotebookPen />
           </button>
@@ -140,7 +140,7 @@ export default function SupplierContracts() {
             <button
               className={`mr-4 pb-2 ${
                 activeTab === "client"
-                  ? "border-b-2 border-blue-500 font-semibold"
+                  ? "border-realizaBlue border-b-2 font-semibold"
                   : "text-gray-500"
               }`}
               onClick={() => setActiveTab("client")}
@@ -150,12 +150,12 @@ export default function SupplierContracts() {
             <button
               className={`pb-2 ${
                 activeTab === "supplier"
-                  ? "border-b-2 border-blue-500 font-semibold"
+                  ? "border-realizaBlue border-b-2 font-semibold"
                   : "text-gray-500"
               }`}
               onClick={() => setActiveTab("supplier")}
             >
-              Contratos com Quarteirizados
+              Contratos com SubContratados
             </button>
           </div>
         </div>

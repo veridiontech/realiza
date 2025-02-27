@@ -12,7 +12,7 @@ const MonittoringBis = () => {
     <>
       <Helmet title="monitoring table" />
       <section className="mx-20 flex flex-col gap-[50px]">
-        <div className="shadow-custom-blue mt-[30px] flex h-[250px] flex-col gap-[50px] rounded-md bg-white dark:bg-primary pt-[35px]">
+        <div className="shadow-custom-blue dark:bg-primary mt-[30px] flex h-[250px] flex-col gap-[50px] rounded-md bg-white pt-[35px]">
           <div className="flex flex-row justify-between px-20">
             <div className="flex items-center gap-2">
               <CircleDollarSign />
@@ -26,7 +26,7 @@ const MonittoringBis = () => {
             <div className="flex flex-col items-center gap-[30px]">
               <div className="flex flex-row items-center gap-2">
                 <h3 className="text-[18px]">Total arrecadado</h3>
-                <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-blue-500 font-semibold text-white">
+                <div className="bg-realizaBlue flex h-[30px] w-[30px] items-center justify-center rounded-full font-semibold text-white">
                   i
                 </div>
               </div>
@@ -37,7 +37,7 @@ const MonittoringBis = () => {
             <div className="flex flex-col items-center gap-[30px]">
               <div className="flex flex-row items-center gap-2">
                 <h3 className="text-[18px]">Total de solicitações</h3>
-                <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-blue-500 font-semibold text-white">
+                <div className="bg-realizaBlue flex h-[30px] w-[30px] items-center justify-center rounded-full font-semibold text-white">
                   i
                 </div>
               </div>
@@ -48,7 +48,7 @@ const MonittoringBis = () => {
             <div className="flex flex-col items-start gap-[30px]">
               <div className="flex flex-row items-center gap-2">
                 <h3 className="text-[18px]">Total vendido</h3>
-                <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-blue-500 font-semibold text-white">
+                <div className="bg-realizaBlue flex h-[30px] w-[30px] items-center justify-center rounded-full font-semibold text-white">
                   i
                 </div>
               </div>

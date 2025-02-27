@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -24,6 +25,10 @@ public class DocumentMatrixSubgroup {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
+    @JoinColumn(name = "idDocumentGroup", nullable = false)
     private DocumentMatrixGroup group;
+
+    @OneToMany(mappedBy = "subGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<DocumentMatrix> documentMatrix;
 }

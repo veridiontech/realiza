@@ -104,6 +104,21 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentClient(@PathVariable String id,
+                                                                              @RequestPart(value = "file") MultipartFile file) {
+        Optional<DocumentResponseDto> documentClient = null;
+        try {
+            documentClient = crudDocumentClient.upload(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.of(Optional.of(documentClient));
+    }
+
     @GetMapping("/filtered-client")
     @ResponseStatus(HttpStatus.OK)
     @Override

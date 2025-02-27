@@ -1,20 +1,12 @@
 import {
   ChartPie,
-  CheckSquare,
   File,
-  FileSearch,
-  FileStack,
-  FileX2,
-  Flag,
   Home,
-  Info,
-  MessageSquare,
   Users2,
   Building2,
   Factory,
   PersonStanding,
 } from "lucide-react";
-
 import { Button } from "../ui/button";
 import { SheetContent } from "../ui/sheet";
 import { Link } from "react-router-dom";
@@ -22,18 +14,19 @@ import { useUser } from "@/context/user-provider";
 
 export function LateralMenu() {
   const { user } = useUser();
-
   const getIdUser = user?.idUser;
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
-      <Button
-        variant={"ghost"}
-        className="w-full justify-start bg-zinc-100 px-4 py-2"
-      >
-        <Home className="size-4 text-blue-600" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
-      </Button>
+      <Link to={`/sistema/select-client/${getIdUser}`}>
+        <Button
+          variant={"ghost"}
+          className="w-full justify-start bg-zinc-100 px-4 py-2"
+        >
+          <Home className="text-realizaBlue size-4" />
+          <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
+        </Button>
+      </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>
@@ -107,17 +100,7 @@ export function LateralMenu() {
           </span>
         </Button>
       </Link>
-      <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
-        <MessageSquare className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">
-          Mensagens
-        </span>
-      </Button>
-      <Button variant={"ghost"} className="mt-1 w-full justify-start px-4 py-2">
-        <Info className="size-4 text-zinc-800" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Suporte</span>
-      </Button>
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Documentos</h3>
+      {/* <h3 className="pl-4 pt-6 text-xs text-zinc-800">Documentos</h3>
       <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <FileStack className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
@@ -135,8 +118,8 @@ export function LateralMenu() {
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Documento vencidos
         </span>
-      </Button>
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Relatórios</h3>
+      </Button> */}
+      {/* <h3 className="pl-4 pt-6 text-xs text-zinc-800">Relatórios</h3>
       <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <Flag className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">
@@ -148,7 +131,7 @@ export function LateralMenu() {
         <span className="ml-2 text-sm font-medium text-zinc-900">
           Relatório de conformidade
         </span>
-      </Button>
+      </Button> */}
     </SheetContent>
   );
 }

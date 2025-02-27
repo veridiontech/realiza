@@ -44,7 +44,7 @@ export default function SubContracts() {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => console.log("Contrato Selecionado:", row)}
-            className="text-blue-500 hover:underline"
+            className="text-realizaBlue hover:underline"
           >
             <NotebookPen />
           </button>

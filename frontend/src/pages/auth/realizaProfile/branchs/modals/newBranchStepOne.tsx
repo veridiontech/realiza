@@ -66,12 +66,12 @@ export function SearchCnpjModal({ onClose, onProceed }: SearchCnpjModalProps) {
                   }}
                   placeholder="00.000.000/0001-01"
                   required
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="focus:border-realizaBlue focus:ring-realizaBlue flex-1 rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={handleSearchCNPJ}
-                  className="rounded-md bg-blue-600 px-3 py-2 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="focus:ring-realizaBlue bg-realizaBlue hover:bg-realizaBlue rounded-md px-3 py-2 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
                   disabled={loading}
                 >
                   {loading ? "Buscando..." : <Search className="h-5 w-5" />}

@@ -14,7 +14,10 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +41,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     private final FileRepository fileRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
@@ -128,17 +130,20 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
                 documentSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentSubcontractor.getDocumentation() != null && ObjectId.isValid(documentSubcontractor.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentSubcontractor.getDocumentation())
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentSubcontractor.getCreationDate())
                             .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
                             .build();
@@ -202,22 +207,84 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     }
 
     @Override
+    public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        DocumentProviderSubcontractor documentProviderSubcontractor = documentSubcontractorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentProviderSubcontractor.setDocumentation(fileDocumentId);
+        }
+
+        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
+
+        if (documentIAValidation.isAutoValidate()) {
+            if (documentIAValidation.isValid()) {
+                documentProviderSubcontractor.setStatus(Document.Status.APROVADO);
+            } else {
+                documentProviderSubcontractor.setStatus(Document.Status.REPROVADO);
+            }
+        } else {
+            documentProviderSubcontractor.setStatus(Document.Status.EM_ANALISE);
+        }
+
+        documentProviderSubcontractor.setVersionDate(LocalDateTime.now());
+
+        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentProviderSubcontractor);
+
+        DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
+                .idDocumentation(savedDocumentSubcontractor.getIdDocumentation())
+                .title(savedDocumentSubcontractor.getTitle())
+                .status(savedDocumentSubcontractor.getStatus())
+                .documentation(savedDocumentSubcontractor.getDocumentation())
+                .creationDate(savedDocumentSubcontractor.getCreationDate())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .documentIAValidationResponse(documentIAValidation)
+                .build();
+
+        return Optional.of(documentSubcontractorResponse);
+    }
+
+    @Override
     public Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
         Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
                 documentSubcontractor -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentSubcontractor.getDocumentation() != null && ObjectId.isValid(documentSubcontractor.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentSubcontractor.getDocumentation())
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument.getName())
-                            .fileContentType(fileDocument.getContentType())
-                            .fileData(fileDocument.getData())
+                            .fileName(fileDocument != null ? fileDocument.getName() : null)
+                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
+                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentSubcontractor.getCreationDate())
                             .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
                             .build();
@@ -231,16 +298,38 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         documentSubcontractorRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
         List<DocumentProviderSubcontractor> documentSubcontractor = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
-        List<DocumentMatrix> selectedDocuments = documentSubcontractor.stream().map(DocumentProviderSubcontractor::getDocumentMatrix).collect(Collectors.toList());
-        List<DocumentMatrix> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
-        List<DocumentMatrix> nonSelectedDocuments = new ArrayList<>(allDocuments);
+        List<DocumentMatrixResponseDto> selectedDocuments = documentSubcontractor.stream()
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+        List<DocumentMatrixResponseDto> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
-        DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
+        DocumentResponseDto subcontractorResponse = DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocuments)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocuments)
                 .build();
 
-        return employeeResponse;
+        return subcontractorResponse;
     }
 
     @Override

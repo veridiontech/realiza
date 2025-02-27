@@ -7,5 +7,7 @@ public interface ReportController {
     ResponseEntity<Long> countSupplierByBranch(String branchId);
     ResponseEntity<Long> countSubcontractorByBranch(String branchId);
     ResponseEntity<Long> countSubcontractorBySupplier(String supplierId);
-    ResponseEntity<Long> countEmployeeByEnterprise(String enterpriseId, Provider.Company companyDegree);
+    ResponseEntity<Long> countEmployeeByEnterprise(String idEnterprise, Provider.Company companyDegree);
+    ResponseEntity<Long> countAdherenceByEnterprise(String idEnterprise, Provider.Company companyDegree);
+    ResponseEntity<Long> countAccordanceByEnterprise(String idEnterprise, Provider.Company companyDegree);
 }

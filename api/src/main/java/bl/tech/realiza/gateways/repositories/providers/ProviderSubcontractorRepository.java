@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.providers;
 
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

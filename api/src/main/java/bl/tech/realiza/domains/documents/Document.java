@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.documents;
 
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,8 +25,7 @@ public abstract class Document {
     private String documentation;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    @Builder.Default
-    private LocalDateTime versionDate = LocalDateTime.now();
+    private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
     private Boolean lowLessThan8h = false;
@@ -51,7 +51,8 @@ public abstract class Document {
     @Builder.Default
     private Request request = Request.NONE;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
+    @JoinColumn(name = "idDocument", nullable = false)
     private DocumentMatrix documentMatrix;
 
     public enum Status {

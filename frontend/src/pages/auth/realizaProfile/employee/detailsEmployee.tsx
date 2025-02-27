@@ -134,7 +134,7 @@ export function DetailsEmployee() {
       render: (_: string, row: Document) => (
         <div className="flex space-x-2">
           <button
-            className="text-blue-500 hover:underline"
+            className="text-realizaBlue hover:underline"
             onClick={() => {
               setSelectedDocumentId(row.idDocumentation);
               setIsViewerOpen(true);
@@ -161,7 +161,7 @@ export function DetailsEmployee() {
       <div className="flex flex-col space-y-6">
         <div className="rounded-lg bg-white p-6 shadow">
           <div className="flex flex-col items-center">
-            <div className="mb-4 h-20 w-20 rounded-full bg-blue-100"></div>
+            <div className="bg-realizaBlue mb-4 h-20 w-20 rounded-full"></div>
             <h3 className="text-lg font-medium">{employee.name}</h3>
             <p className="text-sm text-gray-500">Status: {employee.status}</p>
           </div>

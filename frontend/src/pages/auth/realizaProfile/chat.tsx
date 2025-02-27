@@ -137,7 +137,7 @@ export default function ChatPage() {
                       href={msg.text}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 underline"
+                      className="text-realizaBlue underline"
                     >
                       Baixar Excel
                     </a>

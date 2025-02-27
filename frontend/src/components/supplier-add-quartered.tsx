@@ -80,7 +80,7 @@ export default function SupplierAddQuartered() {
   const [activities, setActivities] = useState<any[]>([]);
   const [requirements, setRequirements] = useState<any[]>([]);
   const [supplierContracts, setSupplierContracts] = useState<any[]>([]);
-  const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
+  const [selectedRadio] = useState<string | null>(null);
 
   // Formulário do convite
   const {
@@ -211,11 +211,6 @@ export default function SupplierAddQuartered() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Lógica para os radio buttons (se necessário)
-  const handleRadioClick = (value: string) => {
-    setSelectedRadio(value);
   };
 
   const shouldShowServiceType =

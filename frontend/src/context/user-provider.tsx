@@ -13,6 +13,8 @@ interface UserContextProps {
   branch: string;
   branches: string[];
   authUser: boolean;
+  token: string | null;
+  setToken: React.Dispatch<React.SetStateAction<string | null>>;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
   logout: () => void;
@@ -31,6 +33,7 @@ export function useUser() {
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState(false);
   const [user, setUser] = useState<propsUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,11 +52,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const validateTokenAndFetchUser = async () => {
-    const token = localStorage.getItem("tokenClient");
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     const userId = localStorage.getItem("userId");
     const roleUser = localStorage.getItem("role");
 
-    if (token && isTokenValid(token) && userId && roleUser) {
+    if (
+      tokenFromStorage &&
+      isTokenValid(tokenFromStorage) &&
+      userId &&
+      roleUser
+    ) {
+      // Salva o token em memória
+      setToken(tokenFromStorage);
       try {
         switch (roleUser) {
           case "ROLE_ADMIN":
@@ -61,7 +71,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_REALIZA_BASIC":
             try {
               const res = await axios.get(`${ip}/user/manager/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${tokenFromStorage}` },
               });
               if (res.data) {
                 setUser(res.data);
@@ -79,7 +89,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_CLIENT_RESPONSIBLE":
             try {
               const res = await axios.get(`${ip}/user/client/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${tokenFromStorage}` },
               });
               if (res.data) {
                 setUser(res.data);
@@ -97,7 +107,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUPPLIER_RESPONSIBLE":
             try {
               const res = await axios.get(`${ip}/user/supplier/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${tokenFromStorage}` },
               });
               if (res.data) {
                 const supplierData = res.data;
@@ -126,7 +136,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               const res = await axios.get(
                 `${ip}/user/subcontractor/${user?.supplier}`,
                 {
-                  headers: { Authorization: `Bearer ${token}` },
+                  headers: { Authorization: `Bearer ${tokenFromStorage}` },
                 },
               );
               if (res.data) {
@@ -150,7 +160,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                   const resUser = await axios.get(
                     `${ip}/user/client/${userId}`,
                     {
-                      headers: { Authorization: `Bearer ${token}` },
+                      headers: { Authorization: `Bearer ${tokenFromStorage}` },
                     },
                   );
                   if (resUser.data) {
@@ -172,7 +182,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/supplier/${userId}`,
                       {
-                        headers: { Authorization: `Bearer ${token}` },
+                        headers: {
+                          Authorization: `Bearer ${tokenFromStorage}`,
+                        },
                       },
                     );
                     if (res.data) {
@@ -200,7 +212,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/subcontractor/${userId}`,
                       {
-                        headers: { Authorization: `Bearer ${token}` },
+                        headers: {
+                          Authorization: `Bearer ${tokenFromStorage}`,
+                        },
                       },
                     );
                     if (res.data) {
@@ -250,6 +264,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("userFullData");
       setUser(null);
       setAuthUser(false);
+      setToken(null);
       navigate("/");
     } catch (error) {
       console.error(`Erro ao deslogar: ${error}`);
@@ -263,6 +278,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         branch: user?.branch || "",
         branches: user?.branches || [],
         authUser,
+        token,
+        setToken,
         setUser,
         setAuthUser,
         logout,

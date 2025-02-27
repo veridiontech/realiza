@@ -57,7 +57,7 @@ export const ClientEmployee = (): JSX.Element => {
       label: "Ações",
       render: (_, row) => (
         <Link to={`/sistema/detailsEmployees/${row.id}`}>
-          <button className="ml-4 text-blue-500 hover:underline">
+          <button className="text-realizaBlue ml-4 hover:underline">
             <Settings2 />
           </button>
         </Link>

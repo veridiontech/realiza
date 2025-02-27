@@ -1,5 +1,7 @@
 package bl.tech.realiza.domains.user;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.services.ItemManagement;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.TimeZone;
 
 @Data
@@ -45,6 +48,12 @@ public abstract class User {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "requester", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ItemManagement> userRequest;
+
+    @OneToOne(mappedBy = "newUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private ItemManagement newUserSolicitation;
 
     public enum Role {
         ROLE_ADMIN,

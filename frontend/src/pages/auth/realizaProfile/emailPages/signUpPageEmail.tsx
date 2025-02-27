@@ -9,7 +9,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const signUpEmailFormSchema = z
@@ -34,12 +33,11 @@ const signUpEmailFormSchema = z
   });
 
 type SignUpEmailFormSchema = z.infer<typeof signUpEmailFormSchema>;
+
 export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
@@ -49,17 +47,28 @@ export function SignUpPageEmail() {
     mode: "onChange",
   });
 
+  if (!enterpriseData) {
+    return <div>Dados da empresa não encontrados.</div>;
+  }
+
   const onSubmit = async (data: SignUpEmailFormSchema) => {
     setIsLoading(true);
     try {
       setUserData(data);
+      const role =
+        enterpriseData.company === "CLIENT"
+          ? "ROLE_CLIENT_RESPONSIBLE"
+          : enterpriseData.company === "SUPPLIER"
+            ? "ROLE_SUPPLIER_RESPONSIBLE"
+            : "ROLE_ADMIN";
       const allDatas = {
         ...enterpriseData,
         ...data,
+        role,
+        company: enterpriseData.company,
       };
-      console.log("enviando dados:", allDatas);
       await axios.post(`${ip}/sign-enterprise`, allDatas);
-      navigate("/");
+      window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
       console.log(err);
     } finally {
@@ -153,38 +162,35 @@ export function SignUpPageEmail() {
         </div>
         <div>
           <Label>Senha</Label>
-          <div>
-            <div className="flex w-[27vw] items-center rounded border border-gray-300">
-              <Input
-                type={isOpenEye ? "text" : "password"}
-                className="flex-1 border-none focus:ring-0"
-                placeholder="Digite sua senha"
-                {...register("password")}
+          <div className="flex w-[27vw] items-center rounded border border-gray-300">
+            <Input
+              type={isOpenEye ? "text" : "password"}
+              className="flex-1 border-none focus:ring-0"
+              placeholder="Digite sua senha"
+              {...register("password")}
+            />
+            {isOpenEye ? (
+              <Eye
+                className="mx-3 cursor-pointer text-gray-400"
+                onClick={togglePasswordVisibility}
               />
-              {isOpenEye ? (
-                <Eye
-                  className="mx-3 cursor-pointer text-gray-400"
-                  onClick={togglePasswordVisibility}
-                />
-              ) : (
-                <EyeOff
-                  className="mx-3 cursor-pointer text-gray-400"
-                  onClick={togglePasswordVisibility}
-                />
-              )}
-            </div>
-            {errors.password && (
-              <span className="text-red-600">{errors.password.message}</span>
+            ) : (
+              <EyeOff
+                className="mx-3 cursor-pointer text-gray-400"
+                onClick={togglePasswordVisibility}
+              />
             )}
           </div>
+          {errors.password && (
+            <span className="text-red-600">{errors.password.message}</span>
+          )}
         </div>
         <div>
           <Label>Confirme sua senha</Label>
           <div className="flex flex-col">
             <Input
               type={isOpenEye ? "text" : "password"}
-              className=""
-              placeholder="Confirme sua senha "
+              placeholder="Confirme sua senha"
               {...register("confirmPassword")}
             />
             {errors.confirmPassword && (
@@ -201,16 +207,15 @@ export function SignUpPageEmail() {
         ) : (
           <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
             <Oval
-            visible={true}
-            height="80"
-            width="80"
-            color="#4fa94d"
-            ariaLabel="oval-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-          />
+              visible={true}
+              height="80"
+              width="80"
+              color="#4fa94d"
+              ariaLabel="oval-loading"
+              wrapperStyle={{}}
+              wrapperClass=""
+            />
           </Button>
-          
         )}
       </form>
     </div>

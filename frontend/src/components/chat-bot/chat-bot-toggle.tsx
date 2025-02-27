@@ -15,7 +15,7 @@ export function ChatBotToggle() {
       )}
       <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-6 rounded-full w-[2vw] h-[4vh] bg-realizaBlue hover:bg-blue-600 text-white shadow-lg"
+        className="bg-realizaBlue hover:bg-realizaBlue h-[4vh] w-[2vw] rounded-full p-6 text-white shadow-lg"
       >
         <BotMessageSquareIcon className="h-6 w-6" />
       </Button>

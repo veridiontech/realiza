@@ -21,11 +21,13 @@ export interface propsUser {
   description: string;
   profilePictureData: string;
   supplier: string;
+  idClient: string;
 }
 
 export interface propsClient {
   cnpj: string;
   corporateName: string;
+  companyName: string;
   idCompany: string;
   email: string;
   idClient: string;
@@ -34,14 +36,17 @@ export interface propsClient {
 }
 
 export interface propsDocument {
-  doesBlock: boolean;
-  idDocumentMatrix: string;
-  idDocumentSubgroup: string;
+  documentId?: string;
+  idDocument: string;
   name: string;
-  type: string;
+  doesBlock?: boolean;
+  idDocumentSubgroup?: string;
+  typets?: string;
+  idDocumentMatrix?: string;
 }
 
 export interface propsBranch {
+  id_branch: string;
   idBranch: string;
   name: string;
 }

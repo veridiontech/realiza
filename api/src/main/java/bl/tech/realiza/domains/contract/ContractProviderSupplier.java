@@ -9,6 +9,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
@@ -19,8 +21,15 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorValue("SUPPLIER")
 public class ContractProviderSupplier extends Contract {
     private Boolean subcontractPermission;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "idProviderSuppllier", nullable = false)
     private ProviderSupplier providerSupplier;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne
+    @JoinColumn(name = "idBranch", nullable = false)
     private Branch branch;
+
+    @OneToMany(mappedBy = "contractProviderSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ContractProviderSubcontractor> contractsSubcontractor;
 }

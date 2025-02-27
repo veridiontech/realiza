@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import { useEmployees } from "@/hooks/gets/realiza/useEmployees";
-import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { StepOneEmployee } from "./modals/stepOne";
 import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,7 +10,7 @@ import { useClient } from "@/context/Client-Provider";
 
 export const EmployeesTable = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const { client } = useClient();
@@ -59,7 +58,7 @@ export const EmployeesTable = (): JSX.Element => {
       label: "Ações",
       render: (_, row) => (
         <Link to={`/sistema/detailsEmployees/${row.id}`}>
-          <button className="ml-4 text-blue-500 hover:underline">
+          <button className="text-realizaBlue ml-4 hover:underline">
             <Settings2 />
           </button>
         </Link>
@@ -79,10 +78,12 @@ export const EmployeesTable = (): JSX.Element => {
     <div className="m-4 flex justify-center">
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
-          <ButtonBlue onClick={() => setIsModalOpen(true)}>
-            Adicionar Colaborador
-          </ButtonBlue>
+          <h1 className="text-2xl">Colaboradores</h1>
+
+          <StepOneEmployee
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleModalSubmit}
+          />
         </div>
         {loading ? (
           <div className="flex items-center justify-center">
@@ -99,13 +100,6 @@ export const EmployeesTable = (): JSX.Element => {
           </div>
         )}
       </div>
-
-      {isModalOpen && (
-        <StepOneEmployee
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleModalSubmit}
-        />
-      )}
     </div>
   );
 };

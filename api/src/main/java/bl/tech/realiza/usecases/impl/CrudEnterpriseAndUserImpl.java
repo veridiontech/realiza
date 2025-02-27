@@ -84,6 +84,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .surname(enterpriseAndUserRequestDto.getSurname())
                 .email(enterpriseAndUserRequestDto.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
+                .isActive(true)
                 .branch(savedBranch)
                 .build();
 
@@ -149,6 +150,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .surname(enterpriseAndUserRequestDto.getSurname())
                 .email(enterpriseAndUserRequestDto.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
+                .isActive(true)
                 .providerSupplier(savedProviderSupplier)
                 .build();
 
@@ -213,6 +215,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .surname(enterpriseAndUserRequestDto.getSurname())
                 .email(enterpriseAndUserRequestDto.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
+                .isActive(true)
                 .providerSubcontractor(savedProviderSubcontractor)
                 .build();
 

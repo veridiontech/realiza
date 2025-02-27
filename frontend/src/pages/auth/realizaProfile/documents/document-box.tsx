@@ -1,4 +1,5 @@
 import { useBranch } from "@/context/Branch-provider";
+import { propsDocument } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import axios from "axios";
@@ -8,21 +9,28 @@ import { toast } from "sonner";
 
 interface DocumentBoxProps {
   isLoading: boolean;
-  documents: { idDocument: string; name: string }[] | undefined;
+  documents: propsDocument[]
+  onSelectDocument: (documentId: string) => void; 
 }
 
-export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
+export function DocumentBox({
+  isLoading,
+  documents = [],
+  onSelectDocument,
+}: DocumentBoxProps) {
   const { branch } = useBranch();
 
   const selectDocument = async (documentId: string) => {
-    console.log("documentoId: ",documentId);
-    console.log("idBranch:", branch?.idBranch);
-    
     try {
+      console.log("selecionando documento");
       await axios.post(
         `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentId=${documentId}`,
       );
-      toast.success("documento selecionado enviado com sucesso");
+      console.log("documento selecionado com sucesso");
+      toast.success("Documento selecionado enviado com sucesso");
+
+
+      onSelectDocument(documentId);
     } catch (err) {
       console.log("erro ao selecionar documento", err); 
       toast.error("Erro ao selecionar documento");
@@ -47,7 +55,8 @@ export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
   }
 
   return (
-    <div className="flex w-[30vw] flex-col gap-5 rounded-md border p-2 shadow-md">
+    <div className="mr-2 flex h-[45vh] w-[30vw] flex-col gap-5 rounded-md border p-2 shadow-md">
+      <h2 className="text-realizaBlue text-lg">Matriz:</h2>
       <div className="flex h-[3vh] w-full items-center gap-1 rounded-md border p-1">
         <Search className="text-gray-500" />
         <input
@@ -61,7 +70,11 @@ export function DocumentBox({ isLoading, documents = [] }: DocumentBoxProps) {
             documents.map((document) => (
               <div
                 key={document.idDocument}
-                onClick={() => selectDocument(document.idDocument)}
+                onClick={() => {
+                  if(document.idDocumentMatrix) {
+                    selectDocument(document.idDocumentMatrix);
+                  }
+                }}
                 className="cursor-pointer rounded-sm p-1 hover:bg-gray-200"
               >
                 <span>{document.name}</span>

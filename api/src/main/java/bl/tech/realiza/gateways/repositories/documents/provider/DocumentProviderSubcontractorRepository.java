@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.documents.provider;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
@@ -13,4 +14,7 @@ public interface DocumentProviderSubcontractorRepository extends JpaRepository<D
     Page<DocumentProviderSubcontractor> findAllByProviderSubcontractor_IdProvider(String idSearch, Pageable pageable);
     List<DocumentProviderSubcontractor> findAllByProviderSubcontractor_IdProvider(String idSearch);
     List<DocumentProviderSubcontractor> findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, String groupName);
+    Long countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, String groupName);
+    Long countByProviderSubcontractor_IdProviderAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, String groupName);
+    Long countByProviderSubcontractor_IdProviderAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, Document.Status status, String groupName);
 }

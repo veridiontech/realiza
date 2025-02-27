@@ -94,6 +94,21 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentEmployee(@PathVariable String id,
+                                                                              @RequestPart(value = "file") MultipartFile file) {
+        Optional<DocumentResponseDto> documentEmployee = null;
+        try {
+            documentEmployee = crudDocumentEmployeeImpl.upload(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.of(Optional.of(documentEmployee));
+    }
+
     @GetMapping("/filtered-employee")
     @ResponseStatus(HttpStatus.OK)
     @Override

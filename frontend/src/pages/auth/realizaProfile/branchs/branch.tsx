@@ -7,6 +7,7 @@ import { Table } from "@/components/ui/tableVanila";
 import axios from "axios";
 import { Puff } from "react-loader-spinner";
 import { ip } from "@/utils/ip";
+import { useClient } from "@/context/Client-Provider";
 
 interface BranchType {
   idBranch: string;
@@ -23,18 +24,6 @@ const columns: {
   { key: "name", label: "Nome da Filial" }, // Alterado para "name"
   { key: "cnpj", label: "CNPJ" },
   { key: "address", label: "Endereço" },
-  {
-    key: "idBranch",
-    label: "Ações",
-    render: (row) => (
-      <button
-        className="ml-4 text-blue-500 hover:underline"
-        onClick={() => console.log(`Editar: ${row.name}`)} // Atualizado para "name"
-      >
-        Editar
-      </button>
-    ),
-  },
 ];
 
 export function Branch() {
@@ -46,14 +35,16 @@ export function Branch() {
   const [selectedCnpj, setSelectedCnpj] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const {client} = useClient()
 
   //   const itemsPerPage = 10;
+
 
   const fetchBranches = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${ip}/branch`);
+      const response = await axios.get(`${ip}/branch/filtered-client?idSearch=${client?.idClient}`);
       const { content, totalPages: total } = response.data;
       setBranches(content);
       setTotalPages(total);
@@ -81,7 +72,7 @@ export function Branch() {
       <div className="m-4 flex justify-center">
         <div className="flex w-[90rem] flex-col rounded-lg bg-white p-4 shadow-md">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="mb-6 text-xl font-semibold">Filiais</h1>
+            <h1 className="m-8 text-2xl">Filiais</h1>
             <ButtonBlue onClick={() => setIsSearchModalOpen(true)}>
               Adicionar Filial
             </ButtonBlue>

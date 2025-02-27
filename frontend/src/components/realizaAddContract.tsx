@@ -18,10 +18,12 @@ import { Radio } from "react-loader-spinner";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import { propsClient } from "@/types/interfaces";
+import { propsBranch, propsClient } from "@/types/interfaces";
 
 const contractFormSchema = z.object({
   serviceName: z.string().nonempty("O nome do serviço é obrigatório"),
+  clientSelect: z.string().nonempty("Selecione um cliente"),
+  id_branch: z.string().nonempty("Selecione uma filial"),
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
@@ -57,8 +59,9 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalAddContract() {
   const [clients, setClients] = useState<propsClient[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [requirements, setRequirements] = useState<any[]>([]);
+  const [branches, setBranches] = useState<propsBranch[]>([]);
+  // const [activities, setActivities] = useState<any[]>([]);
+  // const [requirements, setRequirements] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +70,7 @@ export function ModalAddContract() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
+    // setValue,
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
   });
@@ -81,12 +84,28 @@ export function ModalAddContract() {
     }
   };
 
+  const getBranches = async (clientId: string) => {
+    try {
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${clientId}`,
+      );
+      setBranches(res.data.content);
+      console.log("Filiais do cliente:", res.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    getBranches(e.target.value);
+  };
+
   const getActivities = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
-      const requirementData = await axios.get(`${ip}/contract/requirement`);
-      setActivities(activitieData.data.content);
-      setRequirements(requirementData.data.content);
+      // const activitieData = await axios.get(`${ip}/contract/activity`);
+      // const requirementData = await axios.get(`${ip}/contract/requirement`);
+      // setActivities(activitieData.data.content);
+      // setRequirements(requirementData.data.content);
     } catch (err) {
       console.error("Erro ao buscar atividades e requisitos", err);
     }
@@ -132,7 +151,7 @@ export function ModalAddContract() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-green-600">Novo Contrato</Button>
+        <Button className="bg-realizaBlue">Novo Contrato</Button>
       </DialogTrigger>
       <DialogContent
         style={{
@@ -154,19 +173,40 @@ export function ModalAddContract() {
                 className="w-full rounded-md border p-2"
                 {...register("client")}
                 defaultValue=""
-                onChange={(e) => getManagers(e.target.value)}
+                onChange={(e) => {
+                  register("clientSelect").onChange(e);
+                  handleClientChange(e);
+                  getManagers(e.target.value);
+                }}
               >
                 <option value="" disabled>
                   Selecione um cliente
                 </option>
                 {clients.map((client) => (
                   <option key={client.idClient} value={client.idClient}>
-                    {client.companyName}
+                    {client.tradeName}
                   </option>
                 ))}
               </select>
               {errors.client && (
                 <span className="text-red-600">{errors.client.message}</span>
+              )}
+            </div>
+            <div>
+              <Label className="text-white">Filiais do cliente</Label>
+              <select
+                {...register("id_branch")}
+                className="flex flex-col rounded-md border p-2"
+              >
+                <option value="">Selecione uma filial</option>
+                {branches.map((branch) => (
+                  <option key={branch.id_branch} value={branch.id_branch}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+              {errors.id_branch && (
+                <span className="text-red-600">{errors.id_branch.message}</span>
               )}
             </div>
 
@@ -337,7 +377,7 @@ export function ModalAddContract() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1">
+            {/* <div className="flex flex-col gap-1">
               <Label className="text-white">Atividades</Label>
               <select
                 className="w-full rounded-md border p-2"
@@ -361,8 +401,8 @@ export function ModalAddContract() {
                   {errors.activities.message}
                 </span>
               )}
-            </div>
-
+            </div> */}
+{/* 
             <div className="flex flex-col gap-1">
               <Label className="text-white">Requisitos</Label>
               <select
@@ -390,7 +430,7 @@ export function ModalAddContract() {
                   {errors.requirements.message}
                 </span>
               )}
-            </div>
+            </div> */}
 
             <div className="flex justify-end">
               {isLoading ? (

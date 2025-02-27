@@ -12,7 +12,10 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,6 +38,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final DocumentMatrixRepository documentMatrixRepository;
     private final BranchRepository branchRepository;
     private final FileRepository fileRepository;
+    private final DocumentProcessingService documentProcessingService;
 
     @Override
     public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
@@ -123,8 +128,11 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
                 documentBranch -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentBranch.getDocumentation() != null && ObjectId.isValid(documentBranch.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentBranch.getIdDocumentation())
@@ -198,13 +206,77 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
+    public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        FileDocument fileDocument = null;
+        String fileDocumentId = null;
+        FileDocument savedFileDocument= null;
+
+        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
+
+        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                fileDocument = FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .data(file.getBytes())
+                        .build();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+
+            try {
+                savedFileDocument = fileRepository.save(fileDocument);
+                fileDocumentId = savedFileDocument.getIdDocumentAsString();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
+            }
+            documentBranch.setDocumentation(fileDocumentId);
+        }
+
+        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
+
+        if (documentIAValidation.isAutoValidate()) {
+            if (documentIAValidation.isValid()) {
+                documentBranch.setStatus(Document.Status.APROVADO);
+            } else {
+                documentBranch.setStatus(Document.Status.REPROVADO);
+            }
+        } else {
+            documentBranch.setStatus(Document.Status.EM_ANALISE);
+        }
+
+        documentBranch.setVersionDate(LocalDateTime.now());
+
+        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
+
+        DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
+                .idDocumentation(savedDocumentBranch.getIdDocumentation())
+                .title(savedDocumentBranch.getTitle())
+                .status(savedDocumentBranch.getStatus())
+                .documentation(savedDocumentBranch.getDocumentation())
+                .creationDate(savedDocumentBranch.getCreationDate())
+                .branch(savedDocumentBranch.getBranch().getIdBranch())
+                .documentIAValidationResponse(documentIAValidation)
+                .build();
+
+        return Optional.of(documentBranchResponse);
+    }
+
+    @Override
     public Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable) {
         Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAllByBranch_IdBranch(idSearch, pageable);
 
         Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
                 documentBranch -> {
-                    Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
-                    FileDocument fileDocument = fileDocumentOptional.orElse(null);
+                    FileDocument fileDocument = null;
+                    if (documentBranch.getDocumentation() != null && ObjectId.isValid(documentBranch.getDocumentation())) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
 
                     return DocumentResponseDto.builder()
                             .idDocumentation(documentBranch.getIdDocumentation())
@@ -227,32 +299,146 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     @Override
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        Comparator<DocumentMatrix> byName = Comparator.comparing(DocumentMatrix::getName);
+
         List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(id);
-        List<DocumentMatrix> selectedDocumentsEnterprise = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento empresa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsPersonal = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documento pessoa".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsService = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Documentos empresa-serviço".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
-        List<DocumentMatrix> selectedDocumentsTrainning = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .filter(doc -> "Treinamentos e certificações".equals(doc.getSubGroup().getGroup().getGroupName())).collect(Collectors.toList());
-        List<DocumentMatrix> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa");
-        List<DocumentMatrix> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa");
-        List<DocumentMatrix> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço");
-        List<DocumentMatrix> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações");
-        List<DocumentMatrix> nonSelectedDocumentsEnterprise = new ArrayList<>(allDocumentsEnterprise);
-        List<DocumentMatrix> nonSelectedDocumentsPersonal = new ArrayList<>(allDocumentsPersonal);
-        List<DocumentMatrix> nonSelectedDocumentsService = new ArrayList<>(allDocumentsService);
-        List<DocumentMatrix> nonSelectedDocumentsTrainning = new ArrayList<>(allDocumentsTrainning);
-        nonSelectedDocumentsEnterprise.removeAll(selectedDocumentsEnterprise);
-        nonSelectedDocumentsPersonal.removeAll(selectedDocumentsPersonal);
-        nonSelectedDocumentsService.removeAll(selectedDocumentsService);
-        nonSelectedDocumentsTrainning.removeAll(selectedDocumentsTrainning);
-        DocumentResponseDto branchResponse = DocumentResponseDto.builder()
+
+        List<DocumentMatrixResponseDto> selectedDocumentsEnterprise = documentBranch.stream()
+                .filter(doc -> "Documento empresa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+        List<DocumentMatrixResponseDto> selectedDocumentsPersonal = documentBranch.stream()
+                .filter(doc -> "Documento pessoa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+        List<DocumentMatrixResponseDto> selectedDocumentsService = documentBranch.stream()
+                .filter(doc -> "Documentos empresa-serviço".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+        List<DocumentMatrixResponseDto> selectedDocumentsTrainning = documentBranch.stream()
+                .filter(doc -> "Treinamentos e certificações".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
+                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .name(doc.getTitle())
+                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
+                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+        List<DocumentMatrixResponseDto> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
+                .stream()
+                .sorted(Comparator.comparing(DocumentMatrix::getName))
+                .map(doc -> DocumentMatrixResponseDto.builder()
+                        .idDocumentMatrix(doc.getIdDocument())
+                        .name(doc.getName())
+                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
+                        .subgroupName(doc.getSubGroup().getSubgroupName())
+                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
+                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .build())
+                .toList();
+
+        Set<String> selectedDocumentEnterpriseIds = selectedDocumentsEnterprise.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        Set<String> selectedDocumentPersonalIds = selectedDocumentsPersonal.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        Set<String> selectedDocumentServiceIds = selectedDocumentsService.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        Set<String> selectedDocumentTrainningIds = selectedDocumentsTrainning.stream()
+                .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
+                .collect(Collectors.toSet());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise = allDocumentsEnterprise.stream()
+                .filter(doc -> !selectedDocumentEnterpriseIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal = allDocumentsPersonal.stream()
+                .filter(doc -> !selectedDocumentPersonalIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsService = allDocumentsService.stream()
+                .filter(doc -> !selectedDocumentServiceIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning = allDocumentsTrainning.stream()
+                .filter(doc -> !selectedDocumentTrainningIds.contains(doc.getIdDocumentMatrix()))
+                .collect(Collectors.toList());
+
+        return DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocumentsEnterprise)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocumentsEnterprise)
                 .selectedDocumentsPersonal(selectedDocumentsPersonal)
@@ -262,8 +448,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .selectedDocumentsTrainning(selectedDocumentsTrainning)
                 .nonSelectedDocumentsTrainning(nonSelectedDocumentsTrainning)
                 .build();
-
-        return branchResponse;
     }
 
     @Override
@@ -319,12 +503,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         Branch branch = branchRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Branch not found"));
 
         DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
-
-        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranch(idEnterprise);
-
-        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .collect(Collectors.toSet());
 
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
                         .title(documentMatrix.getName())

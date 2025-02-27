@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const createClientManageFormSchema = z.object({
@@ -33,7 +32,6 @@ export function CreateNewManagerClient() {
   const [uniqueBranch, setUniqueBranch] = useState<propsBranch | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
-
   const {
     register,
     handleSubmit,
@@ -50,13 +48,40 @@ export function CreateNewManagerClient() {
     };
     console.log(payload);
 
+    let responseClient: any;
+
+    let branchName: string;
+
+    let branchResponse: any;
+
     try {
-      await axios.post(`${ip}/user/client`, payload);
-      toast.success("Sua solicitação foi enviada para realiza");
+      responseClient = await axios.post(`${ip}/user/client`, payload);
     } catch (err) {
       console.log("erro ao criar gerente:", err);
     } finally {
       setIsLoading(false);
+    }
+    try {
+      branchResponse = await axios.get(`${ip}/branch/${user?.branch}`);
+    } catch (err) {
+      console.log("erro ao buscar nome da branch:", err);
+    } finally {
+      setIsLoading(false);
+    }
+
+    branchName = branchResponse.data.name;
+
+    const newSolicitation = {
+      title: "Novo usuário Cliente Gerente",
+      details: `Solicitação para criar um novo gerente em ${branchName}`,
+      idRequester: user?.idUser,
+      idNewUser: responseClient.data.idUser,
+    };
+
+    try {
+      await axios.post(`${ip}/item-management/new`, newSolicitation);
+    } catch (err) {
+      console.log("erro ao criar solicitação:", err);
     }
   };
 
@@ -116,7 +141,11 @@ export function CreateNewManagerClient() {
             </div>
             <div>
               <Label>Telefone</Label>
-              <Input type="text" {...register("cellPhone")} className="w-full" />
+              <Input
+                type="text"
+                {...register("cellPhone")}
+                className="w-full"
+              />
               {errors.cellPhone && <span>{errors.cellPhone.message}</span>}
             </div>
             <div>
@@ -140,7 +169,6 @@ export function CreateNewManagerClient() {
                   type="text"
                   {...register("position")}
                   className="w-[15vw]"
-                  
                 />
               </div>
             </div>

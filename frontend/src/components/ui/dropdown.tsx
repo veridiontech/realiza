@@ -25,7 +25,7 @@ export function Dropdown({
     <div className="relative">
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex w-full items-center justify-between rounded-lg bg-blue-100 p-3 font-medium text-blue-600 focus:outline-none"
+        className="bg-realizaBlue text-realizaBlue flex w-full items-center justify-between rounded-lg p-3 font-medium focus:outline-none"
       >
         {getSelectedOptionName()}
         <span>{isDropdownOpen ? "▲" : "▼"}</span>
@@ -41,7 +41,7 @@ export function Dropdown({
                   onSelect(option);
                   setIsDropdownOpen(false);
                 }}
-                className="cursor-pointer p-2 hover:bg-blue-100"
+                className="hover:bg-realizaBlue cursor-pointer p-2"
               >
                 {option.name}
               </div>

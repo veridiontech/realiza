@@ -2,6 +2,15 @@ package bl.tech.realiza.domains.providers;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.clients.Contact;
+import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.user.UserProviderSubcontractor;
+import bl.tech.realiza.domains.user.UserProviderSupplier;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -28,7 +37,28 @@ public class ProviderSupplier extends Provider {
     @JoinTable(
             name = "SUPPLIER_BRANCHS",
             joinColumns = @JoinColumn(name = "idProvider"),
-            inverseJoinColumns = @JoinColumn(name = "idBranch")
+            inverseJoinColumns = @JoinColumn(name = "idBranch", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
     )
     private List<Branch> branches;
+
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Contact> contacts;
+
+    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ContractProviderSupplier> contractsSupplier;
+
+    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ContractProviderSubcontractor> contractsSubcontractor;
+
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Employee> employees;
+
+    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ProviderSubcontractor> providerSubcontracts;
+
+    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<UserProviderSupplier> userProviderSuppliers;
+
+    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<DocumentProviderSupplier> documentProviderSuppliers;
 }

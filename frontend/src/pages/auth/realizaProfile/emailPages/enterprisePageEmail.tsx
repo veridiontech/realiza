@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFormDataContext } from "@/context/formDataProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Search } from "lucide-react";
@@ -10,15 +9,20 @@ import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
+import { useUser } from "@/context/user-provider";
+import { ip } from "@/utils/ip";
+import { useFormDataContext } from "@/context/formDataProvider";
+import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 const enterprisePageEmailFormSchema = z.object({
   cnpj: z.string().nonempty("O CNPJ é obrigatório"),
-  tradeName: z.string().nonempty("O nome fantasia é obrigatório"),
+  tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
   phone: z.string().nonempty("O telefone é obrigatório"),
   idCompany: z.string().optional(),
   company: z.string().nullable().optional(),
+  branches: z.array(z.string()).nonempty("A branch é obrigatória"),
 });
 
 type EnterprisePageEmailFormSchema = z.infer<
@@ -26,20 +30,23 @@ type EnterprisePageEmailFormSchema = z.infer<
 >;
 
 export function EnterprisePageEmail() {
-  const { setEnterpriseData } = useFormDataContext();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  const tokenFromUrl = searchParams.get("token");
+  const { token } = useUser();
+  const { setEnterpriseData } = useFormDataContext();
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
+  const idClient = searchParams.get("idClient");
   const [isLoading, setIsLoading] = useState(false);
+  const [branches, setBranches] = useState<any[]>([]);
 
   useEffect(() => {
     const validateToken = async () => {
       try {
         const res = await axios.get(
-          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${token}`,
+          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${tokenFromUrl}`,
         );
         if (res.status === 200) {
           setIsValidToken(true);
@@ -51,12 +58,30 @@ export function EnterprisePageEmail() {
         setIsValidToken(false);
       }
     };
-    if (token) {
+
+    if (tokenFromUrl) {
       validateToken();
     } else {
       console.log("Token não encontrado.");
     }
-  }, [token]);
+  }, [tokenFromUrl]);
+
+  useEffect(() => {
+    if (idClient) {
+      axios
+        .get(
+          `${ip}/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
+        )
+        .then((res) => {
+          const data = res.data.content || res.data;
+          const branchesArray = Array.isArray(data) ? data : data ? [data] : [];
+          setBranches(branchesArray);
+        })
+        .catch((err) => {
+          console.error("Erro ao buscar branches:", err);
+        });
+    }
+  }, [idClient]);
 
   const {
     register,
@@ -77,15 +102,10 @@ export function EnterprisePageEmail() {
       return;
     }
     try {
-      const res = await axios.get(
-        `https://www.receitaws.com.br/v1/cnpj/${cnpj}`,
-      );
-      if (res.data) {
-        setValue("corporateName", res.data.nome);
-        setValue("tradeName", res.data.fantasia || "Sem nome fantasia");
-        setValue("email", res.data.email);
-        setValue("phone", res.data.telefone);
-      }
+      const data = await fetchCompanyByCNPJ(cnpj);
+      setValue("corporateName", data.razaoSocial);
+      setValue("tradeName", data.nomeFantasia || "");
+      setValue("email", "");
     } catch (err) {
       console.log("Erro ao buscar CNPJ:", err);
     } finally {
@@ -95,56 +115,51 @@ export function EnterprisePageEmail() {
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
-    try {
-      let payload;
-      switch (findCompany) {
-        case "SUBCONTRACTOR":
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-            role: "ROLE_SUPPLIER_RESPONSIBLE",
-          };
-          break;
-        case "CLIENT":
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-            role: "ROLE_CLIENT_RESPONSIBLE",
-          };
-          break;
-        case "SUPPLIER":
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-            role: "ROLE_SUPPLIER_RESPONSIBLE",
-          };
-          break;
-        default:
-          payload = {
-            ...data,
-            idCompany: findIdCompany || "",
-            company: findCompany || "",
-            fantasyName: data.tradeName,
-            socialReason: data.corporateName,
-          };
-          break;
-      }
-      
-      navigate(`/email/Sign-up`);
-    } catch (err) {
-      console.error("Erro ao enviar os dados:", err);
-    } finally {
-      setIsLoading(false);
+    let payload;
+    switch (findCompany) {
+      case "SUBCONTRACTOR":
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+          role: "ROLE_SUPPLIER_RESPONSIBLE",
+        };
+        break;
+      case "CLIENT":
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+          role: "ROLE_CLIENT_RESPONSIBLE",
+        };
+        break;
+      case "SUPPLIER":
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+          branches: data.branches,
+        };
+        break;
+      default:
+        payload = {
+          ...data,
+          idCompany: findIdCompany || "",
+          company: findCompany || "",
+          fantasyName: data.tradeName || "",
+          socialReason: data.corporateName,
+        };
+        break;
     }
+    setEnterpriseData(payload);
+    navigate(`/email/Sign-Up?token=${token}`);
+    setIsLoading(false);
   };
 
   if (!isValidToken) {
@@ -191,15 +206,6 @@ export function EnterprisePageEmail() {
                 )}
               </div>
             </div>
-            <div>
-              <Label>Telefone</Label>
-              <Input
-                type="text"
-                placeholder="Telefone"
-                className="w-[13vw]"
-                {...register("phone")}
-              />
-            </div>
           </div>
           <div>
             <Label>Email corporativo</Label>
@@ -208,6 +214,15 @@ export function EnterprisePageEmail() {
               placeholder="Digite o seu email"
               className="w-[27vw]"
               {...register("email")}
+            />
+          </div>
+          <div>
+            <Label>Telefone</Label>
+            <Input
+              type="text"
+              placeholder="Digite o telefone"
+              className="w-[27vw]"
+              {...register("phone")}
             />
           </div>
           <div className="flex items-center gap-5">
@@ -230,6 +245,25 @@ export function EnterprisePageEmail() {
               />
             </div>
           </div>
+          {branches && branches.length > 0 && (
+            <div>
+              <Label>Selecione a Branch</Label>
+              <select
+                multiple
+                className="w-[27vw] rounded border p-2"
+                {...register("branches")}
+              >
+                {branches.map((branch: any) => (
+                  <option
+                    key={branch.idBranch || branch.id}
+                    value={branch.idBranch || branch.id}
+                  >
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {isLoading ? (
             <Button className="bg-realizaBlue h-[5vh]">
               <Oval

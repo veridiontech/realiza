@@ -94,6 +94,21 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/upload")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentProviderSubcontractor(@PathVariable String id,
+                                                                              @RequestPart(value = "file") MultipartFile file) {
+        Optional<DocumentResponseDto> documentSubcontractor = null;
+        try {
+            documentSubcontractor = crudDocumentSubcontractor.upload(id, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.of(Optional.of(documentSubcontractor));
+    }
+
     @GetMapping("/filtered-subcontractor")
     @ResponseStatus(HttpStatus.OK)
     @Override
@@ -130,7 +145,7 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<String> addRequiredDocument(@PathVariable String idEnterprise, @RequestParam String documentMatrixId) {
-        String response = crudDocumentSubcontractor.addRequiredDocument(documentMatrixId, idEnterprise);
+        String response = crudDocumentSubcontractor.addRequiredDocument(idEnterprise, documentMatrixId);
 
         return ResponseEntity.ok(response);
     }

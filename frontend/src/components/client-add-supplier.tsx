@@ -20,10 +20,12 @@ import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useUser } from "@/context/user-provider";
 
+// Torna o campo idClient opcional, pois vamos atribuí-lo via código
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   company: z.string().default("SUPPLIER"),
   cnpj: z.string().nonempty("Insira o cnpj"),
+  idClient: z.string().optional(),
 });
 
 const contractFormSchema = z.object({
@@ -107,10 +109,22 @@ export function ModalTesteSendSupplier() {
     console.log(user?.branch);
 
     try {
+      // Extrair o idClient do token armazenado no localStorage
+      const token = localStorage.getItem("tokenClient");
+      let extractedIdClient = "";
+      if (token) {
+        const payload = JSON.parse(window.atob(token.split(".")[1]));
+        extractedIdClient = payload.idClient;
+        console.log("idClient extraído do token:", extractedIdClient);
+      } else {
+        console.warn("Token não encontrado no localStorage");
+      }
+
       await axios.post(`${ip}/invite`, {
         email: data.email,
         idCompany: user?.branch,
         company: data.company,
+        idClient: extractedIdClient, // Enviando o idClient extraído
         cnpj: data.cnpj,
       });
       setPushCnpj(data.cnpj);
@@ -178,7 +192,7 @@ export function ModalTesteSendSupplier() {
             onSubmit={handleSubmit(createClient)}
             className="flex flex-col gap-4"
           >
-            <div>
+            <div className="mb-1">
               <Label className="text-white">Email</Label>
               <Input
                 type="email"
