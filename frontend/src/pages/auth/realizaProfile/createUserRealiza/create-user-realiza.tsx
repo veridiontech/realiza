@@ -5,48 +5,61 @@ import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const createUserRealizaSchema = z.object({
-  firstName: z.string(),
-  surname: z.string(),
-  email: z.string().email("Insira um email valido"),
-  cpf: z.string(),
-  telephone: z.string(),
+  firstName: z.string().nonempty("Insira um nome"),
+  surname: z.string().nonempty("Insira um sobrenome"),
+  email: z.string().email("Insira um email válido"),
+  cpf: z.string().nonempty("Insira um CPF"),
+  telephone: z.string().nonempty("Insira um telefone"),
   password: z.string().nonempty("Insira uma senha"),
-  // profilePicture: z.string().optional(),
 });
 
 type CreateUserRealizaSchema = z.infer<typeof createUserRealizaSchema>;
+
 export function CreateUserRealiza() {
+  const [showPassword, setShowPassword] = useState(false);
   const [userPreview, setUserPreview] = useState({
     firstName: "",
     surname: "",
     email: "",
   });
 
-  const { register, handleSubmit } = useForm<CreateUserRealizaSchema>({
+  const {
+    register,
+    handleSubmit,
+    watch, 
+    formState: { errors },
+  } = useForm<CreateUserRealizaSchema>({
     resolver: zodResolver(createUserRealizaSchema),
   });
+
+  const firstName = watch("firstName");
+  const surname = watch("surname");
+  const email = watch("email");
+
+  useEffect(() => {
+    setUserPreview({ firstName, surname, email });
+  }, [firstName, surname, email]);
 
   const createUser = async (data: CreateUserRealizaSchema) => {
     const payload = {
       ...data,
-      role: "ROLE_MANAGER",
+      role: "ROLE_REALIZA_PLUS",
     };
     console.log("Função createUser chamada com os dados:", payload);
     try {
       await axios.post(`${ip}/user/manager`, payload);
       console.log("Usuário criado com sucesso");
+      toast.success("Sucesso ao criar novo usuário Realiza");
     } catch (err) {
       console.error("Erro ao criar novo usuário", err);
+      toast.error("Erro ao criar um novo usuário, tente novamente");
     }
-  };
-
-  const handlePreview = (field: keyof typeof userPreview, value: string) => {
-    setUserPreview((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -64,18 +77,18 @@ export function CreateUserRealiza() {
                 <Input
                   type="text"
                   {...register("firstName")}
-                  onChange={(e) => handlePreview("firstName", e.target.value)}
                   className="dark:bg-white"
                 />
+                {errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}
               </div>
               <div>
                 <Label>Sobrenome</Label>
                 <Input
                   type="text"
                   {...register("surname")}
-                  onChange={(e) => handlePreview("surname", e.target.value)}
                   className="dark:bg-white"
                 />
+                {errors.surname && <p className="text-red-500">{errors.surname.message}</p>}
               </div>
             </div>
 
@@ -86,6 +99,7 @@ export function CreateUserRealiza() {
                 {...register("cpf")}
                 className="dark:bg-white"
               />
+              {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -94,9 +108,9 @@ export function CreateUserRealiza() {
                 <Input
                   type="email"
                   {...register("email")}
-                  onChange={(e) => handlePreview("email", e.target.value)}
                   className="dark:bg-white"
                 />
+                {errors.email && <p className="text-red-500">{errors.email.message}</p>}
               </div>
               <div>
                 <Label>Celular</Label>
@@ -105,6 +119,27 @@ export function CreateUserRealiza() {
                   {...register("telephone")}
                   className="dark:bg-white"
                 />
+                {errors.telephone && <p className="text-red-500">{errors.telephone.message}</p>}
+              </div>
+            </div>
+            <div>
+              <div>
+                <Label>Senha</Label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    className="pr-10 dark:bg-white"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "🙈" : "👁️"}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-500">{errors.password.message}</p>}
               </div>
             </div>
           </div>

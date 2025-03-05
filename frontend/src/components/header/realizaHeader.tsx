@@ -40,16 +40,26 @@ export function Header() {
 
   // Busca clientes
   useEffect(() => {
-    const getClients = async () => {
+    const getAllClients = async () => {
       try {
-        const res = await axios.get(`${ip}/client`);
-        setClients(res.data.content);
+        const firstRes = await axios.get(`${ip}/client`, { params: { page: 0, size: 100 } });
+        const totalPages = firstRes.data.totalPages;
+        const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
+          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } })
+        );
+  
+        const responses = await Promise.all(requests);
+        const allClients = [firstRes.data.content, ...responses.map(res => res.data.content)].flat();
+  
+        setClients(allClients);
       } catch (err) {
         console.error("Erro ao puxar clientes", err);
       }
     };
-    getClients();
+  
+    getAllClients();
   }, []);
+  
 
   const handleSelectClient = async (id: string) => {
     try {
@@ -86,11 +96,10 @@ export function Header() {
               <SheetContent
                 className="h-full overflow-auto dark:bg-white"
                 side="left"
-                // Adiciona os mesmos handlers para que o menu permaneça aberto
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <LateralMenu />
+                <LateralMenu onClose={() => setMenuOpen(false)} />
               </SheetContent>
             </Sheet>
           </div>

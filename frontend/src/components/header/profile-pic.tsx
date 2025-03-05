@@ -17,12 +17,14 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 
+const MAX_FILE_SIZE_MB = 20;
+
 const profilePicFormSchema = z.object({
   file: z
     .instanceof(File, { message: "O arquivo deve ser uma imagem válida." })
     .refine(
-      (file) => file.size <= 2 * 1024 * 1024,
-      "O arquivo deve ter no máximo 2MB."
+      (file) => file.size <= MAX_FILE_SIZE_MB * 1024 * 1024, 
+      `O arquivo deve ter no máximo ${MAX_FILE_SIZE_MB}MB.`
     )
     .refine(
       (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
@@ -67,7 +69,7 @@ export function ProfilePic() {
       );
 
       console.log("Imagem enviada com sucesso!", response.data);
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
       console.error("Erro ao enviar imagem:", error);
     }
@@ -92,14 +94,18 @@ export function ProfilePic() {
   return (
     <Dialog>
       <DialogTrigger>
-        <div >
+        <div>
           {base64Image ? (
             <div>
-            <img src={base64Image} className="w-[10vw] rounded-full h-[20vh] object-cover hover:bg-gray-600" alt="Foto de perfil" />
-            <Pencil className="relative bottom-[5.5vw] left-[4.5vw] text-gray-300 hover:text-gray-500"/>
+              <img
+                src={base64Image}
+                className="w-[10vw] rounded-full h-[20vh] object-cover hover:bg-gray-600"
+                alt="Foto de perfil"
+              />
+              <Pencil className="relative bottom-[5.5vw] left-[4.5vw] text-gray-300 hover:text-gray-500" />
             </div>
           ) : user ? (
-            <div className="flex items-center justify-center bg-gray-300 text-black font-bold text-xl rounded-full">
+            <div className="flex items-center justify-center bg-gray-300 text-black font-bold text-xl rounded-full w-[10vw] h-[20vh]">
               {getNameUser}
               {getSurnameUser}
             </div>
@@ -114,17 +120,31 @@ export function ProfilePic() {
         </DialogHeader>
         <div className="flex items-center justify-center">
           {base64Image ? (
-            <img src={base64Image} className="w-[10vw] h-[20vh] rounded-full object-cover" alt="Foto atual" />
+            <img
+              src={base64Image}
+              className="w-[10vw] h-[20vh] rounded-full object-cover"
+              alt="Foto atual"
+            />
           ) : (
             <p>Nenhuma foto encontrada.</p>
           )}
         </div>
-        <form onSubmit={handleSubmit(handleFileUpload)} className="flex flex-col gap-1">
+        <form
+          onSubmit={handleSubmit(handleFileUpload)}
+          className="flex flex-col gap-1"
+        >
           <div>
-            <Input type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer"/>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="cursor-pointer"
+            />
             {errors.file && <p className="text-red-500">{errors.file.message}</p>}
           </div>
-          <Button type="submit" className="bg-realizaBlue">Enviar</Button>
+          <Button type="submit" className="bg-realizaBlue">
+            Enviar
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
