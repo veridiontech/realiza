@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+// Definição do esquema de validação
 const createUserRealizaSchema = z.object({
   firstName: z.string().nonempty("Insira um nome"),
   surname: z.string().nonempty("Insira um sobrenome"),
@@ -17,12 +18,15 @@ const createUserRealizaSchema = z.object({
   cpf: z.string().nonempty("Insira um CPF"),
   telephone: z.string().nonempty("Insira um telefone"),
   password: z.string().nonempty("Insira uma senha"),
+  position: z.string().nonempty("Insira um cargo"),
+  profilePicture: z.instanceof(File).optional(), // Agora aceita um arquivo opcional
 });
 
 type CreateUserRealizaSchema = z.infer<typeof createUserRealizaSchema>;
 
 export function CreateUserRealiza() {
   const [showPassword, setShowPassword] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [userPreview, setUserPreview] = useState({
     firstName: "",
     surname: "",
@@ -32,7 +36,8 @@ export function CreateUserRealiza() {
   const {
     register,
     handleSubmit,
-    watch, 
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateUserRealizaSchema>({
     resolver: zodResolver(createUserRealizaSchema),
@@ -46,19 +51,54 @@ export function CreateUserRealiza() {
     setUserPreview({ firstName, surname, email });
   }, [firstName, surname, email]);
 
+
   const createUser = async (data: CreateUserRealizaSchema) => {
-    const payload = {
-      ...data,
-      role: "ROLE_REALIZA_BASIC",
-    };
-    console.log("Função createUser chamada com os dados:", payload);
     try {
-      await axios.post(`${ip}/user/manager`, payload);
+      // Criando o objeto JSON esperado pela API
+      const userManagerRequestDto = {
+        cpf: data.cpf,
+        description: "Teste Manager",
+        password: data.password,
+        position: data.position,
+        role: "ROLE_REALIZA_PLUS",
+        firstName: data.firstName,
+        surname: data.surname,
+        email: data.email,
+        telephone: data.telephone,
+      };
+      console.log("Objeto JSON a ser enviado:", userManagerRequestDto);
+      const formData = new FormData();
+      formData.append(
+        "userManagerRequestDto",
+        new Blob([JSON.stringify(userManagerRequestDto)], { type: "application/json" })
+      );
+      if (data.profilePicture) {
+        formData.append("profilePicture", data.profilePicture);
+      }
+      console.log("Dados do FormData antes do envio:");
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
+  
+      await axios.post(`${ip}/user/manager`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
       console.log("Usuário criado com sucesso");
       toast.success("Sucesso ao criar novo usuário Realiza");
     } catch (err) {
       console.error("Erro ao criar novo usuário", err);
       toast.error("Erro ao criar um novo usuário, tente novamente");
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("profilePicture", file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -74,56 +114,47 @@ export function CreateUserRealiza() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label>Nome</Label>
-                <Input
-                  type="text"
-                  {...register("firstName")}
-                  className="dark:bg-white"
-                />
+                <Input type="text" {...register("firstName")} className="dark:bg-white" />
                 {errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}
               </div>
               <div>
                 <Label>Sobrenome</Label>
-                <Input
-                  type="text"
-                  {...register("surname")}
-                  className="dark:bg-white"
-                />
+                <Input type="text" {...register("surname")} className="dark:bg-white" />
                 {errors.surname && <p className="text-red-500">{errors.surname.message}</p>}
               </div>
             </div>
 
             <div>
               <Label>CPF</Label>
-              <Input
-                type="text"
-                {...register("cpf")}
-                className="dark:bg-white"
-              />
+              <Input type="text" {...register("cpf")} className="dark:bg-white" />
               {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
+            </div>
+
+            <div>
+              <Label>Cargo</Label>
+              <Input type="text" {...register("position")} className="dark:bg-white" />
+              {errors.position && <p className="text-red-500">{errors.position.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label>Email</Label>
-                <Input
-                  type="email"
-                  {...register("email")}
-                  className="dark:bg-white"
-                />
+                <Input type="email" {...register("email")} className="dark:bg-white" />
                 {errors.email && <p className="text-red-500">{errors.email.message}</p>}
               </div>
               <div>
                 <Label>Celular</Label>
-                <Input
-                  type="text"
-                  {...register("telephone")}
-                  className="dark:bg-white"
-                />
+                <Input type="text" {...register("telephone")} className="dark:bg-white" />
                 {errors.telephone && <p className="text-red-500">{errors.telephone.message}</p>}
               </div>
             </div>
+
             <div>
-              <div>
+              <Label>Foto de Perfil</Label>
+              <Input type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
+              {errors.profilePicture && <p className="text-red-500">{errors.profilePicture.message}</p>}
+            </div>
+            <div>
                 <Label>Senha</Label>
                 <div className="relative">
                   <Input
@@ -141,31 +172,19 @@ export function CreateUserRealiza() {
                 </div>
                 {errors.password && <p className="text-red-500">{errors.password.message}</p>}
               </div>
-            </div>
-            <div>
-              <Label>Senha: </Label>
-              <Input type="password" 
-              {...register("password")}
-               className="dark:bg-white"
-              />
-            </div>
           </div>
 
           <div className="flex w-full flex-col gap-4 lg:w-[30%]">
             <div className="flex h-[25vh] w-[20vw] items-center justify-center rounded-md bg-gray-300">
-              <User size={94} />
+              {previewImage ? (
+                <img src={previewImage} className="h-full w-full object-cover rounded-md" alt="Preview" />
+              ) : (
+                <User size={94} />
+              )}
             </div>
             <div className="flex flex-col items-start">
-              <div className="flex items-center gap-1">
-                <p className="font-semibold">Nome:</p>
-                <p>
-                  {userPreview.firstName} {userPreview.surname}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <p className="font-semibold">Email:</p>
-                <p>{userPreview.email}</p>
-              </div>
+              <p className="font-semibold">Nome: {userPreview.firstName} {userPreview.surname}</p>
+              <p className="font-semibold">Email: {userPreview.email}</p>
             </div>
           </div>
         </div>

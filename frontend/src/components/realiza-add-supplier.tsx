@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
-import { log } from "console";
 
 const modalSendEmailFormSchema = z.object({
   email: z
@@ -83,7 +82,7 @@ export function ModalTesteSendSupplier() {
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
   const [requirements, setRequirements] = useState<any>([]);
-  const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
+  // const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [supplierInfo, setSupplierInfo] =
     useState<ModalSendEmailFormSchema | null>(null);
   const [branches, setBranches] = useState<propsBranch[]>([]);
@@ -111,8 +110,31 @@ export function ModalTesteSendSupplier() {
 
   const getClients = async () => {
     try {
-      const res = await axios.get(`${ip}/client`);
-      setClients(res.data.content);
+      const firstRes = await axios.get(`${ip}/client`, {
+        params: { page: 0, size: 100 },
+      });
+      const totalPages = firstRes.data.totalPages;
+      const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
+        axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
+      );
+
+      const responses = await Promise.all(requests);
+      const allClients = [
+        firstRes.data.content,
+        ...responses.map((res) => res.data.content),
+      ].flat();
+
+      setClients(allClients);
+      try {
+        const res = await axios.get(
+          `${ip}/user/client/filtered-client?idSearch=${selectedBranchId}`,
+        );
+        console.log("gestores:", res.data.content);
+        
+        setManagers(res.data.content);
+      } catch (err) {
+        console.log("Erro ao buscar gestores:", err);
+      }
     } catch (err) {
       console.log("Erro ao buscar clientes:", err);
     }
@@ -179,14 +201,6 @@ export function ModalTesteSendSupplier() {
       setSupplierInfo(supplierData);
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
-      try {
-        const res = await axios.get(
-          `${ip}/user/client/filtered-client?idSearch=${selectedBranchId}`,
-        );
-        setManagers(res.data.content);
-      } catch (err) {
-        console.log("Erro ao buscar gestores:", err);
-      }
     } catch (err) {
       console.log("Erro ao enviar email para usuário:", err);
       toast.error("Erro ao enviar email. Tente novamente");
@@ -211,12 +225,12 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  const handleRadioClick = (value: string) => {
-    setSelectedRadio(value);
-  };
+  // const handleRadioClick = (value: string) => {
+  //   setSelectedRadio(value);
+  // };
 
-  const shouldShowServiceType =
-    selectedRadio === null || selectedRadio === "nao";
+  // const shouldShowServiceType =
+  //   selectedRadio === null || selectedRadio === "nao";
 
   useEffect(() => {
     getClients();
@@ -318,6 +332,18 @@ export function ModalTesteSendSupplier() {
                   {!selectedBranchId && (
                     <span className="text-red-600">Selecione uma filial</span>
                   )}
+                </div>
+                <div>
+                  <select defaultValue="">
+                    <option value="" disabled>
+                      Selecione um gestor
+                    </option>
+                    {managers.map((manager: any) => (
+                      <option key={manager.idUser} value={manager.idUser}>
+                        {manager.firstName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="flex flex-col gap-4 border-t pt-4">

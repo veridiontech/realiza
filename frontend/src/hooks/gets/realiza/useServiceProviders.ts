@@ -28,7 +28,7 @@ export function useFetchServiceProviders() {
         params: {
           _limit: limit,
           _page: page,
-          idSearch, // Enviando idSearch como parte da query string
+          idSearch,
         },
       });
 

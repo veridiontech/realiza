@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import {
   useFetchServiceProviders,
-  ServiceProviderProps,
 } from "@/hooks/gets/realiza/useServiceProviders";
-import { NotebookPen } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/realiza-add-supplier";
 import { useClient } from "@/context/Client-Provider";
+import { TableServiceProvider } from "./tableServiceProvider";
 
 export function ServiceProvider() {
   const { client } = useClient();
@@ -16,9 +14,8 @@ export function ServiceProvider() {
   const itemsPerPage = 5;
 
   const {
-    serviceProviders = [],
     totalPages = 0,
-    error,
+
     fetchServiceProviders,
   } = useFetchServiceProviders();
 
@@ -26,47 +23,14 @@ export function ServiceProvider() {
   // const [isStepTwoModalOpen, setIsStepTwoModalOpen] = useState(false);
   // const [providerData] = useState<Record<string, any> | null>(null);
 
-  // Pegando o ID do cliente para o filtro
-
   useEffect(() => {
-    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient); // Adicionando o id para filtrar pelo cliente
+    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient); 
   }, [currentPage, client?.idClient]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
-  const columns = [
-    { key: "companyName", label: "Nome do Fornecedor" },
-    { key: "cnpj", label: "CNPJ" },
-    { key: "branches", label: "Filiais que atua" },
-    {
-      key: "idProvider",
-      label: "Ações",
-      render: (value: string) => (
-        <div>
-          <button
-            onClick={() => console.log("Ação para o fornecedor:", value)}
-            className="text-realizaBlue hover:underline"
-          >
-            <NotebookPen />
-          </button>
-          {/* <button
-            onClick={() => {
-              setIsStepTwoModalOpen(true);
-            }}
-            className="ml-2 text-realizaBlue hover:underline"
-          >
-            <FilePlus2 />
-          </button> */}
-        </div>
-      ),
-    },
-  ] as {
-    key: keyof ServiceProviderProps;
-    label: string;
-    render?: (value: string) => React.ReactNode;
-  }[];
 
   return (
     <div className="m-10 flex min-h-full justify-center">
@@ -85,16 +49,7 @@ export function ServiceProvider() {
           <ModalTesteSendSupplier />
         </div>
 
-        {error ? (
-          <p className="text-center text-red-600">
-            Erro ao carregar os dados: {error}
-          </p>
-        ) : (
-          <Table<ServiceProviderProps>
-            data={serviceProviders}
-            columns={columns}
-          />
-        )}
+      <TableServiceProvider />
 
         <Pagination
           currentPage={currentPage}
