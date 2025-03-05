@@ -62,15 +62,15 @@ public abstract class Employee {
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "idBranch", nullable = false)
+    @JoinColumn(name = "idBranch")
     private Branch branch;
 
     @ManyToOne
-    @JoinColumn(name = "idProviderSupplier", nullable = false)
+    @JoinColumn(name = "idProviderSupplier")
     private ProviderSupplier supplier;
 
     @ManyToOne
-    @JoinColumn(name = "idProviderSubcontractor", nullable = false)
+    @JoinColumn(name = "idProviderSubcontractor")
     private ProviderSubcontractor subcontract;
 
     @ManyToMany

@@ -30,22 +30,6 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
 
     private final CrudDocumentBranchImpl crudDocumentBranch;
 
-    @PostMapping(consumes = "multipart/form-data")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Override
-    public ResponseEntity<DocumentResponseDto> createDocumentBranch(
-            @RequestPart("documentBranchRequestDto") @Valid DocumentBranchRequestDto documentBranchRequestDto,
-            @RequestPart(value = "file") MultipartFile file) {
-        DocumentResponseDto documentBranch = null;
-        try {
-            documentBranch = crudDocumentBranch.save(documentBranchRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentBranch));
-    }
-
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
@@ -86,15 +70,6 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         }
 
         return ResponseEntity.of(Optional.of(documentBranch));
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Override
-    public ResponseEntity<Void> deleteDocumentBranch(@PathVariable String id) {
-        crudDocumentBranch.delete(id);
-
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/upload")
