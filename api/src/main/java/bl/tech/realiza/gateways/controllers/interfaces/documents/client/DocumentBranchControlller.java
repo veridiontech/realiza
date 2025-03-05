@@ -13,11 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DocumentBranchControlller {
-    ResponseEntity<DocumentResponseDto> createDocumentBranch(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentBranch(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranch(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file);
-    ResponseEntity<Void> deleteDocumentBranch(String id);
     ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentBranch(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranchByBranch(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);

@@ -18,7 +18,7 @@ public class CorsConfig {
                                 "https://realiza-1.onrender.com",
                                 "http://localhost:5173"
                         ) // URLs permitidas
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH") // Métodos permitidos
+                        .allowedMethods("*") // Métodos permitidos
                         .allowedHeaders("*") // Headers permitidos
                         .exposedHeaders("Authorization", "Content-Type") // Headers expostos na resposta
                         .allowCredentials(true) // Permite envio de credenciais (cookies, auth headers)

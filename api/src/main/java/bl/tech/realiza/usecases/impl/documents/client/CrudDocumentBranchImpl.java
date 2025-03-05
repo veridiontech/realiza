@@ -41,63 +41,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final DocumentProcessingService documentProcessingService;
 
     @Override
-    public DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Invalid file");
-        }
-        if (documentBranchRequestDto.getBranch() == null || documentBranchRequestDto.getBranch().isEmpty()) {
-            throw new BadRequestException("Invalid branch");
-        }
-
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
-        Branch branch = branchRepository.findById(documentBranchRequestDto.getBranch()).orElseThrow(() -> new EntityNotFoundException("Branch not found"));
-
-        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentBranchRequestDto.getMatrixDocumentId()).orElseThrow(() -> new EntityNotFoundException("Document not found in matrix"));
-
-        try {
-            fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        try {
-            savedFileDocument = fileRepository.save(fileDocument);
-            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        DocumentBranch newDocumentBranch = DocumentBranch.builder()
-                .title(documentMatrix.getName())
-                .status(documentBranchRequestDto.getStatus())
-                .documentation(fileDocumentId)
-                .branch(branch)
-                .build();
-
-        DocumentBranch savedDocumentBranch = documentBranchRepository.save(newDocumentBranch);
-
-        DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentBranch.getIdDocumentation())
-                .title(savedDocumentBranch.getTitle())
-                .status(savedDocumentBranch.getStatus())
-                .documentation(savedDocumentBranch.getDocumentation())
-                .creationDate(savedDocumentBranch.getCreationDate())
-                .branch(savedDocumentBranch.getBranch().getIdBranch())
-                .build();
-
-        return documentBranchResponse;
-    }
-
-    @Override
     public Optional<DocumentResponseDto> findOne(String id) {
         Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
 
@@ -198,11 +141,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .build();
 
         return Optional.of(documentBranchResponse);
-    }
-
-    @Override
-    public void delete(String id) {
-        documentBranchRepository.deleteById(id);
     }
 
     @Override

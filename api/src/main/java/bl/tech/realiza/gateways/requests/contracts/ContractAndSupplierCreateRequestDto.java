@@ -21,7 +21,6 @@ public class ContractAndSupplierCreateRequestDto {
     private Date endDate;
     private String contractReference;
     private Boolean subcontractPermission;
-    private String supplierContractId;
     private List<String> activities;
     private List<String> requirements;
     private String cnpj;

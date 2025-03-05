@@ -13,11 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrudDocumentBranch {
-    DocumentResponseDto save(DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException;
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
     Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
-    void delete(String id);
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
