@@ -49,6 +49,7 @@ import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
 import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
 
+
 export const router = createBrowserRouter([
   {
     path: "/sistema",
@@ -133,7 +134,7 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      { path: "create-manager/:id", element: <CreateNewManagerSupplier /> },
+      {path: "create-manager/:id", element: <CreateNewManagerSupplier />}
     ],
   },
   {

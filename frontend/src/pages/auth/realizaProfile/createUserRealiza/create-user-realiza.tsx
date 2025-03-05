@@ -49,7 +49,7 @@ export function CreateUserRealiza() {
   const createUser = async (data: CreateUserRealizaSchema) => {
     const payload = {
       ...data,
-      role: "ROLE_REALIZA_PLUS",
+      role: "ROLE_REALIZA_BASIC",
     };
     console.log("Função createUser chamada com os dados:", payload);
     try {
@@ -141,6 +141,13 @@ export function CreateUserRealiza() {
                 </div>
                 {errors.password && <p className="text-red-500">{errors.password.message}</p>}
               </div>
+            </div>
+            <div>
+              <Label>Senha: </Label>
+              <Input type="password" 
+              {...register("password")}
+               className="dark:bg-white"
+              />
             </div>
           </div>
 

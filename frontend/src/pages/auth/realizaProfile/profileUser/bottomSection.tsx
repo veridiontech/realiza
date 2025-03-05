@@ -31,7 +31,6 @@ export function BottomSection() {
 
   const newPassword = async (data: ProfileFormData) => {
     console.log(data);
-
     try {
       await axios.patch(
         `${ip}/user/manager/change-password/${user?.idUser}`,
