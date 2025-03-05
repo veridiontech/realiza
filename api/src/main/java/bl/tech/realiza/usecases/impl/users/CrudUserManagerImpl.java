@@ -36,7 +36,9 @@ public class CrudUserManagerImpl implements CrudUserManager {
     
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
-
+        if (userManagerRequestDto.getRole() == null) {
+            throw new BadRequestException("Role is required");
+        }
         if (Arrays.stream(UserManagerRequestDto.Role.values())
                 .noneMatch(role -> role.name().equals(userManagerRequestDto.getRole().name()))) {
             throw new BadRequestException("Invalid Role");
@@ -179,7 +181,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
         userManager.setPosition(userManagerRequestDto.getPosition() != null ? userManagerRequestDto.getPosition() : userManager.getPosition());
         userManager.setRole(userManagerRequestDto.getRole() != null ? userManagerRequestDto.getRole() : userManager.getRole());
         userManager.setFirstName(userManagerRequestDto.getFirstName() != null ? userManagerRequestDto.getFirstName() : userManager.getFirstName());
-        userManager.setTimeZone(userManagerRequestDto.getTimeZone() != null ? userManagerRequestDto.getTimeZone() : userManager.getTimeZone());
         userManager.setSurname(userManagerRequestDto.getSurname() != null ? userManagerRequestDto.getSurname() : userManager.getSurname());
         userManager.setEmail(userManagerRequestDto.getEmail() != null ? userManagerRequestDto.getEmail() : userManager.getEmail());
         userManager.setProfilePicture(userManagerRequestDto.getProfilePicture() != null ? userManagerRequestDto.getProfilePicture() : userManager.getProfilePicture());
@@ -195,7 +196,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .position(savedUserManager.getPosition())
                 .role(savedUserManager.getRole())
                 .firstName(savedUserManager.getFirstName())
-                .timeZone(savedUserManager.getTimeZone())
                 .surname(savedUserManager.getSurname())
                 .email(savedUserManager.getEmail())
                 .profilePicture(savedUserManager.getProfilePicture())
@@ -221,7 +221,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        userManager.setPassword(userManagerRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userManagerRequestDto.getPassword()) : userManager.getPassword());
+        userManager.setPassword(userManagerRequestDto.getNewPassword() != null ? passwordEncryptionService.encryptPassword(userManagerRequestDto.getNewPassword()) : userManager.getPassword());
 
         userManagerRepository.save(userManager);
 
