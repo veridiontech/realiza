@@ -14,14 +14,14 @@ export function useEmployees() {
   async function fetchEmployees(
     limit = 10,
     page = 0,
-    enterprise = "CLIENT",
+    idEnterprise = "CLIENT",
     idSearch = "",
   ) {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(API_URL, {
-        params: { size: limit, page, enterprise, idSearch },
+        params: { size: limit, page, idEnterprise, idSearch },
       });
 
       const { content, totalPages } = response.data;

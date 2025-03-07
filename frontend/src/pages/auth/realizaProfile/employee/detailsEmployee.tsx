@@ -40,7 +40,7 @@ export function DetailsEmployee() {
       setEmployee({
         id: data.idEmployee,
         name: data.name,
-        status: data.isActive ? "Ativo" : "Desligado",
+        status: data.situation
       });
     } catch (err: any) {
       setError(
