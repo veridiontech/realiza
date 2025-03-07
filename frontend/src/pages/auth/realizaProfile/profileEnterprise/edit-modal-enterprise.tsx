@@ -17,6 +17,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useClient } from "@/context/Client-Provider";
+import { toast } from "sonner";
 
 interface adressProps {
   city: string;
@@ -26,12 +28,10 @@ interface adressProps {
 
 const editModalEnterpriseSchema = z.object({
   cnpj: z.string(),
-  nameEnterprise: z.string(),
-  fantasyName: z.string(),
-  socialReason: z.string(),
+  corporateName: z.string(),
+  tradeName: z.string(),
   email: z.string(),
   phone: z.string(),
-  cep: z.string(),
   state: z.string(),
   city: z.string(),
   adress: z.string(),
@@ -45,6 +45,7 @@ export function EditModalEnterprise() {
   // >(undefined);
   const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const {client} = useClient()
 
   const {
     register,
@@ -55,25 +56,23 @@ export function EditModalEnterprise() {
     resolver: zodResolver(editModalEnterpriseSchema),
   });
 
-  const getDatasEnterprise = async (id: string) => {
-    try {
-      const res = await axios.get(`${ip}/client/${id}`);
-      const data = res.data;
+  console.log("cliente selecionado:", client);
+  
 
-      // Use `setValue` para preencher os campos com os dados recebidos
+  const getDatasEnterprise = async () => {
+    try {
+      const res = await axios.get(`${ip}/client/${client?.idClient}`);
+      const data = res.data;
       setValue("cnpj", data.cnpj || "");
-      setValue("nameEnterprise", data.nameEnterprise || "");
-      setValue("fantasyName", data.fantasyName || "");
-      setValue("socialReason", data.socialReason || "");
+      setValue("corporateName", data.corporateName || "");
+      setValue("tradeName", data.tradeName || "");
       setValue("email", data.email || "");
       setValue("phone", data.phone || "");
-      setValue("cep", data.cep || "");
       setValue("state", data.state || "");
       setValue("city", data.city || "");
       setValue("adress", data.adress || "");
       setValue("number", data.number || "");
 
-      // setEnterpriseDatas(data); // Atualiza o estado local (opcional)
     } catch (err) {
       console.error("Não foi possível recuperar os dados da empresa", err);
     }
@@ -98,19 +97,23 @@ export function EditModalEnterprise() {
   };
 
   const setValuesAdress = (data: adressProps) => {
-    setValue("city", data.city),
+      setValue("city", data.city),
       setValue("state", data.state),
       setValue("adress", data.adress);
   };
 
   const onSubmit = async () => {
     try {
-    } catch (err) {}
+      await axios.put(`${ip}/client/${client?.idClient}`)
+      toast.success("Sucesso ao atualizar cliente")
+    } catch (err) {
+      console.log("erro ao atualizar cliente:", err);
+      toast.error("Erro ao atualizar cliente, tente novamente")
+    }
   };
 
   useEffect(() => {
-    const id = "123";
-    getDatasEnterprise(id);
+    getDatasEnterprise();
   }, []);
 
   return (
@@ -136,19 +139,15 @@ export function EditModalEnterprise() {
                   {...register("cnpj")}
                 />
               </div>
-              <div className="flex items-center gap-1">
-                <div>
+              <div className="flex items-center gap-1 ">
+                <div className="w-auto">
                   <Label>Nome da empresa</Label>
-                  <Input className="w-[12vw]" {...register("nameEnterprise")} />
+                  <Input className="w-full" {...register("corporateName")} />
                 </div>
-                <div>
+                <div className="w-auto">
                   <Label>Nome fantasia</Label>
-                  <Input className="w-[12vw]" {...register("fantasyName")} />
+                  <Input className="w-auto" {...register("tradeName")} />
                 </div>
-              </div>
-              <div>
-                <Label>Razão social</Label>
-                <Input {...register("socialReason")} />
               </div>
               <div>
                 <Label>Email corporativo</Label>
@@ -163,7 +162,6 @@ export function EditModalEnterprise() {
                   <Label>CEP</Label>
                   <Input
                     className="w-[21vw]"
-                    {...register("cep")}
                     onChange={(e) => setCep(e.target.value)}
                   />
                 </div>

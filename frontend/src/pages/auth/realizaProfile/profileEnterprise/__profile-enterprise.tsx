@@ -28,6 +28,8 @@ export function ProfileEnterpriseReprise() {
   // const [selectedFile, setSelectedFile] = useState<File | null>(null);
   // const [logoClient, setLogoClient] = useState<string | null>(null);
   const { client } = useClient();
+  const firstLetter = client?.tradeName?.charAt(0) || "";
+  const lastLetter = client?.tradeName?.slice(-1) || "";
 
   // const {
   //   // handleSubmit,
@@ -76,9 +78,12 @@ export function ProfileEnterpriseReprise() {
           <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
               <div className="relative bottom-10 left-1 flex items-center gap-4">
-                <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full">
-                  <h1 className="text-white">logo</h1>
-                </div>
+              <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
+                      <div className="text-[40px] text-white">
+                        {firstLetter}
+                        {lastLetter}
+                      </div>
+                    </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
                   <div className="text-lg font-medium text-sky-800">
                     {client ? (

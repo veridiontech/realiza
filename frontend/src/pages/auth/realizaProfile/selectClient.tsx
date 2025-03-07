@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/modal";
-import selectClientImage from "@/assets/selectClientImage.png";
-import { Puff } from "react-loader-spinner";
+import { MagnifyingGlass } from "react-loader-spinner";
 import { ip } from "@/utils/ip";
 import { useUser } from "@/context/user-provider";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useClient } from "@/context/Client-Provider";
+import { TableServiceProvider } from "./serviceProviders/tableServiceProvider";
 
 interface CompanyData {
   razaoSocial: string;
@@ -258,27 +260,28 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
 }
 
 export function SelectClient() {
-  const [loading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [getClients, setGetClients] = useState<any[]>([]);
+  const [branches, setBranches] = useState([]);
   const [showAddWorkflow, setShowAddWorkflow] = useState(false);
   const navigate = useNavigate();
   const { user } = useUser();
+  const { client } = useClient();
 
-  const getClient = async () => {
-    setIsLoading(true);
+  const fetchBranches = async () => {
     try {
-      const res = await axios.get(`${ip}/client`);
-      setGetClients(res.data.content);
+      const response = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+      );
+      const { content } = response.data;
+      setBranches(content);
     } catch (err) {
-      console.log("Erro ao buscar clientes", err);
-    } finally {
-      setIsLoading(false);
+      console.error("Erro ao buscar filiais:", err);
     }
   };
 
   useEffect(() => {
-    getClient();
+    if (client?.idClient) {
+      fetchBranches();
+    }
     const timer = setTimeout(() => {
       if (user?.idUser) {
         toast("Você está na versão 1.0.2 do sistema realiza", {
@@ -294,66 +297,133 @@ export function SelectClient() {
       }
     }, 3000);
     return () => clearTimeout(timer);
-  }, [user, navigate]);
+  }, [user, navigate, client?.idClient]);
+
+  const firstLetter = client?.tradeName?.charAt(0) || "";
+  const lastLetter = client?.tradeName?.slice(-1) || "";
 
   return (
-    <div className="m-10 flex min-h-full justify-center">
-      <div className="dark:bg-primary border-realizaBlue flex h-[30rem] w-[80rem] justify-between rounded-lg border bg-white shadow-md dark:border-white">
-        <div className="ml-10 mt-4">
-          <h1 className="text-2xl">Escolha seu ambiente</h1>
-          <div className="dark:bg-primary-foreground my-10 h-[23rem] w-[40rem] rounded-lg p-6 outline outline-1 outline-offset-2 outline-slate-300">
-            <div className="flex items-start justify-between">
-              <h2 className="text-xl">Selecione um Cliente</h2>
-              <div className="mb-4">
-                <button
-                  onClick={() => setShowAddWorkflow(true)}
-                  className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
-                >
-                  Adicionar Novo Cliente
-                </button>
+    <div className="m-10 flex justify-center gap-10">
+      <div className="">
+        <div>
+          {client ? (
+            <div className="flex flex-col gap-10">
+              <div className="flex gap-10">
+                <div className="flex w-[40vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+                  <div className="flex gap-3">
+                    <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
+                      <div className="text-[40px] text-white">
+                        {firstLetter}
+                        {lastLetter}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-10">
+                      <div className="flex flex-col items-start">
+                        <h2 className="text-realizaBlue text-[30px] font-medium">
+                          {client.tradeName}
+                        </h2>
+                        <h3 className="ml-1 text-sky-900">
+                          {client.corporateName}
+                        </h3>
+                      </div>
+                      <div className="text-[13px] text-sky-900">
+                        <p>{client.email}</p>
+                        <p>{client.cnpj}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowAddWorkflow(true)}
+                    className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
+                  >
+                    + Cliente
+                  </button>
+                </div>
+                <Link to={`/sistema/branch/${user?.idUser}`} className="w-[20vw] rounded-lg border bg-white p-10 shadow-lg hover:bg-gray-200">
+                    <div className="flex flex-col items-start">
+                      <h2 className="text-realizaBlue text-[23px]">
+                        Filiais do cliente
+                      </h2>
+                      <div>
+                        {branches.map((branch: any) => (
+                          <div>
+                            <div key={branch.idBranch}>
+                              <li className="text-sky-900">{branch.name}</li>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                </Link>
+              </div>
+              <div className="rounded-lg border bg-white p-8 shadow-lg">
+                <h2>Prestadores de serviço do cliente</h2>
+                <div>
+                  <TableServiceProvider />
+                </div>
               </div>
             </div>
-            <div className="relative mb-4">
-              <input
-                type="text"
-                placeholder="🔍 Procure por clientes cadastrados aqui..."
-                className="focus:outline-realizaBlue w-full rounded-lg border border-gray-300 p-2"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            {loading ? (
-              <div className="flex w-[20vw] items-center justify-start gap-4 rounded-md border p-2 dark:bg-white">
-                <Puff
-                  visible={true}
-                  height="30"
-                  width="30"
-                  color="#34495D"
-                  ariaLabel="puff-loading"
-                />
-                <span className="text-black">Carregando...</span>
+          ) : (
+            <div className="flex flex-col gap-10">
+              <div className="flex gap-10">
+                <div>
+                  <div>
+                    <div className="flex w-[40vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+                      <div className="flex">
+                        <Skeleton className="h-[16vh] w-[8vw] rounded-full bg-gray-600" />
+                        <div className="flex flex-col gap-10">
+                          <div className="flex flex-col gap-5">
+                            <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
+                            <Skeleton className="ml-1 h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
+                          </div>
+                          <div className="ml-2 flex flex-col gap-5">
+                            <Skeleton className="h-[0.5vh] w-[6vw] rounded-full bg-gray-600" />
+                            <Skeleton className="h-[0.3vh] w-[4vw] rounded-full bg-gray-600" />
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowAddWorkflow(true)}
+                        className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
+                      >
+                        + Cliente
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-white p-10 shadow-lg">
+                  <div className="flex flex-col">
+                    <h2 className="text-realizaBlue text-[23px]">
+                      Filiais do cliente
+                    </h2>
+                    <p>
+                      <MagnifyingGlass
+                        visible={true}
+                        height="60"
+                        width="55"
+                        ariaLabel="magnifying-glass-loading"
+                        wrapperStyle={{}}
+                        wrapperClass="magnifying-glass-wrapper"
+                        glassColor="#c0efff"
+                        color="#34495D"
+                      />
+                    </p>
+                  </div>
+                </div>
               </div>
-            ) : getClients.length === 0 ? (
-              <p className="text-gray-500">Nenhum cliente encontrado.</p>
-            ) : (
-              <select className="h-[5vh] w-[20vw] rounded-md border p-1 text-black">
-                {getClients.map((client: any) => (
-                  <option key={client.idClient} value={client.idClient}>
-                    {client.tradeName}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        </div>
-        <div className="mx-8 my-4 h-[28rem] w-[30rem] rounded-lg bg-blue-50">
-          <img
-            src={selectClientImage}
-            alt="Imagem de seleção de cliente"
-            className="h-full w-full rounded-lg object-cover"
-          />
+              <div>
+                <div className="rounded-lg border bg-white p-8 shadow-lg">
+                  <h2>Prestadores de serviço do cliente</h2>
+                  <div>
+                    <TableServiceProvider />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
       {showAddWorkflow && (
         <AddClientWorkflow onClose={() => setShowAddWorkflow(false)} />
       )}
