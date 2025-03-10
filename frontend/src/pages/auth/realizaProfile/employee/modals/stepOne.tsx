@@ -18,6 +18,7 @@ import { propsBranch, propsClient } from "@/types/interfaces";
 import { useClient } from "@/context/Client-Provider";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 const employeeFormSchema = z.object({
   clientSelect: z.string().nonempty("Selecione um cliente"),
@@ -25,10 +26,8 @@ const employeeFormSchema = z.object({
   contractType: z.string().nonempty("Tipo de contrato é obrigatório"),
   name: z.string().nonempty("Nome completo é obrigatório"),
   cpf: z.string().nonempty("CPF é obrigatório"),
-  rg: z.string().nonempty("RG é obrigatório"),
-  pis: z.string().optional(),
-  salary: z.string().nonempty("Salário é obrigatório"),
-  sex: z.string().nonempty("Sexo é obrigatório"),
+  salary: z.string(),
+  gender: z.string().nonempty("Sexo é obrigatório"),
   maritalStatus: z.string().nonempty("Estado Civil é obrigatório"),
   dob: z.string().nonempty("Data de nascimento é obrigatória"),
   cep: z.string().nonempty("CEP é obrigatório"),
@@ -36,7 +35,7 @@ const employeeFormSchema = z.object({
   city: z.string().nonempty("Cidade é obrigatória"),
   address: z.string().nonempty("Endereço é obrigatório"),
   phone: z.string().optional(),
-  mobile: z.string().nonempty("Celular é obrigatório"),
+  mobile: z.string(),
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
   role: z.string().nonempty("Cargo é obrigatório"),
   education: z.string().nonempty("Grau de instrução é obrigatório"),
@@ -55,6 +54,8 @@ export function StepOneEmployee({
   const { client } = useClient();
   const [clients, setClients] = useState<propsClient[]>([]);
   const [branches, setBranches] = useState<propsBranch[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [idbranch, setIdBranch] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -63,23 +64,58 @@ export function StepOneEmployee({
     resolver: zodResolver(employeeFormSchema),
   });
 
-  const getClients = async () => {
-    try {
-      const res = await axios.get(`${ip}/client`);
-      setClients(res.data.content);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  useEffect(() => {
+    const getAllClients = async () => {
+      try {
+        const firstRes = await axios.get(`${ip}/client`, {
+          params: { page: 0, size: 100 },
+        });
+        const totalPages = firstRes.data.totalPaages;
+        const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
+          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
+        );
+
+        const responses = await Promise.all(requests);
+        const allClients = [
+          firstRes.data.content,
+          ...responses.map((res) => res.data.content),
+        ].flat();
+
+        setClients(allClients);
+      } catch (err) {
+        console.error("Erro ao puxar clientes", err);
+      }
+    };
+
+    getAllClients();
+  }, []);
 
   const getBranches = async (clientId: string) => {
     try {
-      const res = await axios.get(
+      // Faz a primeira requisição para obter o número total de páginas
+      const firstRes = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${clientId}`,
+        { params: { page: 0, size: 100 } },
       );
-      setBranches(res.data.content);
+      const totalPages = firstRes.data.totalPages; // Obtém o total de páginas disponíveis
+      const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
+        axios.get(`${ip}/branch/filtered-client?idSearch=${clientId}`, {
+          params: { page: i + 1, size: 100 },
+        }),
+      );
+
+      // Aguarda todas as requisições assíncronas
+      const responses = await Promise.all(requests);
+
+      // Combina todas as respostas
+      const allBranches = [
+        firstRes.data.content,
+        ...responses.map((res) => res.data.content),
+      ].flat();
+
+      setBranches(allBranches);
     } catch (err) {
-      console.log(err);
+      console.error("Erro ao buscar filiais", err);
     }
   };
 
@@ -87,21 +123,25 @@ export function StepOneEmployee({
     getBranches(e.target.value);
   };
 
+  const getIdBranch = (id_branch: string) => {
+    setIdBranch(id_branch);
+  };
+
   const onFormSubmit = async (data: EmployeeFormSchema) => {
     const filterIdClient = client?.idClient;
-    const payload = { ...data, client: filterIdClient };
+    console.log("id da branch teste:", idbranch);
+    
+    const payload = { ...data, client: filterIdClient, id_branch: idbranch };
     try {
       const response = await axios.post(`${ip}/employee/brazilian`, payload);
       onSubmit(response.data);
+      toast.success("Sucesso ao criar colaborador");
     } catch (error: any) {
       console.error(error.response?.data || error.message);
-      alert("Erro ao criar colaborador. Verifique os dados e tente novamente.");
+      toast.error("Erro ao criar colaborador, tente novamente");
+      setIsOpen(false);
     }
   };
-
-  useEffect(() => {
-    getClients();
-  }, []);
 
   return (
     <Dialog>
@@ -148,16 +188,17 @@ export function StepOneEmployee({
             <div>
               <Label className="text-white">Filiais do cliente</Label>
               <select
-                {...register("id_branch")}
                 className="flex flex-col rounded-md border p-2"
+                onChange={(e) => setIdBranch(e.target.value)}
               >
                 <option value="">Selecione uma filial</option>
                 {branches.map((branch) => (
-                  <option key={branch.id_branch} value={branch.id_branch}>
+                  <option key={branch.id_branch} value={branch.id_branch} onClick={() => getIdBranch(branch.id_branch)}>
                     {branch.name}
                   </option>
                 ))}
               </select>
+
               {errors.id_branch && (
                 <span className="text-red-600">{errors.id_branch.message}</span>
               )}
@@ -220,20 +261,6 @@ export function StepOneEmployee({
               )}
             </div>
             <div>
-              <Label className="text-white">RG</Label>
-              <Input type="text" placeholder="RG" {...register("rg")} />
-              {errors.rg && (
-                <span className="text-red-600">{errors.rg.message}</span>
-              )}
-            </div>
-            <div>
-              <Label className="text-white">PIS</Label>
-              <Input type="text" placeholder="PIS" {...register("pis")} />
-              {errors.pis && (
-                <span className="text-red-600">{errors.pis.message}</span>
-              )}
-            </div>
-            <div>
               <Label className="text-white">Salário R$</Label>
               <Input type="number" placeholder="0.00" {...register("salary")} />
               {errors.salary && (
@@ -243,19 +270,18 @@ export function StepOneEmployee({
             <div>
               <Label className="text-white">Sexo</Label>
               <select
-                {...register("sex")}
+                {...register("gender")}
                 className="flex flex-col rounded-md border p-2"
               >
                 <option value="">Selecione</option>
                 <option value="Masculino">Masculino</option>
                 <option value="Feminino">Feminino</option>
-                <option value="Outro">Outro</option>
               </select>
-              {errors.sex && (
-                <span className="text-red-600">{errors.sex.message}</span>
+              {errors.gender && (
+                <span className="text-red-600">{errors.gender.message}</span>
               )}
             </div>
-            <div>
+            <div> 
               <Label className="text-white">Estado Civil</Label>
               <select
                 {...register("maritalStatus")}

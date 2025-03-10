@@ -39,7 +39,9 @@ export function TableServiceProvider() {
 
   useEffect(() => {
     if (client?.idClient) {
+      setSelectedBranch("")
       getBranchClient();
+      setSuppliers([]);
     }
   }, [client?.idClient]);
 

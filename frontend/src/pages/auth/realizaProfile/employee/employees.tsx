@@ -8,24 +8,14 @@ import { StepOneEmployee } from "./modals/stepOne";
 // import { Employee } from "@/types/employee";
 // import { useClient } from "@/context/Client-Provider";
 import { TableEmployee } from "./tableEmployee";
+import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 
 export const EmployeesTable = (): JSX.Element => {
   // const [currentPage, setCurrentPage] = useState(1);
   const [, setIsModalOpen] = useState(false);
   // const itemsPerPage = 10;
 
-  // const { client } = useClient();
-
- 
-
- 
-
-
-
-  const handleModalSubmit = (formData: Record<string, any>) => {
-    console.log("Dados do novo colaborador:", formData);
-    setIsModalOpen(false);
-  };
+  // const { client } = useClient()
 
 
 
@@ -35,10 +25,7 @@ export const EmployeesTable = (): JSX.Element => {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Colaboradores</h1>
 
-          <StepOneEmployee
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleModalSubmit}
-          />
+          <NewModalCreateEmployee />
         </div>
 
           <div>

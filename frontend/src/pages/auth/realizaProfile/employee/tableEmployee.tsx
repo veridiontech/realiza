@@ -36,9 +36,14 @@ export function TableEmployee() {
     }
   };
 
+  console.log("colaboradores da branch:", employees,);
+  
+
   useEffect(() => {
     if (client?.idClient) {
       getBranchClient();
+      setSelectedBranch("")
+      setEmployee([])
     }
   }, [client?.idClient]);
 

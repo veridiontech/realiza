@@ -21,9 +21,9 @@ export function useBranch() {
 export function BranchProvider({ children }: { children: React.ReactNode }) {
   const [branch, setBranch] = useState<propsBranch | null>(null);
 
-  const getBranch = async (idBranch: string) => {
+  const getBranch = async (idClient: string) => {
     try {
-      const res = await axios.get(`${ip}/branch/${idBranch}`);
+      const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`);
       if (res.data) {
         setBranch(res.data);
       } else {

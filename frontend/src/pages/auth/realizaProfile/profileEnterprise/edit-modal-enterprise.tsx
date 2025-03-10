@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Search } from "lucide-react";
+import { Pencil, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -102,10 +102,11 @@ export function EditModalEnterprise() {
       setValue("adress", data.adress);
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: EditModalEnterpriseSchema) => {
     try {
-      await axios.put(`${ip}/client/${client?.idClient}`)
+      await axios.put(`${ip}/client/${client?.idClient}`, data)
       toast.success("Sucesso ao atualizar cliente")
+      window.location.reload()
     } catch (err) {
       console.log("erro ao atualizar cliente:", err);
       toast.error("Erro ao atualizar cliente, tente novamente")
@@ -119,7 +120,7 @@ export function EditModalEnterprise() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-realizaBlue">Editar perfil</Button>
+        <Button className="bg-realizaBlue"><Pencil /></Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

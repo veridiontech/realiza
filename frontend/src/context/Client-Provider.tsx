@@ -1,11 +1,13 @@
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { propsClient } from "@/types/interfaces";
+import { propsBranch, propsClient } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 
 interface ClientContextProps {
   client: propsClient | null;
   setClient: React.Dispatch<React.SetStateAction<propsClient | null>>;
+  branches: propsBranch | null;
+  setBranches: React.Dispatch<React.SetStateAction<propsBranch | null>>;
 }
 
 const ClientContext = createContext<ClientContextProps | undefined>(undefined);
@@ -20,17 +22,21 @@ export function useClient() {
 
 export function ClientProvider({ children }: { children: React.ReactNode }) {
   const [client, setClient] = useState<propsClient | null>(null);
+  const [branches, setBranches] = useState<propsBranch | null>(null);
 
   useEffect(() => {
     const idClient = localStorage.getItem("idClient");
     if (idClient) {
       getUser(idClient);
+      if (client) {
+        getBranches(idClient);
+      }
     }
   }, []);
 
   const getUser = async (idClient: string) => {
     try {
-      const res = await axios.get(`${ip}/client/${idClient}`);   
+      const res = await axios.get(`${ip}/client/${idClient}`);
       if (res.data) {
         setClient(res.data);
       } else {
@@ -43,11 +49,24 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const getBranches = async (idClient: string) => {
+    try {
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${idClient}`,
+      );
+      setBranches(res.data.content);
+    } catch (err) {
+      console.log("erro ao puxar filiais:", err);
+    }
+  };
+
   return (
     <ClientContext.Provider
       value={{
         client,
         setClient,
+        branches,
+        setBranches,
       }}
     >
       {children}

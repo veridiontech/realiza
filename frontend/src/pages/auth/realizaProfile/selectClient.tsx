@@ -11,6 +11,7 @@ import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClient } from "@/context/Client-Provider";
 import { TableServiceProvider } from "./serviceProviders/tableServiceProvider";
+import { EditModalEnterprise } from "./profileEnterprise/edit-modal-enterprise";
 
 interface CompanyData {
   razaoSocial: string;
@@ -303,8 +304,8 @@ export function SelectClient() {
   const lastLetter = client?.tradeName?.slice(-1) || "";
 
   return (
-    <div className="m-10 flex justify-center gap-10">
-      <div className="">
+    <div className="mt-10 flex justify-center gap-10">
+      <div className="flex items-start justify-center gap-10">
         <div>
           {client ? (
             <div className="flex flex-col gap-10">
@@ -332,28 +333,25 @@ export function SelectClient() {
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowAddWorkflow(true)}
-                    className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
-                  >
-                    + Cliente
-                  </button>
                 </div>
-                <Link to={`/sistema/branch/${user?.idUser}`} className="w-[20vw] rounded-lg border bg-white p-10 shadow-lg hover:bg-gray-200">
-                    <div className="flex flex-col items-start">
-                      <h2 className="text-realizaBlue text-[23px]">
-                        Filiais do cliente
-                      </h2>
-                      <div>
-                        {branches.map((branch: any) => (
-                          <div>
-                            <div key={branch.idBranch}>
-                              <li className="text-sky-900">{branch.name}</li>
-                            </div>
+                <Link
+                  to={`/sistema/branch/${user?.idUser}`}
+                  className="w-[20vw] rounded-lg border bg-white p-10 shadow-lg hover:bg-gray-200"
+                >
+                  <div className="flex flex-col items-start">
+                    <h2 className="text-realizaBlue text-[23px]">
+                      Filiais do cliente
+                    </h2>
+                    <div>
+                      {branches.map((branch: any) => (
+                        <div>
+                          <div key={branch.idBranch}>
+                            <li className="text-sky-900">{branch.name}</li>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
+                  </div>
                 </Link>
               </div>
               <div className="rounded-lg border bg-white p-8 shadow-lg">
@@ -382,12 +380,6 @@ export function SelectClient() {
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => setShowAddWorkflow(true)}
-                        className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
-                      >
-                        + Cliente
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -421,6 +413,15 @@ export function SelectClient() {
               </div>
             </div>
           )}
+        </div>
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={() => setShowAddWorkflow(true)}
+            className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
+          >
+            +
+          </button>
+          <EditModalEnterprise />
         </div>
       </div>
 

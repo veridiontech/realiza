@@ -32,7 +32,7 @@ import { ProfilePhoto } from "./profile-photo";
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
-  const { setClient } = useClient();
+  const { setClient, branches} = useClient();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -42,24 +42,28 @@ export function Header() {
   useEffect(() => {
     const getAllClients = async () => {
       try {
-        const firstRes = await axios.get(`${ip}/client`, { params: { page: 0, size: 100 } });
+        const firstRes = await axios.get(`${ip}/client`, {
+          params: { page: 0, size: 100 },
+        });
         const totalPages = firstRes.data.totalPages;
         const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } })
+          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
         );
-  
+
         const responses = await Promise.all(requests);
-        const allClients = [firstRes.data.content, ...responses.map(res => res.data.content)].flat();
-  
+        const allClients = [
+          firstRes.data.content,
+          ...responses.map((res) => res.data.content),
+        ].flat();
+
         setClients(allClients);
       } catch (err) {
         console.error("Erro ao puxar clientes", err);
       }
     };
-  
+
     getAllClients();
   }, []);
-  
 
   const handleSelectClient = async (id: string) => {
     try {
@@ -69,6 +73,7 @@ export function Header() {
       console.error("Erro ao selecionar cliente", err);
     }
   };
+  
 
   // Handlers de hover:
   const handleMouseEnter = () => setMenuOpen(true);
@@ -107,6 +112,18 @@ export function Header() {
           <Link to={`/sistema/select-client/${getIdUser}`}>
             <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
           </Link>
+        </div>
+
+        <div>
+          <div>
+            <span>Filial: </span>
+            <select defaultValue="">
+              <option value="" disabled>Selecione uma filial</option>
+              {Array.isArray(branches) && branches.map((branch) => (
+                <option value="" key={branch.idBranch}>{branch.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Seleção de cliente */}
