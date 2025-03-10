@@ -11,9 +11,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { propsClient } from "@/types/interfaces";
+import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const createNewEmployeeFormSchema = z.object({
@@ -39,6 +44,9 @@ const createNewEmployeeFormSchema = z.object({
 
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 export function NewModalCreateEmployee() {
+  const [clients, setClients] = useState<propsClient[]>([]);
+  const [selectRole, setSelectRole] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -52,10 +60,41 @@ export function NewModalCreateEmployee() {
       ...data,
     };
     try {
+      await axios.post(`${ip}/employee/brazilian`, payload);
+      toast.success("Sucesso ao cadastrar novo usuário");
     } catch (err) {
       console.log("erro ao enviar dados do novo colaborador:", err);
+      toast.error("Erro ao cadastrar novo usuário, tente novamente");
     }
   };
+
+  const getClient = async () => {
+    try {
+      const firstRes = await axios.get(`${ip}/client`, {
+        params: { page: 0, size: 100 },
+      });
+      const totalPages = firstRes.data.totalPages;
+      const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
+        axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
+      );
+
+      const responses = await Promise.all(requests);
+      const allClients = [
+        firstRes.data.content,
+        ...responses.map((res) => res.data.content),
+      ].flat();
+
+      setClients(allClients);
+    } catch (err) {
+      console.error("Erro ao puxar clientes", err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectRole === "branch") {
+      getClient();
+    }
+  }, [selectRole]);
 
   return (
     <Dialog>
@@ -67,15 +106,22 @@ export function NewModalCreateEmployee() {
         className="max-w-[45vw]"
       >
         <DialogHeader>
-          <DialogTitle>Cadastrar colaborador</DialogTitle>
+          <DialogTitle className="text-white">
+            Cadastrar colaborador
+          </DialogTitle>
           <ScrollArea className="h-[75vh]">
             <div>
-              <form action="" className="flex flex-col gap-5">
+              <form
+                action=""
+                className="flex flex-col gap-5"
+                onSubmit={handleSubmit(onSubmit)}
+              >
                 <div>
                   <Label className="text-white">Tipo de contrato</Label>
                   <select
                     {...register("contractType")}
                     className="flex flex-col rounded-md border p-2"
+                    {...register("contractType")}
                   >
                     <option value="">Selecione um tipo de contrato</option>
                     <option value="Autônomo">Autônomo</option>
@@ -105,15 +151,76 @@ export function NewModalCreateEmployee() {
                 </div>
                 <div>
                   <Label className="text-white">Nome</Label>
-                  <Input type="text" />
+                  <Input type="text" {...register("name")} />
                 </div>
                 <div>
                   <Label className="text-white">Cpf</Label>
-                  <Input type="text" />
+                  <Input type="text" {...register("cpf")} />
                 </div>
                 <div>
-                  <Label className="text-white">salary</Label>
-                  <Input type="text" />
+                  <Label className="text-white">salário</Label>
+                  <Input type="text" {...register("salary")} />
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-start gap-2">
+                    <Label className="text-white">
+                      {" "}
+                      Usuário para filial do cliente
+                    </Label>
+                    <input
+                      type="radio"
+                      checked={selectRole === "branch"}
+                      onChange={() => setSelectRole("branch")}
+                    />
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Label className="text-white">Subcontratado</Label>
+                    <input
+                      type="radio"
+                      checked={selectRole === "subcontractor"}
+                      onChange={() => setSelectRole("subcontractor")}
+                    />
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Label className="text-white">Fornecedor</Label>
+                    <input
+                      type="radio"
+                      checked={selectRole === "supplier"}
+                      onChange={() => setSelectRole("supplier")}
+                    />
+                  </div>
+                </div>
+                <div>
+                  {selectRole === "branch" && (
+                    <div className="flex flex-col gap-3">
+                      <select defaultValue="" className="rounded-md p-1">
+                        <option value="" disabled>
+                          Selecione um cliente
+                        </option>
+                        {clients.map((client: propsClient) => (
+                          <option value="" key={client.idClient}>
+                            {client.tradeName}
+                          </option>
+                        ))}
+                      </select>
+                      <select className="rounded-md p-1">
+                        <option value="">Selecione uma filial</option>
+                        {}
+                      </select>
+                    </div>
+                  )}
+                  {selectRole === "subcontractor" && (
+                    <div>
+                      teste sasa
+                      <select>{}</select>
+                    </div>
+                  )}
+                  {selectRole === "supplier" && (
+                    <div>
+                      teste as1231
+                      <select>{}</select>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label className="text-white">Sexo</Label>
@@ -134,7 +241,7 @@ export function NewModalCreateEmployee() {
                 <div>
                   <Label className="text-white">Estado civil</Label>
                   <select
-                    {...register("gender")}
+                    {...register("maritalStatus")}
                     className="flex flex-col rounded-md border p-2"
                   >
                     <option value="">Selecione</option>
@@ -146,7 +253,7 @@ export function NewModalCreateEmployee() {
                   <div>
                     <Label className="text-white">CEP</Label>
                     <div className="flex gap-2">
-                      <Input />
+                      <Input {...register("cep")} />
                       <Button className="bg-realizaBlue">
                         <Search />
                       </Button>
@@ -154,35 +261,51 @@ export function NewModalCreateEmployee() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-white">Estado</Label>
+                  <Label className="text-white" {...register("state")}>
+                    Estado
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">Cidade</Label>
+                  <Label className="text-white" {...register("city")}>
+                    Cidade
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">Adress</Label>
+                  <Label className="text-white" {...register("address")}>
+                    Adress
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">Telefone</Label>
+                  <Label className="text-white" {...register("phone")}>
+                    Telefone
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">Celular</Label>
+                  <Label className="text-white" {...register("mobile")}>
+                    Celular
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">Cargo</Label>
+                  <Label className="text-white" {...register("role")}>
+                    Cargo
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">cbo</Label>
+                  <Label className="text-white" {...register("cbo")}>
+                    cbo
+                  </Label>
                   <Input />
                 </div>
                 <div>
-                  <Label className="text-white">Acesso a plataforma</Label>
+                  <Label className="text-white" {...register("platformAccess")}>
+                    Acesso a plataforma
+                  </Label>
                   <select
                     {...register("platformAccess")}
                     className="flex flex-col rounded-md border p-2"
@@ -192,6 +315,9 @@ export function NewModalCreateEmployee() {
                     <option value="Não">Não</option>
                   </select>
                 </div>
+                <Button type="submit" className="bg-realizaBlue">
+                  Cadastrar
+                </Button>
               </form>
             </div>
           </ScrollArea>

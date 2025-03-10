@@ -54,7 +54,7 @@ export function StepOneEmployee({
   const { client } = useClient();
   const [clients, setClients] = useState<propsClient[]>([]);
   const [branches, setBranches] = useState<propsBranch[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [idbranch, setIdBranch] = useState<string | null>(null);
   const {
     register,
@@ -139,7 +139,7 @@ export function StepOneEmployee({
     } catch (error: any) {
       console.error(error.response?.data || error.message);
       toast.error("Erro ao criar colaborador, tente novamente");
-      setIsOpen(false);
+      // setIsOpen(false);
     }
   };
 
