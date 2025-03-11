@@ -4,14 +4,14 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/modal";
-import { MagnifyingGlass } from "react-loader-spinner";
 import { ip } from "@/utils/ip";
 import { useUser } from "@/context/user-provider";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClient } from "@/context/Client-Provider";
-import { TableServiceProvider } from "./serviceProviders/tableServiceProvider";
 import { EditModalEnterprise } from "./profileEnterprise/edit-modal-enterprise";
+import { useBranch } from "@/context/Branch-provider";
+import { Settings2 } from "lucide-react";
 
 interface CompanyData {
   razaoSocial: string;
@@ -266,6 +266,9 @@ export function SelectClient() {
   const navigate = useNavigate();
   const { user } = useUser();
   const { client } = useClient();
+  const [selectedTab, setSelectedTab] = useState("filiais");
+  const [employees, setEmployees] = useState([]);
+  const { selectedBranch } = useBranch();
 
   const fetchBranches = async () => {
     try {
@@ -278,6 +281,27 @@ export function SelectClient() {
       console.error("Erro ao buscar filiais:", err);
     }
   };
+  const getEmployee = async (idBranch: string) => {
+    if (!idBranch) return
+    setEmployees([]); 
+    console.log("idBranch: ", idBranch);
+    try {
+      const res = await axios.get(
+        `${ip}/employee?idSearch=${idBranch}&enterprise=CLIENT`
+      );
+      setEmployees(res.data.content);
+    } catch (error) {
+      console.log("Erro ao buscar colaboradores:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("id da branch:", selectedBranch);
+
+    if (selectedBranch) {
+      getEmployee(selectedBranch);
+    }
+  }, [selectedBranch]);
 
   useEffect(() => {
     if (client?.idClient) {
@@ -303,6 +327,8 @@ export function SelectClient() {
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
 
+  console.log("branch selecionada:", selectedBranch);
+
   return (
     <div className="mt-10 flex justify-center gap-10">
       <div className="flex items-start justify-center gap-10">
@@ -310,7 +336,7 @@ export function SelectClient() {
           {client ? (
             <div className="flex flex-col gap-10">
               <div className="flex gap-10">
-                <div className="flex w-[40vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+                <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
                   <div className="flex gap-3">
                     <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
                       <div className="text-[40px] text-white">
@@ -334,30 +360,132 @@ export function SelectClient() {
                     </div>
                   </div>
                 </div>
-                <Link
-                  to={`/sistema/branch/${user?.idUser}`}
-                  className="w-[20vw] rounded-lg border bg-white p-10 shadow-lg hover:bg-gray-200"
-                >
-                  <div className="flex flex-col items-start">
-                    <h2 className="text-realizaBlue text-[23px]">
-                      Filiais do cliente
-                    </h2>
-                    <div>
-                      {branches.map((branch: any) => (
-                        <div>
-                          <div key={branch.idBranch}>
-                            <li className="text-sky-900">{branch.name}</li>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Link>
               </div>
               <div className="rounded-lg border bg-white p-8 shadow-lg">
-                <h2>Prestadores de serviço do cliente</h2>
-                <div>
-                  <TableServiceProvider />
+                <div className="flex flex-col items-start gap-4">
+                  <div>
+                    <nav className="flex items-center">
+                      <Button
+                        variant={"ghost"}
+                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                          selectedTab === "filiais"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                        }`}
+                        onClick={() => setSelectedTab("filiais")}
+                      >
+                        Filiais
+                      </Button>
+                      <Button
+                        variant={"ghost"}
+                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                          selectedTab === "usuarios"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                        }`}
+                        onClick={() => setSelectedTab("usuarios")}
+                      >
+                        Usuários
+                      </Button>
+                    </nav>
+                  </div>
+                  {selectedTab === "filiais" && (
+                    <div>
+                      <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                        <thead>
+                          <tr>
+                            <th className="border border-gray-300 px-4 py-2 text-start">
+                              Filiais
+                            </th>
+                            <th className="border">Cnpj</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {branches && branches.length > 0 ? (
+                            branches.map((branch: any) => (
+                              <tr key={branch.idBranch}>
+                                <td className="border border-gray-300 px-4 py-2">
+                                  <li className="text-realizaBlue">
+                                    {branch.name}
+                                  </li>
+                                </td>
+                                <td className="text-center">{branch.cnpj}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={3}
+                                className="border border-gray-300 px-4 py-2 text-center"
+                              >
+                                Nenhuma filial encontrada
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  {selectedTab === "usuarios" && (
+                    <div>
+                      <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                        <thead>
+                          <tr>
+                            <th className="border border-gray-300 px-4 py-2">
+                              Nome
+                            </th>
+                            <th className="border border-gray-300 px-4 py-2">
+                              Status
+                            </th>
+                            <th className="border border-gray-300 px-4 py-2">
+                              Ações
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {employees && employees.length > 0 ? (
+                            employees.map((employee: any) => (
+                              <tr key={employee.idEmployee}>
+                                <td className="border border-gray-300 px-4 py-2">
+                                  {employee.name}
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                  <span
+                                    className={
+                                      employee.situation === "Ativo"
+                                        ? "text-green-500"
+                                        : "text-red-500"
+                                    }
+                                  >
+                                    {employee.situation}
+                                  </span>
+                                </td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                  <Link
+                                    to={`/sistema/detailsEmployees/${employee.idEmployee}`}
+                                  >
+                                    <button className="text-realizaBlue ml-4 hover:underline">
+                                      <Settings2 />
+                                    </button>
+                                  </Link>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={3}
+                                className="border border-gray-300 px-4 py-2 text-center"
+                              >
+                                Nenhum colaborador encontrado
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -366,7 +494,7 @@ export function SelectClient() {
               <div className="flex gap-10">
                 <div>
                   <div>
-                    <div className="flex w-[40vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+                    <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
                       <div className="flex">
                         <Skeleton className="h-[16vh] w-[8vw] rounded-full bg-gray-600" />
                         <div className="flex flex-col gap-10">
@@ -383,32 +511,71 @@ export function SelectClient() {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-lg border bg-white p-10 shadow-lg">
-                  <div className="flex flex-col">
-                    <h2 className="text-realizaBlue text-[23px]">
-                      Filiais do cliente
-                    </h2>
-                    <p>
-                      <MagnifyingGlass
-                        visible={true}
-                        height="60"
-                        width="55"
-                        ariaLabel="magnifying-glass-loading"
-                        wrapperStyle={{}}
-                        wrapperClass="magnifying-glass-wrapper"
-                        glassColor="#c0efff"
-                        color="#34495D"
-                      />
-                    </p>
-                  </div>
-                </div>
               </div>
-              <div>
-                <div className="rounded-lg border bg-white p-8 shadow-lg">
-                  <h2>Prestadores de serviço do cliente</h2>
+              <div className="rounded-lg border bg-white p-8 shadow-lg">
+                <div className="flex flex-col items-start gap-4">
                   <div>
-                    <TableServiceProvider />
+                    <nav className="flex items-center">
+                      <Button
+                        variant={"ghost"}
+                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                          selectedTab === "filiais"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                        }`}
+                        onClick={() => setSelectedTab("filiais")}
+                      >
+                        Filiais
+                      </Button>
+                      <Button
+                        variant={"ghost"}
+                        className={`px-4 py-2 transition-all duration-300 text-white${
+                          selectedTab === "usuarios"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                        }`}
+                        onClick={() => setSelectedTab("usuarios")}
+                      >
+                        Usuários
+                      </Button>
+                    </nav>
                   </div>
+                  {selectedTab === "filiais" && (
+                    <div>
+                      <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                        <thead>
+                          <tr>
+                            <th className="border border-gray-300 px-4 py-2 text-start">
+                              Filiais
+                            </th>
+                            <th>Cnpj</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {branches && branches.length > 0 ? (
+                            branches.map((branch: any) => (
+                              <tr key={branch.id}>
+                                <td className="border border-gray-300 px-4 py-2">
+                                  <li className="text-realizaBlue">
+                                    {branch.name}
+                                  </li>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={3}
+                                className="border border-gray-300 px-4 py-2 text-center"
+                              >
+                                Nenhuma filial encontrada
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

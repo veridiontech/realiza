@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  Bell,
   ChartNoAxesGantt,
   LogOut,
   Paperclip,
   Plus,
-  Search,
   User,
   LayoutPanelTop,
 } from "lucide-react";
@@ -14,7 +12,7 @@ import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { LateralMenu } from "./realizaLateralMenu";
-import { ToggleTheme } from "../toggle-theme";
+// import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
 import axios from "axios";
 import { ip } from "@/utils/ip";
@@ -29,10 +27,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ProfilePhoto } from "./profile-photo";
+import { useBranch } from "@/context/Branch-provider";
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
-  const { setClient, branches} = useClient();
+  const { setClient } = useClient();
+  const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -73,7 +73,6 @@ export function Header() {
       console.error("Erro ao selecionar cliente", err);
     }
   };
-  
 
   // Handlers de hover:
   const handleMouseEnter = () => setMenuOpen(true);
@@ -114,56 +113,51 @@ export function Header() {
           </Link>
         </div>
 
-        <div>
-          <div>
-            <span>Filial: </span>
-            <select defaultValue="">
-              <option value="" disabled>Selecione uma filial</option>
-              {Array.isArray(branches) && branches.map((branch) => (
-                <option value="" key={branch.idBranch}>{branch.name}</option>
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-4">
+            <span className="text-realizaBlue mr-4 text-xl">
+              Cliente Selecionado:
+            </span>
+            <select
+              onChange={(e) => handleSelectClient(e.target.value)}
+              defaultValue=""
+              className="rounded-md border p-1 text-black"
+            >
+              <option value="" disabled>
+                Selecione um cliente
+              </option>
+              {clients.map((client) => (
+                <option key={client.idClient} value={client.idClient}>
+                  {client.tradeName}
+                </option>
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Seleção de cliente */}
-        <div className="flex items-center gap-4">
-          <span className="text-realizaBlue mr-4 text-xl">
-            Cliente Selecionado:
-          </span>
-          <select
-            onChange={(e) => handleSelectClient(e.target.value)}
-            defaultValue=""
-            className="rounded-md border p-1 text-black"
-          >
-            <option value="" disabled>
-              Selecione um cliente
-            </option>
-            {clients.map((client) => (
-              <option key={client.idClient} value={client.idClient}>
-                {client.tradeName}
-              </option>
-            ))}
-          </select>
+          <div className="">
+            <div>
+              <span className="text-realizaBlue text-[14px]">Filial: </span>
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)} 
+                className="text-[12px]"
+              >
+                <option value="">Selecione uma filial</option>
+                {Array.isArray(branch) &&
+                  branch.map((branch) => (
+                    <option value={branch.idBranch} key={branch.idBranch}>
+                      {branch.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+          {/* Seleção de cliente */}
         </div>
-
         {/* Perfil do usuário e demais itens */}
         <div className="hidden items-center md:flex">
-          <div className="flex w-[320px] items-center gap-3 rounded-full border bg-zinc-100 px-4 py-2">
-            <Search className="size-5 text-zinc-900" />
-            <input
-              className="h-auto flex-1 border-0 bg-transparent p-0 text-sm outline-none"
-              placeholder="Pesquise aqui..."
-            />
-          </div>
           <div className="ml-12 flex items-center gap-8">
-            <ToggleTheme />
-            <Button
-              variant={"ghost"}
-              className="dark:bg-primary-foreground w-[2.2vw] rounded-full bg-zinc-100 p-2"
-            >
-              <Bell size={24} />
-            </Button>
+            {/* <ToggleTheme /> */}
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <ProfilePhoto />

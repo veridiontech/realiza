@@ -2,10 +2,13 @@ import { propsBranch } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useClient } from "./Client-Provider";
 
 interface BranchContextProps {
-  branch: propsBranch | null;
-  setBranch: React.Dispatch<React.SetStateAction<propsBranch | null>>;
+  branch: propsBranch[]; 
+  setBranch: React.Dispatch<React.SetStateAction<propsBranch[]>>;
+  selectedBranch: string;
+  setSelectedBranch: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const BranchContext = createContext<BranchContextProps | undefined>(undefined);
@@ -19,35 +22,29 @@ export function useBranch() {
 }
 
 export function BranchProvider({ children }: { children: React.ReactNode }) {
-  const [branch, setBranch] = useState<propsBranch | null>(null);
+  const [branch, setBranch] = useState<propsBranch[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const { client } = useClient();
+
+  useEffect(() => {
+    if (client?.idClient) {
+      setSelectedBranch(""); 
+      getBranch(client.idClient);
+    }
+  }, [client?.idClient]);
 
   const getBranch = async (idClient: string) => {
     try {
       const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`);
-      if (res.data) {
-        setBranch(res.data);
-      } else {
-        console.log("cliente não encontrado");
-        setBranch(null);
-      }
+      setBranch(res.data.content || []);
     } catch (err) {
-      console.log("erro ao buscar filiais no context", err);
+      console.error("Erro ao buscar filiais no context", err);
+      setBranch([]);
     }
   };
 
-  useEffect(() => {
-    const idBranch = localStorage.getItem("idBranch");
-    if (idBranch) {
-      getBranch(idBranch);
-    }
-  });
   return (
-    <BranchContext.Provider
-      value={{
-        branch,
-        setBranch,
-      }}
-    >
+    <BranchContext.Provider value={{ branch, setBranch, selectedBranch, setSelectedBranch }}>
       {children}
     </BranchContext.Provider>
   );

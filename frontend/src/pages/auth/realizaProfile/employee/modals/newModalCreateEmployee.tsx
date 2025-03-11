@@ -11,41 +11,49 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { propsClient } from "@/types/interfaces";
+import { propsBranch, propsClient } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 
 const createNewEmployeeFormSchema = z.object({
-  contractType: z.string().nonempty("Tipo de contrato é obrigatório"),
-  name: z.string().nonempty("Nome completo é obrigatório"),
-  cpf: z.string().nonempty("CPF é obrigatório"),
+  contractType: z.string(),
+  name: z.string(),
+  surname: z.string(),
+  email: z.string(),
+  cpf: z.string(),
   salary: z.string(),
-  gender: z.string().nonempty("Sexo é obrigatório"),
-  maritalStatus: z.string().nonempty("Estado Civil é obrigatório"),
-  dob: z.string().nonempty("Data de nascimento é obrigatória"),
-  cep: z.string().nonempty("CEP é obrigatório"),
-  state: z.string().nonempty("Estado é obrigatório"),
-  city: z.string().nonempty("Cidade é obrigatória"),
-  address: z.string().nonempty("Endereço é obrigatório"),
+  gender: z.string(),
+  maritalStatus: z.string(),
+  cep: z.string(),
+  state: z.string(),
+  city: z.string(),
+  address: z.string(),
   phone: z.string().optional(),
   mobile: z.string(),
-  admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
-  role: z.string().nonempty("Cargo é obrigatório"),
-  education: z.string().nonempty("Grau de instrução é obrigatório"),
+  position: z.string(),
+  education: z.string(),
   cbo: z.string().optional(),
-  platformAccess: z.string().nonempty("Acesso à plataforma é obrigatório"),
+  platformAccess: z.string(),
+  rg: z.string(),
+  admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
+  dob: z.string()
 });
 
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 export function NewModalCreateEmployee() {
   const [clients, setClients] = useState<propsClient[]>([]);
+  const [branches, setBranches] = useState([]);
   const [selectRole, setSelectRole] = useState("");
+  const [selectedClient, setSelectedClient] = useState<string>("");
+  const [seletedBranch, setSeletedBranch] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -56,15 +64,26 @@ export function NewModalCreateEmployee() {
   });
 
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
+    setIsLoading(true);
     const payload = {
       ...data,
+      branch: seletedBranch,
     };
+    console.log("Enviando dados:",payload);
     try {
-      await axios.post(`${ip}/employee/brazilian`, payload);
+      const response = await axios.post(`${ip}/employee/brazilian`, payload);
+      console.log("Sucesso na requisição!", response.data);
       toast.success("Sucesso ao cadastrar novo usuário");
     } catch (err) {
-      console.log("erro ao enviar dados do novo colaborador:", err);
-      toast.error("Erro ao cadastrar novo usuário, tente novamente");
+      if (axios.isAxiosError(err)) {
+        console.error("Erro Axios:", err.response?.status, err.response?.data);
+        toast.error(`Erro ${err.response?.status}: ${err.response?.data?.message || "Erro ao cadastrar usuário"}`);
+      } else {
+        console.error("Erro desconhecido:", err);
+        toast.error("Erro inesperado, tente novamente");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -96,6 +115,27 @@ export function NewModalCreateEmployee() {
     }
   }, [selectRole]);
 
+  useEffect(() => {
+    if (selectedClient) {
+      getBranch(selectedClient); 
+    }
+  }, [selectedClient]);
+
+  const getBranch = async (idClient: string) => {
+    console.log("idClient:", idClient);
+    if (!idClient) return;
+    try {
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${idClient}`,
+      );
+      console.log("teste", res.data.content);
+
+      setBranches(res.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -114,14 +154,15 @@ export function NewModalCreateEmployee() {
               <form
                 action=""
                 className="flex flex-col gap-5"
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(onSubmit, (errors) => {
+                  console.log("Erros detectados:", errors);
+                })}
               >
                 <div>
                   <Label className="text-white">Tipo de contrato</Label>
                   <select
                     {...register("contractType")}
                     className="flex flex-col rounded-md border p-2"
-                    {...register("contractType")}
                   >
                     <option value="">Selecione um tipo de contrato</option>
                     <option value="Autônomo">Autônomo</option>
@@ -154,8 +195,28 @@ export function NewModalCreateEmployee() {
                   <Input type="text" {...register("name")} />
                 </div>
                 <div>
+                  <Label className="text-white">Sobrenome</Label>
+                  <Input type="text" {...register("surname")} />
+                </div>
+                <div>
+                  <Label className="text-white">Data de aniversário</Label>
+                  <Input type="date" {...register("dob")} />
+                </div>
+                <div>
+                  <Label className="text-white">Email</Label>
+                  <Input type="text" {...register("email")} />
+                </div>
+                <div>
                   <Label className="text-white">Cpf</Label>
                   <Input type="text" {...register("cpf")} />
+                </div>
+                <div>
+                  <Label className="text-white">RG</Label>
+                  <Input type="text" {...register("rg")} />
+                </div>
+                <div>
+                  <Label className="text-white">Data de admissão</Label>
+                  <Input type="date" {...register("admissionDate")} />
                 </div>
                 <div>
                   <Label className="text-white">salário</Label>
@@ -193,19 +254,38 @@ export function NewModalCreateEmployee() {
                 <div>
                   {selectRole === "branch" && (
                     <div className="flex flex-col gap-3">
-                      <select defaultValue="" className="rounded-md p-1">
+                      <select
+                        defaultValue=""
+                        className="rounded-md p-1"
+                        onChange={(e) => {
+                          const id = e.target.value;
+                          setSelectedClient(id);
+                          getBranch(id);
+                        }}
+                      >
                         <option value="" disabled>
                           Selecione um cliente
                         </option>
                         {clients.map((client: propsClient) => (
-                          <option value="" key={client.idClient}>
+                          <option value={client.idClient} key={client.idClient}>
                             {client.tradeName}
                           </option>
                         ))}
                       </select>
-                      <select className="rounded-md p-1">
+                      <select
+                        className="rounded-md p-1"
+                        defaultValue=""
+                        onChange={(e) => {
+                          const id = e.target.value;
+                          setSeletedBranch(id);
+                        }}
+                      >
                         <option value="">Selecione uma filial</option>
-                        {}
+                        {branches.map((branch: propsBranch) => (
+                          <option value={branch.idBranch} key={branch.idBranch}>
+                            {branch.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   )}
@@ -261,51 +341,62 @@ export function NewModalCreateEmployee() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-white" {...register("state")}>
-                    Estado
-                  </Label>
-                  <Input />
+                  <Label className="text-white">Estado</Label>
+                  <Input {...register("state")} />
                 </div>
                 <div>
-                  <Label className="text-white" {...register("city")}>
-                    Cidade
-                  </Label>
-                  <Input />
+                  <Label className="text-white">Cidade</Label>
+                  <Input {...register("city")} />
                 </div>
                 <div>
-                  <Label className="text-white" {...register("address")}>
-                    Adress
-                  </Label>
-                  <Input />
+                  <Label className="text-white">Adress</Label>
+                  <Input {...register("address")} />
                 </div>
                 <div>
-                  <Label className="text-white" {...register("phone")}>
-                    Telefone
-                  </Label>
-                  <Input />
+                  <Label className="text-white">Telefone</Label>
+                  <Input {...register("phone")} />
                 </div>
                 <div>
-                  <Label className="text-white" {...register("mobile")}>
-                    Celular
-                  </Label>
-                  <Input />
+                  <Label className="text-white">Celular</Label>
+                  <Input {...register("mobile")} />
                 </div>
                 <div>
-                  <Label className="text-white" {...register("role")}>
-                    Cargo
-                  </Label>
-                  <Input />
+                  <Label className="text-white">Cargo</Label>
+                  <Input {...register("position")} />
                 </div>
                 <div>
-                  <Label className="text-white" {...register("cbo")}>
-                    cbo
-                  </Label>
-                  <Input />
+                  <Label className="text-white">cbo</Label>
+                  <Input {...register("cbo")} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-white">Graduação</Label>
+                  <select
+                {...register("education")}
+                className="flex flex-col rounded-md border p-2"
+              >
+                <option value="">Selecione</option>
+                <option value="Ensino Fundamental Incompleto">
+                  Ensino Fundamental Incompleto
+                </option>
+                <option value="Ensino Fundamental Completo">
+                  Ensino Fundamental Completo
+                </option>
+                <option value="Ensino Médio Incompleto">
+                  Ensino Médio Incompleto
+                </option>
+                <option value="Ensino Médio Completo">
+                  Ensino Médio Completo
+                </option>
+                <option value="Ensino Superior Incompleto">
+                  Ensino Superior Incompleto
+                </option>
+                <option value="Ensino Superior Completo">
+                  Ensino Superior Completo
+                </option>
+              </select>
                 </div>
                 <div>
-                  <Label className="text-white" {...register("platformAccess")}>
-                    Acesso a plataforma
-                  </Label>
+                  <Label className="text-white">Acesso a plataforma</Label>
                   <select
                     {...register("platformAccess")}
                     className="flex flex-col rounded-md border p-2"
@@ -315,8 +406,22 @@ export function NewModalCreateEmployee() {
                     <option value="Não">Não</option>
                   </select>
                 </div>
-                <Button type="submit" className="bg-realizaBlue">
-                  Cadastrar
+                <Button
+                  type="submit"
+                  className="bg-realizaBlue"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Oval
+                      visible={true}
+                      height={20}
+                      width={20}
+                      color="#fff"
+                      ariaLabel="oval-loading"
+                    />
+                  ) : (
+                    "Cadastrar"
+                  )}
                 </Button>
               </form>
             </div>

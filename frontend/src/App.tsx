@@ -26,13 +26,13 @@ export function App() {
               className="w-[20vw]"
             />
             <Helmet titleTemplate="%s | realiza" />
-            <BranchProvider>
-              <DocumentProvider>
-                <ClientProvider>
+            <ClientProvider>
+              <BranchProvider>
+                <DocumentProvider>
                   <RouterProvider router={router} />
-                </ClientProvider>
-              </DocumentProvider>
-            </BranchProvider>
+                </DocumentProvider>
+              </BranchProvider>
+            </ClientProvider>
           </HelmetProvider>
         </FormDataProvider>
       </QueryClientProvider>

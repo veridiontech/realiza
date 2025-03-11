@@ -58,9 +58,12 @@ export function Branch() {
   };
 
   useEffect(() => {
-    fetchBranches();
-  }, [currentPage]);
-
+    if (client?.idClient) {
+      setBranches([]); 
+      setCurrentPage(1); 
+      fetchBranches(); 
+    }
+  }, [client?.idClient]); 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
