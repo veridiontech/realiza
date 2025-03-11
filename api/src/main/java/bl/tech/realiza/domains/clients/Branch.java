@@ -4,8 +4,10 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.UserClient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,13 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class Branch {
+
+    /*
+    unidade -> branch
+    núcleo -> center
+    mercado -> market
+    board -> diretoria
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idBranch;
@@ -61,4 +70,6 @@ public class Branch {
     @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<UserClient> userClients;
 
+    /*@OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Center> centers;*/
 }
