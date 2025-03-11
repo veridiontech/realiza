@@ -1,101 +1,98 @@
-import { useState, useEffect } from "react";
-import { Table } from "@/components/ui/tableVanila";
-import { Pagination } from "@/components/ui/pagination";
-import { useContracts } from "@/hooks/gets/realiza/useContracts";
-import { useClient } from "@/context/Client-Provider";
-import { Contract } from "@/types/contracts";
-import { NotebookPen, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { ModalAddContract } from "@/components/realizaAddContract";
+import { useBranch } from "@/context/Branch-provider";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function ContractsTable() {
-  const { client } = useClient();
-  const itemsPerPage = 10;
-  const navigate = useNavigate();
+  const { selectedBranch } = useBranch();
+  const [contracts, setContracts] = useState([]);
 
-  const {
-    contracts = [],
-    totalPages = 0,
-    loading,
-    error,
-    fetchContracts,
-  } = useContracts();
+  const getContract = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/contract/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+      );
+      console.log("contratos:", res.data.content);
 
-  const [currentPage, setCurrentPage] = useState(0);
-
-  useEffect(() => {
-    if (client?.idClient) {
-      fetchContracts(itemsPerPage, currentPage, client.idClient);
+      setContracts(res.data.content);
+    } catch (err) {
+      console.log("erro ao buscar documentos:", err);
     }
-  }, [currentPage, client?.idClient]);
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
   };
 
-  const columns = [
-    { key: "serviceName" as keyof Contract, label: "Serviço" },
-    { key: "startDate" as keyof Contract, label: "Data de Início" },
-    { key: "endDate" as keyof Contract, label: "Data de Fim" },
-    {
-      key: "id" as keyof Contract,
-      label: "Ações",
-      render: (_: any, row: Contract) => (
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => console.log("Contrato Selecionado:", row)}
-            className="text-realizaBlue hover:underline"
-          >
-            <NotebookPen />
-          </button>
-          <button
-            onClick={() => {
-              console.log("ID do contrato antes da navegação:", row.id);
-              if (row.id) {
-                navigate(`/sistema/employee-to-contract/${row.id}`);
-              } else {
-                console.error("ID do contrato não encontrado!", row);
-              }
-            }}
-            className="text-green-500 hover:underline"
-          >
-            <Users />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  useEffect(() => {
+    if (selectedBranch?.idBranch) {
+      getContract();
+    }
+  }, [selectedBranch?.idBranch]);
 
   return (
     <div className="m-10 flex min-h-full justify-center">
-      <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
+      <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white p-10">
         {/* Cabeçalho com o título e botão para adicionar contrato */}
         <div className="m-8 flex items-center justify-between">
           <h1 className="text-2xl">Contratos</h1>
           <ModalAddContract /> {/* Botão Novo Contrato */}
         </div>
-
-        {/* Mensagens de erro e carregamento */}
-        {error ? (
-          <p className="text-center text-red-600">
-            Erro ao carregar os dados: {error}
-          </p>
-        ) : loading ? (
-          <p className="text-center">Carregando contratos...</p>
-        ) : contracts.length > 0 ? (
-          <Table<Contract> data={contracts} columns={columns} />
-        ) : (
-          <p className="text-center text-gray-500">
-            Nenhum contrato disponível.
-          </p>
-        )}
-
-        {/* Paginação */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <Dialog>
+          <DialogTrigger asChild>
+            <div className="border-l-realizaBlue w-auto cursor-pointer rounded-lg border border-l-8 p-5 shadow-lg hover:bg-gray-100">
+              {contracts.map((contract: any) => (
+                <div
+                  className="flex flex-col items-start gap-5"
+                  key={contract.idContract}
+                >
+                  <div className="flex flex-col gap-1">
+                    <h1>Nome do serviço: </h1>
+                    <p>{contract.serviceName}</p>
+                  </div>
+                  <div className="text-[12px]">
+                    <p>Data de início</p>
+                    <p>
+                      {new Date(contract.startDate).toLocaleDateString("pt-BR")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Detalhes do Contrato</DialogTitle>
+              {contracts.map((contract: any) => (
+                <div key={contract.idContract} className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-1">
+                    <h1>{contract.serviceName}</h1>
+                    <div className="text-[12px]">
+                      <p>{contract.description}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p>Prestador do serviço:</p>
+                    <div>
+                      <li>{contract.providerSupplierName}</li>
+                      <div>
+                        <li>Duração do serviço: {contract.serviceDuration}</li>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p>Data de início</p>
+                    <p>{new Date(contract.startDate).toLocaleDateString("pt-BR")}</p>
+                  </div>
+                </div>
+              ))}
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

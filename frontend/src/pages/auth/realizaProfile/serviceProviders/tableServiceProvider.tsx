@@ -1,34 +1,18 @@
-import { useClient } from "@/context/Client-Provider";
+import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 export function TableServiceProvider() {
   const [suppliers, setSuppliers] = useState<any>([]);
-  const { client } = useClient();
-  const [branches, setBranches] = useState<any>([]);
-  const [selectedBranch, setSelectedBranch] = useState("");
-
-  console.log("client:", client);
-  const getBranchClient = async () => {
-    if (!client?.idClient) return;
-    try {
-      const res = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client.idClient}`,
-      );
-      setBranches(res.data.content);
-      console.log("Filiais:", res.data.content);
-    } catch (err) {
-      console.log("Erro ao buscar filial do cliente", err);
-    }
-  };
+  const {selectedBranch} = useBranch()
 
   // Busca os fornecedores da filial selecionada
-  const getSupplier = async (idBranch: string) => {
-    if (!idBranch) return;
+  const getSupplier = async () => {
+    if (!selectedBranch?.idBranch) return;
     try {
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${idBranch}`,
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
       );
       console.log("Dados do supplier:", res.data.content);
       setSuppliers(res.data.content);
@@ -38,34 +22,15 @@ export function TableServiceProvider() {
   };
 
   useEffect(() => {
-    if (client?.idClient) {
-      setSelectedBranch("")
-      getBranchClient();
-      setSuppliers([]);
+    if(selectedBranch?.idBranch) {
+      getSupplier()
+      setSuppliers([])
     }
-  }, [client?.idClient]);
+  }, [selectedBranch]);
 
   return (
     <div className="p-10">
       <div className="mb-4">
-        <select
-          value={selectedBranch}
-          className="w-[20vw] rounded-md border p-2"
-          onChange={(e) => {
-            const id = e.target.value;
-            setSelectedBranch(id);
-            getSupplier(id);
-          }}
-        >
-          <option value="" disabled>
-            Selecione uma filial
-          </option>
-          {branches.map((branch: any) => (
-            <option key={branch.idBranch} value={branch.idBranch}>
-              {branch.name}
-            </option>
-          ))}
-        </select>
       </div>
       {suppliers.length > 0 ? (
         <table className="w-full border-collapse border border-gray-300">

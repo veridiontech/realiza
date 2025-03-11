@@ -298,8 +298,8 @@ export function SelectClient() {
   useEffect(() => {
     console.log("id da branch:", selectedBranch);
 
-    if (selectedBranch) {
-      getEmployee(selectedBranch);
+    if (selectedBranch?.idBranch) {
+      getEmployee(selectedBranch.idBranch);
     }
   }, [selectedBranch]);
 

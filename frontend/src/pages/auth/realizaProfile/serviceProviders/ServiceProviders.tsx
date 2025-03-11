@@ -38,14 +38,6 @@ export function ServiceProvider() {
         <h1 className="m-8 text-2xl">Prestadores de Serviço</h1>
 
         <div className="flex w-[90rem] flex-row justify-between px-10">
-          <div className="relative mb-4">
-            <input
-              type="text"
-              placeholder="🔍 Pesquisar fornecedor..."
-              className="focus:outline-realizaBlue w-[34rem] rounded-lg border border-gray-300 p-2"
-              onChange={() => {}}
-            />
-          </div>
           <ModalTesteSendSupplier />
         </div>
 

@@ -7,8 +7,8 @@ import { useClient } from "./Client-Provider";
 interface BranchContextProps {
   branch: propsBranch[]; 
   setBranch: React.Dispatch<React.SetStateAction<propsBranch[]>>;
-  selectedBranch: string;
-  setSelectedBranch: React.Dispatch<React.SetStateAction<string>>;
+  selectedBranch: propsBranch | null;
+  setSelectedBranch: React.Dispatch<React.SetStateAction<propsBranch | null>>;
 }
 
 const BranchContext = createContext<BranchContextProps | undefined>(undefined);
@@ -23,12 +23,12 @@ export function useBranch() {
 
 export function BranchProvider({ children }: { children: React.ReactNode }) {
   const [branch, setBranch] = useState<propsBranch[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [selectedBranch, setSelectedBranch] = useState<propsBranch | null>(null);
   const { client } = useClient();
 
   useEffect(() => {
     if (client?.idClient) {
-      setSelectedBranch(""); 
+      setSelectedBranch(null); 
       getBranch(client.idClient);
     }
   }, [client?.idClient]);

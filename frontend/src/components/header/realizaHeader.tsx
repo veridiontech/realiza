@@ -138,15 +138,20 @@ export function Header() {
             <div>
               <span className="text-realizaBlue text-[14px]">Filial: </span>
               <select
-                value={selectedBranch}
-                onChange={(e) => setSelectedBranch(e.target.value)} 
+                value={selectedBranch?.idBranch || ""}
+                onChange={(e) => {
+                  const selected = branch.find(
+                    (b) => b.idBranch === e.target.value,
+                  );
+                  setSelectedBranch(selected || null);
+                }}
                 className="text-[12px]"
               >
                 <option value="">Selecione uma filial</option>
                 {Array.isArray(branch) &&
-                  branch.map((branch) => (
-                    <option value={branch.idBranch} key={branch.idBranch}>
-                      {branch.name}
+                  branch.map((b) => (
+                    <option value={b.idBranch} key={b.idBranch}>
+                      {b.name}
                     </option>
                   ))}
               </select>

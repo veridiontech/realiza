@@ -36,7 +36,7 @@ export default function EmployeeToContract() {
       );
       const updatedEmployee = {
         ...employee,
-        idContracts: [...(employee.idContracts ?? []), contractId], // Garante que idContracts seja sempre um array
+        idContracts: [...(employee.idContracts ?? []), contractId], 
       };
 
       await axios.put(
