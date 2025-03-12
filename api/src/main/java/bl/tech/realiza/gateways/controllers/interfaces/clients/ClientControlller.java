@@ -16,4 +16,5 @@ public interface ClientControlller {
     ResponseEntity<Optional<ClientResponseDto>> updateClient(String id, ClientRequestDto clientRequestDto);
     ResponseEntity<String> updateLogo(String id, MultipartFile file);
     ResponseEntity<Void> deleteClient(String id);
+    ResponseEntity<Optional<ClientResponseDto>> getClientByBranch(String idBranch);
 }

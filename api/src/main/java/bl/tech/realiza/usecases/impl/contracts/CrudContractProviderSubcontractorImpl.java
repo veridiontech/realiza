@@ -93,7 +93,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             }
         }
 
-        switch (contractProviderSubcontractorRequestDto.getRisk()) {
+        if (contractProviderSubcontractorRequestDto.getRisk() != null) {
+            switch (contractProviderSubcontractorRequestDto.getRisk()) {
             case LOW_LESS_THAN_8H -> {
                 documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan8hIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
             }
@@ -133,6 +134,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 documentSuplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndHighMoreThan6mIsTrue(contractProviderSubcontractorRequestDto.getBranch(), "Documentos empresa-serviço");
 
             }
+        }
         }
 
         List<DocumentMatrix> documentMatrixList = documentSuplier.stream()

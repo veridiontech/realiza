@@ -8,7 +8,9 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.ultragaz.Center;
+import bl.tech.realiza.domains.ultragaz.Market;
 import bl.tech.realiza.domains.user.UserClient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,10 +28,10 @@ import java.util.List;
 public class Branch {
 
     /*
-    unidade -> branch
-    núcleo -> center
-    mercado -> market
-    board -> diretoria
+    unidade -> branch -> 4º nível
+    núcleo -> center -> 3º nível
+    mercado -> market -> 2º nível
+    board -> diretoria -> 1º nível
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -70,6 +72,7 @@ public class Branch {
     @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<UserClient> userClients;
 
-    /*@OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Center> centers;*/
+    @ManyToOne
+    @JoinColumn(name = "idCenter")
+    private Center center;
 }

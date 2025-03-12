@@ -12,6 +12,5 @@ public interface ClientRepository extends JpaRepository<Client, String> {
     Optional<Client> findByCnpj(String cnpj);
     Collection<Client> findAllByIsActive(boolean b);
     Collection<Client> findAllByDeleteRequest(boolean b);
-
     Page<Client> findAllByIsActiveIsTrue(Pageable pageable);
 }
