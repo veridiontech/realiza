@@ -36,6 +36,8 @@ public class UserResponseDto {
     private String branch;
     private String idClient;
     private BranchResponseDto branchResponse;
+    private String tradeName;
+    private String corporateName;
 
     // subcontractor
     private String subcontractor;
