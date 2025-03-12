@@ -92,4 +92,13 @@ public class ClientControllerImpl implements ClientControlller {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/find-by-branch/{idBranch}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Optional<ClientResponseDto>> getClientByBranch(@PathVariable String idBranch) {
+        Optional<ClientResponseDto> client = crudClient.findClientbyBranch(idBranch);
+
+        return ResponseEntity.of(Optional.of(client));
+    }
 }

@@ -16,4 +16,5 @@ public interface CrudClient {
     Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto);
     void delete(String id);
     String changeLogo(String id, MultipartFile file) throws IOException;
+    Optional<ClientResponseDto> findClientbyBranch(String idBranch);
 }

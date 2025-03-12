@@ -39,8 +39,6 @@ public abstract class Contract {
     private Date startDate;
     private Date endDate;
     @Builder.Default
-    private Document.Risk risk = Document.Risk.LOW_LESS_THAN_1M;
-    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
     private Boolean isActive = true;

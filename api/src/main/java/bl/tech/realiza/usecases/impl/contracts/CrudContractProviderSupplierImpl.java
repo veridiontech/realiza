@@ -91,45 +91,50 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             }
         }
 
-        switch (contractProviderSupplierRequestDto.getRisk()) {
-            case LOW_LESS_THAN_8H -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan8hIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
-            }
-            case LOW_LESS_THAN_1M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan1mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+        if (contractProviderSupplierRequestDto.getRisk() != null) {
+            switch (contractProviderSupplierRequestDto.getRisk()) {
+                case LOW_LESS_THAN_8H -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan8hIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case LOW_LESS_THAN_1M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan1mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case LOW_LESS_THAN_6M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case LOW_LESS_THAN_6M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case LOW_MORE_THAN_6M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowMoreThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case LOW_MORE_THAN_6M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowMoreThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case MEDIUM_LESS_THAN_1M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan1mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case MEDIUM_LESS_THAN_1M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan1mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case MEDIUM_LESS_THAN_6M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case MEDIUM_LESS_THAN_6M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumLessThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case MEDIUM_MORE_THAN_6M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumMoreThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case MEDIUM_MORE_THAN_6M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumMoreThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case HIGH_LESS_THAN_1M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan1mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case HIGH_LESS_THAN_1M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan1mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case HIGH_LESS_THAN_6M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case HIGH_LESS_THAN_6M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighLessThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
-            }
-            case HIGH_MORE_THAN_6M -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighMoreThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
+                }
+                case HIGH_MORE_THAN_6M -> {
+                    documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighMoreThan6mIsTrue(contractProviderSupplierRequestDto.getBranch(), "Documentos empresa-serviço");
 
+                }
+                default -> {
+                    documentBranch = List.of();
+                }
             }
         }
 
@@ -469,7 +474,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             }
         }
 
-        switch (contractAndSupplierCreateRequestDto.getRisk()) {
+        if (contractAndSupplierCreateRequestDto.getRisk() != null) {
+            switch (contractAndSupplierCreateRequestDto.getRisk()) {
             case LOW_LESS_THAN_8H -> {
                 documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowLessThan8hIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
             }
@@ -509,6 +515,10 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighMoreThan6mIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
 
             }
+            default -> {
+                documentBranch = List.of();
+            }
+        }
         }
 
         documentMatrixList = documentBranch.stream()
