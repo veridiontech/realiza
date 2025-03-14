@@ -1,17 +1,11 @@
-import {
-  Bell,
-  ChartNoAxesGantt,
-  LogOut,
-  Plus,
-  Search,
-  User,
-} from "lucide-react";
+import { ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
-import { Sheet, SheetTrigger } from "../ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { ClientLateralMenu } from "./clientLateralMenu";
-import { ToggleTheme } from "../toggle-theme";
+// import { ToggleTheme } from "../toggle-theme";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/context/user-provider";
 import {
   DropdownMenu,
@@ -22,17 +16,71 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ProfilePhoto } from "./profile-photo";
+import { useEffect, useState } from "react";
+import { ip } from "@/utils/ip";
+import axios from "axios";
+import { useBranch } from "@/context/Branch-provider";
+import { useClient } from "@/context/Client-Provider";
 
 export function HeaderClient() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout } = useUser();
+  const [clients, setClients] = useState<any>(null);
+  const { branch, selectedBranch, setSelectedBranch } = useBranch();
+
+  const { setClient } = useClient();
 
   const getIdUser = user?.idUser;
+
+  const getClientWithUser = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/client/find-by-branch/${user?.branch}`,
+      );
+      setClients(res.data);
+      setClient(res.data);
+      fetchBranchesByClient(res.data.idClient);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchBranchesByClient = async (idClient: string) => {
+    try {
+      const res = await axios.get(`${ip}/branch/by-client/${idClient}`);
+      setSelectedBranch(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar filiais:", err);
+    }
+  };
+
+  console.log("branch:", selectedBranch);
+
+  useEffect(() => {
+    if (user?.branch) {
+      getClientWithUser();
+    }
+  }, [user?.branch]);
+
+  useEffect(() => {
+    if (clients) {
+      fetchBranchesByClient(clients.idClient);
+    }
+  }, [clients]);
+
+  const handleMouseEnter = () => setMenuOpen(true);
+  const handleMouseLeave = () => setMenuOpen(false);
 
   return (
     <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Sheet>
+        <div
+          className="flex items-center"
+
+        >
+          <div  onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}>
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button
                 variant={"ghost"}
@@ -41,30 +89,70 @@ export function HeaderClient() {
                 <ChartNoAxesGantt className="text-white" />
               </Button>
             </SheetTrigger>
-            <ClientLateralMenu />
+            <SheetContent
+              className="h-full overflow-auto dark:bg-white"
+              side="left"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <ClientLateralMenu onClose={() => setMenuOpen(false)} />
+            </SheetContent>
           </Sheet>
-          <Link to={`/cliente/contracts/${getIdUser}`}>
+          </div>
+          <Link to={`/cliente/home/${getIdUser}`}>
             <img src={realizaLogo} alt="" className="w-[6vw]" />
           </Link>
+          <div>
+            {clients ? (
+              <h1>Empresa: {clients?.corporateName}</h1>
+            ) : (
+              <div className="flex items-center gap-1">
+                <h1>Empresa:</h1>
+                <Skeleton className="h-[10px] w-[100px] rounded-full" />
+              </div>
+            )}
+
+            <div className="flex items-center gap-1">
+              <h2>Filiais:</h2>{" "}
+              <select
+                value={selectedBranch?.idBranch || ""}
+                onChange={(e) => {
+                  const selected = branch.find(
+                    (b) => b.idBranch === e.target.value,
+                  );
+                  setSelectedBranch(selected || null);
+                }}
+                className="text-[12px]"
+              >
+                <option value="">Selecione uma filial</option>
+                {Array.isArray(branch) &&
+                  branch.map((b) => (
+                    <option value={b.idBranch} key={b.idBranch}>
+                      {b.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         <div className="hidden items-center md:flex">
-          <div className="flex w-[320px] items-center gap-3 rounded-full border border-none bg-zinc-100 px-4 py-2">
+          {/* <div className="flex w-[320px] items-center gap-3 rounded-full border border-none bg-zinc-100 px-4 py-2">
             <Search className="size-5 text-zinc-900" />
             <input
               className="h-auto flex-1 border-0 bg-transparent p-0 text-sm outline-none"
               placeholder="Pesquise aqui..."
             />
-          </div>
+          </div> */}
           <div className="ml-12 flex items-center gap-8">
-            <ToggleTheme />
+            {/* <ToggleTheme /> */}
             <div className="flex items-center gap-1">
-              <Button
+              {/* <Button
                 variant={"ghost"}
                 className="dark:bg-primary-foreground w-[2.2vw] rounded-full bg-zinc-100 p-2"
               >
                 <Bell size={24} />
-              </Button>
+              </Button> */}
               {/* <Link to={`/profile-user`}>
                   <Avatar>
                     <AvatarImage src="https://github.com/shadcn.png" />

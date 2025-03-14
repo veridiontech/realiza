@@ -48,6 +48,7 @@ import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
 import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
+import { HomeClient } from "./pages/auth/clientProfile/home/homeClient";
 
 
 export const router = createBrowserRouter([
@@ -109,6 +110,7 @@ export const router = createBrowserRouter([
       </UserProvider>
     ),
     children: [
+      { path: "home/:id", element: <HomeClient /> },
       { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },

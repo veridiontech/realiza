@@ -1,5 +1,5 @@
 import {
-  ChartPie,
+  // ChartPie,
   File,
   Home,
   Users2,
@@ -13,13 +13,19 @@ import { SheetContent } from "../ui/sheet";
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 
-export function ClientLateralMenu() {
+export function ClientLateralMenu({ onClose }: { onClose: () => void }) {
   const { user } = useUser();
 
   const getIdUser = user?.idUser;
 
   return (
-    <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
+    <SheetContent
+      className="h-full overflow-auto dark:bg-white"
+      side={"left"}
+      onInteractOutside={onClose}
+      onEscapeKeyDown={onClose}
+    >
+      <Link to={`/cliente/home/${getIdUser}`} onClick={onClose}>
       <Button
         variant={"ghost"}
         className="w-full justify-start bg-zinc-100 px-4 py-2"
@@ -27,10 +33,11 @@ export function ClientLateralMenu() {
         <Home className="text-realizaBlue size-4" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
       </Button>
+      </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>
-      <Link to={`/cliente/serviceProviders/${getIdUser}`}>
+      <Link to={`/cliente/serviceProviders/${getIdUser}`} onClick={onClose}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -41,7 +48,7 @@ export function ClientLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={`/cliente/dashboard/${getIdUser}`}>
+      {/* <Link to={`/cliente/dashboard/${getIdUser}`} onClick={onClose}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -51,11 +58,11 @@ export function ClientLateralMenu() {
             Ver BI’s
           </span>
         </Button>
-      </Link>
+      </Link> */}
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Colaboradores e contratos
       </h3>
-      <Link to={`/cliente/contracts/${getIdUser}`}>
+      <Link to={`/cliente/contracts/${getIdUser}`} onClick={onClose}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -67,7 +74,7 @@ export function ClientLateralMenu() {
         </Button>
       </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
-      <Link to={`/cliente/profile/${getIdUser}`}>
+      <Link to={`/cliente/profile/${getIdUser}`} onClick={onClose}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -78,7 +85,7 @@ export function ClientLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={`/cliente/branch/${getIdUser}`}>
+      <Link to={`/cliente/branch/${getIdUser}`} onClick={onClose}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"
@@ -89,7 +96,7 @@ export function ClientLateralMenu() {
           </span>
         </Button>
       </Link>
-      <Link to={`/cliente/employees/${getIdUser}`}>
+      <Link to={`/cliente/employees/${getIdUser}`} onClick={onClose}>
         <Button
           variant={"ghost"}
           className="mt-2 w-full justify-start px-4 py-2"

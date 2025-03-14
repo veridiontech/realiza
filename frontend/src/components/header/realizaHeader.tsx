@@ -79,7 +79,10 @@ export function Header() {
   const handleMouseLeave = () => setMenuOpen(false);
 
   return (
-    <header className="dark:bg-primary relative p-5">
+    <header className="dark:bg-primary relative p-5 ">
+      <div>
+        {/* seach */}
+      </div>
       <div className="flex items-center justify-between">
         {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">

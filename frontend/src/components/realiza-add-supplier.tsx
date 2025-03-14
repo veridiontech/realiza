@@ -15,41 +15,34 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { Radio } from "react-loader-spinner";
-import { propsBranch, propsClient } from "@/types/interfaces";
+// import { propsBranch, propsClient } from "@/types/interfaces";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
+import { Search } from "lucide-react";
+import { useClient } from "@/context/Client-Provider";
+import { useBranch } from "@/context/Branch-provider";
 
 const modalSendEmailFormSchema = z.object({
-  email: z
-    .string()
-    .email("Insira um email válido")
-    .default("vendas@comercialbrasil.com"),
+  email: z.string().email("Insira um email válido"),
   company: z.string().default("SUPPLIER"),
-  cnpj: z.string().nonempty("Insira o CNPJ").default("98.765.432/0001-12"),
-  idCompany: z.string().nonempty("Selecione um cliente"),
-  branch: z.string().default("78016e8e-b197-4158-a2df-06a4841a5685"),
-  tradeName: z.string().default("Comercial Brasil EIRELI"),
-  corporateName: z.string().default("Comercial Brasil EIRELI Matriz"),
-  cep: z.string().default("20031-000"),
-  state: z.string().default("RJ"),
-  city: z.string().default("Rio de Janeiro"),
-  address: z.string().default("Rua das Flores, 50"),
-  number: z.string().default("50"),
+  cnpj: z.string().nonempty("Insira o CNPJ"),
+  tradeName: z.string(),
+  corporateName: z.string(),
+  cep: z.string(),
+  state: z.string(),
+  city: z.string(),
+  address: z.string(),
+  number: z.string(),
 });
 
 const contractFormSchema = z.object({
   contractReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
-  serviceDuration: z.string().nonempty("A duração do serviço é obrigatória"),
-  serviceName: z.string().nonempty("O nome do serviço é obrigatório"),
+  serviceName: z.string(),
   description: z.string().nonempty("A descrição detalhada é obrigatória"),
-  allocatedLimit: z
-    .string()
-    .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
-  responsible: z.string().nonempty("O responsável é obrigatório"),
   expenseType: z.string().nonempty("O tipo de despesa é obrigatório"),
   startDate: z
     .string()
@@ -57,38 +50,29 @@ const contractFormSchema = z.object({
       (val) => !isNaN(Date.parse(val)),
       "A data de início deve ser válida",
     ),
-  endDate: z
-    .string()
-    .refine(
-      (val) => !isNaN(Date.parse(val)),
-      "A data de término deve ser válida",
-    ),
-  serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
-  subcontractPermission: z.string(),
-  risk: z.string(),
+  serviceType: z.string().optional(),
+  // risk: z.string(),
   activities: z
     .array(z.string())
     .min(1, "Pelo menos uma atividade é obrigatória"),
-  requirements: z
-    .array(z.string())
-    .min(1, "Pelo menos um requisito é obrigatória"),
+  serviceTypeExpense: z.string(),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
-  const [clients, setClients] = useState<propsClient[]>([]);
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
-  const [requirements, setRequirements] = useState<any>([]);
+  // const [requirements, setRequirements] = useState<any>([]);
   // const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
+  const [manager, setManager] = useState<any>(null);
   const [supplierInfo, setSupplierInfo] =
     useState<ModalSendEmailFormSchema | null>(null);
-  const [branches, setBranches] = useState<propsBranch[]>([]);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
+  const { client } = useClient();
+  const { selectedBranch } = useBranch();
 
   const {
     register,
@@ -108,68 +92,17 @@ export function ModalTesteSendSupplier() {
     resolver: zodResolver(contractFormSchema),
   });
 
-  const getClients = async () => {
-    try {
-      const firstRes = await axios.get(`${ip}/client`, {
-        params: { page: 0, size: 100 },
-      });
-      const totalPages = firstRes.data.totalPages;
-      const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-        axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
-      );
-
-      const responses = await Promise.all(requests);
-      const allClients = [
-        firstRes.data.content,
-        ...responses.map((res) => res.data.content),
-      ].flat();
-
-      setClients(allClients);
-      try {
-        const res = await axios.get(
-          `${ip}/user/client/filtered-client?idSearch=${selectedBranchId}`,
-        );
-        console.log("gestores:", res.data.content);
-        
-        setManagers(res.data.content);
-      } catch (err) {
-        console.log("Erro ao buscar gestores:", err);
-      }
-    } catch (err) {
-      console.log("Erro ao buscar clientes:", err);
-    }
-  };
-
-  const getBranches = async (clientId: string) => {
-    try {
-      const res = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${clientId}`,
-      );
-      setBranches(res.data.content);
-    } catch (err) {
-      console.log("Erro ao buscar filiais:", err);
-    }
-  };
-
   const getActivities = async () => {
     try {
       const activitieData = await axios.get(`${ip}/contract/activity`);
-      const requirementData = await axios.get(`${ip}/contract/requirement`);
+      // const requirementData = await axios.get(`${ip}/contract/requirement`);
       setActivities(activitieData.data.content);
-      setRequirements(requirementData.data.content);
+      console.log("atividades log teste:", activitieData.data.content);
+      
+      // setRequirements(requirementData.data.content);
     } catch (err) {
       console.log(err);
     }
-  };
-
-  const onSelectClient = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value;
-    getBranches(id);
-  };
-
-  const onSelectBranch = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value;
-    setSelectedBranchId(id);
   };
 
   const handleCNPJSearch = async () => {
@@ -193,11 +126,14 @@ export function ModalTesteSendSupplier() {
     try {
       await axios.post(`${ip}/invite`, {
         email: data.email,
-        idCompany: selectedBranchId,
         company: data.company,
         cnpj: data.cnpj,
       });
-      const supplierData = { ...data, branch: selectedBranchId };
+      const supplierData = {
+        ...data,
+        branch: selectedBranch,
+        manager: manager,
+      };
       setSupplierInfo(supplierData);
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
@@ -232,8 +168,27 @@ export function ModalTesteSendSupplier() {
   // const shouldShowServiceType =
   //   selectedRadio === null || selectedRadio === "nao";
 
+  const getManager = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+      );
+      console.log("gestores:", res.data.content);
+      setManagers(res.data.content);
+    } catch (err) {
+      console.log(
+        `erro ao buscar gestores da filia: ${selectedBranch?.name}`,
+        err,
+      );
+    }
+  };
+
+  console.log("manager teste:", manager);
+
   useEffect(() => {
-    getClients();
+    if (selectedBranch?.idBranch) {
+      getManager();
+    }
     getActivities();
   }, []);
 
@@ -248,10 +203,25 @@ export function ModalTesteSendSupplier() {
       >
         <DialogHeader>
           <DialogTitle className="text-white">
-            Cadastrar novo prestador
+            <h1>Cadastrar novo prestador</h1>
           </DialogTitle>
         </DialogHeader>
-        <div>
+        <div className="flex flex-col gap-5">
+          <div>
+            {client ? (
+              <h1 className="text-white">{client?.tradeName}</h1>
+            ) : (
+              <h1>Cliente não selecionado</h1>
+            )}
+            <div>
+              {selectedBranch ? (
+                <h1 className="text-white">Filial: {selectedBranch?.name}</h1>
+              ) : (
+                <h1>Cliente não selecionado</h1>
+              )}
+            </div>
+          </div>
+
           <ScrollArea className="h-[60vh]">
             <form
               onSubmit={handleSubmit(createClient)}
@@ -280,9 +250,9 @@ export function ModalTesteSendSupplier() {
                   <Button
                     type="button"
                     onClick={handleCNPJSearch}
-                    className="ml-2"
+                    className="bg-realizaBlue ml-2"
                   >
-                    <i className="icon-search" />
+                    <Search />
                   </Button>
                 </div>
                 {errors.cnpj && (
@@ -290,51 +260,17 @@ export function ModalTesteSendSupplier() {
                 )}
               </div>
               <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1">
-                  <Label className="text-white">Selecione um cliente</Label>
-                  <select
-                    className="rounded-md border p-2"
-                    defaultValue=""
-                    {...register("idCompany")}
-                    onChange={onSelectClient}
-                  >
-                    <option value="" disabled>
-                      Selecione um cliente
-                    </option>
-                    {clients.map((client) => (
-                      <option key={client.idClient} value={client.idClient}>
-                        {client.tradeName}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.idCompany && (
-                    <span className="text-red-600">
-                      {errors.idCompany.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Label className="text-white">Filiais do cliente</Label>
-                  <select
-                    className="rounded-md border p-2"
-                    defaultValue=""
-                    onChange={onSelectBranch}
-                  >
-                    <option value="" disabled>
-                      Selecione uma filial
-                    </option>
-                    {branches.map((branch) => (
-                      <option key={branch.idBranch} value={branch.idBranch}>
-                        {branch.name}
-                      </option>
-                    ))}
-                  </select>
-                  {!selectedBranchId && (
-                    <span className="text-red-600">Selecione uma filial</span>
-                  )}
-                </div>
                 <div>
-                  <select defaultValue="">
+                  <select
+                    defaultValue=""
+                    onChange={(event) => {
+                      const selectedId = event.target.value;
+                      const managerObj = managers.find(
+                        (m: any) => m.idUser === selectedId,
+                      );
+                      setManager(managerObj);
+                    }}
+                  >
                     <option value="" disabled>
                       Selecione um gestor
                     </option>
@@ -429,11 +365,32 @@ export function ModalTesteSendSupplier() {
               style={{ backgroundImage: `url(${bgModalRealiza})` }}
             >
               <DialogHeader>
-                <DialogTitle className="text-white">
-                  Faça o contrato
+                <DialogTitle className="flex flex-col gap-5 text-white">
+                  <h1>Faça o contrato</h1>
+                  <div className="flex flex-col gap-2">
+                    {client ? (
+                      <h1 className="text-white">{client?.tradeName}</h1>
+                    ) : (
+                      <h1>Cliente não selecionado</h1>
+                    )}
+                    <div>
+                      {selectedBranch ? (
+                        <h1 className="text-white">
+                          Filial: {selectedBranch?.name}
+                        </h1>
+                      ) : (
+                        <h1>Cliente não selecionado</h1>
+                      )}
+                    </div>
+                  </div>
                 </DialogTitle>
               </DialogHeader>
-              <ScrollArea className="h-[60vh] w-full px-5">
+              <ScrollArea className="h-[60vh] p-5">
+                <div>
+                  <h2 className="text-white">
+                    Gestor responsável: {manager?.firstName}
+                  </h2>
+                </div>
                 <div className="p-4">
                   {supplierInfo && (
                     <div className="mb-4 rounded-md border bg-white p-2 text-black">
@@ -472,73 +429,7 @@ export function ModalTesteSendSupplier() {
                     onSubmit={handleSubmitContract(createContract)}
                   >
                     <div>
-                      <Label className="text-white">Contract Reference</Label>
-                      <Input {...registerContract("contractReference")} />
-                      {errorsContract.contractReference && (
-                        <span className="text-red-500">
-                          {errorsContract.contractReference.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Service Duration</Label>
-                      <Input {...registerContract("serviceDuration")} />
-                      {errorsContract.serviceDuration && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceDuration.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Service Name</Label>
-                      <Input {...registerContract("serviceName")} />
-                      {errorsContract.serviceName && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceName.message}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <Label className="text-white">Description</Label>
-                      <textarea
-                        {...registerContract("description")}
-                        className="rounded-md border p-2"
-                      />
-                      {errorsContract.description && (
-                        <span className="text-red-500">
-                          {errorsContract.description.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Allocated Limit</Label>
-                      <Input {...registerContract("allocatedLimit")} />
-                      {errorsContract.allocatedLimit && (
-                        <span className="text-red-500">
-                          {errorsContract.allocatedLimit.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Responsible</Label>
-                      <Input {...registerContract("responsible")} />
-                      {errorsContract.responsible && (
-                        <span className="text-red-500">
-                          {errorsContract.responsible.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Expense Type</Label>
-                      <Input {...registerContract("expenseType")} />
-                      {errorsContract.expenseType && (
-                        <span className="text-red-500">
-                          {errorsContract.expenseType.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Start Date</Label>
+                      <Label className="text-white">Início do serviço</Label>
                       <Input type="date" {...registerContract("startDate")} />
                       {errorsContract.startDate && (
                         <span className="text-red-500">
@@ -547,55 +438,56 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label className="text-white">End Date</Label>
-                      <Input type="date" {...registerContract("endDate")} />
-                      {errorsContract.endDate && (
+                      <Label className="text-white">
+                        Referencia do contrato
+                      </Label>
+                      <Input {...registerContract("contractReference")} />
+                      {errorsContract.contractReference && (
                         <span className="text-red-500">
-                          {errorsContract.endDate.message}
+                          {errorsContract.contractReference.message}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <Label className="text-white">Service Type</Label>
-                      <Input {...registerContract("serviceType")} />
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-white">Tipoe do serviço</Label>
+                      <select
+                        {...registerContract("serviceTypeExpense")}
+                        className="rounded-md p-1"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione um tipo de serviço
+                        </option>
+                        <option value="CAPEX">CAPEX</option>
+                        <option value="OPEX">OPEX</option>
+                      </select>
                       {errorsContract.serviceType && (
                         <span className="text-red-500">
                           {errorsContract.serviceType.message}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <Label className="text-white">
-                        Subcontract Permission
-                      </Label>
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-white">Tipo de gestão</Label>
                       <select
-                        {...registerContract("subcontractPermission")}
-                        className="rounded-md border p-2"
+                        className="rounded-md p-1"
                         defaultValue=""
+                        {...registerContract("expenseType")}
                       >
-                        <option value="" disabled>
-                          Selecione uma opção
-                        </option>
-                        <option value="true">True</option>
-                        <option value="false">False</option>
+                        <option disabled>Selecione uma opção</option>
+                        <option value="TRABALHISTA">Trabalhista</option>
+                        <option value="AMBAS">AMBAS</option>
+                        <option value="SSMA">SSMA</option>
+                        <option value="TODAS">TODAS</option>
                       </select>
-                      {errorsContract.subcontractPermission && (
+                      {errorsContract.expenseType && (
                         <span className="text-red-500">
-                          {errorsContract.subcontractPermission.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Risk</Label>
-                      <Input {...registerContract("risk")} />
-                      {errorsContract.risk && (
-                        <span className="text-red-500">
-                          {errorsContract.risk.message}
+                          {errorsContract.expenseType.message}
                         </span>
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Activities</Label>
+                      <Label className="text-white">Tipos de atividades</Label>
                       <select
                         multiple
                         {...registerContract("activities")}
@@ -617,29 +509,69 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
+                    <div>
+                      <Label className="text-white">Nome do serviço</Label>
+                      <Input {...registerContract("serviceName")} />
+                    </div>
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Requirements</Label>
-                      <select
-                        multiple
-                        {...registerContract("requirements")}
+                      <Label className="text-white">Description</Label>
+                      <textarea
+                        {...registerContract("description")}
                         className="rounded-md border p-2"
-                        defaultValue={[]}
-                      >
-                        {requirements.map((requirement: any) => (
-                          <option
-                            key={requirement.idRequeriment}
-                            value={requirement.title}
-                          >
-                            {requirement.title}
-                          </option>
-                        ))}
-                      </select>
-                      {errorsContract.requirements && (
+                      />
+                      {errorsContract.description && (
                         <span className="text-red-500">
-                          {errorsContract.requirements.message}
+                          {errorsContract.description.message}
                         </span>
                       )}
                     </div>
+                    {/* <div>
+                      <Label className="text-white">Risco do contrato</Label>
+                      <select
+                        {...registerContract("risk")}
+                        className="w-full rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione o risco do contrato
+                        </option>
+                        <option value="LOW_LESS_THAN_8H">
+                          LOW_LESS_THAN_8H
+                        </option>
+                        <option value="LOW_LESS_THAN_1M">
+                          LOW_LESS_THAN_1M
+                        </option>
+                        <option value="LOW_LESS_THAN_6M">
+                          LOW_LESS_THAN_6M
+                        </option>
+                        <option value="LOW_MORE_THAN_6M">
+                          LOW_MORE_THAN_6M
+                        </option>
+                        <option value="MEDIUM_LESS_THAN_1M">
+                          MEDIUM_LESS_THAN_1M
+                        </option>
+                        <option value="MEDIUM_LESS_THAN_6M">
+                          MEDIUM_LESS_THAN_6M
+                        </option>
+                        <option value="MEDIUM_MORE_THAN_6M">
+                          MEDIUM_MORE_THAN_6M
+                        </option>
+                        <option value="HIGH_LESS_THAN_1M">
+                          HIGH_LESS_THAN_1M
+                        </option>
+                        <option value="HIGH_LESS_THAN_6M">
+                          HIGH_LESS_THAN_6M
+                        </option>
+                        <option value="HIGH_MORE_THAN_6M">
+                          HIGH_MORE_THAN_6M
+                        </option>
+                      </select>
+                      {errorsContract.risk && (
+                        <span className="text-red-500">
+                          {errorsContract.risk.message}
+                        </span>
+                      )}
+                    </div> */}
                     <Button className="bg-realizaBlue" type="submit">
                       Criar contrato
                     </Button>

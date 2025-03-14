@@ -1,60 +1,10 @@
-import { useState, useEffect } from "react";
-import { Table } from "@/components/ui/tableVanila";
-import { Pagination } from "@/components/ui/pagination";
-import {
-  useFetchServiceProviders,
-  ServiceProviderProps,
-} from "@/hooks/gets/realiza/useServiceProviders";
-import { NotebookPen } from "lucide-react";
+// import { Pagination } from "@/components/ui/pagination";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
-import { useClient } from "@/context/Client-Provider";
+// import { useClient } from "@/context/Client-Provider";
+import { TableClientServiceProvider } from "./tableClientProviders";
 
 export function ClientServiceProvider() {
-  const { client } = useClient();
-  console.log(client);
-
-  const itemsPerPage = 5;
-
-  const {
-    serviceProviders = [],
-    totalPages = 0,
-    error,
-    fetchServiceProviders,
-  } = useFetchServiceProviders();
-
-  const [currentPage, setCurrentPage] = useState(0);
-
-  useEffect(() => {
-    fetchServiceProviders(itemsPerPage, currentPage, client?.idClient);
-  }, [currentPage, client?.idClient]);
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  const columns = [
-    { key: "companyName", label: "Nome do Fornecedor" },
-    { key: "cnpj", label: "CNPJ" },
-    { key: "branches", label: "Filiais que atua" },
-    {
-      key: "idProvider",
-      label: "Ações",
-      render: (value: string) => (
-        <div>
-          <button
-            onClick={() => console.log("Ação para o fornecedor:", value)}
-            className="text-realizaBlue hover:underline"
-          >
-            <NotebookPen />
-          </button>
-        </div>
-      ),
-    },
-  ] as {
-    key: keyof ServiceProviderProps;
-    label: string;
-    render?: (value: string) => React.ReactNode;
-  }[];
+  // const { client } = useClient();
 
   return (
     <div className="m-10 flex min-h-full justify-center">
@@ -73,22 +23,7 @@ export function ClientServiceProvider() {
           <ModalTesteSendSupplier />
         </div>
 
-        {error ? (
-          <p className="text-center text-red-600">
-            Erro ao carregar os dados: {error}
-          </p>
-        ) : (
-          <Table<ServiceProviderProps>
-            data={serviceProviders}
-            columns={columns}
-          />
-        )}
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <TableClientServiceProvider />
       </div>
     </div>
   );

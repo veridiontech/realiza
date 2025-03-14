@@ -114,8 +114,10 @@ export function EditModalEnterprise() {
   };
 
   useEffect(() => {
-    getDatasEnterprise();
-  }, []);
+    if(client) {
+      getDatasEnterprise();
+    }
+  }, [client]);
 
   return (
     <Dialog>

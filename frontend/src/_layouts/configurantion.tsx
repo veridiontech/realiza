@@ -34,6 +34,19 @@ export function ConfigurationLayout() {
     );
   }
 
+  if (user?.role === "ROLE_CLIENT_MANAGER") {
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <HeaderClient />
+        <div className="flex flex-grow bg-gray-200">
+          <div className="mx-4 my-6 flex flex-grow flex-col rounded-lg bg-white shadow">
+            <Outlet />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE") {
     return (
       <div className="flex min-h-screen flex-col bg-white">
