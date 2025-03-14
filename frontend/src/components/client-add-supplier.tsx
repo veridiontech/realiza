@@ -51,9 +51,9 @@ const contractFormSchema = z.object({
       "A data de início deve ser válida",
     ),
   serviceType: z.string().optional(),
-  // activities: z
-  //   .string()
-  //   .min(1, "Pelo menos uma atividade é obrigatória"),
+  activities: z
+    .string()
+    .min(1, "Pelo menos uma atividade é obrigatória"),
   description: z.string().optional(),
   expenseType: z.string().nonempty("O tipo de serviço é obrigatório"),
 });
@@ -67,7 +67,7 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
   const [managers, setManagers] = useState<any>([]);
-  // const [activities, setActivities] = useState<any>([]);
+  const [activities, setActivities] = useState<any>([]);
   // const [setRequirements] = useState<any>([]);
   // const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
@@ -450,7 +450,7 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    {/* <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo de atividade</Label>
                       <select
                         {...registerContract("activities")}
@@ -467,7 +467,7 @@ export function ModalTesteSendSupplier() {
                           {errorsContract.description.message}
                         </span>
                       )}
-                    </div> */}
+                    </div>
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">
                         Descrição detalhada do serviço
