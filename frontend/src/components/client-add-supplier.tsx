@@ -50,26 +50,12 @@ const contractFormSchema = z.object({
       (val) => !isNaN(Date.parse(val)),
       "A data de início deve ser válida",
     ),
-  endDate: z
-    .string()
-    .refine(
-      (val) => !isNaN(Date.parse(val)),
-      "A data de término deve ser válida",
-    ),
-  serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
-  activities: z
-    .array(z.string())
-    .min(1, "Pelo menos uma atividade é obrigatória"),
-  requirements: z
-    .array(z.string())
-    .min(1, "Pelo menos um requisito é obrigatório"),
-  description: z.string().nonempty("A descrição detalhada é obrigatória"),
-  serviceTypeExpense: z.string().nonempty("O tipo de despesa é obrigatório"),
-  allocatedLimit: z
-    .string()
-    .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
-  client: z.string().nonempty("O cliente é obrigatório"),
-  responsible: z.string().nonempty("O responsável é obrigatório"),
+  serviceType: z.string().optional(),
+  // activities: z
+  //   .string()
+  //   .min(1, "Pelo menos uma atividade é obrigatória"),
+  description: z.string().optional(),
+  expenseType: z.string().nonempty("O tipo de serviço é obrigatório"),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -81,8 +67,8 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalTesteSendSupplier() {
   const [managers, setManagers] = useState<any>([]);
-  const [setActivities] = useState<any>([]);
-  const [setRequirements] = useState<any>([]);
+  // const [activities, setActivities] = useState<any>([]);
+  // const [setRequirements] = useState<any>([]);
   // const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,13 +109,16 @@ export function ModalTesteSendSupplier() {
   const getActivities = async () => {
     try {
       const activitieData = await axios.get(`${ip}/contract/activity`);
-      const requirementData = await axios.get(`${ip}/contract/requirement`);
+      // const requirementData = await axios.get(`${ip}/contract/requirement`);
       setActivities(activitieData.data.content);
-      setRequirements(requirementData.data.content);
+      console.log("atividades log teste:", activitieData.data.content);
+      
+      // setRequirements(requirementData.data.content);
     } catch (err) {
-      console.log("Erro ao buscar atividades/requisitos:", err);
+      console.log(err);
     }
   };
+
 
   const createClient = async (data: ModalSendEmailFormSchema) => {
     setIsLoading(true);
@@ -144,7 +133,7 @@ export function ModalTesteSendSupplier() {
       if (isSubcontractor === "sim") {
         payload.subcontractorDetails = {
           email: data.email,
-          cnpj: data.cnpj
+          cnpj: data.cnpj,
         };
       }
       console.log("Dados enviados para modal de contrato:", payload);
@@ -152,34 +141,55 @@ export function ModalTesteSendSupplier() {
       setPushCnpj(data.cnpj);
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
-
-      try {
-        const res = await axios.get(
-          `${ip}/user/client/filtered-client?idSearch=${selectedBranch}`
-        );
-        setManagers(res.data.content);
-      } catch (err) {
-        console.log("Erro ao buscar gestores:", err);
-      }
     } catch (err) {
       console.log("Erro ao enviar email para usuário:", err);
       toast.error("Erro ao enviar email. Tente novamente");
     } finally {
       setIsLoading(false);
     }
-};
+  };
+
+  const getManager = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+      );
+      console.log("gestores:", res.data.content);
+      setManagers(res.data.content);
+    } catch (err) {
+      console.log(
+        `erro ao buscar gestores da filia: ${selectedBranch?.name}`,
+        err,
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (selectedBranch?.idBranch) {
+      getManager();
+    }
+    getActivities();
+  }, []);
 
   const createContract = async (data: ContractFormSchema) => {
-    const payload = {
-      ...data,
-      providerDatas,
-    };
+    if (!providerDatas) {
+      toast.error("Dados do prestador não encontrados. Reinicie o processo.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      console.log("Criando contrato:", data);
+      const payload = { ...data, providerDatas, activity: ["teste", "teste23"] };
+      console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);
-      console.log("Contrato criado com sucesso");
+      
+      
+      toast.success("Contrato criado com sucesso!");
     } catch (err) {
-      console.log("Erro ao criar contrato:", err);
+      console.error("Erro ao criar contrato:", err);
+      toast.error("Erro ao criar contrato. Verifique os dados e tente novamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -286,7 +296,7 @@ export function ModalTesteSendSupplier() {
                 </div>
                 <div>
                   <Label className="text-white">CNPJ do subcontratado</Label>
-                  <Input type="text" {...registerContract("cnpj")} />
+                  <Input type="text" {...registerSubContract("cnpj")} />
                 </div>
               </div>
             )}
@@ -346,6 +356,7 @@ export function ModalTesteSendSupplier() {
                       <div>
                         <Input
                           type="text"
+                          {...registerContract("cnpj")}
                           value={pushCnpj || "erro ao puxar cnpj"}
                         />
                         {errorsContract.cnpj && (
@@ -368,85 +379,11 @@ export function ModalTesteSendSupplier() {
                         </option>
                         {Array.isArray(managers) &&
                           managers.map((manager: any) => (
-                            <option key={manager.idUser}>
+                            <option value={manager.iduser} key={manager.idUser}>
                               {manager.firstName} {manager.surname}
                             </option>
                           ))}
                       </select>
-                    </div>
-                    <div>
-                      <Label className="text-white">
-                        Referência de serviço
-                      </Label>
-                      <Input {...registerContract("serviceReference")} />
-                      {errorsContract.serviceReference && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceReference.message}
-                        </span>
-                      )}
-                    </div>
-
-                      <div>
-                        <Label className="text-white">Tipo do Serviço</Label>
-                        <Input {...registerContract("serviceType")} />
-                        {errorsContract.serviceType && (
-                          <span className="text-red-500">
-                            {errorsContract.serviceType.message}
-                          </span>
-                        )}
-                      </div>
-
-                    <div className="flex flex-col gap-1">
-                      <Label className="text-white">Tipo de despesa</Label>
-                      <select
-                        {...registerContract("serviceTypeExpense")}
-                        className="rounded-md border p-2"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          Selecione uma opção
-                        </option>
-                        <option>CAPEX</option>
-                        <option>OPEX</option>
-                        <option value="">Nenhuma</option>
-                      </select>
-                      {errorsContract.serviceTypeExpense && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceTypeExpense.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Nome do Serviço</Label>
-                      <Input {...registerContract("serviceName")} />
-                      {errorsContract.serviceName && (
-                        <span className="text-red-500">
-                          {errorsContract.serviceName.message}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <Label className="text-white">Escopo do serviço</Label>
-                      <textarea
-                        {...registerContract("description")}
-                        className="rounded-md border p-2"
-                      />
-                      {errorsContract.description && (
-                        <span className="text-red-500">
-                          {errorsContract.description.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">
-                        Número máximo de empregados alocados
-                      </Label>
-                      <Input {...registerContract("allocatedLimit")} />
-                      {errorsContract.allocatedLimit && (
-                        <span className="text-red-500">
-                          {errorsContract.allocatedLimit.message}
-                        </span>
-                      )}
                     </div>
                     <div>
                       <Label className="text-white">Data de início</Label>
@@ -458,14 +395,79 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label className="text-white">Data de término</Label>
-                      <Input type="date" {...registerContract("endDate")} />
-                      {errorsContract.endDate && (
+                      <Label className="text-white">
+                        Referência do contrato
+                      </Label>
+                      <Input {...registerContract("serviceReference")} />
+                      {errorsContract.serviceReference && (
                         <span className="text-red-500">
-                          {errorsContract.endDate.message}
+                          {errorsContract.serviceReference.message}
                         </span>
                       )}
                     </div>
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-white">Tipo de despesa</Label>
+                      <select
+                        {...registerContract("serviceType")}
+                        className="rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Selecione uma opção
+                        </option>
+                        <option value="CAPEX">CAPEX</option>
+                        <option value="OPEX">OPEX</option>
+                        <option value="Nenhuma">Nenhuma</option>
+                      </select>
+                      {errorsContract.serviceType && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceType.message}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-white">Tipo do Serviço</Label>
+                      <select {...registerContract("expenseType")} className="rounded-md p-1">
+                        <option value="TRABALHISTA">TRABALHISTA</option>
+                        <option value="AMBAS">AMBAS</option>
+                        <option value="SSMA">SSMA</option>
+                        <option value="TODAS">TODAS</option>
+                      </select>
+                      {errorsContract.expenseType && (
+                        <span className="text-red-500">
+                          {errorsContract.expenseType.message}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Nome do Serviço</Label>
+                      <Input {...registerContract("serviceName")} />
+                      {errorsContract.serviceName && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceName.message}
+                        </span>
+                      )}
+                    </div>
+                    {/* <div className="flex flex-col gap-1">
+                      <Label className="text-white">Tipo de atividade</Label>
+                      <select
+                        {...registerContract("activities")}
+                        className="rounded-md border p-2"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Selecione uma atividade</option>
+                        {activities.map((activitie: any) => (
+                          <option value={activitie.idActivity} key={activitie.idActivity}>{activitie.title} </option>
+                        ))}
+                      </select>
+                      {errorsContract.description && (
+                        <span className="text-red-500">
+                          {errorsContract.description.message}
+                        </span>
+                      )}
+                    </div> */}
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">
                         Descrição detalhada do serviço
