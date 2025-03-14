@@ -223,4 +223,35 @@ public class CrudClientImpl implements CrudClient {
 
         return "Logo updated successfully";
     }
+
+    @Override
+    public Optional<ClientResponseDto> findClientbyBranch(String idBranch) {
+        Branch branch = branchRepository.findById(idBranch).orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        FileDocument fileDocument = null;
+
+        Client client = clientRepository.findById(branch.getClient().getIdClient()).orElseThrow(() -> new NotFoundException("Client not found"));
+
+        if (client.getLogo() != null) {
+            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
+            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
+        }
+
+        ClientResponseDto clientResponse = ClientResponseDto.builder()
+                .idClient(client.getIdClient())
+                .cnpj(client.getCnpj())
+                .tradeName(client.getTradeName())
+                .corporateName(client.getCorporateName())
+                .logoData(fileDocument != null ? fileDocument.getData() : null)
+                .email(client.getEmail())
+                .telephone(client.getTelephone())
+                .cep(client.getCep())
+                .state(client.getState())
+                .city(client.getCity())
+                .address(client.getAddress())
+                .number(client.getNumber())
+                .build();
+
+        return Optional.of(clientResponse);
+    }
 }
