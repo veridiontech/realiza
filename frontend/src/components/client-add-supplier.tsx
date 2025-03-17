@@ -18,8 +18,8 @@ import { Radio } from "react-loader-spinner";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import { useUser } from "@/context/user-provider";
-import { useClient } from "@/context/Client-Provider";
+// import { useUser } from "@/context/user-provider";
+// import { useClient } from "@/context/Client-Provider";
 import { useBranch } from "@/context/Branch-provider";
 // import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
@@ -27,15 +27,14 @@ import { useBranch } from "@/context/Branch-provider";
 const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
-  company: z.string().default("SUPPLIER"),
   cnpj: z.string().nonempty("Insira o cnpj"),
 });
 
 const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
-  company: z.string().default("SUBCONTRACTOR"),
   cnpj: z.string().nonempty("Insira o cnpj"),
+  providerSubcontractor: z.string().nonempty("Selecionar um fornecedor é obrigatório")
 });
 
 const contractFormSchema = z.object({
@@ -44,16 +43,8 @@ const contractFormSchema = z.object({
   serviceReference: z
     .string()
     .nonempty("A referência do contrato é obrigatória"),
-  startDate: z
-    .string()
-    .refine(
-      (val) => !isNaN(Date.parse(val)),
-      "A data de início deve ser válida",
-    ),
   serviceType: z.string().optional(),
-  activities: z
-    .string()
-    .min(1, "Pelo menos uma atividade é obrigatória"),
+  activities: z.string().min(1, "Pelo menos uma atividade é obrigatória"),
   description: z.string().optional(),
   expenseType: z.string().nonempty("O tipo de serviço é obrigatório"),
 });
@@ -74,10 +65,10 @@ export function ModalTesteSendSupplier() {
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
   const [providerDatas, setProviderDatas] = useState({});
-  const { client } = useClient();
-  const { user } = useUser();
+  // const { client } = useClient();
   const { selectedBranch } = useBranch();
-  const [isSubcontractor, setIsSubContractor] = useState("nao");
+  const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
+  const [suppliers, setSuppliers] = useState<any>([]);
   // const [subContractDatas, setSubContractDatas] = useState({});
 
   const {
@@ -100,11 +91,33 @@ export function ModalTesteSendSupplier() {
 
   const {
     register: registerSubContract,
-    // handleSubmit: handleSubmitSubContract,
-    // formState: { errors: errorsSubContract },
+    handleSubmit: handleSubmitSubContract,
+    formState: { errors: errorsSubContract },
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
+
+
+  
+  const getSupplier = async () => {
+    if (!selectedBranch?.idBranch) return;
+    try {
+      const res = await axios.get(
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
+      );
+      console.log("Dados do supplier:", res.data.content);
+      setSuppliers(res.data.content);
+    } catch (err) {
+      console.log("Erro ao buscar prestadores de serviço", err);
+    }
+  };
+
+  useEffect(() => {
+    if(selectedBranch?.idBranch) {
+      getSupplier()
+      setSuppliers([])
+    }
+  }, [selectedBranch]);
 
   const getActivities = async () => {
     try {
@@ -112,29 +125,19 @@ export function ModalTesteSendSupplier() {
       // const requirementData = await axios.get(`${ip}/contract/requirement`);
       setActivities(activitieData.data.content);
       console.log("atividades log teste:", activitieData.data.content);
-      
+
       // setRequirements(requirementData.data.content);
     } catch (err) {
       console.log(err);
     }
   };
 
-
   const createClient = async (data: ModalSendEmailFormSchema) => {
     setIsLoading(true);
     try {
-      const payload: any = {
-        email: data.email,
-        idCompany: user?.branch,
-        company: data.company,
-        idClient: client?.idClient,
-        cnpj: data.cnpj,
-      };
-      if (isSubcontractor === "sim") {
-        payload.subcontractorDetails = {
-          email: data.email,
-          cnpj: data.cnpj,
-        };
+      const payload = {
+        ...data,
+
       }
       console.log("Dados enviados para modal de contrato:", payload);
       setProviderDatas(payload);
@@ -179,15 +182,20 @@ export function ModalTesteSendSupplier() {
 
     setIsLoading(true);
     try {
-      const payload = { ...data, providerDatas, activity: ["teste", "teste23"] };
+      const payload = {
+        ...data,
+        providerDatas,
+        activity: ["teste", "teste23"],
+      };
       console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);
-      
-      
+
       toast.success("Contrato criado com sucesso!");
     } catch (err) {
       console.error("Erro ao criar contrato:", err);
-      toast.error("Erro ao criar contrato. Verifique os dados e tente novamente.");
+      toast.error(
+        "Erro ao criar contrato. Verifique os dados e tente novamente.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -221,104 +229,145 @@ export function ModalTesteSendSupplier() {
           </DialogTitle>
         </DialogHeader>
         <div>
-          <div>
-            <h1 className="text-white">{client?.corporateName}</h1>
-            {selectedBranch ? (
-              <span className="text-white">
-                <strong>Filial:</strong> {selectedBranch?.name}
-              </span>
-            ) : (
-              <span className="text-white">Nenhuma filial selecionada</span>
-            )}
+          {selectedBranch ? (
+            <span className="text-white">
+              <strong>Filial:</strong> {selectedBranch?.name}
+            </span>
+          ) : (
+            <span className="text-white">Nenhuma filial selecionada</span>
+          )}
+        </div>
+        <div>
+          <div className="flex flex-col gap-2">
+            <Label className="text-white">É uma subcontratação?</Label>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-1 text-white">
+                <input
+                  type="radio"
+                  value="sim"
+                  checked={isSubcontractor === "contratado"}
+                  onChange={() => setIsSubContractor("contratado")}
+                />
+                Contratado direto
+              </label>
+              <label className="flex items-center gap-1 text-white">
+                <input
+                  type="radio"
+                  value="nao"
+                  checked={isSubcontractor === "subcontratado"}
+                  onChange={() => setIsSubContractor("subcontratado")}
+                />
+                Subcontratado
+              </label>
+            </div>
           </div>
-          <form
-            onSubmit={handleSubmit(createClient)}
-            className="flex flex-col gap-4"
-          >
-            <div>
-              <Label className="text-white">Cnpj</Label>
-              <Input
-                type="text"
-                placeholder="Insira o cnpj do prestador..."
-                {...register("cnpj")}
-              />
-              {errors.cnpj && (
-                <span className="text-red-600">{errors.cnpj.message}</span>
-              )}
-            </div>
-            <div className="mb-1">
-              <Label className="text-white">Email</Label>
-              <Input
-                type="email"
-                placeholder="Digite o email do novo prestador"
-                {...register("email")}
-                className="w-full"
-              />
-              {errors.email && (
-                <span className="text-red-600">{errors.email.message}</span>
-              )}
-            </div>
-            <div>
-              <Label className="text-white">Telefone</Label>
-              <Input placeholder="Digite o telefone" {...register("phone")} />
-              {errors.phone && (
-                <span className="text-red-600">{errors.phone.message}</span>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label className="text-white">É uma subcontratação?</Label>
-              <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1 text-white">
-                  <input
-                    type="radio"
-                    value="sim"
-                    checked={isSubcontractor === "sim"}
-                    onChange={() => setIsSubContractor("sim")}
-                  />
-                  Sim
-                </label>
-                <label className="flex items-center gap-1 text-white">
-                  <input
-                    type="radio"
-                    value="nao"
-                    checked={isSubcontractor === "nao"}
-                    onChange={() => setIsSubContractor("nao")}
-                  />
-                  Não
-                </label>
+          {isSubcontractor === "contratado" && (
+            <form
+              onSubmit={handleSubmit(createClient)}
+              className="flex flex-col gap-4"
+            >
+              <div>
+                <Label className="text-white">CNPJ</Label>
+                <Input
+                  type="text"
+                  placeholder="Insira o cnpj do prestador..."
+                  {...register("cnpj")}
+                />
+                {errors.cnpj && (
+                  <span className="text-red-600">{errors.cnpj.message}</span>
+                )}
               </div>
-            </div>
-            {isSubcontractor === "sim" && (
-              <div className="flex flex-col gap-4">
-                <div>
-                  <Label className="text-white">Email do subcontratado</Label>
-                  <Input type="text" {...registerSubContract("email")} />
-                </div>
-                <div>
-                  <Label className="text-white">CNPJ do subcontratado</Label>
-                  <Input type="text" {...registerSubContract("cnpj")} />
-                </div>
+              <div className="mb-1">
+                <Label className="text-white">Email</Label>
+                <Input
+                  type="email"
+                  placeholder="Digite o email do novo prestador"
+                  {...register("email")}
+                  className="w-full"
+                />
+                {errors.email && (
+                  <span className="text-red-600">{errors.email.message}</span>
+                )}
               </div>
-            )}
-            <div className="flex justify-end">
-              {isLoading ? (
-                <Button>
-                  <Radio
-                    visible={true}
-                    height="80"
-                    width="80"
-                    ariaLabel="radio-loading"
-                    wrapperStyle={{}}
-                    wrapperClass=""
-                  />
-                </Button>
-              ) : (
-                <Button className="bg-realizaBlue" type="submit">
-                  Próximo
-                </Button>
-              )}
-            </div>
-          </form>
+              <div>
+                <Label className="text-white">Telefone</Label>
+                <Input placeholder="Digite o telefone" {...register("phone")} />
+                {errors.phone && (
+                  <span className="text-red-600">{errors.phone.message}</span>
+                )}
+              </div>
+              <div className="flex justify-end">
+                <Button className="bg-realizaBlue">Próximo</Button>
+              </div>
+            </form>
+          )}
+          {isSubcontractor === "subcontratado" && (
+            <form
+              onSubmit={handleSubmitSubContract(createClient)}
+              className="flex flex-col gap-4"
+            >
+              <div>
+                <Label className="text-white">CNPJ</Label>
+                <Input
+                  type="text"
+                  placeholder="Insira o cnpj do prestador..."
+                  {...registerSubContract("cnpj")}
+                />
+                {errorsSubContract.cnpj && (
+                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
+                )}
+              </div>
+              <div className="mb-1">
+                <Label className="text-white">Email</Label>
+                <Input
+                  type="email"
+                  placeholder="Digite o email do novo prestador"
+                  {...registerSubContract("email")}
+                  className="w-full"
+                />
+                {errorsSubContract.email && (
+                  <span className="text-red-600">{errorsSubContract.email.message}</span>
+                )}
+              </div>
+              <div>
+                <Label className="text-white">Telefone</Label>
+                <Input placeholder="Digite o telefone" {...registerSubContract("phone")} />
+                {errorsSubContract.phone && (
+                  <span className="text-red-600">{errorsSubContract.phone.message}</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label className="text-white">Selecione um fornecedor</Label>
+                <select defaultValue={""} className="rounded-lg p-2" {...registerSubContract("providerSubcontractor")}>
+                  <option value="" disabled>Selecione uma opção</option>
+                  {suppliers.map((supplier: any) => (
+                    <option value={supplier.idProvider} key={supplier.idProvider}>{supplier.tradeName}  {supplier.cnpj}</option>
+                  ))}
+                </select>
+                {errorsSubContract.providerSubcontractor && (
+                  <span className="text-red-600">{errorsSubContract.providerSubcontractor.message}</span>
+                )}
+              </div>
+              <div className="flex justify-end">
+                {isLoading ? (
+                  <Button>
+                    <Radio
+                      visible={true}
+                      height="80"
+                      width="80"
+                      ariaLabel="radio-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </Button>
+                ) : (
+                  <Button className="bg-realizaBlue" type="submit">
+                    Próximo
+                  </Button>
+                )}
+              </div>
+            </form>
+          )}
           <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent
               className="max-w-[45vw] border-none"
@@ -331,10 +380,7 @@ export function ModalTesteSendSupplier() {
                   Faça o contrato
                 </DialogTitle>
               </DialogHeader>
-              <ScrollArea className="h-[60vh] w-full px-5">
-                <div className="p-4">
-                  <div>
-                    <h1 className="text-white">{client?.corporateName}</h1>
+              <div>
                     {selectedBranch ? (
                       <span className="text-white">
                         <strong>Filial:</strong> {selectedBranch?.name}
@@ -345,6 +391,8 @@ export function ModalTesteSendSupplier() {
                       </span>
                     )}
                   </div>
+              <ScrollArea className="h-[60vh] w-full px-5">
+                <div className="p-4">
                   <form
                     className="flex flex-col gap-2"
                     onSubmit={handleSubmitContract(createContract)}
@@ -386,15 +434,6 @@ export function ModalTesteSendSupplier() {
                       </select>
                     </div>
                     <div>
-                      <Label className="text-white">Data de início</Label>
-                      <Input type="date" {...registerContract("startDate")} />
-                      {errorsContract.startDate && (
-                        <span className="text-red-500">
-                          {errorsContract.startDate.message}
-                        </span>
-                      )}
-                    </div>
-                    <div>
                       <Label className="text-white">
                         Referência do contrato
                       </Label>
@@ -428,7 +467,10 @@ export function ModalTesteSendSupplier() {
 
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
-                      <select {...registerContract("expenseType")} className="rounded-md p-1">
+                      <select
+                        {...registerContract("expenseType")}
+                        className="rounded-md p-1"
+                      >
                         <option value="TRABALHISTA">TRABALHISTA</option>
                         <option value="AMBAS">AMBAS</option>
                         <option value="SSMA">SSMA</option>
@@ -457,9 +499,16 @@ export function ModalTesteSendSupplier() {
                         className="rounded-md border p-2"
                         defaultValue=""
                       >
-                        <option value="" disabled>Selecione uma atividade</option>
+                        <option value="" disabled>
+                          Selecione uma atividade
+                        </option>
                         {activities.map((activitie: any) => (
-                          <option value={activitie.idActivity} key={activitie.idActivity}>{activitie.title} </option>
+                          <option
+                            value={activitie.idActivity}
+                            key={activitie.idActivity}
+                          >
+                            {activitie.title}{" "}
+                          </option>
                         ))}
                       </select>
                       {errorsContract.description && (

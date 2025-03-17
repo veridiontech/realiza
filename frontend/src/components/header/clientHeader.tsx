@@ -74,34 +74,35 @@ export function HeaderClient() {
   return (
     <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
-        <div
-          className="flex items-center"
-
-        >
-          <div  onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}>
-          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant={"ghost"}
-                className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
+        <div className="flex items-center gap-8">
+          <div
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className="flex items-center"
+          >
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant={"ghost"}
+                  className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
+                >
+                  <ChartNoAxesGantt className="text-white" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                className="h-full overflow-auto dark:bg-white"
+                side="left"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
-                <ChartNoAxesGantt className="text-white" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              className="h-full overflow-auto dark:bg-white"
-              side="left"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <ClientLateralMenu onClose={() => setMenuOpen(false)} />
-            </SheetContent>
-          </Sheet>
+                <ClientLateralMenu onClose={() => setMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
+            <Link to={`/cliente/home/${getIdUser}`}>
+              <img src={realizaLogo} alt="" className="w-[6vw]" />
+            </Link>
           </div>
-          <Link to={`/cliente/home/${getIdUser}`}>
-            <img src={realizaLogo} alt="" className="w-[6vw]" />
-          </Link>
+
           <div>
             {clients ? (
               <h1>Empresa: {clients?.corporateName}</h1>
