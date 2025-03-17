@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityControlller;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -55,6 +57,13 @@ public class ActivityControllerImpl implements ActivityControlller {
         Page<ActivityResponseDto> pageActivity = crudActivity.findAll(pageable);
 
         return ResponseEntity.ok(pageActivity);
+    }
+
+    @GetMapping("/find-by-branch/{idBranch}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<ActivityResponseDto>> getAllActivitiesByBranch(@PathVariable String idBranch) {
+        return ResponseEntity.of(Optional.of(crudActivity.findAllByBranch(idBranch)));
     }
 
     @PutMapping("/{id}")

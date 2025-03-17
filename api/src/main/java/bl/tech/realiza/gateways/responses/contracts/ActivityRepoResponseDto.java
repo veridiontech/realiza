@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ActivityResponseDto {
+public class ActivityRepoResponseDto {
     private String idActivity;
     private String title;
     private Activity.Risk risk;

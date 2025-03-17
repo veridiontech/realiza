@@ -27,29 +27,15 @@ public abstract class Document {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
-    @Builder.Default
-    private Boolean lowLessThan8h = false;
-    @Builder.Default
-    private Boolean lowLessThan1m = false;
-    @Builder.Default
-    private Boolean lowLessThan6m = false;
-    @Builder.Default
-    private Boolean lowMoreThan6m = false;
-    @Builder.Default
-    private Boolean mediumLessThan1m = false;
-    @Builder.Default
-    private Boolean mediumLessThan6m = false;
-    @Builder.Default
-    private Boolean mediumMoreThan6m = false;
-    @Builder.Default
-    private Boolean highLessThan1m = false;
-    @Builder.Default
-    private Boolean highLessThan6m = false;
-    @Builder.Default
-    private Boolean highMoreThan6m = false;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;
+    @Builder.Default
+    private Boolean lowRisk = true;
+    @Builder.Default
+    private Boolean mediumRisk = true;
+    @Builder.Default
+    private Boolean highRisk = true;
 
     @ManyToOne
     @JoinColumn(name = "idDocument", nullable = false)
@@ -67,18 +53,5 @@ public abstract class Document {
         NONE,
         DELETE,
         ADD
-    }
-
-    public enum Risk {
-        LOW_LESS_THAN_8H,
-        LOW_LESS_THAN_1M,
-        LOW_LESS_THAN_6M,
-        LOW_MORE_THAN_6M,
-        MEDIUM_LESS_THAN_1M,
-        MEDIUM_LESS_THAN_6M,
-        MEDIUM_MORE_THAN_6M,
-        HIGH_LESS_THAN_1M,
-        HIGH_LESS_THAN_6M,
-        HIGH_MORE_THAN_6M
     }
 }
