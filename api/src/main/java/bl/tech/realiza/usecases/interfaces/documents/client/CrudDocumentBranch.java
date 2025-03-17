@@ -22,6 +22,4 @@ public interface CrudDocumentBranch {
     String updateRequiredDocumentsByList(String id, List<String> documentCollection);
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
     void removeRequiredDocument(String documentId);
-    String updateSelectedDocuments(String id, List<DocumentBranch> documentCollection);
-    List<DocumentResponseDto> findAllSelectedDocumentsByRisk(String id, Document.Risk risk);
 }

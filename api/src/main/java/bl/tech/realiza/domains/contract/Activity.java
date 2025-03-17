@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contract;
 
+import bl.tech.realiza.domains.clients.Branch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,13 +21,24 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idActivity;
     private String title;
+    private Risk risk;
     @Builder.Default
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    public enum Risk {
+        LOW,
+        MEDIUM,
+        HIGH
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "idBranch")
+    private Branch branch;
+
     @JsonIgnore
-    @ManyToMany(mappedBy = "activities")
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.DETACH, orphanRemoval = true)
     private List<Contract> contracts;
 
 }

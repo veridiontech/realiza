@@ -13,7 +13,9 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
+import bl.tech.realiza.usecases.interfaces.contracts.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +30,7 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
-    private final DocumentBranchRepository documentBranchRepository;
-    private final DocumentMatrixRepository documentMatrixRepository;
+    private final CrudActivityImpl crudActivity;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -51,6 +52,8 @@ public class CrudBranchImpl implements CrudBranch {
                 .build();
 
         Branch savedBranch = branchRepository.save(newBranch);
+
+        crudActivity.transferFromRepo(savedBranch.getIdBranch());
 
         BranchResponseDto branchResponseDto = BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())

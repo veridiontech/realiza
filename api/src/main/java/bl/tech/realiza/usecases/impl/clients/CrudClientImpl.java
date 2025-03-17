@@ -11,6 +11,7 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -18,6 +19,7 @@ import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -42,6 +44,7 @@ public class CrudClientImpl implements CrudClient {
     private final BranchRepository branchRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
+    private final CrudActivityImpl crudActivity;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -79,7 +82,9 @@ public class CrudClientImpl implements CrudClient {
                 .client(savedClient)
                 .build();
 
-        branchRepository.save(newBranch);
+        Branch savedBranch = branchRepository.save(newBranch);
+
+        crudActivity.transferFromRepo(savedBranch.getIdBranch());
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())

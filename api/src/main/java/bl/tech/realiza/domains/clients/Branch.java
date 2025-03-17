@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.clients;
 
+import bl.tech.realiza.domains.contract.Activity;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
@@ -71,6 +72,9 @@ public class Branch {
 
     @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<UserClient> userClients;
+
+    @OneToMany(mappedBy = "branch", cascade = CascadeType.DETACH, orphanRemoval = true)
+    private List<Activity> activities;
 
     @ManyToOne
     @JoinColumn(name = "idCenter")
