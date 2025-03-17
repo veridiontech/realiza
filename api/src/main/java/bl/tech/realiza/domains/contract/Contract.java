@@ -45,13 +45,9 @@ public abstract class Contract {
     @Builder.Default
     private Boolean deleteRequest = false;
 
-    @ManyToMany
-    @JoinTable(
-            name = "CONTRACT_ACTIVITIES",
-            joinColumns = @JoinColumn(name = "idContract"),
-            inverseJoinColumns = @JoinColumn(name = "idActivity", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
-    )
-    private List<Activity> activities;
+    @ManyToOne
+    @JoinColumn(name = "idActivity", nullable = false)
+    private Activity activity;
 
     @ManyToMany
     @JoinTable(

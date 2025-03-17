@@ -29,7 +29,7 @@ public class ContractAndSupplierCreateResponseDto {
     private Date endDate;
     private Boolean subcontractPermission;
     private String contractSupplierId;
-    private List<Activity> activities;
+    private Activity activity;
     private List<Requirement> requirements;
 
     // client

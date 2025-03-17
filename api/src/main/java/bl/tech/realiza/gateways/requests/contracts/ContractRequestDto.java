@@ -21,10 +21,9 @@ public class ContractRequestDto {
     private String contractReference;
     private Boolean subcontractPermission;
     private String supplierContractId;
-    private List<String> activities;
+    private String idActivity;
     private List<String> requirements;
     private String cnpj;
-    private Document.Risk risk;
 
     // supplier
     private String providerSupplier; // also for subcontractor

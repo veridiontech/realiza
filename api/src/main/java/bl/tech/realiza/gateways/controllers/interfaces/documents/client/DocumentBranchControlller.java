@@ -22,6 +22,4 @@ public interface DocumentBranchControlller {
     ResponseEntity<String> updateBranchDocuments(String id, List<String> documentList);
     ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
     ResponseEntity<Void> removeRequiredDocument(String documentId);
-    ResponseEntity<String> updateBranchDocumentsRisk(String id, List<DocumentBranch> documentList);
-    ResponseEntity<List<DocumentResponseDto>> getDocumentBranchByIdAndRisk(String id, Document.Risk risk);
 }

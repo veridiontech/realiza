@@ -19,6 +19,7 @@ import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepositor
 import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final PasswordEncryptionService passwordEncryptionService;
     private final BranchRepository branchRepository;
+    private final CrudActivityImpl crudActivity;
 
     @Override
     public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
@@ -72,6 +74,8 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .build();
 
         Branch savedBranch = branchRepository.save(newBranch);
+
+        crudActivity.transferFromRepo(savedBranch.getIdBranch());
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
