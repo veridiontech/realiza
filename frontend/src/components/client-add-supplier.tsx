@@ -28,12 +28,14 @@ const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
   cnpj: z.string().nonempty("Insira o cnpj"),
+  corporateName: z.string().nonempty("Insira o nome ")
 });
 
 const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
   cnpj: z.string().nonempty("Insira o cnpj"),
+  corporateName: z.string().nonempty("Insira o nome "),
   providerSubcontractor: z.string().nonempty("Selecionar um fornecedor é obrigatório")
 });
 
@@ -135,12 +137,22 @@ export function ModalTesteSendSupplier() {
   const createClient = async (data: ModalSendEmailFormSchema) => {
     setIsLoading(true);
     try {
-      const payload = {
-        ...data,
-
+      if(isSubcontractor === "contratado") {
+        const payload = {
+          ...data,
+          idBranch: selectedBranch?.idBranch
+        }     
+        console.log("Dados enviados de contratado para modal de contrato:", payload);
+        setProviderDatas(payload);
+      } else {
+        const payload = {
+          ...data,
+        }
+        console.log("enviando dados de subcontratado para o modal de contrato:", payload);
+        
+        setProviderDatas(payload)
       }
-      console.log("Dados enviados para modal de contrato:", payload);
-      setProviderDatas(payload);
+
       setPushCnpj(data.cnpj);
       toast.success("Email de cadastro enviado para novo prestador");
       setNextModal(true);
@@ -185,7 +197,6 @@ export function ModalTesteSendSupplier() {
       const payload = {
         ...data,
         providerDatas,
-        activity: ["teste", "teste23"],
       };
       console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);
@@ -239,7 +250,7 @@ export function ModalTesteSendSupplier() {
         </div>
         <div>
           <div className="flex flex-col gap-2">
-            <Label className="text-white">É uma subcontratação?</Label>
+            <Label className="text-white">Selecione uma das opções</Label>
             <div className="flex items-center gap-2">
               <label className="flex items-center gap-1 text-white">
                 <input
@@ -275,6 +286,17 @@ export function ModalTesteSendSupplier() {
                 />
                 {errors.cnpj && (
                   <span className="text-red-600">{errors.cnpj.message}</span>
+                )}
+              </div>
+              <div>
+                <Label className="text-white">Razão social</Label>
+                <Input
+                  type="text"
+                  placeholder="Insira o cnpj do prestador..."
+                  {...register("corporateName")}
+                />
+                {errors.corporateName && (
+                  <span className="text-red-600">{errors.corporateName.message}</span>
                 )}
               </div>
               <div className="mb-1">
@@ -315,6 +337,17 @@ export function ModalTesteSendSupplier() {
                 />
                 {errorsSubContract.cnpj && (
                   <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
+                )}
+              </div>
+              <div>
+                <Label className="text-white">Razão social</Label>
+                <Input
+                  type="text"
+                  placeholder="Insira o cnpj do prestador..."
+                  {...registerSubContract("corporateName")}
+                />
+                {errorsSubContract.corporateName && (
+                  <span className="text-red-600">{errorsSubContract.corporateName.message}</span>
                 )}
               </div>
               <div className="mb-1">
