@@ -137,7 +137,6 @@ export function ModalTesteSendSupplier() {
     try {
       const payload = {
         ...data,
-
       }
       console.log("Dados enviados para modal de contrato:", payload);
       setProviderDatas(payload);
@@ -184,9 +183,7 @@ export function ModalTesteSendSupplier() {
     try {
       const payload = {
         ...data,
-        providerDatas,
-        activity: ["teste", "teste23"],
-      };
+        providerDatas,        };
       console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);
 
