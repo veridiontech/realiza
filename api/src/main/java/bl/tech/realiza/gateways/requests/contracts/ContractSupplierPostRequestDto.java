@@ -26,7 +26,6 @@ public class ContractSupplierPostRequestDto {
     private String idRequester;
     @NotEmpty
     private Date dateStart;
-    @NotEmpty
     private Contract.ExpenseType expenseType;
     @NotEmpty
     private String contractReference;
