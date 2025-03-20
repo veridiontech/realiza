@@ -103,6 +103,7 @@ export function ModalTesteSendSupplier() {
     register: registerSubContract,
     handleSubmit: handleSubmitSubContract,
     formState: { errors: errorsSubContract },
+    setValue: setValueSubcontract
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
@@ -112,6 +113,7 @@ export function ModalTesteSendSupplier() {
     try {
       const companyData = await fetchCompanyByCNPJ(cnpjValue);
       setValue("corporateName", companyData.razaoSocial || "");
+      setValueSubcontract("corporateName", companyData.razaoSocial || "")
     } catch (error) {
       toast.error("Erro ao buscar dados do CNPJ");
     }
@@ -360,7 +362,7 @@ export function ModalTesteSendSupplier() {
                 <Input
                   type="text"
                   placeholder="Insira o cnpj do prestador..."
-                  {...register("cnpj")}
+                  {...registerSubContract("cnpj")}
                   className="pr-10"
                 />
                 <button
@@ -379,7 +381,7 @@ export function ModalTesteSendSupplier() {
                 <Input
                   type="corporateName"
                   placeholder="Digite a razão social do novo prestador"
-                  {...register("corporateName")}
+                  {...registerSubContract("corporateName")}
                   className="w-full"
                 />
               </div>

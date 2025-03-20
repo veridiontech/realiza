@@ -1,22 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import {
   Ban,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
-  Mail,
-  PencilLine,
   Rotate3D,
-  TriangleAlert,
 } from "lucide-react";
 import { ip } from "@/utils/ip";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,6 +17,7 @@ import {
 import { CardPanelControl } from "@/components/cardPanelControl";
 import { Button } from "@/components/ui/button";
 import { ColumnPanelControl } from "@/components/column-panel-control";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Requester {
   idUser: string;
@@ -46,7 +39,6 @@ export interface Solicitation {
 interface ApiResponse {
   content: Solicitation[];
   totalPages: number;
-  // outros campos da paginação se necessário
 }
 
 export function ControlPanel() {
@@ -54,27 +46,14 @@ export function ControlPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Configurações de paginação
-  const itemsPerPage = 12;
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchSolicitations = async (pageNumber: number) => {
+  const fetchSolicitations = async () => {
     setLoading(true);
     try {
       const response = await axios.get<ApiResponse>(
         `${ip}/item-management/new`,
-        {
-          params: {
-            page: pageNumber,
-            size: itemsPerPage,
-            sort: "idSolicitation",
-            direction: "ASC",
-          },
-        },
       );
       setSolicitations(response.data.content);
-      setTotalPages(response.data.totalPages);
     } catch (err: any) {
       setError(err);
     } finally {
@@ -83,20 +62,9 @@ export function ControlPanel() {
   };
 
   useEffect(() => {
-    fetchSolicitations(page);
-  }, [page]);
+    fetchSolicitations();
+  }, []);
 
-  const goToNextPage = () => {
-    if (page < totalPages - 1) {
-      setPage(page + 1);
-    }
-  };
-
-  const goToPreviousPage = () => {
-    if (page > 0) {
-      setPage(page - 1);
-    }
-  };
 
   // Callback para remover o item aprovado ou negado da lista
   const removeSolicitation = (idSolicitation: string) => {
@@ -136,7 +104,7 @@ export function ControlPanel() {
 
       {/* Listagem de Solicitações */}
       <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
-        <div className="flex items-center justify-around">
+        <div className="flex items-start justify-around">
           <div>
             <ColumnPanelControl
               lenghtControl="10"
@@ -145,19 +113,19 @@ export function ControlPanel() {
               textColor="text-[#F97316]"
               icon={<Rotate3D className="text-[#F97316]" />}
             />
-                      <div>
-            <div className="bg-gray-100 p-8">
-              <div className="w-[20vw]">
-                {solicitations.map((solicitation) => (
-                  <CardPanelControl
-                    key={solicitation.idSolicitation}
-                    data={solicitation}
-                    onActionCompleted={removeSolicitation}
-                  />
-                ))}
+            <div>
+              <div className="bg-gray-100 p-8">
+                <ScrollArea className="w-[20vw] h-[40vh]">
+                  {solicitations.map((solicitation) => (
+                    <CardPanelControl
+                      key={solicitation.idSolicitation}
+                      data={solicitation}
+                      onActionCompleted={removeSolicitation}
+                    />
+                  ))}
+                </ScrollArea>
               </div>
             </div>
-          </div>  
           </div>
           <ColumnPanelControl
             lenghtControl="9"
