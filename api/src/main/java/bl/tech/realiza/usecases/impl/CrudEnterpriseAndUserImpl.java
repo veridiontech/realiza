@@ -119,8 +119,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
             throw new BadRequestException("Invalid password");
         }
 
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findByCnpj(enterpriseAndUserRequestDto.getCnpj());
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElse(null);
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(enterpriseAndUserRequestDto.getIdCompany()).orElse(null);
 
         Optional<Branch> branchOptional = branchRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
         Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));

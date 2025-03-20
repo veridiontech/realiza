@@ -135,6 +135,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             emailSender.sendInviteEmail(EmailInviteRequestDto.builder()
                     .email(provider.getEmail())
                     .company(Provider.Company.SUPPLIER)
+                    .idCompany(provider.getIdProvider())
                     .build());
         }
 
