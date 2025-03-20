@@ -3,10 +3,7 @@ package bl.tech.realiza.domains.user;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,6 +14,9 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CLIENT")
 public class UserClient extends User {
+    @Builder.Default
+    private Boolean denied = false;
+
     @ManyToOne
     @JoinColumn(name = "idBranch", nullable = false)
     private Branch branch;

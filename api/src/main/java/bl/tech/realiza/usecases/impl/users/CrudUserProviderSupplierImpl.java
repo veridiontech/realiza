@@ -61,7 +61,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .position(userProviderSupplierRequestDto.getPosition())
                 .role(userProviderSupplierRequestDto.getRole())
                 .firstName(userProviderSupplierRequestDto.getFirstName())
-                .timeZone(userProviderSupplierRequestDto.getTimeZone())
                 .surname(userProviderSupplierRequestDto.getSurname())
                 .email(userProviderSupplierRequestDto.getEmail())
                 .profilePicture(userProviderSupplierRequestDto.getProfilePicture())
@@ -78,7 +77,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .position(savedUserSupplier.getPosition())
                 .role(savedUserSupplier.getRole())
                 .firstName(savedUserSupplier.getFirstName())
-                .timeZone(savedUserSupplier.getTimeZone())
                 .surname(savedUserSupplier.getSurname())
                 .email(savedUserSupplier.getEmail())
                 .profilePicture(savedUserSupplier.getProfilePicture())
@@ -108,7 +106,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .position(userProvider.getPosition())
                 .role(userProvider.getRole())
                 .firstName(userProvider.getFirstName())
-                .timeZone(userProvider.getTimeZone())
                 .surname(userProvider.getSurname())
                 .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userProvider.getEmail())
@@ -138,7 +135,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                             .position(userProvider.getPosition())
                             .role(userProvider.getRole())
                             .firstName(userProvider.getFirstName())
-                            .timeZone(userProvider.getTimeZone())
                             .surname(userProvider.getSurname())
                             .email(userProvider.getEmail())
                             .profilePicture(userProvider.getProfilePicture())
@@ -163,7 +159,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null ? userProviderSupplierRequestDto.getPosition() : userProvider.getPosition());
         userProvider.setRole(userProviderSupplierRequestDto.getRole() != null ? userProviderSupplierRequestDto.getRole() : userProvider.getRole());
         userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null ? userProviderSupplierRequestDto.getFirstName() : userProvider.getFirstName());
-        userProvider.setTimeZone(userProviderSupplierRequestDto.getTimeZone() != null ? userProviderSupplierRequestDto.getTimeZone() : userProvider.getTimeZone());
         userProvider.setSurname(userProviderSupplierRequestDto.getSurname() != null ? userProviderSupplierRequestDto.getSurname() : userProvider.getSurname());
         userProvider.setEmail(userProviderSupplierRequestDto.getEmail() != null ? userProviderSupplierRequestDto.getEmail() : userProvider.getEmail());
         userProvider.setProfilePicture(userProviderSupplierRequestDto.getProfilePicture() != null ? userProviderSupplierRequestDto.getProfilePicture() : userProvider.getProfilePicture());
@@ -178,7 +173,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .position(savedUserSupplier.getPosition())
                 .role(savedUserSupplier.getRole())
                 .firstName(savedUserSupplier.getFirstName())
-                .timeZone(savedUserSupplier.getTimeZone())
                 .surname(savedUserSupplier.getSurname())
                 .email(savedUserSupplier.getEmail())
                 .profilePicture(savedUserSupplier.getProfilePicture())
@@ -212,7 +206,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                             .position(userProvider.getPosition())
                             .role(userProvider.getRole())
                             .firstName(userProvider.getFirstName())
-                            .timeZone(userProvider.getTimeZone())
                             .surname(userProvider.getSurname())
                             .email(userProvider.getEmail())
                             .profilePicture(userProvider.getProfilePicture())

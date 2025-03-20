@@ -7,39 +7,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Date;
 import java.util.List;
 
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ContractResponseDto {
-    // provider
+public class ContractSubcontractorResponseDto {
     private String idContract;
     private String serviceType;
     private String serviceDuration;
     private String serviceName;
-    private String contractReference;
     private String description;
     private String allocatedLimit;
-    private String responsible;
+    private String idResponsible;
     private Contract.ExpenseType expenseType;
-    private Date dateStart;
-    private Date endDate;
-    private Boolean subcontractPermission;
-    private String contractSupplierId;
+    private String contractReference;
+    private String idContractSupplier;
+    private Contract.IsActive isActive;
     private Activity activity;
     private List<Requirement> requirements;
-
-    // client
-    private String branchName;
-    private String branch;
-
-    // supplier
-    private String providerSupplierName;
-    private String providerSupplier;
-
-    // subcontractor
-    private String providerSubcontractorName;
-    private String providerSubcontractor;
+    private String idSupplier;
+    private String nameSupplier;
+    private String idSubcontractor;
+    private String nameSubcontractor;
 }

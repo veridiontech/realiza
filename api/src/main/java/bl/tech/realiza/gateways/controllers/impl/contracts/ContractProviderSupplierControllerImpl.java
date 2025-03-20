@@ -3,8 +3,10 @@ package bl.tech.realiza.gateways.controllers.impl.contracts;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProviderSupplierControlller;
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudContractProviderSupplierImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,8 +32,8 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ContractResponseDto> createContractProviderSupplier(@RequestBody @Valid ContractRequestDto contractSupplierRequestDto) {
-        ContractResponseDto supplier = crudSupplier.save(contractSupplierRequestDto);
+    public ResponseEntity<ContractSupplierResponseDto> createContractProviderSupplier(@RequestBody @Valid ContractSupplierPostRequestDto contractSupplierRequestDto) {
+        ContractSupplierResponseDto supplier = crudSupplier.save(contractSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }

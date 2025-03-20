@@ -33,7 +33,9 @@ public abstract class Provider {
     private String address;
     private String number;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
+    @Builder.Default
+    private Boolean denied = false;
     @Builder.Default
     private Boolean deleteRequest = false;
     @Builder.Default
