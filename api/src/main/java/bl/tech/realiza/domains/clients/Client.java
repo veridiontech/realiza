@@ -25,8 +25,8 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idClient;
     private String cnpj;
-    private String tradeName;
-    private String corporateName;
+    private String tradeName; // nome fantasia
+    private String corporateName; // razão social
     private String logo;
     private String email;
     private String telephone;

@@ -7,6 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Collection;
 
 public interface ContractRepository extends JpaRepository<Contract, String> {
-    Collection<Contract> findAllByIsActive(boolean b);
     Collection<Contract> findAllByDeleteRequest(boolean b);
 }

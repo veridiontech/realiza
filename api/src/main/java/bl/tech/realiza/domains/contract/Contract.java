@@ -1,7 +1,5 @@
 package bl.tech.realiza.domains.contract;
 
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
@@ -33,15 +31,16 @@ public abstract class Contract {
     private String contractReference;
     private String description;
     private String allocatedLimit;
-    private ExpenseType expenseType;
+    @Builder.Default
+    private ExpenseType expenseType = ExpenseType.NENHUM;
     @OneToOne(cascade = CascadeType.REMOVE)
     private User responsible;
-    private Date startDate;
+    private Date dateStart;
     private Date endDate;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
-    private Boolean isActive = true;
+    private IsActive isActive = IsActive.PENDENTE;
     @Builder.Default
     private Boolean deleteRequest = false;
 
@@ -65,6 +64,13 @@ public abstract class Contract {
 
     public enum ExpenseType {
         CAPEX,
-        OPEX
+        OPEX,
+        NENHUM
+    }
+
+    public enum IsActive {
+        ATIVADO,
+        PENDENTE,
+        NEGADO
     }
 }

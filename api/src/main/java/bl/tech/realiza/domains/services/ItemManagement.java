@@ -1,6 +1,8 @@
 package bl.tech.realiza.domains.services;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,14 +24,25 @@ public class ItemManagement {
     private String title;
     private String details;
     @Builder.Default
+    private Status status = Status.PENDING;
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "requester_id", nullable = false)
+    @JoinColumn(name = "idRequester", nullable = false)
     private User requester;
 
     @OneToOne
-    @JoinColumn(name = "new_user_id", nullable = false)
+    @JoinColumn(name = "idNewUser")
     private User newUser;
 
+    @OneToOne
+    @JoinColumn(name = "idNewProvider")
+    private Provider newProvider;
+
+    public enum Status {
+        APPROVED,
+        DENIED,
+        PENDING
+    }
 }

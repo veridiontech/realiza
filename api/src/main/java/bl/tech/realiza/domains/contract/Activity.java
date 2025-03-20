@@ -30,7 +30,8 @@ public class Activity {
     public enum Risk {
         LOW,
         MEDIUM,
-        HIGH
+        HIGH,
+        VERY_HIGH
     }
 
     @ManyToOne
