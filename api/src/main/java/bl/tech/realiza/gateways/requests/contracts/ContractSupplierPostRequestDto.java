@@ -39,7 +39,6 @@ public class ContractSupplierPostRequestDto {
     private String corporateName;
     @NotEmpty
     private String idBranch;
-    @NotEmpty
     private ProviderDatas providerDatas;
 
     @Data

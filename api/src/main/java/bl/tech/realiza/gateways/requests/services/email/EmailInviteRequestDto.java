@@ -9,6 +9,6 @@ import lombok.Data;
 public class EmailInviteRequestDto {
     private String email;
     private Provider.Company company; // o nível da empresa que quer criar
-    private String idCompany; // onde vai se linkar
+    private String idCompany; // id do slot da empresa
     private String idClient;
 }
