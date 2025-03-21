@@ -18,13 +18,13 @@ export function DocumentBox({
   documents = [],
   onSelectDocument,
 }: DocumentBoxProps) {
-  const { branch } = useBranch();
+  const { selectedBranch } = useBranch();
 
   const selectDocument = async (documentId: string) => {
     try {
       console.log("selecionando documento");
       await axios.post(
-        `${ip}/document/branch/${branch?.idBranch}/document-matrix?documentId=${documentId}`,
+        `${ip}/document/branch/${selectedBranch?.idBranch}/document-matrix?documentId=${documentId}`,
       );
       console.log("documento selecionado com sucesso");
       toast.success("Documento selecionado enviado com sucesso");

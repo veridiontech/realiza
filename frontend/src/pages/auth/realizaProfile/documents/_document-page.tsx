@@ -22,7 +22,7 @@ export function DocumentPage() {
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [branchs, setBranchs] = useState<propsBranch[]>([]);
-  const { branch, setBranch } = useBranch();
+  const { selectedBranch, setBranch } = useBranch();
 
   // Estados para Documentos Empresa Terceiro
   const [enterpriseSelectedDocs, setEnterpriseSelectedDocs] = useState<
@@ -203,10 +203,10 @@ export function DocumentPage() {
 
   useEffect(() => {
     const fetchDocuments = async () => {
-      if (!branch?.idBranch) return;
+      if (!selectedBranch?.idBranch) return;
       setIsLoading(true);
       try {
-        await getDocuments(branch.idBranch);
+        await getDocuments(selectedBranch.idBranch);
       } catch (err) {
         console.error("Erro ao carregar documentos:", err);
       } finally {
@@ -215,7 +215,7 @@ export function DocumentPage() {
     };
 
     fetchDocuments();
-  }, [branch?.idBranch]);
+  }, [selectedBranch?.idBranch]);
 
   return (
     <div className="px-56 py-16">
