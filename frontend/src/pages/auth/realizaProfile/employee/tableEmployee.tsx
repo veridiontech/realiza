@@ -1,4 +1,5 @@
-import { useClient } from "@/context/Client-Provider";
+import { useBranch } from "@/context/Branch-provider";
+// import { useClient } from "@/context/Client-Provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { Settings2 } from "lucide-react";
@@ -7,32 +8,31 @@ import { Link } from "react-router-dom";
 
 export function TableEmployee() {
   const [employees, setEmployee] = useState([]);
-  const [branches, setBranches] = useState([]);
-  const [selectedBranch, setSelectedBranch] = useState("");
-  const { client } = useClient();
+  // const [branches, setBranches] = useState([]);
+  // const [selectedBranch, setSelectedBranch] = useState("");
+  // const { client } = useClient();
+  const {selectedBranch} = useBranch()
 
   const page = 0; // Número da página
   const limit = 10; // Quantidade de itens por página
 
-  const getBranchClient = async () => {
-    if (!client?.idClient) return;
+  // const getBranchClient = async () => {
+  //   if (!client?.idClient) return;
+  //   try {
+  //     const res = await axios.get(
+  //       `${ip}/branch/filtered-client?idSearch=${client.idClient}`
+  //     );
+  //     setBranches(res.data.content);
+  //     console.log("Filiais:", res.data.content);
+  //   } catch (err) {
+  //     console.log("Erro ao buscar filial do cliente", err);
+  //   }
+  // };
+
+  const getEmployee = async () => {
     try {
       const res = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client.idClient}`
-      );
-      setBranches(res.data.content);
-      console.log("Filiais:", res.data.content);
-    } catch (err) {
-      console.log("Erro ao buscar filial do cliente", err);
-    }
-  };
-
-  const getEmployee = async (idBranch: string) => {
-
-    console.log("idBranch: ", idBranch);
-    try {
-      const res = await axios.get(
-        `${ip}/employee?idSearch=${idBranch}&enterprise=CLIENT`, {
+        `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`, {
           params: {
             page: page,
             limit: limit,
@@ -49,18 +49,16 @@ export function TableEmployee() {
   
 
   useEffect(() => {
-    if (client?.idClient) {
-      getBranchClient();
-      setSelectedBranch("")
-      setEmployee([])
-    }
-  }, [client?.idClient]);
+    if (selectedBranch?.idBranch) {
+      getEmployee()
+    } setEmployee([])
+  }, [selectedBranch?.idBranch]);
 
-  const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const branchId = e.target.value;
-    setSelectedBranch(branchId);
-    getEmployee(branchId);
-  };
+  // const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const branchId = e.target.value;
+  //   // setSelectedBranch(branchId);
+  //   getEmployee(branchId);
+  // };
 
   return (
     <div>

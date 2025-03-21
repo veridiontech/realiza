@@ -189,7 +189,7 @@ export function Header() {
               {/* Verificando se solicitations existe e se há itens pendentes */}
               {solicitations && solicitations.length > 0 ? (
                 // Filtra solicitações com status "PENDING"
-                <ScrollArea className="h-[40vh] w-[20vw]">
+                <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
                   {solicitations.filter(
                     (solicitation) => solicitation.status === "PENDING",
                   ).length > 0 ? (
@@ -199,11 +199,11 @@ export function Header() {
                       )
                       .map((solicitation) => (
                         <div
-                          className="border p-4 shadow-md"
+                          className="border p-4 shadow-md border-l-[#F97316] border-l-[10px] "
                           key={solicitation.idSolicitation}
                         >
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-2 ">
+                            <div className="flex items-center gap-2 ">
                               <strong>Título:</strong>
                               <span>{solicitation.title}</span>
                             </div>
