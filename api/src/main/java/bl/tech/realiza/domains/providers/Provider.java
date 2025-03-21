@@ -21,19 +21,21 @@ public abstract class Provider {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idProvider;
     @Column(unique = true)
-    private String cnpj;
+    private String cnpj; //
     private String tradeName;
-    private String corporateName;
+    private String corporateName; //
     private String logo;
-    private String email;
-    private String telephone;
+    private String email; //
+    private String telephone; //
     private String cep;
     private String state;
     private String city;
     private String address;
     private String number;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
+    @Builder.Default
+    private Boolean denied = false;
     @Builder.Default
     private Boolean deleteRequest = false;
     @Builder.Default

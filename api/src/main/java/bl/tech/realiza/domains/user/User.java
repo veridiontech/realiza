@@ -36,7 +36,6 @@ public abstract class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String firstName;
-    private TimeZone timeZone;
     private String surname;
     private String email;
     private String profilePicture;

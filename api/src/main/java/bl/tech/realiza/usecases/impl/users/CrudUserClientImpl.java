@@ -60,7 +60,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(userClientRequestDto.getPosition())
                 .role(userClientRequestDto.getRole())
                 .firstName(userClientRequestDto.getFirstName())
-                .timeZone(userClientRequestDto.getTimeZone())
                 .surname(userClientRequestDto.getSurname())
                 .email(userClientRequestDto.getEmail())
                 .profilePicture(userClientRequestDto.getProfilePicture())
@@ -78,7 +77,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(savedUserClient.getPosition())
                 .role(savedUserClient.getRole())
                 .firstName(savedUserClient.getFirstName())
-                .timeZone(savedUserClient.getTimeZone())
                 .surname(savedUserClient.getSurname())
                 .email(savedUserClient.getEmail())
                 .profilePicture(savedUserClient.getProfilePicture())
@@ -109,7 +107,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(userClient.getPosition())
                 .role(userClient.getRole())
                 .firstName(userClient.getFirstName())
-                .timeZone(userClient.getTimeZone())
                 .surname(userClient.getSurname())
                 .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userClient.getEmail())
@@ -141,7 +138,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .position(userClient.getPosition())
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
-                            .timeZone(userClient.getTimeZone())
                             .surname(userClient.getSurname())
                             .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userClient.getEmail())
@@ -167,7 +163,6 @@ public class CrudUserClientImpl implements CrudUserClient {
         userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
         userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
         userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());
-        userClient.setTimeZone(userClientRequestDto.getTimeZone() != null ? userClientRequestDto.getTimeZone() : userClient.getTimeZone());
         userClient.setSurname(userClientRequestDto.getSurname() != null ? userClientRequestDto.getSurname() : userClient.getSurname());
         userClient.setEmail(userClientRequestDto.getEmail() != null ? userClientRequestDto.getEmail() : userClient.getEmail());
         userClient.setProfilePicture(userClientRequestDto.getProfilePicture() != null ? userClientRequestDto.getProfilePicture() : userClient.getProfilePicture());
@@ -183,7 +178,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(savedUserClient.getPosition())
                 .role(savedUserClient.getRole())
                 .firstName(savedUserClient.getFirstName())
-                .timeZone(savedUserClient.getTimeZone())
                 .surname(savedUserClient.getSurname())
                 .email(savedUserClient.getEmail())
                 .profilePicture(savedUserClient.getProfilePicture())
@@ -219,7 +213,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .position(userClient.getPosition())
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
-                            .timeZone(userClient.getTimeZone())
                             .surname(userClient.getSurname())
                             .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userClient.getEmail())
