@@ -20,7 +20,6 @@ public abstract class Provider {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idProvider;
-    @Column(unique = true)
     private String cnpj; //
     private String tradeName;
     private String corporateName; //
