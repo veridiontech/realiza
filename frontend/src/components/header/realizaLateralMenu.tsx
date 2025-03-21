@@ -6,6 +6,8 @@ import {
   Building2,
   Factory,
   PersonStanding,
+  LayoutPanelTop,
+  Paperclip,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { SheetContent } from "../ui/sheet";
@@ -73,6 +75,21 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
           <PersonStanding className="size-4 text-zinc-800" />
           <span className="ml-2 text-sm font-medium text-zinc-900">Usuários</span>
         </Button>
+      </Link>
+
+      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Funcionalidades</h3>
+      <Link to={`/sistema/controlPanel/${user?.idUser}`}>
+          <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
+            <LayoutPanelTop />
+            <span className="ml-2 text-sm font-medium text-zinc-900">Painel de solicitação</span>
+          </Button>
+      </Link>
+
+      <Link to={`/sistema/documents/${user?.idUser}`}>
+          <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
+          <Paperclip/>
+            <span className="ml-2 text-sm font-medium text-zinc-900">Gestão de documentos</span>
+          </Button>
       </Link>
     </SheetContent>
   );
