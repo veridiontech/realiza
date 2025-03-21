@@ -1,6 +1,7 @@
 package bl.tech.realiza.services.email;
 
 import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -44,10 +45,10 @@ public class EmailSender {
                 companyName = "Realiza Assessoria Empresarial Ltda";
             }
             case SUPPLIER -> {
-                var supplier = branchRepository.findById(emailInviteRequestDto.getIdCompany())
-                        .orElseThrow(() -> new EntityNotFoundException("Client not found"));
-                companyName = supplier.getClient().getCorporateName();
-                idCompany = supplier.getIdBranch();
+                ProviderSupplier providerSupplier = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+                companyName = providerSupplier.getCorporateName();
+                idCompany = providerSupplier.getIdProvider();
             }
             case SUBCONTRACTOR -> {
                 var subcontractor = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
@@ -84,7 +85,7 @@ public class EmailSender {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(dotenv.get("GMAIL_EMAIL"));
             helper.setTo(emailInviteRequestDto.getEmail());
-            helper.setSubject("Bem-vindo à " + companyName);
+            helper.setSubject("Bem-vindo à Realiza");
             helper.setText(emailBody, true); // Enable HTML format
 
             try {
