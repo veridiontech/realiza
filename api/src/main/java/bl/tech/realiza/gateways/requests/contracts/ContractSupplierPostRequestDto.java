@@ -23,12 +23,12 @@ public class ContractSupplierPostRequestDto {
     private Boolean subcontractPermission;
     private String idActivity;
     private List<String> requirements;
-    private String corporateName;
     private String idBranch;
     private ProviderDatas providerDatas;
 
     @Data
     public class ProviderDatas {
+        private String corporateName;
         private String email;
         private String cnpj;
         private String telephone;

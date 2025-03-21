@@ -98,7 +98,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         ProviderSupplier newProviderSupplier = providerSupplierRepository.save(ProviderSupplier.builder()
                 .cnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
-                .corporateName(contractProviderSupplierRequestDto.getCorporateName())
+                .corporateName(contractProviderSupplierRequestDto.getProviderDatas().getCorporateName())
                 .email(contractProviderSupplierRequestDto.getProviderDatas().getEmail())
                 .telephone(contractProviderSupplierRequestDto.getProviderDatas().getTelephone())
                 .build());
