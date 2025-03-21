@@ -325,8 +325,8 @@ export function NewModalCreateEmployee() {
                     className="flex flex-col rounded-md border p-2"
                   >
                     <option value="">Selecione</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Feminino">Feminino</option>
+                    <option value="Masculino">Casado</option>
+                    <option value="Feminino">Solteiro</option>
                   </select>
                 </div>
                 <div className="flex gap-1">

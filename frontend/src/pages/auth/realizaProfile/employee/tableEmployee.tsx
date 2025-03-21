@@ -55,21 +55,6 @@ export function TableEmployee() {
 
   return (
     <div>
-      <select
-        value={selectedBranch}
-        className="w-[20vw] rounded-md border p-2"
-        onChange={handleBranchChange}
-      >
-        <option value="" disabled>
-          Selecione uma filial
-        </option>
-        {branches.map((branch: any) => (
-          <option key={branch.idBranch} value={branch.idBranch}>
-            {branch.name}
-          </option>
-        ))}
-      </select>
-
       <table className="min-w-full border-collapse border border-gray-300 mt-4">
         <thead>
           <tr>
