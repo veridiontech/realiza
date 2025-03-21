@@ -1,8 +1,8 @@
-import { useState} from "react";
+// import { useState} from "react";
 // import { Table } from "@/components/ui/tableVanila";
 // import { Pagination } from "@/components/ui/pagination";
 // import { useEmployees } from "@/hooks/gets/realiza/useEmployees";
-import { StepOneEmployee } from "./modals/stepOne";
+// import { StepOneEmployee } from "./modals/stepOne";
 // import { Settings2 } from "lucide-react";
 // import { Link } from "react-router-dom";
 // import { Employee } from "@/types/employee";
@@ -12,7 +12,7 @@ import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 
 export const EmployeesTable = (): JSX.Element => {
   // const [currentPage, setCurrentPage] = useState(1);
-  const [, setIsModalOpen] = useState(false);
+  // const [, setIsModalOpen] = useState(false);
   // const itemsPerPage = 10;
 
   // const { client } = useClient()
