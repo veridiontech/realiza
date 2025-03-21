@@ -3,7 +3,7 @@ import { Pagination } from "@/components/ui/pagination";
 import {
   useFetchServiceProviders,
 } from "@/hooks/gets/realiza/useServiceProviders";
-import { ModalTesteSendSupplier } from "@/components/realiza-add-supplier";
+// import { ModalTesteSendSupplier } from "@/components/realiza-add-supplier";
 import { useClient } from "@/context/Client-Provider";
 import { TableServiceProvider } from "./tableServiceProvider";
 
