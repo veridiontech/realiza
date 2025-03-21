@@ -34,12 +34,13 @@ export function CardPanelControl({
         `${ip}/item-management/${data.idSolicitation}/approve`,
       );
       toast.success("Solicitação aprovada");
+      window.location.reload
       if (onActionCompleted) {
         onActionCompleted(data.idSolicitation);
       }
     } catch (error) {
       console.error("Erro ao aprovar solicitação:", error);
-      alert("Erro ao aprovar solicitação.");
+      toast.error("Erro ao aceitar solicitação")
     }
   };
 
@@ -91,7 +92,7 @@ export function CardPanelControl({
           </button>
           <button
             onClick={handleApprove}
-            className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A]"
+            className="flex flex-row items-center hover:bg-stone-300 justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A]"
           >
             Aceitar <ThumbsUp size={15} />
           </button>

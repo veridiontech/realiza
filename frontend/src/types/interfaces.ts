@@ -55,3 +55,20 @@ export interface propsBranch {
   cep: string;
   state: string;
 }
+
+export interface propsSupplier {
+  idProvider: string;
+  cnpj: string;
+  tradeName: string;
+  corporateName: string;
+  logoId: string;
+  logoData: string;
+  email: string;
+  cep: string;
+  state: string;
+  city: string;
+  address: string;
+  number: string;
+  supplier: string;
+  client: string;
+}

@@ -79,7 +79,7 @@ export function ModalTesteSendSupplier() {
   const { selectedBranch } = useBranch();
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
-  const [getIdManager, setGetIdManager] = useState<string | null>(null)
+  const [getIdManager, setGetIdManager] = useState<string | null>(null);
   // const [subContractDatas, setSubContractDatas] = useState({});
 
   const {
@@ -139,7 +139,6 @@ export function ModalTesteSendSupplier() {
   };
 
   console.log("idBranch teste:", selectedBranch?.idBranch);
-  
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -182,18 +181,23 @@ export function ModalTesteSendSupplier() {
         payload = {
           ...data,
         };
-        console.log("Dados enviados de contratado para modal de contrato:", payload);
+        console.log(
+          "Dados enviados de contratado para modal de contrato:",
+          payload,
+        );
       } else {
         payload = {
           ...data,
         };
-        console.log("Enviando dados de subcontratado para o modal de contrato:", payload);
+        console.log(
+          "Enviando dados de subcontratado para o modal de contrato:",
+          payload,
+        );
       }
       setProviderDatas(payload);
       setPushCnpj(data.cnpj);
       toast.success("Prestador preenchido com sucesso");
       setNextModal(true);
-  
     } catch (err) {
       console.log("Erro ao criar prestador", err);
       toast.error("Erro ao criar prestador. Tente novamente");
@@ -201,7 +205,6 @@ export function ModalTesteSendSupplier() {
       setIsLoading(false);
     }
   };
-  
 
   const getManager = async () => {
     try {
@@ -219,11 +222,13 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
+    if(selectedBranch?.idBranch) {
+      getManager()
+    }
+  }, [selectedBranch?.idBranch])
 
-      getManager();
-
-
-
+  useEffect(() => {
+  
     getActivities();
   }, []);
 
@@ -240,6 +245,7 @@ export function ModalTesteSendSupplier() {
         idRequester: user?.idUser,
         providerDatas,
         idBranch: selectedBranch?.idBranch,
+
       };
       console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);
@@ -575,7 +581,11 @@ export function ModalTesteSendSupplier() {
                         </option>
                         {Array.isArray(managers) &&
                           managers.map((manager: any) => (
-                            <option value={manager.idUser} onClick={() => setGetIdManager(manager.idUser)} key={manager.idUser}>
+                            <option
+                              value={manager.idUser}
+                              onClick={() => setGetIdManager(manager.idUser)}
+                              key={manager.idUser}
+                            >
                               {manager.firstName} {manager.surname}{" "}
                             </option>
                           ))}
@@ -697,9 +707,23 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <Button className="bg-realizaBlue" type="submit">
-                      Criar contrato
-                    </Button>
+                    {isLoading ? (
+                      <Button className="bg-realizaBlue" type="submit">
+                        <Oval
+                          visible={true}
+                          height="80"
+                          width="80"
+                          color="#4fa94d"
+                          ariaLabel="oval-loading"
+                          wrapperStyle={{}}
+                          wrapperClass=""
+                        />
+                      </Button>
+                    ) : (
+                      <Button className="bg-realizaBlue" type="submit">
+                        Enviar contrato
+                      </Button>
+                    )}
                   </form>
                 </div>
               </ScrollArea>

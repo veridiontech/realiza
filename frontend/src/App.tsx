@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import { ClientProvider } from "./context/Client-Provider";
 import { DocumentProvider } from "./context/Document-provider";
 import { BranchProvider } from "./context/Branch-provider";
+import { SupplierProvider } from "./context/Supplier-context";
 
 const queryClient = new QueryClient();
 
@@ -28,9 +29,11 @@ export function App() {
             <Helmet titleTemplate="%s | realiza" />
             <ClientProvider>
               <BranchProvider>
+              <SupplierProvider>
                 <DocumentProvider>
                   <RouterProvider router={router} />
                 </DocumentProvider>
+              </SupplierProvider>
               </BranchProvider>
             </ClientProvider>
           </HelmetProvider>
