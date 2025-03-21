@@ -123,6 +123,9 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
         ProviderSupplier providerSupplier = providerSupplierRepository.findById(enterpriseAndUserRequestDto.getIdCompany())
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
+        providerSupplier.setCorporateName(enterpriseAndUserRequestDto.getCorporateName() != null ? enterpriseAndUserRequestDto.getCorporateName() : providerSupplier.getCorporateName());
+        providerSupplier.setEmail(enterpriseAndUserRequestDto.getEmail() != null ? enterpriseAndUserRequestDto.getEmail() : providerSupplier.getEmail());
+        providerSupplier.setTelephone(enterpriseAndUserRequestDto.getPhone() != null ? enterpriseAndUserRequestDto.getPhone() : providerSupplier.getTelephone());
         providerSupplier.setTradeName(enterpriseAndUserRequestDto.getTradeName() != null ? enterpriseAndUserRequestDto.getTradeName() : providerSupplier.getTradeName());
         providerSupplier.setCep(enterpriseAndUserRequestDto.getCep() != null ? enterpriseAndUserRequestDto.getCep() : providerSupplier.getCep());
         providerSupplier.setState(enterpriseAndUserRequestDto.getState() != null ? enterpriseAndUserRequestDto.getState() : providerSupplier.getState());
