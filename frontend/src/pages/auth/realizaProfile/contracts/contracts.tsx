@@ -10,7 +10,7 @@ export default function ContractsTable() {
           <h1 className="text-2xl">Contratos</h1>
           <ModalAddContract /> 
         </div>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-">
           <CardContract />
         </div>
       </div>

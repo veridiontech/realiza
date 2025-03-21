@@ -47,6 +47,7 @@ export function CardContract() {
   }, [selectedBranch?.idBranch]);
 
   return (
+    <div className="flex flex-col gap-5">
     <Dialog>
       <DialogTrigger asChild>
         <div className="border-l-realizaBlue w-auto cursor-pointer rounded-lg border border-l-8 p-5 shadow-lg hover:bg-gray-100">
@@ -100,5 +101,6 @@ export function CardContract() {
         </DialogHeader>
       </DialogContent>
     </Dialog>
+    </div>
   );
 }

@@ -45,7 +45,7 @@ export function HeaderProvider() {
   return (
     <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center gap-5">
           <div className="flex items-center">
             <Sheet>
               <SheetTrigger asChild>
@@ -58,14 +58,14 @@ export function HeaderProvider() {
               </SheetTrigger>
               <ProviderLateralMenu />
             </Sheet>
-            <Link to={`/fornecedor/contracts/${user?.idUser}`}>
+            <Link to={`/fornecedor/home/${user?.idUser}`}>
               <img src={realizaLogo} alt="" className="w-[6vw]" />
             </Link>
           </div>
           <div>
-            <div>
-              <span></span>
-              <h1></h1>
+            <div className="flex items-center gap-2">
+              <span>Fornecedor:</span>
+              <h1>{supplier?.corporateName}</h1>
             </div>
           </div>
         </div>

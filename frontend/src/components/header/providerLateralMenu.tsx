@@ -19,6 +19,7 @@ export function ProviderLateralMenu() {
 
   return (
     <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
+      <Link to={`/fornecedor/home/${getIdUser}`}>
       <Button
         variant={"ghost"}
         className="w-full justify-start bg-zinc-100 px-4 py-2"
@@ -26,6 +27,7 @@ export function ProviderLateralMenu() {
         <Home className="text-realizaBlue size-4" />
         <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
       </Button>
+      </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Prestadores de serviço
       </h3>

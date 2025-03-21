@@ -11,6 +11,9 @@ export function TableEmployee() {
   const [selectedBranch, setSelectedBranch] = useState("");
   const { client } = useClient();
 
+  const page = 0; // Número da página
+  const limit = 10; // Quantidade de itens por página
+
   const getBranchClient = async () => {
     if (!client?.idClient) return;
     try {
@@ -25,10 +28,16 @@ export function TableEmployee() {
   };
 
   const getEmployee = async (idBranch: string) => {
+
     console.log("idBranch: ", idBranch);
     try {
       const res = await axios.get(
-        `${ip}/employee?idSearch=${idBranch}&enterprise=CLIENT`
+        `${ip}/employee?idSearch=${idBranch}&enterprise=CLIENT`, {
+          params: {
+            page: page,
+            limit: limit,
+          }
+        }
       );
       setEmployee(res.data.content);
     } catch (error) {

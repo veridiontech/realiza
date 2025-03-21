@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  ChartNoAxesGantt,
-  LogOut,
-  Paperclip,
-  Plus,
-  User,
-} from "lucide-react";
+import { Bell, ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
 import { Button } from "../ui/button";
@@ -27,6 +21,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfilePhoto } from "./profile-photo";
 import { useBranch } from "@/context/Branch-provider";
+import { Solicitation } from "@/pages/auth/realizaProfile/panelControl";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+
+interface ApiResponse {
+  content: Solicitation[];
+  totalPages: number;
+}
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
@@ -34,6 +35,7 @@ export function Header() {
   const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
 
   const getIdUser = user?.idUser;
 
@@ -62,6 +64,7 @@ export function Header() {
     };
 
     getAllClients();
+    fetchSolicitations();
   }, []);
 
   const handleSelectClient = async (id: string) => {
@@ -73,15 +76,28 @@ export function Header() {
     }
   };
 
+  const fetchSolicitations = async () => {
+    // setLoading(true);
+    try {
+      const response = await axios.get<ApiResponse>(
+        `${ip}/item-management/new-provider`,
+      );
+      console.log("solicitacao:", response.data.content);
+      setSolicitations(response.data.content);
+    } catch (err: any) {
+      // setError(err);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
   // Handlers de hover:
   const handleMouseEnter = () => setMenuOpen(true);
   const handleMouseLeave = () => setMenuOpen(false);
 
   return (
-    <header className="dark:bg-primary relative p-5 ">
-      <div>
-        {/* seach */}
-      </div>
+    <header className="dark:bg-primary relative p-5">
+      <div>{/* seach */}</div>
       <div className="flex items-center justify-between">
         {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">
@@ -163,8 +179,57 @@ export function Header() {
         </div>
         {/* Perfil do usuário e demais itens */}
         <div className="hidden items-center md:flex">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="cursor-pointer rounded-full bg-gray-300 p-2">
+                <Bell />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="mr-32 flex flex-col gap-2 p-5">
+              {/* Verificando se solicitations existe e se há itens pendentes */}
+              {solicitations && solicitations.length > 0 ? (
+                // Filtra solicitações com status "PENDING"
+                <ScrollArea className="h-[40vh] w-[20vw]">
+                  {solicitations.filter(
+                    (solicitation) => solicitation.status === "PENDING",
+                  ).length > 0 ? (
+                    solicitations
+                      .filter(
+                        (solicitation) => solicitation.status === "PENDING",
+                      )
+                      .map((solicitation) => (
+                        <div
+                          className="border p-4 shadow-md"
+                          key={solicitation.idSolicitation}
+                        >
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <strong>Título:</strong>
+                              <span>{solicitation.title}</span>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <strong>Detalhes da solicitação:</strong>{" "}
+                              <span className="text-[14px]">{solicitation.details}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <span className="text-black">Nenhuma notificação</span>
+                    </div>
+                  )}
+                </ScrollArea>
+              ) : (
+                <div>
+                  <span className="text-black">Nenhuma notificação</span>
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div className="ml-12 flex items-center gap-8">
             {/* <ToggleTheme /> */}
+
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <ProfilePhoto />
