@@ -37,9 +37,9 @@ export function ServiceProvider() {
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
         <h1 className="m-8 text-2xl">Prestadores de Serviço</h1>
 
-        <div className="flex w-[90rem] flex-row justify-between px-10">
+        {/* <div className="flex w-[90rem] flex-row justify-between px-10">
           <ModalTesteSendSupplier />
-        </div>
+        </div> */}
 
       <TableServiceProvider />
 

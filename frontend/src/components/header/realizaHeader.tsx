@@ -5,7 +5,6 @@ import {
   Paperclip,
   Plus,
   User,
-  LayoutPanelTop,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
@@ -180,22 +179,6 @@ export function Header() {
                     <div className="flex items-center gap-1">
                       <User />
                       <p>Perfil</p>
-                    </div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link to={`/sistema/controlPanel/${user?.idUser}`}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
-                    <div className="flex items-center gap-1">
-                      <LayoutPanelTop />
-                      <p>Painel de Solicitações</p>
-                    </div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link to={`/sistema/documents/${user?.idUser}`}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
-                    <div className="flex items-center gap-1">
-                      <Paperclip />
-                      <p>Gestão de documentos</p>
                     </div>
                   </DropdownMenuItem>
                 </Link>
