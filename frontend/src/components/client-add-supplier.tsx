@@ -23,6 +23,7 @@ import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useBranch } from "@/context/Branch-provider";
 import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
+import { useUser } from "@/context/user-provider";
 // import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 // Torna o campo idClient opcional, pois vamos atribuí-lo via código
@@ -73,10 +74,12 @@ export function ModalTesteSendSupplier() {
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
   const [providerDatas, setProviderDatas] = useState({});
+  const { user } = useUser();
   // const { client } = useClient();
   const { selectedBranch } = useBranch();
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
+  const [getIdManager, setGetIdManager] = useState<string | null>(null)
   // const [subContractDatas, setSubContractDatas] = useState({});
 
   const {
@@ -102,7 +105,7 @@ export function ModalTesteSendSupplier() {
     handleSubmit: handleSubmitSubContract,
     formState: { errors: errorsSubContract },
     setValue: setValueSub,
-    getValues: getValuesSub
+    getValues: getValuesSub,
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
@@ -134,6 +137,9 @@ export function ModalTesteSendSupplier() {
       setIsLoading(false);
     }
   };
+
+  console.log("idBranch teste:", selectedBranch?.idBranch);
+  
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -171,42 +177,31 @@ export function ModalTesteSendSupplier() {
   const createClient = async (data: ModalSendEmailFormSchema) => {
     setIsLoading(true);
     try {
+      let payload;
       if (isSubcontractor === "contratado") {
-        const payload = {
+        payload = {
           ...data,
-          idBranch: selectedBranch?.idBranch,
         };
-        console.log(
-          "Dados enviados de contratado para modal de contrato:",
-          payload,
-        );
-        setProviderDatas(payload);
+        console.log("Dados enviados de contratado para modal de contrato:", payload);
       } else {
-        const payload = {
+        payload = {
           ...data,
         };
-        console.log(
-          "enviando dados de subcontratado para o modal de contrato:",
-          payload,
-        );
-        setProviderDatas(payload);
+        console.log("Enviando dados de subcontratado para o modal de contrato:", payload);
       }
-
-      const payload = {
-        ...data,
-      };
-      console.log("Dados enviados para modal de contrato:", payload);
       setProviderDatas(payload);
       setPushCnpj(data.cnpj);
-      toast.success("Email de cadastro enviado para novo prestador");
+      toast.success("Prestador preenchido com sucesso");
       setNextModal(true);
+  
     } catch (err) {
-      console.log("Erro ao enviar email para usuário:", err);
-      toast.error("Erro ao enviar email. Tente novamente");
+      console.log("Erro ao criar prestador", err);
+      toast.error("Erro ao criar prestador. Tente novamente");
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   const getManager = async () => {
     try {
@@ -224,9 +219,11 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
-    if (selectedBranch?.idBranch) {
+
       getManager();
-    }
+
+
+
     getActivities();
   }, []);
 
@@ -240,17 +237,24 @@ export function ModalTesteSendSupplier() {
     try {
       const payload = {
         ...data,
+        idRequester: user?.idUser,
         providerDatas,
+        idBranch: selectedBranch?.idBranch,
       };
       console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);
-
       toast.success("Contrato criado com sucesso!");
-    } catch (err) {
-      console.error("Erro ao criar contrato:", err);
-      toast.error(
-        "Erro ao criar contrato. Verifique os dados e tente novamente.",
-      );
+    } catch (err: any) {
+      if (err.response) {
+        console.error("Erro no servidor:", err.response.data);
+        toast.error(`Erro ao criar contrato: Erro desconhecido.`);
+      } else if (err.request) {
+        console.error("Erro na requisição:", err.request);
+        toast.error("Erro na requisição ao servidor.");
+      } else {
+        console.error("Erro ao configurar requisição:", err.message);
+        toast.error("Erro ao criar contrato. Tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -562,21 +566,25 @@ export function ModalTesteSendSupplier() {
                     <div className="flex flex-col gap-2">
                       <Label className="text-white">Gestor do serviço</Label>
                       <select
-                        key={managers.idUser}
+                        key={getIdManager}
                         className="rounded-md border p-2"
-                        defaultValue=""
-                        {...registerContract("idResponsible")}
+                        {...registerContract("idResponsible")} // Associando ao idResponsible
                       >
                         <option value="" disabled>
                           Selecione um gestor
                         </option>
                         {Array.isArray(managers) &&
                           managers.map((manager: any) => (
-                            <option value={manager.iduser} key={manager.idUser}>
-                              {manager.firstName} {manager.surname}
+                            <option value={manager.idUser} onClick={() => setGetIdManager(manager.idUser)} key={manager.idUser}>
+                              {manager.firstName} {manager.surname}{" "}
                             </option>
                           ))}
                       </select>
+                      {errorsContract.idResponsible && (
+                        <span className="text-red-600">
+                          {errorsContract.idResponsible.message}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <Label className="text-white">
@@ -603,7 +611,7 @@ export function ModalTesteSendSupplier() {
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo de despesa</Label>
                       <select
-                        {...registerContract("serviceType")}
+                        {...registerContract("expenseType")}
                         className="rounded-md border p-2"
                         defaultValue=""
                       >
@@ -624,10 +632,12 @@ export function ModalTesteSendSupplier() {
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
                       <select
-                        {...registerContract("expenseType")}
+                        {...registerContract("serviceType")}
                         className="rounded-md p-1"
                       >
-                        <option value="TRABALHISTA">TRABALHISTA</option>
+                        <option value="" disabled>
+                          Selecione uma opção
+                        </option>
                         <option value="AMBAS">AMBAS</option>
                         <option value="SSMA">SSMA</option>
                         <option value="TODAS">TODAS</option>

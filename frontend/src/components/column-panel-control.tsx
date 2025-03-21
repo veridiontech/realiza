@@ -5,7 +5,7 @@ interface ColumnPanelControlProps {
   bgColor: string;
   textColor: string;
   icon: ReactNode;
-  lenghtControl: string;
+  lenghtControl: number;
 }
 
 export function ColumnPanelControl({

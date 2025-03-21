@@ -48,4 +48,10 @@ export interface propsDocument {
 export interface propsBranch {
   idBranch: string
   name: string;
+  email: string;
+  cnpj: string;
+  address: string;
+  telephone: string;
+  cep: string;
+  state: string;
 }

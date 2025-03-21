@@ -1,6 +1,7 @@
 import axios from "axios";
 import { CalendarDays, ThumbsDown, ThumbsUp, User } from "lucide-react";
 import { ip } from "@/utils/ip";
+import { toast } from "sonner";
 
 interface CardPanelControlProps {
   data: {
@@ -27,11 +28,12 @@ export function CardPanelControl({
 }: CardPanelControlProps) {
   const handleApprove = async () => {
     try {
-      const response = await axios.patch(
-        `${ip}/item-management/new/${data.idSolicitation}/approve`,
+      console.log("teste id da solicitacao",data.idSolicitation);
+      
+      await axios.patch(
+        `${ip}/item-management/${data.idSolicitation}/approve`,
       );
-      alert(response.data);
-      // Remove o item aprovado da lista se houver callback
+      toast.success("Solicitação aprovada");
       if (onActionCompleted) {
         onActionCompleted(data.idSolicitation);
       }
