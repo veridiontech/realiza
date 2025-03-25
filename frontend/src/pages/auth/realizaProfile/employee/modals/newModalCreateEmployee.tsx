@@ -27,8 +27,8 @@ const createNewEmployeeFormSchema = z.object({
   name: z.string(),
   surname: z.string(),
   email: z.string(),
-  cpf: z.string(),
-  salary: z.string(),
+  cpf: z.string().regex(/^(\d{3})(\d{3})(\d{3})(\d{2})$/),
+  salary: z.string().regex(/^(\d+)(\d{3})*(\.\d{2})?$/),
   gender: z.string(),
   maritalStatus: z.string(),
   cep: z.string(),
@@ -41,7 +41,7 @@ const createNewEmployeeFormSchema = z.object({
   education: z.string(),
   cbo: z.string().optional(),
   platformAccess: z.string(),
-  rg: z.string(),
+  rg: z.string().regex(/^(\d{2})(\d{3})(\d{3})(\d{1})$/),
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
   dob: z.string()
 });
@@ -58,10 +58,35 @@ export function NewModalCreateEmployee() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
+    getValues,
   } = useForm<CreateNewEmpoloyeeFormSchema>({
     resolver: zodResolver(createNewEmployeeFormSchema),
   });
+
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{2})$/, "$1-$2");
+  };
+
+  const formatRG = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1})$/, "$1-$2");
+  };
+
+  const formatSalary = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
@@ -207,33 +232,55 @@ export function NewModalCreateEmployee() {
                   <Input type="text" {...register("email")} />
                 </div>
                 <div>
-                  <Label className="text-white">Cpf</Label>
-                  <Input type="text" {...register("cpf")} />
+                  <Label className="text-white">CPF:</Label>
+                  <Input
+                    type="text"
+                    value={getValues("cpf")} 
+                    {...register("cpf")}
+                    onChange={(e) => {
+                      const formattedCPF = formatCPF(e.target.value);
+                      setValue("cpf", formattedCPF);
+                    }}
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                  />
+                  {errors.cpf && <span>{errors.cpf.message}</span>}
                 </div>
                 <div>
-                  <Label className="text-white">RG</Label>
-                  <Input type="text" {...register("rg")} />
+                  <Label className="text-white">RG:</Label>
+                  <Input
+                    type="text"
+                    value={getValues("rg")}
+                    {...register("rg")}
+                    onChange={(e) => {
+                      const formattedRG = formatRG(e.target.value);
+                      setValue("rg", formattedRG);
+                    }}
+                    placeholder="00.000.000-0"
+                    maxLength={12}
+                  />
+                  {errors.rg && <span>{errors.rg.message}</span>}
                 </div>
                 <div>
                   <Label className="text-white">Data de admissão</Label>
                   <Input type="date" {...register("admissionDate")} />
                 </div>
                 <div>
-                  <Label className="text-white">salário</Label>
-                  <Input type="text" {...register("salary")} />
+                  <Label className="text-white">Salário:</Label>
+                  <Input
+                    type="text"
+                    value={getValues("salary")}
+                    {...register("salary")}
+                    onChange={(e) => {
+                      const formattedSalary = formatSalary(e.target.value);
+                      setValue("salary", formattedSalary);
+                    }}
+                    placeholder="000.000,00"
+                  />
+                  {errors.salary && <span>{errors.salary.message}</span>}
                 </div>
                 <div className="flex flex-col items-start gap-3">
-                  <div className="flex items-start gap-2">
-                    <Label className="text-white">
-                      {" "}
-                      Usuário para filial do cliente
-                    </Label>
-                    <input
-                      type="radio"
-                      checked={selectRole === "branch"}
-                      onChange={() => setSelectRole("branch")}
-                    />
-                  </div>
+
                   <div className="flex items-start gap-2">
                     <Label className="text-white">Subcontratado</Label>
                     <input
