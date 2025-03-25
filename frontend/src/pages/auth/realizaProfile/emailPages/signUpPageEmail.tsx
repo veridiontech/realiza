@@ -202,10 +202,6 @@ export function SignUpPageEmail() {
         </div>
         {isLoading ? (
           <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
-            Cadastrar
-          </Button>
-        ) : (
-          <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
             <Oval
               visible={true}
               height="80"
@@ -215,6 +211,10 @@ export function SignUpPageEmail() {
               wrapperStyle={{}}
               wrapperClass=""
             />
+          </Button>
+        ) : (
+          <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
+            Cadastrar
           </Button>
         )}
       </form>
