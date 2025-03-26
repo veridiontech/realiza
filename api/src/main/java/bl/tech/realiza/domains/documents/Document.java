@@ -37,8 +37,11 @@ public abstract class Document {
     @Builder.Default
     private Boolean highRisk = true;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idDocument", nullable = false)
+    @JoinColumn(name = "idDocument")
     private DocumentMatrix documentMatrix;
 
     public enum Status {

@@ -39,6 +39,7 @@ public class EmailSender {
     public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
         String idCompany = "";
+        String idBranch = "";
         Provider.Company company = emailInviteRequestDto.getCompany();
         switch (emailInviteRequestDto.getCompany()) {
             case CLIENT -> {
@@ -49,12 +50,14 @@ public class EmailSender {
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = providerSupplier.getCorporateName() != null ? providerSupplier.getCorporateName() : "Tech Solutions Ltda";
                 idCompany = providerSupplier.getIdProvider();
+                idBranch = providerSupplier.getBranches().get(0).getIdBranch();
             }
             case SUBCONTRACTOR -> {
-                var subcontractor = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
+                var subcontractor = providerSubcontractorRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = subcontractor.getCorporateName();
                 idCompany = subcontractor.getIdProvider();
+                idBranch = subcontractor.getProviderSupplier().getBranches().get(0).getIdBranch();
             }
         }
 
@@ -70,7 +73,7 @@ public class EmailSender {
                         .replace("Tech Solutions Ltda", companyName)
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
-                        .replace("#COMPANY_PLACEHOLDER#",company.name());
+                        .replace("#ID_BRANCH#",idBranch);
                 if (emailInviteRequestDto.getIdClient() != null) {
                     emailBody = emailBody.replace("#ID_CLIENT#", emailInviteRequestDto.getIdClient());
                 } else {

@@ -33,8 +33,6 @@ public abstract class Contract {
     private String allocatedLimit;
     @Builder.Default
     private ExpenseType expenseType = ExpenseType.NENHUM;
-    @OneToOne(cascade = CascadeType.REMOVE)
-    private User responsible;
     private Date dateStart;
     private Date endDate;
     @Builder.Default
@@ -44,8 +42,15 @@ public abstract class Contract {
     @Builder.Default
     private Boolean deleteRequest = false;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idActivity", nullable = false)
+    @JoinColumn(name = "idUser")
+    private User responsible;
+
+    @ManyToOne
+    @JoinColumn(name = "idActivity")
     private Activity activity;
 
     @ManyToMany
@@ -59,7 +64,7 @@ public abstract class Contract {
     @ManyToMany(mappedBy = "contracts")
     private List<Employee> employees;
 
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     private List<DocumentContract> documentContracts;
 
     public enum ExpenseType {

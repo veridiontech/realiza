@@ -23,11 +23,17 @@ public class Center {
     private String idCenter;
     private String name;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idMarket", nullable = false)
+    @JoinColumn(name = "idMarket")
     private Market market;
 
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
     @JsonIgnore
-    @OneToMany(mappedBy = "center", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "center", cascade = CascadeType.REMOVE)
     private List<Branch> branches;
 }

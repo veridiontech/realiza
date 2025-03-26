@@ -3,10 +3,7 @@ package bl.tech.realiza.domains.documents.employee;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,6 +18,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("EMPLOYEE")
 public class DocumentEmployee extends Document {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "idEmployee")
     private Employee employee;
 }

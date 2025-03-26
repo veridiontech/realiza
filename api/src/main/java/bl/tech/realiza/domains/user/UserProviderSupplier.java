@@ -16,7 +16,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class UserProviderSupplier extends User {
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idProviderSupplier", nullable = false)
+    @JoinColumn(name = "idProviderSupplier")
     private ProviderSupplier providerSupplier;
 }

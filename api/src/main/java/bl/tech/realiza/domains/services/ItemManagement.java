@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.domains.user.UserClient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,13 +29,16 @@ public class ItemManagement {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idRequester", nullable = false)
+    @JoinColumn(name = "idRequester")
     private User requester;
 
     @OneToOne
     @JoinColumn(name = "idNewUser")
-    private User newUser;
+    private UserClient newUser;
 
     @OneToOne
     @JoinColumn(name = "idNewProvider")
