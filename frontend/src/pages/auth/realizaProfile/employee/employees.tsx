@@ -6,20 +6,55 @@
 // import { Link } from "react-router-dom";
 // import { Employee } from "@/types/employee";
 // import { useClient } from "@/context/Client-Provider";
-import { useState} from "react";
+import { useState, useEffect} from "react";
 import { TableEmployee } from "./tableEmployee";
 import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { useClient } from "@/context/Client-Provider";
 
 
 export const EmployeesTable = (): JSX.Element => {
-  const [selectedTab, setSelectedTab] = useState("colaboradores")
+  const [selectedTab, setSelectedTab] = useState("colaboradores");
+  const [, setEmployees] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { client } = useClient();
 
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [, setIsModalOpen] = useState(false);
-  // const itemsPerPage = 10;
+  const fetchEmployees = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${ip}/employee/filtered-client?idSearch=${client?.idClient}&page=${currentPage}`);
+      const { content, totalPages: total } = response.data;
+      setEmployees(content);
+      setTotalPages(total);
+    } catch (err) {
+      if (axios.isAxiosError(err)  && err.response) {
+        console.error("Erro ao buscar employees", err.response.data)
+      }
+      console.error("Erro ao buscar colaboradores:", err);
+      setError("Erro ao buscar colaboradores. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const { client } = useClient()
+  useEffect(() => {
+    if (client?.idClient) {
+      fetchEmployees();
+    }
+  }, [client?.idClient, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
 
 
@@ -55,13 +90,19 @@ export const EmployeesTable = (): JSX.Element => {
           </Button>
         </div>
         <div>
-          {selectedTab === "fornecedor" && <TableEmployee />}
-          {selectedTab === "subcontratado" && (
+          {loading ? (
+            <div className="text-center text-gray-600">Carregando colaboradores...</div>
+          ) : error ? (
+            <div className="text-center text-red-500">{error}</div>
+          ) : selectedTab === "fornecedor" ? (
+            <TableEmployee />
+          ) : (
             <div className="text-center text-gray-600">
               Lista de colaboradores será exibida aqui.
             </div>
           )}
         </div>
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       </div>
     </div>
   );

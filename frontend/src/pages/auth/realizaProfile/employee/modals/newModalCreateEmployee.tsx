@@ -83,7 +83,6 @@ export function NewModalCreateEmployee() {
 
   const formatSalary = (value: string) => {
     return value
-      .replace(/\D/g, "")
       .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
       .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
