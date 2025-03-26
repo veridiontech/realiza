@@ -11,6 +11,7 @@ import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 // import { ip } from "@/utils/ip";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 
 const enterprisePageEmailFormSchema = z.object({
   tradeName: z.string().optional(),
@@ -35,6 +36,7 @@ export function EnterprisePageEmail() {
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const [isLoading, setIsLoading] = useState(false);
+  const {datasSender} = useDataSendEmailContext()
   // const {userData} = useFormDataContext()
 
   useEffect(() => {
@@ -65,22 +67,13 @@ export function EnterprisePageEmail() {
   const {
     register,
     handleSubmit,
-    // setValue,
+    setValue,
     // getValues,
     formState: { isValid },
   } = useForm<EnterprisePageEmailFormSchema>({
     resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange",
   });
-
-// useEffect(() => {
-//   if (userData) {
-//     if (userData.email) setValue("email", userData.email);
-//     if (userData.phone) setValue("phone", userData.phone);
-//     if (userData.tradeName) setValue("tradeName", userData.tradeName);
-//     if (userData.corporateName) setValue("corporateName", userData.corporateName);
-//   }
-// }, [userData, setValue]);
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
@@ -137,6 +130,20 @@ export function EnterprisePageEmail() {
       </div>
     );
   }
+
+  
+useEffect(() => {
+  if (datasSender) {
+    if (datasSender.email) setValue("email", datasSender.email);
+    if (datasSender.phone) setValue("phone", datasSender.phone);
+    if (datasSender.tradeName) setValue("tradeName", datasSender.tradeName);
+    if (datasSender.corporateName) setValue("corporateName", datasSender.corporateName);
+  }
+}, [datasSender, setValue]);
+
+  useEffect(() => {
+
+  }, )
 
   return (
     <div className="flex flex-col gap-4">
