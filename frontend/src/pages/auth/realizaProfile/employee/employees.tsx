@@ -160,7 +160,7 @@ export const EmployeesTable = (): JSX.Element => {
                   )}
                 </div>
                 <div>
-                  {getSubcontractorList.map((subcontractor) => (
+                  {getSubcontractorList.map((subcontractor: any) => (
                     <div key={subcontractor.idProvider}>
                       <span>{subcontractor.corporateName}teste</span>
                     </div>
