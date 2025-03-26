@@ -211,6 +211,8 @@ export function ModalTesteSendSupplier() {
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
       );
+      console.log(selectedBranch);
+      
       console.log("gestores:", res.data.content);
       setManagers(res.data.content);
     } catch (err) {
@@ -222,13 +224,11 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
-    if(selectedBranch?.idBranch) {
       getManager()
-    }
-  }, [selectedBranch?.idBranch])
+    
+  }, [])
 
   useEffect(() => {
-  
     getActivities();
   }, []);
 
@@ -245,7 +245,6 @@ export function ModalTesteSendSupplier() {
         idRequester: user?.idUser,
         providerDatas,
         idBranch: selectedBranch?.idBranch,
-
       };
       console.log("enviando dados do contrato", payload);
       await axios.post(`${ip}/contract/supplier`, payload);

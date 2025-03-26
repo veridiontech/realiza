@@ -35,6 +35,7 @@ export function EnterprisePageEmail() {
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const [isLoading, setIsLoading] = useState(false);
+  // const {userData} = useFormDataContext()
 
   useEffect(() => {
     const validateToken = async () => {
@@ -71,6 +72,15 @@ export function EnterprisePageEmail() {
     resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange",
   });
+
+// useEffect(() => {
+//   if (userData) {
+//     if (userData.email) setValue("email", userData.email);
+//     if (userData.phone) setValue("phone", userData.phone);
+//     if (userData.tradeName) setValue("tradeName", userData.tradeName);
+//     if (userData.corporateName) setValue("corporateName", userData.corporateName);
+//   }
+// }, [userData, setValue]);
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
@@ -120,13 +130,13 @@ export function EnterprisePageEmail() {
     setIsLoading(false);
   };
 
-  if (!isValidToken) {
-    return (
-      <div className="text-red-600">
-        Token inválido ou expirado. Por favor, solicite um novo convite.
-      </div>
-    );
-  }
+  // if (!isValidToken) {
+  //   return (
+  //     <div className="text-red-600">
+  //       Token inválido ou expirado. Por favor, solicite um novo convite.
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="flex flex-col gap-4">

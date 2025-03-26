@@ -67,9 +67,23 @@ export function SignUpPageEmail() {
         role,
         company: enterpriseData.company,
       };
-      await axios.post(`${ip}/sign-enterprise`, allDatas);
+      const response = await axios.post(`${ip}/sign-enterprise`, allDatas);
+      if (response.status === 200) {
+        window.location.href = "https://realiza-1.onrender.com/";
+      }
       window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        // Aqui você pode acessar a resposta do erro e fazer validação
+        console.error("Erro na resposta da API:", err.response.data);
+        
+        // Exemplo: Mostrando o erro no console ou em um alerta
+        const apiErrorMessage = err.response?.data?.message || "Erro desconhecido";
+        console.log(`Erro: ${apiErrorMessage}`);
+      } else {
+        // Se não for erro da API, apenas mostra no console
+        console.error("Erro desconhecido:", err);
+      }
       console.log(err);
     } finally {
       setIsLoading(false);

@@ -67,7 +67,7 @@ export function HeaderClient() {
     if (user?.role === "ROLE_CLIENT_MANAGER") {
       getBranch();
     }
-  }, [user?.branch]);
+  }, [user?.role === "ROLE_CLIENT_MANAGER"]);
 
   useEffect(() => {
     if (user?.branch) {
