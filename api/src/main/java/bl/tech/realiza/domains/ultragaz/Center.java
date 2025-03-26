@@ -21,6 +21,7 @@ public class Center {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idCenter;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "idMarket", nullable = false)

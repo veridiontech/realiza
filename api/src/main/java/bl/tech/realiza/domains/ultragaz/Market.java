@@ -20,6 +20,7 @@ public class Market {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idMarket;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "idBoard", nullable = false)

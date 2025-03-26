@@ -47,7 +47,7 @@ public class EmailSender {
             case SUPPLIER -> {
                 ProviderSupplier providerSupplier = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
-                companyName = providerSupplier.getCorporateName();
+                companyName = providerSupplier.getCorporateName() != null ? providerSupplier.getCorporateName() : "Tech Solutions Ltda";
                 idCompany = providerSupplier.getIdProvider();
             }
             case SUBCONTRACTOR -> {
@@ -67,8 +67,7 @@ public class EmailSender {
             try (var inputStream = Objects.requireNonNull(
                     EmailControllerImpl.class.getResourceAsStream("/templates/email-invite.html"))) {
                 emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("<span class=\"highlight\">Realiza Assessoria Empresarial Ltda</span>",
-                                "<span class=\"highlight\">" + companyName + "</span>")
+                        .replace("Tech Solutions Ltda", companyName)
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
                         .replace("#COMPANY_PLACEHOLDER#",company.name());
@@ -85,7 +84,7 @@ public class EmailSender {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(dotenv.get("GMAIL_EMAIL"));
             helper.setTo(emailInviteRequestDto.getEmail());
-            helper.setSubject("Bem-vindo à Realiza");
+            helper.setSubject("Bem-vindo à " + companyName);
             helper.setText(emailBody, true); // Enable HTML format
 
             try {

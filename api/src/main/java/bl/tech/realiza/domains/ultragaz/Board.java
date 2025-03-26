@@ -19,6 +19,7 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idBoard;
+    private String name;
 
     @JsonIgnore
     @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE, orphanRemoval = true)
