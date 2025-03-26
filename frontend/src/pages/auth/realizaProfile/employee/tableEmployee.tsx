@@ -1,4 +1,4 @@
-import { useBranch } from "@/context/Branch-provider";
+// import { useBranch } from "@/context/Branch-provider";
 // import { useClient } from "@/context/Client-Provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
@@ -15,7 +15,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   // const [branches, setBranches] = useState([]);
   // const [selectedBranch, setSelectedBranch] = useState("");
   // const { client } = useClient();
-  const { selectedBranch } = useBranch();
+  // const { selectedBranch } = useBranch();
 
   const page = 0; // Número da página
   const limit = 10; // Quantidade de itens por página

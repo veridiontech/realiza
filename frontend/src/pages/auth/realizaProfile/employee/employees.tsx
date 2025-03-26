@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 // import { TableEmployee } from "./tableEmployee";
 import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 import { Button } from "@/components/ui/button";
-import { Pagination } from "@/components/ui/pagination";
+// import { Pagination } from "@/components/ui/pagination";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 // import { useClient } from "@/context/Client-Provider";
@@ -20,11 +20,11 @@ import { useBranch } from "@/context/Branch-provider";
 
 export const EmployeesTable = (): JSX.Element => {
   const [selectedTab, setSelectedTab] = useState("fornecedor");
-  const [employee, setEmployees] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [employee, setEmployees] = useState([]);
+  // const [totalPages, setTotalPages] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   // const { client } = useClient();
   const { selectedBranch } = useBranch();
   const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
@@ -33,11 +33,11 @@ export const EmployeesTable = (): JSX.Element => {
     useState<propsSupplier | null>(null);
   const [getSubcontractorList, setGetSubcontractorList] = useState([])
 
-  const handlePageChange = (page: number) => {
-    if (page >= 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  // const handlePageChange = (page: number) => {
+  //   if (page >= 0 && page <= totalPages) {
+  //     setCurrentPage(page);
+  //   }
+  // };
 
   const suppliers = async () => {
     try {
@@ -52,6 +52,7 @@ export const EmployeesTable = (): JSX.Element => {
 
   const uniqueSupplier = async () => {
     try {
+      throw new Error
       const res = await axios.get(`${ip}/supplier/${selectedSupplier}`);
       setGetUniqueSupplier(res.data);
     } catch (err) {
@@ -60,13 +61,14 @@ export const EmployeesTable = (): JSX.Element => {
   };
 
   const getSubcontractor = async() => {
+    setLoading(true)
     try{
       const res = await axios.get(`${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`)
-      console.log(res.data);
       setGetSubcontractorList(res.data.content)
     }catch(err) {
       console.log("erro ao buscar subcontratados:", err);
-      
+    }finally{
+      setLoading(false)
     }
   }
 
@@ -156,7 +158,7 @@ export const EmployeesTable = (): JSX.Element => {
                       <p>{getUniqueSupplier?.cnpj}</p>
                     </div>
                   ) : (
-                    <p>Nenuhm fornecedor selecionado</p>
+                    <p>Nenhum fornecedor selecionado</p>
                   )}
                 </div>
                 <div>
@@ -170,11 +172,11 @@ export const EmployeesTable = (): JSX.Element => {
             </div>
           )}
         </div>
-        <Pagination
+        {/* <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-        />
+        /> */}
       </div>
     </div>
   );
