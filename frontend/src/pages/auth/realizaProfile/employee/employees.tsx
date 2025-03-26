@@ -17,13 +17,15 @@ import { useClient } from "@/context/Client-Provider";
 
 
 export const EmployeesTable = (): JSX.Element => {
-  const [selectedTab, setSelectedTab] = useState("colaboradores");
+  const [selectedTab, setSelectedTab] = useState("fornecedor");
   const [, setEmployees] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { client } = useClient();
+  const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
+  const [suppliersList, setSuppliersList] = useState<{ id: string; name: string }[]>([]);
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -34,8 +36,8 @@ export const EmployeesTable = (): JSX.Element => {
       setEmployees(content);
       setTotalPages(total);
     } catch (err) {
-      if (axios.isAxiosError(err)  && err.response) {
-        console.error("Erro ao buscar employees", err.response.data)
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("Erro ao buscar employees", err.response.data);
       }
       console.error("Erro ao buscar colaboradores:", err);
       setError("Erro ao buscar colaboradores. Tente novamente.");
@@ -51,12 +53,23 @@ export const EmployeesTable = (): JSX.Element => {
   }, [client?.idClient, currentPage]);
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 0 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
+  const suppliers = async () => {
+    try {
+      const res = await axios.get(`${ip}/suppliers`);
+      setSuppliersList(res.data);
+    } catch (error) {
+      console.error("Erro ao encontrar fornecedor:", error);
+    }
+  };
 
+  useEffect(() => {
+    suppliers();
+  }, []);
 
   return (
     <div className="m-4 flex justify-center">
@@ -69,9 +82,7 @@ export const EmployeesTable = (): JSX.Element => {
           <Button
             variant="ghost"
             className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "fornecedor"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
+              selectedTab === "fornecedor" ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg" : "text-realizaBlue bg-white"
             }`}
             onClick={() => setSelectedTab("fornecedor")}
           >
@@ -80,9 +91,7 @@ export const EmployeesTable = (): JSX.Element => {
           <Button
             variant="ghost"
             className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "subcontratado"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
+              selectedTab === "subcontratado" ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg" : "text-realizaBlue bg-white"
             }`}
             onClick={() => setSelectedTab("subcontratado")}
           >
@@ -95,7 +104,24 @@ export const EmployeesTable = (): JSX.Element => {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : selectedTab === "fornecedor" ? (
-            <TableEmployee />
+            <div>
+              <h2 className="text-xl mb-4">Selecione um Fornecedor</h2>
+              <div>
+                <span className="text-realizaBlue text-[14px]">Fornecedor: </span>
+                <select
+                  value={selectedSupplier || ""}
+                  onChange={(e) => setSelectedSupplier(e.target.value)}
+                  className="text-[12px] p-2 border rounded w-full"
+                >
+                  <option value="">Selecione um fornecedor</option>
+                  {suppliersList.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           ) : (
             <div className="text-center text-gray-600">
               Lista de colaboradores será exibida aqui.
