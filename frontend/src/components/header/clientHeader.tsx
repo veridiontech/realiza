@@ -70,13 +70,13 @@ export function HeaderClient() {
   }, [user?.role === "ROLE_CLIENT_MANAGER"]);
 
   useEffect(() => {
-    if (user?.branch) {
+    if (user?.branch && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
       getClientWithUser();
     }
   }, [user?.branch]);
 
   useEffect(() => {
-    if (clients) {
+    if (clients && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
       fetchBranchesByClient(clients.idClient);
     }
   }, [clients]);
