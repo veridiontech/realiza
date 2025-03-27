@@ -42,6 +42,77 @@ export function HeaderProvider() {
     }
   }, [])
 
+
+  if(user?.role === "ROLE_SUBCONTRACTOR_RESPONSIBLE") {
+    return (
+      <header className="dark:bg-primary relative p-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-5">
+          <div className="flex items-center">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant={"ghost"}
+                  className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
+                >
+                  <ChartNoAxesGantt className="text-white" />
+                </Button>
+              </SheetTrigger>
+              <ProviderLateralMenu />
+            </Sheet>
+            <Link to={`/fornecedor/home/${user?.idUser}`}>
+              <img src={realizaLogo} alt="" className="w-[6vw]" />
+            </Link>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span>Fornecedor:</span>
+              <h1>{supplier?.corporateName}</h1>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden items-center md:flex">
+          <div className="ml-12 flex items-center gap-8">
+            <div className="flex items-center gap-1">
+
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <ProfilePhoto />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="dark:bg-primary mr-5">
+                  <DropdownMenuLabel>
+                    {user?.firstName} {user?.surname}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Link to={`/profile-user/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <User />
+                        <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer hover:bg-gray-200"
+                  >
+                    <div className="flex items-center gap-1">
+                      <LogOut />
+                      <p>Sair</p>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    )
+  }
+ 
   return (
     <header className="dark:bg-primary relative p-5">
       <div className="flex items-center justify-between">
