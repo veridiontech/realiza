@@ -24,17 +24,18 @@ import { useBranch } from "@/context/Branch-provider";
 import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
+import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 // import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 // Torna o campo idClient opcional, pois vamos atribuí-lo via código
-const modalSendEmailFormSchema = z.object({
+export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
   cnpj: z.string().nonempty("Insira o cnpj"),
   corporateName: z.string().nonempty("Insira o nome da empresa"),
 });
 
-const modalSendEmailFormSchemaSubContractor = z.object({
+export const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
   cnpj: z.string().nonempty("Insira o cnpj"),
@@ -44,7 +45,7 @@ const modalSendEmailFormSchemaSubContractor = z.object({
     .nonempty("Selecionar um fornecedor é obrigatório"),
 });
 
-const contractFormSchema = z.object({
+export const contractFormSchema = z.object({
   cnpj: z.string(),
   serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
   serviceType: z.string().nonempty("Tipo de despesa é obrigatório"),
@@ -80,6 +81,7 @@ export function ModalTesteSendSupplier() {
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
+  const {datasSender,setDatasSender} = useDataSendEmailContext()
   // const [subContractDatas, setSubContractDatas] = useState({});
 
   const {
@@ -211,6 +213,8 @@ export function ModalTesteSendSupplier() {
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
       );
+      console.log(selectedBranch);
+      
       console.log("gestores:", res.data.content);
       setManagers(res.data.content);
     } catch (err) {
@@ -222,13 +226,10 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
-    if(selectedBranch?.idBranch) {
       getManager()
-    }
-  }, [selectedBranch?.idBranch])
+  }, [])
 
   useEffect(() => {
-  
     getActivities();
   }, []);
 
@@ -245,9 +246,11 @@ export function ModalTesteSendSupplier() {
         idRequester: user?.idUser,
         providerDatas,
         idBranch: selectedBranch?.idBranch,
-
       };
       console.log("enviando dados do contrato", payload);
+      setDatasSender(payload)
+      console.log("dados recebidos:", datasSender);
+      
       await axios.post(`${ip}/contract/supplier`, payload);
       toast.success("Contrato criado com sucesso!");
     } catch (err: any) {

@@ -1,4 +1,4 @@
-import { useBranch } from "@/context/Branch-provider";
+// import { useBranch } from "@/context/Branch-provider";
 // import { useClient } from "@/context/Client-Provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
@@ -6,12 +6,16 @@ import { Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-export function TableEmployee() {
+interface TableEmployeeProps {
+  idProvider: string | null;
+}
+
+export function TableEmployee({ idProvider }: TableEmployeeProps) {
   const [employees, setEmployee] = useState([]);
   // const [branches, setBranches] = useState([]);
   // const [selectedBranch, setSelectedBranch] = useState("");
   // const { client } = useClient();
-  const {selectedBranch} = useBranch()
+  // const { selectedBranch } = useBranch();
 
   const page = 0; // Número da página
   const limit = 10; // Quantidade de itens por página
@@ -30,29 +34,33 @@ export function TableEmployee() {
   // };
 
   const getEmployee = async () => {
+    console.log("idProvider watch:", idProvider);
     try {
       const res = await axios.get(
-        `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`, {
+        `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
+        {
           params: {
             page: page,
             limit: limit,
-          }
-        }
+          },
+        },
       );
+      console.log("employees:", res.data.content);
+
       setEmployee(res.data.content);
     } catch (error) {
       console.log("Erro ao buscar colaboradores:", error);
     }
   };
 
-  console.log("colaboradores da branch:", employees,);
-  
+  console.log("colaboradores da branch:", employees);
 
   useEffect(() => {
-    if (selectedBranch?.idBranch) {
-      getEmployee()
-    } setEmployee([])
-  }, [selectedBranch?.idBranch]);
+    if (idProvider) {
+      getEmployee();
+    }
+    setEmployee([]);
+  }, [idProvider]);
 
   // const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   //   const branchId = e.target.value;
@@ -62,7 +70,7 @@ export function TableEmployee() {
 
   return (
     <div>
-      <table className="min-w-full border-collapse border border-gray-300 mt-4">
+      <table className="mt-4 min-w-full border-collapse border border-gray-300">
         <thead>
           <tr>
             <th className="border border-gray-300 px-4 py-2">Nome</th>
@@ -73,7 +81,7 @@ export function TableEmployee() {
         <tbody>
           {employees && employees.length > 0 ? (
             employees.map((employee: any) => (
-              <tr key={employee.id}>
+              <tr key={employee.idEmployee}>
                 <td className="border border-gray-300 px-4 py-2">
                   {employee.name}
                 </td>
