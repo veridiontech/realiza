@@ -1,11 +1,10 @@
 package bl.tech.realiza.domains.providers;
 
 import bl.tech.realiza.domains.services.ItemManagement;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -44,8 +43,9 @@ public abstract class Provider {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
-    @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
-    private ItemManagement newProviderSolicitation;
+//    @JsonIgnore
+//    @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
+//    private ItemManagement newProviderSolicitation;
 
     public enum Company {
         CLIENT,

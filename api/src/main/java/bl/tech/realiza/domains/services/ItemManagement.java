@@ -5,11 +5,10 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -32,15 +31,16 @@ public class ItemManagement {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idRequester")
+    @JsonBackReference // Evita serialização recursiva
     private User requester;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idNewUser")
-    private UserClient newUser;
+    private User newUser;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idNewProvider")
     private Provider newProvider;
 
