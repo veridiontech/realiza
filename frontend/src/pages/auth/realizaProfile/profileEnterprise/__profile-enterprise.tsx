@@ -174,7 +174,7 @@ export function ProfileEnterpriseReprise() {
       <Helmet title="profile" />
       <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
         <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
-          <div className="bg-realizaBlue min-h-[220px] w-full rounded-t-xl" />
+          <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" />
           <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
               <div className="relative bottom-10 left-1 flex items-center gap-4">

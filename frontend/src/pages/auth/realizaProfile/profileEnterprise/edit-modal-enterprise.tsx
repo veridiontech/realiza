@@ -39,25 +39,19 @@ const editModalEnterpriseSchema = z.object({
 });
 
 type EditModalEnterpriseSchema = z.infer<typeof editModalEnterpriseSchema>;
+
 export function EditModalEnterprise() {
-  // const [enterpriseDatas, setEnterpriseDatas] = useState<
-  //   EditModalEnterpriseSchema | undefined
-  // >(undefined);
   const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const {client} = useClient()
+  const { client } = useClient();
 
   const {
     register,
     handleSubmit,
     setValue,
-    // formState = { }
   } = useForm<EditModalEnterpriseSchema>({
     resolver: zodResolver(editModalEnterpriseSchema),
   });
-
-  console.log("cliente selecionado:", client);
-  
 
   const getDatasEnterprise = async () => {
     try {
@@ -72,7 +66,6 @@ export function EditModalEnterprise() {
       setValue("city", data.city || "");
       setValue("adress", data.adress || "");
       setValue("number", data.number || "");
-
     } catch (err) {
       console.error("Não foi possível recuperar os dados da empresa", err);
     }
@@ -97,24 +90,24 @@ export function EditModalEnterprise() {
   };
 
   const setValuesAdress = (data: adressProps) => {
-      setValue("city", data.city),
+    setValue("city", data.city),
       setValue("state", data.state),
       setValue("adress", data.adress);
   };
 
   const onSubmit = async (data: EditModalEnterpriseSchema) => {
     try {
-      await axios.put(`${ip}/client/${client?.idClient}`, data)
-      toast.success("Sucesso ao atualizar cliente")
-      window.location.reload()
+      await axios.put(`${ip}/client/${client?.idClient}`, data);
+      toast.success("Sucesso ao atualizar cliente");
+      window.location.reload();
     } catch (err) {
       console.log("erro ao atualizar cliente:", err);
-      toast.error("Erro ao atualizar cliente, tente novamente")
+      toast.error("Erro ao atualizar cliente, tente novamente");
     }
   };
 
   useEffect(() => {
-    if(client) {
+    if (client) {
       getDatasEnterprise();
     }
   }, [client]);
@@ -137,12 +130,10 @@ export function EditModalEnterprise() {
             >
               <div>
                 <Label>CNPJ</Label>
-                <Input
-                  placeholder="CNPJ: __.___.___/____-__"
-                  {...register("cnpj")}
-                />
+                {/* Campo fixo de CNPJ */}
+                <div>{client?.cnpj}</div> 
               </div>
-              <div className="flex items-center gap-1 ">
+              <div className="flex items-center gap-1">
                 <div className="w-auto">
                   <Label>Nome da empresa</Label>
                   <Input className="w-full" {...register("corporateName")} />
