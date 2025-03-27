@@ -43,9 +43,9 @@ public abstract class Provider {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
-//    @JsonIgnore
-//    @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
-//    private ItemManagement newProviderSolicitation;
+    @JsonIgnore
+    @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
+    private ItemManagement newProviderSolicitation;
 
     public enum Company {
         CLIENT,
