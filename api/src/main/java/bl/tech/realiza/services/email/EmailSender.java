@@ -39,6 +39,7 @@ public class EmailSender {
     public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
         String idCompany = "";
+        String idBranch = "";
         Provider.Company company = emailInviteRequestDto.getCompany();
         switch (emailInviteRequestDto.getCompany()) {
             case CLIENT -> {
@@ -47,14 +48,16 @@ public class EmailSender {
             case SUPPLIER -> {
                 ProviderSupplier providerSupplier = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
-                companyName = providerSupplier.getCorporateName();
+                companyName = providerSupplier.getCorporateName() != null ? providerSupplier.getCorporateName() : "Tech Solutions Ltda";
                 idCompany = providerSupplier.getIdProvider();
+                idBranch = providerSupplier.getBranches().get(0).getIdBranch();
             }
             case SUBCONTRACTOR -> {
-                var subcontractor = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
+                var subcontractor = providerSubcontractorRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = subcontractor.getCorporateName();
                 idCompany = subcontractor.getIdProvider();
+                idBranch = subcontractor.getProviderSupplier().getBranches().get(0).getIdBranch();
             }
         }
 
@@ -67,11 +70,10 @@ public class EmailSender {
             try (var inputStream = Objects.requireNonNull(
                     EmailControllerImpl.class.getResourceAsStream("/templates/email-invite.html"))) {
                 emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("<span class=\"highlight\">Realiza Assessoria Empresarial Ltda</span>",
-                                "<span class=\"highlight\">" + companyName + "</span>")
+                        .replace("Tech Solutions Ltda", companyName)
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
-                        .replace("#COMPANY_PLACEHOLDER#",company.name());
+                        .replace("#ID_BRANCH#",idBranch);
                 if (emailInviteRequestDto.getIdClient() != null) {
                     emailBody = emailBody.replace("#ID_CLIENT#", emailInviteRequestDto.getIdClient());
                 } else {
@@ -85,7 +87,7 @@ public class EmailSender {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(dotenv.get("GMAIL_EMAIL"));
             helper.setTo(emailInviteRequestDto.getEmail());
-            helper.setSubject("Bem-vindo à Realiza");
+            helper.setSubject("Bem-vindo à " + companyName);
             helper.setText(emailBody, true); // Enable HTML format
 
             try {

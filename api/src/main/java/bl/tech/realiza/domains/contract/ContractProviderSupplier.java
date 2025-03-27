@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -22,14 +24,21 @@ import java.util.List;
 public class ContractProviderSupplier extends Contract {
     private Boolean subcontractPermission;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idProviderSuppllier", nullable = false)
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "idProviderSuppllier")
     private ProviderSupplier providerSupplier;
 
     @ManyToOne
-    @JoinColumn(name = "idBranch", nullable = false)
+    @JoinColumn(name = "idBranch")
     private Branch branch;
 
-    @OneToMany(mappedBy = "contractProviderSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToMany(mappedBy = "contractProviderSupplier")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ContractProviderSubcontractor> contractsSubcontractor;
 }

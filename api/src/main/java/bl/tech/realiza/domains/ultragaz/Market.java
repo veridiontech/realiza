@@ -20,12 +20,19 @@ public class Market {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idMarket;
+    private String name;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idBoard", nullable = false)
+    @JoinColumn(name = "idBoard")
     private Board board;
 
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
     @JsonIgnore
-    @OneToMany(mappedBy = "market", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "market", cascade = CascadeType.REMOVE)
     private List<Center> centers;
 }

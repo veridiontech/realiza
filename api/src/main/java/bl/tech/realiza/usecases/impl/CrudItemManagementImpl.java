@@ -4,11 +4,13 @@ import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.UserClient;
+import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
+import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
@@ -30,6 +32,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ProviderRepository providerRepository;
     private final EmailSender emailSender;
+    private final UserManagerRepository userManagerRepository;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -53,8 +56,11 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     @Override
     public ItemManagementProviderResponseDto saveProviderSolicitation(ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
 
-        UserClient requester = userClientRepository.findById(itemManagementProviderRequestDto.getIdRequester())
-                .orElseThrow(() -> new NotFoundException("Requester not found"));
+        UserManager requesterManager = userManagerRepository.findById(itemManagementProviderRequestDto.getIdRequester())
+                .orElse(null);
+
+        UserClient requesterClient = userClientRepository.findById(itemManagementProviderRequestDto.getIdRequester())
+                .orElse(null);
 
         ProviderSupplier newProviderSupplier = providerSupplierRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
                 .orElseThrow(() -> new NotFoundException("New Provider not found"));
@@ -62,11 +68,11 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
                 .title(itemManagementProviderRequestDto.getTitle())
                 .details(itemManagementProviderRequestDto.getDetails())
-                .requester(requester)
+                .requester(requesterManager != null ? requesterManager : requesterClient)
                 .newProvider(newProviderSupplier)
                 .build());
 
-        return getItemManagementProviderResponseDto(solicitation, requester);
+        return getItemManagementProviderResponseDto(solicitation, requesterClient, requesterManager);
     }
 
     @Override
@@ -93,10 +99,13 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
         return itemManagementPage.map(
                 itemManagement -> {
-                    UserClient requester = userClientRepository.findById(itemManagement.getRequester().getIdUser())
-                            .orElseThrow(() -> new NotFoundException("Requester not found"));
+                    UserClient requesterClient = userClientRepository.findById(itemManagement.getRequester().getIdUser())
+                            .orElse(null);
 
-                    return getItemManagementProviderResponseDto(itemManagement, requester);
+                    UserManager requesterManager = userManagerRepository.findById(itemManagement.getRequester().getIdUser())
+                            .orElse(null);
+
+                    return getItemManagementProviderResponseDto(itemManagement, requesterClient, requesterManager);
                 }
         );
     }
@@ -197,7 +206,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .build();
     }
 
-    private ItemManagementProviderResponseDto getItemManagementProviderResponseDto(ItemManagement itemManagement, UserClient requester) {
+    private ItemManagementProviderResponseDto getItemManagementProviderResponseDto(ItemManagement itemManagement, UserClient requesterClient, UserManager requesterManager) {
         return ItemManagementProviderResponseDto.builder()
                 .idSolicitation(itemManagement.getIdSolicitation())
                 .title(itemManagement.getTitle())
@@ -210,7 +219,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .email(itemManagement.getRequester().getEmail())
                         .firstName(itemManagement.getRequester().getFirstName())
                         .surname(itemManagement.getRequester().getSurname())
-                        .nameEnterprise(requester.getBranch().getName())
+                        .nameEnterprise(requesterManager != null ? "Realiza Assessoria" : requesterClient.getBranch().getName())
                         .build())
                 .newProvider(ItemManagementProviderResponseDto.NewProvider.builder()
                         .cnpj(itemManagement.getNewProvider().getCnpj())

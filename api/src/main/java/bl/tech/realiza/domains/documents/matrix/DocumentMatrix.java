@@ -35,10 +35,16 @@ public class DocumentMatrix {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idDocumentSubgroup", nullable = false)
+    @JoinColumn(name = "idDocumentSubgroup")
     private DocumentMatrixSubgroup subGroup;
 
-    @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.DETACH, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.REMOVE)
     private List<Document> documents;
 }

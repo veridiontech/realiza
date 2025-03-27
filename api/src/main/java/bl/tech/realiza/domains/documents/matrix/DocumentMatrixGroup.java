@@ -26,6 +26,9 @@ public class DocumentMatrixGroup {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
     private List<DocumentMatrixSubgroup> subgroups;
 }
