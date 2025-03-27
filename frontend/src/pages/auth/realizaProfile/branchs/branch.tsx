@@ -28,8 +28,6 @@
 //   { key: "acoes", label: "Ações"},
 // ];
 
-
-
 // export function Branch() {
 //   const [branches, setBranches] = useState<BranchType[]>([]);
 //   const [totalPages, setTotalPages] = useState(1);
@@ -42,7 +40,6 @@
 //   const {client} = useClient()
 
 //   //   const itemsPerPage = 10;
-
 
 //   const fetchBranches = async () => {
 //     setLoading(true);
@@ -63,11 +60,11 @@
 
 //   useEffect(() => {
 //     if (client?.idClient) {
-//       setBranches([]); 
-//       setCurrentPage(1); 
-//       fetchBranches(); 
+//       setBranches([]);
+//       setCurrentPage(1);
+//       fetchBranches();
 //     }
-//   }, [client?.idClient]); 
+//   }, [client?.idClient]);
 //   const handlePageChange = (page: number) => {
 //     if (page >= 1 && page <= totalPages) {
 //       setCurrentPage(page);
@@ -132,7 +129,6 @@
 //   );
 // }
 
-
 import { useEffect, useState } from "react";
 import { SearchCnpjModal } from "./modals/newBranchStepOne";
 import { NewBranchModal } from "./modals/newBranchStepTwo";
@@ -143,8 +139,10 @@ import axios from "axios";
 import { Puff } from "react-loader-spinner";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
-import { Eye } from "lucide-react";  // Importando apenas o ícone Eye
+import { Eye } from "lucide-react"; // Importando apenas o ícone Eye
 import { Link } from "react-router-dom";
+import { useUser } from "@/context/user-provider";
+import { useBranch } from "@/context/Branch-provider";
 
 interface BranchType {
   idBranch: string;
@@ -153,8 +151,6 @@ interface BranchType {
   address: string;
   actions: string;
 }
-
-
 
 export function Branch() {
   const [branches, setBranches] = useState<BranchType[]>([]);
@@ -166,6 +162,8 @@ export function Branch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { client } = useClient();
+  const { user } = useUser();
+  const {setSelectedBranch} = useBranch()
 
   const columns: {
     key: keyof BranchType;
@@ -175,12 +173,20 @@ export function Branch() {
     { key: "name", label: "Nome da Filial" },
     { key: "cnpj", label: "CNPJ" },
     { key: "address", label: "Endereço" },
-    { key: "actions", label: "Ações",
+    {
+      key: "actions",
+      label: "Ações",
       render: (value: any, row: BranchType) => (
         <div>
-          <Link to={`/cliente/profileBranch/${row.idBranch}`}>
-            <Eye />
-          </Link>
+          {user?.role === "ROLE_CLIENT_RESPONSIBLE" ? (
+            <Link to={`/cliente/profileBranch/${row.idBranch}`}>
+              <Eye />
+            </Link>
+          ) : (
+            <Link to={`/sistema/profileBranch/${row.idBranch}`} onClick={() => setSelectedBranch(row)}>
+              <Eye />
+            </Link>
+          )}
         </div>
       ),
     },
@@ -190,7 +196,9 @@ export function Branch() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${ip}/branch/filtered-client?idSearch=${client?.idClient}`);
+      const response = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+      );
       const { content, totalPages: total } = response.data;
       setBranches(content);
       setTotalPages(total);

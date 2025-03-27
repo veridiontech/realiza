@@ -87,6 +87,7 @@ export const router = createBrowserRouter([
       { path: "documents/:id", element: <DocumentPage /> },
       { path: "risk-matriz/:id", element: <RiskMatriz /> },
       { path: "controlPanel/:id", element: <ControlPanel /> },
+      { path: "profileBranch/:id", element: <ProfileBranch /> },
     ],
   },
 
@@ -119,7 +120,7 @@ export const router = createBrowserRouter([
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <ClientEmployee /> },
       { path: "create-manager/:id", element: <CreateNewManagerClient /> },
-      { path: "profileBranch/ :id", element: <ProfileBranch /> },
+      { path: "profileBranch/:id", element: <ProfileBranch /> },
 
     ],
   },

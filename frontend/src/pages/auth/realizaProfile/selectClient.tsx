@@ -17,6 +17,7 @@ interface CompanyData {
   razaoSocial: string;
   nomeFantasia: string;
   cep: string;
+  email: string;
   state: string;
   city: string;
   address: string;
@@ -60,7 +61,7 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
         cnpj: sanitizeNumber(cnpj),
         tradeName: res.nomeFantasia,
         corporateName: res.razaoSocial,
-        email: "",
+        email: res.email,
         telephone: res.telefone ? sanitizeNumber(res.telefone) : "",
         cep: sanitizeNumber(res.cep),
         state: res.state,

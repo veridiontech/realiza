@@ -2,14 +2,14 @@ import { Outlet } from "react-router-dom";
 
 import { Header } from "@/components/header/realizaHeader";
 import { ChatBotToggle } from "@/components/chat-bot/chat-bot-toggle";
-//import { useUser } from "@/context/user-provider";
+import { useUser } from "@/context/user-provider";
 
 export function AppLayout() {
-  //const { authUser } = useUser();
+  const { authUser } = useUser();
 
-  /*if (!authUser) {
+  if (!authUser) {
     return <div className="flex items-center justify-center min-h-screen">pagina nao autenticada</div>;
-  } */
+  } 
 
   return (
     <div className="flex min-h-screen flex-col">
