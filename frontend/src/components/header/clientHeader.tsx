@@ -29,7 +29,7 @@ export function HeaderClient() {
   const [clients, setClients] = useState<any>(null);
   const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const [uniqueBranch, setUniqueBranch] = useState<propsBranch | null>(null);
-  const { setClient } = useClient();
+  const { client ,setClient } = useClient();
 
   const getBranch = async () => {
     try {
@@ -56,7 +56,7 @@ export function HeaderClient() {
 
   const fetchBranchesByClient = async (idClient: string) => {
     try {
-      const res = await axios.get(`${ip}/branch/by-client/${idClient}`);
+      const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`);
       setSelectedBranch(res.data);
     } catch (err) {
       console.error("Erro ao buscar filiais:", err);
@@ -76,10 +76,10 @@ export function HeaderClient() {
   }, [user?.branch]);
 
   useEffect(() => {
-    if (clients && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
+    if (client?.idClient && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
       fetchBranchesByClient(clients.idClient);
     }
-  }, [clients]);
+  }, [client?.idClient]);
 
   const handleMouseEnter = () => setMenuOpen(true);
   const handleMouseLeave = () => setMenuOpen(false);

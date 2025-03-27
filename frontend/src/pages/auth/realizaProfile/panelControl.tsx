@@ -40,7 +40,7 @@ interface ApiResponse {
 
 export function ControlPanel() {
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
-  // const [loading, setLoading] = useState(true);
+
   // const [error, setError] = useState<Error | null>(null);
 
   const fetchSolicitations = async () => {
@@ -110,6 +110,7 @@ export function ControlPanel() {
               bgColor="bg-[#F9731640]"
               textColor="text-[#F97316]"
               icon={<Rotate3D className="text-[#F97316]" />}
+             
             />
             <div>
               <div className="bg-gray-100 p-8">
@@ -134,6 +135,7 @@ export function ControlPanel() {
               bgColor="bg-[#2563EB40]"
               textColor="text-[#2563EB]"
               icon={<CheckCircle className="text-[#2563EB]" />}
+              // isLoading={loading}
             />
             <div>
               <div className="bg-gray-100 p-8">
@@ -160,6 +162,7 @@ export function ControlPanel() {
               bgColor="bg-[#FF464640]  "
               textColor=" text-[#FF4646]"
               icon={<Ban className="text-[#FF4646]" />}
+              // isLoading={loading}
             />
             <div>
               <div className="bg-gray-100 p-8">

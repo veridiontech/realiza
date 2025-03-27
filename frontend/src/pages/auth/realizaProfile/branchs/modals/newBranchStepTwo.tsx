@@ -2,6 +2,7 @@ import { Modal } from "@/components/modal";
 import * as z from "zod";
 import axios from "axios";
 import { ip } from "@/utils/ip";
+import { useClient } from "@/context/Client-Provider";
 
 interface NewBranchModalProps {
   onClose: () => void;
@@ -19,6 +20,8 @@ const newBranchSchema = z.object({
 });
 
 export function NewBranchModal({ onClose, onSubmit }: NewBranchModalProps) {
+  const { client } = useClient();
+
   const handleSubmit = async (data: Record<string, any>) => {
     try {
       const validatedData = newBranchSchema.parse(data);
@@ -29,14 +32,15 @@ export function NewBranchModal({ onClose, onSubmit }: NewBranchModalProps) {
           formData.append(key, value as string);
         }
       });
-
-      const response = await axios.post(
-       `${ip}/branche`,
+      const payload = {
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        },
-      );
+        idClient: client?.idClient,
+      };
+      console.log("enviando obj:", payload);
+      
+      const response = await axios.post(`${ip}/branch`, payload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       onSubmit(response.data);
     } catch (error) {

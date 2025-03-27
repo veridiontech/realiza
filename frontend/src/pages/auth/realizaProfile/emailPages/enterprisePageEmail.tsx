@@ -35,6 +35,7 @@ export function EnterprisePageEmail() {
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
+  const findBranchId = searchParams.get("idBranch")
   const [isLoading, setIsLoading] = useState(false);
   const {datasSender} = useDataSendEmailContext()
   // const {userData} = useFormDataContext()
@@ -102,6 +103,7 @@ export function EnterprisePageEmail() {
       case "SUPPLIER":
         payload = {
           ...data,
+                    idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
           company: findCompany || "",
           fantasyName: data.tradeName || "",

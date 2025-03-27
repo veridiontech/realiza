@@ -59,7 +59,6 @@ export function SearchCnpjModal({ onClose, onProceed }: SearchCnpjModalProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  value={value}
                   onChange={(e) => {
                     setCnpj(e.target.value);
                     onChange(e.target.value);

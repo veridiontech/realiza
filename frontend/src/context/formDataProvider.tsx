@@ -8,6 +8,7 @@ interface EnterpriseFormData {
   company: string;
   role?: string;
   idCompany: string;
+  idBranch?: string
 }
 
 interface UserFormData {

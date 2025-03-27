@@ -118,8 +118,10 @@ export function ModalTesteSendSupplier() {
     setIsLoading(true);
     try {
       const companyData = await fetchCompanyByCNPJ(cnpjValue);
-      setValue("corporateName", companyData.razaoSocial || "");
+      setValue("corporateName", companyData.razaoSocial|| "");
     } catch (error) {
+      console.log("erro ao buscar cnpj",error);
+      
       toast.error("Erro ao buscar dados do CNPJ");
     } finally {
       setIsLoading(false);
