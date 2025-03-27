@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,32 +53,49 @@ public class Branch {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idClient", nullable = false)
+    @JoinColumn(name = "idClient")
     private Client client;
-
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Contact> contacts;
-
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<DocumentBranch> documentBranches;
-
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<ContractProviderSupplier> contracts;
-
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Employee> employees;
-
-    @ManyToMany(mappedBy = "branches", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<ProviderSupplier> providerSuppliers;
-
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<UserClient> userClients;
-
-    @OneToMany(mappedBy = "branch", cascade = CascadeType.DETACH, orphanRemoval = true)
-    private List<Activity> activities;
 
     @ManyToOne
     @JoinColumn(name = "idCenter")
     private Center center;
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE)
+    private List<Contact> contacts;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch", cascade = CascadeType.REMOVE)
+    private List<DocumentBranch> documentBranches;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<ContractProviderSupplier> contracts;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<Employee> employees;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "branches")
+    private List<ProviderSupplier> providerSuppliers;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<UserClient> userClients;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<Activity> activities;
 }

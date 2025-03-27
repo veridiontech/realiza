@@ -1,13 +1,17 @@
 package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.services.ItemManagement;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,11 +52,21 @@ public abstract class User {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "requester", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToMany(mappedBy = "requester")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ItemManagement> userRequest;
 
-    @OneToOne(mappedBy = "newUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private ItemManagement newUserSolicitation;
+    @JsonIgnore
+    @OneToMany(mappedBy = "responsible")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<Contract> contracts;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<Notification> notifications;
 
     public enum Role {
         ROLE_ADMIN,

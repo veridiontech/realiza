@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.providers;
 
+import bl.tech.realiza.domains.services.ItemManagement;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,12 @@ public abstract class Provider {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
+    private ItemManagement newProviderSolicitation;
 
     public enum Company {
         CLIENT,

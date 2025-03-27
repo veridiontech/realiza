@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.services.ItemManagement;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -17,7 +18,16 @@ public class UserClient extends User {
     @Builder.Default
     private Boolean denied = false;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idBranch", nullable = false)
+    @JoinColumn(name = "idBranch")
     private Branch branch;
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToOne(mappedBy = "newUser", cascade = CascadeType.REMOVE)
+    private ItemManagement newUserSolicitation;
 }
