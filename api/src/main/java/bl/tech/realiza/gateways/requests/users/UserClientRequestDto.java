@@ -21,6 +21,7 @@ public class UserClientRequestDto {
     private String telephone;
     private String cellphone;
     private String branch;
+    private String idUser;
 
     public enum Role {
         ROLE_CLIENT_RESPONSIBLE,

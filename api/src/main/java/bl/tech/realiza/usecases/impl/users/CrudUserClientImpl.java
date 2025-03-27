@@ -9,9 +9,12 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -33,6 +36,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
+    private final CrudItemManagementImpl crudItemManagementImpl;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -69,6 +73,16 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .build();
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);
+
+        // criar solicitação
+        crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
+                .title(String.format("Novo usuário %s %s", savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "", savedUserClient.getSurname() != null ? savedUserClient.getSurname() : ""))
+                .details(String.format("Solicitação de adição do usuário %s %s da empresa %s a plataforma",
+                        savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "",
+                        savedUserClient.getSurname() != null ? savedUserClient.getSurname() : "", savedUserClient.getBranch().getName() != null ? savedUserClient.getBranch().getName() : ""))
+                .idRequester(userClientRequestDto.getIdUser())
+                .idNewUser(savedUserClient.getIdUser())
+                .build());
 
         UserResponseDto userClientResponse = UserResponseDto.builder()
                 .idUser(savedUserClient.getIdUser())
