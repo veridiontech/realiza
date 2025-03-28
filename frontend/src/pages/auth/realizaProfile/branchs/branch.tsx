@@ -143,17 +143,18 @@ import { Eye } from "lucide-react"; // Importando apenas o ícone Eye
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 import { useBranch } from "@/context/Branch-provider";
+import { propsBranch } from "@/types/interfaces";
 
-interface BranchType {
-  idBranch: string;
-  name: string;
-  cnpj: string;
-  address: string;
-  actions: string;
-}
+// interface BranchType {
+//   idBranch: string;
+//   name: string;
+//   cnpj: string;
+//   address: string;
+//   actions: string;
+// }
 
 export function Branch() {
-  const [branches, setBranches] = useState<BranchType[]>([]);
+  const [branches, setBranches] = useState<propsBranch[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -166,9 +167,9 @@ export function Branch() {
   const {setSelectedBranch} = useBranch()
 
   const columns: {
-    key: keyof BranchType;
+    key: keyof propsBranch;
     label: string;
-    render?: (value: any, row: BranchType) => JSX.Element;
+    render?: (value: any, row: propsBranch) => JSX.Element;
   }[] = [
     { key: "name", label: "Nome da Filial" },
     { key: "cnpj", label: "CNPJ" },
@@ -176,7 +177,7 @@ export function Branch() {
     {
       key: "actions",
       label: "Ações",
-      render: (value: any, row: BranchType) => (
+      render: (_value, row: propsBranch) => (
         <div>
           {user?.role === "ROLE_CLIENT_RESPONSIBLE" ? (
             <Link to={`/cliente/profileBranch/${row.idBranch}`}>
@@ -248,7 +249,7 @@ export function Branch() {
           ) : error ? (
             <div className="text-center text-red-500">{error}</div>
           ) : (
-            <Table<BranchType> data={branches} columns={columns} />
+            <Table<propsBranch> data={branches} columns={columns} />
           )}
           <Pagination
             currentPage={currentPage}

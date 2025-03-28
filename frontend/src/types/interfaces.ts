@@ -54,6 +54,8 @@ export interface propsBranch {
   telephone: string;
   cep: string;
   state: string;
+  row: string;
+  actions: string
 }
 
 export interface propsSupplier {

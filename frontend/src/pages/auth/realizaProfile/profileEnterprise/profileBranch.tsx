@@ -2,16 +2,9 @@ import { Locate, Mail } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSupplier } from "@/context/Supplier-context";
-import { useClient } from "@/context/Client-Provider";
 import { useBranch } from "@/context/Branch-provider";
-import axios from "axios";
-import { ip } from "@/utils/ip";
-import { useEffect, useState } from "react";
 
 export function ProfileBranch() {
-  const { client } = useClient();
-  const { supplier } = useSupplier();
   const {selectedBranch} = useBranch()
 
   const firstLetter = selectedBranch?.name?.charAt(0) || "";
