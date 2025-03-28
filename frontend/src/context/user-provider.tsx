@@ -14,6 +14,7 @@ interface UserContextProps {
   branches: string[];
   authUser: boolean;
   token: string | null;
+  loading: boolean;
   setToken: React.Dispatch<React.SetStateAction<string | null>>;
   setUser: React.Dispatch<React.SetStateAction<propsUser | null>>;
   setAuthUser: (auth: boolean) => void;
@@ -34,10 +35,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState(false);
   const [user, setUser] = useState<propsUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     validateTokenAndFetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isTokenValid = (token: string): boolean => {
@@ -52,19 +55,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const validateTokenAndFetchUser = async () => {
-    const tokenFromStorage = localStorage.getItem("tokenClient");
-    const userId = localStorage.getItem("userId");
-    const roleUser = localStorage.getItem("role");
+    setLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const userId = localStorage.getItem("userId");
+      const roleUser = localStorage.getItem("role");
 
-    if (
-      tokenFromStorage &&
-      isTokenValid(tokenFromStorage) &&
-      userId &&
-      roleUser
-    ) {
-      // Salva o token em memória
-      setToken(tokenFromStorage);
-      try {
+      if (tokenFromStorage && isTokenValid(tokenFromStorage) && userId && roleUser) {
+        // Salva o token em memória
+        setToken(tokenFromStorage);
         switch (roleUser) {
           case "ROLE_ADMIN":
           case "ROLE_REALIZA_PLUS":
@@ -113,7 +112,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 const supplierData = res.data;
                 console.log("Dados do supplier:", res.data);
                 const storedBranches = JSON.parse(
-                  localStorage.getItem("userBranches") || "[]",
+                  localStorage.getItem("userBranches") || "[]"
                 );
                 setUser({
                   ...supplierData,
@@ -133,12 +132,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
-              const res = await axios.get(
-                `${ip}/user/subcontractor/${userId}`,
-                {
-                  headers: { Authorization: `Bearer ${tokenFromStorage}` },
-                },
-              );
+              const res = await axios.get(`${ip}/user/subcontractor/${userId}`, {
+                headers: { Authorization: `Bearer ${tokenFromStorage}` },
+              });
               if (res.data) {
                 setUser(res.data);
                 setAuthUser(true);
@@ -157,12 +153,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               if (resClient.data?.content) {
                 const dataClient = resClient.data.content;
                 if (dataClient.branch) {
-                  const resUser = await axios.get(
-                    `${ip}/user/client/${userId}`,
-                    {
-                      headers: { Authorization: `Bearer ${tokenFromStorage}` },
-                    },
-                  );
+                  const resUser = await axios.get(`${ip}/user/client/${userId}`, {
+                    headers: { Authorization: `Bearer ${tokenFromStorage}` },
+                  });
                   if (resUser.data) {
                     setUser(resUser.data);
                     setAuthUser(true);
@@ -179,14 +172,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 const dataSupplier = resSupplier.data.content;
                 if (dataSupplier.supplier) {
                   try {
-                    const res = await axios.get(
-                      `${ip}/user/supplier/${userId}`,
-                      {
-                        headers: {
-                          Authorization: `Bearer ${tokenFromStorage}`,
-                        },
-                      },
-                    );
+                    const res = await axios.get(`${ip}/user/supplier/${userId}`, {
+                      headers: { Authorization: `Bearer ${tokenFromStorage}` },
+                    });
                     if (res.data) {
                       setUser(res.data);
                       setAuthUser(true);
@@ -202,9 +190,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               } else {
                 logout();
               }
-              const resSubcontractor = await axios.get(
-                `${ip}/user/subcontractor`,
-              );
+              const resSubcontractor = await axios.get(`${ip}/user/subcontractor`);
               if (resSubcontractor.data.content) {
                 const dataSubcontractor = resSubcontractor.data.content;
                 if (dataSubcontractor.subcontrator) {
@@ -212,10 +198,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     const res = await axios.get(
                       `${ip}/user/subcontractor/${userId}`,
                       {
-                        headers: {
-                          Authorization: `Bearer ${tokenFromStorage}`,
-                        },
-                      },
+                        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+                      }
                     );
                     if (res.data) {
                       setUser(res.data);
@@ -240,18 +224,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           default:
             console.log("Função não definida para este tipo de usuário.");
         }
-      } catch (error) {
-        console.log("erro ao logar usuario", error);
-        logout();
+      } else {
+        toast("Sua sessão expirou. Faça seu Login novamente", {
+          action: (
+            <Button className="bg-realizaBlue" onClick={() => navigate("/")}>
+              Entendido
+            </Button>
+          ),
+        });
       }
-    } else {
-      toast("Sua sessão expirou. Faça seu Login novamente", {
-        action: (
-          <Button className="bg-realizaBlue" onClick={() => navigate("/")}>
-            Entendido
-          </Button>
-        ),
-      });
+    } catch (error) {
+      console.log("Erro ao logar usuário:", error);
+      logout();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -279,6 +265,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         branches: user?.branches || [],
         authUser,
         token,
+        loading,
         setToken,
         setUser,
         setAuthUser,
