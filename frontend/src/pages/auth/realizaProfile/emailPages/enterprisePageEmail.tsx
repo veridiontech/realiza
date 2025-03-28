@@ -120,6 +120,7 @@ export function EnterprisePageEmail() {
         };
         break;
     }
+    console.log("enviando cadastro", payload);
     setEnterpriseData(payload);
     navigate(`/email/Sign-Up?token=${token}`);
     setIsLoading(false);

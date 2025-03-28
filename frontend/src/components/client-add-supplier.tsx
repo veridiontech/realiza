@@ -228,8 +228,11 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
+    if(selectedBranch?.idBranch) {
       getManager()
-  }, [])
+    }
+     
+  }, [selectedBranch?.idBranch])
 
   useEffect(() => {
     getActivities();
