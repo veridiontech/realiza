@@ -43,7 +43,7 @@ const newBranchFormSchema = z.object({
   city: z.string().min(1, "A cidade é obrigatória."),
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
-  telephone: z.string().nonempty("Insira um telefone")
+  telephone: z.string().nonempty("Insira um telefone"),
 });
 
 type NewBranchFormSchema = z.infer<typeof newBranchFormSchema>;
@@ -139,9 +139,9 @@ export function Branch() {
       const country = res.data.address.country.name;
 
       const state = res.data.address.state;
-      const number = res.data.address.number
+      const number = res.data.address.number;
 
-      setValue("number", number)
+      setValue("number", number);
       setValue("state", state);
       setValue("country", country);
       setValue("address", address);
@@ -170,13 +170,13 @@ export function Branch() {
       setCurrentPage(page);
     }
   };
-  
+
   const onSubmit = async (data: NewBranchFormSchema) => {
     const payload = {
       ...data,
       client: client?.idClient,
     };
-  
+
     try {
       console.log("enviando dados:", payload);
       await axios.post(`${ip}/branch`, payload);
@@ -189,7 +189,7 @@ export function Branch() {
           err.response.data.error ||
           "Erro inesperado no servidor";
         console.log(mensagemBackend);
-        
+
         toast.error(mensagemBackend);
       } else if (err.request) {
         // Erro de conexão
@@ -198,7 +198,7 @@ export function Branch() {
         // Erro desconhecido
         toast.error("Erro desconhecido ao processar requisição.");
       }
-  
+
       console.error("Erro ao criar filial:", err);
     }
   };
@@ -217,8 +217,10 @@ export function Branch() {
                 <DialogHeader>
                   <DialogTitle>Cadastro de filial</DialogTitle>
                 </DialogHeader>
-                <form action="" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-                  <div className="flex flex-col gap-2">
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="flex flex-col gap-5"
+                >
                   <div className="flex flex-col gap-2">
                     <Label>CNPJ</Label>
                     <div className="flex items-center gap-2">
@@ -230,53 +232,110 @@ export function Branch() {
                         <Search className="text-white" />
                       </div>
                     </div>
+                    {errors.cnpj && (
+                      <span className="text-sm text-red-600">
+                        {errors.cnpj.message}
+                      </span>
+                    )}
                     {razaoSocial && (
                       <p className="mt-1 text-sm text-gray-700">
                         Razão social: <strong>{razaoSocial}</strong>
                       </p>
                     )}
                   </div>
+
                   <div>
                     <Label>Email</Label>
-                    <Input type="email" {...register("email")}/>
+                    <Input type="email" {...register("email")} />
+                    {errors.email && (
+                      <span className="text-sm text-red-600">
+                        {errors.email.message}
+                      </span>
+                    )}
                   </div>
+
                   <div>
                     <Label>Razão social</Label>
                     <Input type="text" {...register("name")} />
+                    {errors.name && (
+                      <span className="text-sm text-red-600">
+                        {errors.name.message}
+                      </span>
+                    )}
                   </div>
+
                   <div>
                     <Label>CEP</Label>
                     <Input type="text" {...register("cep")} />
+                    {errors.cep && (
+                      <span className="text-sm text-red-600">
+                        {errors.cep.message}
+                      </span>
+                    )}
                   </div>
+
                   <div>
                     <Label>Cidade</Label>
                     <Input type="text" {...register("city")} />
+                    {errors.city && (
+                      <span className="text-sm text-red-600">
+                        {errors.city.message}
+                      </span>
+                    )}
                   </div>
-                  <div>
+
                   <div>
                     <Label>Endereço</Label>
                     <Input type="text" {...register("address")} />
+                    {errors.address && (
+                      <span className="text-sm text-red-600">
+                        {errors.address.message}
+                      </span>
+                    )}
                   </div>
+
                   <div>
                     <Label>Número</Label>
-                    <Input type="text" {...register("number")}/>
+                    <Input type="text" {...register("number")} />
+                    {errors.number && (
+                      <span className="text-sm text-red-600">
+                        {errors.number.message}
+                      </span>
+                    )}
                   </div>
-                  </div>
+
                   <div>
                     <Label>País</Label>
                     <Input type="text" {...register("country")} />
+                    {errors.country && (
+                      <span className="text-sm text-red-600">
+                        {errors.country.message}
+                      </span>
+                    )}
                   </div>
+
                   <div>
                     <Label>Estado</Label>
                     <Input type="text" {...register("state")} />
+                    {errors.state && (
+                      <span className="text-sm text-red-600">
+                        {errors.state.message}
+                      </span>
+                    )}
                   </div>
+
                   <div>
                     <Label>Telefone</Label>
-                    <Input type="text" {...register("telephone")}/>
+                    <Input type="text" {...register("telephone")} />
+                    {errors.telephone && (
+                      <span className="text-sm text-red-600">
+                        {errors.telephone.message}
+                      </span>
+                    )}
                   </div>
-                  </div>
+
                   <div className="flex justify-end">
-                    <Button>Cadastrar</Button>
+                    <Button type="submit">Cadastrar</Button>
                   </div>
                 </form>
               </DialogContent>

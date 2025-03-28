@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import { SupplierGetEmployee } from "@/hooks/gets/supplier/supplierGetEmployee";
-import { ButtonBlue } from "@/components/ui/buttonBlue";
+// import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { SupplierAddEmployee } from "./modal/supplierAddEmployee";
 import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -84,9 +84,9 @@ export const SupplierEmployee = (): JSX.Element => {
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
-          <ButtonBlue onClick={() => setIsModalOpen(true)}>
+          {/* <ButtonBlue onClick={() => setIsModalOpen(true)}>
             Adicionar Colaborador
-          </ButtonBlue>
+          </ButtonBlue> */}
         </div>
         {loading ? (
           <div className="flex items-center justify-center">

@@ -8,7 +8,7 @@
 // import { useClient } from "@/context/Client-Provider";
 import { useState, useEffect } from "react";
 // import { TableEmployee } from "./tableEmployee";
-import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
+// import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 import { Button } from "@/components/ui/button";
 // import { Pagination } from "@/components/ui/pagination";
 import axios from "axios";
@@ -86,7 +86,7 @@ export const EmployeesTable = (): JSX.Element => {
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Colaboradores</h1>
-          <NewModalCreateEmployee />
+          {/* <NewModalCreateEmployee /> */}
         </div>
         <div className="mb-4 flex">
           <Button
