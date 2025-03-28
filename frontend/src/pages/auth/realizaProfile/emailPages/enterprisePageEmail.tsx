@@ -113,6 +113,7 @@ export function EnterprisePageEmail() {
       default:
         payload = {
           ...data,
+          idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
           company: findCompany || "",
           fantasyName: data.tradeName || "",
