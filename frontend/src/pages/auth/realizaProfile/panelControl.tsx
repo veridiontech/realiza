@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import {
   Ban,
   CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
-  Mail,
-  PencilLine,
   Rotate3D,
   TriangleAlert,
 } from "lucide-react";
@@ -25,6 +19,7 @@ import {
 import { CardPanelControl } from "@/components/cardPanelControl";
 import { Button } from "@/components/ui/button";
 import { ColumnPanelControl } from "@/components/column-panel-control";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Requester {
   idUser: string;
@@ -136,8 +131,8 @@ export function ControlPanel() {
 
       {/* Listagem de Solicitações */}
       <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
-        <div className="flex items-center justify-around">
-          <div>
+        <div className="flex items-start justify-around">
+          <div className="flex flex-col gap-5">
             <ColumnPanelControl
               lenghtControl="10"
               title="Solicitações pendentes"
@@ -145,19 +140,19 @@ export function ControlPanel() {
               textColor="text-[#F97316]"
               icon={<Rotate3D className="text-[#F97316]" />}
             />
-                      <div>
-            <div className="bg-gray-100 p-8">
-              <div className="w-[20vw]">
-                {solicitations.map((solicitation) => (
-                  <CardPanelControl
-                    key={solicitation.idSolicitation}
-                    data={solicitation}
-                    onActionCompleted={removeSolicitation}
-                  />
-                ))}
+            <div className="flex justify-center">
+              <div className="flex justify-center bg-gray-100 w-[20vw] border-[#F97316] border shadow-lg rounded-md">
+                <ScrollArea className="h-[60vh] w-[20vw] p-5">
+                  {solicitations.map((solicitation) => (
+                      <CardPanelControl
+                        key={solicitation.idSolicitation}
+                        data={solicitation}
+                        onActionCompleted={removeSolicitation}
+                      />
+                  ))}
+                </ScrollArea>
               </div>
             </div>
-          </div>  
           </div>
           <ColumnPanelControl
             lenghtControl="9"

@@ -16,8 +16,8 @@ export function ColumnPanelControl({
   lenghtControl,
 }: ColumnPanelControlProps) {
   return (
-<div className={`rounded-md p-4 ${bgColor}`}>
-      <div className="flex items-center gap-28">
+<div className={`rounded-md p-4 w-[25vw] ${bgColor}`}>
+      <div className="flex items-center justify-between ">
         <h2 className={`font-semibold ${textColor}`}>{title}</h2>
         <div className={`flex items-center gap-2 rounded-lg p-2 ${bgColor}`}>
 
