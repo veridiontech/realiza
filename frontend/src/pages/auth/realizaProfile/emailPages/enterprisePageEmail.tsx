@@ -115,7 +115,7 @@ export function EnterprisePageEmail() {
           ...data,
           idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
-          company: findCompany || "",
+          company: "SUPPLIER",
           fantasyName: data.tradeName || "",
           socialReason: data.corporateName,
         };
