@@ -118,12 +118,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     @Override
     public String approveSolicitation(String id) {
 
+
         ItemManagement solicitation = itemManagementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
-
-        solicitation.setStatus(ItemManagement.Status.APPROVED);
-
-        itemManagementRepository.save(solicitation);
 
         if (solicitation.getNewUser() != null) {
             UserClient userClient = userClientRepository.findById(solicitation.getNewUser().getIdUser())
@@ -133,6 +130,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
             userClientRepository.save(userClient);
         } else if (solicitation.getNewProvider() != null) {
+
             Provider provider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
                     .orElseThrow(() -> new NotFoundException("Provider not found"));
 
@@ -140,13 +138,18 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
             providerRepository.save(provider);
 
-            // mandar e-mail de cadastro
-            emailSender.sendInviteEmail(EmailInviteRequestDto.builder()
-                    .email(provider.getEmail())
-                    .company(Provider.Company.SUPPLIER)
-                    .idCompany(provider.getIdProvider())
-                    .build());
+            if (provider.getEmail() != null) {
+                emailSender.sendInviteEmail(EmailInviteRequestDto.builder()
+                            .email(provider.getEmail())
+                            .company(Provider.Company.SUPPLIER)
+                            .idCompany(provider.getIdProvider())
+                        .build());
+            }
         }
+
+        solicitation.setStatus(ItemManagement.Status.APPROVED);
+
+        itemManagementRepository.save(solicitation);
 
         return "Solicitation approved";
     }
@@ -157,7 +160,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         ItemManagement solicitation = itemManagementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
-        solicitation.setStatus(ItemManagement.Status.APPROVED);
+        solicitation.setStatus(ItemManagement.Status.DENIED);
 
         itemManagementRepository.save(solicitation);
 

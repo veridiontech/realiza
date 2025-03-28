@@ -101,6 +101,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .corporateName(contractProviderSupplierRequestDto.getProviderDatas().getCorporateName())
                 .email(contractProviderSupplierRequestDto.getProviderDatas().getEmail())
                 .telephone(contractProviderSupplierRequestDto.getProviderDatas().getTelephone())
+                .branches(List.of(branch))
                 .build());
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(ContractProviderSupplier.builder()
