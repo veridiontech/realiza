@@ -48,6 +48,7 @@ export function CardPanelControl({
       if (onActionCompleted) {
         onActionCompleted(data.idSolicitation);
       }
+      window.location.reload()
     } catch (error) {
       console.error("Erro ao aprovar solicitação:", error);
       toast.error("Erro ao aceitar solicitação");
