@@ -114,7 +114,7 @@ export function EnterprisePageEmail() {
         payload = {
           ...data,
           idBranch: findBranchId || "",
-          idCompany: findIdCompany || "",
+          idCompany: "SUPPLIER",
           company: findCompany || "",
           fantasyName: data.tradeName || "",
           socialReason: data.corporateName,
