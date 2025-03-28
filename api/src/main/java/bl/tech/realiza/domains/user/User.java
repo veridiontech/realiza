@@ -3,7 +3,9 @@ package bl.tech.realiza.domains.user;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.services.ItemManagement;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,9 +57,15 @@ public abstract class User {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
-    @OneToMany(mappedBy = "requester")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JsonIgnore
+    @JsonManagedReference
+    @OneToMany(mappedBy = "requester", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ItemManagement> userRequest;
+
+    @JsonIgnore
+    @JsonManagedReference
+    @OneToOne(mappedBy = "newUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private ItemManagement newUserSolicitation;
 
     @JsonIgnore
     @OneToMany(mappedBy = "responsible")

@@ -11,6 +11,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -49,28 +50,35 @@ public class ProviderSupplier extends Provider {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
+    @JsonIgnore
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE)
     private List<Contact> contacts;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "providerSupplier")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ContractProviderSupplier> contractsSupplier;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "providerSupplier")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ContractProviderSubcontractor> contractsSubcontractor;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE)
     private List<Employee> employees;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "providerSupplier")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ProviderSubcontractor> providerSubcontracts;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "providerSupplier")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<UserProviderSupplier> userProviderSuppliers;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE)
     private List<DocumentProviderSupplier> documentProviderSuppliers;
 }

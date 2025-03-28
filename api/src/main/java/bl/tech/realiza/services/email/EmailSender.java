@@ -11,7 +11,9 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
 import bl.tech.realiza.gateways.requests.services.email.EmailUpdateRequestDto;
+import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
+import bl.tech.realiza.usecases.impl.providers.CrudProviderSupplierImpl;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +37,7 @@ public class EmailSender {
     private final TokenManagerService tokenManagerService;
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
+    private final CrudProviderSupplierImpl crudProviderSupplierImpl;
 
     public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
@@ -46,7 +49,7 @@ public class EmailSender {
                 companyName = "Realiza Assessoria Empresarial Ltda";
             }
             case SUPPLIER -> {
-                ProviderSupplier providerSupplier = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
+                ProviderResponseDto providerSupplier = crudProviderSupplierImpl.findOne(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = providerSupplier.getCorporateName() != null ? providerSupplier.getCorporateName() : "Tech Solutions Ltda";
                 idCompany = providerSupplier.getIdProvider();
