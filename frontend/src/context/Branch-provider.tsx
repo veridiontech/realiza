@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useClient } from "./Client-Provider";
 
 interface BranchContextProps {
-  branch: propsBranch[]; 
+  branch: propsBranch[];
   setBranch: React.Dispatch<React.SetStateAction<propsBranch[]>>;
   selectedBranch: propsBranch | null;
   setSelectedBranch: React.Dispatch<React.SetStateAction<propsBranch | null>>;

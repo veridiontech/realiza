@@ -1,6 +1,9 @@
 import axios from "axios";
 import { CalendarDays, ThumbsDown, ThumbsUp, User } from "lucide-react";
 import { ip } from "@/utils/ip";
+import { toast } from "sonner";
+import { Oval } from "react-loader-spinner";
+import { useState } from "react";
 
 interface CardPanelControlProps {
   data: {
@@ -25,26 +28,38 @@ export function CardPanelControl({
   data,
   onActionCompleted,
 }: CardPanelControlProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleApprove = async () => {
     try {
-      const response = await axios.patch(
-        `${ip}/item-management/new/${data.idSolicitation}/approve`,
-      );
-      alert(response.data);
-      // Remove o item aprovado da lista se houver callback
+      // Define o loading como true antes de começar a requisição
+      setIsLoading(true);
+
+      console.log("teste id da solicitacao", data.idSolicitation);
+
+      await axios.patch(`${ip}/item-management/${data.idSolicitation}/approve`);
+
+      toast.success("Solicitação aprovada");
+
+      // Atualize o estado do loading para false quando a requisição for concluída
+      setIsLoading(false);
+
+      // Recarregue ou atualize conforme necessário
       if (onActionCompleted) {
         onActionCompleted(data.idSolicitation);
       }
+      window.location.reload()
     } catch (error) {
       console.error("Erro ao aprovar solicitação:", error);
-      alert("Erro ao aprovar solicitação.");
+      toast.error("Erro ao aceitar solicitação");
+      setIsLoading(false); // Também precisa garantir que o loading seja alterado em caso de erro
     }
   };
 
   const handleDeny = async () => {
     try {
-      const response = await axios.delete(
-        `${ip}/item-management/new/${data.idSolicitation}/deny`,
+      const response = await axios.patch(
+        `${ip}/item-management/${data.idSolicitation}/deny`,
       );
       alert(response.data);
       // Remove o item negado da lista se houver callback
@@ -87,12 +102,29 @@ export function CardPanelControl({
           >
             Dispensar <ThumbsDown size={15} />
           </button>
-          <button
-            onClick={handleApprove}
-            className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A]"
-          >
-            Aceitar <ThumbsUp size={15} />
-          </button>
+          {isLoading ? (
+            <button
+              onClick={handleApprove}
+              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
+            >
+              <Oval
+                visible={true}
+                height="20"
+                width="20"
+                color="#4fa94d"
+                ariaLabel="oval-loading"
+                wrapperStyle={{}}
+                wrapperClass=""
+              />
+            </button>
+          ) : (
+            <button
+              onClick={handleApprove}
+              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
+            >
+              Aceitar <ThumbsUp size={15} />
+            </button>
+          )}
         </div>
       </div>
     </div>

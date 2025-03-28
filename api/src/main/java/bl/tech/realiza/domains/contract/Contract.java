@@ -1,7 +1,5 @@
 package bl.tech.realiza.domains.contract;
 
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
@@ -33,20 +31,26 @@ public abstract class Contract {
     private String contractReference;
     private String description;
     private String allocatedLimit;
-    private ExpenseType expenseType;
-    @OneToOne(cascade = CascadeType.REMOVE)
-    private User responsible;
-    private Date startDate;
+    @Builder.Default
+    private ExpenseType expenseType = ExpenseType.NENHUM;
+    private Date dateStart;
     private Date endDate;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
-    private Boolean isActive = true;
+    private IsActive isActive = IsActive.PENDENTE;
     @Builder.Default
     private Boolean deleteRequest = false;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idActivity", nullable = false)
+    @JoinColumn(name = "idUser")
+    private User responsible;
+
+    @ManyToOne
+    @JoinColumn(name = "idActivity")
     private Activity activity;
 
     @ManyToMany
@@ -60,11 +64,18 @@ public abstract class Contract {
     @ManyToMany(mappedBy = "contracts")
     private List<Employee> employees;
 
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     private List<DocumentContract> documentContracts;
 
     public enum ExpenseType {
         CAPEX,
-        OPEX
+        OPEX,
+        NENHUM
+    }
+
+    public enum IsActive {
+        ATIVADO,
+        PENDENTE,
+        NEGADO
     }
 }

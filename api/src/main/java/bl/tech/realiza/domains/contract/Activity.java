@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,15 +32,20 @@ public class Activity {
     public enum Risk {
         LOW,
         MEDIUM,
-        HIGH
+        HIGH,
+        VERY_HIGH
     }
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
     @JoinColumn(name = "idBranch")
     private Branch branch;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.DETACH, orphanRemoval = true)
+    @OneToMany(mappedBy = "activity")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<Contract> contracts;
 
 }

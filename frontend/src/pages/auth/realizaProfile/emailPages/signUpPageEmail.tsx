@@ -67,9 +67,21 @@ export function SignUpPageEmail() {
         role,
         company: enterpriseData.company,
       };
-      await axios.post(`${ip}/sign-enterprise`, allDatas);
+      console.log("enviando dados:", allDatas);
+      
+      const response = await axios.post(`${ip}/sign-enterprise`, allDatas);
+      if (response.status === 200) {
+        window.location.href = "https://realiza-1.onrender.com/";
+      }
       window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("Erro na resposta da API:", err.response.data);
+        const apiErrorMessage = err.response?.data?.message || "Erro desconhecido";
+        console.log(`Erro: ${apiErrorMessage}`);
+      } else {
+        console.error("Erro desconhecido:", err);
+      }
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -202,10 +214,6 @@ export function SignUpPageEmail() {
         </div>
         {isLoading ? (
           <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
-            Cadastrar
-          </Button>
-        ) : (
-          <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
             <Oval
               visible={true}
               height="80"
@@ -215,6 +223,10 @@ export function SignUpPageEmail() {
               wrapperStyle={{}}
               wrapperClass=""
             />
+          </Button>
+        ) : (
+          <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
+            Cadastrar
           </Button>
         )}
       </form>

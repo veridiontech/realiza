@@ -25,6 +25,9 @@ public class Requirement {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @JsonIgnore
     @ManyToMany(mappedBy = "requirements")
     private List<Contract> contracts;

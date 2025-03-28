@@ -88,10 +88,10 @@ export function SignIn() {
             navigate(`/cliente/home/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_RESPONSIBLE":
-            navigate(`/fornecedor/quartered/${userData.idUser}`);
+            navigate(`/fornecedor/home/${userData.idUser}`);
             break;
           case "ROLE_SUPPLIER_MANAGER":
-            navigate(`/fornecedor/contracts/${userData.idUser}`);
+            navigate(`/fornecedor/home/${userData.idUser}`);
             break;
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
             navigate(`/sub/employees/${userData.idUser}`);

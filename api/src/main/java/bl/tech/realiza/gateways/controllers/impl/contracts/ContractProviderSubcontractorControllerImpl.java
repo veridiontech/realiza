@@ -3,7 +3,9 @@ package bl.tech.realiza.gateways.controllers.impl.contracts;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProviderSubcontractorControlller;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
+import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudContractProviderSubcontractorImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,8 +31,8 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ContractResponseDto> createContractProviderSubcontractor(@RequestBody @Valid ContractRequestDto contractSubcontractorRequestDto) {
-        ContractResponseDto subcontractor = crudSubcontractor.save(contractSubcontractorRequestDto);
+    public ResponseEntity<ContractSubcontractorResponseDto> createContractProviderSubcontractor(@RequestBody @Valid ContractSubcontractorPostRequestDto contractSubcontractorRequestDto) {
+        ContractSubcontractorResponseDto subcontractor = crudSubcontractor.save(contractSubcontractorRequestDto);
 
         return ResponseEntity.of(Optional.of(subcontractor));
     }

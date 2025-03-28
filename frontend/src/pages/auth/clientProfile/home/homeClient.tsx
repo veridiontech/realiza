@@ -8,18 +8,21 @@ import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useBranch } from "@/context/Branch-provider";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/context/user-provider";
 
 export function HomeClient() {
   const [employees, setEmployees] = useState([]);
+  const {user} = useUser()
   const { selectedBranch } = useBranch();
   const { client } = useClient();
   const [selectTab, setSelectedTab] = useState("filiais");
   const [branches, setBranches] = useState([]);
 
-  console.log("cliente home:", client);
-
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
+
+  const firstLetterBranch = selectedBranch?.name?.charAt(0) || ""
+  const lastLetterBranch = selectedBranch?.name?.slice(-1) || "";
 
   const fetchBranches = async () => {
     try {
@@ -54,6 +57,61 @@ export function HomeClient() {
       getEmployee();
     }
   }, [selectedBranch?.idBranch, client?.idClient]);
+
+  if(user?.role === "ROLE_CLIENT_MANAGER") {
+    return(
+      <div className="flex flex-col items-center justify-center gap-5 p-10">
+      <div className="flex gap-4">
+        <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+          <div className="flex gap-3">
+            <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
+              <div className="text-[40px] text-white">
+                {firstLetterBranch}
+                {lastLetterBranch}
+              </div>
+            </div>
+            <div className="flex flex-col gap-10">
+              <div className="flex flex-col items-start gap-3">
+                <div className="text-realizaBlue text-[30px] font-medium">
+                  {selectedBranch ? (
+                    <h2>{selectedBranch?.name}</h2>
+                  ) : (
+                    <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
+                  )}
+                </div>
+                <div className="ml-1 text-sky-900">
+                  {selectedBranch ? (
+                    <h3>{selectedBranch?.email}</h3>
+                  ) : (
+                    <Skeleton className="h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1 text-[13px] text-sky-900">
+                <div>
+                  {selectedBranch ? (
+                    <p>{selectedBranch?.cnpj}</p>
+                  ) : (
+                    <Skeleton className="h-[0.8vh] w-[7vw] rounded-full bg-gray-600" />
+                  )}
+                </div>
+                <div>
+                  {selectedBranch ? (
+                    <p>{selectedBranch?.cep}</p>
+                  ) : (
+                    <Skeleton className="h-[0.6vh] w-[5vw] rounded-full bg-gray-600" />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <EditModalEnterprise />
+      </div>
+      
+    </div>
+    )
+  }
 
   return (
     <div className="flex flex-col items-center justify-center gap-5 p-10">

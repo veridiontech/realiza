@@ -1,260 +1,234 @@
 package bl.tech.realiza.usecases.impl;
 
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
-import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
-import bl.tech.realiza.domains.user.UserProviderSubcontractor;
-import bl.tech.realiza.domains.user.UserProviderSupplier;
-import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
-import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
-import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
-import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
-import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
-import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
-import bl.tech.realiza.gateways.repositories.users.UserRepository;
-import bl.tech.realiza.gateways.requests.services.ItemManagementRequestDto;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
-import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
-import bl.tech.realiza.gateways.responses.services.ItemManagementResponseDto;
-import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
+import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementUserResponseDto;
+import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CrudItemManagementImpl implements CrudItemManagement {
-
-    private final BranchRepository branchRepository;
-    private final ClientRepository clientRepository;
-    private final ContractRepository contractRepository;
-    private final ProviderRepository providerRepository;
-    private final UserRepository userRepository;
-    private final ActivityRepository activityRepository;
-    private final RequirementRepository requirementRepository;
-    private final DocumentRepository documentRepository;
-    private final EmployeeRepository employeeRepository;
-    private final DocumentEmployeeRepository documentEmployeeRepository;
-    private final ItemManagementRepository itemManagementRepository;
     private final UserClientRepository userClientRepository;
-    private final UserProviderSupplierRepository userProviderSupplierRepository;
-    private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
-
-
-    public String approveUserSolicitation(String id) {
-        ItemManagement itemManagement = itemManagementRepository.findById(id).orElseThrow(() -> new NotFoundException("Solicitation not found"));
-        String userId = itemManagement.getNewUser().getIdUser();
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        user.setIsActive(true);
-        userRepository.save(user);
-        deleteUserSolicitation(id); // delete the solicitation
-        return "User activated successfully";
-    }
-
-    public String denyUserSolicitation(String id) {
-        ItemManagement itemManagement = itemManagementRepository.findById(id).orElseThrow(() -> new NotFoundException("Solicitation not found"));
-        String userId = itemManagement.getNewUser().getIdUser();
-        deleteUserSolicitation(id); // delete the solicitation
-        userRepository.deleteById(userId);
-        return "Solicitation denied successfully";
-    }
+    private final ItemManagementRepository itemManagementRepository;
+    private final ProviderSupplierRepository providerSupplierRepository;
+    private final ProviderRepository providerRepository;
+    private final EmailSender emailSender;
+    private final UserManagerRepository userManagerRepository;
 
     @Override
-    public ItemManagementResponseDto saveUserSolicitation(ItemManagementRequestDto itemManagementRequestDto) {
-        if (itemManagementRequestDto.getIdRequester() == null || itemManagementRequestDto.getIdRequester().isEmpty()) {
-            throw new BadRequestException("Invalid requester");
-        }
-        if (itemManagementRequestDto.getIdNewUser() == null || itemManagementRequestDto.getIdNewUser().isEmpty()) {
-            throw new BadRequestException("Invalid user");
-        }
-        User userRequester = userRepository.findById(itemManagementRequestDto.getIdRequester()).orElseThrow(() -> new NotFoundException("User not found"));
-        String company = userRequester.getClass().getSimpleName();
-        User newUser = userRepository.findById(itemManagementRequestDto.getIdNewUser()).orElseThrow(() -> new NotFoundException("New user not found"));
+    public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
 
-        ItemManagement itemManagement = ItemManagement.builder()
-                .title(itemManagementRequestDto.getTitle())
-                .requester(userRequester)
-                .details(itemManagementRequestDto.getDetails())
+        UserClient requester = userClientRepository.findById(itemManagementUserRequestDto.getIdRequester())
+                .orElseThrow(() -> new NotFoundException("Requester not found"));
+
+        UserClient newUser = userClientRepository.findById(itemManagementUserRequestDto.getIdNewUser())
+                .orElseThrow(() -> new NotFoundException("New user not found"));
+
+        ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
+                .title(itemManagementUserRequestDto.getTitle())
+                .details(itemManagementUserRequestDto.getDetails())
+                .requester(requester)
                 .newUser(newUser)
-                .build();
+                .build());
 
-        ItemManagement savedItemManagement = itemManagementRepository.save(itemManagement);
-
-        UserResponseDto newUserResponse = UserResponseDto.builder()
-                .idUser(savedItemManagement.getNewUser().getIdUser())
-                .cpf(savedItemManagement.getNewUser().getCpf())
-                .description(savedItemManagement.getNewUser().getDescription())
-                .position(savedItemManagement.getNewUser().getPosition())
-                .role(savedItemManagement.getNewUser().getRole())
-                .firstName(savedItemManagement.getNewUser().getFirstName())
-                .surname(savedItemManagement.getNewUser().getSurname())
-                .email(savedItemManagement.getNewUser().getEmail())
-                .telephone(savedItemManagement.getNewUser().getTelephone())
-                .cellphone(savedItemManagement.getNewUser().getCellphone())
-                .build();
-
-        switch (company) {
-            case "CLIENT" -> {
-                UserClient userClient = userClientRepository.findById(savedItemManagement.getNewUser().getIdUser()).orElseThrow(() -> new NotFoundException("User not found"));
-                newUserResponse.setBranchResponse(BranchResponseDto.builder()
-                        .idBranch(userClient.getBranch().getIdBranch())
-                        .name(userClient.getBranch().getName())
-                        .build());
-            }
-            case "SUPPLIER" -> {
-                UserProviderSupplier userProviderSupplier = userProviderSupplierRepository.findById(savedItemManagement.getNewUser().getIdUser()).orElseThrow(() -> new NotFoundException("User not found"));
-                newUserResponse.setProviderResponseDto(ProviderResponseDto.builder()
-                                .idProvider(userProviderSupplier.getProviderSupplier().getIdProvider())
-                                .corporateName(userProviderSupplier.getProviderSupplier().getCorporateName())
-                        .build());
-            }
-            case "SUBCONTRACTOR" -> {
-                UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorRepository.findById(savedItemManagement.getNewUser().getIdUser()).orElseThrow(() -> new NotFoundException("User not found"));
-                newUserResponse.setProviderResponseDto(ProviderResponseDto.builder()
-                                .idProvider(userProviderSubcontractor.getProviderSubcontractor().getIdProvider())
-                                .corporateName(userProviderSubcontractor.getProviderSubcontractor().getCorporateName())
-                        .build());
-            }
-        }
-
-        ItemManagementResponseDto itemManagementResponseDto = ItemManagementResponseDto.builder()
-                .title(savedItemManagement.getTitle())
-                .requester(UserResponseDto.builder()
-                        .idUser(savedItemManagement.getRequester().getIdUser())
-                        .firstName(savedItemManagement.getRequester().getFirstName())
-                        .surname(savedItemManagement.getRequester().getSurname())
-                        .build())
-                .details(savedItemManagement.getDetails())
-                .newUser(newUserResponse)
-                .build();
-
-        return itemManagementResponseDto;
+        return getItemManagementUserResponseDto(solicitation, requester, newUser);
     }
 
     @Override
-    public Page<ItemManagementResponseDto> findAllUserSolicitation(Pageable pageable) {
-        Page<ItemManagement> inactiveItemsPage = itemManagementRepository.findAll(pageable);
+    public ItemManagementProviderResponseDto saveProviderSolicitation(ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
 
-        Page<ItemManagementResponseDto> itemManagementResponsePage = inactiveItemsPage.map(
-                itemManagement -> ItemManagementResponseDto.builder()
-                        .idSolicitation(itemManagement.getIdSolicitation())
-                        .title(itemManagement.getTitle())
-                        .creationDate(itemManagement.getCreationDate())
-                        .details(itemManagement.getDetails())
-                        .requester(UserResponseDto.builder()
-                                .idUser(itemManagement.getRequester().getIdUser())
-                                .firstName(itemManagement.getRequester().getFirstName())
-                                .surname(itemManagement.getRequester().getSurname())
-                                .build())
-                        .newUser(UserResponseDto.builder()
-                                        .idUser(itemManagement.getNewUser().getIdUser())
-                                        .build())
-                        .build()
+        UserManager requesterManager = userManagerRepository.findById(itemManagementProviderRequestDto.getIdRequester())
+                .orElse(null);
+
+        UserClient requesterClient = userClientRepository.findById(itemManagementProviderRequestDto.getIdRequester())
+                .orElse(null);
+
+        ProviderSupplier newProviderSupplier = providerSupplierRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
+                .orElseThrow(() -> new NotFoundException("New Provider not found"));
+
+        ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
+                .title(itemManagementProviderRequestDto.getTitle())
+                .details(itemManagementProviderRequestDto.getDetails())
+                .requester(requesterManager != null ? requesterManager : requesterClient)
+                .newProvider(newProviderSupplier)
+                .build());
+
+        return getItemManagementProviderResponseDto(solicitation, requesterClient, requesterManager);
+    }
+
+    @Override
+    public Page<ItemManagementUserResponseDto> findAllUserSolicitation(Pageable pageable) {
+
+        Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByNewUserIsNotNull(pageable);
+
+        return itemManagementPage.map(
+                itemManagement -> {
+                    UserClient requester = userClientRepository.findById(itemManagement.getRequester().getIdUser())
+                            .orElseThrow(() -> new NotFoundException("Requester not found"));
+
+                    UserClient newUser = userClientRepository.findById(itemManagement.getNewUser().getIdUser())
+                            .orElseThrow(() -> new NotFoundException("New user not found"));
+                    return getItemManagementUserResponseDto(itemManagement, requester, newUser);
+                }
         );
-        return itemManagementResponsePage;
     }
 
     @Override
-    public void deleteUserSolicitation(String id) {
+    public Page<ItemManagementProviderResponseDto> findAllProviderSolicitation(Pageable pageable) {
+
+        Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByNewProviderIsNotNull(pageable);
+
+        return itemManagementPage.map(
+                itemManagement -> {
+                    UserClient requesterClient = userClientRepository.findById(itemManagement.getRequester().getIdUser())
+                            .orElse(null);
+
+                    UserManager requesterManager = userManagerRepository.findById(itemManagement.getRequester().getIdUser())
+                            .orElse(null);
+
+                    return getItemManagementProviderResponseDto(itemManagement, requesterClient, requesterManager);
+                }
+        );
+    }
+
+    @Override
+    public void deleteSolicitation(String id) {
         itemManagementRepository.deleteById(id);
     }
 
-    public List<Object> getDeleteItemRequest() {
-        List<Object> deleteItemSolicitations = new ArrayList<>();
+    @Override
+    public String approveSolicitation(String id) {
 
-        deleteItemSolicitations.addAll(contractRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(clientRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(providerRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(userRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(activityRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(requirementRepository.findAllByDeleteRequest(true));
-        deleteItemSolicitations.addAll(documentRepository.findAllByRequestIs(Document.Request.DELETE));
-        deleteItemSolicitations.addAll(employeeRepository.findAllByDeleteRequest(true));
 
-        return deleteItemSolicitations;
-    }
+        ItemManagement solicitation = itemManagementRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
-    public void deleteItem(String id, DeleteItemType item) {
-        switch (item) {
-            case BRANCH ->  {
-                branchRepository.deleteById(id);
-            }
-            case CLIENT -> {
-                clientRepository.deleteById(id);
-            }
-            case CONTRACT -> {
-                contractRepository.deleteById(id);
-            }
-            case PROVIDER -> {
-                providerRepository.deleteById(id);
-            }
-            case USER -> {
-                userRepository.deleteById(id);
-            }
-            case ACTIVITY -> {
-                activityRepository.deleteById(id);
-            }
-            case REQUIREMENT -> {
-                requirementRepository.deleteById(id);
-            }
-            case DOCUMENT -> {
-                documentRepository.deleteById(id);
-            }
-            case EMPLOYEE -> {
-                employeeRepository.deleteById(id);
-            }
-            default -> {
-                throw new BadRequestException("Invalid entity");
+        if (solicitation.getNewUser() != null) {
+            UserClient userClient = userClientRepository.findById(solicitation.getNewUser().getIdUser())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+
+            userClient.setIsActive(true);
+
+            userClientRepository.save(userClient);
+        } else if (solicitation.getNewProvider() != null) {
+
+            Provider provider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
+                    .orElseThrow(() -> new NotFoundException("Provider not found"));
+
+            provider.setIsActive(true);
+
+            providerRepository.save(provider);
+
+            if (provider.getEmail() != null) {
+                emailSender.sendInviteEmail(EmailInviteRequestDto.builder()
+                            .email(provider.getEmail())
+                            .company(Provider.Company.SUPPLIER)
+                            .idCompany(provider.getIdProvider())
+                        .build());
             }
         }
+
+        solicitation.setStatus(ItemManagement.Status.APPROVED);
+
+        itemManagementRepository.save(solicitation);
+
+        return "Solicitation approved";
     }
 
-    public String approveNewDocumentEmployee(String idDocument) {
-        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(idDocument).orElseThrow(() -> new NotFoundException("Document not found"));
+    @Override
+    public String denySolicitation(String id) {
 
-        documentEmployee.setRequest(Document.Request.NONE);
+        ItemManagement solicitation = itemManagementRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
-        return documentEmployee.getTitle() + " successfully approved";
+        solicitation.setStatus(ItemManagement.Status.DENIED);
+
+        itemManagementRepository.save(solicitation);
+
+        if (solicitation.getNewUser() != null) {
+            UserClient userClient = userClientRepository.findById(solicitation.getNewUser().getIdUser())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+
+            userClient.setDenied(true);
+
+            userClientRepository.save(userClient);
+        } else if (solicitation.getNewProvider() != null) {
+            Provider provider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
+                    .orElseThrow(() -> new NotFoundException("Provider not found"));
+
+            provider.setDenied(true);
+
+            providerRepository.save(provider);
+        }
+
+        return "Solicitation denied";
     }
 
-    public List<DocumentEmployee> getAddRequestDocumentEmployees() {
-        List<DocumentEmployee> addRequestDocumentEmployees = documentEmployeeRepository.findAllByRequest(Document.Request.ADD);
-        return addRequestDocumentEmployees;
+    private ItemManagementUserResponseDto getItemManagementUserResponseDto(ItemManagement itemManagement, UserClient requester, UserClient newUser) {
+        return ItemManagementUserResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .title(itemManagement.getTitle())
+                .details(itemManagement.getDetails())
+                .status(itemManagement.getStatus())
+                .creationDate(itemManagement.getCreationDate())
+                .requester(ItemManagementUserResponseDto.Requester.builder()
+                        .idUser(itemManagement.getRequester().getIdUser())
+                        .cpf(itemManagement.getRequester().getCpf())
+                        .email(itemManagement.getRequester().getEmail())
+                        .firstName(itemManagement.getRequester().getFirstName())
+                        .surname(itemManagement.getRequester().getSurname())
+                        .nameEnterprise(requester.getBranch().getName())
+                        .build())
+                .newUser(ItemManagementUserResponseDto.NewUser.builder()
+                        .idUser(itemManagement.getNewUser().getIdUser())
+                        .cpf(itemManagement.getNewUser().getCpf())
+                        .email(itemManagement.getNewUser().getEmail())
+                        .firstName(itemManagement.getNewUser().getFirstName())
+                        .surname(itemManagement.getNewUser().getSurname())
+                        .enterprise(newUser.getBranch().getName())
+                        .build())
+                .build();
     }
 
-    public enum ActivationItemType {
-        BRANCH,
-        CLIENT,
-        CONTRACT,
-        PROVIDER,
-        USER
-    }
-
-    public enum DeleteItemType {
-        BRANCH,
-        CLIENT,
-        CONTRACT,
-        PROVIDER,
-        USER,
-        ACTIVITY,
-        REQUIREMENT,
-        DOCUMENT,
-        EMPLOYEE
+    private ItemManagementProviderResponseDto getItemManagementProviderResponseDto(ItemManagement itemManagement, UserClient requesterClient, UserManager requesterManager) {
+        return ItemManagementProviderResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .title(itemManagement.getTitle())
+                .details(itemManagement.getDetails())
+                .status(itemManagement.getStatus())
+                .creationDate(itemManagement.getCreationDate())
+                .requester(ItemManagementProviderResponseDto.Requester.builder()
+                        .idUser(itemManagement.getRequester().getIdUser())
+                        .cpf(itemManagement.getRequester().getCpf())
+                        .email(itemManagement.getRequester().getEmail())
+                        .firstName(itemManagement.getRequester().getFirstName())
+                        .surname(itemManagement.getRequester().getSurname())
+                        .nameEnterprise(requesterManager != null ? "Realiza Assessoria" : requesterClient.getBranch().getName())
+                        .build())
+                .newProvider(ItemManagementProviderResponseDto.NewProvider.builder()
+                        .cnpj(itemManagement.getNewProvider().getCnpj())
+                        .telephone(itemManagement.getNewProvider().getTelephone())
+                        .corporateName(itemManagement.getNewProvider().getCorporateName())
+                        .build())
+                .build();
     }
 }

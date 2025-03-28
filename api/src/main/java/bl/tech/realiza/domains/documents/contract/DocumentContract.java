@@ -3,10 +3,7 @@ package bl.tech.realiza.domains.documents.contract;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,6 +18,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CONTRACT")
 public class DocumentContract extends Document {
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "documentContracts")
     private Contract contract;
 }

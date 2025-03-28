@@ -63,7 +63,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .position(userProviderSubcontractorRequestDto.getPosition())
                 .role(userProviderSubcontractorRequestDto.getRole())
                 .firstName(userProviderSubcontractorRequestDto.getFirstName())
-                .timeZone(userProviderSubcontractorRequestDto.getTimeZone())
                 .surname(userProviderSubcontractorRequestDto.getSurname())
                 .email(userProviderSubcontractorRequestDto.getEmail())
                 .profilePicture(userProviderSubcontractorRequestDto.getProfilePicture())
@@ -80,7 +79,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .position(savedUserSubcontractor.getPosition())
                 .role(savedUserSubcontractor.getRole())
                 .firstName(savedUserSubcontractor.getFirstName())
-                .timeZone(savedUserSubcontractor.getTimeZone())
                 .surname(savedUserSubcontractor.getSurname())
                 .email(savedUserSubcontractor.getEmail())
                 .profilePicture(savedUserSubcontractor.getProfilePicture())
@@ -110,7 +108,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .position(userSubcontractor.getPosition())
                 .role(userSubcontractor.getRole())
                 .firstName(userSubcontractor.getFirstName())
-                .timeZone(userSubcontractor.getTimeZone())
                 .surname(userSubcontractor.getSurname())
                 .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userSubcontractor.getEmail())
@@ -140,7 +137,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                             .position(userSubcontractor.getPosition())
                             .role(userSubcontractor.getRole())
                             .firstName(userSubcontractor.getFirstName())
-                            .timeZone(userSubcontractor.getTimeZone())
                             .surname(userSubcontractor.getSurname())
                             .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userSubcontractor.getEmail())
@@ -167,7 +163,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null ? userProviderSubcontractorRequestDto.getPosition() : userSubcontractor.getPosition());
         userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null ? userProviderSubcontractorRequestDto.getRole() : userSubcontractor.getRole());
         userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null ? userProviderSubcontractorRequestDto.getFirstName() : userSubcontractor.getFirstName());
-        userSubcontractor.setTimeZone(userProviderSubcontractorRequestDto.getTimeZone() != null ? userProviderSubcontractorRequestDto.getTimeZone() : userSubcontractor.getTimeZone());
         userSubcontractor.setSurname(userProviderSubcontractorRequestDto.getSurname() != null ? userProviderSubcontractorRequestDto.getSurname() : userSubcontractor.getSurname());
         userSubcontractor.setEmail(userProviderSubcontractorRequestDto.getEmail() != null ? userProviderSubcontractorRequestDto.getEmail() : userSubcontractor.getEmail());
         userSubcontractor.setProfilePicture(userProviderSubcontractorRequestDto.getProfilePicture() != null ? userProviderSubcontractorRequestDto.getProfilePicture() : userSubcontractor.getProfilePicture());
@@ -182,7 +177,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .position(savedUserSubcontractor.getPosition())
                 .role(savedUserSubcontractor.getRole())
                 .firstName(savedUserSubcontractor.getFirstName())
-                .timeZone(savedUserSubcontractor.getTimeZone())
                 .surname(savedUserSubcontractor.getSurname())
                 .email(savedUserSubcontractor.getEmail())
                 .profilePicture(savedUserSubcontractor.getProfilePicture())
@@ -216,7 +210,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                             .position(userSubcontractor.getPosition())
                             .role(userSubcontractor.getRole())
                             .firstName(userSubcontractor.getFirstName())
-                            .timeZone(userSubcontractor.getTimeZone())
                             .surname(userSubcontractor.getSurname())
                             .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userSubcontractor.getEmail())

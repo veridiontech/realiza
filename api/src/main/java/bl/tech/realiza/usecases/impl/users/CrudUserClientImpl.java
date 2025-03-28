@@ -9,9 +9,12 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -33,6 +36,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
+    private final CrudItemManagementImpl crudItemManagementImpl;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -60,7 +64,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(userClientRequestDto.getPosition())
                 .role(userClientRequestDto.getRole())
                 .firstName(userClientRequestDto.getFirstName())
-                .timeZone(userClientRequestDto.getTimeZone())
                 .surname(userClientRequestDto.getSurname())
                 .email(userClientRequestDto.getEmail())
                 .profilePicture(userClientRequestDto.getProfilePicture())
@@ -71,6 +74,16 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
+        // criar solicitação
+        crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
+                .title(String.format("Novo usuário %s %s", savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "", savedUserClient.getSurname() != null ? savedUserClient.getSurname() : ""))
+                .details(String.format("Solicitação de adição do usuário %s %s da empresa %s a plataforma",
+                        savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "",
+                        savedUserClient.getSurname() != null ? savedUserClient.getSurname() : "", savedUserClient.getBranch().getName() != null ? savedUserClient.getBranch().getName() : ""))
+                .idRequester(userClientRequestDto.getIdUser())
+                .idNewUser(savedUserClient.getIdUser())
+                .build());
+
         UserResponseDto userClientResponse = UserResponseDto.builder()
                 .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
@@ -78,7 +91,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(savedUserClient.getPosition())
                 .role(savedUserClient.getRole())
                 .firstName(savedUserClient.getFirstName())
-                .timeZone(savedUserClient.getTimeZone())
                 .surname(savedUserClient.getSurname())
                 .email(savedUserClient.getEmail())
                 .profilePicture(savedUserClient.getProfilePicture())
@@ -109,7 +121,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(userClient.getPosition())
                 .role(userClient.getRole())
                 .firstName(userClient.getFirstName())
-                .timeZone(userClient.getTimeZone())
                 .surname(userClient.getSurname())
                 .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .email(userClient.getEmail())
@@ -141,7 +152,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .position(userClient.getPosition())
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
-                            .timeZone(userClient.getTimeZone())
                             .surname(userClient.getSurname())
                             .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userClient.getEmail())
@@ -167,7 +177,6 @@ public class CrudUserClientImpl implements CrudUserClient {
         userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
         userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
         userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());
-        userClient.setTimeZone(userClientRequestDto.getTimeZone() != null ? userClientRequestDto.getTimeZone() : userClient.getTimeZone());
         userClient.setSurname(userClientRequestDto.getSurname() != null ? userClientRequestDto.getSurname() : userClient.getSurname());
         userClient.setEmail(userClientRequestDto.getEmail() != null ? userClientRequestDto.getEmail() : userClient.getEmail());
         userClient.setProfilePicture(userClientRequestDto.getProfilePicture() != null ? userClientRequestDto.getProfilePicture() : userClient.getProfilePicture());
@@ -183,7 +192,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .position(savedUserClient.getPosition())
                 .role(savedUserClient.getRole())
                 .firstName(savedUserClient.getFirstName())
-                .timeZone(savedUserClient.getTimeZone())
                 .surname(savedUserClient.getSurname())
                 .email(savedUserClient.getEmail())
                 .profilePicture(savedUserClient.getProfilePicture())
@@ -219,7 +227,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .position(userClient.getPosition())
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
-                            .timeZone(userClient.getTimeZone())
                             .surname(userClient.getSurname())
                             .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                             .email(userClient.getEmail())

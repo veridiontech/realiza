@@ -17,6 +17,7 @@ interface CompanyData {
   razaoSocial: string;
   nomeFantasia: string;
   cep: string;
+  email: string;
   state: string;
   city: string;
   address: string;
@@ -60,7 +61,7 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
         cnpj: sanitizeNumber(cnpj),
         tradeName: res.nomeFantasia,
         corporateName: res.razaoSocial,
-        email: "",
+        email: res.email,
         telephone: res.telefone ? sanitizeNumber(res.telefone) : "",
         cep: sanitizeNumber(res.cep),
         state: res.state,
@@ -126,7 +127,7 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
     }
 
     try {
-      console.log("Dados enviados para /user/client:", formData);
+
       await axios.post(`${ip}/user/client`, formData, {
         headers: { "Content-Type": "application/json" },
       });
@@ -234,6 +235,12 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
             defaultValue: clientForm.number,
             required: true,
           },
+          {
+            name: "passoword",
+            label: "Senha",
+            type: "password",
+            required: true
+          }
         ]}
         onSubmit={handleStep2Submit}
         onClose={onClose}
@@ -267,7 +274,7 @@ export function SelectClient() {
   const { user } = useUser();
   const { client } = useClient();
   const [selectedTab, setSelectedTab] = useState("filiais");
-  const [employees, setEmployees] = useState([]);
+  const [usersFromBranch, setUsersFromBranch] = useState([]);
   const { selectedBranch } = useBranch();
 
   const fetchBranches = async () => {
@@ -281,25 +288,24 @@ export function SelectClient() {
       console.error("Erro ao buscar filiais:", err);
     }
   };
-  const getEmployee = async (idBranch: string) => {
-    if (!idBranch) return
-    setEmployees([]); 
-    console.log("idBranch: ", idBranch);
-    try {
-      const res = await axios.get(
-        `${ip}/employee?idSearch=${idBranch}&enterprise=CLIENT`
-      );
-      setEmployees(res.data.content);
-    } catch (error) {
-      console.log("Erro ao buscar colaboradores:", error);
+
+  const getUsersFromBranch = async() => {
+    try{
+      const res = await axios.get(`${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`)
+      console.log("usuários da branch:", res.data.content);
+      
+      setUsersFromBranch(res.data.content)
+    }catch(err) {
+      console.log("erro ao buscar usuários:", err);
+      
     }
-  };
+  }
 
   useEffect(() => {
     console.log("id da branch:", selectedBranch);
 
     if (selectedBranch?.idBranch) {
-      getEmployee(selectedBranch.idBranch);
+      getUsersFromBranch();
     }
   }, [selectedBranch]);
 
@@ -435,7 +441,7 @@ export function SelectClient() {
                               Nome
                             </th>
                             <th className="border border-gray-300 px-4 py-2">
-                              Status
+                              CPF
                             </th>
                             <th className="border border-gray-300 px-4 py-2">
                               Ações
@@ -443,26 +449,18 @@ export function SelectClient() {
                           </tr>
                         </thead>
                         <tbody>
-                          {employees && employees.length > 0 ? (
-                            employees.map((employee: any) => (
-                              <tr key={employee.idEmployee}>
+                          {usersFromBranch && usersFromBranch.length > 0 ? (
+                            usersFromBranch.map((users: any) => (
+                              <tr key={users.idUser} className="overflow-auto">
                                 <td className="border border-gray-300 px-4 py-2">
-                                  {employee.name}
+                                  {users.firstName}
                                 </td>
                                 <td className="border border-gray-300 px-4 py-2">
-                                  <span
-                                    className={
-                                      employee.situation === "Ativo"
-                                        ? "text-green-500"
-                                        : "text-red-500"
-                                    }
-                                  >
-                                    {employee.situation}
-                                  </span>
+                                  <span>{users.cpf}</span>
                                 </td>
                                 <td className="border border-gray-300 px-4 py-2">
                                   <Link
-                                    to={`/sistema/detailsEmployees/${employee.idEmployee}`}
+                                    to={`/sistema/detailsEmployees/${users.idEmployee}`}
                                   >
                                     <button className="text-realizaBlue ml-4 hover:underline">
                                       <Settings2 />

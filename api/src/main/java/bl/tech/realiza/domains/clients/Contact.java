@@ -27,15 +27,18 @@ public class Contact {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idBranch", nullable = false)
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "idBranch")
     private Branch branch;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idProviderSupplier", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "idProviderSupplier")
     private ProviderSupplier supplier;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idProviderSubcontractor", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "idProviderSubcontractor")
     private ProviderSubcontractor subcontractor;
 }

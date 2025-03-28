@@ -3,26 +3,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
-import { ip } from "@/utils/ip";
+// import { ip } from "@/utils/ip";
 import { useFormDataContext } from "@/context/formDataProvider";
-import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
+// import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 
 const enterprisePageEmailFormSchema = z.object({
-  cnpj: z.string().nonempty("O CNPJ é obrigatório"),
   tradeName: z.string().optional(),
   corporateName: z.string().nonempty("A razão social é obrigatória"),
   email: z.string().nonempty("O email é obrigatório"),
   phone: z.string().nonempty("O telefone é obrigatório"),
-  idCompany: z.string().optional(),
   company: z.string().nullable().optional(),
-  branches: z.array(z.string()).nonempty("A branch é obrigatória"),
+
 });
 
 type EnterprisePageEmailFormSchema = z.infer<
@@ -38,9 +35,10 @@ export function EnterprisePageEmail() {
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
-  const idClient = searchParams.get("idClient");
+  const findBranchId = searchParams.get("idBranch")
   const [isLoading, setIsLoading] = useState(false);
-  const [branches, setBranches] = useState<any[]>([]);
+  // const {datasSender} = useDataSendEmailContext()
+  // const {userData} = useFormDataContext()
 
   useEffect(() => {
     const validateToken = async () => {
@@ -66,52 +64,17 @@ export function EnterprisePageEmail() {
     }
   }, [tokenFromUrl]);
 
-  useEffect(() => {
-    if (idClient) {
-      axios
-        .get(
-          `${ip}/branch/filtered-client?idSearch=${idClient}&page=0&size=100`,
-        )
-        .then((res) => {
-          const data = res.data.content || res.data;
-          const branchesArray = Array.isArray(data) ? data : data ? [data] : [];
-          setBranches(branchesArray);
-        })
-        .catch((err) => {
-          console.error("Erro ao buscar branches:", err);
-        });
-    }
-  }, [idClient]);
 
   const {
     register,
     handleSubmit,
-    setValue,
-    getValues,
+    // setValue,
+    // getValues,
     formState: { isValid },
   } = useForm<EnterprisePageEmailFormSchema>({
     resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange",
   });
-
-  const validateCnpj = async () => {
-    setIsLoading(true);
-    const cnpj = getValues("cnpj").replace(/\D/g, "");
-    if (cnpj.length !== 14) {
-      setIsLoading(false);
-      return;
-    }
-    try {
-      const data = await fetchCompanyByCNPJ(cnpj);
-      setValue("corporateName", data.razaoSocial);
-      setValue("tradeName", data.nomeFantasia || "");
-      setValue("email", "");
-    } catch (err) {
-      console.log("Erro ao buscar CNPJ:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setIsLoading(true);
@@ -140,23 +103,25 @@ export function EnterprisePageEmail() {
       case "SUPPLIER":
         payload = {
           ...data,
+          idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
-          company: findCompany || "",
+          company: findCompany || "SUPPLIER",
           fantasyName: data.tradeName || "",
           socialReason: data.corporateName,
-          branches: data.branches,
         };
         break;
       default:
         payload = {
           ...data,
+          idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
-          company: findCompany || "",
+          company: "SUPPLIER",
           fantasyName: data.tradeName || "",
           socialReason: data.corporateName,
         };
         break;
     }
+    console.log("enviando cadastro", payload);
     setEnterpriseData(payload);
     navigate(`/email/Sign-Up?token=${token}`);
     setIsLoading(false);
@@ -170,6 +135,16 @@ export function EnterprisePageEmail() {
     );
   }
 
+  
+// useEffect(() => {
+//   if (datasSender) {
+//     if (datasSender.email) setValue("email", datasSender.email);
+//     if (datasSender.phone) setValue("phone", datasSender.phone);
+//     if (datasSender.tradeName) setValue("tradeName", datasSender.tradeName);
+//     if (datasSender.corporateName) setValue("corporateName", datasSender.corporateName);
+//   }
+// }, [datasSender, setValue]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-center">
@@ -178,34 +153,6 @@ export function EnterprisePageEmail() {
       <div>
         <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex items-center gap-5">
-            <div>
-              <Label>CNPJ</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  placeholder="CNPJ: __.___.___/____-__"
-                  className="w-[10vw]"
-                  {...register("cnpj")}
-                />
-                {isLoading ? (
-                  <Button type="button" onClick={validateCnpj}>
-                    <Oval
-                      visible={true}
-                      height="80"
-                      width="80"
-                      color="#4fa94d"
-                      ariaLabel="oval-loading"
-                      wrapperStyle={{}}
-                      wrapperClass=""
-                    />
-                  </Button>
-                ) : (
-                  <Button type="button" onClick={validateCnpj}>
-                    <Search />
-                  </Button>
-                )}
-              </div>
-            </div>
           </div>
           <div>
             <Label>Email corporativo</Label>
@@ -245,25 +192,6 @@ export function EnterprisePageEmail() {
               />
             </div>
           </div>
-          {branches && branches.length > 0 && (
-            <div>
-              <Label>Selecione a Branch</Label>
-              <select
-                multiple
-                className="w-[27vw] rounded border p-2"
-                {...register("branches")}
-              >
-                {branches.map((branch: any) => (
-                  <option
-                    key={branch.idBranch || branch.id}
-                    value={branch.idBranch || branch.id}
-                  >
-                    {branch.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
           {isLoading ? (
             <Button className="bg-realizaBlue h-[5vh]">
               <Oval

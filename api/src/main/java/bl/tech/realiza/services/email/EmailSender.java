@@ -1,6 +1,7 @@
 package bl.tech.realiza.services.email;
 
 import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -10,7 +11,9 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
 import bl.tech.realiza.gateways.requests.services.email.EmailUpdateRequestDto;
+import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
+import bl.tech.realiza.usecases.impl.providers.CrudProviderSupplierImpl;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,26 +37,30 @@ public class EmailSender {
     private final TokenManagerService tokenManagerService;
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
+    private final CrudProviderSupplierImpl crudProviderSupplierImpl;
 
     public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
         String idCompany = "";
+        String idBranch = "";
         Provider.Company company = emailInviteRequestDto.getCompany();
         switch (emailInviteRequestDto.getCompany()) {
             case CLIENT -> {
                 companyName = "Realiza Assessoria Empresarial Ltda";
             }
             case SUPPLIER -> {
-                var supplier = branchRepository.findById(emailInviteRequestDto.getIdCompany())
-                        .orElseThrow(() -> new EntityNotFoundException("Client not found"));
-                companyName = supplier.getClient().getCorporateName();
-                idCompany = supplier.getIdBranch();
+                ProviderResponseDto providerSupplier = crudProviderSupplierImpl.findOne(emailInviteRequestDto.getIdCompany())
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+                companyName = providerSupplier.getCorporateName() != null ? providerSupplier.getCorporateName() : "Tech Solutions Ltda";
+                idCompany = providerSupplier.getIdProvider();
+                idBranch = providerSupplier.getBranches().get(0).getIdBranch();
             }
             case SUBCONTRACTOR -> {
-                var subcontractor = providerSupplierRepository.findById(emailInviteRequestDto.getIdCompany())
+                var subcontractor = providerSubcontractorRepository.findById(emailInviteRequestDto.getIdCompany())
                         .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
                 companyName = subcontractor.getCorporateName();
                 idCompany = subcontractor.getIdProvider();
+                idBranch = subcontractor.getProviderSupplier().getBranches().get(0).getIdBranch();
             }
         }
 
@@ -66,11 +73,10 @@ public class EmailSender {
             try (var inputStream = Objects.requireNonNull(
                     EmailControllerImpl.class.getResourceAsStream("/templates/email-invite.html"))) {
                 emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("<span class=\"highlight\">Realiza Assessoria Empresarial Ltda</span>",
-                                "<span class=\"highlight\">" + companyName + "</span>")
+                        .replace("Tech Solutions Ltda", companyName)
                         .replace("#TOKEN_PLACEHOLDER#", token)
                         .replace("#ID_PLACEHOLDER#",idCompany)
-                        .replace("#COMPANY_PLACEHOLDER#",company.name());
+                        .replace("#ID_BRANCH#",idBranch);
                 if (emailInviteRequestDto.getIdClient() != null) {
                     emailBody = emailBody.replace("#ID_CLIENT#", emailInviteRequestDto.getIdClient());
                 } else {

@@ -54,12 +54,11 @@ export function SearchCnpjModal({ onClose, onProceed }: SearchCnpjModalProps) {
           name: "cnpj",
           label: "CNPJ",
           type: "custom",
-          render: ({ value, onChange }) => (
+          render: ({  onChange }) => (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  value={value}
                   onChange={(e) => {
                     setCnpj(e.target.value);
                     onChange(e.target.value);

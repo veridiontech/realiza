@@ -11,6 +11,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -22,6 +23,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -33,32 +36,49 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("SUPPLIER")
 public class ProviderSupplier extends Provider {
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToMany
     @JoinTable(
             name = "SUPPLIER_BRANCHS",
             joinColumns = @JoinColumn(name = "idProvider"),
-            inverseJoinColumns = @JoinColumn(name = "idBranch", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+            inverseJoinColumns = @JoinColumn(name = "idBranch")
     )
     private List<Branch> branches;
 
-    @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @JsonIgnore
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE)
     private List<Contact> contacts;
 
-    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "providerSupplier")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ContractProviderSupplier> contractsSupplier;
 
-    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "providerSupplier")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ContractProviderSubcontractor> contractsSubcontractor;
 
-    @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.REMOVE)
     private List<Employee> employees;
 
-    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "providerSupplier")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ProviderSubcontractor> providerSubcontracts;
 
-    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "providerSupplier")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<UserProviderSupplier> userProviderSuppliers;
 
-    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "providerSupplier", cascade = CascadeType.REMOVE)
     private List<DocumentProviderSupplier> documentProviderSuppliers;
 }

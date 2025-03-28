@@ -13,6 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -24,22 +26,30 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("SUBCONTRACTOR")
 public class ProviderSubcontractor extends Provider {
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "idProviderSupplier", nullable = false)
+    @JoinColumn(name = "idProviderSupplier")
     private ProviderSupplier providerSupplier;
 
-    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.REMOVE)
     private List<Contact> contacts;
 
-    @OneToMany(mappedBy = "providerSubcontractor", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "providerSubcontractor")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<ContractProviderSubcontractor> contractsSubcontractor;
 
-    @OneToMany(mappedBy = "subcontract", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "subcontract", cascade = CascadeType.REMOVE)
     private List<Employee> employees;
 
-    @OneToMany(mappedBy = "providerSubcontractor", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "providerSubcontractor")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<UserProviderSubcontractor> userProviderSubcontractors;
 
-    @OneToMany(mappedBy = "providerSubcontractor", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "providerSubcontractor", cascade = CascadeType.REMOVE)
     private List<DocumentProviderSubcontractor> documentProviderSubcontractors;
 }

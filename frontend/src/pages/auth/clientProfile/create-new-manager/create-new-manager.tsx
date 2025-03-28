@@ -1,18 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useBranch } from "@/context/Branch-provider";
 import { useUser } from "@/context/user-provider";
-import { propsBranch } from "@/types/interfaces";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Oval } from "react-loader-spinner";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const createClientManageFormSchema = z.object({
-  name: z.string().nonempty("Nome é obrigatório"),
+  firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
   cellPhone: z.string().nonempty("Celular é obrigatório"),
   cpf: z.string().nonempty("Cpf é obrigatório"),
@@ -29,7 +30,7 @@ type CreateClientManagerFormSchema = z.infer<
   typeof createClientManageFormSchema
 >;
 export function CreateNewManagerClient() {
-  const [uniqueBranch, setUniqueBranch] = useState<propsBranch | null>(null);
+  const { selectedBranch } = useBranch();
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
   const {
@@ -40,76 +41,35 @@ export function CreateNewManagerClient() {
     resolver: zodResolver(createClientManageFormSchema),
   });
 
+  console.log(selectedBranch);
+
   const createClientManager = async (data: CreateClientManagerFormSchema) => {
     setIsLoading(true);
     const payload = {
       ...data,
       branch: user?.branch,
+      idUser: user?.idUser,
     };
-    console.log(payload);
-
-    let responseClient: any;
-
-    let branchName: string;
-
-    let branchResponse: any;
-
     try {
-      responseClient = await axios.post(`${ip}/user/client`, payload);
+       await axios.post(`${ip}/user/client`, payload);
+       toast.success("Sucesso ao solicitar novo usuário")
     } catch (err) {
       console.log("erro ao criar gerente:", err);
+      toast.error("Erro ao criar nova solicitação")
     } finally {
       setIsLoading(false);
     }
-    try {
-      branchResponse = await axios.get(`${ip}/branch/${user?.branch}`);
-    } catch (err) {
-      console.log("erro ao buscar nome da branch:", err);
-    } finally {
-      setIsLoading(false);
-    }
-
-    branchName = branchResponse.data.name;
-
-    const newSolicitation = {
-      title: "Novo usuário Cliente Gerente",
-      details: `Solicitação para criar um novo gerente em ${branchName}`,
-      idRequester: user?.idUser,
-      idNewUser: responseClient.data.idUser,
-    };
-
-    try {
-      await axios.post(`${ip}/item-management/new`, newSolicitation);
-    } catch (err) {
-      console.log("erro ao criar solicitação:", err);
-    }
   };
-
-  const getUniqueBranch = async () => {
-    setIsLoading(true);
-    try {
-      const res = await axios.get(`${ip}/branch/${user?.branch}`);
-      setUniqueBranch(res.data);
-      console.log(res.data);
-    } catch (err) {
-      console.log("erro ao buscar filial:", err);
-    }
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    getUniqueBranch();
-  }, []);
 
   return (
     <div className="flex min-h-screen justify-center bg-gray-200 p-16">
       <div className="bg-primary-foreground flex flex-col gap-8 rounded-md p-10">
         <div className="flex items-center gap-1 text-[20px]">
           <h1>Crie um novo gerente para</h1>
-          {isLoading ? (
-            <strong>{uniqueBranch?.name}</strong>
+          {selectedBranch ? (
+            <strong>{selectedBranch?.name}</strong>
           ) : (
-            <Skeleton className="h-[10px] w-[150px] rounded-full bg-gray-300" />
+            <span className="text-red-600">Selecione uma filial</span>
           )}{" "}
         </div>
         <div className="rounded-md bg-gray-200 p-10 shadow-md">
@@ -121,8 +81,8 @@ export function CreateNewManagerClient() {
             <div className="flex gap-7">
               <div>
                 <Label>Nome</Label>
-                <Input type="text" {...register("name")} className="w-[15vw]" />
-                {errors.name && <span>{errors.name.message}</span>}
+                <Input type="text" {...register("firstName")} className="w-[15vw]" />
+                {errors.firstName && <span>{errors.firstName.message}</span>}
               </div>
               <div>
                 <Label>Sobrenome</Label>
@@ -172,9 +132,23 @@ export function CreateNewManagerClient() {
                 />
               </div>
             </div>
-            <Button type="submit" className="bg-realizaBlue">
-              Solicitar criação do gerente
-            </Button>
+            {isLoading ? (
+              <Button type="submit" className="bg-realizaBlue">
+                <Oval
+                  visible={true}
+                  height="80"
+                  width="80"
+                  color="#4fa94d"
+                  ariaLabel="oval-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                />
+              </Button>
+            ) : (
+              <Button type="submit" className="bg-realizaBlue">
+                Solicitar criação do gerente
+              </Button>
+            )}
           </form>
         </div>
       </div>

@@ -134,7 +134,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
               const res = await axios.get(
-                `${ip}/user/subcontractor/${user?.supplier}`,
+                `${ip}/user/subcontractor/${userId}`,
                 {
                   headers: { Authorization: `Bearer ${tokenFromStorage}` },
                 },

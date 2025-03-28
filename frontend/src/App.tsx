@@ -10,6 +10,8 @@ import { Toaster } from "sonner";
 import { ClientProvider } from "./context/Client-Provider";
 import { DocumentProvider } from "./context/Document-provider";
 import { BranchProvider } from "./context/Branch-provider";
+import { SupplierProvider } from "./context/Supplier-context";
+import { DataSendEmailProvider } from "./context/dataSendEmail-Provider";
 
 const queryClient = new QueryClient();
 
@@ -17,24 +19,28 @@ export function App() {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <FormDataProvider>
-          <HelmetProvider>
-            <Toaster
-              richColors
-              closeButton
-              expand={false}
-              className="w-[20vw]"
-            />
-            <Helmet titleTemplate="%s | realiza" />
-            <ClientProvider>
-              <BranchProvider>
-                <DocumentProvider>
-                  <RouterProvider router={router} />
-                </DocumentProvider>
-              </BranchProvider>
-            </ClientProvider>
-          </HelmetProvider>
-        </FormDataProvider>
+        <DataSendEmailProvider>
+          <FormDataProvider>
+            <HelmetProvider>
+              <Toaster
+                richColors
+                closeButton
+                expand={false}
+                className="w-[20vw]"
+              />
+              <Helmet titleTemplate="%s | realiza" />
+              <ClientProvider>
+                <BranchProvider>
+                  <SupplierProvider>
+                    <DocumentProvider>
+                      <RouterProvider router={router} />
+                    </DocumentProvider>
+                  </SupplierProvider>
+                </BranchProvider>
+              </ClientProvider>
+            </HelmetProvider>
+          </FormDataProvider>
+        </DataSendEmailProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

@@ -5,6 +5,7 @@ import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.ultragaz.Board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,8 +26,8 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idClient;
     private String cnpj;
-    private String tradeName;
-    private String corporateName;
+    private String tradeName; // nome fantasia
+    private String corporateName; // razão social
     private String logo;
     private String email;
     private String telephone;
@@ -42,11 +43,18 @@ public class Client {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
     @JsonIgnore
-    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
     private List<Branch> branches;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
+    private List<Board> boards;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
     private List<DocumentClient> documentClients;
 }

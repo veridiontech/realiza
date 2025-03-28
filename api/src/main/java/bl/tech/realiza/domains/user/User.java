@@ -1,13 +1,19 @@
 package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.services.ItemManagement;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,7 +42,6 @@ public abstract class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String firstName;
-    private TimeZone timeZone;
     private String surname;
     private String email;
     private String profilePicture;
@@ -49,11 +54,27 @@ public abstract class User {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @JsonIgnore
+    @JsonManagedReference
     @OneToMany(mappedBy = "requester", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ItemManagement> userRequest;
 
+    @JsonIgnore
+    @JsonManagedReference
     @OneToOne(mappedBy = "newUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private ItemManagement newUserSolicitation;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "responsible")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<Contract> contracts;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<Notification> notifications;
 
     public enum Role {
         ROLE_ADMIN,

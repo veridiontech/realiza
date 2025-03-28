@@ -21,7 +21,10 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("BRANCH")
 public class DocumentBranch extends Document {
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "id_branch", nullable = false)
+    @JoinColumn(name = "idBranch")
     private Branch branch;
 }

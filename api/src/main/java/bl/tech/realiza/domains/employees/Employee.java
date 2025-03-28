@@ -61,6 +61,9 @@ public abstract class Employee {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
     @ManyToOne
     @JoinColumn(name = "idBranch")
     private Branch branch;
@@ -81,15 +84,10 @@ public abstract class Employee {
     )
     private List<Contract> contracts;
 
-    @ManyToMany
-    @JoinTable(
-            name = "EMPLOYEE_DOCUMENT_MATRIX",
-            joinColumns = @JoinColumn(name = "idEmployee"),
-            inverseJoinColumns = @JoinColumn(name = "idDocument", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
-    )
-    private List<DocumentMatrix> documents;
-
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.REMOVE)
     private List<DocumentEmployee> documentEmployees;
 
     public enum Situation {

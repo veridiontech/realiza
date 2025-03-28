@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
@@ -119,27 +120,18 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
             throw new BadRequestException("Invalid password");
         }
 
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findByCnpj(enterpriseAndUserRequestDto.getCnpj());
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElse(null);
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(enterpriseAndUserRequestDto.getIdCompany())
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-        Optional<Branch> branchOptional = branchRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
-        Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
-        List<Branch> branchList = List.of(branch);
-
-        if (providerSupplierOptional.isPresent()) {
-            providerSupplier.setTradeName(enterpriseAndUserRequestDto.getTradeName() != null ? enterpriseAndUserRequestDto.getTradeName() : providerSupplier.getTradeName());
-            providerSupplier.setCorporateName(enterpriseAndUserRequestDto.getCorporateName() != null ? enterpriseAndUserRequestDto.getCorporateName() : providerSupplier.getCorporateName());
-            providerSupplier.setEmail(enterpriseAndUserRequestDto.getEmail() != null ? enterpriseAndUserRequestDto.getEmail() : providerSupplier.getEmail());
-            providerSupplier.setBranches(branchList);
-        } else {
-            providerSupplier = ProviderSupplier.builder()
-                    .cnpj(enterpriseAndUserRequestDto.getCnpj())
-                    .tradeName(enterpriseAndUserRequestDto.getTradeName())
-                    .corporateName(enterpriseAndUserRequestDto.getCorporateName())
-                    .email(enterpriseAndUserRequestDto.getEmail())
-                    .branches(branchList)
-                    .build();
-        }
+        providerSupplier.setCorporateName(enterpriseAndUserRequestDto.getCorporateName() != null ? enterpriseAndUserRequestDto.getCorporateName() : providerSupplier.getCorporateName());
+        providerSupplier.setEmail(enterpriseAndUserRequestDto.getEmail() != null ? enterpriseAndUserRequestDto.getEmail() : providerSupplier.getEmail());
+        providerSupplier.setTelephone(enterpriseAndUserRequestDto.getPhone() != null ? enterpriseAndUserRequestDto.getPhone() : providerSupplier.getTelephone());
+        providerSupplier.setTradeName(enterpriseAndUserRequestDto.getTradeName() != null ? enterpriseAndUserRequestDto.getTradeName() : providerSupplier.getTradeName());
+        providerSupplier.setCep(enterpriseAndUserRequestDto.getCep() != null ? enterpriseAndUserRequestDto.getCep() : providerSupplier.getCep());
+        providerSupplier.setState(enterpriseAndUserRequestDto.getState() != null ? enterpriseAndUserRequestDto.getState() : providerSupplier.getState());
+        providerSupplier.setCity(enterpriseAndUserRequestDto.getCity() != null ? enterpriseAndUserRequestDto.getCity() : providerSupplier.getCity());
+        providerSupplier.setAddress(enterpriseAndUserRequestDto.getAddress() != null ? enterpriseAndUserRequestDto.getAddress() : providerSupplier.getAddress());
+        providerSupplier.setNumber(enterpriseAndUserRequestDto.getNumber() != null ? enterpriseAndUserRequestDto.getNumber() : providerSupplier.getNumber());
 
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(providerSupplier);
 
@@ -149,10 +141,10 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .cpf(enterpriseAndUserRequestDto.getCpf())
                 .password(encryptedPassword)
                 .position(enterpriseAndUserRequestDto.getPosition())
-                .role(enterpriseAndUserRequestDto.getRole())
+                .role(User.Role.ROLE_SUPPLIER_RESPONSIBLE)
                 .firstName(enterpriseAndUserRequestDto.getName())
                 .surname(enterpriseAndUserRequestDto.getSurname())
-                .email(enterpriseAndUserRequestDto.getEmail())
+                .email(savedProviderSupplier.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
                 .isActive(true)
                 .providerSupplier(savedProviderSupplier)
@@ -160,7 +152,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
 
         UserProviderSupplier savedUserProviderSupplier = userProviderSupplierRepository.save(newUserProviderSupplier);
 
-        EnterpriseAndUserResponseDto clientAndUserClientResponseDto = EnterpriseAndUserResponseDto.builder()
+        return EnterpriseAndUserResponseDto.builder()
                 .idEnterprise(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
                 .corporateName(savedProviderSupplier.getCorporateName())
@@ -174,8 +166,6 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .position(savedUserProviderSupplier.getPosition())
                 .role(savedUserProviderSupplier.getRole())
                 .build();
-
-        return clientAndUserClientResponseDto;
     }
 
     @Override
@@ -225,7 +215,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
 
         UserProviderSubcontractor savedUserProviderSubcontractor = userProviderSubcontractorRepository.save(newUserProviderSubcontractor);
 
-        EnterpriseAndUserResponseDto clientAndUserClientResponseDto = EnterpriseAndUserResponseDto.builder()
+        return EnterpriseAndUserResponseDto.builder()
                 .idEnterprise(savedProviderSubcontractor.getIdProvider())
                 .cnpj(savedProviderSubcontractor.getCnpj())
                 .corporateName(savedProviderSubcontractor.getCorporateName())
@@ -239,7 +229,5 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .position(savedUserProviderSubcontractor.getPosition())
                 .role(savedUserProviderSubcontractor.getRole())
                 .build();
-
-        return clientAndUserClientResponseDto;
     }
 }

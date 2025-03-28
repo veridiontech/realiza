@@ -24,6 +24,10 @@ public class Notification {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "idUser")
     private User user;
 }

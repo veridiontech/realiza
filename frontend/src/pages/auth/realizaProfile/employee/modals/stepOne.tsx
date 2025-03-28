@@ -192,7 +192,7 @@ export function StepOneEmployee({
                 onChange={(e) => setIdBranch(e.target.value)}
               >
                 <option value="">Selecione uma filial</option>
-                {branches.map((branch) => (
+                {branches.map((branch: any) => (
                   <option key={branch.id_branch} value={branch.id_branch} onClick={() => getIdBranch(branch.id_branch)}>
                     {branch.name}
                   </option>

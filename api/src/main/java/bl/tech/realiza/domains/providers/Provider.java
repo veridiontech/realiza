@@ -1,10 +1,10 @@
 package bl.tech.realiza.domains.providers;
 
+import bl.tech.realiza.domains.services.ItemManagement;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
@@ -20,24 +20,32 @@ public abstract class Provider {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idProvider;
-    @Column(unique = true)
-    private String cnpj;
+    private String cnpj; //
     private String tradeName;
-    private String corporateName;
+    private String corporateName; //
     private String logo;
-    private String email;
-    private String telephone;
+    private String email; //
+    private String telephone; //
     private String cep;
     private String state;
     private String city;
     private String address;
     private String number;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
+    @Builder.Default
+    private Boolean denied = false;
     @Builder.Default
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+    @JsonIgnore
+    @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
+    private ItemManagement newProviderSolicitation;
 
     public enum Company {
         CLIENT,

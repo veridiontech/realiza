@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.ultragaz;
 
-import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,8 +19,19 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idBoard;
+    private String name;
 
+    // -------------------------------
+    // Relacionamentos INERENTES
+    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "idClient")
+    private Client client;
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
     @JsonIgnore
-    @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
     private List<Market> markets;
 }

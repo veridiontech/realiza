@@ -18,41 +18,35 @@ import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useBranch } from "@/context/Branch-provider";
+import { Oval } from "react-loader-spinner";
 
 const contractFormSchema = z.object({
-  serviceName: z.string().nonempty("O nome do serviço é obrigatório"),
-  serviceReference: z
+  serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
+  serviceType: z.string().nonempty("Tipo de despesa é obrigatório"),
+  description: z.string().optional(),
+  expenseType: z.string().nonempty("Tipo do serviço"),
+  dateStart: z.string().nonempty("Início efetivo é obrigatório"),
+  idResponsible: z.string().nonempty("Selecione um gestor"), //*
+  contractReference: z
     .string()
-    .nonempty("A referência do contrato é obrigatória"),
-  startDate: z
-    .string()
-    .refine(
-      (val) => !isNaN(Date.parse(val)),
-      "A data de início deve ser válida",
-    ),
-  serviceType: z.string(),
-  // activities: z.string().min(1, "Pelo menos uma atividade é obrigatória"),
-  // requirements: z
-  //   .string(),
-  description: z.string().nonempty("A descrição detalhada é obrigatória"),
-  serviceTypeExpense: z.string().nonempty("O tipo de despesa é obrigatório"),
-  // allocatedLimit: z
-  //   .string()
-  //   .regex(/^\d+$/, "O limite de alocados deve ser um número válido"),
-  risk: z.string(),
+    .nonempty("Referência do contrato é obrigatório"),
+  idActivity: z.string().nonempty("Selecione uma atividade"), //*
 });
 
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
 export function ModalAddContract() {
+  const [isLoading, setIsLoading] = useState(false)
   const { selectedBranch } = useBranch();
   const [managers, setManagers] = useState<any[]>([]);
-  const [selectManager, setSelectManager] = useState<string | null>(null);
+  const [activities, setActivities] = useState([])
+  // const [selectManager, setSelectManager] = useState<string | null>(null);
   // const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
+    // setValue,
     formState: { errors },
   } = useForm<ContractFormSchema>({
     resolver: zodResolver(contractFormSchema),
@@ -60,9 +54,9 @@ export function ModalAddContract() {
 
   const getActivities = async () => {
     try {
-      // const activitieData = await axios.get(`${ip}/contract/activity`);
+      const activitieData = await axios.get(`${ip}/contract/activity`);
       // const requirementData = await axios.get(`${ip}/contract/requirement`);
-      // setActivities(activitieData.data.content);
+      setActivities(activitieData.data.content);
       // setRequirements(requirementData.data.content);
     } catch (err) {
       console.error("Erro ao buscar atividades e requisitos", err);
@@ -70,13 +64,12 @@ export function ModalAddContract() {
   };
 
   const createContract = async (data: ContractFormSchema) => {
-    // setIsLoading(true);
-    console.log("manager selecionado:", selectManager);
+    setIsLoading(true);
+    // console.log("manager selecionado:", selectManager);
 
     const payload = {
       ...data,
       branch: selectedBranch?.idBranch,
-      responsible: selectManager,
     };
     try {
       console.log("Criando contrato:", payload);
@@ -86,7 +79,7 @@ export function ModalAddContract() {
       console.error("Erro ao criar contrato", err);
       toast.error("Erro ao criar contrato. Tente novamente.");
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -161,8 +154,7 @@ export function ModalAddContract() {
               <Label className="text-white">Gestor do serviço</Label>
               <select
                 className="w-full rounded-md border p-2"
-                defaultValue=""
-                onChange={(e) => setSelectManager(e.target.value)}
+                {...register("idResponsible")}
               >
                 <option value="" disabled>
                   Selecione um gestor
@@ -177,18 +169,18 @@ export function ModalAddContract() {
 
             <div>
               <Label className="text-white">Data de Início</Label>
-              <Input type="date" {...register("startDate")} />
-              {errors.startDate && (
-                <span className="text-red-500">{errors.startDate.message}</span>
+              <Input type="date" {...register("dateStart")} />
+              {errors.dateStart && (
+                <span className="text-red-500">{errors.dateStart.message}</span>
               )}
             </div>
 
             <div>
               <Label className="text-white">Referência do contrato</Label>
-              <Input {...register("serviceReference")} />
-              {errors.serviceReference && (
+              <Input {...register("contractReference")} />
+              {errors.contractReference && (
                 <span className="text-red-500">
-                  {errors.serviceReference.message}
+                  {errors.contractReference.message}
                 </span>
               )}
             </div>
@@ -197,19 +189,19 @@ export function ModalAddContract() {
               <div>
                 <Label className="text-white">Tipo de Despesa</Label>
                 <select
-                  {...register("serviceTypeExpense")}
+                  {...register("expenseType")}
                   className="w-full rounded-md border p-2"
                   defaultValue=""
                 >
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  <option>Capex</option>
-                  <option>Opex</option>
+                  <option>CAPEX</option>
+                  <option>OPEX</option>
                 </select>
-                {errors.serviceTypeExpense && (
+                {errors.expenseType && (
                   <span className="text-red-500">
-                    {errors.serviceTypeExpense.message}
+                    {errors.expenseType.message}
                   </span>
                 )}
               </div>
@@ -228,7 +220,6 @@ export function ModalAddContract() {
                   </option>
                   <option value="Trabalhista">Trabalhista</option>
                   <option value="SSMA">SSMA</option>
-                  <option value="Ambas">Ambas</option>
                   <option value="Todas">Todas</option>
                 </select>
                 {errors.serviceType && (
@@ -284,57 +275,26 @@ export function ModalAddContract() {
                 </span>
               )}
             </div>
-            <div>
-              <Label className="text-white">Risco do contrato</Label>
-              <select
-                {...register("risk")}
-                className="w-full rounded-md border p-2"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Selecione o risco do contrato
-                </option>
-                <option value="LOW_LESS_THAN_8H">LOW_LESS_THAN_8H</option>
-                <option value="LOW_LESS_THAN_1M">LOW_LESS_THAN_1M</option>
-                <option value="LOW_LESS_THAN_6M">LOW_LESS_THAN_6M</option>
-                <option value="LOW_MORE_THAN_6M">LOW_MORE_THAN_6M</option>
-                <option value="MEDIUM_LESS_THAN_1M">MEDIUM_LESS_THAN_1M</option>
-                <option value="MEDIUM_LESS_THAN_6M">MEDIUM_LESS_THAN_6M</option>
-                <option value="MEDIUM_MORE_THAN_6M">MEDIUM_MORE_THAN_6M</option>
-                <option value="HIGH_LESS_THAN_1M">HIGH_LESS_THAN_1M</option>
-                <option value="HIGH_LESS_THAN_6M">HIGH_LESS_THAN_6M</option>
-                <option value="HIGH_MORE_THAN_6M">HIGH_MORE_THAN_6M</option>
-              </select>
-              {errors.risk && (
-                <span className="text-red-500">{errors.risk.message}</span>
-              )}
-            </div>
 
-            {/* <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1">
               <Label className="text-white">Atividades</Label>
               <select
+                {...register("idActivity")}
                 className="w-full rounded-md border p-2"
-                multiple
-                onChange={(e) => {
-                  const selectedValues = Array.from(
-                    e.target.selectedOptions,
-                    (option) => option.value,
-                  );
-                  setValue("activities", selectedValues);
-                }}
+                
               >
-                {activities.map((activity) => (
-                  <option key={activity.idActivity} value={activity.title}>
+                {activities.map((activity: any) => (
+                  <option key={activity.idActivity} value={activity.idActivity}>
                     {activity.title}
                   </option>
                 ))}
               </select>
-              {errors.activities && (
+              {errors.idActivity && (
                 <span className="text-red-500">
-                  {errors.activities.message}
+                  {errors.idActivity.message}
                 </span>
               )}
-            </div> */}
+            </div>
 
             {/* <div className="flex flex-col gap-1">
               <Label className="text-white">Requisitos</Label>
@@ -366,9 +326,20 @@ export function ModalAddContract() {
             </div>  */}
 
             <div className="flex justify-end">
-              <Button className="bg-green-600" type="submit">
+              {isLoading ? ( <Button className="bg-green-600" type="submit">
+                <Oval
+  visible={true}
+  height="80"
+  width="80"
+  color="#4fa94d"
+  ariaLabel="oval-loading"
+  wrapperStyle={{}}
+  wrapperClass=""
+  />
+              </Button>):( <Button className="bg-green-600" type="submit">
                 Criar Contrato
-              </Button>
+              </Button>)}
+             
             </div>
           </form>
         </ScrollArea>

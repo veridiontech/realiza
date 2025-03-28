@@ -1,9 +1,16 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.services.ItemManagement;
+import bl.tech.realiza.domains.user.UserClient;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
-import bl.tech.realiza.gateways.requests.services.ItemManagementRequestDto;
-import bl.tech.realiza.gateways.responses.services.ItemManagementResponseDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementUserResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,83 +35,78 @@ public class ItemManagementControllerImpl implements ItemManagementController {
 
     private final CrudItemManagementImpl crudItemManagementImpl;
 
-    @PostMapping("/new")
+    @PostMapping("/new-user")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cria uma solicitação para adicionar um usuário")
     @Override
-    public ResponseEntity<ItemManagementResponseDto> createSolicitations(@RequestBody @Valid ItemManagementRequestDto itemManagementRequestDto) {
-        ItemManagementResponseDto itemManagementResponseDto = crudItemManagementImpl.saveUserSolicitation(itemManagementRequestDto);
+    public ResponseEntity<ItemManagementUserResponseDto> createUserSolicitation(@RequestBody @Valid ItemManagementUserRequestDto itemManagementUserRequestDto) {
+        ItemManagementUserResponseDto itemManagementUserResponseDto = crudItemManagementImpl.saveUserSolicitation(itemManagementUserRequestDto);
 
-        return ResponseEntity.ok(itemManagementResponseDto);
+        return ResponseEntity.ok(itemManagementUserResponseDto);
     }
 
-    @GetMapping("/new")
+    @PostMapping("/new-provider")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Cria uma solicitação para adicionar uma empresa")
+    @Override
+    public ResponseEntity<ItemManagementProviderResponseDto> createProviderSolicitation(@RequestBody @Valid ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
+        ItemManagementProviderResponseDto itemManagementProviderResponseDto = crudItemManagementImpl.saveProviderSolicitation(itemManagementProviderRequestDto);
+
+        return ResponseEntity.ok(itemManagementProviderResponseDto);
+    }
+
+    @GetMapping("/new-user")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Busca todas as solicitações para adicionar usuários")
     @Override
-    public ResponseEntity<Page<ItemManagementResponseDto>> getSolicitations(@RequestParam(defaultValue = "0") int page,
-                                                                            @RequestParam(defaultValue = "10") int size,
-                                                                            @RequestParam(defaultValue = "idSolicitation") String sort,
-                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+    public ResponseEntity<Page<ItemManagementUserResponseDto>> getUserSolicitations(@RequestParam(defaultValue = "0") int page,
+                                                                                @RequestParam(defaultValue = "10") int size,
+                                                                                @RequestParam(defaultValue = "idSolicitation") String sort,
+                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ItemManagementResponseDto> itemManagementResponse = crudItemManagementImpl.findAllUserSolicitation(pageable);
+        Page<ItemManagementUserResponseDto> itemManagementResponse = crudItemManagementImpl.findAllUserSolicitation(pageable);
 
         return ResponseEntity.ok(itemManagementResponse);
     }
 
-    @DeleteMapping("/new/{idSolicitation}")
+    @GetMapping("/new-provider")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Apaga uma solicitação para adicionar usuário")
+    @Operation(summary = "Busca todas as solicitações para adicionar cnpj")
     @Override
-    public ResponseEntity<Void> deleteSolicitation(@PathVariable String idSolicitation) {
-        crudItemManagementImpl.deleteUserSolicitation(idSolicitation);
+    public ResponseEntity<Page<ItemManagementProviderResponseDto>> getProviderSolicitations(@RequestParam(defaultValue = "0") int page,
+                                                                                    @RequestParam(defaultValue = "10") int size,
+                                                                                    @RequestParam(defaultValue = "idSolicitation") String sort,
+                                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        return ResponseEntity.noContent().build();
+        Page<ItemManagementProviderResponseDto> itemManagementResponse = crudItemManagementImpl.findAllProviderSolicitation(pageable);
+
+        return ResponseEntity.ok(itemManagementResponse);
     }
 
-    @PatchMapping("/new/{idSolicitation}/approve")
+    @PatchMapping("/{idSolicitation}/approve")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Aprova uma solicitação para adicionar usuário")
+    @Operation(summary = "Aprova uma solicitação")
     @Override
     public ResponseEntity<String> approveSolicitation(@PathVariable String idSolicitation) {
-        String response = crudItemManagementImpl.approveUserSolicitation(idSolicitation);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(crudItemManagementImpl.approveSolicitation(idSolicitation));
     }
 
-    @DeleteMapping("/new/{idSolicitation}/deny")
+    @PatchMapping("/{idSolicitation}/deny")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Nega uma solicitação para adicionar usuário")
+    @Operation(summary = "Nega uma solicitação")
     @Override
     public ResponseEntity<String> denySolicitation(@PathVariable String idSolicitation) {
-        String response = crudItemManagementImpl.denyUserSolicitation(idSolicitation);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(crudItemManagementImpl.denySolicitation(idSolicitation));
     }
 
-    @GetMapping("/delete-requests")
+    @DeleteMapping("/{idSolicitation}")
     @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Deleta uma solicitação")
     @Override
-    public ResponseEntity<Collection<Object>> getDeleteRequests() {
-        Collection<Object> items = crudItemManagementImpl.getDeleteItemRequest();
-
-        return ResponseEntity.of(Optional.ofNullable(items));
-    }
-
-    @PatchMapping("/approve-employee-document")
-    @ResponseStatus(HttpStatus.OK)
-    @Override
-    public ResponseEntity<String> approveDocumentEmployee(@RequestParam String idDocument) {
-        String response = crudItemManagementImpl.approveNewDocumentEmployee(idDocument);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/employee-document-request")
-    @ResponseStatus(HttpStatus.OK)
-    @Override
-    public ResponseEntity<Collection<DocumentEmployee>> getApproveRequests() {
-        Collection<DocumentEmployee> documentEmployees = crudItemManagementImpl.getAddRequestDocumentEmployees();
-        return ResponseEntity.ok(documentEmployees);
+    public ResponseEntity<Void> deleteSolicitation(@PathVariable String idSolicitation) {
+        crudItemManagementImpl.deleteSolicitation(idSolicitation);
+        return ResponseEntity.noContent().build();
     }
 }

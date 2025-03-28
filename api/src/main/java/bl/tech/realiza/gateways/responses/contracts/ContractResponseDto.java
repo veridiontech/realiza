@@ -24,7 +24,7 @@ public class ContractResponseDto {
     private String allocatedLimit;
     private String responsible;
     private Contract.ExpenseType expenseType;
-    private Date startDate;
+    private Date dateStart;
     private Date endDate;
     private Boolean subcontractPermission;
     private String contractSupplierId;
