@@ -52,7 +52,6 @@ export const EmployeesTable = (): JSX.Element => {
 
   const uniqueSupplier = async () => {
     try {
-      throw new Error
       const res = await axios.get(`${ip}/supplier/${selectedSupplier}`);
       setGetUniqueSupplier(res.data);
     } catch (err) {
