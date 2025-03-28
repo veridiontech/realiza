@@ -103,9 +103,9 @@ export function EnterprisePageEmail() {
       case "SUPPLIER":
         payload = {
           ...data,
-                    idBranch: findBranchId || "",
+          idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
-          company: findCompany || "",
+          company: findCompany || "SUPPLIER",
           fantasyName: data.tradeName || "",
           socialReason: data.corporateName,
         };
