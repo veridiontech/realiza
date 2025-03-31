@@ -235,12 +235,6 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
             defaultValue: clientForm.number,
             required: true,
           },
-          {
-            name: "passoword",
-            label: "Senha",
-            type: "password",
-            required: true
-          }
         ]}
         onSubmit={handleStep2Submit}
         onClose={onClose}
@@ -256,10 +250,9 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
         { name: "cpf", label: "CPF", type: "text", required: true },
         { name: "firstName", label: "Nome", type: "text", required: true },
         { name: "surname", label: "Sobrenome", type: "text", required: true },
-        { name: "email", label: "E-mail", type: "email", required: true },
+        { name: "email", label: "E-mail", type: "email", required: false },
         { name: "telephone", label: "Telefone", type: "text", required: true },
         { name: "cellphone", label: "Celular", type: "text" },
-        { name: "password", label: "Senha", type: "password", required: true },
       ]}
       onSubmit={handleStep3Submit}
       onClose={onClose}
