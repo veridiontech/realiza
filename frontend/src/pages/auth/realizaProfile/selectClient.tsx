@@ -12,6 +12,18 @@ import { useClient } from "@/context/Client-Provider";
 import { EditModalEnterprise } from "./profileEnterprise/edit-modal-enterprise";
 import { useBranch } from "@/context/Branch-provider";
 import { Settings2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
 
 interface CompanyData {
   razaoSocial: string;
@@ -27,6 +39,21 @@ interface CompanyData {
 
 const sanitizeNumber = (value: string) => value.replace(/\D/g, "");
 
+const createUserClient = z.object({
+  firstName: z.string().nonempty("Nome é obrigatório"),
+  surname: z.string().nonempty("Sobrenome é obrigatório"),
+  cellPhone: z.string().nonempty("Celular é obrigatório"),
+  cpf: z.string().nonempty("Cpf é obrigatório"),
+  email: z
+    .string()
+    .email("Formato de email inválido")
+    .nonempty("Email é obrigatório"),
+  position: z.string().nonempty("Seu cargo é obrigatório"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  role: z.string().default("ROLE_CLIENT_MANAGER"),
+});
+
+type CreateUserClient = z.infer<typeof createUserClient>;
 export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [clientForm, setClientForm] = useState({
@@ -127,7 +154,6 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
     }
 
     try {
-
       await axios.post(`${ip}/user/client`, formData, {
         headers: { "Content-Type": "application/json" },
       });
@@ -270,6 +296,22 @@ export function SelectClient() {
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   const { selectedBranch } = useBranch();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateUserClient>({
+    resolver: zodResolver(createUserClient),
+  });
+
+  const onSubmitUserClient = async () => {
+    try {
+      await axios.post(`${ip}/user/client`);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const fetchBranches = async () => {
     try {
       const response = await axios.get(
@@ -282,17 +324,18 @@ export function SelectClient() {
     }
   };
 
-  const getUsersFromBranch = async() => {
-    try{
-      const res = await axios.get(`${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`)
+  const getUsersFromBranch = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+      );
       console.log("usuários da branch:", res.data.content);
-      
-      setUsersFromBranch(res.data.content)
-    }catch(err) {
+
+      setUsersFromBranch(res.data.content);
+    } catch (err) {
       console.log("erro ao buscar usuários:", err);
-      
     }
-  }
+  };
 
   useEffect(() => {
     console.log("id da branch:", selectedBranch);
@@ -361,31 +404,127 @@ export function SelectClient() {
                 </div>
               </div>
               <div className="rounded-lg border bg-white p-8 shadow-lg">
-                <div className="flex flex-col items-start gap-4">
+                <div className="flex flex-col gap-4">
                   <div>
-                    <nav className="flex items-center">
-                      <Button
-                        variant={"ghost"}
-                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                          selectedTab === "filiais"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
-                        }`}
-                        onClick={() => setSelectedTab("filiais")}
-                      >
-                        Filiais
-                      </Button>
-                      <Button
-                        variant={"ghost"}
-                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                          selectedTab === "usuarios"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
-                        }`}
-                        onClick={() => setSelectedTab("usuarios")}
-                      >
-                        Usuários
-                      </Button>
+                    <nav className="flex items-center justify-between">
+                      <div>
+                        <Button
+                          variant={"ghost"}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                            selectedTab === "filiais"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                          }`}
+                          onClick={() => setSelectedTab("filiais")}
+                        >
+                          Filiais
+                        </Button>
+                        <Button
+                          variant={"ghost"}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                            selectedTab === "usuarios"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                          }`}
+                          onClick={() => setSelectedTab("usuarios")}
+                        >
+                          Usuários
+                        </Button>
+                      </div>
+                      {selectedTab === "usuarios" && (
+                        <div>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button className="bg-realizaBlue">+</Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-[30vw]">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  Criar usuário para o cliente{" "}
+                                  {client ? (
+                                    <p>{client.corporateName}</p>
+                                  ) : (
+                                    <p>Nenhum cliente selecionado</p>
+                                  )}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <form onSubmit={handleSubmit(onSubmitUserClient)}>
+                                <div className="flex flex-col gap-2">
+                                  <div>
+                                    <Label>Nome</Label>
+                                    <Input
+                                      type="text"
+                                      {...register("firstName")}
+                                    />
+                                    {errors.firstName && (
+                                      <span className="text-red-600">
+                                        {errors.firstName.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label>Sobrenome</Label>
+                                    <Input
+                                      type="text"
+                                      {...register("surname")}
+                                    />
+                                    {errors.surname && (
+                                      <span className="text-red-600">
+                                        {errors.surname.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label>Email</Label>
+                                    <Input type="text" {...register("email")} />
+                                    {errors.email && (
+                                      <span className="text-red-600">
+                                        {errors.email.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label>CPF</Label>
+                                    <Input type="text" {...register("cpf")} />
+                                    {errors.cpf && (
+                                      <span className="text-red-600">
+                                        {errors.cpf.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label>Cargo</Label>
+                                    <Input
+                                      type="text"
+                                      {...register("position")}
+                                    />
+                                    {errors.position && (
+                                      <span className="text-red-600">
+                                        {errors.position.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <Label>Senha</Label>
+                                    <Input
+                                      type="text"
+                                      {...register("password")}
+                                    />
+                                    {errors.password && (
+                                      <span className="text-red-600">
+                                        {errors.password.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <Button className="bg-realizaBlue">
+                                    Criar
+                                  </Button>
+                                </div>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      )}
                     </nav>
                   </div>
                   {selectedTab === "filiais" && (
@@ -474,7 +613,6 @@ export function SelectClient() {
                           )}
                         </tbody>
                       </table>
-
                     </div>
                   )}
                 </div>

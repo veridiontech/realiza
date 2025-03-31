@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Pagination } from "@/components/ui/pagination";
 import { Table } from "@/components/ui/tableVanila";
 import axios from "axios";
-import { Puff } from "react-loader-spinner";
+import { Oval, Puff } from "react-loader-spinner";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 import { Eye, Search } from "lucide-react"; // Importando apenas o ícone Eye
@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // interface BranchType {
 //   idBranch: string;
@@ -35,7 +36,7 @@ import { Label } from "@/components/ui/label";
 
 const newBranchFormSchema = z.object({
   cnpj: z.string(),
-  name: z.string().min(1, "O nome fantasia é obrigatório."),
+  name: z.string().min(1, "O nome da filial é obrigatório"),
   email: z.string().email("Insira um email válido"),
   cep: z.string().min(8, "O CEP deve ter pelo menos 8 caracteres."),
   country: z.string().min(1, "O país é obrigatório."),
@@ -182,7 +183,6 @@ export function Branch() {
       await axios.post(`${ip}/branch`, payload);
       toast.success("Sucesso ao criar filial");
     } catch (err: any) {
-      // Se o erro vier com resposta do backend
       if (err.response && err.response.data) {
         const mensagemBackend =
           err.response.data.message ||
@@ -192,10 +192,8 @@ export function Branch() {
 
         toast.error(mensagemBackend);
       } else if (err.request) {
-        // Erro de conexão
         toast.error("Não foi possível se conectar ao servidor.");
       } else {
-        // Erro desconhecido
         toast.error("Erro desconhecido ao processar requisição.");
       }
 
@@ -217,127 +215,152 @@ export function Branch() {
                 <DialogHeader>
                   <DialogTitle>Cadastro de filial</DialogTitle>
                 </DialogHeader>
-                <form
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="flex flex-col gap-5"
-                >
-                  <div className="flex flex-col gap-2">
-                    <Label>CNPJ</Label>
-                    <div className="flex items-center gap-2">
-                      <Input type="text" {...register("cnpj")} />
-                      <div
-                        onClick={handleCnpj}
-                        className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
-                      >
-                        <Search className="text-white" />
+                <ScrollArea className="h-[40vh] p-3">
+                  <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="flex flex-col gap-5 m-2"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <Label>CNPJ</Label>
+                      <div className="flex items-center gap-2">
+                        <Input type="text" {...register("cnpj")} />
+                        <div
+                          onClick={handleCnpj}
+                          className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
+                        >
+                          <Search className="text-white" />
+                        </div>
                       </div>
+                      {errors.cnpj && (
+                        <span className="text-sm text-red-600">
+                          {errors.cnpj.message}
+                        </span>
+                      )}
+                      {razaoSocial && (
+                        <p className="mt-1 text-sm text-gray-700">
+                          Razão social: <strong>{razaoSocial}</strong>
+                        </p>
+                      )}
                     </div>
-                    {errors.cnpj && (
-                      <span className="text-sm text-red-600">
-                        {errors.cnpj.message}
-                      </span>
-                    )}
-                    {razaoSocial && (
-                      <p className="mt-1 text-sm text-gray-700">
-                        Razão social: <strong>{razaoSocial}</strong>
-                      </p>
-                    )}
-                  </div>
 
-                  <div>
-                    <Label>Email</Label>
-                    <Input type="email" {...register("email")} />
-                    {errors.email && (
-                      <span className="text-sm text-red-600">
-                        {errors.email.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Email</Label>
+                      <Input type="email" {...register("email")} />
+                      {errors.email && (
+                        <span className="text-sm text-red-600">
+                          {errors.email.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>Razão social</Label>
-                    <Input type="text" {...register("name")} />
-                    {errors.name && (
-                      <span className="text-sm text-red-600">
-                        {errors.name.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Nome da filial</Label>
+                      <Input type="text" {...register("name")} />
+                      {errors.name && (
+                        <span className="text-sm text-red-600">
+                          {errors.name.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>CEP</Label>
-                    <Input type="text" {...register("cep")} />
-                    {errors.cep && (
-                      <span className="text-sm text-red-600">
-                        {errors.cep.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Razão social</Label>
+                      <Input type="text" {...register("name")} />
+                      {errors.name && (
+                        <span className="text-sm text-red-600">
+                          {errors.name.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>Cidade</Label>
-                    <Input type="text" {...register("city")} />
-                    {errors.city && (
-                      <span className="text-sm text-red-600">
-                        {errors.city.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>CEP</Label>
+                      <Input type="text" {...register("cep")} />
+                      {errors.cep && (
+                        <span className="text-sm text-red-600">
+                          {errors.cep.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>Endereço</Label>
-                    <Input type="text" {...register("address")} />
-                    {errors.address && (
-                      <span className="text-sm text-red-600">
-                        {errors.address.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Cidade</Label>
+                      <Input type="text" {...register("city")} />
+                      {errors.city && (
+                        <span className="text-sm text-red-600">
+                          {errors.city.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>Número</Label>
-                    <Input type="text" {...register("number")} />
-                    {errors.number && (
-                      <span className="text-sm text-red-600">
-                        {errors.number.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Endereço</Label>
+                      <Input type="text" {...register("address")} />
+                      {errors.address && (
+                        <span className="text-sm text-red-600">
+                          {errors.address.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>País</Label>
-                    <Input type="text" {...register("country")} />
-                    {errors.country && (
-                      <span className="text-sm text-red-600">
-                        {errors.country.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Número</Label>
+                      <Input type="text" {...register("number")} />
+                      {errors.number && (
+                        <span className="text-sm text-red-600">
+                          {errors.number.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>Estado</Label>
-                    <Input type="text" {...register("state")} />
-                    {errors.state && (
-                      <span className="text-sm text-red-600">
-                        {errors.state.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>País</Label>
+                      <Input type="text" {...register("country")} />
+                      {errors.country && (
+                        <span className="text-sm text-red-600">
+                          {errors.country.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label>Telefone</Label>
-                    <Input type="text" {...register("telephone")} />
-                    {errors.telephone && (
-                      <span className="text-sm text-red-600">
-                        {errors.telephone.message}
-                      </span>
-                    )}
-                  </div>
+                    <div>
+                      <Label>Estado</Label>
+                      <Input type="text" {...register("state")} />
+                      {errors.state && (
+                        <span className="text-sm text-red-600">
+                          {errors.state.message}
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="flex justify-end">
-                    <Button type="submit">Cadastrar</Button>
-                  </div>
-                </form>
+                    <div>
+                      <Label>Telefone</Label>
+                      <Input type="text" {...register("telephone")} />
+                      {errors.telephone && (
+                        <span className="text-sm text-red-600">
+                          {errors.telephone.message}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end">
+                      {loading ? (
+                        <Button type="submit" className="bg-realizaBlue">
+                          {" "}
+                          <Oval
+                            visible={true}
+                            height="30"
+                            width="30"
+                            color="#34495D"
+                            ariaLabel="puff-loading"
+                          />
+                        </Button>
+                      ) : (
+                        <Button type="submit" className="bg-realizaBlue">Cadastrar</Button>
+                      )}
+                    </div>
+                  </form>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
           </div>
