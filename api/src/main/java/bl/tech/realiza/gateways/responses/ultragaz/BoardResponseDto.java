@@ -8,4 +8,5 @@ import lombok.Data;
 public class BoardResponseDto {
     private String idBoard;
     private String name;
+    private String idClient;
 }

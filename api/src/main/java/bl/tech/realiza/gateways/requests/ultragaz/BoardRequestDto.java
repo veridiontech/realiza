@@ -6,4 +6,5 @@ import lombok.Data;
 public class BoardRequestDto {
     private String idBoard;
     private String name;
+    private String idClient;
 }

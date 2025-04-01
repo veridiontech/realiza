@@ -7,4 +7,5 @@ import lombok.Data;
 public class MarketRequestDto {
     private String idMarket;
     private String name;
+    private String idBoard;
 }
