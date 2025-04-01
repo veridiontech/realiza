@@ -58,6 +58,16 @@ const createUserClient = z.object({
   role: z.string().default("ROLE_CLIENT_MANAGER"),
 });
 
+const createNewBoard = z.object({
+  name: z.string().nonempty("Nome da diretoria é obrigatório")
+})
+
+const createNewMarket = z.object({
+  name: z.string().nonempty("Nome da diretoria é obrigatório")
+})
+
+type CreateNewBoard = z.infer<typeof createNewBoard>
+type CreateNewMarket = z.infer<typeof createNewMarket>
 type CreateUserClient = z.infer<typeof createUserClient>;
 export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
@@ -314,6 +324,68 @@ export function SelectClient() {
     resolver: zodResolver(createUserClient),
   });
 
+  const {
+    register: registerNewBoard,
+    handleSubmit: handleSubmitBoard,
+    formState: {errors: errorBoard},
+  } = useForm<CreateNewBoard>({
+    resolver: zodResolver(createNewBoard)
+  })
+
+  const {
+    register: registerNewMarket,
+    handleSubmit: handleSubmitMarket,
+    formState: {errors: errorMarket},
+  } = useForm<CreateNewMarket>({
+    resolver: zodResolver(createNewMarket)
+  })
+
+  const createNewBoardSubmit = async(data: CreateNewBoard) => {
+    const payload = {
+      ...data,
+      idClient: client?.idClient
+    }
+    try{
+      console.log("Enviando dados da nova diretoria:", payload);
+      await axios.post(`${ip}/ultragaz/board`, payload)
+      toast.success("Sucesso ao criar novo ")
+    }catch(err) {
+      toast.error("erro ao criar nova diretoria")
+      console.log("erro ao criar nova diretoria",err);
+      
+    }
+  } 
+
+  const createNewMarketSubmit = async(data: CreateNewMarket) => {
+    const payload = {
+      ...data,
+      idBoard: selectedBoard?.idBoard
+    }
+    try{
+      console.log("Enviando dados da nova diretoria:", payload);
+      await axios.post(`${ip}/ultragaz/market`, payload)
+      toast.success("Sucesso ao criar novo ")
+    }catch(err) {
+      toast.error("erro ao criar nova diretoria")
+      console.log("erro ao criar nova diretoria",err);
+    }
+  } 
+  
+  const createNewCenterSubmit = async(data: CreateNewMarket) => {
+    const payload = {
+      ...data,
+      idMarket: selectedMarket?.idMarket
+    }
+    try{
+      console.log("Enviando dados da nova diretoria:", payload);
+      await axios.post(`${ip}/ultragaz/center`, payload)
+      toast.success("Sucesso ao criar novo ")
+    }catch(err) {
+      toast.error("erro ao criar nova diretoria")
+      console.log("erro ao criar nova diretoria",err);
+    }
+  } 
+
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const payload = {
       ...data,
@@ -485,7 +557,7 @@ export function SelectClient() {
                               <DialogContent className="max-w-[30vw]">
                                 <DialogHeader>
                                   <DialogTitle className="flex items-center gap-2">
-                                    Criar usuário para o cliente{" "}
+                                    Criar uma nova diretoria para{" "}
                                     {client ? (
                                       <p>{client.corporateName}</p>
                                     ) : (
@@ -494,90 +566,114 @@ export function SelectClient() {
                                   </DialogTitle>
                                 </DialogHeader>
                                 <form
-                                  onSubmit={handleSubmit(onSubmitUserClient)}
+                                  onSubmit={handleSubmitBoard(createNewBoardSubmit)}
                                 >
                                   <div className="flex flex-col gap-2">
                                     <div>
                                       <Label>Nome</Label>
                                       <Input
                                         type="text"
-                                        {...register("firstName")}
+                                        {...registerNewBoard("name")}
                                       />
-                                      {errors.firstName && (
+                                      {errorBoard.name && (
                                         <span className="text-red-600">
-                                          {errors.firstName.message}
+                                          {errorBoard.name.message}
                                         </span>
                                       )}
                                     </div>
+                                    
+                                    <Button
+                                      className="bg-realizaBlue"
+                                      type="submit"
+                                    >
+                                      Criar
+                                    </Button>
+                                  </div>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        )}
+                        {selectedTabUltra === "mercado" && (
+                          <div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className="bg-realizaBlue">+</Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[35vw]">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    Criar um novo mercado para{" "}
+                                    {selectedBoard ? (
+                                      <p>{selectedBoard.name}</p>
+                                    ) : (
+                                      <p className="font-normal">Nenhuma diretoria selecionada</p>
+                                    )}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <form
+                                  onSubmit={handleSubmitMarket(createNewMarketSubmit)}
+                                >
+                                  <div className="flex flex-col gap-2">
                                     <div>
-                                      <Label>Sobrenome</Label>
+                                      <Label>Nome</Label>
                                       <Input
                                         type="text"
-                                        {...register("surname")}
+                                        {...registerNewMarket("name")}
                                       />
-                                      {errors.surname && (
+                                      {errorMarket.name && (
                                         <span className="text-red-600">
-                                          {errors.surname.message}
+                                          {errorMarket.name.message}
                                         </span>
                                       )}
                                     </div>
+                                    
+                                    <Button
+                                      className="bg-realizaBlue"
+                                      type="submit"
+                                    >
+                                      Criar
+                                    </Button>
+                                  </div>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        )}
+                        {selectedTabUltra === "nucleo" && (
+                          <div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className="bg-realizaBlue">+</Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[35vw]">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    Criar um novo núcleo para{" "}
+                                    {selectedMarket ? (
+                                      <p>{selectedMarket.name}</p>
+                                    ) : (
+                                      <p className="font-normal">Nenhum tipo de mercado selecionado</p>
+                                    )}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <form
+                                  onSubmit={handleSubmitMarket(createNewCenterSubmit)}
+                                >
+                                  <div className="flex flex-col gap-2">
                                     <div>
-                                      <Label>Email</Label>
+                                      <Label>Nome</Label>
                                       <Input
                                         type="text"
-                                        {...register("email")}
+                                        {...registerNewMarket("name")}
                                       />
-                                      {errors.email && (
+                                      {errorMarket.name && (
                                         <span className="text-red-600">
-                                          {errors.email.message}
+                                          {errorMarket.name.message}
                                         </span>
                                       )}
                                     </div>
-                                    <div>
-                                      <Label>CPF</Label>
-                                      <Input type="text" {...register("cpf")} />
-                                      {errors.cpf && (
-                                        <span className="text-red-600">
-                                          {errors.cpf.message}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div>
-                                      <Label>Telefone</Label>
-                                      <Input
-                                        type="text"
-                                        {...register("cellPhone")}
-                                      />
-                                      {errors.cellPhone && (
-                                        <span className="text-red-600">
-                                          {errors.cellPhone.message}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div>
-                                      <Label>Cargo</Label>
-                                      <Input
-                                        type="text"
-                                        {...register("position")}
-                                      />
-                                      {errors.position && (
-                                        <span className="text-red-600">
-                                          {errors.position.message}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div>
-                                      <Label>Senha</Label>
-                                      <Input
-                                        type="text"
-                                        {...register("password")}
-                                      />
-                                      {errors.password && (
-                                        <span className="text-red-600">
-                                          {errors.password.message}
-                                        </span>
-                                      )}
-                                    </div>
+                                    
                                     <Button
                                       className="bg-realizaBlue"
                                       type="submit"
