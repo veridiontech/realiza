@@ -35,6 +35,8 @@ public class Client {
     private String state;
     private String city;
     private String address;
+    @Builder.Default
+    private Boolean isUltragaz = false;
     private String number;
     @Builder.Default
     private Boolean isActive = true;
