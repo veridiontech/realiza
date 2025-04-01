@@ -99,20 +99,24 @@ public class CrudBranchImpl implements CrudBranch {
     private Page<BranchResponseDto> getBranchResponseDtos(Page<Branch> pageBranch) {
 
         return pageBranch.map(
-                branch -> BranchResponseDto.builder()
-                        .idBranch(branch.getIdBranch())
-                        .name(branch.getName())
-                        .cnpj(branch.getCnpj())
-                        .cep(branch.getCep())
-                        .state(branch.getState())
-                        .city(branch.getCity())
-                        .email(branch.getEmail())
-                        .telephone(branch.getTelephone())
-                        .address(branch.getAddress())
-                        .number(branch.getNumber())
-                        .client(branch.getClient().getIdClient())
-                        .center(branch.getCenter().getIdCenter())
-                        .build()
+                branch -> {
+                    String client = branch.getClient() != null ? branch.getClient().getIdClient() : null;
+                    String center = branch.getCenter() != null ? branch.getCenter().getIdCenter() : null;
+                    return BranchResponseDto.builder()
+                            .idBranch(branch.getIdBranch())
+                            .name(branch.getName())
+                            .cnpj(branch.getCnpj())
+                            .cep(branch.getCep())
+                            .state(branch.getState())
+                            .city(branch.getCity())
+                            .email(branch.getEmail())
+                            .telephone(branch.getTelephone())
+                            .address(branch.getAddress())
+                            .number(branch.getNumber())
+                            .client(client)
+                            .center(center)
+                            .build();
+                }
         );
     }
 
