@@ -12,6 +12,7 @@ public interface BranchControlller {
     ResponseEntity<BranchResponseDto> createBranch(BranchCreateRequestDto branchCreateRequestDto);
     ResponseEntity<Optional<BranchResponseDto>> getOneBranch(String id);
     ResponseEntity<Page<BranchResponseDto>> getAllBranches(int page, int size, String sort, Sort.Direction direction);
+    ResponseEntity<Page<BranchResponseDto>> getAllBranchesByCenter(int page, int size, String sort, Sort.Direction direction, String idCenter);
     ResponseEntity<Optional<BranchResponseDto>> updateBranch(String id, BranchCreateRequestDto branchCreateRequestDto);
     ResponseEntity<Void> deleteBranch(String id);
     ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);

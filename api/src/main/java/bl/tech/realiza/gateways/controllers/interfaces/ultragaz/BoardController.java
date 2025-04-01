@@ -10,6 +10,7 @@ public interface BoardController {
     ResponseEntity<BoardResponseDto> createBoard(BoardRequestDto boardRequestDto);
     ResponseEntity<BoardResponseDto> getOneBoard(String id);
     ResponseEntity<Page<BoardResponseDto>> getAllBoards(int page, int size, String sort, Sort.Direction direction);
+    ResponseEntity<Page<BoardResponseDto>> getAllBoardsByClient(int page, int size, String sort, Sort.Direction direction, String idClient);
     ResponseEntity<BoardResponseDto> updateBoard(String id, BoardRequestDto boardRequestDto);
     ResponseEntity<Void> deleteBoard(String id);
 }
