@@ -304,10 +304,24 @@ export function SelectClient() {
     resolver: zodResolver(createUserClient),
   });
 
-  const onSubmitUserClient = async () => {
+  const onSubmitUserClient = async (data: CreateUserClient) => {
+    const payload = {
+      ...data,
+      branch: selectedBranch?.idBranch
+    }
+    console.log("Enviando dados do novo usuário:", payload);
     try {
-      await axios.post(`${ip}/user/client`);
-    } catch (err) {
+      await axios.post(`${ip}/user/client`, payload);
+      toast.success("Sucesso ao criar usuário")
+    } catch (err: any) {
+      if(err.response && err.response.data) {
+        const mensagemBackend =
+        err.response.data.message ||
+        err.response.data.error ||
+        "Erro inesperado no servidor";
+      console.log(mensagemBackend);
+      }
+      toast.error("Erro ao criar novo usuário")
       console.log(err);
     }
   };
@@ -493,6 +507,18 @@ export function SelectClient() {
                                     )}
                                   </div>
                                   <div>
+                                    <Label>Telefone</Label>
+                                    <Input
+                                      type="text"
+                                      {...register("cellPhone")}
+                                    />
+                                    {errors.cellPhone && (
+                                      <span className="text-red-600">
+                                        {errors.cellPhone.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div>
                                     <Label>Cargo</Label>
                                     <Input
                                       type="text"
@@ -516,7 +542,7 @@ export function SelectClient() {
                                       </span>
                                     )}
                                   </div>
-                                  <Button className="bg-realizaBlue">
+                                  <Button className="bg-realizaBlue" type="submit">
                                     Criar
                                   </Button>
                                 </div>
@@ -566,6 +592,19 @@ export function SelectClient() {
                   )}
                   {selectedTab === "usuarios" && (
                     <div>
+                      <div>
+                        <span>
+                          {selectedBranch ? (
+                            <div>
+                              <p><strong>Filial:</strong> {selectedBranch.name}</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p><strong>Filial:</strong> Filial não selecionada</p>
+                            </div>
+                          )}
+                        </span>
+                      </div>
                       <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
                         <thead>
                           <tr>
