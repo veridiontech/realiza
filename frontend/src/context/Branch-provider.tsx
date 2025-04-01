@@ -23,19 +23,24 @@ export function useBranch() {
 
 export function BranchProvider({ children }: { children: React.ReactNode }) {
   const [branch, setBranch] = useState<propsBranch[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<propsBranch | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<propsBranch | null>(
+    null,
+  );
   const { client } = useClient();
 
   useEffect(() => {
     if (client?.idClient) {
-      setSelectedBranch(null); 
+      setSelectedBranch(null);
       getBranch(client.idClient);
     }
   }, [client?.idClient]);
 
   const getBranch = async (idClient: string) => {
     try {
-      const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`);
+      if(client?.isUltragaz === true) {}
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${idClient}`,
+      );
       setBranch(res.data.content || []);
     } catch (err) {
       console.error("Erro ao buscar filiais no context", err);
@@ -44,7 +49,9 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <BranchContext.Provider value={{ branch, setBranch, selectedBranch, setSelectedBranch }}>
+    <BranchContext.Provider
+      value={{ branch, setBranch, selectedBranch, setSelectedBranch }}
+    >
       {children}
     </BranchContext.Provider>
   );

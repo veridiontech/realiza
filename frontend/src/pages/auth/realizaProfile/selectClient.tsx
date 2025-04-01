@@ -633,7 +633,7 @@ export function SelectClient() {
                                   <Link
                                     to={`/sistema/detailsEmployees/${users.idEmployee}`}
                                   >
-                                    <button className="text-realizaBlue ml-4 hover:underline">
+                                    <button className="text-realizaBlue ml-4 hover:underline flex items-center justify-center">
                                       <Settings2 />
                                     </button>
                                   </Link>
