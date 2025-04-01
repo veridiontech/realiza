@@ -25,9 +25,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useBoard } from "@/context/context-ultra/Board-provider";
-import { propsBoard, propsMarket } from "@/types/interfaces";
+import { propsBoard, propsBranchUltra, propsMarket } from "@/types/interfaces";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
+import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
 
 interface CompanyData {
   razaoSocial: string;
@@ -300,9 +301,10 @@ export function SelectClient() {
   const [selectedTabUltra, setSelectedTabUltra] = useState("diretoria");
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   const { selectedBranch } = useBranch();
-  const { markets, setSelectedMarket } = useMarket();
+  const { markets, setSelectedMarket, selectedMarket } = useMarket();
   const { boards, setSelectedBoard, selectedBoard } = useBoard();
-  const {center, selectedCenter} = useCenter()
+  const { center, selectedCenter, setSelectedCenter } = useCenter();
+  const { branchUltra} = useBranchUltra()
 
   const {
     register,
@@ -465,13 +467,13 @@ export function SelectClient() {
                           <Button
                             variant={"ghost"}
                             className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "usuarios"
+                              selectedTabUltra === "filial"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
                             }`}
                             onClick={() => setSelectedTabUltra("filial")}
                           >
-                            Filial
+                            Unidade
                           </Button>
                         </div>
                         {selectedTabUltra === "diretoria" && (
@@ -637,6 +639,7 @@ export function SelectClient() {
                               setSelectedBoard(selected || null);
                             }}
                             className="rounded-md border p-2"
+                            defaultValue=""
                           >
                             <option value="" disabled>
                               Selecione uma diretoria
@@ -693,30 +696,22 @@ export function SelectClient() {
                     )}
                     {selectedTabUltra === "nucleo" && (
                       <div>
-                        <div className="flex items-start gap-4">
-                          <div className="flex flex-col gap-2">
-                            <Label>Diretoria</Label>
-                            <select
-                              onChange={(e) => {
-                                const selected = boards.find(
-                                  (b) => b.idBoard === e.target.value,
-                                );
-                                setSelectedBoard(selected || null);
-                              }}
-                              className="rounded-md border p-2"
-                            >
-                              <option value="" >
-                                Selecione uma diretoria
-                              </option>
-                              {boards.map((board) => (
-                                <option
-                                  value={board.idBoard}
-                                  key={board.idBoard}
-                                >
-                                  {board.name}
-                                </option>
-                              ))}
-                            </select>
+                        <div className="flex flex-col items-start gap-4">
+                          <div>
+                            <div>
+                              <span className="flex items-center gap-2 font-medium">
+                                Diretoria selecionada:{" "}
+                                {selectedBoard ? (
+                                  <p className="font-normal">
+                                    {selectedBoard.name}
+                                  </p>
+                                ) : (
+                                  <p className="font-normal">
+                                    Nenhuma diretoria selecionada
+                                  </p>
+                                )}
+                              </span>
+                            </div>
                           </div>
                           <div className="flex flex-col gap-2">
                             <Label>Mercado</Label>
@@ -730,7 +725,7 @@ export function SelectClient() {
                               className="rounded-md border p-2"
                             >
                               <option value="">
-                                Selecione uma diretoria
+                                Selecione um tipo de mercado
                               </option>
                               {markets.map((market) => (
                                 <option
@@ -765,9 +760,7 @@ export function SelectClient() {
                                   className="overflow-auto text-start"
                                 >
                                   {center.map((center) => (
-                                    <td key={center.idCenter}>
-                                      {center.name}
-                                    </td>
+                                    <td key={center.idCenter}>{center.name}</td>
                                   ))}
                                   <td className="border border-gray-300 px-4 py-2">
                                     {market.name}
@@ -778,6 +771,88 @@ export function SelectClient() {
                                   >
                                     {selectedBoard?.name}
                                   </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="border border-gray-300 px-4 py-2 text-center"
+                                >
+                                  Nenhum colaborador encontrado
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {selectedTabUltra === "filial" && (
+                      <div>
+                        <div className="flex flex-col items-start gap-4">
+                          <div>
+                            <div>
+                              <span className="flex items-center gap-2 font-medium">
+                                Diretoria selecionada:{" "}
+                                {selectedBoard ? (
+                                  <p className="font-normal">
+                                    {selectedBoard.name}
+                                  </p>
+                                ) : (
+                                  <p className="font-normal">
+                                    Nenhuma diretoria selecionada
+                                  </p>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                          <span className="flex items-center gap-2 font-medium">
+                                Mercado selecionado:{" "}
+                                {selectedMarket ? (
+                                  <p className="font-normal">
+                                    {selectedMarket.name}
+                                  </p>
+                                ) : (
+                                  <p className="font-normal">
+                                    Nenhum tipo de mercado selecionado
+                                  </p>
+                                )}
+                              </span>
+                          </div>
+                          <div>
+                            <select onChange={(e) => {
+                                const selected = center.find(
+                                  (b) => b.idCenter === e.target.value,
+                                );
+                                setSelectedCenter(selected || null);
+                              }} defaultValue="" className="border p-2 rounded-md">
+                              <option value="" disabled>Selecione um núcleo</option>
+                              {center.map((center) => (
+                                <option value={center.idCenter} key={center.idCenter}>{center.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                          <thead>
+                            <tr>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Unidade
+                              </th>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Núcleo
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {branchUltra && branchUltra.length > 0 ? (
+                              branchUltra.map((branchUltra: propsBranchUltra) => (
+                                <tr
+                                  className="overflow-auto text-start"
+                                >
+                                  <td className="border border-gray-300 px-4 py-2" key={branchUltra.idBranch}>{branchUltra.name}</td>
+                                  <td className="border border-gray-300 px-4 py-2" key={selectedCenter?.idCenter}>{selectedCenter?.name}</td>
                                 </tr>
                               ))
                             ) : (
@@ -1149,8 +1224,8 @@ export function SelectClient() {
                           </tr>
                         </thead>
                         <tbody>
-                          {markets && markets.length > 0 ? (
-                            markets.map((users: any) => (
+                          {usersFromBranch && usersFromBranch.length > 0 ? (
+                            usersFromBranch.map((users: any) => (
                               <tr key={users.idUser} className="overflow-auto">
                                 <td className="border border-gray-300 px-4 py-2">
                                   {users.firstName}
