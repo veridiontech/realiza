@@ -24,6 +24,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { useBoard } from "@/context/context-ultra/Board-provider";
+import { propsBoard, propsMarket } from "@/types/interfaces";
+import { useMarket } from "@/context/context-ultra/Market-provider";
+import { useCenter } from "@/context/context-ultra/Center-provider";
 
 interface CompanyData {
   razaoSocial: string;
@@ -293,8 +297,12 @@ export function SelectClient() {
   const { user } = useUser();
   const { client } = useClient();
   const [selectedTab, setSelectedTab] = useState("filiais");
+  const [selectedTabUltra, setSelectedTabUltra] = useState("diretoria");
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   const { selectedBranch } = useBranch();
+  const { markets, setSelectedMarket } = useMarket();
+  const { boards, setSelectedBoard, selectedBoard } = useBoard();
+  const {center, selectedCenter} = useCenter()
 
   const {
     register,
@@ -307,21 +315,21 @@ export function SelectClient() {
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const payload = {
       ...data,
-      branch: selectedBranch?.idBranch
-    }
+      branch: selectedBranch?.idBranch,
+    };
     console.log("Enviando dados do novo usuário:", payload);
     try {
       await axios.post(`${ip}/user/client`, payload);
-      toast.success("Sucesso ao criar usuário")
+      toast.success("Sucesso ao criar usuário");
     } catch (err: any) {
-      if(err.response && err.response.data) {
+      if (err.response && err.response.data) {
         const mensagemBackend =
-        err.response.data.message ||
-        err.response.data.error ||
-        "Erro inesperado no servidor";
-      console.log(mensagemBackend);
+          err.response.data.message ||
+          err.response.data.error ||
+          "Erro inesperado no servidor";
+        console.log(mensagemBackend);
       }
-      toast.error("Erro ao criar novo usuário")
+      toast.error("Erro ao criar novo usuário");
       console.log(err);
     }
   };
@@ -383,7 +391,521 @@ export function SelectClient() {
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
 
-  console.log("branch selecionada:", selectedBranch);
+  if (client?.isUltragaz === true) {
+    return (
+      <div className="mt-10 flex justify-center gap-10">
+        <div className="flex items-start justify-center gap-10">
+          <div>
+            {client ? (
+              <div className="flex flex-col gap-10">
+                <div className="flex gap-10">
+                  <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+                    <div className="flex gap-3">
+                      <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
+                        <div className="text-[40px] text-white">
+                          {firstLetter}
+                          {lastLetter}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-10">
+                        <div className="flex flex-col items-start">
+                          <h2 className="text-realizaBlue text-[30px] font-medium">
+                            {client.tradeName}
+                          </h2>
+                          <h3 className="ml-1 text-sky-900">
+                            {client.corporateName}
+                          </h3>
+                        </div>
+                        <div className="text-[13px] text-sky-900">
+                          <p>{client.email}</p>
+                          <p>{client.cnpj}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-white p-8 shadow-lg">
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <nav className="flex items-center justify-between">
+                        <div>
+                          <Button
+                            variant={"ghost"}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                              selectedTabUltra === "diretoria"
+                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                                : "text-realizaBlue bg-white"
+                            }`}
+                            onClick={() => setSelectedTabUltra("diretoria")}
+                          >
+                            Diretoria
+                          </Button>
+                          <Button
+                            variant={"ghost"}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                              selectedTabUltra === "mercado"
+                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                                : "text-realizaBlue bg-white"
+                            }`}
+                            onClick={() => setSelectedTabUltra("mercado")}
+                          >
+                            Mercado
+                          </Button>
+                          <Button
+                            variant={"ghost"}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                              selectedTabUltra === "nucleo"
+                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                                : "text-realizaBlue bg-white"
+                            }`}
+                            onClick={() => setSelectedTabUltra("nucleo")}
+                          >
+                            Núcleo
+                          </Button>
+                          <Button
+                            variant={"ghost"}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                              selectedTabUltra === "usuarios"
+                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                                : "text-realizaBlue bg-white"
+                            }`}
+                            onClick={() => setSelectedTabUltra("filial")}
+                          >
+                            Filial
+                          </Button>
+                        </div>
+                        {selectedTabUltra === "diretoria" && (
+                          <div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className="bg-realizaBlue">+</Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[30vw]">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    Criar usuário para o cliente{" "}
+                                    {client ? (
+                                      <p>{client.corporateName}</p>
+                                    ) : (
+                                      <p>Nenhum cliente selecionado</p>
+                                    )}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <form
+                                  onSubmit={handleSubmit(onSubmitUserClient)}
+                                >
+                                  <div className="flex flex-col gap-2">
+                                    <div>
+                                      <Label>Nome</Label>
+                                      <Input
+                                        type="text"
+                                        {...register("firstName")}
+                                      />
+                                      {errors.firstName && (
+                                        <span className="text-red-600">
+                                          {errors.firstName.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Sobrenome</Label>
+                                      <Input
+                                        type="text"
+                                        {...register("surname")}
+                                      />
+                                      {errors.surname && (
+                                        <span className="text-red-600">
+                                          {errors.surname.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Email</Label>
+                                      <Input
+                                        type="text"
+                                        {...register("email")}
+                                      />
+                                      {errors.email && (
+                                        <span className="text-red-600">
+                                          {errors.email.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>CPF</Label>
+                                      <Input type="text" {...register("cpf")} />
+                                      {errors.cpf && (
+                                        <span className="text-red-600">
+                                          {errors.cpf.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Telefone</Label>
+                                      <Input
+                                        type="text"
+                                        {...register("cellPhone")}
+                                      />
+                                      {errors.cellPhone && (
+                                        <span className="text-red-600">
+                                          {errors.cellPhone.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Cargo</Label>
+                                      <Input
+                                        type="text"
+                                        {...register("position")}
+                                      />
+                                      {errors.position && (
+                                        <span className="text-red-600">
+                                          {errors.position.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Senha</Label>
+                                      <Input
+                                        type="text"
+                                        {...register("password")}
+                                      />
+                                      {errors.password && (
+                                        <span className="text-red-600">
+                                          {errors.password.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <Button
+                                      className="bg-realizaBlue"
+                                      type="submit"
+                                    >
+                                      Criar
+                                    </Button>
+                                  </div>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        )}
+                      </nav>
+                    </div>
+                    {selectedTabUltra === "diretoria" && (
+                      <div>
+                        <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                          <thead>
+                            <tr>
+                              <th className="border border-gray-300 px-4 py-2 text-start">
+                                Diretorias
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {boards && boards.length > 0 ? (
+                              boards.map((board: propsBoard) => (
+                                <tr key={board.idBoard}>
+                                  <td className="border border-gray-300 px-4 py-2">
+                                    <li className="text-realizaBlue">
+                                      {board.name}
+                                    </li>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="border border-gray-300 px-4 py-2 text-center"
+                                >
+                                  Nenhuma filial encontrada
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {selectedTabUltra === "mercado" && (
+                      <div>
+                        <div className="flex flex-col items-start gap-2">
+                          <Label>Diretoria</Label>
+                          <select
+                            onChange={(e) => {
+                              const selected = boards.find(
+                                (b) => b.idBoard === e.target.value,
+                              );
+                              setSelectedBoard(selected || null);
+                            }}
+                            className="rounded-md border p-2"
+                          >
+                            <option value="" disabled>
+                              Selecione uma diretoria
+                            </option>
+                            {boards.map((board) => (
+                              <option value={board.idBoard} key={board.idBoard}>
+                                {board.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                          <thead>
+                            <tr>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Mercados
+                              </th>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Diretoria
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {markets && markets.length > 0 ? (
+                              markets.map((market: propsMarket) => (
+                                <tr
+                                  key={market.idMarket}
+                                  className="overflow-auto text-start"
+                                >
+                                  <td className="border border-gray-300 px-4 py-2">
+                                    {market.name}
+                                  </td>
+                                  <td
+                                    key={selectedBoard?.idBoard}
+                                    className="text-center"
+                                  >
+                                    {selectedBoard?.name}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="border border-gray-300 px-4 py-2 text-center"
+                                >
+                                  Nenhum colaborador encontrado
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {selectedTabUltra === "nucleo" && (
+                      <div>
+                        <div className="flex items-start gap-4">
+                          <div className="flex flex-col gap-2">
+                            <Label>Diretoria</Label>
+                            <select
+                              onChange={(e) => {
+                                const selected = boards.find(
+                                  (b) => b.idBoard === e.target.value,
+                                );
+                                setSelectedBoard(selected || null);
+                              }}
+                              className="rounded-md border p-2"
+                            >
+                              <option value="" >
+                                Selecione uma diretoria
+                              </option>
+                              {boards.map((board) => (
+                                <option
+                                  value={board.idBoard}
+                                  key={board.idBoard}
+                                >
+                                  {board.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Label>Mercado</Label>
+                            <select
+                              onChange={(e) => {
+                                const selected = markets.find(
+                                  (b) => b.idBoard === e.target.value,
+                                );
+                                setSelectedMarket(selected || null);
+                              }}
+                              className="rounded-md border p-2"
+                            >
+                              <option value="">
+                                Selecione uma diretoria
+                              </option>
+                              {markets.map((market) => (
+                                <option
+                                  value={market.idBoard}
+                                  key={market.idBoard}
+                                >
+                                  {market.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                          <thead>
+                            <tr>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Núcleo
+                              </th>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Mercado
+                              </th>
+                              <th className="border border-gray-300 px-4 py-2">
+                                Diretoria
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {markets && markets.length > 0 ? (
+                              markets.map((market: propsMarket) => (
+                                <tr
+                                  key={market.idMarket}
+                                  className="overflow-auto text-start"
+                                >
+                                  {center.map((center) => (
+                                    <td key={center.idCenter}>
+                                      {center.name}
+                                    </td>
+                                  ))}
+                                  <td className="border border-gray-300 px-4 py-2">
+                                    {market.name}
+                                  </td>
+                                  <td
+                                    key={selectedBoard?.idBoard}
+                                    className="text-center"
+                                  >
+                                    {selectedBoard?.name}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="border border-gray-300 px-4 py-2 text-center"
+                                >
+                                  Nenhum colaborador encontrado
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-10">
+                <div className="flex gap-10">
+                  <div>
+                    <div>
+                      <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+                        <div className="flex">
+                          <Skeleton className="h-[16vh] w-[8vw] rounded-full bg-gray-600" />
+                          <div className="flex flex-col gap-10">
+                            <div className="flex flex-col gap-5">
+                              <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
+                              <Skeleton className="ml-1 h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
+                            </div>
+                            <div className="ml-2 flex flex-col gap-5">
+                              <Skeleton className="h-[0.5vh] w-[6vw] rounded-full bg-gray-600" />
+                              <Skeleton className="h-[0.3vh] w-[4vw] rounded-full bg-gray-600" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-white p-8 shadow-lg">
+                  <div className="flex flex-col items-start gap-4">
+                    <div>
+                      <nav className="flex items-center">
+                        <Button
+                          variant={"ghost"}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                            selectedTab === "filiais"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                          }`}
+                          onClick={() => setSelectedTabUltra("filiais")}
+                        >
+                          Filiais
+                        </Button>
+                        <Button
+                          variant={"ghost"}
+                          className={`px-4 py-2 transition-all duration-300 text-white${
+                            selectedTab === "usuarios"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                          }`}
+                          onClick={() => setSelectedTabUltra("usuarios")}
+                        >
+                          Usuários
+                        </Button>
+                      </nav>
+                    </div>
+                    {selectedTab === "filiais" && (
+                      <div>
+                        <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                          <thead>
+                            <tr>
+                              <th className="border border-gray-300 px-4 py-2 text-start">
+                                Filiais
+                              </th>
+                              <th>Cnpj</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {branches && branches.length > 0 ? (
+                              branches.map((branch: any) => (
+                                <tr key={branch.id}>
+                                  <td className="border border-gray-300 px-4 py-2">
+                                    <li className="text-realizaBlue">
+                                      {branch.name}
+                                    </li>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="border border-gray-300 px-4 py-2 text-center"
+                                >
+                                  Nenhuma filial encontrada
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={() => setShowAddWorkflow(true)}
+              className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
+            >
+              +
+            </button>
+            <EditModalEnterprise />
+          </div>
+        </div>
+
+        {showAddWorkflow && (
+          <AddClientWorkflow onClose={() => setShowAddWorkflow(false)} />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-10 flex justify-center gap-10">
@@ -542,7 +1064,10 @@ export function SelectClient() {
                                       </span>
                                     )}
                                   </div>
-                                  <Button className="bg-realizaBlue" type="submit">
+                                  <Button
+                                    className="bg-realizaBlue"
+                                    type="submit"
+                                  >
                                     Criar
                                   </Button>
                                 </div>
@@ -596,11 +1121,15 @@ export function SelectClient() {
                         <span>
                           {selectedBranch ? (
                             <div>
-                              <p><strong>Filial:</strong> {selectedBranch.name}</p>
+                              <p>
+                                <strong>Filial:</strong> {selectedBranch.name}
+                              </p>
                             </div>
                           ) : (
                             <div>
-                              <p><strong>Filial:</strong> Filial não selecionada</p>
+                              <p>
+                                <strong>Filial:</strong> Filial não selecionada
+                              </p>
                             </div>
                           )}
                         </span>
@@ -620,8 +1149,8 @@ export function SelectClient() {
                           </tr>
                         </thead>
                         <tbody>
-                          {usersFromBranch && usersFromBranch.length > 0 ? (
-                            usersFromBranch.map((users: any) => (
+                          {markets && markets.length > 0 ? (
+                            markets.map((users: any) => (
                               <tr key={users.idUser} className="overflow-auto">
                                 <td className="border border-gray-300 px-4 py-2">
                                   {users.firstName}
@@ -633,7 +1162,7 @@ export function SelectClient() {
                                   <Link
                                     to={`/sistema/detailsEmployees/${users.idEmployee}`}
                                   >
-                                    <button className="text-realizaBlue ml-4 hover:underline flex items-center justify-center">
+                                    <button className="text-realizaBlue ml-4 flex items-center justify-center hover:underline">
                                       <Settings2 />
                                     </button>
                                   </Link>

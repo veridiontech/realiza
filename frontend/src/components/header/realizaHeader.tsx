@@ -143,7 +143,7 @@ export function Header() {
             </Link>
           </div>
   
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col gap-3 items-center">
             <div className="flex items-center gap-4">
               <span className="text-realizaBlue mr-4 text-xl">
                 Cliente Selecionado:
