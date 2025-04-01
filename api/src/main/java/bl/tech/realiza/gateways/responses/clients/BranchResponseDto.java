@@ -19,4 +19,5 @@ public class BranchResponseDto {
     private String address;
     private String number;
     private String client;
+    private String center;
 }

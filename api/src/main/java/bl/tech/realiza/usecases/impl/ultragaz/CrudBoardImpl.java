@@ -1,7 +1,9 @@
 package bl.tech.realiza.usecases.impl.ultragaz;
 
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.ultragaz.Board;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.BoardRepository;
 import bl.tech.realiza.gateways.requests.ultragaz.BoardRequestDto;
 import bl.tech.realiza.gateways.responses.ultragaz.BoardResponseDto;
@@ -16,11 +18,17 @@ import org.springframework.stereotype.Service;
 public class CrudBoardImpl implements CrudBoard {
 
     private final BoardRepository boardRepository;
+    private final ClientRepository clientRepository;
 
     @Override
     public BoardResponseDto save(BoardRequestDto request) {
+
+        Client client = clientRepository.findById(request.getIdClient())
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
         Board board = Board.builder()
                 .name(request.getName())
+                .client(client)
                 .build();
 
         Board saved = boardRepository.save(board);
@@ -37,6 +45,12 @@ public class CrudBoardImpl implements CrudBoard {
     @Override
     public Page<BoardResponseDto> findAll(Pageable pageable) {
         return boardRepository.findAll(pageable)
+                .map(this::toResponse);
+    }
+
+    @Override
+    public Page<BoardResponseDto> findAllByClient(String idClient, Pageable pageable) {
+        return boardRepository.findAllByClient_IdClient(idClient, pageable)
                 .map(this::toResponse);
     }
 
@@ -60,6 +74,7 @@ public class CrudBoardImpl implements CrudBoard {
         return BoardResponseDto.builder()
                 .idBoard(board.getIdBoard())
                 .name(board.getName())
+                .idClient(board.getClient().getIdClient())
                 .build();
     }
 }

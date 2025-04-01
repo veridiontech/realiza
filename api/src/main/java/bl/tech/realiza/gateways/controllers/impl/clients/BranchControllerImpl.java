@@ -57,6 +57,18 @@ public class BranchControllerImpl implements BranchControlller {
         return ResponseEntity.ok(pageBranch);
     }
 
+    @GetMapping("/find-by-center")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<BranchResponseDto>> getAllBranchesByCenter(@RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "200") int size,
+                                                                          @RequestParam(defaultValue = "idBranch") String sort,
+                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                          @RequestParam String idCenter) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        return ResponseEntity.ok(crudBranch.findAllByCenter(idCenter, pageable));
+    }
+
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override

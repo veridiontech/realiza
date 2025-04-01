@@ -48,6 +48,18 @@ public class MarketControllerImpl implements MarketController {
         return ResponseEntity.ok(crudMarket.findAll(pageable));
     }
 
+    @GetMapping("/find-by-board")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<MarketResponseDto>> getAllMarketsByBoard(@RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "200") int size,
+                                                                        @RequestParam(defaultValue = "idMarket") String sort,
+                                                                        @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                        @RequestParam String idBoard) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        return ResponseEntity.ok(crudMarket.findAllByBoard(idBoard, pageable));
+    }
+
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
