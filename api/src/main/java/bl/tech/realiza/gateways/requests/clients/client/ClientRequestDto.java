@@ -14,4 +14,5 @@ public class ClientRequestDto {
     private String city;
     private String address;
     private String number;
+    private Boolean isUltragaz;
 }

@@ -21,4 +21,5 @@ public class ClientResponseDto {
     private String city;
     private String address;
     private String number;
+    private Boolean isUltragaz;
 }
