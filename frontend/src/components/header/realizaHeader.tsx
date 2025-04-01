@@ -94,6 +94,10 @@ export function Header() {
   // Handlers de hover:
   const handleMouseEnter = () => setMenuOpen(true);
   const handleMouseLeave = () => setMenuOpen(false);
+  
+  const pendingSolicitationsCount = solicitations.filter(
+    (solicitation) => solicitation.status === "PENDING",
+  ).length;
 
   return (
     <header className="dark:bg-primary relative p-5">
@@ -181,14 +185,19 @@ export function Header() {
         <div className="hidden items-center md:flex">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="cursor-pointer rounded-full bg-gray-300 p-2">
+              <div className="cursor-pointer rounded-full bg-gray-300 p-2 relative">
                 <Bell />
+                {/* Exibir contagem de notificações pendentes */}
+                {pendingSolicitationsCount > 0 && (
+                  <span className="absolute top-0 right-0 rounded-full bg-red-500 text-white text-xs px-2 py-1">
+                    {pendingSolicitationsCount}
+                  </span>
+                )}
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-32 flex flex-col gap-2 p-5">
               {/* Verificando se solicitations existe e se há itens pendentes */}
               {solicitations && solicitations.length > 0 ? (
-                // Filtra solicitações com status "PENDING"
                 <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
                   {solicitations.filter(
                     (solicitation) => solicitation.status === "PENDING",
@@ -209,7 +218,9 @@ export function Header() {
                             </div>
                             <div className="flex flex-col gap-1">
                               <strong>Detalhes da solicitação:</strong>{" "}
-                              <span className="text-[14px]">{solicitation.details}</span>
+                              <span className="text-[14px]">
+                                {solicitation.details}
+                              </span>
                             </div>
                           </div>
                         </div>
