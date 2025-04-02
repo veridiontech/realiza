@@ -1,10 +1,8 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
 import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
-import bl.tech.realiza.gateways.requests.services.email.EmailUpdateRequestDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,19 +20,7 @@ public class EmailControllerImpl {
     @RequestMapping("/invite")
     public ResponseEntity<String> sendEmailInvite(@RequestBody EmailInviteRequestDto email) {
         try {
-            emailSender.sendInviteEmail(email);
-            return ResponseEntity.ok("Success!");
-        } catch (Exception e) {
-            return ResponseEntity.ok(e.getMessage());
-        }
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/update")
-    public ResponseEntity<String> sendEmailUpdate(@RequestBody EmailUpdateRequestDto email) {
-        try {
-            emailSender.sendUpdateEmail(email);
+            emailSender.sendInviteEnterpriseEmail(email);
             return ResponseEntity.ok("Success!");
         } catch (Exception e) {
             return ResponseEntity.ok(e.getMessage());

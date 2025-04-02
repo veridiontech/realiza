@@ -1,19 +1,24 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
-import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.domains.user.UserClient;
-import bl.tech.realiza.domains.user.UserManager;
+import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
-import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
-import bl.tech.realiza.gateways.repositories.users.UserRepository;
-import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
+import bl.tech.realiza.gateways.repositories.users.*;
+import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -33,7 +38,15 @@ public class CrudUserManagerImpl implements CrudUserManager {
     private final UserManagerRepository userManagerRepository;
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
-    
+    private final ClientRepository clientRepository;
+    private final BranchRepository branchRepository;
+    private final UserClientRepository userClientRepository;
+    private final ProviderSupplierRepository providerSupplierRepository;
+    private final UserProviderSupplierRepository userProviderSupplierRepository;
+    private final ProviderSubcontractorRepository providerSubcontractorRepository;
+    private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
+    private final EmailSender emailSender;
+
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
         if (userManagerRequestDto.getRole() == null) {
@@ -248,5 +261,106 @@ public class CrudUserManagerImpl implements CrudUserManager {
         userManagerRepository.save(userManager);
 
         return "Profile picture updated successfully";
+    }
+
+    @Override
+    public String createNewUserActivated(UserCreateRequestDto userCreateRequestDto) {
+
+        switch (userCreateRequestDto.getEnterprise()) {
+            case REALIZA -> {
+                if (userCreateRequestDto.getRole() == User.Role.ROLE_REALIZA_BASIC ||
+                        userCreateRequestDto.getRole() == User.Role.ROLE_REALIZA_PLUS) {
+                    userManagerRepository.save(UserManager.builder()
+                            .cpf(userCreateRequestDto.getCpf())
+                            .description(userCreateRequestDto.getDescription())
+                            .position(userCreateRequestDto.getPosition())
+                            .role(userCreateRequestDto.getRole())
+                            .firstName(userCreateRequestDto.getFirstName())
+                            .surname(userCreateRequestDto.getSurname())
+                            .email(userCreateRequestDto.getEmail())
+                            .telephone(userCreateRequestDto.getTelephone())
+                            .cellphone(userCreateRequestDto.getCellphone())
+                            .isActive(true)
+                            .build());
+                } else {
+                    throw new IllegalArgumentException("Invalid role for REALIZA enterprise");
+                }
+            }
+            case CLIENT -> {
+                if (userCreateRequestDto.getRole() == User.Role.ROLE_CLIENT_RESPONSIBLE ||
+                        userCreateRequestDto.getRole() == User.Role.ROLE_CLIENT_MANAGER) {
+
+                    Branch branch = branchRepository.findById(userCreateRequestDto.getIdEnterprise())
+                                    .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+                    userClientRepository.save(UserClient.builder()
+                                    .cpf(userCreateRequestDto.getCpf())
+                                    .description(userCreateRequestDto.getDescription())
+                                    .position(userCreateRequestDto.getPosition())
+                                    .role(userCreateRequestDto.getRole())
+                                    .firstName(userCreateRequestDto.getFirstName())
+                                    .surname(userCreateRequestDto.getSurname())
+                                    .email(userCreateRequestDto.getEmail())
+                                    .telephone(userCreateRequestDto.getTelephone())
+                                    .cellphone(userCreateRequestDto.getCellphone())
+                                    .branch(branch)
+                                    .isActive(true)
+                            .build());
+                } else {
+                    throw new IllegalArgumentException("Invalid role for CLIENT enterprise");
+                }
+            }
+            case SUPPLIER -> {
+                if (userCreateRequestDto.getRole() == User.Role.ROLE_SUPPLIER_RESPONSIBLE ||
+                        userCreateRequestDto.getRole() == User.Role.ROLE_SUPPLIER_MANAGER) {
+                    ProviderSupplier supplier = providerSupplierRepository.findById(userCreateRequestDto.getIdEnterprise())
+                            .orElseThrow(() -> new NotFoundException("Supplier not found"));
+
+                    userProviderSupplierRepository.save(UserProviderSupplier.builder()
+                            .cpf(userCreateRequestDto.getCpf())
+                            .description(userCreateRequestDto.getDescription())
+                            .position(userCreateRequestDto.getPosition())
+                            .role(userCreateRequestDto.getRole())
+                            .firstName(userCreateRequestDto.getFirstName())
+                            .surname(userCreateRequestDto.getSurname())
+                            .email(userCreateRequestDto.getEmail())
+                            .telephone(userCreateRequestDto.getTelephone())
+                            .cellphone(userCreateRequestDto.getCellphone())
+                            .providerSupplier(supplier)
+                            .isActive(true)
+                            .build());
+                } else {
+                    throw new IllegalArgumentException("Invalid role for SUPPLIER enterprise");
+                }
+            }
+            case SUBCONTRACTOR -> {
+                if (userCreateRequestDto.getRole() == User.Role.ROLE_SUBCONTRACTOR_RESPONSIBLE ||
+                        userCreateRequestDto.getRole() == User.Role.ROLE_SUBCONTRACTOR_MANAGER) {
+                    ProviderSubcontractor subcontractor = providerSubcontractorRepository.findById(userCreateRequestDto.getIdEnterprise())
+                            .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+
+                    userProviderSubcontractorRepository.save(UserProviderSubcontractor.builder()
+                            .cpf(userCreateRequestDto.getCpf())
+                            .description(userCreateRequestDto.getDescription())
+                            .position(userCreateRequestDto.getPosition())
+                            .role(userCreateRequestDto.getRole())
+                            .firstName(userCreateRequestDto.getFirstName())
+                            .surname(userCreateRequestDto.getSurname())
+                            .email(userCreateRequestDto.getEmail())
+                            .telephone(userCreateRequestDto.getTelephone())
+                            .cellphone(userCreateRequestDto.getCellphone())
+                            .providerSubcontractor(subcontractor)
+                            .isActive(true)
+                            .build());
+                } else {
+                    throw new IllegalArgumentException("Invalid role for SUBCONTRACTOR enterprise");
+                }
+            }
+            default -> throw new BadRequestException("Unexpected value: " + userCreateRequestDto.getEnterprise());
+        }
+
+//        emailSender.sendInviteEnterpriseEmail();
+
+        return "User " + userCreateRequestDto.getEnterprise() + " created successfully";
     }
 }

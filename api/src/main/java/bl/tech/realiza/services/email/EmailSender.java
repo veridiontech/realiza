@@ -1,7 +1,6 @@
 package bl.tech.realiza.services.email;
 
 import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -10,7 +9,6 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepo
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
-import bl.tech.realiza.gateways.requests.services.email.EmailUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.usecases.impl.providers.CrudProviderSupplierImpl;
@@ -39,7 +37,7 @@ public class EmailSender {
     private final UserRepository userRepository;
     private final CrudProviderSupplierImpl crudProviderSupplierImpl;
 
-    public void sendInviteEmail(EmailInviteRequestDto emailInviteRequestDto) {
+    public void sendInviteEnterpriseEmail(EmailInviteRequestDto emailInviteRequestDto) {
         String companyName = "";
         String idCompany = "";
         String idBranch = "";
@@ -71,7 +69,7 @@ public class EmailSender {
 
             // Reading and customizing the email template
             try (var inputStream = Objects.requireNonNull(
-                    EmailControllerImpl.class.getResourceAsStream("/templates/email-invite.html"))) {
+                    EmailControllerImpl.class.getResourceAsStream("/templates/email-enterprise-invite.html"))) {
                 emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
                         .replace("Tech Solutions Ltda", companyName)
                         .replace("#TOKEN_PLACEHOLDER#", token)
@@ -103,43 +101,67 @@ public class EmailSender {
         }
     }
 
-    public void sendUpdateEmail(EmailUpdateRequestDto emailUpdateRequestDto) {
+    public void sendInviteNewUserEmail(EmailInviteRequestDto emailInviteRequestDto) {
+        String companyName = "";
+        String idCompany = "";
+        String idBranch = "";
+        Provider.Company company = emailInviteRequestDto.getCompany();
+        switch (emailInviteRequestDto.getCompany()) {
+            case CLIENT -> {
+                companyName = "Realiza Assessoria Empresarial Ltda";
+            }
+            case SUPPLIER -> {
+                ProviderResponseDto providerSupplier = crudProviderSupplierImpl.findOne(emailInviteRequestDto.getIdCompany())
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+                companyName = providerSupplier.getCorporateName() != null ? providerSupplier.getCorporateName() : "Tech Solutions Ltda";
+                idCompany = providerSupplier.getIdProvider();
+                idBranch = providerSupplier.getBranches().get(0).getIdBranch();
+            }
+            case SUBCONTRACTOR -> {
+                var subcontractor = providerSubcontractorRepository.findById(emailInviteRequestDto.getIdCompany())
+                        .orElseThrow(() -> new EntityNotFoundException("Supplier not found"));
+                companyName = subcontractor.getCorporateName();
+                idCompany = subcontractor.getIdProvider();
+                idBranch = subcontractor.getProviderSupplier().getBranches().get(0).getIdBranch();
+            }
+        }
+
         try {
-            // Carrega o template básico do email
-            String emailTemplate;
+            // Generating a unique token
+            String token = tokenManagerService.generateToken();
+            String emailBody;
+
+            // Reading and customizing the email template
             try (var inputStream = Objects.requireNonNull(
-                    EmailControllerImpl.class.getResourceAsStream("/templates/email-update.html"))) {
-                emailTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            }
-
-            // Constrói dinamicamente o HTML da lista de seções
-            StringBuilder sectionsHtml = new StringBuilder();
-            for (EmailUpdateRequestDto.Section section : emailUpdateRequestDto.getSections()) {
-                sectionsHtml.append("<li><b>").append(section.getSectionTitle()).append("</b><ul>");
-                for (String item : section.getItems()) {
-                    sectionsHtml.append("<li>").append(item).append("</li>");
+                    EmailControllerImpl.class.getResourceAsStream("/templates/email-enterprise-invite.html"))) {
+                emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+                        .replace("Tech Solutions Ltda", companyName)
+                        .replace("#TOKEN_PLACEHOLDER#", token)
+                        .replace("#ID_PLACEHOLDER#",idCompany)
+                        .replace("#ID_BRANCH#",idBranch);
+                if (emailInviteRequestDto.getIdClient() != null) {
+                    emailBody = emailBody.replace("#ID_CLIENT#", emailInviteRequestDto.getIdClient());
+                } else {
+                    emailBody = emailBody.replace("&idClient=#ID_CLIENT#", "");
                 }
-                sectionsHtml.append("</ul></li>");
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to generate email", e);
             }
-
-            // Substitui os placeholders no template
-            String emailBody = emailTemplate
-                    .replace("#VERSION#", emailUpdateRequestDto.getVersion())
-                    .replace("#TITLE#", emailUpdateRequestDto.getTitle())
-                    .replace("#DESCRIPTION#", emailUpdateRequestDto.getDescription())
-                    .replace("#SECTIONS#", sectionsHtml.toString());
-
-            // Configura e envia o email
+            // Creating and sending the email
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(dotenv.get("GMAIL_EMAIL"));
-            helper.setTo("jhonatan.sampaiof@gmail.com");
-            helper.setSubject("Atualização Realiza Sistema Versão " + emailUpdateRequestDto.getVersion());
-            helper.setText(emailBody, true); // Habilita formato HTML
+            helper.setTo(emailInviteRequestDto.getEmail());
+            helper.setSubject("Bem-vindo à " + companyName);
+            helper.setText(emailBody, true); // Enable HTML format
 
-            mailSender.send(message);
+            try {
+                mailSender.send(message);
+            } catch (MailException e) {
+                throw new RuntimeException("Failed to send the email", e);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate or send email", e);
+            throw new RuntimeException("Failed to generate email", e);
         }
     }
 
