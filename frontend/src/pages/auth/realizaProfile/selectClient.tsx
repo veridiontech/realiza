@@ -329,7 +329,11 @@ export function SelectClient() {
   const { markets, setSelectedMarket, selectedMarket } = useMarket();
   const { boards, setSelectedBoard, selectedBoard } = useBoard();
   const { center, selectedCenter, setSelectedCenter } = useCenter();
-  const { branchUltra} = useBranchUltra()
+  const { branchUltra } = useBranchUltra()
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [, setLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -342,7 +346,7 @@ export function SelectClient() {
   const {
     register: registerNewBoard,
     handleSubmit: handleSubmitBoard,
-    formState: {errors: errorBoard},
+    formState: { errors: errorBoard },
   } = useForm<CreateNewBoard>({
     resolver: zodResolver(createNewBoard)
   })
@@ -350,7 +354,7 @@ export function SelectClient() {
   const {
     register: registerNewMarket,
     handleSubmit: handleSubmitMarket,
-    formState: {errors: errorMarket},
+    formState: { errors: errorMarket },
   } = useForm<CreateNewMarket>({
     resolver: zodResolver(createNewMarket)
   })
@@ -363,62 +367,62 @@ export function SelectClient() {
     resolver: zodResolver(createBranchUltra),
   });
 
-  const createNewBoardSubmit = async(data: CreateNewBoard) => {
+  const createNewBoardSubmit = async (data: CreateNewBoard) => {
     const payload = {
       ...data,
       idClient: client?.idClient
     }
-    try{
+    try {
       console.log("Enviando dados da nova diretoria:", payload);
       await axios.post(`${ip}/ultragaz/board`, payload)
       toast.success("Sucesso ao criar novo ")
-    }catch(err) {
+    } catch (err) {
       toast.error("erro ao criar nova diretoria")
-      console.log("erro ao criar nova diretoria",err);
-      
-    }
-  } 
+      console.log("erro ao criar nova diretoria", err);
 
-  const createNewMarketSubmit = async(data: CreateNewMarket) => {
+    }
+  }
+
+  const createNewMarketSubmit = async (data: CreateNewMarket) => {
     const payload = {
       ...data,
       idBoard: selectedBoard?.idBoard
     }
-    try{
+    try {
       console.log("Enviando dados da nova diretoria:", payload);
       await axios.post(`${ip}/ultragaz/market`, payload)
       toast.success("Sucesso ao criar novo ")
-    }catch(err) {
+    } catch (err) {
       toast.error("erro ao criar nova diretoria")
-      console.log("erro ao criar nova diretoria",err);
+      console.log("erro ao criar nova diretoria", err);
     }
-  } 
-  
-  const createNewCenterSubmit = async(data: CreateNewMarket) => {
+  }
+
+  const createNewCenterSubmit = async (data: CreateNewMarket) => {
     const payload = {
       ...data,
       idMarket: selectedMarket?.idMarket
     }
-    try{
+    try {
       console.log("Enviando dados da nova diretoria:", payload);
       await axios.post(`${ip}/ultragaz/center`, payload)
       toast.success("Sucesso ao criar novo ")
-    }catch(err) {
+    } catch (err) {
       toast.error("erro ao criar nova diretoria")
-      console.log("erro ao criar nova diretoria",err);
+      console.log("erro ao criar nova diretoria", err);
     }
-  } 
+  }
 
-  const createNewBranchUltraSubmit = async(data: CreateBranchUltra) => {
+  const createNewBranchUltraSubmit = async (data: CreateBranchUltra) => {
     const payload = {
       ...data,
       center: selectedCenter?.idCenter
     }
-    try{
+    try {
       console.log("Enviando dados da nova diretoria:", payload);
       await axios.post(`${ip}/branch`, payload)
       toast.success("Sucesso ao criar novo ")
-    }catch(err: any) {
+    } catch (err: any) {
       if (err.response && err.response.data) {
         const mensagemBackend =
           err.response.data.message ||
@@ -435,12 +439,13 @@ export function SelectClient() {
 
       console.error("Erro ao criar filial:", err);
     }
-  } 
+  }
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const payload = {
       ...data,
       branch: selectedBranch?.idBranch,
+      idUser: user?.idUser
     };
     console.log("Enviando dados do novo usuário:", payload);
     try {
@@ -472,15 +477,21 @@ export function SelectClient() {
   };
 
   const getUsersFromBranch = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
       );
-      console.log("usuários da branch:", res.data.content);
-
-      setUsersFromBranch(res.data.content);
+      const { content, totalPages: total } = res.data;
+      console.log("usuários da branch:", content);
+      setUsersFromBranch(content);
+      setTotalPages(total);
     } catch (err) {
-      console.log("erro ao buscar usuários:", err);
+      console.error("erro ao buscar usuários:", err);
+      setError("Erro ao buscar usuários.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -556,44 +567,40 @@ export function SelectClient() {
                         <div>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                              selectedTabUltra === "diretoria"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTabUltra === "diretoria"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                            }`}
+                              }`}
                             onClick={() => setSelectedTabUltra("diretoria")}
                           >
                             Diretoria
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "mercado"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "mercado"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                            }`}
+                              }`}
                             onClick={() => setSelectedTabUltra("mercado")}
                           >
                             Mercado
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "nucleo"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "nucleo"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                            }`}
+                              }`}
                             onClick={() => setSelectedTabUltra("nucleo")}
                           >
                             Núcleo
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "filial"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "filial"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                            }`}
+                              }`}
                             onClick={() => setSelectedTabUltra("filial")}
                           >
                             Unidade
@@ -632,7 +639,7 @@ export function SelectClient() {
                                         </span>
                                       )}
                                     </div>
-                                    
+
                                     <Button
                                       className="bg-realizaBlue"
                                       type="submit"
@@ -678,7 +685,7 @@ export function SelectClient() {
                                         </span>
                                       )}
                                     </div>
-                                    
+
                                     <Button
                                       className="bg-realizaBlue"
                                       type="submit"
@@ -724,7 +731,7 @@ export function SelectClient() {
                                         </span>
                                       )}
                                     </div>
-                                    
+
                                     <Button
                                       className="bg-realizaBlue"
                                       type="submit"
@@ -1107,26 +1114,26 @@ export function SelectClient() {
                             </div>
                           </div>
                           <div className="flex flex-col gap-2">
-                          <span className="flex items-center gap-2 font-medium">
-                                Mercado selecionado:{" "}
-                                {selectedMarket ? (
-                                  <p className="font-normal">
-                                    {selectedMarket.name}
-                                  </p>
-                                ) : (
-                                  <p className="font-normal">
-                                    Nenhum tipo de mercado selecionado
-                                  </p>
-                                )}
-                              </span>
+                            <span className="flex items-center gap-2 font-medium">
+                              Mercado selecionado:{" "}
+                              {selectedMarket ? (
+                                <p className="font-normal">
+                                  {selectedMarket.name}
+                                </p>
+                              ) : (
+                                <p className="font-normal">
+                                  Nenhum tipo de mercado selecionado
+                                </p>
+                              )}
+                            </span>
                           </div>
                           <div>
                             <select onChange={(e) => {
-                                const selected = center.find(
-                                  (b) => b.idCenter === e.target.value,
-                                );
-                                setSelectedCenter(selected || null);
-                              }} defaultValue="" className="border p-2 rounded-md">
+                              const selected = center.find(
+                                (b) => b.idCenter === e.target.value,
+                              );
+                              setSelectedCenter(selected || null);
+                            }} defaultValue="" className="border p-2 rounded-md">
                               <option value="" disabled>Selecione um núcleo</option>
                               {center.map((center) => (
                                 <option value={center.idCenter} key={center.idCenter}>{center.name}</option>
@@ -1201,22 +1208,20 @@ export function SelectClient() {
                       <nav className="flex items-center">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTab === "filiais"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTabUltra("filiais")}
                         >
                           Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`px-4 py-2 transition-all duration-300 text-white${
-                            selectedTab === "usuarios"
+                          className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTabUltra("usuarios")}
                         >
                           Usuários
@@ -1282,9 +1287,19 @@ export function SelectClient() {
     );
   }
 
-  function handlePageChange(_page: number): void {
-    throw new Error("Function not implemented.");
-  }
+  useEffect(() => {
+    if (client?.idClient) {
+      setBranches([]);
+      setCurrentPage(0);
+      fetchBranches();
+    }
+  }, [client?.idClient]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="mt-10 flex justify-center gap-10">
@@ -1326,8 +1341,8 @@ export function SelectClient() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
                             }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
@@ -1336,8 +1351,8 @@ export function SelectClient() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
                             }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
@@ -1558,11 +1573,11 @@ export function SelectClient() {
                           )}
                         </tbody>
                       </table>
-                      {/* <Pagination
+                      <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={handlePageChange}
-                      /> */}
+                      />
                     </div>
                   )}
                 </div>
@@ -1598,8 +1613,8 @@ export function SelectClient() {
                       <Button
                         variant={"ghost"}
                         className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
+                          ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                          : "text-realizaBlue bg-white"
                           }`}
                         onClick={() => setSelectedTab("filiais")}
                       >
@@ -1608,8 +1623,8 @@ export function SelectClient() {
                       <Button
                         variant={"ghost"}
                         className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
+                          ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                          : "text-realizaBlue bg-white"
                           }`}
                         onClick={() => setSelectedTab("usuarios")}
                       >
