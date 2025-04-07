@@ -79,7 +79,7 @@ export function BottomSection() {
             className="absolute inset-y-0 right-3 mt-12 flex items-center text-gray-500 hover:text-gray-700"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? "🙈" : "👁️"}
+            {showPassword ? "🔒" : "👁️"}
           </button>
         </div>
         <div className="relative">
@@ -101,7 +101,7 @@ export function BottomSection() {
             className="absolute inset-y-0 right-3 mt-12 flex items-center text-gray-500 hover:text-gray-700"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? "🙈" : "👁️"}
+            {showPassword ? "🔒" : "👁️"}
           </button>
         </div>
         {errors.newPassword && (

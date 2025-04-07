@@ -18,7 +18,6 @@ import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagement
 import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementUserResponseDto;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -139,7 +138,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             providerRepository.save(provider);
 
             if (provider.getEmail() != null) {
-                emailSender.sendInviteEmail(EmailInviteRequestDto.builder()
+                emailSender.sendInviteEnterpriseEmail(EmailInviteRequestDto.builder()
                             .email(provider.getEmail())
                             .company(Provider.Company.SUPPLIER)
                             .idCompany(provider.getIdProvider())

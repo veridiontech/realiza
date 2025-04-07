@@ -167,7 +167,7 @@ export function CreateUserRealiza() {
                     className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? "🙈" : "👁️"}
+                    {showPassword ? "🔒" : "👁️"}
                   </button>
                 </div>
                 {errors.password && <p className="text-red-500">{errors.password.message}</p>}

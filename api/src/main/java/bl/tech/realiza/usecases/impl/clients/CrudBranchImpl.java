@@ -31,9 +31,12 @@ public class CrudBranchImpl implements CrudBranch {
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
         Center center = null;
+        Client client = null;
 
-        Client client = clientRepository.findById(branchCreateRequestDto.getClient())
-                    .orElseThrow(() -> new NotFoundException("Client not found"));
+        if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
+            client = clientRepository.findById(branchCreateRequestDto.getClient())
+                        .orElseThrow(() -> new NotFoundException("Client not found"));
+        }
 
         if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isBlank()) {
             center = centerRepository.findById(branchCreateRequestDto.getCenter())
@@ -69,8 +72,8 @@ public class CrudBranchImpl implements CrudBranch {
                 .telephone(savedBranch.getTelephone())
                 .address(savedBranch.getAddress())
                 .number(savedBranch.getNumber())
-                .client(savedBranch.getClient().getIdClient())
-                .center(savedBranch.getCenter().getIdCenter())
+                .client(savedBranch.getClient() != null ? savedBranch.getClient().getIdClient() : null)
+                .center(savedBranch.getCenter() != null ? savedBranch.getCenter().getIdCenter() : null)
                 .build();
     }
 

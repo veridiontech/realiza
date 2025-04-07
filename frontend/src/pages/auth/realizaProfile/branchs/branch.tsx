@@ -35,7 +35,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // }
 
 const newBranchFormSchema = z.object({
-  cnpj: z.string(),
+  cnpj: z.string().regex(/^(?:\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}|\d{14})$/),
   name: z.string().min(1, "O nome da filial é obrigatório"),
   email: z.string().email("Insira um email válido"),
   cep: z.string().min(8, "O CEP deve ter pelo menos 8 caracteres."),
@@ -58,6 +58,7 @@ export function Branch() {
   const { user } = useUser();
   const { setSelectedBranch } = useBranch();
   const [razaoSocial, setRazaoSocial] = useState<string | null>(null);
+  const [cnpjValue, setCnpjValue] = useState("");
 
   const {
     register,
@@ -69,35 +70,45 @@ export function Branch() {
     resolver: zodResolver(newBranchFormSchema),
   });
 
+  const formatCNPJ = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{4})$/, "$1/$2")
+      .replace(/(\d{4})(\d{2})$/, "$1-$2");
+  };
+
+
   const columns: {
     key: keyof propsBranch;
     label: string;
     render?: (value: any, row: propsBranch) => JSX.Element;
   }[] = [
-    { key: "name", label: "Nome da Filial" },
-    { key: "cnpj", label: "CNPJ" },
-    { key: "address", label: "Endereço" },
-    {
-      key: "actions",
-      label: "Ações",
-      render: (_value, row: propsBranch) => (
-        <div>
-          {user?.role === "ROLE_CLIENT_RESPONSIBLE" ? (
-            <Link to={`/cliente/profileBranch/${row.idBranch}`}>
-              <Eye />
-            </Link>
-          ) : (
-            <Link
-              to={`/sistema/profileBranch/${row.idBranch}`}
-              onClick={() => setSelectedBranch(row)}
-            >
-              <Eye />
-            </Link>
-          )}
-        </div>
-      ),
-    },
-  ];
+      { key: "name", label: "Nome da Filial" },
+      { key: "cnpj", label: "CNPJ" },
+      { key: "address", label: "Endereço" },
+      {
+        key: "actions",
+        label: "Ações",
+        render: (_value, row: propsBranch) => (
+          <div>
+            {user?.role === "ROLE_CLIENT_RESPONSIBLE" ? (
+              <Link to={`/cliente/profileBranch/${row.idBranch}`}>
+                <Eye />
+              </Link>
+            ) : (
+              <Link
+                to={`/sistema/profileBranch/${row.idBranch}`}
+                onClick={() => setSelectedBranch(row)}
+              >
+                <Eye />
+              </Link>
+            )}
+          </div>
+        ),
+      },
+    ];
 
   const fetchBranches = async () => {
     setLoading(true);
@@ -223,14 +234,25 @@ export function Branch() {
                     <div className="flex flex-col gap-2">
                       <Label>CNPJ</Label>
                       <div className="flex items-center gap-2">
-                        <Input type="text" {...register("cnpj")} />
+                        <Input
+                          type="text"
+                          value={cnpjValue}
+                          onChange={(e) => {
+                            const formattedCNPJ = formatCNPJ(e.target.value); 
+                            setCnpjValue(formattedCNPJ); 
+                            setValue("cnpj", formattedCNPJ); 
+                          }}
+                          placeholder="00.000.000/0000-00" 
+                          maxLength={18} 
+                        />
                         <div
-                          onClick={handleCnpj}
+                          onClick={handleCnpj} 
                           className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
                         >
                           <Search className="text-white" />
                         </div>
                       </div>
+                      {errors.cnpj && <span className="text-sm text-red-600">{errors.cnpj.message}</span>}
                       {errors.cnpj && (
                         <span className="text-sm text-red-600">
                           {errors.cnpj.message}

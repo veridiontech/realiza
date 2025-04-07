@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.users;
 
 import bl.tech.realiza.gateways.controllers.interfaces.users.UserManagerController;
+import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
@@ -101,5 +102,12 @@ public class UserManagerControllerImpl implements UserManagerController {
         String userManager = crudUserManager.changePassword(id, userManagerRequestDto);
 
         return ResponseEntity.ok(userManager);
+    }
+
+    @PostMapping("/new-user")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<String> createNewUserByManagerAccount(@RequestBody UserCreateRequestDto userCreateRequestDto) {
+        return ResponseEntity.ok(crudUserManager.createNewUserActivated(userCreateRequestDto));
     }
 }
