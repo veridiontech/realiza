@@ -66,6 +66,20 @@ const createNewMarket = z.object({
   name: z.string().nonempty("Nome da diretoria é obrigatório")
 })
 
+const createBranchUltra = z.object({
+  cnpj: z.string(),
+  name: z.string().min(1, "O nome da filial é obrigatório"),
+  email: z.string().email("Insira um email válido"),
+  cep: z.string().min(8, "O CEP deve ter pelo menos 8 caracteres."),
+  country: z.string().min(1, "O país é obrigatório."),
+  state: z.string().min(1, "O estado é obrigatório."),
+  city: z.string().min(1, "A cidade é obrigatória."),
+  address: z.string().min(1, "O endereço é obrigatório."),
+  number: z.string().nonempty("Número é obrigatório"),
+  telephone: z.string().nonempty("Insira um telefone"),
+})
+
+type CreateBranchUltra = z.infer<typeof createBranchUltra>
 type CreateNewBoard = z.infer<typeof createNewBoard>
 type CreateNewMarket = z.infer<typeof createNewMarket>
 type CreateUserClient = z.infer<typeof createUserClient>;
@@ -340,6 +354,14 @@ export function SelectClient() {
     resolver: zodResolver(createNewMarket)
   })
 
+  const {
+    register: registerBranchUltra,
+    handleSubmit: handleSubmitBranchUltra,
+    formState: { errors: errorsBranchUltra },
+  } = useForm<CreateBranchUltra>({
+    resolver: zodResolver(createBranchUltra),
+  });
+
   const createNewBoardSubmit = async(data: CreateNewBoard) => {
     const payload = {
       ...data,
@@ -383,6 +405,34 @@ export function SelectClient() {
     }catch(err) {
       toast.error("erro ao criar nova diretoria")
       console.log("erro ao criar nova diretoria",err);
+    }
+  } 
+
+  const createNewBranchUltraSubmit = async(data: CreateBranchUltra) => {
+    const payload = {
+      ...data,
+      center: selectedCenter?.idCenter
+    }
+    try{
+      console.log("Enviando dados da nova diretoria:", payload);
+      await axios.post(`${ip}/branch`, payload)
+      toast.success("Sucesso ao criar novo ")
+    }catch(err: any) {
+      if (err.response && err.response.data) {
+        const mensagemBackend =
+          err.response.data.message ||
+          err.response.data.error ||
+          "Erro inesperado no servidor";
+        console.log(mensagemBackend);
+
+        toast.error(mensagemBackend);
+      } else if (err.request) {
+        toast.error("Não foi possível se conectar ao servidor.");
+      } else {
+        toast.error("Erro desconhecido ao processar requisição.");
+      }
+
+      console.error("Erro ao criar filial:", err);
     }
   } 
 
@@ -674,6 +724,159 @@ export function SelectClient() {
                                       )}
                                     </div>
                                     
+                                    <Button
+                                      className="bg-realizaBlue"
+                                      type="submit"
+                                    >
+                                      Criar
+                                    </Button>
+                                  </div>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        )}
+                        {selectedTabUltra === "filial" && (
+                          <div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className="bg-realizaBlue">+</Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[35vw]">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    Criar uma nova filial para{" "}
+                                    {selectedCenter ? (
+                                      <p>{selectedCenter.name}</p>
+                                    ) : (
+                                      <p className="font-normal">Nenhum núcleo selecionado</p>
+                                    )}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <form
+                                  onSubmit={handleSubmitBranchUltra(createNewBranchUltraSubmit)}
+                                >
+                                  <div className="flex flex-col gap-2">
+                                    <div>
+                                      <Label>Nome</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("name")}
+                                      />
+                                      {errorsBranchUltra.name && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.name.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Email</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("email")}
+                                      />
+                                      {errorsBranchUltra.email && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.email.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>CNPJ</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("cnpj")}
+                                      />
+                                      {errorsBranchUltra.cnpj && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.cnpj.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Cidade</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("city")}
+                                      />
+                                      {errorsBranchUltra.city && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.city.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>CEP</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("cep")}
+                                      />
+                                      {errorsBranchUltra.cep && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.cep.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Endereço</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("address")}
+                                      />
+                                      {errorsBranchUltra.address && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.address.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Número</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("number")}
+                                      />
+                                      {errorsBranchUltra.number && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.number.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>País</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("country")}
+                                      />
+                                      {errorsBranchUltra.country && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.country.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Estado</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("state")}
+                                      />
+                                      {errorsBranchUltra.state && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.state.message}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Telefone</Label>
+                                      <Input
+                                        type="text"
+                                        {...registerBranchUltra("telephone")}
+                                      />
+                                      {errorsBranchUltra.telephone && (
+                                        <span className="text-red-600">
+                                          {errorsBranchUltra.telephone.message}
+                                        </span>
+                                      )}
+                                    </div>
                                     <Button
                                       className="bg-realizaBlue"
                                       type="submit"
