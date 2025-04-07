@@ -9,11 +9,11 @@ import { SupplierAddContract } from "@/components/supplierAddContract";
 import { useUser } from "@/context/user-provider";
 import { Contract } from "@/types/contracts";
 import { ip } from "@/utils/ip";
+import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
+import { useSupplier } from "@/context/Supplier-context";
 
 export default function SupplierContracts() {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const supplierId = user?.supplier;
 
   const itemsPerPage = 10;
 
@@ -31,6 +31,7 @@ export default function SupplierContracts() {
   const [supplierLoading, setSupplierLoading] = useState<boolean>(false);
   const [supplierError, setSupplierError] = useState<string | null>(null);
   const [supplierCurrentPage, setSupplierCurrentPage] = useState<number>(0);
+  const {supplier} = useSupplier()
 
   // Colunas comuns para ambas as tabelas
   const columns = [
@@ -68,7 +69,7 @@ export default function SupplierContracts() {
 
   // Chamada para buscar os contratos filtrados por cliente (rota: filtered-client)
   useEffect(() => {
-    if (activeTab === "supplier" && supplierId) {
+    if (activeTab === "supplier" && supplier?.idProvider) {
       setClientLoading(true);
       axios
         .get(`${ip}/contract/supplier/filtered-client`, {
@@ -77,7 +78,7 @@ export default function SupplierContracts() {
             size: itemsPerPage,
             sort: "idContract",
             direction: "ASC",
-            idSearch: supplierId,
+            idSearch: supplier.idProvider,
           },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
@@ -94,11 +95,11 @@ export default function SupplierContracts() {
           setClientLoading(false);
         });
     }
-  }, [activeTab, supplierId, clientCurrentPage]);
+  }, [activeTab, supplier?.idProvider, clientCurrentPage]);
 
   // Chamada para buscar os contratos filtrados por fornecedor (rota: filtered-supplier)
   useEffect(() => {
-    if (activeTab === "supplier" && supplierId) {
+    if (activeTab === "client" && supplier?.idProvider) {
       setSupplierLoading(true);
       axios
         .get(`${ip}/contract/supplier/filtered-supplier`, {
@@ -107,13 +108,15 @@ export default function SupplierContracts() {
             size: itemsPerPage,
             sort: "idContract",
             direction: "ASC",
-            idSearch: supplierId,
+            idSearch: supplier?.idProvider,
           },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
           },
         })
         .then((response) => {
+          console.log("log dos contratos:", response.data.content);
+          
           setSupplierContracts(response.data.content);
           setSupplierTotalPages(response.data.totalPages);
           setSupplierLoading(false);
@@ -123,7 +126,7 @@ export default function SupplierContracts() {
           setSupplierLoading(false);
         });
     }
-  }, [activeTab, supplierId, supplierCurrentPage]);
+  }, [activeTab, supplier?.idProvider, supplierCurrentPage]);
 
   return (
     <div className="m-10 flex min-h-full justify-center">
@@ -131,7 +134,8 @@ export default function SupplierContracts() {
         {/* Cabeçalho com o título e botão para adicionar contrato */}
         <div className="m-8 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Tabela de Contratos</h1>
-          <SupplierAddContract />
+          {/* <SupplierAddContract /> */}
+          <ModalTesteSendSupplier />
         </div>
 
         {/* Navegação por abas */}

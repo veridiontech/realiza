@@ -24,15 +24,12 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-<<<<<<< HEAD
 import { Pagination } from "@/components/ui/pagination";
-=======
-import { useBoard } from "@/context/context-ultra/Board-provider";
-import { propsBoard, propsBranchUltra, propsMarket } from "@/types/interfaces";
-import { useMarket } from "@/context/context-ultra/Market-provider";
-import { useCenter } from "@/context/context-ultra/Center-provider";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
->>>>>>> 19f945564706bedb455cb318b7bb4744ca5ea59a
+import { useMarket } from "@/context/context-ultra/Market-provider";
+import { useBoard } from "@/context/context-ultra/Board-provider";
+import { useCenter } from "@/context/context-ultra/Center-provider";
+import { propsBoard, propsBranchUltra, propsMarket } from "@/types/interfaces";
 
 interface CompanyData {
   razaoSocial: string;
@@ -329,15 +326,10 @@ export function SelectClient() {
   const [selectedTabUltra, setSelectedTabUltra] = useState("diretoria");
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   const { selectedBranch } = useBranch();
-<<<<<<< HEAD
-  const [totalPages] = useState(1);
-  const [currentPage] = useState(1);
-=======
   const { markets, setSelectedMarket, selectedMarket } = useMarket();
   const { boards, setSelectedBoard, selectedBoard } = useBoard();
   const { center, selectedCenter, setSelectedCenter } = useCenter();
   const { branchUltra} = useBranchUltra()
->>>>>>> 19f945564706bedb455cb318b7bb4744ca5ea59a
 
   const {
     register,
@@ -1566,11 +1558,11 @@ export function SelectClient() {
                           )}
                         </tbody>
                       </table>
-                      <Pagination
+                      {/* <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={handlePageChange}
-                      />
+                      /> */}
                     </div>
                   )}
                 </div>

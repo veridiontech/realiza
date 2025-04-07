@@ -25,6 +25,7 @@ import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
+import { useSupplier } from "@/context/Supplier-context";
 // import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
 // Torna o campo idClient opcional, pois vamos atribuí-lo via código
@@ -81,7 +82,8 @@ export function ModalTesteSendSupplier() {
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
-  const {datasSender,setDatasSender} = useDataSendEmailContext()
+  const { datasSender, setDatasSender } = useDataSendEmailContext();
+  const {supplier} = useSupplier()
   // const [subContractDatas, setSubContractDatas] = useState({});
 
   const {
@@ -118,10 +120,10 @@ export function ModalTesteSendSupplier() {
     setIsLoading(true);
     try {
       const companyData = await fetchCompanyByCNPJ(cnpjValue);
-      setValue("corporateName", companyData.razaoSocial|| "");
+      setValue("corporateName", companyData.razaoSocial || "");
     } catch (error) {
-      console.log("erro ao buscar cnpj",error);
-      
+      console.log("erro ao buscar cnpj", error);
+
       toast.error("Erro ao buscar dados do CNPJ");
     } finally {
       setIsLoading(false);
@@ -216,7 +218,7 @@ export function ModalTesteSendSupplier() {
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
       );
       console.log(selectedBranch);
-      
+
       console.log("gestores:", res.data.content);
       setManagers(res.data.content);
     } catch (err) {
@@ -228,11 +230,10 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
-    if(selectedBranch?.idBranch) {
-      getManager()
+    if (selectedBranch?.idBranch) {
+      getManager();
     }
-     
-  }, [selectedBranch?.idBranch])
+  }, [selectedBranch?.idBranch]);
 
   useEffect(() => {
     getActivities();
@@ -253,9 +254,9 @@ export function ModalTesteSendSupplier() {
         idBranch: selectedBranch?.idBranch,
       };
       console.log("enviando dados do contrato", payload);
-      setDatasSender(payload)
+      setDatasSender(payload);
       console.log("dados recebidos:", datasSender);
-      
+
       await axios.post(`${ip}/contract/supplier`, payload);
       toast.success("Contrato criado com sucesso!");
     } catch (err: any) {
@@ -284,6 +285,370 @@ export function ModalTesteSendSupplier() {
   useEffect(() => {
     getActivities();
   }, []);
+
+  if (
+    user?.role === "ROLE_SUPPLIER_RESPONSIBLE" &&
+    "ROLE_SUPPLIER_RESPONSIBLE"
+  ) {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button className="bg-sky-700">Cadastrar novo prestador</Button>
+        </DialogTrigger>
+        <DialogContent
+          style={{
+            backgroundImage: `url(${bgModalRealiza})`,
+          }}
+          className="max-w-[45vw]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              Cadastrar novo Subcontratado
+            </DialogTitle>
+          </DialogHeader>
+          <div>
+            {supplier ? (
+              <span className="text-white">
+                <strong>Filial:</strong> {supplier.corporateName}
+              </span>
+            ) : (
+              <span className="text-white">Nenhuma filial encontrada</span>
+            )}
+          </div>
+          <div>
+              <form
+                onSubmit={handleSubmitSubContract(createClient)}
+                className="flex flex-col gap-4"
+              >
+                <div className="relative">
+                  <Label className="text-white">CNPJ</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Insira o cnpj do prestador..."
+                      {...registerSubContract("cnpj")}
+                      defaultValue={getValues("cnpj") || ""}
+                      className="pr-10"
+                    />
+                    {isLoading ? (
+                      <div
+                        onClick={handleCNPJSearchSub}
+                        className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                      >
+                        <Oval
+                          visible={true}
+                          height="30"
+                          width="40"
+                          color="#34495E"
+                          ariaLabel="oval-loading"
+                          wrapperStyle={{}}
+                          wrapperClass=""
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        onClick={handleCNPJSearchSub}
+                        className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                      >
+                        <Search />
+                      </div>
+                    )}
+                  </div>
+                  {errors.cnpj && (
+                    <span className="text-red-600">{errors.cnpj.message}</span>
+                  )}
+                </div>
+                <div className="mb-1">
+                  <Label className="text-white">Razão Social</Label>
+                  <Input
+                    type="corporateName"
+                    placeholder="Digite a razão social do novo prestador"
+                    {...registerSubContract("corporateName")}
+                    className="w-full"
+                  />
+                </div>
+                <div className="mb-1">
+                  <Label className="text-white">Email</Label>
+                  <Input
+                    type="email"
+                    placeholder="Digite o email do novo prestador"
+                    {...registerSubContract("email")}
+                    className="w-full"
+                  />
+                  {errorsSubContract.email && (
+                    <span className="text-red-600">
+                      {errorsSubContract.email.message}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-white">Telefone</Label>
+                  <Input
+                    placeholder="Digite o telefone"
+                    {...registerSubContract("phone")}
+                  />
+                  {errorsSubContract.phone && (
+                    <span className="text-red-600">
+                      {errorsSubContract.phone.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Label className="text-white">Selecione um fornecedor</Label>
+                  <select
+                    defaultValue={""}
+                    className="rounded-lg p-2"
+                    {...registerSubContract("providerSubcontractor")}
+                  >
+                    <option value="" disabled>
+                      Selecione uma opção
+                    </option>
+                    {suppliers.map((supplier: any) => (
+                      <option
+                        value={supplier.idProvider}
+                        key={supplier.idProvider}
+                      >
+                        {supplier.tradeName} {supplier.cnpj}
+                      </option>
+                    ))}
+                  </select>
+                  {errorsSubContract.providerSubcontractor && (
+                    <span className="text-red-600">
+                      {errorsSubContract.providerSubcontractor.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex justify-end">
+                  {isLoading ? (
+                    <Button>
+                      <Radio
+                        visible={true}
+                        height="80"
+                        width="80"
+                        ariaLabel="radio-loading"
+                        wrapperStyle={{}}
+                        wrapperClass=""
+                      />
+                    </Button>
+                  ) : (
+                    <Button className="bg-realizaBlue" type="submit">
+                      Próximo
+                    </Button>
+                  )}
+                </div>
+              </form>
+            <Dialog open={nextModal} onOpenChange={setNextModal}>
+              <DialogContent
+                className="max-w-[45vw] border-none"
+                style={{
+                  backgroundImage: `url(${bgModalRealiza})`,
+                }}
+              >
+                <DialogHeader>
+                  <DialogTitle className="text-white">
+                    Faça o contrato
+                  </DialogTitle>
+                </DialogHeader>
+                <div>
+                  {selectedBranch ? (
+                    <span className="text-white">
+                      <strong>Filial:</strong> {selectedBranch?.name}
+                    </span>
+                  ) : (
+                    <span className="text-white">
+                      Nenhuma filial selecionada
+                    </span>
+                  )}
+                </div>
+                <ScrollArea className="h-[60vh] w-full px-5">
+                  <div className="p-4">
+                    <form
+                      className="flex flex-col gap-2"
+                      onSubmit={handleSubmitContract(createContract)}
+                    >
+                      <div>
+                        <Label className="text-white">
+                          CNPJ do novo prestador
+                        </Label>
+                        <div>
+                          <Input
+                            type="text"
+                            {...registerContract("cnpj")}
+                            value={pushCnpj || "erro ao puxar cnpj"}
+                          />
+                          {errorsContract.cnpj && (
+                            <span className="text-red-600">
+                              {errorsContract.cnpj.message}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <Label className="text-white">Gestor do serviço</Label>
+                        <select
+                          key={getIdManager}
+                          className="rounded-md border p-2"
+                          {...registerContract("idResponsible")} // Associando ao idResponsible
+                        >
+                          <option value="" disabled>
+                            Selecione um gestor
+                          </option>
+                          {Array.isArray(managers) &&
+                            managers.map((manager: any) => (
+                              <option
+                                value={manager.idUser}
+                                onClick={() => setGetIdManager(manager.idUser)}
+                                key={manager.idUser}
+                              >
+                                {manager.firstName} {manager.surname}{" "}
+                              </option>
+                            ))}
+                        </select>
+                        {errorsContract.idResponsible && (
+                          <span className="text-red-600">
+                            {errorsContract.idResponsible.message}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-white">
+                          Data de início efetivo
+                        </Label>
+                        <Input type="date" {...registerContract("dateStart")} />
+                        {errorsContract.dateStart && (
+                          <span className="text-red-600">
+                            {errorsContract.dateStart.message}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-white">
+                          Referência do contrato
+                        </Label>
+                        <Input {...registerContract("contractReference")} />
+                        {errorsContract.contractReference && (
+                          <span className="text-red-500">
+                            {errorsContract.contractReference.message}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label className="text-white">Tipo de despesa</Label>
+                        <select
+                          {...registerContract("expenseType")}
+                          className="rounded-md border p-2"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>
+                            Selecione uma opção
+                          </option>
+                          <option value="CAPEX">CAPEX</option>
+                          <option value="OPEX">OPEX</option>
+                          <option value="Nenhuma">Nenhuma</option>
+                        </select>
+                        {errorsContract.serviceType && (
+                          <span className="text-red-500">
+                            {errorsContract.serviceType.message}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <Label className="text-white">Tipo do Serviço</Label>
+                        <select
+                          {...registerContract("serviceType")}
+                          className="rounded-md p-1"
+                        >
+                          <option value="" disabled>
+                            Selecione uma opção
+                          </option>
+                          <option value="AMBAS">AMBAS</option>
+                          <option value="SSMA">SSMA</option>
+                          <option value="TODAS">TODAS</option>
+                        </select>
+                        {errorsContract.expenseType && (
+                          <span className="text-red-500">
+                            {errorsContract.expenseType.message}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label className="text-white">Nome do Serviço</Label>
+                        <Input {...registerContract("serviceName")} />
+                        {errorsContract.serviceName && (
+                          <span className="text-red-500">
+                            {errorsContract.serviceName.message}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label className="text-white">Tipo de atividade</Label>
+                        <select
+                          {...registerContract("idActivity")}
+                          className="rounded-md border p-2"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>
+                            Selecione uma atividade
+                          </option>
+                          {activities.map((activitie: any) => (
+                            <option
+                              value={activitie.idActivity}
+                              key={activitie.idActivity}
+                            >
+                              {activitie.title}{" "}
+                            </option>
+                          ))}
+                        </select>
+                        {errorsContract.idActivity && (
+                          <span className="text-red-500">
+                            {errorsContract.idActivity.message}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label className="text-white">
+                          Descrição detalhada do serviço
+                        </Label>
+                        <textarea
+                          {...registerContract("description")}
+                          className="rounded-md border p-2"
+                        />
+                        {errorsContract.description && (
+                          <span className="text-red-500">
+                            {errorsContract.description.message}
+                          </span>
+                        )}
+                      </div>
+                      {isLoading ? (
+                        <Button className="bg-realizaBlue" type="submit">
+                          <Oval
+                            visible={true}
+                            height="80"
+                            width="80"
+                            color="#4fa94d"
+                            ariaLabel="oval-loading"
+                            wrapperStyle={{}}
+                            wrapperClass=""
+                          />
+                        </Button>
+                      ) : (
+                        <Button className="bg-realizaBlue" type="submit">
+                          Enviar contrato
+                        </Button>
+                      )}
+                    </form>
+                  </div>
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog>
