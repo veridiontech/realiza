@@ -136,7 +136,7 @@ export const router = createBrowserRouter([
       </UserProvider>
     ),
     children: [
-      { path: "home/:id", element: <SupplierContractNewPage /> },
+      { path: "home/:id", element: <SupplierContractNewPage/> },
       { path: "quartered/:id", element: <Quartered /> },
       { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },

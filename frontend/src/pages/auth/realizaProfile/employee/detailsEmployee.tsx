@@ -32,6 +32,7 @@ export function DetailsEmployee() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
+  // const idEmployee = 
 
   const fetchEmployee = async () => {
     try {

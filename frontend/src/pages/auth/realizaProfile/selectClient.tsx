@@ -24,7 +24,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { Pagination } from "@/components/ui/pagination";
+// import { Pagination } from "@/components/ui/pagination";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useBoard } from "@/context/context-ultra/Board-provider";
@@ -1282,9 +1282,9 @@ export function SelectClient() {
     );
   }
 
-  function handlePageChange(_page: number): void {
-    throw new Error("Function not implemented.");
-  }
+  // function handlePageChange(_page: number): void {
+  //   throw new Error("Function not implemented.");
+  // }
 
   return (
     <div className="mt-10 flex justify-center gap-10">
