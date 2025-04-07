@@ -24,11 +24,15 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+<<<<<<< HEAD
+import { Pagination } from "@/components/ui/pagination";
+=======
 import { useBoard } from "@/context/context-ultra/Board-provider";
 import { propsBoard, propsBranchUltra, propsMarket } from "@/types/interfaces";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
+>>>>>>> 19f945564706bedb455cb318b7bb4744ca5ea59a
 
 interface CompanyData {
   razaoSocial: string;
@@ -311,10 +315,15 @@ export function SelectClient() {
   const [selectedTabUltra, setSelectedTabUltra] = useState("diretoria");
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   const { selectedBranch } = useBranch();
+<<<<<<< HEAD
+  const [totalPages] = useState(1);
+  const [currentPage] = useState(1);
+=======
   const { markets, setSelectedMarket, selectedMarket } = useMarket();
   const { boards, setSelectedBoard, selectedBoard } = useBoard();
   const { center, selectedCenter, setSelectedCenter } = useCenter();
   const { branchUltra} = useBranchUltra()
+>>>>>>> 19f945564706bedb455cb318b7bb4744ca5ea59a
 
   const {
     register,
@@ -1078,6 +1087,10 @@ export function SelectClient() {
     );
   }
 
+  function handlePageChange(_page: number): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div className="mt-10 flex justify-center gap-10">
       <div className="flex items-start justify-center gap-10">
@@ -1117,22 +1130,20 @@ export function SelectClient() {
                       <div>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTab === "filiais"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTab === "usuarios"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           Usuários
@@ -1352,6 +1363,11 @@ export function SelectClient() {
                           )}
                         </tbody>
                       </table>
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                      />
                     </div>
                   )}
                 </div>
@@ -1386,22 +1402,20 @@ export function SelectClient() {
                     <nav className="flex items-center">
                       <Button
                         variant={"ghost"}
-                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                          selectedTab === "filiais"
+                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
                             ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                             : "text-realizaBlue bg-white"
-                        }`}
+                          }`}
                         onClick={() => setSelectedTab("filiais")}
                       >
                         Filiais
                       </Button>
                       <Button
                         variant={"ghost"}
-                        className={`px-4 py-2 transition-all duration-300 text-white${
-                          selectedTab === "usuarios"
+                        className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
                             ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                             : "text-realizaBlue bg-white"
-                        }`}
+                          }`}
                         onClick={() => setSelectedTab("usuarios")}
                       >
                         Usuários
