@@ -18,11 +18,17 @@ import org.springframework.stereotype.Service;
 public class CrudCenterImpl implements CrudCenter {
 
     private final CenterRepository centerRepository;
+    private final MarketRepository marketRepository;
 
     @Override
     public CenterResponseDto save(CenterRequestDto request) {
+
+        Market market = marketRepository.findById(request.getIdMarket())
+                .orElseThrow(() -> new NotFoundException("Market not found"));
+
         Center center = Center.builder()
                 .name(request.getName())
+                .market(market)
                 .build();
 
         Center saved = centerRepository.save(center);
@@ -39,6 +45,12 @@ public class CrudCenterImpl implements CrudCenter {
     @Override
     public Page<CenterResponseDto> findAll(Pageable pageable) {
         return centerRepository.findAll(pageable)
+                .map(this::toResponse);
+    }
+
+    @Override
+    public Page<CenterResponseDto> findAllByMarket(String idMarket, Pageable pageable) {
+        return centerRepository.findAllByMarket_IdMarket(idMarket, pageable)
                 .map(this::toResponse);
     }
 
@@ -62,6 +74,7 @@ public class CrudCenterImpl implements CrudCenter {
         return CenterResponseDto.builder()
                 .idCenter(center.getIdCenter())
                 .name(center.getName())
+                .idMarket(center.getMarket().getIdMarket())
                 .build();
     }
 }

@@ -1,27 +1,36 @@
 package bl.tech.realiza.gateways.requests.users;
 
 import bl.tech.realiza.domains.user.User;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class UserManagerRequestDto {
+public class UserCreateRequestDto {
+    @NotEmpty
     private String cpf;
     private String description;
+    @NotEmpty
     private String password;
-    private String newPassword;
     private String position;
+    @NotNull
     private User.Role role;
+    @NotEmpty
     private String firstName;
+    @NotEmpty
     private String surname;
+    @NotEmpty
     private String email;
-    private String profilePicture;
     private String telephone;
     private String cellphone;
+    @NotNull
+    private Enterprise enterprise;
+    private String idEnterprise;
 
-    public enum Role {
-        ROLE_ADMIN,
-        ROLE_REALIZA_PLUS,
-        ROLE_REALIZA_BASIC,
-        ROLE_VIEWER
+    public enum Enterprise {
+        REALIZA,
+        CLIENT,
+        SUPPLIER,
+        SUBCONTRACTOR
     }
 }

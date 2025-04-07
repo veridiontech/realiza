@@ -2,27 +2,22 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
-import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
+import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudActivity;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,12 +26,22 @@ public class CrudBranchImpl implements CrudBranch {
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
     private final CrudActivityImpl crudActivity;
+    private final CenterRepository centerRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
+        Center center = null;
+        Client client = null;
 
-        Optional<Client> clientOptional = clientRepository.findById(branchCreateRequestDto.getClient());
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+        if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
+            client = clientRepository.findById(branchCreateRequestDto.getClient())
+                        .orElseThrow(() -> new NotFoundException("Client not found"));
+        }
+
+        if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isBlank()) {
+            center = centerRepository.findById(branchCreateRequestDto.getCenter())
+                    .orElseThrow(() -> new NotFoundException("Center not found"));
+        }
 
         Branch newBranch = Branch.builder()
                 .name(branchCreateRequestDto.getName())
@@ -49,13 +54,14 @@ public class CrudBranchImpl implements CrudBranch {
                 .address(branchCreateRequestDto.getAddress())
                 .number(branchCreateRequestDto.getNumber())
                 .client(client)
+                .center(center)
                 .build();
 
         Branch savedBranch = branchRepository.save(newBranch);
 
         crudActivity.transferFromRepo(savedBranch.getIdBranch());
 
-        BranchResponseDto branchResponseDto = BranchResponseDto.builder()
+        return BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
                 .name(savedBranch.getName())
                 .cnpj(savedBranch.getCnpj())
@@ -66,10 +72,9 @@ public class CrudBranchImpl implements CrudBranch {
                 .telephone(savedBranch.getTelephone())
                 .address(savedBranch.getAddress())
                 .number(savedBranch.getNumber())
-                .client(savedBranch.getClient().getIdClient())
+                .client(savedBranch.getClient() != null ? savedBranch.getClient().getIdClient() : null)
+                .center(savedBranch.getCenter() != null ? savedBranch.getCenter().getIdCenter() : null)
                 .build();
-
-        return branchResponseDto;
     }
 
     @Override
@@ -78,44 +83,44 @@ public class CrudBranchImpl implements CrudBranch {
 
         Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        BranchResponseDto branchResponse = BranchResponseDto.builder()
-                .idBranch(branch.getIdBranch())
-                .name(branch.getName())
-                .cnpj(branch.getCnpj())
-                .cep(branch.getCep())
-                .state(branch.getState())
-                .city(branch.getCity())
-                .email(branch.getEmail())
-                .telephone(branch.getTelephone())
-                .address(branch.getAddress())
-                .number(branch.getNumber())
-                .client(branch.getClient().getIdClient())
-                .build();
-
-        return Optional.of(branchResponse);
+        return getBranchResponseDto(branch);
     }
 
     @Override
     public Page<BranchResponseDto> findAll(Pageable pageable) {
         Page<Branch> pageBranch = branchRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<BranchResponseDto> pageBranchResponse = pageBranch.map(
-                branch -> BranchResponseDto.builder()
-                        .idBranch(branch.getIdBranch())
-                        .name(branch.getName())
-                        .cnpj(branch.getCnpj())
-                        .cep(branch.getCep())
-                        .state(branch.getState())
-                        .city(branch.getCity())
-                        .email(branch.getEmail())
-                        .telephone(branch.getTelephone())
-                        .address(branch.getAddress())
-                        .number(branch.getNumber())
-                        .client(branch.getClient().getIdClient())
-                        .build()
-        );
+        return getBranchResponseDtos(pageBranch);
+    }
 
-        return pageBranchResponse;
+    @Override
+    public Page<BranchResponseDto> findAllByCenter(String idCenter, Pageable pageable) {
+        return getBranchResponseDtos(branchRepository.findAllByCenter_IdCenter(idCenter, pageable));
+    }
+
+    @NotNull
+    private Page<BranchResponseDto> getBranchResponseDtos(Page<Branch> pageBranch) {
+
+        return pageBranch.map(
+                branch -> {
+                    String client = branch.getClient() != null ? branch.getClient().getIdClient() : null;
+                    String center = branch.getCenter() != null ? branch.getCenter().getIdCenter() : null;
+                    return BranchResponseDto.builder()
+                            .idBranch(branch.getIdBranch())
+                            .name(branch.getName())
+                            .cnpj(branch.getCnpj())
+                            .cep(branch.getCep())
+                            .state(branch.getState())
+                            .city(branch.getCity())
+                            .email(branch.getEmail())
+                            .telephone(branch.getTelephone())
+                            .address(branch.getAddress())
+                            .number(branch.getNumber())
+                            .client(client)
+                            .center(center)
+                            .build();
+                }
+        );
     }
 
     @Override
@@ -137,6 +142,11 @@ public class CrudBranchImpl implements CrudBranch {
 
         Branch savedBranch = branchRepository.save(branch);
 
+        return getBranchResponseDto(savedBranch);
+    }
+
+    @NotNull
+    private Optional<BranchResponseDto> getBranchResponseDto(Branch savedBranch) {
         BranchResponseDto branchResponseDto = BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
                 .name(savedBranch.getName())
@@ -149,6 +159,7 @@ public class CrudBranchImpl implements CrudBranch {
                 .address(savedBranch.getAddress())
                 .number(savedBranch.getNumber())
                 .client(savedBranch.getClient().getIdClient())
+                .center(savedBranch.getCenter().getIdCenter())
                 .build();
 
         return Optional.of(branchResponseDto);
@@ -163,22 +174,6 @@ public class CrudBranchImpl implements CrudBranch {
     public Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable) {
         Page<Branch> pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
 
-        Page<BranchResponseDto> pageBranchResponse = pageBranch.map(
-                branch -> BranchResponseDto.builder()
-                        .idBranch(branch.getIdBranch())
-                        .name(branch.getName())
-                        .cnpj(branch.getCnpj())
-                        .cep(branch.getCep())
-                        .state(branch.getState())
-                        .city(branch.getCity())
-                        .email(branch.getEmail())
-                        .telephone(branch.getTelephone())
-                        .address(branch.getAddress())
-                        .number(branch.getNumber())
-                        .client(branch.getClient().getIdClient())
-                        .build()
-        );
-
-        return pageBranchResponse;
+        return getBranchResponseDtos(pageBranch);
     }
 }

@@ -12,6 +12,10 @@ import { DocumentProvider } from "./context/Document-provider";
 import { BranchProvider } from "./context/Branch-provider";
 import { SupplierProvider } from "./context/Supplier-context";
 import { DataSendEmailProvider } from "./context/dataSendEmail-Provider";
+import { BoardProvider } from "./context/context-ultra/Board-provider";
+import { MarketProvider } from "./context/context-ultra/Market-provider";
+import { CenterProvider } from "./context/context-ultra/Center-provider";
+import { BranchUltraProvider } from "./context/context-ultra/BranchUltra-provider";
 
 const queryClient = new QueryClient();
 
@@ -31,11 +35,19 @@ export function App() {
               <Helmet titleTemplate="%s | realiza" />
               <ClientProvider>
                 <BranchProvider>
-                  <SupplierProvider>
-                    <DocumentProvider>
-                      <RouterProvider router={router} />
-                    </DocumentProvider>
-                  </SupplierProvider>
+                  <BoardProvider>
+                    <MarketProvider>
+                      <CenterProvider>
+                        <BranchUltraProvider>
+                          <SupplierProvider>
+                            <DocumentProvider>
+                              <RouterProvider router={router} />
+                            </DocumentProvider>
+                          </SupplierProvider>
+                        </BranchUltraProvider>
+                      </CenterProvider>
+                    </MarketProvider>
+                  </BoardProvider>
                 </BranchProvider>
               </ClientProvider>
             </HelmetProvider>

@@ -8,4 +8,5 @@ import lombok.Data;
 public class MarketResponseDto {
     private String idMarket;
     private String name;
+    private String idBoard;
 }

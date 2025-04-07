@@ -10,6 +10,7 @@ public interface CenterController {
     ResponseEntity<CenterResponseDto> createCenter(CenterRequestDto centerRequestDto);
     ResponseEntity<CenterResponseDto> getOneCenter(String id);
     ResponseEntity<Page<CenterResponseDto>> getAllCenters(int page, int size, String sort, Sort.Direction direction);
+    ResponseEntity<Page<CenterResponseDto>> getAllCentersByMarket(int page, int size, String sort, Sort.Direction direction, String idMarket);
     ResponseEntity<CenterResponseDto> updateCenter(String id, CenterRequestDto centerRequestDto);
     ResponseEntity<Void> deleteCenter(String id);
 }

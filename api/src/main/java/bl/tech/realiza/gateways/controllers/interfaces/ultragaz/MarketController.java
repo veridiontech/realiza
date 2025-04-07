@@ -10,6 +10,7 @@ public interface MarketController {
     ResponseEntity<MarketResponseDto> createMarket(MarketRequestDto marketRequestDto);
     ResponseEntity<MarketResponseDto> getOneMarket(String id);
     ResponseEntity<Page<MarketResponseDto>> getAllMarkets(int page, int size, String sort, Sort.Direction direction);
+    ResponseEntity<Page<MarketResponseDto>> getAllMarketsByBoard(int page, int size, String sort, Sort.Direction direction, String idBoard);
     ResponseEntity<MarketResponseDto> updateMarket(String id, MarketRequestDto marketRequestDto);
     ResponseEntity<Void> deleteMarket(String id);
 }
