@@ -24,12 +24,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { Pagination } from "@/components/ui/pagination";
+// import { Pagination } from "@/components/ui/pagination";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useBoard } from "@/context/context-ultra/Board-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { propsBoard, propsBranchUltra, propsMarket } from "@/types/interfaces";
+import { Pagination } from "@/components/ui/pagination";
 
 interface CompanyData {
   razaoSocial: string;

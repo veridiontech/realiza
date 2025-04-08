@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Modal } from "@/components/modal";
+import { ip } from "@/utils/ip";
 
 interface AddDocumentProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
       [
         JSON.stringify({
           title: formData.title,
-          status: "ativo",
+          status: "PENDENTE",
           employee: employeeId,
         }),
       ],
@@ -54,10 +55,12 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
     data.append("documentEmployeeRequestDto", jsonBlob);
     data.append("file", selectedFile); // Adiciona o arquivo selecionado
 
+    console.log("teste", data);
+    
     try {
-      await axios.post("https://realiza.onrender.com/document/employee", data);
+      await axios.post(`${ip}/document/employee`, data);
       setStatus("Arquivo enviado com sucesso!");
-      setSelectedFile(null); // Reseta o arquivo após o envio
+      setSelectedFile(null); 
     } catch (error) {
       console.error(error);
       setStatus("Erro ao enviar o arquivo. Tente novamente.");

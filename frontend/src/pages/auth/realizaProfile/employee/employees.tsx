@@ -17,6 +17,9 @@ import { ip } from "@/utils/ip";
 import { propsSupplier } from "@/types/interfaces";
 import { TableEmployee } from "./tableEmployee";
 import { useBranch } from "@/context/Branch-provider";
+import { useSupplier } from "@/context/Supplier-context";
+import { useUser } from "@/context/user-provider";
+import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 
 export const EmployeesTable = (): JSX.Element => {
   const [selectedTab, setSelectedTab] = useState("fornecedor");
@@ -32,6 +35,9 @@ export const EmployeesTable = (): JSX.Element => {
   const [getUniqueSupplier, setGetUniqueSupplier] =
     useState<propsSupplier | null>(null);
   const [getSubcontractorList, setGetSubcontractorList] = useState([])
+  const {user} = useUser()
+  const {supplier} = useSupplier()
+  // const [employees, setEmployees] = useState([])
 
   // const handlePageChange = (page: number) => {
   //   if (page >= 0 && page <= totalPages) {
@@ -71,6 +77,22 @@ export const EmployeesTable = (): JSX.Element => {
     }
   }
 
+  // const getEmployees = async() => {
+  //   try{
+  //     const res = await axios.get(`${ip}/employee?idSearch=${supplier?.idProvider}&enterprise=SUPPLIER`)
+  //     setEmployees(res.data.content)
+  //   }catch(err) {
+  //     console.log(err);
+      
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   if(supplier?.idProvider) {
+  //     getEmployees()
+  //   }
+  // }, [supplier?.idProvider])
+
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       suppliers();
@@ -80,6 +102,82 @@ export const EmployeesTable = (): JSX.Element => {
       getSubcontractor()
     }
   }, [selectedBranch?.idBranch, selectedSupplier]);
+
+  if(user?.role === "ROLE_SUPPLIER_RESPONSIBLE" && "ROLE_SUPPLIER_RESPONSIBLE") {
+    return (
+      <div className="m-4 flex justify-center">
+        <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-2xl">Colaboradores</h1>
+            <NewModalCreateEmployee />
+          </div>
+          <div className="mb-4 flex">
+            <Button
+              variant="ghost"
+              className={`px-4 py-2 transition-all duration-300 ${
+                selectedTab === "fornecedor"
+                  ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                  : "text-realizaBlue bg-white"
+              }`}
+              onClick={() => setSelectedTab("fornecedor")}
+            >
+              Fornecedor
+            </Button>
+            <Button
+              variant="ghost"
+              className={`px-4 py-2 transition-all duration-300 ${
+                selectedTab === "subcontratado"
+                  ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                  : "text-realizaBlue bg-white"
+              }`}
+              onClick={() => setSelectedTab("subcontratado")}
+            >
+              Subcontratado
+            </Button>
+          </div>
+          <div>
+            {loading ? (
+              <div className="text-center text-gray-600">
+                Carregando colaboradores...
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-500">{error}</div>
+            ) : selectedTab === "fornecedor" ? (
+              <div>
+                <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
+                <div>
+                  
+                  <TableEmployee idProvider={supplier?.idProvider ?? null} />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center gap-2">
+                    {" "}
+                    <strong>Fornecedor: </strong>
+                    <h1>{supplier?.corporateName}</h1>
+                  </div>
+                  <div>
+                    {getSubcontractorList.map((subcontractor: any) => (
+                      <div key={subcontractor.idProvider}>
+                        <span>{subcontractor.corporateName}teste</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          /> */}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="m-4 flex justify-center">

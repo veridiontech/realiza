@@ -139,7 +139,7 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
         </div>
 
         <div className="mt-6 flex justify-center">
-          <div className="flex flex-row gap-6">
+          {/* <div className="flex flex-row gap-6">
             <button className="h-12 w-[10rem] rounded-full bg-green-400 font-bold text-white hover:bg-green-300">
               Aprovar
             </button>
@@ -149,7 +149,7 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
             <button className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-red-300">
               Bloquear
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
