@@ -142,7 +142,8 @@ export const router = createBrowserRouter([
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      {path: "create-manager/:id", element: <CreateNewManagerSupplier />}
+      {path: "create-manager/:id", element: <CreateNewManagerSupplier />},
+      { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
     ],
   },
   {
