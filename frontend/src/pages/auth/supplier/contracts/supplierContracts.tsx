@@ -5,8 +5,8 @@ import { NotebookPen, Users } from "lucide-react";
 
 import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
-import { SupplierAddContract } from "@/components/supplierAddContract";
-import { useUser } from "@/context/user-provider";
+// import { SupplierAddContract } from "@/components/supplierAddContract";
+// import { useUser } from "@/context/user-provider";
 import { Contract } from "@/types/contracts";
 import { ip } from "@/utils/ip";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
