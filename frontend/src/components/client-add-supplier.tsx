@@ -84,6 +84,7 @@ export function ModalTesteSendSupplier() {
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
   const { datasSender, setDatasSender } = useDataSendEmailContext();
   const {supplier} = useSupplier()
+  const [contracts, setContracts] = useState([]);
   // const [subContractDatas, setSubContractDatas] = useState({});
 
   const {
@@ -129,6 +130,26 @@ export function ModalTesteSendSupplier() {
       setIsLoading(false);
     }
   };
+
+  
+  const getContracts = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/contract/supplier/filtered-supplier?idSearch=${supplier?.idProvider}`,
+      );
+      console.log("contratos:", res.data.content);
+
+      setContracts(res.data.content);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (supplier?.idProvider) {
+      getContracts();
+    }
+  }, [supplier?.idProvider]);
 
   const handleCNPJSearchSub = async () => {
     const cnpjValue = getValuesSub("cnpj");
@@ -403,12 +424,12 @@ export function ModalTesteSendSupplier() {
                     <option value="" disabled>
                       Selecione uma opção
                     </option>
-                    {suppliers.map((supplier: any) => (
+                    {contracts.map((supplier: any) => (
                       <option
-                        value={supplier.idProvider}
-                        key={supplier.idProvider}
+                        value={supplier.idContract}
+                        key={supplier.idContract}
                       >
-                        {supplier.tradeName} {supplier.cnpj}
+                        {supplier.serviceName}
                       </option>
                     ))}
                   </select>
