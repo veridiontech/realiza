@@ -12,28 +12,27 @@ import { useEffect, useState } from "react";
 
 export function CardContract() {
   const { selectedBranch } = useBranch();
-  const [contracts, setContracts] = useState<any>([]);
-  const [supplierData, setSupplierData] = useState<any>(null)
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [supplierData, setSupplierData] = useState<any>(null);
 
   const getContract = async () => {
     try {
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
       );
-      console.log("contratos:", res.data.content);
-
       setContracts(res.data.content);
     } catch (err) {
-      console.log("erro ao buscar documentos:", err);
+      console.log("Erro ao buscar contratos:", err);
     }
   };
 
-  const getSupplier = async () => {
+  const getSupplier = async (supplierId: string) => {
     try {
-        const res = await axios.get(`${ip}/supplier/${contracts.providerSupplier}`)
-        setSupplierData(res.data)
+      const res = await axios.get(`${ip}/supplier/${supplierId}`);
+      setSupplierData(res.data);
     } catch (err) {
-      console.log(err);
+      console.log("Erro ao buscar fornecedor:", err);
     }
   };
 
@@ -41,66 +40,74 @@ export function CardContract() {
     if (selectedBranch?.idBranch) {
       getContract();
     }
-    if(contracts.providerSupplier) {
-        getSupplier() 
-    }
   }, [selectedBranch?.idBranch]);
 
   return (
-    <div className="flex flex-col gap-5">
-    <Dialog>
-      <DialogTrigger asChild>
-        <div className="border-l-realizaBlue w-auto cursor-pointer rounded-lg border border-l-8 p-5 shadow-lg hover:bg-gray-100">
-          {contracts.map((contract: any) => (
+    <div className="grid grid-cols-2 gap-x-1 gap-y-8">
+      {contracts.map((contract) => (
+        <Dialog key={contract.idContract}>
+          <DialogTrigger asChild>
             <div
-              className="flex flex-col items-start gap-5"
-              key={contract.idContract}
+              onClick={() => {
+                setSelectedContract(contract);
+                getSupplier(contract.providerSupplier);
+              }}
+              className="border-l-realizaBlue flex w-[33vw] cursor-pointer flex-col items-start gap-5 rounded-lg border border-l-8 p-5 shadow-lg hover:bg-gray-100"
             >
-              <div className="flex gap-1">
-                <h1>Nome do serviço: </h1>
-                <p>{contract.serviceName}</p>
+              <div>
+                <div className="flex gap-1">
+                  <strong>Nome do serviço: </strong>
+                  <p>{contract.serviceName}</p>
+                </div>
+                <div>
+                  <h2 className="text-[12px]">
+                    <strong>Referência de contrato:</strong>{" "}
+                    {contract.contractReference}
+                  </h2>
+                </div>
               </div>
               <div className="text-[12px]">
-                <p>Data de início</p>
+                <strong>Data de início</strong>
                 <p>
                   {new Date(contract.dateStart).toLocaleDateString("pt-BR")}
                 </p>
               </div>
             </div>
-          ))}
-        </div>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Detalhes do Contrato</DialogTitle>
-          {contracts.map((contract: any) => (
-            <div key={contract.idContract} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-1">
-                <h1>{contract.serviceName}</h1>
-                <div className="text-[12px]">
-                  <p>{contract.description}</p>
-                </div>
-              </div>
-              <div>
-                <p>Prestador do serviço:</p>
-                <div>
-                  <li>{supplierData?.corporateName}</li>
-                  <div>
-                    <li>Duração do serviço: {contract.serviceDuration}</li>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader className="flex flex-col gap-5">
+              <DialogTitle>Detalhes do Contrato</DialogTitle>
+              {selectedContract && (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <h1>Nome do serviço: {selectedContract.serviceName}</h1>
+                    <div className="text-[12px]">
+                      <p>{selectedContract.description}</p>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div>
-                <p>Data de início</p>
-                <p>
-                  {new Date(contract.startDate).toLocaleDateString("pt-BR")}
-                </p>
-              </div>
-            </div>
-          ))}
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+                  <div>
+                    <p>Prestador do serviço:</p>
+                    <ul>
+                      <li>{supplierData?.corporateName}</li>
+                      <li>
+                        Duração do serviço: {selectedContract.serviceDuration}
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p>Data de início</p>
+                    <p>
+                      {new Date(selectedContract.dateStart).toLocaleDateString(
+                        "pt-BR",
+                      )}
+                    </p>
+                  </div>
+                </>
+              )}
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      ))}
     </div>
   );
 }

@@ -41,6 +41,7 @@ const createNewEmployeeFormSchema = z.object({
   state: z.string(),
   city: z.string(),
   address: z.string(),
+  number: z.string(),
   phone: z.string().optional(),
   mobile: z.string(),
   position: z.string(),
@@ -314,6 +315,10 @@ export function NewModalCreateEmployee() {
                 <div>
                   <Label className="text-white">Adress</Label>
                   <Input {...register("address")} />
+                </div>
+                <div>
+                  <Label>Número</Label>
+                  <Input {...register("number")}/>
                 </div>
                 <div>
                   <Label className="text-white">Telefone</Label>
