@@ -3,6 +3,8 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 
+
+
 interface SupplierAddEmployeeProps {
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
@@ -36,6 +38,7 @@ export function SupplierAddEmployee({
   };
 
   return (
+    
     <Modal
       title="Cadastrar colaborador"
       fields={[

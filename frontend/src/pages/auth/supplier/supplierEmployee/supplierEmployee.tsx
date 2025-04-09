@@ -10,9 +10,11 @@ import { Link } from "react-router-dom";
 import { Employee } from "@/types/employee";
 import { useClient } from "@/context/Client-Provider";
 
+
+
 export const SupplierEmployee = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const { client } = useClient();
@@ -35,10 +37,10 @@ export const SupplierEmployee = (): JSX.Element => {
     }
   };
 
-  const handleModalSubmit = (formData: Record<string, any>) => {
-    console.log("Dados do novo colaborador:", formData);
-    setIsModalOpen(false);
-  };
+  // const handleModalSubmit = (formData: Record<string, any>) => {
+  //   console.log("Dados do novo colaborador:", formData);
+  //   setIsModalOpen(false);
+  // };
 
   const columns: {
     key: keyof Employee;
@@ -103,13 +105,6 @@ export const SupplierEmployee = (): JSX.Element => {
           </div>
         )}
       </div>
-
-      {isModalOpen && (
-        <SupplierAddEmployee
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleModalSubmit}
-        />
-      )}
     </div>
   );
 };

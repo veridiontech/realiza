@@ -22,11 +22,17 @@ import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 
+interface propsCep {
+  address: string;
+  city: string;
+  state: string;
+}
+
 const createNewEmployeeFormSchema = z.object({
   contractType: z.string(),
   name: z.string(),
   surname: z.string(),
-  email: z.string(),
+  // email: z.string(),
   cpf: z.string(),
   salary: z.string(),
   gender: z.string(),
@@ -42,13 +48,14 @@ const createNewEmployeeFormSchema = z.object({
   education: z.string(),
   cbo: z.string().optional(),
   // platformAccess: z.string(),
-  rg: z.string(),
+  // rg: z.string(),
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
-  // dob: z.string()
+  birthDate: z.string(),
 });
 
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 export function NewModalCreateEmployee() {
+  const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
 
@@ -69,13 +76,13 @@ export function NewModalCreateEmployee() {
       .replace(/(\d{3})(\d{2})$/, "$1-$2");
   };
 
-  const formatRG = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{2})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1})$/, "$1-$2");
-  };
+  // const formatRG = (value: string) => {
+  //   return value
+  //     .replace(/\D/g, "")
+  //     .replace(/(\d{2})(\d)/, "$1.$2")
+  //     .replace(/(\d{3})(\d)/, "$1.$2")
+  //     .replace(/(\d{3})(\d{1})$/, "$1-$2");
+  // };
 
   const formatSalary = (value: string) => {
     return value
@@ -109,6 +116,27 @@ export function NewModalCreateEmployee() {
     }
   };
 
+  const handleCep = async () => {
+    try {
+      const res = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+      if (res.data) {
+        setValuesCep({
+          address: res.data.logradouro,
+          city: res.data.localidade,
+          state: res.data.uf,
+        });
+      }
+      console.log(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const setValuesCep = (data: propsCep) => {
+    setValue("city", data.city),
+      setValue("state", data.state),
+      setValue("address", data.address);
+  };
 
   return (
     <Dialog>
@@ -132,6 +160,29 @@ export function NewModalCreateEmployee() {
                   console.log("Erros detectados:", errors);
                 })}
               >
+                <div>
+                  <Label className="text-white">Nome</Label>
+                  <Input type="text" {...register("name")} />
+                </div>
+                <div>
+                  <Label className="text-white">Sobrenome</Label>
+                  <Input type="text" {...register("surname")} />
+                </div>
+                <div>
+                  <Label className="text-white">Data de nascimento</Label>
+                  <Input type="date" {...register("birthDate")} />
+                </div>
+                <div>
+                  <Label className="text-white">Estado civil</Label>
+                  <select
+                    {...register("maritalStatus")}
+                    className="flex flex-col rounded-md border p-2"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="Masculino">Casado</option>
+                    <option value="Feminino">Solteiro</option>
+                  </select>
+                </div>
                 <div>
                   <Label className="text-white">Tipo de contrato</Label>
                   <select
@@ -164,53 +215,17 @@ export function NewModalCreateEmployee() {
                     <option value="Temporário">Temporário</option>
                   </select>
                 </div>
-                <div>
-                  <Label className="text-white">Situação</Label>
-                  <select
-                    {...register("situation")}
-                    className="flex flex-col rounded-md border p-2"
-                  >
-                    <option value="">Selecione uma situação</option>
-                    <option value="ALOCADO">Alocado</option>
-                    <option value="DESALOCADO">Desalocado</option>
-                    <option value="DEMITIDO">Demitido</option>
-                    <option value="AFASTADO">Afastado</option>
-                    <option value="LICENCA_MATERNIDADE">
-                      Licença Maternidade
-                    </option>
-                    <option value="LICENCA_MEDICA">Licença Médica</option>
-                    <option value="LICENCA_MILITAR">Licença Militar</option>
-                    <option value="FERIAS">Férias</option>
-                    <option value="ALISTAMENTO_MILITAR">
-                      Alistamento Militar
-                    </option>
-                    <option value="APOSENTADORIA_POR_INVALIDEZ">
-                      Aposentadoria por Invalidez
-                    </option>
-                  </select>
-                </div>
 
-                <div>
-                  <Label className="text-white">Nome</Label>
-                  <Input type="text" {...register("name")} />
-                </div>
-                <div>
-                  <Label className="text-white">Sobrenome</Label>
-                  <Input type="text" {...register("surname")} />
-                </div>
-                {/* <div>
-                  <Label className="text-white">Data de aniversário</Label>
-                  <Input type="date" {...register("dob")} />
-                </div> */}
+                {/*                 
                 <div>
                   <Label className="text-white">Email</Label>
                   <Input type="text" {...register("email")} />
-                </div>
+                </div> */}
                 <div>
                   <Label className="text-white">CPF:</Label>
                   <Input
                     type="text"
-                    // value={getValues("cpf")}
+                    // value={getValues("cpf")
                     {...register("cpf")}
                     onChange={(e) => {
                       const formattedCPF = formatCPF(e.target.value);
@@ -221,7 +236,7 @@ export function NewModalCreateEmployee() {
                   />
                   {errors.cpf && <span>{errors.cpf.message}</span>}
                 </div>
-                <div>
+                {/* <div>
                   <Label className="text-white">RG:</Label>
                   <Input
                     type="text"
@@ -235,7 +250,7 @@ export function NewModalCreateEmployee() {
                     maxLength={12}
                   />
                   {errors.rg && <span>{errors.rg.message}</span>}
-                </div>
+                </div> */}
                 <div>
                   <Label className="text-white">Data de admissão</Label>
                   <Input type="date" {...register("admissionDate")} />
@@ -270,23 +285,19 @@ export function NewModalCreateEmployee() {
                     </span>
                   )}
                 </div>
-                <div>
-                  <Label className="text-white">Estado civil</Label>
-                  <select
-                    {...register("maritalStatus")}
-                    className="flex flex-col rounded-md border p-2"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="Masculino">Casado</option>
-                    <option value="Feminino">Solteiro</option>
-                  </select>
-                </div>
+
                 <div className="flex gap-1">
                   <div>
                     <Label className="text-white">CEP</Label>
                     <div className="flex gap-2">
-                      <Input {...register("cep")} />
-                      <div className="bg-realizaBlue p-2 rounded-md text-white cursor-pointer hover:bg-gray-600">
+                      <Input
+                        {...register("cep")}
+                        onChange={(e) => setCep(e.target.value)}
+                      />
+                      <div
+                        className="bg-realizaBlue cursor-pointer rounded-md p-2 text-white hover:bg-gray-600"
+                        onClick={handleCep}
+                      >
                         <Search />
                       </div>
                     </div>
@@ -344,6 +355,31 @@ export function NewModalCreateEmployee() {
                     </option>
                     <option value="Ensino Superior Completo">
                       Ensino Superior Completo
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-white">Situação</Label>
+                  <select
+                    {...register("situation")}
+                    className="flex flex-col rounded-md border p-2"
+                  >
+                    <option value="">Selecione uma situação</option>
+                    <option value="ALOCADO">Alocado</option>
+                    <option value="DESALOCADO">Desalocado</option>
+                    <option value="DEMITIDO">Demitido</option>
+                    <option value="AFASTADO">Afastado</option>
+                    <option value="LICENCA_MATERNIDADE">
+                      Licença Maternidade
+                    </option>
+                    <option value="LICENCA_MEDICA">Licença Médica</option>
+                    <option value="LICENCA_MILITAR">Licença Militar</option>
+                    <option value="FERIAS">Férias</option>
+                    <option value="ALISTAMENTO_MILITAR">
+                      Alistamento Militar
+                    </option>
+                    <option value="APOSENTADORIA_POR_INVALIDEZ">
+                      Aposentadoria por Invalidez
                     </option>
                   </select>
                 </div>
