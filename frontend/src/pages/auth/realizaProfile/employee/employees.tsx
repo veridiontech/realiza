@@ -34,9 +34,9 @@ export const EmployeesTable = (): JSX.Element => {
   const [suppliersList, setSuppliersList] = useState<propsSupplier[]>([]);
   const [getUniqueSupplier, setGetUniqueSupplier] =
     useState<propsSupplier | null>(null);
-  const [getSubcontractorList, setGetSubcontractorList] = useState([])
-  const {user} = useUser()
-  const {supplier} = useSupplier()
+  const [getSubcontractorList, setGetSubcontractorList] = useState([]);
+  const { user } = useUser();
+  const { supplier } = useSupplier();
   // const [employees, setEmployees] = useState([])
 
   // const handlePageChange = (page: number) => {
@@ -65,17 +65,19 @@ export const EmployeesTable = (): JSX.Element => {
     }
   };
 
-  const getSubcontractor = async() => {
-    setLoading(true)
-    try{
-      const res = await axios.get(`${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`)
-      setGetSubcontractorList(res.data.content)
-    }catch(err) {
+  const getSubcontractor = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`,
+      );
+      setGetSubcontractorList(res.data.content);
+    } catch (err) {
       console.log("erro ao buscar subcontratados:", err);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   // const getEmployees = async() => {
   //   try{
@@ -83,7 +85,7 @@ export const EmployeesTable = (): JSX.Element => {
   //     setEmployees(res.data.content)
   //   }catch(err) {
   //     console.log(err);
-      
+
   //   }
   // }
 
@@ -99,11 +101,14 @@ export const EmployeesTable = (): JSX.Element => {
     }
     if (selectedSupplier) {
       uniqueSupplier();
-      getSubcontractor()
+      getSubcontractor();
     }
   }, [selectedBranch?.idBranch, selectedSupplier]);
 
-  if(user?.role === "ROLE_SUPPLIER_RESPONSIBLE" && "ROLE_SUPPLIER_RESPONSIBLE") {
+  if (
+    user?.role === "ROLE_SUPPLIER_RESPONSIBLE" &&
+    "ROLE_SUPPLIER_RESPONSIBLE"
+  ) {
     return (
       <div className="m-4 flex justify-center">
         <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
@@ -146,7 +151,6 @@ export const EmployeesTable = (): JSX.Element => {
               <div>
                 <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
                 <div>
-                  
                   <TableEmployee idProvider={supplier?.idProvider ?? null} />
                 </div>
               </div>
@@ -184,7 +188,7 @@ export const EmployeesTable = (): JSX.Element => {
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Colaboradores</h1>
-          {/* <NewModalCreateEmployee /> */}
+          <NewModalCreateEmployee />
         </div>
         <div className="mb-4 flex">
           <Button

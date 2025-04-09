@@ -9,7 +9,7 @@ import { Pagination } from "@/components/ui/pagination";
 // import { useUser } from "@/context/user-provider";
 import { Contract } from "@/types/contracts";
 import { ip } from "@/utils/ip";
-import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
+// import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 import { useSupplier } from "@/context/Supplier-context";
 
 export default function SupplierContracts() {
@@ -135,7 +135,7 @@ export default function SupplierContracts() {
         <div className="m-8 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Tabela de Contratos</h1>
           {/* <SupplierAddContract /> */}
-          <ModalTesteSendSupplier />
+          {/* <ModalTesteSendSupplier /> */}
         </div>
 
         {/* Navegação por abas */}
