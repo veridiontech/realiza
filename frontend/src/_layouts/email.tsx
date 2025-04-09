@@ -1,18 +1,22 @@
 import { Outlet } from "react-router-dom";
-import bgImage from '@/assets/imageLogin.png'
+import bgImage from '@/assets/imageLogin.png';
 import { MenuNav } from "@/components/menuNav/menuNav";
 
 export function EmailLayout() {
-    return(
-        <div style={({backgroundImage: `url(${bgImage})`})} className="min-h-screen bg-no-repeat bg-cover bg-center flex justify-center py-10 ">
-            <div className="bg-white rounded-sm flex flex-col gap-5 items-center px-10 py-10">
-                <div>
-                    <MenuNav />
-                </div>
-                <div>
-                    <Outlet />
+    return (
+        <div className="min-h-screen flex">
+            <div className="w-1/2 flex justify-center items-center bg-white p-10">
+                <div className="flex flex-col gap-5 items-center">
+                    <div>
+                        <MenuNav />
+                    </div>
+                    <div>
+                        <Outlet />
+                    </div>
                 </div>
             </div>
+            <div style={{ backgroundImage: `url(${bgImage})` }} className="w-1/2 bg-no-repeat bg-cover bg-center">
+            </div>
         </div>
-    )
+    );
 }

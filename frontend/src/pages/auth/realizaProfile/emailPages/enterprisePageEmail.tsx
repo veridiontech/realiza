@@ -9,9 +9,7 @@ import { Oval } from "react-loader-spinner";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
-// import { ip } from "@/utils/ip";
 import { useFormDataContext } from "@/context/formDataProvider";
-// import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 
 const enterprisePageEmailFormSchema = z.object({
   tradeName: z.string().optional(),
@@ -19,12 +17,10 @@ const enterprisePageEmailFormSchema = z.object({
   email: z.string().nonempty("O email é obrigatório"),
   phone: z.string().nonempty("O telefone é obrigatório"),
   company: z.string().nullable().optional(),
-
+  cnpj: z.string().nonempty("O cnpj é obrigatório"),
 });
 
-type EnterprisePageEmailFormSchema = z.infer<
-  typeof enterprisePageEmailFormSchema
->;
+type EnterprisePageEmailFormSchema = z.infer<typeof enterprisePageEmailFormSchema>;
 
 export function EnterprisePageEmail() {
   const navigate = useNavigate();
@@ -32,13 +28,15 @@ export function EnterprisePageEmail() {
   const tokenFromUrl = searchParams.get("token");
   const { token } = useUser();
   const { setEnterpriseData } = useFormDataContext();
+
   const [isValidToken, setIsValidToken] = useState(false);
   const findIdCompany = searchParams.get("id");
   const findCompany = searchParams.get("company");
-  const findBranchId = searchParams.get("idBranch")
+  const findBranchId = searchParams.get("idBranch");
   const [isLoading, setIsLoading] = useState(false);
-  // const {datasSender} = useDataSendEmailContext()
-  // const {userData} = useFormDataContext()
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [formData, setFormData] = useState<EnterprisePageEmailFormSchema | null>(null);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -64,12 +62,9 @@ export function EnterprisePageEmail() {
     }
   }, [tokenFromUrl]);
 
-
   const {
     register,
     handleSubmit,
-    // setValue,
-    // getValues,
     formState: { isValid },
   } = useForm<EnterprisePageEmailFormSchema>({
     resolver: zodResolver(enterprisePageEmailFormSchema),
@@ -77,73 +72,65 @@ export function EnterprisePageEmail() {
   });
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
+    setFormData(data);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = () => {
+    if (!formData) return;
+
     setIsLoading(true);
     let payload;
+
     switch (findCompany) {
       case "SUBCONTRACTOR":
         payload = {
-          ...data,
+          ...formData,
           idCompany: findIdCompany || "",
           company: findCompany || "",
-          fantasyName: data.tradeName || "",
-          socialReason: data.corporateName,
+          fantasyName: formData.tradeName || "",
+          socialReason: formData.corporateName,
           role: "ROLE_SUPPLIER_RESPONSIBLE",
         };
         break;
       case "CLIENT":
         payload = {
-          ...data,
+          ...formData,
           idCompany: findIdCompany || "",
           company: findCompany || "",
-          fantasyName: data.tradeName || "",
-          socialReason: data.corporateName,
+          fantasyName: formData.tradeName || "",
+          socialReason: formData.corporateName,
           role: "ROLE_CLIENT_RESPONSIBLE",
         };
         break;
       case "SUPPLIER":
         payload = {
-          ...data,
+          ...formData,
           idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
           company: findCompany || "SUPPLIER",
-          fantasyName: data.tradeName || "",
-          socialReason: data.corporateName,
+          fantasyName: formData.tradeName || "",
+          socialReason: formData.corporateName,
         };
         break;
       default:
         payload = {
-          ...data,
+          ...formData,
           idBranch: findBranchId || "",
           idCompany: findIdCompany || "",
           company: "SUPPLIER",
-          fantasyName: data.tradeName || "",
-          socialReason: data.corporateName,
+          fantasyName: formData.tradeName || "",
+          socialReason: formData.corporateName,
         };
         break;
     }
+
     console.log("enviando cadastro", payload);
     setEnterpriseData(payload);
     navigate(`/email/Sign-Up?token=${token}`);
     setIsLoading(false);
+    setShowConfirmModal(false);
   };
-
-  if (!isValidToken) {
-    return (
-      <div className="text-red-600">
-        Token inválido ou expirado. Por favor, solicite um novo convite.
-      </div>
-    );
-  }
-
-  
-// useEffect(() => {
-//   if (datasSender) {
-//     if (datasSender.email) setValue("email", datasSender.email);
-//     if (datasSender.phone) setValue("phone", datasSender.phone);
-//     if (datasSender.tradeName) setValue("tradeName", datasSender.tradeName);
-//     if (datasSender.corporateName) setValue("corporateName", datasSender.corporateName);
-//   }
-// }, [datasSender, setValue]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -152,8 +139,6 @@ export function EnterprisePageEmail() {
       </div>
       <div>
         <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex items-center gap-5">
-          </div>
           <div>
             <Label>Email corporativo</Label>
             <Input
@@ -170,6 +155,14 @@ export function EnterprisePageEmail() {
               placeholder="Digite o telefone"
               className="w-[27vw]"
               {...register("phone")}
+            />
+          </div>
+          <div>
+            <Label>CNPJ</Label>
+            <Input
+              placeholder="Digite o CNPJ"
+              className="w-[27vw]"
+              {...register("cnpj")}
             />
           </div>
           <div className="flex items-center gap-5">
@@ -210,11 +203,38 @@ export function EnterprisePageEmail() {
               type="submit"
               disabled={!isValid}
             >
-              Cadastrar empresa
+              Próximo
             </Button>
           )}
         </form>
       </div>
+      {showConfirmModal && formData && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-[90vw] max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Confirmar CNPJ</h2>
+            <p className="mb-4">
+              Você confirma que o <strong>CNPJ</strong> informado é o mesmo em que o funcionario está registrado?
+            </p>
+            <p className="mb-4 text-blue-600 font-medium">{formData.cnpj} - {formData.corporateName}</p>
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                className="bg-gray-300 text-black hover:bg-gray-400"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                className="bg-realizaBlue"
+                onClick={handleConfirm}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
