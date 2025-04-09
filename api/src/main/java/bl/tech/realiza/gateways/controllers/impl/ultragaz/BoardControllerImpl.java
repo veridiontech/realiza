@@ -48,6 +48,18 @@ public class BoardControllerImpl implements BoardController {
         return ResponseEntity.ok(crudBoard.findAll(pageable));
     }
 
+    @GetMapping("/find-by-client")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<BoardResponseDto>> getAllBoardsByClient(@RequestParam(defaultValue = "0") int page,
+                                                                       @RequestParam(defaultValue = "200") int size,
+                                                                       @RequestParam(defaultValue = "idBoard") String sort,
+                                                                       @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                       @RequestParam String idClient) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        return ResponseEntity.ok(crudBoard.findAllByClient(idClient, pageable));
+    }
+
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override

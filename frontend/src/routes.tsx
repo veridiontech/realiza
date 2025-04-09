@@ -49,8 +49,8 @@ import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
 import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
 import { HomeClient } from "./pages/auth/clientProfile/home/homeClient";
-import { HomeSupplier } from "./pages/auth/supplier/home/home";
 import { ProfileBranch } from "./pages/auth/realizaProfile/profileEnterprise/profileBranch";
+import { SupplierContractNewPage } from "./pages/auth/supplier/contracts/supplier-contract-new-page";
 
 
 export const router = createBrowserRouter([
@@ -136,13 +136,14 @@ export const router = createBrowserRouter([
       </UserProvider>
     ),
     children: [
-      { path: "home/:id", element: <HomeSupplier /> },
+      { path: "home/:id", element: <SupplierContractNewPage/> },
       { path: "quartered/:id", element: <Quartered /> },
       { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      {path: "create-manager/:id", element: <CreateNewManagerSupplier />}
+      {path: "create-manager/:id", element: <CreateNewManagerSupplier />},
+      { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
     ],
   },
   {
@@ -160,6 +161,7 @@ export const router = createBrowserRouter([
       </UserProvider>
     ),
     children: [
+      { path: "home/:id", element: <SupplierContracts /> },
       { path: "contracts/:id", element: <SubContracts /> },
       { path: "contracts/:id", element: <SupplierContracts /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },

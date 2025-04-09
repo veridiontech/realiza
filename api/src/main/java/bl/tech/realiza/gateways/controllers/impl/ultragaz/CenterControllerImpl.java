@@ -48,6 +48,18 @@ public class CenterControllerImpl implements CenterController {
         return ResponseEntity.ok(crudCenter.findAll(pageable));
     }
 
+    @GetMapping("/find-by-market")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<CenterResponseDto>> getAllCentersByMarket(@RequestParam(defaultValue = "0") int page,
+                                                                         @RequestParam(defaultValue = "200") int size,
+                                                                         @RequestParam(defaultValue = "idCenter") String sort,
+                                                                         @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                         @RequestParam String idMarket) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        return ResponseEntity.ok(crudCenter.findAllByMarket(idMarket, pageable));
+    }
+
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override

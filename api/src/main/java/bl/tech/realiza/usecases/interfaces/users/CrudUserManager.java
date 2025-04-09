@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.users;
 
+import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -17,4 +18,5 @@ public interface CrudUserManager {
     void delete(String id);
     String changePassword(String id, UserManagerRequestDto userManagerRequestDto);
     String changeProfilePicture(String id, MultipartFile file) throws IOException;
+    String createNewUserActivated(UserCreateRequestDto userCreateRequestDto);
 }

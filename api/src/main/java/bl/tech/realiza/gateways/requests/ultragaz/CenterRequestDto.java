@@ -6,4 +6,5 @@ import lombok.Data;
 public class CenterRequestDto {
     private String idCenter;
     private String name;
+    private String idMarket;
 }

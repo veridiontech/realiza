@@ -33,6 +33,7 @@ export interface propsClient {
   idClient: string;
   telephone: string;
   tradeName: string;
+  isUltragaz: boolean;
 }
 
 export interface propsDocument {
@@ -73,4 +74,35 @@ export interface propsSupplier {
   number: string;
   supplier: string;
   client: string;
+}
+
+export interface propsBoard {
+  idBoard: string,
+  name: string,
+  idClient: string,
+}
+
+export interface propsMarket {
+  idMarket: string,
+  name: string,
+  idBoard: string,
+}
+
+export interface propsCenter {
+  idCenter: string,
+  name: string,
+  idMarkete: string,
+}
+
+export interface propsBranchUltra {
+  idBranch: string
+  name: string;
+  email: string;
+  cnpj: string;
+  address: string;
+  telephone: string;
+  cep: string;
+  state: string;
+  row: string;
+  actions: string
 }

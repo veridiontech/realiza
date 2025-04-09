@@ -11,12 +11,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { propsBranch, propsClient } from "@/types/interfaces";
+import { useSupplier } from "@/context/Supplier-context";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
@@ -27,8 +27,8 @@ const createNewEmployeeFormSchema = z.object({
   name: z.string(),
   surname: z.string(),
   email: z.string(),
-  cpf: z.string().regex(/^(\d{3})(\d{3})(\d{3})(\d{2})$/),
-  salary: z.string().regex(/^(\d+)(\d{3})*(\.\d{2})?$/),
+  cpf: z.string(),
+  salary: z.string(),
   gender: z.string(),
   maritalStatus: z.string(),
   cep: z.string(),
@@ -38,29 +38,25 @@ const createNewEmployeeFormSchema = z.object({
   phone: z.string().optional(),
   mobile: z.string(),
   position: z.string(),
+  situation: z.string(),
   education: z.string(),
   cbo: z.string().optional(),
-  platformAccess: z.string(),
-  rg: z.string().regex(/^(\d{2})(\d{3})(\d{3})(\d{1})$/),
+  // platformAccess: z.string(),
+  rg: z.string(),
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
-  dob: z.string()
+  // dob: z.string()
 });
 
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 export function NewModalCreateEmployee() {
-  const [clients, setClients] = useState<propsClient[]>([]);
-  const [branches, setBranches] = useState([]);
-  const [selectRole, setSelectRole] = useState("");
-  const [selectedClient, setSelectedClient] = useState<string>("");
-  const [seletedBranch, setSeletedBranch] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const { supplier } = useSupplier();
 
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
-    getValues,
   } = useForm<CreateNewEmpoloyeeFormSchema>({
     resolver: zodResolver(createNewEmployeeFormSchema),
   });
@@ -91,9 +87,9 @@ export function NewModalCreateEmployee() {
     setIsLoading(true);
     const payload = {
       ...data,
-      branch: seletedBranch,
+      supplier: supplier?.idProvider,
     };
-    console.log("Enviando dados:",payload);
+    console.log("Enviando dados:", payload);
     try {
       const response = await axios.post(`${ip}/employee/brazilian`, payload);
       console.log("Sucesso na requisição!", response.data);
@@ -101,7 +97,9 @@ export function NewModalCreateEmployee() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         console.error("Erro Axios:", err.response?.status, err.response?.data);
-        toast.error(`Erro ${err.response?.status}: ${err.response?.data?.message || "Erro ao cadastrar usuário"}`);
+        toast.error(
+          `Erro ${err.response?.status}: ${err.response?.data?.message || "Erro ao cadastrar usuário"}`,
+        );
       } else {
         console.error("Erro desconhecido:", err);
         toast.error("Erro inesperado, tente novamente");
@@ -111,54 +109,6 @@ export function NewModalCreateEmployee() {
     }
   };
 
-  const getClient = async () => {
-    try {
-      const firstRes = await axios.get(`${ip}/client`, {
-        params: { page: 0, size: 100 },
-      });
-      const totalPages = firstRes.data.totalPages;
-      const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-        axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
-      );
-
-      const responses = await Promise.all(requests);
-      const allClients = [
-        firstRes.data.content,
-        ...responses.map((res) => res.data.content),
-      ].flat();
-
-      setClients(allClients);
-    } catch (err) {
-      console.error("Erro ao puxar clientes", err);
-    }
-  };
-
-  useEffect(() => {
-    if (selectRole === "branch") {
-      getClient();
-    }
-  }, [selectRole]);
-
-  useEffect(() => {
-    if (selectedClient) {
-      getBranch(selectedClient); 
-    }
-  }, [selectedClient]);
-
-  const getBranch = async (idClient: string) => {
-    console.log("idClient:", idClient);
-    if (!idClient) return;
-    try {
-      const res = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${idClient}`,
-      );
-      console.log("teste", res.data.content);
-
-      setBranches(res.data.content);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   return (
     <Dialog>
@@ -215,6 +165,32 @@ export function NewModalCreateEmployee() {
                   </select>
                 </div>
                 <div>
+                  <Label className="text-white">Situação</Label>
+                  <select
+                    {...register("situation")}
+                    className="flex flex-col rounded-md border p-2"
+                  >
+                    <option value="">Selecione uma situação</option>
+                    <option value="ALOCADO">Alocado</option>
+                    <option value="DESALOCADO">Desalocado</option>
+                    <option value="DEMITIDO">Demitido</option>
+                    <option value="AFASTADO">Afastado</option>
+                    <option value="LICENCA_MATERNIDADE">
+                      Licença Maternidade
+                    </option>
+                    <option value="LICENCA_MEDICA">Licença Médica</option>
+                    <option value="LICENCA_MILITAR">Licença Militar</option>
+                    <option value="FERIAS">Férias</option>
+                    <option value="ALISTAMENTO_MILITAR">
+                      Alistamento Militar
+                    </option>
+                    <option value="APOSENTADORIA_POR_INVALIDEZ">
+                      Aposentadoria por Invalidez
+                    </option>
+                  </select>
+                </div>
+
+                <div>
                   <Label className="text-white">Nome</Label>
                   <Input type="text" {...register("name")} />
                 </div>
@@ -222,10 +198,10 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Sobrenome</Label>
                   <Input type="text" {...register("surname")} />
                 </div>
-                <div>
+                {/* <div>
                   <Label className="text-white">Data de aniversário</Label>
                   <Input type="date" {...register("dob")} />
-                </div>
+                </div> */}
                 <div>
                   <Label className="text-white">Email</Label>
                   <Input type="text" {...register("email")} />
@@ -234,7 +210,7 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">CPF:</Label>
                   <Input
                     type="text"
-                    value={getValues("cpf")} 
+                    // value={getValues("cpf")}
                     {...register("cpf")}
                     onChange={(e) => {
                       const formattedCPF = formatCPF(e.target.value);
@@ -249,7 +225,7 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">RG:</Label>
                   <Input
                     type="text"
-                    value={getValues("rg")}
+                    // value={getValues("rg")}
                     {...register("rg")}
                     onChange={(e) => {
                       const formattedRG = formatRG(e.target.value);
@@ -268,7 +244,7 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Salário:</Label>
                   <Input
                     type="text"
-                    value={getValues("salary")}
+                    // value={getValues("salary")}
                     {...register("salary")}
                     onChange={(e) => {
                       const formattedSalary = formatSalary(e.target.value);
@@ -277,76 +253,6 @@ export function NewModalCreateEmployee() {
                     placeholder="000.000,00"
                   />
                   {errors.salary && <span>{errors.salary.message}</span>}
-                </div>
-                <div className="flex flex-col items-start gap-3">
-
-                  <div className="flex items-start gap-2">
-                    <Label className="text-white">Subcontratado</Label>
-                    <input
-                      type="radio"
-                      checked={selectRole === "subcontractor"}
-                      onChange={() => setSelectRole("subcontractor")}
-                    />
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Label className="text-white">Fornecedor</Label>
-                    <input
-                      type="radio"
-                      checked={selectRole === "supplier"}
-                      onChange={() => setSelectRole("supplier")}
-                    />
-                  </div>
-                </div>
-                <div>
-                  {selectRole === "branch" && (
-                    <div className="flex flex-col gap-3">
-                      <select
-                        defaultValue=""
-                        className="rounded-md p-1"
-                        onChange={(e) => {
-                          const id = e.target.value;
-                          setSelectedClient(id);
-                          getBranch(id);
-                        }}
-                      >
-                        <option value="" disabled>
-                          Selecione um cliente
-                        </option>
-                        {clients.map((client: propsClient) => (
-                          <option value={client.idClient} key={client.idClient}>
-                            {client.tradeName}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className="rounded-md p-1"
-                        defaultValue=""
-                        onChange={(e) => {
-                          const id = e.target.value;
-                          setSeletedBranch(id);
-                        }}
-                      >
-                        <option value="">Selecione uma filial</option>
-                        {branches.map((branch: propsBranch) => (
-                          <option value={branch.idBranch} key={branch.idBranch}>
-                            {branch.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {selectRole === "subcontractor" && (
-                    <div>
-                      teste sasa
-                      <select>{}</select>
-                    </div>
-                  )}
-                  {selectRole === "supplier" && (
-                    <div>
-                      teste as1231
-                      <select>{}</select>
-                    </div>
-                  )}
                 </div>
                 <div>
                   <Label className="text-white">Sexo</Label>
@@ -380,9 +286,9 @@ export function NewModalCreateEmployee() {
                     <Label className="text-white">CEP</Label>
                     <div className="flex gap-2">
                       <Input {...register("cep")} />
-                      <Button className="bg-realizaBlue">
+                      <div className="bg-realizaBlue p-2 rounded-md text-white cursor-pointer hover:bg-gray-600">
                         <Search />
-                      </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -417,31 +323,31 @@ export function NewModalCreateEmployee() {
                 <div className="flex flex-col gap-2">
                   <Label className="text-white">Graduação</Label>
                   <select
-                {...register("education")}
-                className="flex flex-col rounded-md border p-2"
-              >
-                <option value="">Selecione</option>
-                <option value="Ensino Fundamental Incompleto">
-                  Ensino Fundamental Incompleto
-                </option>
-                <option value="Ensino Fundamental Completo">
-                  Ensino Fundamental Completo
-                </option>
-                <option value="Ensino Médio Incompleto">
-                  Ensino Médio Incompleto
-                </option>
-                <option value="Ensino Médio Completo">
-                  Ensino Médio Completo
-                </option>
-                <option value="Ensino Superior Incompleto">
-                  Ensino Superior Incompleto
-                </option>
-                <option value="Ensino Superior Completo">
-                  Ensino Superior Completo
-                </option>
-              </select>
+                    {...register("education")}
+                    className="flex flex-col rounded-md border p-2"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="Ensino Fundamental Incompleto">
+                      Ensino Fundamental Incompleto
+                    </option>
+                    <option value="Ensino Fundamental Completo">
+                      Ensino Fundamental Completo
+                    </option>
+                    <option value="Ensino Médio Incompleto">
+                      Ensino Médio Incompleto
+                    </option>
+                    <option value="Ensino Médio Completo">
+                      Ensino Médio Completo
+                    </option>
+                    <option value="Ensino Superior Incompleto">
+                      Ensino Superior Incompleto
+                    </option>
+                    <option value="Ensino Superior Completo">
+                      Ensino Superior Completo
+                    </option>
+                  </select>
                 </div>
-                <div>
+                {/* <div>
                   <Label className="text-white">Acesso a plataforma</Label>
                   <select
                     {...register("platformAccess")}
@@ -451,7 +357,7 @@ export function NewModalCreateEmployee() {
                     <option value="Sim">Sim</option>
                     <option value="Não">Não</option>
                   </select>
-                </div>
+                </div> */}
                 <Button
                   type="submit"
                   className="bg-realizaBlue"
