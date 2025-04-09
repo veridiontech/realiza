@@ -61,12 +61,12 @@ const createUserClient = z.object({
 });
 
 const createNewBoard = z.object({
-  name: z.string().nonempty("Nome da diretoria é obrigatório")
-})
+  name: z.string().nonempty("Nome da diretoria é obrigatório"),
+});
 
 const createNewMarket = z.object({
-  name: z.string().nonempty("Nome da diretoria é obrigatório")
-})
+  name: z.string().nonempty("Nome da diretoria é obrigatório"),
+});
 
 const createBranchUltra = z.object({
   cnpj: z.string(),
@@ -79,11 +79,11 @@ const createBranchUltra = z.object({
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
   telephone: z.string().nonempty("Insira um telefone"),
-})
+});
 
-type CreateBranchUltra = z.infer<typeof createBranchUltra>
-type CreateNewBoard = z.infer<typeof createNewBoard>
-type CreateNewMarket = z.infer<typeof createNewMarket>
+type CreateBranchUltra = z.infer<typeof createBranchUltra>;
+type CreateNewBoard = z.infer<typeof createNewBoard>;
+type CreateNewMarket = z.infer<typeof createNewMarket>;
 type CreateUserClient = z.infer<typeof createUserClient>;
 export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
@@ -330,11 +330,13 @@ export function SelectClient() {
   const { markets, setSelectedMarket, selectedMarket } = useMarket();
   const { boards, setSelectedBoard, selectedBoard } = useBoard();
   const { center, selectedCenter, setSelectedCenter } = useCenter();
-  const { branchUltra } = useBranchUltra()
+  const { branchUltra } = useBranchUltra();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [, setLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredBranches, setFilteredBranches] = useState([]);
 
   const {
     register,
@@ -349,16 +351,16 @@ export function SelectClient() {
     handleSubmit: handleSubmitBoard,
     formState: { errors: errorBoard },
   } = useForm<CreateNewBoard>({
-    resolver: zodResolver(createNewBoard)
-  })
+    resolver: zodResolver(createNewBoard),
+  });
 
   const {
     register: registerNewMarket,
     handleSubmit: handleSubmitMarket,
     formState: { errors: errorMarket },
   } = useForm<CreateNewMarket>({
-    resolver: zodResolver(createNewMarket)
-  })
+    resolver: zodResolver(createNewMarket),
+  });
 
   const {
     register: registerBranchUltra,
@@ -371,58 +373,57 @@ export function SelectClient() {
   const createNewBoardSubmit = async (data: CreateNewBoard) => {
     const payload = {
       ...data,
-      idClient: client?.idClient
-    }
+      idClient: client?.idClient,
+    };
     try {
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/board`, payload)
-      toast.success("Sucesso ao criar novo ")
+      await axios.post(`${ip}/ultragaz/board`, payload);
+      toast.success("Sucesso ao criar novo ");
     } catch (err) {
-      toast.error("erro ao criar nova diretoria")
+      toast.error("erro ao criar nova diretoria");
       console.log("erro ao criar nova diretoria", err);
-
     }
-  }
+  };
 
   const createNewMarketSubmit = async (data: CreateNewMarket) => {
     const payload = {
       ...data,
-      idBoard: selectedBoard?.idBoard
-    }
+      idBoard: selectedBoard?.idBoard,
+    };
     try {
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/market`, payload)
-      toast.success("Sucesso ao criar novo ")
+      await axios.post(`${ip}/ultragaz/market`, payload);
+      toast.success("Sucesso ao criar novo ");
     } catch (err) {
-      toast.error("erro ao criar nova diretoria")
+      toast.error("erro ao criar nova diretoria");
       console.log("erro ao criar nova diretoria", err);
     }
-  }
+  };
 
   const createNewCenterSubmit = async (data: CreateNewMarket) => {
     const payload = {
       ...data,
-      idMarket: selectedMarket?.idMarket
-    }
+      idMarket: selectedMarket?.idMarket,
+    };
     try {
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/center`, payload)
-      toast.success("Sucesso ao criar novo ")
+      await axios.post(`${ip}/ultragaz/center`, payload);
+      toast.success("Sucesso ao criar novo ");
     } catch (err) {
-      toast.error("erro ao criar nova diretoria")
+      toast.error("erro ao criar nova diretoria");
       console.log("erro ao criar nova diretoria", err);
     }
-  }
+  };
 
   const createNewBranchUltraSubmit = async (data: CreateBranchUltra) => {
     const payload = {
       ...data,
-      center: selectedCenter?.idCenter
-    }
+      center: selectedCenter?.idCenter,
+    };
     try {
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/branch`, payload)
-      toast.success("Sucesso ao criar novo ")
+      await axios.post(`${ip}/branch`, payload);
+      toast.success("Sucesso ao criar novo ");
     } catch (err: any) {
       if (err.response && err.response.data) {
         const mensagemBackend =
@@ -440,13 +441,13 @@ export function SelectClient() {
 
       console.error("Erro ao criar filial:", err);
     }
-  }
+  };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const payload = {
       ...data,
       branch: selectedBranch?.idBranch,
-      idUser: user?.idUser
+      idUser: user?.idUser,
     };
     console.log("Enviando dados do novo usuário:", payload);
     try {
@@ -472,9 +473,19 @@ export function SelectClient() {
       );
       const { content } = response.data;
       setBranches(content);
+      setFilteredBranches(content);
     } catch (err) {
       console.error("Erro ao buscar filiais:", err);
     }
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = branches.filter((branch: any) =>
+      branch.name.toLowerCase().includes(term) || branch.cnpj.includes(term)
+    );
+    setFilteredBranches(filtered);
   };
 
   const getUsersFromBranch = async () => {
@@ -568,40 +579,44 @@ export function SelectClient() {
                         <div>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTabUltra === "diretoria"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                              selectedTabUltra === "diretoria"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                              }`}
+                            }`}
                             onClick={() => setSelectedTabUltra("diretoria")}
                           >
                             Diretoria
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "mercado"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                              selectedTabUltra === "mercado"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                              }`}
+                            }`}
                             onClick={() => setSelectedTabUltra("mercado")}
                           >
                             Mercado
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "nucleo"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                              selectedTabUltra === "nucleo"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                              }`}
+                            }`}
                             onClick={() => setSelectedTabUltra("nucleo")}
                           >
                             Núcleo
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "filial"
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                              selectedTabUltra === "filial"
                                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                                 : "text-realizaBlue bg-white"
-                              }`}
+                            }`}
                             onClick={() => setSelectedTabUltra("filial")}
                           >
                             Unidade
@@ -625,7 +640,9 @@ export function SelectClient() {
                                   </DialogTitle>
                                 </DialogHeader>
                                 <form
-                                  onSubmit={handleSubmitBoard(createNewBoardSubmit)}
+                                  onSubmit={handleSubmitBoard(
+                                    createNewBoardSubmit,
+                                  )}
                                 >
                                   <div className="flex flex-col gap-2">
                                     <div>
@@ -666,12 +683,16 @@ export function SelectClient() {
                                     {selectedBoard ? (
                                       <p>{selectedBoard.name}</p>
                                     ) : (
-                                      <p className="font-normal">Nenhuma diretoria selecionada</p>
+                                      <p className="font-normal">
+                                        Nenhuma diretoria selecionada
+                                      </p>
                                     )}
                                   </DialogTitle>
                                 </DialogHeader>
                                 <form
-                                  onSubmit={handleSubmitMarket(createNewMarketSubmit)}
+                                  onSubmit={handleSubmitMarket(
+                                    createNewMarketSubmit,
+                                  )}
                                 >
                                   <div className="flex flex-col gap-2">
                                     <div>
@@ -712,12 +733,16 @@ export function SelectClient() {
                                     {selectedMarket ? (
                                       <p>{selectedMarket.name}</p>
                                     ) : (
-                                      <p className="font-normal">Nenhum tipo de mercado selecionado</p>
+                                      <p className="font-normal">
+                                        Nenhum tipo de mercado selecionado
+                                      </p>
                                     )}
                                   </DialogTitle>
                                 </DialogHeader>
                                 <form
-                                  onSubmit={handleSubmitMarket(createNewCenterSubmit)}
+                                  onSubmit={handleSubmitMarket(
+                                    createNewCenterSubmit,
+                                  )}
                                 >
                                   <div className="flex flex-col gap-2">
                                     <div>
@@ -758,12 +783,16 @@ export function SelectClient() {
                                     {selectedCenter ? (
                                       <p>{selectedCenter.name}</p>
                                     ) : (
-                                      <p className="font-normal">Nenhum núcleo selecionado</p>
+                                      <p className="font-normal">
+                                        Nenhum núcleo selecionado
+                                      </p>
                                     )}
                                   </DialogTitle>
                                 </DialogHeader>
                                 <form
-                                  onSubmit={handleSubmitBranchUltra(createNewBranchUltraSubmit)}
+                                  onSubmit={handleSubmitBranchUltra(
+                                    createNewBranchUltraSubmit,
+                                  )}
                                 >
                                   <div className="flex flex-col gap-2">
                                     <div>
@@ -1129,15 +1158,26 @@ export function SelectClient() {
                             </span>
                           </div>
                           <div>
-                            <select onChange={(e) => {
-                              const selected = center.find(
-                                (b) => b.idCenter === e.target.value,
-                              );
-                              setSelectedCenter(selected || null);
-                            }} defaultValue="" className="border p-2 rounded-md">
-                              <option value="" disabled>Selecione um núcleo</option>
+                            <select
+                              onChange={(e) => {
+                                const selected = center.find(
+                                  (b) => b.idCenter === e.target.value,
+                                );
+                                setSelectedCenter(selected || null);
+                              }}
+                              defaultValue=""
+                              className="rounded-md border p-2"
+                            >
+                              <option value="" disabled>
+                                Selecione um núcleo
+                              </option>
                               {center.map((center) => (
-                                <option value={center.idCenter} key={center.idCenter}>{center.name}</option>
+                                <option
+                                  value={center.idCenter}
+                                  key={center.idCenter}
+                                >
+                                  {center.name}
+                                </option>
                               ))}
                             </select>
                           </div>
@@ -1155,14 +1195,24 @@ export function SelectClient() {
                           </thead>
                           <tbody>
                             {branchUltra && branchUltra.length > 0 ? (
-                              branchUltra.map((branchUltra: propsBranchUltra) => (
-                                <tr
-                                  className="overflow-auto text-start"
-                                >
-                                  <td className="border border-gray-300 px-4 py-2" key={branchUltra.idBranch}>{branchUltra.name}</td>
-                                  <td className="border border-gray-300 px-4 py-2" key={selectedCenter?.idCenter}>{selectedCenter?.name}</td>
-                                </tr>
-                              ))
+                              branchUltra.map(
+                                (branchUltra: propsBranchUltra) => (
+                                  <tr className="overflow-auto text-start">
+                                    <td
+                                      className="border border-gray-300 px-4 py-2"
+                                      key={branchUltra.idBranch}
+                                    >
+                                      {branchUltra.name}
+                                    </td>
+                                    <td
+                                      className="border border-gray-300 px-4 py-2"
+                                      key={selectedCenter?.idCenter}
+                                    >
+                                      {selectedCenter?.name}
+                                    </td>
+                                  </tr>
+                                ),
+                              )
                             ) : (
                               <tr>
                                 <td
@@ -1209,20 +1259,22 @@ export function SelectClient() {
                       <nav className="flex items-center">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                            selectedTab === "filiais"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                            }`}
+                          }`}
                           onClick={() => setSelectedTabUltra("filiais")}
                         >
                           Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
+                          className={`px-4 py-2 transition-all duration-300 text-white${
+                            selectedTab === "usuarios"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                            }`}
+                          }`}
                           onClick={() => setSelectedTabUltra("usuarios")}
                         >
                           Usuários
@@ -1341,20 +1393,22 @@ export function SelectClient() {
                       <div>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
-                            }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                            selectedTab === "filiais"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                          }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
-                            }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                            selectedTab === "usuarios"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                          }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           Usuários
@@ -1472,40 +1526,55 @@ export function SelectClient() {
                     </nav>
                   </div>
                   {selectedTab === "filiais" && (
-                    <div>
-                      <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
-                        <thead>
-                          <tr>
-                            <th className="border border-gray-300 px-4 py-2 text-start">
-                              Filiais
-                            </th>
-                            <th className="border">Cnpj</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {branches && branches.length > 0 ? (
-                            branches.map((branch: any) => (
-                              <tr key={branch.idBranch}>
-                                <td className="border border-gray-300 px-4 py-2">
-                                  <li className="text-realizaBlue">
-                                    {branch.name}
-                                  </li>
-                                </td>
-                                <td className="text-center">{branch.cnpj}</td>
-                              </tr>
-                            ))
-                          ) : (
+                    <div className="flex flex-col gap-5">
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm font-semibold text-sky-900">
+                          Buscar Filial:
+                        </div>
+                        <input
+                          type="text"
+                          value={searchTerm}
+                          onChange={handleSearch}
+                          placeholder="Pesquisar filiais"
+                          className="w-64 rounded-md border p-2"
+                        />
+                      </div>
+
+                      <div className="rounded-lg border bg-white p-8 shadow-lg">
+                        <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                          <thead>
                             <tr>
-                              <td
-                                colSpan={3}
-                                className="border border-gray-300 px-4 py-2 text-center"
-                              >
-                                Nenhuma filial encontrada
-                              </td>
+                              <th className="border border-gray-300 px-4 py-2 text-start">
+                                Filiais
+                              </th>
+                              <th className="border">CNPJ</th>
                             </tr>
-                          )}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {filteredBranches && filteredBranches.length > 0 ? (
+                              filteredBranches.map((branch: any) => (
+                                <tr key={branch.idBranch}>
+                                  <td className="border border-gray-300 px-4 py-2">
+                                    <li className="text-realizaBlue">
+                                      {branch.name}
+                                    </li>
+                                  </td>
+                                  <td className="text-center border-gray-300 border">{branch.cnpj}</td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={2}
+                                  className="border border-gray-300 px-4 py-2 text-center"
+                                >
+                                  Nenhuma filial encontrada
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
                   {selectedTab === "usuarios" && (
@@ -1613,20 +1682,22 @@ export function SelectClient() {
                     <nav className="flex items-center">
                       <Button
                         variant={"ghost"}
-                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                          ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                          : "text-realizaBlue bg-white"
-                          }`}
+                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                          selectedTab === "filiais"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                        }`}
                         onClick={() => setSelectedTab("filiais")}
                       >
                         Filiais
                       </Button>
                       <Button
                         variant={"ghost"}
-                        className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
-                          ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                          : "text-realizaBlue bg-white"
-                          }`}
+                        className={`px-4 py-2 transition-all duration-300 text-white${
+                          selectedTab === "usuarios"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                        }`}
                         onClick={() => setSelectedTab("usuarios")}
                       >
                         Usuários

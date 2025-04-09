@@ -12,16 +12,18 @@ import { useUser } from "@/context/user-provider";
 
 export function HomeClient() {
   const [employees, setEmployees] = useState([]);
-  const {user} = useUser()
+  const { user } = useUser();
   const { selectedBranch } = useBranch();
   const { client } = useClient();
   const [selectTab, setSelectedTab] = useState("filiais");
   const [branches, setBranches] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredBranches, setFilteredBranches] = useState([]);
 
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
 
-  const firstLetterBranch = selectedBranch?.name?.charAt(0) || ""
+  const firstLetterBranch = selectedBranch?.name?.charAt(0) || "";
   const lastLetterBranch = selectedBranch?.name?.slice(-1) || "";
 
   const fetchBranches = async () => {
@@ -31,9 +33,19 @@ export function HomeClient() {
       );
       const { content } = response.data;
       setBranches(content);
+      setFilteredBranches(content);
     } catch (err) {
       console.error("Erro ao buscar filiais:", err);
     }
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = branches.filter((branch: any) =>
+      branch.name.toLowerCase().includes(searchTerm) || branch.cnpj.includes(term)
+    );
+    setFilteredBranches(filtered);
   };
 
   const getEmployee = async () => {
@@ -58,59 +70,58 @@ export function HomeClient() {
     }
   }, [selectedBranch?.idBranch, client?.idClient]);
 
-  if(user?.role === "ROLE_CLIENT_MANAGER") {
-    return(
+  if (user?.role === "ROLE_CLIENT_MANAGER") {
+    return (
       <div className="flex flex-col items-center justify-center gap-5 p-10">
-      <div className="flex gap-4">
-        <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
-          <div className="flex gap-3">
-            <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
-              <div className="text-[40px] text-white">
-                {firstLetterBranch}
-                {lastLetterBranch}
-              </div>
-            </div>
-            <div className="flex flex-col gap-10">
-              <div className="flex flex-col items-start gap-3">
-                <div className="text-realizaBlue text-[30px] font-medium">
-                  {selectedBranch ? (
-                    <h2>{selectedBranch?.name}</h2>
-                  ) : (
-                    <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
-                  )}
-                </div>
-                <div className="ml-1 text-sky-900">
-                  {selectedBranch ? (
-                    <h3>{selectedBranch?.email}</h3>
-                  ) : (
-                    <Skeleton className="h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
-                  )}
+        <div className="flex gap-4">
+          <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
+            <div className="flex gap-3">
+              <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
+                <div className="text-[40px] text-white">
+                  {firstLetterBranch}
+                  {lastLetterBranch}
                 </div>
               </div>
-              <div className="flex flex-col gap-1 text-[13px] text-sky-900">
-                <div>
-                  {selectedBranch ? (
-                    <p>{selectedBranch?.cnpj}</p>
-                  ) : (
-                    <Skeleton className="h-[0.8vh] w-[7vw] rounded-full bg-gray-600" />
-                  )}
+              <div className="flex flex-col gap-10">
+                <div className="flex flex-col items-start gap-3">
+                  <div className="text-realizaBlue text-[30px] font-medium">
+                    {selectedBranch ? (
+                      <h2>{selectedBranch?.name}</h2>
+                    ) : (
+                      <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
+                    )}
+                  </div>
+                  <div className="ml-1 text-sky-900">
+                    {selectedBranch ? (
+                      <h3>{selectedBranch?.email}</h3>
+                    ) : (
+                      <Skeleton className="h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  {selectedBranch ? (
-                    <p>{selectedBranch?.cep}</p>
-                  ) : (
-                    <Skeleton className="h-[0.6vh] w-[5vw] rounded-full bg-gray-600" />
-                  )}
+                <div className="flex flex-col gap-1 text-[13px] text-sky-900">
+                  <div>
+                    {selectedBranch ? (
+                      <p>{selectedBranch?.cnpj}</p>
+                    ) : (
+                      <Skeleton className="h-[0.8vh] w-[7vw] rounded-full bg-gray-600" />
+                    )}
+                  </div>
+                  <div>
+                    {selectedBranch ? (
+                      <p>{selectedBranch?.cep}</p>
+                    ) : (
+                      <Skeleton className="h-[0.6vh] w-[5vw] rounded-full bg-gray-600" />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <EditModalEnterprise />
         </div>
-        <EditModalEnterprise />
       </div>
-      
-    </div>
-    )
+    );
   }
 
   return (
@@ -162,7 +173,7 @@ export function HomeClient() {
         </div>
         <EditModalEnterprise />
       </div>
-      <div className="rounded-lg border bg-white p-8 shadow-lg mr-10">
+      <div className="mr-10 rounded-lg border bg-white p-8 shadow-lg">
         <div className="flex flex-col items-start gap-4">
           <div className="">
             <nav className="flex items-center">
@@ -192,37 +203,51 @@ export function HomeClient() {
           </div>
           {selectTab === "filiais" && (
             <div>
-              <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
-                <thead>
-                  <tr>
-                    <th className="border border-gray-300 px-4 py-2 text-start">
-                      Filiais
-                    </th>
-                    <th className="border">Cnpj</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {branches && branches.length > 0 ? (
-                    branches.map((branch: any) => (
-                      <tr key={branch.idBranch}>
-                        <td className="border border-gray-300 px-4 py-2">
-                          <li className="text-realizaBlue">{branch.name}</li>
-                        </td>
-                        <td className="text-center">{branch.cnpj}</td>
-                      </tr>
-                    ))
-                  ) : (
+              <div className="flex items-center gap-5">
+                <div className="text-sm font-semibold text-sky-900">
+                  Buscar Filial:
+                </div>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  placeholder="Pesquisar filiais"
+                  className="w-64 rounded-md border p-2"
+                />
+              </div>
+              <div className="mt-4">
+                <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+                  <thead>
                     <tr>
-                      <td
-                        colSpan={3}
-                        className="border border-gray-300 px-4 py-2 text-center"
-                      >
-                        Nenhuma filial encontrada
-                      </td>
+                      <th className="border border-gray-300 px-4 py-2 text-start">
+                        Filiais
+                      </th>
+                      <th className="border">CNPJ</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredBranches && filteredBranches.length > 0 ? (
+                      filteredBranches.map((branch: any) => (
+                        <tr key={branch.idBranch}>
+                          <td className="border border-gray-300 px-4 py-2">
+                            <li className="text-realizaBlue">{branch.name}</li>
+                          </td>
+                          <td className="text-center">{branch.cnpj}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="border border-gray-300 px-4 py-2 text-center"
+                        >
+                          Nenhuma filial encontrada
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
           {selectTab === "usuarios" && (
