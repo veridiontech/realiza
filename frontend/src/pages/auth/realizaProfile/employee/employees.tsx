@@ -17,6 +17,7 @@ import { ip } from "@/utils/ip";
 import { propsSupplier } from "@/types/interfaces";
 import { TableEmployee } from "./tableEmployee";
 import { useBranch } from "@/context/Branch-provider";
+import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 
 export const EmployeesTable = (): JSX.Element => {
   const [selectedTab, setSelectedTab] = useState("fornecedor");
@@ -86,7 +87,7 @@ export const EmployeesTable = (): JSX.Element => {
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Colaboradores</h1>
-          {/* <NewModalCreateEmployee /> */}
+          <NewModalCreateEmployee />
         </div>
         <div className="mb-4 flex">
           <Button

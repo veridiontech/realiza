@@ -293,7 +293,6 @@ export function SelectClient() {
     try{
       const res = await axios.get(`${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`)
       console.log("usuários da branch:", res.data.content);
-      
       setUsersFromBranch(res.data.content)
     }catch(err) {
       console.log("erro ao buscar usuários:", err);
