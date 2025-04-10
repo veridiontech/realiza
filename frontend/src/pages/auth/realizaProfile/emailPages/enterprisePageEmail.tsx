@@ -30,7 +30,7 @@ export function EnterprisePageEmail() {
   const { setEnterpriseData } = useFormDataContext();
 
   const [isValidToken, setIsValidToken] = useState(false);
-  const findIdCompany = searchParams.get("id");
+  const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const findBranchId = searchParams.get("idBranch");
   const [isLoading, setIsLoading] = useState(false);
@@ -86,7 +86,7 @@ export function EnterprisePageEmail() {
       case "SUBCONTRACTOR":
         payload = {
           ...formData,
-          idCompany: findIdCompany || "",
+          idCompany: findId || "",
           company: findCompany || "",
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
@@ -96,7 +96,7 @@ export function EnterprisePageEmail() {
       case "CLIENT":
         payload = {
           ...formData,
-          idCompany: findIdCompany || "",
+          idCompany: findId || "",
           company: findCompany || "",
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
@@ -107,7 +107,7 @@ export function EnterprisePageEmail() {
         payload = {
           ...formData,
           idBranch: findBranchId || "",
-          idCompany: findIdCompany || "",
+          idCompany: findId || "",
           company: findCompany || "SUPPLIER",
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
@@ -117,7 +117,7 @@ export function EnterprisePageEmail() {
         payload = {
           ...formData,
           idBranch: findBranchId || "",
-          idCompany: findIdCompany || "",
+          idCompany: findId || "",
           company: "SUPPLIER",
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
@@ -131,6 +131,14 @@ export function EnterprisePageEmail() {
     setIsLoading(false);
     setShowConfirmModal(false);
   };
+
+  if (!isValidToken) {
+    return (
+      <div className="text-red-600">
+        Token inválido ou expirado. Por favor, solicite um novo convite.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

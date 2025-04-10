@@ -56,7 +56,7 @@ export function ProfilePic() {
     formData.append("file", selectedFile);
 
     try {
-      console.log("Enviando arquivo:", selectedFile.name);
+      console.log("Enviando arquivo:", formData);
 
       const response = await axios.patch(
         `${ip}/user/manager/change-profile-picture/${user?.idUser}`,

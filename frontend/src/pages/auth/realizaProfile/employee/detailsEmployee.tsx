@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Table } from "@/components/ui/tableVanila";
-import { ButtonBlue } from "@/components/ui/buttonBlue";
+// import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { AddDocument } from "./modals/addDocument";
 import { useParams } from "react-router-dom";
 import { Eye, Edit } from "lucide-react";
@@ -167,11 +167,11 @@ export function DetailsEmployee() {
             <p className="text-sm text-gray-500">Status: {employee.status}</p>
           </div>
         </div>
-        <div className="ml-10 flex justify-start">
+        {/* <div className="ml-10 flex justify-start">
           <ButtonBlue onClick={() => setIsModalOpen(true)}>
             Adicionar Documento
           </ButtonBlue>
-        </div>
+        </div> */}
         <div className="flex flex-row items-start space-x-4">
           <div className="flex-[2]">
             <Table<Document> data={documents} columns={columns} />
