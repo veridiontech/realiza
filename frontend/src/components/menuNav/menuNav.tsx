@@ -22,14 +22,14 @@ export function MenuNav() {
         <NavLink
           to={`/email/Sign-Up?token=${token}`}
           className={({ isActive }) =>
-            `flex h-[6vh] w-[10vw] items-center justify-center bg-gray-300 ${
+            `flex h-[6vh] w-[10vw] items-center justify-center rounded-r-md bg-gray-300 ${
               isActive
                 ? "bg-realizaBlue h-[9vh] w-[10vw] rounded-md font-bold text-white"
                 : "text-black"
             }`
           }
         >
-          Cadastro
+          Dados Pessoais
         </NavLink>
       </nav>
     </div>
