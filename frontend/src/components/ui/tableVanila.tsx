@@ -41,7 +41,7 @@ export const Table = <T,>({ data, columns }: TableProps<T>) => {
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-2 text-center text-gray-500 text-red-600"
+                className="px-4 py-2 text-center text-gray-500 "
               >
                 Nenhum dado disponível
               </td>
