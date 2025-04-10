@@ -229,6 +229,11 @@ export function SignUpPageEmail() {
             Cadastrar
           </Button>
         )}
+        <div>
+        <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
+            Voltar  
+          </Button>
+        </div>
       </form>
     </div>
   );
