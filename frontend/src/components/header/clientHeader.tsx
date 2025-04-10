@@ -76,8 +76,8 @@ export function HeaderClient() {
   }, [user?.branch]);
 
   useEffect(() => {
-    if (client?.idClient && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
-      fetchBranchesByClient(clients.idClient);
+    if (client && client.idClient && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
+      fetchBranchesByClient(client.idClient); 
     }
   }, [client?.idClient]);
 

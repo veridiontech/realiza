@@ -35,7 +35,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // }
 
 const newBranchFormSchema = z.object({
-  cnpj: z.string().regex(/^(?:\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}|\d{14})$/),
+  cnpj: z.string(),
   name: z.string().min(1, "O nome da filial é obrigatório"),
   email: z.string().email("Insira um email válido"),
   cep: z.string().min(8, "O CEP deve ter pelo menos 8 caracteres."),
@@ -237,11 +237,11 @@ export function Branch() {
                         <Input
                           type="text"
                           value={cnpjValue}
-                          onChange={(e) => {
-                            const formattedCNPJ = formatCNPJ(e.target.value); 
-                            setCnpjValue(formattedCNPJ); 
-                            setValue("cnpj", formattedCNPJ); 
-                          }}
+                          // onChange={(e) => {
+                          //   // const formattedCNPJ = formatCNPJ(e.target.value); 
+                          //   // setCnpjValue(formattedCNPJ); 
+                          //   setValue("cnpj", formattedCNPJ); 
+                          // }}
                           placeholder="00.000.000/0000-00" 
                           maxLength={18} 
                         />

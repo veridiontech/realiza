@@ -79,7 +79,7 @@ export function SignIn() {
           case "ROLE_ADMIN":
           case "ROLE_REALIZA_PLUS":
           case "ROLE_REALIZA_BASIC":
-            navigate(`/sistema/select-client/${userData.idUser}`);
+            navigate(`/sistema/dashboard/${userData.idUser}`);
             break;
           case "ROLE_CLIENT_RESPONSIBLE":
             navigate(`/cliente/home/${userData.idUser}`);

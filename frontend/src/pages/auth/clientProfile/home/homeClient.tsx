@@ -49,12 +49,13 @@ export function HomeClient() {
   };
 
   const getEmployee = async () => {
-    if (selectedBranch?.idBranch) return;
     setEmployees([]);
     try {
       const res = await axios.get(
         `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`,
       );
+      console.log(res.data.content);
+      
       setEmployees(res.data.content);
     } catch (error) {
       console.log("Erro ao buscar colaboradores:", error);
@@ -62,12 +63,16 @@ export function HomeClient() {
   };
 
   useEffect(() => {
-    if (client?.idClient) {
-      fetchBranches();
-    }
     if (selectedBranch?.idBranch) {
       getEmployee();
     }
+  }, [selectedBranch?.idBranch])
+
+  useEffect(() => {
+    if (client?.idClient) {
+      fetchBranches();
+    }
+
   }, [selectedBranch?.idBranch, client?.idClient]);
 
   if (user?.role === "ROLE_CLIENT_MANAGER") {

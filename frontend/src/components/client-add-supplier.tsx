@@ -316,7 +316,7 @@ export function ModalTesteSendSupplier() {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="bg-sky-700">Cadastrar novo prestador</Button>
+          <Button className="bg-realizaBlue">Cadastrar novo prestador</Button>
         </DialogTrigger>
         <DialogContent
           style={{
