@@ -4,7 +4,7 @@ import { Table } from "@/components/ui/tableVanila";
 import { Pagination } from "@/components/ui/pagination";
 import { SupplierGetEmployee } from "@/hooks/gets/supplier/supplierGetEmployee";
 // import { ButtonBlue } from "@/components/ui/buttonBlue";
-import { SupplierAddEmployee } from "./modal/supplierAddEmployee";
+// import { SupplierAddEmployee } from "./modal/supplierAddEmployee";
 import { Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Employee } from "@/types/employee";
