@@ -26,8 +26,8 @@ export function CardContract({
     <div>
       <Dialog>
         <DialogTrigger asChild>
-          <div className="border-l-realizaBlue w-auto cursor-pointer rounded-lg border border-l-8 p-5 shadow-lg hover:bg-gray-100">
-            <div className="flex flex-col items-start gap-5" key={idContract}>
+          <div className="flex flex-col gap-5">
+            <div className=" border-l-realizaBlue w-auto cursor-pointer rounded-lg border border-l-8 p-5 shadow-lg hover:bg-gray-100 flex flex-col items-start gap-5" key={idContract}>
               <div className="flex gap-1">
                 <h1>Nome do serviço: </h1>
                 <p>{serviceName}</p>

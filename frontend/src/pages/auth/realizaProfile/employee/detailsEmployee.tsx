@@ -4,16 +4,16 @@ import { Table } from "@/components/ui/tableVanila";
 // import { ButtonBlue } from "@/components/ui/buttonBlue";
 import { AddDocument } from "./modals/addDocument";
 import { useParams } from "react-router-dom";
-import { Eye, Edit } from "lucide-react";
+import { Eye, Edit, User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
 import { Blocks } from "react-loader-spinner";
 
-interface Employee {
-  id: string;
-  name: string;
-  status: string;
-}
+// interface Employee {
+//   id: string;
+//   name: string;
+//   status: string;
+// }
 
 interface Document {
   idDocumentation: string;
@@ -24,7 +24,7 @@ interface Document {
 
 export function DetailsEmployee() {
   const { id } = useParams<{ id: string }>();
-  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [employee, setEmployee] = useState<any | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,17 +33,13 @@ export function DetailsEmployee() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
-  // const idEmployee =
 
   const fetchEmployee = async () => {
     try {
       const response = await axios.get(`${ip}/employee/brazilian/${id}`);
-      const data = response.data;
-      setEmployee({
-        id: data.idEmployee,
-        name: data.name,
-        status: data.situation,
-      });
+      console.log("teste", response.data);
+
+      setEmployee(response.data);
     } catch (err: any) {
       setError(
         err.response?.data?.message || "Erro ao carregar o Colaborador.",
@@ -82,7 +78,7 @@ export function DetailsEmployee() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         {" "}
         <Blocks
           height="80"
@@ -175,10 +171,20 @@ export function DetailsEmployee() {
       </div>
       <div className="flex flex-col space-y-6">
         <div className="rounded-lg bg-white p-6 shadow">
-          <div className="flex flex-col items-center">
-            <div className="bg-realizaBlue mb-4 h-20 w-20 rounded-full"></div>
-            <h3 className="text-lg font-medium">{employee.name}</h3>
-            <p className="text-sm text-gray-500">Status: {employee.status}</p>
+          <div className="flex flex-col items-start">
+            <div className="flex gap-2">
+              <div className="bg-realizaBlue mb-4 flex h-20 w-20 items-center justify-center rounded-full">
+                <User className="text-white" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-lg font-medium">
+                  {employee.name} {employee.surname}
+                </h3>
+                <p className="text-[14px] text-gray-500">
+                  Status: {employee.situation}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
         {/* <div className="ml-10 flex justify-start">
