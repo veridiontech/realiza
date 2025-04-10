@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { Eye, Edit } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
+import { Blocks } from "react-loader-spinner";
 
 interface Employee {
   id: string;
@@ -32,7 +33,7 @@ export function DetailsEmployee() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
-  // const idEmployee = 
+  // const idEmployee =
 
   const fetchEmployee = async () => {
     try {
@@ -41,7 +42,7 @@ export function DetailsEmployee() {
       setEmployee({
         id: data.idEmployee,
         name: data.name,
-        status: data.situation
+        status: data.situation,
       });
     } catch (err: any) {
       setError(
@@ -80,7 +81,20 @@ export function DetailsEmployee() {
   }, [id]);
 
   if (isLoading) {
-    return <p>Carregando...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        {" "}
+        <Blocks
+          height="80"
+          width="80"
+          color="#34495E"
+          ariaLabel="blocks-loading"
+          wrapperStyle={{}}
+          wrapperClass="blocks-wrapper"
+          visible={true}
+        />
+      </div>
+    );
   }
 
   if (error) {
@@ -176,8 +190,54 @@ export function DetailsEmployee() {
           <div className="flex-[2]">
             <Table<Document> data={documents} columns={columns} />
           </div>
-          <div className="flex flex-[1] items-center justify-center bg-black p-4">
-            <span className="text-white">teste</span>
+          <div className="flex flex-1 flex-col">
+            <h2 className="text-[20px] font-medium">Histórico</h2>
+            <div className="h-[40vh] overflow-auto rounded-md bg-white p-4 shadow-md">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Atividade
+                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Tipo de Atividade
+                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Feito por
+                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Data
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="p-2 text-stone-600">
+                      NR33 - Atividade teste
+                    </td>
+                    <td className="p-2 text-stone-600">Upload</td>
+                    <td className="p-2 text-stone-600">Monica</td>
+                    <td className="p-2 text-stone-600">10/04/2025</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 text-stone-600">
+                      NR34 - Atividade teste
+                    </td>
+                    <td className="p-2 text-stone-600">Upload</td>
+                    <td className="p-2 text-stone-600">Monica</td>
+                    <td className="p-2 text-stone-600">05/04/2025</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 text-stone-600">
+                      MDF³ - Atividade teste
+                    </td>
+                    <td className="p-2 text-stone-600">Modificação</td>
+                    <td className="p-2 text-stone-600">Monica</td>
+                    <td className="p-2 text-stone-600">05/04/2025</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

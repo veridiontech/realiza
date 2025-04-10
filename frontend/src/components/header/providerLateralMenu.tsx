@@ -57,7 +57,7 @@ export function ProviderLateralMenu() {
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Colaboradores e contratos
       </h3>
-      <Link to={`contracts/${user?.idUser}`}>
+      <Link to={`/fornecedor/home/${user?.idUser}`}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -132,10 +132,10 @@ export function ProviderLateralMenu() {
           </span>
         </Button>
       </Link>
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">
+      {/* <h3 className="pl-4 pt-6 text-xs text-zinc-800">
         Colaboradores e contratos
       </h3>
-      <Link to={`/fornecedor/contracts/${getIdUser}`}>
+      <Link to={`/fornecedor/home/${user?.idUser}`}>
         <Button
           variant={"ghost"}
           className="mt-1 w-full justify-start px-4 py-2"
@@ -145,7 +145,7 @@ export function ProviderLateralMenu() {
             Meus contratos
           </span>
         </Button>
-      </Link>
+      </Link> */}
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
       <Link to={`/fornecedor/profile/${getIdUser}`}>
         <Button

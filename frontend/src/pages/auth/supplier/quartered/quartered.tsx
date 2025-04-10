@@ -7,7 +7,7 @@ import {
   QuarteredProps,
 } from "@/hooks/gets/supplier/supplierGetQuartereds";
 import { NotebookPen } from "lucide-react";
-import SupplierAddQuartered from "@/components/supplier-add-quartered";
+// import SupplierAddQuartered from "@/components/supplier-add-quartered";
 import { useUser } from "@/context/user-provider";
 
 export function Quartered() {
@@ -64,7 +64,7 @@ export function Quartered() {
   return (
     <div className="m-10 flex min-h-full justify-center">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg bg-white">
-        <h1 className="m-8 text-2xl">SubContratados</h1>
+        <h1 className="m-8 text-2xl">Subcontratados</h1>
 
         <div className="flex w-[90rem] flex-row justify-between px-10">
           <div className="relative mb-4">
@@ -75,7 +75,7 @@ export function Quartered() {
               onChange={() => {}}
             />
           </div>
-          <SupplierAddQuartered />
+          {/* <SupplierAddQuartered /> */}
         </div>
 
         {error ? (
