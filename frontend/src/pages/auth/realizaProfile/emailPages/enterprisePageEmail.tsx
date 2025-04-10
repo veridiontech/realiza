@@ -209,31 +209,30 @@ export function EnterprisePageEmail() {
         </form>
       </div>
       {showConfirmModal && formData && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-[90vw] max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Confirmar CNPJ</h2>
-            <p className="mb-4">
-              Você confirma que o <strong>CNPJ</strong> informado é o mesmo em que o funcionario está registrado?
-            </p>
-            <p className="mb-4 text-blue-600 font-medium">{formData.cnpj} - {formData.corporateName}</p>
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                className="bg-gray-300 text-black hover:bg-gray-400"
-                onClick={() => setShowConfirmModal(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                className="bg-realizaBlue"
-                onClick={handleConfirm}
-              >
-                Confirmar
-              </Button>
-            </div>
-          </div>
-        </div>
+       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+       <div className="bg-[#1d314a] text-white p-6 rounded-xl shadow-xl w-[90vw] max-w-md">
+         <h2 className="text-xl font-semibold mb-4">Confirmar CNPJ</h2>
+         <p className="mb-4">
+           Você confirma que o <strong className="font-semibold">CNPJ</strong> informado é o mesmo em que o funcionário está registrado? Caso não, entre em contato com o suporte!</p>
+         <strong className="block text-center font-medium mb-4">{formData.cnpj} - {formData.corporateName}</strong>
+         <div className="flex justify-end gap-4">
+           <Button
+             type="button"
+             className="bg-white text-[#1d314a] font-semibold px-4 py-2 rounded-lg hover:bg-gray-200"
+             onClick={() => setShowConfirmModal(false)}
+           >
+             Cancelar
+           </Button>
+           <Button
+             type="button"
+             className="bg-white text-[#1d314a] font-semibold px-4 py-2 rounded-lg hover:bg-gray-200"
+             onClick={handleConfirm}
+           >
+             Confirmar
+           </Button>
+         </div>
+       </div>
+     </div>
       )}
     </div>
   );

@@ -92,6 +92,10 @@ export function SignUpPageEmail() {
     setIsOpenEye(!isOpenEye);
   };
 
+    const handleGoBack = () => {
+      window.history.back();
+    };
+
   return (
     <div>
       <div className="flex justify-center">
@@ -230,8 +234,8 @@ export function SignUpPageEmail() {
           </Button>
         )}
         <div>
-        <Button className="bg-realizaBlue h-[5vh]" disabled={!isValid}>
-            Voltar  
+                <Button className="bg-realizaBlue h-[5vh]" onClick={handleGoBack}>
+            Voltar
           </Button>
         </div>
       </form>
