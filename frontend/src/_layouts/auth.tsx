@@ -25,8 +25,9 @@ export function AuthLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Coluna para o Outlet */}
       <div
-        className="w-6/12 bg-white bg-left-bottom bg-no-repeat"
+        className="w-full md:w-6/12 bg-white bg-left-bottom bg-no-repeat"
         style={{
           backgroundImage: `url(${bgAuth})`,
           backgroundSize: "300px 300px",
@@ -34,7 +35,8 @@ export function AuthLayout() {
       >
         <Outlet />
       </div>
-      <div className="hidden h-screen w-6/12 md:flex">
+      {/* Coluna para a imagem que só aparece em telas médias ou maiores */}
+      <div className="hidden md:flex h-screen w-6/12">
         <img src={dynamicImage} alt="imagem" className="w-full object-cover" />
       </div>
     </div>
