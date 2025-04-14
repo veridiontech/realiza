@@ -35,7 +35,7 @@ import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
-import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
+// import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 import RiskMatriz from "./pages/auth/realizaProfile/documents/risk-matriz";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
 import { ControlPanel } from "./pages/auth/realizaProfile/panelControl";
@@ -51,6 +51,7 @@ import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manag
 import { HomeClient } from "./pages/auth/clientProfile/home/homeClient";
 import { ProfileBranch } from "./pages/auth/realizaProfile/profileEnterprise/profileBranch";
 import { SupplierContractNewPage } from "./pages/auth/supplier/contracts/supplier-contract-new-page";
+import { DocumentPageNew } from "./pages/auth/realizaProfile/documents/new-documents-page/document-page";
 
 
 export const router = createBrowserRouter([
@@ -84,7 +85,7 @@ export const router = createBrowserRouter([
       { path: "new-features/:id", element: <AtualizationPage /> },
       { path: "create-new-user/:id", element: <CreateUserRealiza /> },
       { path: "chat/:id", element: <ChatPage /> },
-      { path: "documents/:id", element: <DocumentPage /> },
+      { path: "documents/:id", element: <DocumentPageNew /> },
       { path: "risk-matriz/:id", element: <RiskMatriz /> },
       { path: "controlPanel/:id", element: <ControlPanel /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
