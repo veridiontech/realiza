@@ -65,8 +65,6 @@ export function EnterprisePageEmail() {
     if (tokenFromUrl) validateToken();
   }, [tokenFromUrl]);
 
-
-
   useEffect(() => {
     const fetchBranchData = async () => {
       if (!findBranchId) return;
@@ -76,7 +74,7 @@ export function EnterprisePageEmail() {
         const branchData = response.data;
         if (branchData) {
           setValue("cnpj", branchData.cnpj);
-          setValue("corporateName", branchData.corporteName);
+          setValue("corporateName", branchData.corporateName);
         }
       } catch (error) {
         console.error("Erro ao buscar dados da filial:", error);
