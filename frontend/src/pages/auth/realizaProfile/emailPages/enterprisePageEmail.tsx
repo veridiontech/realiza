@@ -182,6 +182,7 @@ export function EnterprisePageEmail() {
               placeholder="Digite o CNPJ"
               className="w-[27vw]"
               {...register("cnpj")}
+              disabled
             />
           </div>
           <div className="flex items-center gap-5">
@@ -201,6 +202,7 @@ export function EnterprisePageEmail() {
                 placeholder="*Razão social"
                 className="w-[13vw]"
                 {...register("corporateName")}
+                disabled
               />
             </div>
           </div>
