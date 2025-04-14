@@ -11,6 +11,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { ip } from "@/utils/ip";
 
 const enterprisePageEmailFormSchema = z.object({
   tradeName: z.string().optional(),
@@ -34,6 +35,7 @@ export function EnterprisePageEmail() {
   const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const findBranchId = searchParams.get("idBranch");
+  // const findIdSupplier = searchParams.get("idSupplier")
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState<EnterprisePageEmailFormSchema | null>(null);
@@ -63,15 +65,18 @@ export function EnterprisePageEmail() {
     if (tokenFromUrl) validateToken();
   }, [tokenFromUrl]);
 
+
+
   useEffect(() => {
     const fetchBranchData = async () => {
       if (!findBranchId) return;
       try {
-        const response = await axios.get(`https://realiza-1.onrender.com/branch/${findBranchId}`);
+        const response = await axios.get(`${ip}/supplier/${findId}`);
+        console.log("testando dados do supplier", response.data);
         const branchData = response.data;
         if (branchData) {
           setValue("cnpj", branchData.cnpj);
-          setValue("corporateName", branchData.socialReason);
+          setValue("corporateName", branchData.corporteName);
         }
       } catch (error) {
         console.error("Erro ao buscar dados da filial:", error);
@@ -140,13 +145,13 @@ export function EnterprisePageEmail() {
     setShowConfirmModal(false);
   };
 
-  // if (!isValidToken) {
-  //   return (
-  //     <div className="text-red-600">
-  //       Token inválido ou expirado. Por favor, solicite um novo convite.
-  //     </div>
-  //   );
-  // }
+  if (!isValidToken) {
+    return (
+      <div className="text-red-600">
+        Token inválido ou expirado. Por favor, solicite um novo convite.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
