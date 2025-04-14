@@ -71,8 +71,10 @@ export function SignUpPageEmail() {
       
       const response = await axios.post(`${ip}/sign-enterprise`, allDatas);
       if (response.status === 200) {
+        localStorage.removeItem("enterpriseForm");
         window.location.href = "https://realiza-1.onrender.com/";
       }
+      
       window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
