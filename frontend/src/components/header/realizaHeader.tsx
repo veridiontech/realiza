@@ -355,7 +355,7 @@ export function Header() {
   return (
     <header className="dark:bg-primary relative p-5">
       <div>{/* seach */}</div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">
           <div
@@ -383,7 +383,7 @@ export function Header() {
             </Sheet>
           </div>
 
-          <Link to={`/sistema/select-client/${getIdUser}`}>
+          <Link to={`/sistema/select-client/${getIdUser}`} className="hidden md:flex">
             <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
           </Link>
         </div>

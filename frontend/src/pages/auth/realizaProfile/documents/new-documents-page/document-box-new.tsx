@@ -1,37 +1,41 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { BoxNonSelected } from "./box-non-selected";
-import { BoxSelected } from "./box-selected";
-import { propsDocument } from "@/types/interfaces";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useDocument } from "@/context/Document-provider";
+// import { BoxNonSelected } from "./box-non-selected";
+// import { BoxSelected } from "./box-selected";
+// import { propsDocument } from "@/types/interfaces";
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+//   AlertDialogTrigger,
+// } from "@/components/ui/alert-dialog";
+// import { useDocument } from "@/context/Document-provider";
+import { ThirdCompany } from "../boxes-selected/third-company";
+import { ThirdCollaborators } from "../boxes-selected/third-collaborators";
+import { TrainingBox } from "../boxes-selected/services";
+import { OrtherRequirements } from "../boxes-selected/orther-requirements";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
-  const { documents, nonSelected } = useDocument();
+  // const { documents, nonSelected } = useDocument();
 
-  const mockDocumentsNonSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 1" },
-    { idDocument: "2", name: "Documento 2" },
-    { idDocument: "3", name: "Documento 3" },
-    { idDocument: "4", name: "Documento 4" },
-  ];
+  // const mockDocumentsNonSelected: propsDocument[] = [
+  //   { idDocument: "1", name: "Documento 1" },
+  //   { idDocument: "2", name: "Documento 2" },
+  //   { idDocument: "3", name: "Documento 3" },
+  //   { idDocument: "4", name: "Documento 4" },
+  // ];
 
-  const mockDocumentsSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 11231231" },
-    { idDocument: "2", name: "Documento 21231231" },
-    { idDocument: "3", name: "Documento 31231231" },
-    { idDocument: "4", name: "Documento 4231321" },
-  ];
+  // const mockDocumentsSelected: propsDocument[] = [
+  //   { idDocument: "1", name: "Documento 11231231" },
+  //   { idDocument: "2", name: "Documento 21231231" },
+  //   { idDocument: "3", name: "Documento 31231231" },
+  //   { idDocument: "4", name: "Documento 4231321" },
+  // ];
 
   return (
     <div className="relative">
@@ -59,7 +63,7 @@ export function NewDocumentBox() {
           >
             Colaboradores terceiros
           </Button>
-          <Button
+          {/* <Button
             variant={"ghost"}
             className={`px-4 py-2 transition-all duration-300 ${
               selectedTab === "training"
@@ -69,7 +73,7 @@ export function NewDocumentBox() {
             onClick={() => setSelectedTab("training")}
           >
             Treinamentos
-          </Button>
+          </Button> */}
           <Button
             variant={"ghost"}
             className={`px-4 py-2 transition-all duration-300 ${
@@ -84,150 +88,10 @@ export function NewDocumentBox() {
         </div>
       </div>
       <div className="bg-white pt-24 shadow-md">
-        {selectedTab === "thirdCompany" && (
-          <div className="flex items-center justify-center gap-10 p-10">
-            <div>
-              <BoxNonSelected documents={mockDocumentsNonSelected} />
-            </div>
-            <div className="flex flex-col gap-5">
-              <div>
-                <AlertDialog>
-                  <AlertDialogTrigger className="bg-realizaBlue w-[10vw] rounded-md p-4 text-white">
-                    Confirmar Seleção
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Documentos Selecionados
-                      </AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <div>
-                      <ul>
-                        {nonSelected.length > 0 ? (
-                          nonSelected.map((doc) => (
-                            <li key={doc.idDocument}>{doc.name}</li>
-                          ))
-                        ) : (
-                          <p>Nenhum documento selecionado.</p>
-                        )}
-                      </ul>
-                    </div>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction>Confirmar</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-              <div>
-                <AlertDialog>
-                  <AlertDialogTrigger className="w-[10vw] rounded-md bg-red-600 p-3 text-white">
-                    Confirmar Remoção
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Documentos Selecionados
-                      </AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <div>
-                      <ul>
-                        {documents.length > 0 ? (
-                          documents.map((doc) => (
-                            <li key={doc.idDocument}>{doc.name}</li>
-                          ))
-                        ) : (
-                          <p>Nenhum documento selecionado.</p>
-                        )}
-                      </ul>
-                    </div>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction>Confirmar</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-            <div>
-              <BoxSelected documents={mockDocumentsSelected} />
-            </div>
-          </div>
-        )}
-        {selectedTab === "thirdCollaborators" && (
-          <div className="flex items-center justify-center gap-10 p-10">
-          <div>
-            <BoxNonSelected documents={mockDocumentsNonSelected} />
-          </div>
-          <div className="flex flex-col gap-5">
-            <div>
-              <AlertDialog>
-                <AlertDialogTrigger className="bg-realizaBlue w-[10vw] rounded-md p-4 text-white">
-                  Confirmar Seleção
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Documentos Selecionados
-                    </AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <div>
-                    <ul>
-                      {nonSelected.length > 0 ? (
-                        nonSelected.map((doc) => (
-                          <li key={doc.idDocument}>{doc.name}</li>
-                        ))
-                      ) : (
-                        <p>Nenhum documento selecionado.</p>
-                      )}
-                    </ul>
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction>Confirmar</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-            <div>
-              <AlertDialog>
-                <AlertDialogTrigger className="w-[10vw] rounded-md bg-red-600 p-3 text-white">
-                  Confirmar Remoção
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Documentos Selecionados
-                    </AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <div>
-                    <ul>
-                      {documents.length > 0 ? (
-                        documents.map((doc) => (
-                          <li key={doc.idDocument}>{doc.name}</li>
-                        ))
-                      ) : (
-                        <p>Nenhum documento selecionado.</p>
-                      )}
-                    </ul>
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction>Confirmar</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-          <div>
-            <BoxSelected documents={mockDocumentsSelected} />
-          </div>
-        </div>
-        )}
-        {selectedTab === "training" && <div className="p-4">ola deive2</div>}
-        {selectedTab === "otherRequirements" && (
-          <div className="p-4">ola deive3</div>
-        )}
+        {selectedTab === "thirdCompany" && <ThirdCompany />}
+        {selectedTab === "thirdCollaborators" && <ThirdCollaborators />}
+        {selectedTab === "training" && <TrainingBox />}
+        {selectedTab === "otherRequirements" && <OrtherRequirements />}
       </div>
     </div>
   );
