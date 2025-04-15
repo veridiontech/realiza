@@ -36,13 +36,13 @@ public abstract class Employee {
     private String name;
     private String surname;
     private String profilePicture;
-    private String address;
-    private String country;
     private String acronym;
-    private String state;
     private Date birthDate;
-    private String city;
     private String postalCode;
+    private String address;
+    private String city;
+    private String state;
+    private String country;
     private String gender;
     private String position;
     private String registration;
@@ -51,7 +51,6 @@ public abstract class Employee {
     private String platformAccess;
     private String telephone;
     private String directory;
-    private String email;
     private String levelOfEducation;
     private String cbo;
     @Builder.Default

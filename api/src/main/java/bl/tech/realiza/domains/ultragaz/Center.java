@@ -2,6 +2,8 @@ package bl.tech.realiza.domains.ultragaz;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -30,10 +32,7 @@ public class Center {
     @JoinColumn(name = "idMarket")
     private Market market;
 
-    // -------------------------------
-    // Relacionamentos CONTRATUAIS
-    // -------------------------------
     @JsonIgnore
-    @OneToMany(mappedBy = "center", cascade = CascadeType.REMOVE)
+    @ManyToMany(mappedBy = "center")
     private List<Branch> branches;
 }

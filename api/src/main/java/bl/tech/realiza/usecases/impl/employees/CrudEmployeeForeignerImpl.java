@@ -1,7 +1,6 @@
 package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
@@ -76,7 +75,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             Optional<Branch> branchOptional = branchRepository.findById(employeeForeignerRequestDto.getBranch());
             branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
-            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(employeeForeignerRequestDto.getBranch(), "Documento pessoa");
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getBranch(), "Documento pessoa", true);
 
             documentMatrixList = documentBranches.stream()
                     .map(DocumentBranch::getDocumentMatrix)
@@ -85,7 +84,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier());
             providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeForeignerRequestDto.getSupplier(), "Documento pessoa");
+            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSupplier(), "Documento pessoa", true);
 
             documentMatrixList = documentProviderSuppliers.stream()
                     .map(DocumentProviderSupplier::getDocumentMatrix)
@@ -95,7 +94,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract());
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
-            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeForeignerRequestDto.getSubcontract(), "Documento pessoa");
+            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSubcontract(), "Documento pessoa", true);
 
             documentMatrixList = documentProviderSubcontractors.stream()
                     .map(DocumentProviderSubcontractor::getDocumentMatrix)
@@ -125,7 +124,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .platformAccess(employeeForeignerRequestDto.getPlatformAccess())
                 .telephone(employeeForeignerRequestDto.getTelephone())
                 .directory(employeeForeignerRequestDto.getDirectory())
-                .email(employeeForeignerRequestDto.getEmail())
                 .levelOfEducation(employeeForeignerRequestDto.getLevelOfEducation())
                 .cbo(employeeForeignerRequestDto.getCbo())
                 .situation(employeeForeignerRequestDto.getSituation())
@@ -174,7 +172,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .platformAccess(savedEmployeeForeigner.getPlatformAccess())
                 .telephone(savedEmployeeForeigner.getTelephone())
                 .directory(savedEmployeeForeigner.getDirectory())
-                .email(savedEmployeeForeigner.getEmail())
                 .levelOfEducation(savedEmployeeForeigner.getLevelOfEducation())
                 .cbo(savedEmployeeForeigner.getCbo())
                 .situation(savedEmployeeForeigner.getSituation())
@@ -231,7 +228,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .platformAccess(employeeForeigner.getPlatformAccess())
                 .telephone(employeeForeigner.getTelephone())
                 .directory(employeeForeigner.getDirectory())
-                .email(employeeForeigner.getEmail())
                 .levelOfEducation(employeeForeigner.getLevelOfEducation())
                 .cbo(employeeForeigner.getCbo())
                 .situation(employeeForeigner.getSituation())
@@ -287,7 +283,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .platformAccess(employeeForeigner.getPlatformAccess())
                             .telephone(employeeForeigner.getTelephone())
                             .directory(employeeForeigner.getDirectory())
-                            .email(employeeForeigner.getEmail())
                             .levelOfEducation(employeeForeigner.getLevelOfEducation())
                             .cbo(employeeForeigner.getCbo())
                             .situation(employeeForeigner.getSituation())
@@ -346,7 +341,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         employeeForeigner.setPlatformAccess(employeeForeignerRequestDto.getPlatformAccess() != null ? employeeForeignerRequestDto.getPlatformAccess() : employeeForeigner.getPlatformAccess());
         employeeForeigner.setTelephone(employeeForeignerRequestDto.getTelephone() != null ? employeeForeignerRequestDto.getTelephone() : employeeForeigner.getTelephone());
         employeeForeigner.setDirectory(employeeForeignerRequestDto.getDirectory() != null ? employeeForeignerRequestDto.getDirectory() : employeeForeigner.getDirectory());
-        employeeForeigner.setEmail(employeeForeignerRequestDto.getEmail() != null ? employeeForeignerRequestDto.getEmail() : employeeForeigner.getEmail());
         employeeForeigner.setLevelOfEducation(employeeForeignerRequestDto.getLevelOfEducation() != null ? employeeForeignerRequestDto.getLevelOfEducation() : employeeForeigner.getLevelOfEducation());
         employeeForeigner.setCbo(employeeForeignerRequestDto.getCbo() != null ? employeeForeignerRequestDto.getCbo() : employeeForeigner.getCbo());
         employeeForeigner.setSituation(employeeForeignerRequestDto.getSituation() != null ? employeeForeignerRequestDto.getSituation() : employeeForeigner.getSituation());
@@ -380,7 +374,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .platformAccess(savedEmployeeForeigner.getPlatformAccess())
                 .telephone(savedEmployeeForeigner.getTelephone())
                 .directory(savedEmployeeForeigner.getDirectory())
-                .email(savedEmployeeForeigner.getEmail())
                 .levelOfEducation(savedEmployeeForeigner.getLevelOfEducation())
                 .cbo(savedEmployeeForeigner.getCbo())
                 .situation(savedEmployeeForeigner.getSituation())

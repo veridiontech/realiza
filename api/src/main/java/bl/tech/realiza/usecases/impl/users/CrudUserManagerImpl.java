@@ -14,10 +14,12 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepo
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.*;
+import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.auth.RandomPasswordService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final EmailSender emailSender;
+    private final RandomPasswordService randomPasswordService;
 
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
@@ -266,6 +269,8 @@ public class CrudUserManagerImpl implements CrudUserManager {
     @Override
     public String createNewUserActivated(UserCreateRequestDto userCreateRequestDto) {
 
+        String randomPassword = randomPasswordService.generateRandomPassword();
+
         switch (userCreateRequestDto.getEnterprise()) {
             case REALIZA -> {
                 if (userCreateRequestDto.getRole() == User.Role.ROLE_REALIZA_BASIC ||
@@ -278,6 +283,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
+                            .password(randomPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .isActive(true)
@@ -301,6 +307,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                                     .firstName(userCreateRequestDto.getFirstName())
                                     .surname(userCreateRequestDto.getSurname())
                                     .email(userCreateRequestDto.getEmail())
+                                    .password(randomPassword)
                                     .telephone(userCreateRequestDto.getTelephone())
                                     .cellphone(userCreateRequestDto.getCellphone())
                                     .branch(branch)
@@ -324,6 +331,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
+                            .password(randomPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .providerSupplier(supplier)
@@ -347,6 +355,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
+                            .password(randomPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .providerSubcontractor(subcontractor)
@@ -359,7 +368,11 @@ public class CrudUserManagerImpl implements CrudUserManager {
             default -> throw new BadRequestException("Unexpected value: " + userCreateRequestDto.getEnterprise());
         }
 
-//        emailSender.sendInviteEnterpriseEmail();
+        emailSender.sendNewUserEmail(EmailNewUserRequestDto.builder()
+                .email(userCreateRequestDto.getEmail())
+                .password(randomPassword)
+                .nameUser(userCreateRequestDto.getFirstName() + " " + userCreateRequestDto.getSurname())
+                .build());
 
         return "User " + userCreateRequestDto.getEnterprise() + " created successfully";
     }

@@ -26,6 +26,6 @@ public class BranchCreateRequestDto {
     @NotEmpty
     private String number;
     private String client;
-    private String center;
+    private List<String> center;
     private List<String> documents;
 }
