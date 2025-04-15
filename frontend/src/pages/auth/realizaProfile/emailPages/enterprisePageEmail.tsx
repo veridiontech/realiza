@@ -11,6 +11,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { ip } from "@/utils/ip";
 
 const enterprisePageEmailFormSchema = z.object({
   tradeName: z.string().optional(),
@@ -34,6 +35,7 @@ export function EnterprisePageEmail() {
   const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const findBranchId = searchParams.get("idBranch");
+  // const findIdSupplier = searchParams.get("idSupplier")
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState<EnterprisePageEmailFormSchema | null>(null);
@@ -67,11 +69,12 @@ export function EnterprisePageEmail() {
     const fetchBranchData = async () => {
       if (!findBranchId) return;
       try {
-        const response = await axios.get(`https://realiza-1.onrender.com/branch/${findBranchId}`);
+        const response = await axios.get(`${ip}/supplier/${findId}`);
+        console.log("testando dados do supplier", response.data);
         const branchData = response.data;
         if (branchData) {
           setValue("cnpj", branchData.cnpj);
-          setValue("corporateName", branchData.socialReason);
+          setValue("corporateName", branchData.corporateName);
         }
       } catch (error) {
         console.error("Erro ao buscar dados da filial:", error);
@@ -179,6 +182,7 @@ export function EnterprisePageEmail() {
               placeholder="Digite o CNPJ"
               className="w-[27vw]"
               {...register("cnpj")}
+              disabled
             />
           </div>
           <div className="flex items-center gap-5">
@@ -198,6 +202,7 @@ export function EnterprisePageEmail() {
                 placeholder="*Razão social"
                 className="w-[13vw]"
                 {...register("corporateName")}
+                disabled
               />
             </div>
           </div>
