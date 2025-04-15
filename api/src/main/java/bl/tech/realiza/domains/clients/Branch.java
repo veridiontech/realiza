@@ -3,6 +3,7 @@ package bl.tech.realiza.domains.clients;
 import bl.tech.realiza.domains.contract.Activity;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
@@ -60,9 +61,22 @@ public class Branch {
     @JoinColumn(name = "idClient")
     private Client client;
 
-    @ManyToOne
-    @JoinColumn(name = "idCenter")
-    private Center center;
+    @ManyToMany
+    @JoinTable(
+            name = "CENTER_BRANCH",
+            joinColumns = @JoinColumn(name = "idBranch"),
+            inverseJoinColumns = @JoinColumn(name = "idCenter",
+                    foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+    )
+    private List<Center> center;
+
+    @ManyToMany
+    @JoinTable(
+            name = "CONTRACT_REQUIREMENTS",
+            joinColumns = @JoinColumn(name = "idContract"),
+            inverseJoinColumns = @JoinColumn(name = "idRequirement", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+    )
+    private List<Requirement> requirements;
 
     // -------------------------------
     // Relacionamentos CONTRATUAIS

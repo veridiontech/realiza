@@ -1,12 +1,6 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
-import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
-import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.domains.services.ItemManagement;
-import bl.tech.realiza.domains.user.UserClient;
-import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
-import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
@@ -23,9 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor

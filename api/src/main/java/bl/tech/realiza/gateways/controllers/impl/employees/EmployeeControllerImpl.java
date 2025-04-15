@@ -44,7 +44,7 @@ public class EmployeeControllerImpl implements EmployeeController {
                                                                                  @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee.findAllByEnterprise(idSearch, enterprise, pageable);
+        Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee. findAllByEnterprise(idSearch, enterprise, pageable);
 
         return ResponseEntity.ok(pageEmployeeForeigner);
     }

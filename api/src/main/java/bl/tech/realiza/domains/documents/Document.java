@@ -27,6 +27,8 @@ public abstract class Document {
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
+    @Builder.Default
+    private Boolean isActive = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;

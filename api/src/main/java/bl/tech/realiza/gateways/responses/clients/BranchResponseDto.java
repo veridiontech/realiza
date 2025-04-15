@@ -1,8 +1,11 @@
 package bl.tech.realiza.gateways.responses.clients;
 
+import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -19,5 +22,5 @@ public class BranchResponseDto {
     private String address;
     private String number;
     private String client;
-    private String center;
+    private List<CenterResponseDto> center;
 }

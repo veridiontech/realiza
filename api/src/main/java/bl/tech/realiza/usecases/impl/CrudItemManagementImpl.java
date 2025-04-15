@@ -1,17 +1,24 @@
 package bl.tech.realiza.usecases.impl;
 
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
-import bl.tech.realiza.gateways.requests.services.email.EmailInviteRequestDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailEnterpriseInviteRequestDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
+import bl.tech.realiza.gateways.requests.services.email.EmailRegistrationDeniedRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
@@ -32,6 +39,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final ProviderRepository providerRepository;
     private final EmailSender emailSender;
     private final UserManagerRepository userManagerRepository;
+    private final ContractProviderSupplierRepository contractProviderSupplierRepository;
+    private final ContractRepository contractRepository;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -69,6 +78,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .details(itemManagementProviderRequestDto.getDetails())
                 .requester(requesterManager != null ? requesterManager : requesterClient)
                 .newProvider(newProviderSupplier)
+                .status(ItemManagement.Status.PENDING)
                 .build());
 
         return getItemManagementProviderResponseDto(solicitation, requesterClient, requesterManager);
@@ -116,8 +126,6 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
     @Override
     public String approveSolicitation(String id) {
-
-
         ItemManagement solicitation = itemManagementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
@@ -128,6 +136,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             userClient.setIsActive(true);
 
             userClientRepository.save(userClient);
+
+            // enviar e-mail convite pedindo para finalizar cadastro
         } else if (solicitation.getNewProvider() != null) {
 
             Provider provider = providerRepository.findById(solicitation.getNewProvider().getIdProvider())
@@ -137,11 +147,24 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
             providerRepository.save(provider);
 
+
+            Contract contract = contractRepository.findById(
+                    contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
+                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+
             if (provider.getEmail() != null) {
-                emailSender.sendInviteEnterpriseEmail(EmailInviteRequestDto.builder()
-                            .email(provider.getEmail())
-                            .company(Provider.Company.SUPPLIER)
-                            .idCompany(provider.getIdProvider())
+                emailSender.sendNewProviderEmail(EmailEnterpriseInviteRequestDto.builder()
+                        .email(provider.getEmail())
+                        .companyName(provider.getCorporateName())
+                        .requesterName(contract instanceof ContractProviderSupplier ? ((ContractProviderSupplier) contract).getBranch().getName() : ((ContractProviderSubcontractor) contract).getContractProviderSupplier().getProviderSupplier().getTradeName())
+                        .serviceName(contract.getServiceName())
+                        .startDate(contract.getDateStart())
+                        .requesterBranchName(contract instanceof ContractProviderSupplier ? ((ContractProviderSupplier) contract).getBranch().getName() : ((ContractProviderSubcontractor) contract).getContractProviderSupplier().getBranch().getName())
+                        .responsibleName(contract.getResponsible().getFirstName() + " " + contract.getResponsible().getSurname())
+                        .contractReference(contract.getContractReference())
+                        .idCompany(provider.getIdProvider())
+                        .idBranch(contract instanceof ContractProviderSupplier ? ((ContractProviderSupplier) contract).getBranch().getIdBranch() : null)
+                        .idSupplier(contract instanceof ContractProviderSubcontractor ? ((ContractProviderSubcontractor) contract).getContractProviderSupplier().getProviderSupplier().getIdProvider() : null)
                         .build());
             }
         }
@@ -159,10 +182,6 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         ItemManagement solicitation = itemManagementRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
-        solicitation.setStatus(ItemManagement.Status.DENIED);
-
-        itemManagementRepository.save(solicitation);
-
         if (solicitation.getNewUser() != null) {
             UserClient userClient = userClientRepository.findById(solicitation.getNewUser().getIdUser())
                     .orElseThrow(() -> new NotFoundException("User not found"));
@@ -177,7 +196,25 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             provider.setDenied(true);
 
             providerRepository.save(provider);
+
+            Contract contract = contractRepository.findById(
+                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
+                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+            if (provider.getEmail() != null) {
+                emailSender.sendNewProviderDeniedEmail(EmailRegistrationDeniedRequestDto.builder()
+                        .email(provider.getEmail())
+                        .responsibleName(contract.getResponsible().getFirstName() + " " + contract.getResponsible().getSurname())
+                        .enterpriseName(provider.getCorporateName())
+                        // adicionar motivos ao sistema
+                        .reason(null)
+                        .build());
+            }
         }
+
+        solicitation.setStatus(ItemManagement.Status.DENIED);
+
+        itemManagementRepository.save(solicitation);
 
         return "Solicitation denied";
     }

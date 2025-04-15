@@ -206,7 +206,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable) {
-        Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAllByBranch_IdBranch(idSearch, pageable);
+        Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(idSearch, pageable);
 
         Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
                 documentBranch -> {
@@ -240,7 +240,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         Comparator<DocumentMatrix> byName = Comparator.comparing(DocumentMatrix::getName);
 
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(id);
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(id);
 
         List<DocumentMatrixResponseDto> selectedDocumentsEnterprise = documentBranch.stream()
                 .filter(doc -> "Documento empresa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
@@ -389,6 +389,22 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
+    public List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentGroupName, Boolean isSelected) {
+        branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(id, documentGroupName, isSelected);
+
+        return documentBranch.stream()
+                .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
+                .map(document -> DocumentResponseDto.builder()
+                        .idDocumentation(document.getIdDocumentation())
+                        .title(document.getTitle())
+                        .status(document.getStatus())
+                        .documentation(document.getDocumentation())
+                        .build()).toList();
+    }
+
+    @Override
     public String updateRequiredDocumentsByList(String id, List<String> documentCollection) {
         if (documentCollection == null || documentCollection.isEmpty()) {
             throw new BadRequestException("Invalid documents");
@@ -401,7 +417,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             throw new NotFoundException("Documents not found");
         }
 
-        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranch(id);
+        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(id);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
                 .map(DocumentBranch::getDocumentMatrix)
