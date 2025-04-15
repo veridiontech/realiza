@@ -17,7 +17,6 @@ export function BoxNonSelected({ documents }: BoxNonSelectedDocuments) {
       prev.includes(id) ? prev.filter((docId) => docId !== id) : [...prev, id]
     );
 
-
     setNonSelected((prevDocuments) => {
       if (prevDocuments.some((doc) => doc.idDocument === id)) {
         return prevDocuments.filter((doc) => doc.idDocument !== id);

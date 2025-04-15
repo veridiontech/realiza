@@ -84,6 +84,16 @@ export function NewDocumentBox() {
             onClick={() => setSelectedTab("otherRequirements")}
           >
             Outras exigências
+          </Button>          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "otherRequirements"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => setSelectedTab("otherRequirements")}
+          >
+            Atividades
           </Button>
         </div>
       </div>

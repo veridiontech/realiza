@@ -16,6 +16,7 @@ import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
+import { propsDocument } from "@/types/interfaces";
 
 export function ThirdCollaborators() {
     const { documents, nonSelected } = useDocument();
@@ -23,19 +24,19 @@ export function ThirdCollaborators() {
     const [selectedDocument, setSelectedDocument] = useState<any>([])
     const { selectedBranch } = useBranch();
 
-  // const mockDocumentsNonSelected: propsDocument[] = [
-  //   { idDocument: "1", name: "Documento 1" },
-  //   { idDocument: "2", name: "Documento 2" },
-  //   { idDocument: "3", name: "Documento 3" },
-  //   { idDocument: "4", name: "Documento 4" },
-  // ];
+  const mockDocumentsNonSelected: propsDocument[] = [
+    { idDocument: "1", name: "Documento 1" },
+    { idDocument: "2", name: "Documento 2" },
+    { idDocument: "3", name: "Documento 3" },
+    { idDocument: "4", name: "Documento 4" },
+  ];
 
-  // const mockDocumentsSelected: propsDocument[] = [
-  //   { idDocument: "1", name: "Documento 11231231" },
-  //   { idDocument: "2", name: "Documento 21231231" },
-  //   { idDocument: "3", name: "Documento 31231231" },
-  //   { idDocument: "4", name: "Documento 4231321" },
-  // ];
+  const mockDocumentsSelected: propsDocument[] = [
+    { idDocument: "1", name: "Documento 11231231" },
+    { idDocument: "2", name: "Documento 21231231" },
+    { idDocument: "3", name: "Documento 31231231" },
+    { idDocument: "4", name: "Documento 4231321" },
+  ];
 
   const getDocument = async () => {
     const token = localStorage.getItem("tokenClient");
@@ -78,7 +79,7 @@ export function ThirdCollaborators() {
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={notSelectedDocument} />
+        <BoxNonSelected documents={mockDocumentsNonSelected} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -137,7 +138,7 @@ export function ThirdCollaborators() {
         </div>
       </div>
       <div>
-        <BoxSelected documents={selectedDocument} />
+        <BoxSelected documents={mockDocumentsSelected} />
       </div>
     </div>
   );
