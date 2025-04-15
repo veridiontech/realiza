@@ -113,14 +113,6 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.ok(branchResponse);
     }
 
-    @PutMapping("/{id}/document-matrix")
-    @ResponseStatus(HttpStatus.OK)
-    @Override
-    public ResponseEntity<String> updateBranchDocuments(@PathVariable String id, @RequestBody List<String> documentList) {
-        String response = crudDocumentBranch.updateRequiredDocumentsByList(id, documentList);
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/{idEnterprise}/document-matrix")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
@@ -148,5 +140,15 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
             @RequestParam String documentGroupName,
             @RequestParam Boolean isSelected) {
         return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentGroupName,isSelected));
+    }
+
+    @PatchMapping("/document-matrix/update")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<String> updateSelectedBranchDocuments(
+            @RequestParam Boolean isSelected,
+            @RequestBody List<String> documentList) {
+        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocuments(isSelected, documentList));
     }
 }
