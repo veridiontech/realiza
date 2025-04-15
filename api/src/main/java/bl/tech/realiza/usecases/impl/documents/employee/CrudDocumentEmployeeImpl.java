@@ -209,7 +209,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
         FileDocument fileDocument = null;
         String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+        FileDocument savedFileDocument = null;
 
         DocumentEmployee documentEmployee = documentEmployeeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Document employee not found"));
 

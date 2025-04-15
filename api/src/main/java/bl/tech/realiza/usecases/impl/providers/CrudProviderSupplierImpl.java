@@ -3,7 +3,6 @@ package bl.tech.realiza.usecases.impl.providers;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -50,8 +49,8 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
             throw new NotFoundException("Branches not found");
         }
 
-//        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(providerSupplierRequestDto.getBranch(), "Documento empresa");
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(providerSupplierRequestDto.getBranches().get(0));
+//        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(providerSupplierRequestDto.getBranch(), "Documento empresa");
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(providerSupplierRequestDto.getBranches().get(0));
         List<DocumentMatrix> documentMatrixList = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
                 .toList();

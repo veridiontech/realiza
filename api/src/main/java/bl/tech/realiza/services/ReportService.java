@@ -1,11 +1,9 @@
 package bl.tech.realiza.services;
 
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.exceptions.BadRequestException;
-import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
@@ -72,7 +70,7 @@ public class ReportService {
             }
             case SUBCONTRACTOR -> {
                 return documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa")
-                        / documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa");
+                        / documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(enterpriseId, "Documento empresa", true);
             }
             default -> {
                 throw new BadRequestException("Invalid company degree");
@@ -92,7 +90,7 @@ public class ReportService {
             }
             case SUBCONTRACTOR -> {
                 return documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, Document.Status.APROVADO, "Documento empresa")
-                        / documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa");
+                        / documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(enterpriseId, "Documento empresa", true);
             }
             default -> {
                 throw new BadRequestException("Invalid company degree");

@@ -7,5 +7,4 @@ import java.util.Collection;
 import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, String> {
-    Collection<Document> findAllByRequestIs(Document.Request request);
 }

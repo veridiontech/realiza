@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
-        Center center = null;
+        List<Center> center = null;
         Client client = null;
 
         if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
@@ -38,9 +39,8 @@ public class CrudBranchImpl implements CrudBranch {
                         .orElseThrow(() -> new NotFoundException("Client not found"));
         }
 
-        if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isBlank()) {
-            center = centerRepository.findById(branchCreateRequestDto.getCenter())
-                    .orElseThrow(() -> new NotFoundException("Center not found"));
+        if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isEmpty()) {
+            center = centerRepository.findAllById(branchCreateRequestDto.getCenter());
         }
 
         Branch newBranch = Branch.builder()
@@ -73,7 +73,13 @@ public class CrudBranchImpl implements CrudBranch {
                 .address(savedBranch.getAddress())
                 .number(savedBranch.getNumber())
                 .client(savedBranch.getClient() != null ? savedBranch.getClient().getIdClient() : null)
-                .center(savedBranch.getCenter() != null ? savedBranch.getCenter().getIdCenter() : null)
+                .center(!savedBranch.getCenter().isEmpty() ? savedBranch.getCenter().stream().map(
+                        center1 -> CenterResponseDto.builder()
+                                .idCenter(center1.getIdCenter())
+                                .name(center1.getName())
+                                .idMarket(center1.getMarket().getIdMarket())
+                                .build()
+                ).toList() : null)
                 .build();
     }
 
@@ -104,7 +110,12 @@ public class CrudBranchImpl implements CrudBranch {
         return pageBranch.map(
                 branch -> {
                     String client = branch.getClient() != null ? branch.getClient().getIdClient() : null;
-                    String center = branch.getCenter() != null ? branch.getCenter().getIdCenter() : null;
+                    List<Center> center = !branch.getCenter().isEmpty() ? branch.getCenter().stream().map(
+                            center1 -> Center.builder()
+                                    .idCenter(center1.getIdCenter())
+                                    .name(center1.getName())
+                                    .build()
+                    ).toList() : List.of();
                     return BranchResponseDto.builder()
                             .idBranch(branch.getIdBranch())
                             .name(branch.getName())
@@ -117,7 +128,13 @@ public class CrudBranchImpl implements CrudBranch {
                             .address(branch.getAddress())
                             .number(branch.getNumber())
                             .client(client)
-                            .center(center)
+                            .center(!center.isEmpty() ? center.stream().map(
+                                    center1 -> CenterResponseDto.builder()
+                                            .idCenter(center1.getIdCenter())
+                                            .name(center1.getName())
+                                            .idMarket(center1.getMarket().getIdMarket())
+                                            .build()
+                            ).toList() : null)
                             .build();
                 }
         );
@@ -159,7 +176,13 @@ public class CrudBranchImpl implements CrudBranch {
                 .address(savedBranch.getAddress())
                 .number(savedBranch.getNumber())
                 .client(savedBranch.getClient().getIdClient())
-                .center(savedBranch.getCenter().getIdCenter())
+                .center(savedBranch.getCenter().stream().map(
+                        center -> CenterResponseDto.builder()
+                                .idCenter(center.getIdCenter())
+                                .name(center.getName())
+                                .idMarket(center.getMarket().getIdMarket())
+                                .build()
+                ).toList())
                 .build();
 
         return Optional.of(branchResponseDto);

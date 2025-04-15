@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -266,7 +264,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAllByProviderSupplier_IdProvider(idSearch, pageable);
+        Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(idSearch, pageable, true);
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> {
@@ -296,7 +294,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     @Override
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         providerSupplierRepository.findById(id).orElseThrow(() -> new NotFoundException("Supplier not found"));
-        List<DocumentProviderSupplier> documentSupplier = documentSupplierRepository.findAllByProviderSupplier_IdProvider(id);
+        List<DocumentProviderSupplier> documentSupplier = documentSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(id, true);
         List<DocumentMatrixResponseDto> selectedDocuments = documentSupplier.stream()
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
@@ -344,7 +342,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             throw new NotFoundException("Documents not found");
         }
 
-        List<DocumentProviderSupplier> existingDocumentSuppliers = documentSupplierRepository.findAllByProviderSupplier_IdProvider(id);
+        List<DocumentProviderSupplier> existingDocumentSuppliers = documentSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(id, true);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentSuppliers.stream()
                 .map(DocumentProviderSupplier::getDocumentMatrix)
@@ -385,7 +383,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
 
-        List<DocumentProviderSupplier> existingDocumentBranches = documentSupplierRepository.findAllByProviderSupplier_IdProvider(idEnterprise);
+        List<DocumentProviderSupplier> existingDocumentBranches = documentSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(idEnterprise, true);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
                 .map(DocumentProviderSupplier::getDocumentMatrix)

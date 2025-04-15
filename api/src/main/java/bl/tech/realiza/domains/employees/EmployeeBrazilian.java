@@ -18,6 +18,5 @@ import java.sql.Date;
 @Entity
 @DiscriminatorValue("BRAZILIAN")
 public class EmployeeBrazilian extends Employee {
-    private String rg;
     private Date admissionDate;
 }
