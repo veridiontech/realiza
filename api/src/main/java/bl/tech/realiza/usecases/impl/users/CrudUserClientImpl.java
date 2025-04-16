@@ -72,19 +72,27 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .branch(branch)
                 .build();
 
+        UserClient userClient = userClientRepository.findById(userClientRequestDto.getIdUser())
+                .orElse(null);
+        if (userClient == null) {
+            newUserClient.setIsActive(true);
+        }
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
-        // criar solicitação
-        crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
-                .title(String.format("Novo usuário %s %s", savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "", savedUserClient.getSurname() != null ? savedUserClient.getSurname() : ""))
-                .details(String.format("Solicitação de adição do usuário %s %s da empresa %s a plataforma",
-                        savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "",
-                        savedUserClient.getSurname() != null ? savedUserClient.getSurname() : "", savedUserClient.getBranch().getName() != null ? savedUserClient.getBranch().getName() : ""))
-                .idRequester(userClientRequestDto.getIdUser())
-                .idNewUser(savedUserClient.getIdUser())
-                .build());
 
-        UserResponseDto userClientResponse = UserResponseDto.builder()
+        if (userClient == null) {
+            // criar solicitação
+            crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
+                    .title(String.format("Novo usuário %s %s", savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "", savedUserClient.getSurname() != null ? savedUserClient.getSurname() : ""))
+                    .details(String.format("Solicitação de adição do usuário %s %s da empresa %s a plataforma",
+                            savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "",
+                            savedUserClient.getSurname() != null ? savedUserClient.getSurname() : "", savedUserClient.getBranch().getName() != null ? savedUserClient.getBranch().getName() : ""))
+                    .idRequester(userClientRequestDto.getIdUser())
+                    .idNewUser(savedUserClient.getIdUser())
+                    .build());
+        }
+
+        return UserResponseDto.builder()
                 .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
                 .description(savedUserClient.getDescription())
@@ -98,8 +106,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .cellphone(savedUserClient.getCellphone())
                 .branch(savedUserClient.getBranch().getIdBranch())
                 .build();
-
-        return userClientResponse;
     }
 
     @Override

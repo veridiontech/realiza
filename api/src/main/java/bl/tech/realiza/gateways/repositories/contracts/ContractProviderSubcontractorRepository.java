@@ -14,4 +14,5 @@ public interface ContractProviderSubcontractorRepository extends JpaRepository<C
     Page<ContractProviderSubcontractor> findAllByIsActiveIsTrue(Pageable pageable);
     Page<ContractProviderSubcontractor> findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(String idSearch, Pageable pageable);
     Page<ContractProviderSubcontractor> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch, Pageable pageable);
+    ContractProviderSubcontractor findTopByProviderSubcontractor_IdProviderOrderByCreationDateDesc(String idCompany);
 }

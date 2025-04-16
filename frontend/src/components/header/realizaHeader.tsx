@@ -257,7 +257,7 @@ export function Header() {
             {/* Seleção de cliente */}
           </div>
           {/* Perfil do usuário e demais itens */}
-          <div className="hidden items-center md:flex">
+          <div className="hidden items-center lg:flex md:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="cursor-pointer rounded-full bg-gray-300 p-2">
@@ -311,7 +311,7 @@ export function Header() {
   
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <ProfilePhoto />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
@@ -497,7 +497,7 @@ export function Header() {
 
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <ProfilePhoto />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="dark:bg-primary mr-5">
                 <DropdownMenuLabel>

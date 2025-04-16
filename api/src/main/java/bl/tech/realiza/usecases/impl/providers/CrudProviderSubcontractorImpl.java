@@ -52,7 +52,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(providerSubcontractorRequestDto.getSupplier());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider supplier not found"));
 
-        List<DocumentProviderSupplier> documentSupplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProvider(providerSubcontractorRequestDto.getSupplier());
+        List<DocumentProviderSupplier> documentSupplier = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(providerSubcontractorRequestDto.getSupplier(), true);
         List<DocumentMatrix> documentMatrixList = documentSupplier.stream()
                 .map(DocumentProviderSupplier::getDocumentMatrix)
                 .toList();

@@ -37,7 +37,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,32 +71,32 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
             }
         }
 
-        if (employeeBrazilianRequestDto.getBranch() != null) {
+        if (employeeBrazilianRequestDto.getBranch() != null && !employeeBrazilianRequestDto.getBranch().isEmpty()) {
             Optional<Branch> branchOptional = branchRepository.findById(employeeBrazilianRequestDto.getBranch());
             branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
 
-            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(employeeBrazilianRequestDto.getBranch(), "Documento pessoa");
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeBrazilianRequestDto.getBranch(), "Documento pessoa", true);
 
             documentMatrixList = documentBranches.stream()
                     .map(DocumentBranch::getDocumentMatrix)
                     .toList();
 
-        } else if (employeeBrazilianRequestDto.getSupplier() != null) {
+        } else if (employeeBrazilianRequestDto.getSupplier() != null && !employeeBrazilianRequestDto.getSupplier().isEmpty()) {
             Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeBrazilianRequestDto.getSupplier());
             providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeBrazilianRequestDto.getSupplier(), "Documento pessoa");
+            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeBrazilianRequestDto.getSupplier(), "Documento pessoa", true);
 
             documentMatrixList = documentProviderSuppliers.stream()
                     .map(DocumentProviderSupplier::getDocumentMatrix)
                     .toList();
 
-        } else if(employeeBrazilianRequestDto.getSubcontract() != null) {
+        } else if(employeeBrazilianRequestDto.getSubcontract() != null && !employeeBrazilianRequestDto.getSubcontract().isEmpty()) {
             Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeBrazilianRequestDto.getSubcontract());
 
             providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
-            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(employeeBrazilianRequestDto.getSubcontract(), "Documento pessoa");
+            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeBrazilianRequestDto.getSubcontract(), "Documento pessoa", true);
 
             documentMatrixList = documentProviderSubcontractors.stream()
                     .map(DocumentProviderSubcontractor::getDocumentMatrix)
@@ -126,11 +125,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .platformAccess(employeeBrazilianRequestDto.getPlatformAccess())
                 .telephone(employeeBrazilianRequestDto.getTelephone())
                 .directory(employeeBrazilianRequestDto.getDirectory())
-                .email(employeeBrazilianRequestDto.getEmail())
                 .levelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation())
                 .cbo(employeeBrazilianRequestDto.getCbo())
                 .situation(employeeBrazilianRequestDto.getSituation())
-                .rg(employeeBrazilianRequestDto.getRg())
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
                 .branch(branch)
                 .supplier(providerSupplier)
@@ -174,11 +171,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .platformAccess(savedEmployeeBrazilian.getPlatformAccess())
                 .telephone(savedEmployeeBrazilian.getTelephone())
                 .directory(savedEmployeeBrazilian.getDirectory())
-                .email(savedEmployeeBrazilian.getEmail())
                 .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
                 .cbo(savedEmployeeBrazilian.getCbo())
                 .situation(savedEmployeeBrazilian.getSituation())
-                .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
@@ -230,11 +225,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .platformAccess(employeeBrazilian.getPlatformAccess())
                 .telephone(employeeBrazilian.getTelephone())
                 .directory(employeeBrazilian.getDirectory())
-                .email(employeeBrazilian.getEmail())
                 .levelOfEducation(employeeBrazilian.getLevelOfEducation())
                 .cbo(employeeBrazilian.getCbo())
                 .situation(employeeBrazilian.getSituation())
-                .rg(employeeBrazilian.getRg())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
                 .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
@@ -286,11 +279,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .platformAccess(employeeBrazilian.getPlatformAccess())
                             .telephone(employeeBrazilian.getTelephone())
                             .directory(employeeBrazilian.getDirectory())
-                            .email(employeeBrazilian.getEmail())
                             .levelOfEducation(employeeBrazilian.getLevelOfEducation())
                             .cbo(employeeBrazilian.getCbo())
                             .situation(employeeBrazilian.getSituation())
-                            .rg(employeeBrazilian.getRg())
                             .admissionDate(employeeBrazilian.getAdmissionDate())
                             .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
@@ -344,11 +335,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setPlatformAccess(employeeBrazilianRequestDto.getPlatformAccess() != null ? employeeBrazilianRequestDto.getPlatformAccess() : employeeBrazilian.getPlatformAccess());
         employeeBrazilian.setTelephone(employeeBrazilianRequestDto.getTelephone() != null ? employeeBrazilianRequestDto.getTelephone() : employeeBrazilian.getTelephone());
         employeeBrazilian.setDirectory(employeeBrazilianRequestDto.getDirectory() != null ? employeeBrazilianRequestDto.getDirectory() : employeeBrazilian.getDirectory());
-        employeeBrazilian.setEmail(employeeBrazilianRequestDto.getEmail() != null ? employeeBrazilianRequestDto.getEmail() : employeeBrazilian.getEmail());
         employeeBrazilian.setLevelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation() != null ? employeeBrazilianRequestDto.getLevelOfEducation() : employeeBrazilian.getLevelOfEducation());
         employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCbo() != null ? employeeBrazilianRequestDto.getCbo() : employeeBrazilian.getCbo());
         employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null ? employeeBrazilianRequestDto.getSituation() : employeeBrazilian.getSituation());
-        employeeBrazilian.setRg(employeeBrazilianRequestDto.getRg() != null ? employeeBrazilianRequestDto.getRg() : employeeBrazilian.getRg());
         employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
         employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null ? contracts : employeeBrazilian.getContracts());
 
@@ -377,11 +366,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .platformAccess(savedEmployeeBrazilian.getPlatformAccess())
                 .telephone(savedEmployeeBrazilian.getTelephone())
                 .directory(savedEmployeeBrazilian.getDirectory())
-                .email(savedEmployeeBrazilian.getEmail())
                 .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
                 .cbo(savedEmployeeBrazilian.getCbo())
                 .situation(savedEmployeeBrazilian.getSituation())
-                .rg(savedEmployeeBrazilian.getRg())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)

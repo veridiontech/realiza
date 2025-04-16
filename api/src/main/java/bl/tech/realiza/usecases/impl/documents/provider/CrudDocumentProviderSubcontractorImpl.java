@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
@@ -267,7 +265,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
-        Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idSearch, pageable);
+        Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(idSearch, pageable);
 
         Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
                 documentSubcontractor -> {
@@ -297,7 +295,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     @Override
     public DocumentResponseDto findAllSelectedDocuments(String id) {
         documentSubcontractorRepository.findById(id).orElseThrow(() -> new NotFoundException("Subcontractor not found"));
-        List<DocumentProviderSubcontractor> documentSubcontractor = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
+        List<DocumentProviderSubcontractor> documentSubcontractor = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(id);
         List<DocumentMatrixResponseDto> selectedDocuments = documentSubcontractor.stream()
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
@@ -345,7 +343,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             throw new NotFoundException("Documents not found");
         }
 
-        List<DocumentProviderSubcontractor> existingDocumentSubcontractors = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(id);
+        List<DocumentProviderSubcontractor> existingDocumentSubcontractors = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(id);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentSubcontractors.stream()
                 .map(DocumentProviderSubcontractor::getDocumentMatrix)
@@ -386,7 +384,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
 
-        List<DocumentProviderSubcontractor> existingDocumentBranches = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(idEnterprise);
+        List<DocumentProviderSubcontractor> existingDocumentBranches = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(idEnterprise);
 
         Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
                 .map(DocumentProviderSubcontractor::getDocumentMatrix)

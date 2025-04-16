@@ -134,7 +134,10 @@ export function AddNewBranch() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-realizaBlue">Adicionar Filial</Button>
+        <Button className="bg-realizaBlue hidden md:block">Adicionar Filial</Button>
+      </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="bg-realizaBlue md:hidden">+</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

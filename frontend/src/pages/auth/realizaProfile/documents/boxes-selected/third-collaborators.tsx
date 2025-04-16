@@ -1,0 +1,145 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { BoxNonSelected } from "../new-documents-page/box-non-selected";
+// import { propsDocument } from "@/types/interfaces";
+import { BoxSelected } from "../new-documents-page/box-selected";
+import { useDocument } from "@/context/Document-provider";
+import { useBranch } from "@/context/Branch-provider";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { propsDocument } from "@/types/interfaces";
+
+export function ThirdCollaborators() {
+    const { documents, nonSelected } = useDocument();
+    const [notSelectedDocument, setNotSelectedDocument] = useState([])
+    const [selectedDocument, setSelectedDocument] = useState<any>([])
+    const { selectedBranch } = useBranch();
+
+  const mockDocumentsNonSelected: propsDocument[] = [
+    { idDocument: "1", name: "Documento 1" },
+    { idDocument: "2", name: "Documento 2" },
+    { idDocument: "3", name: "Documento 3" },
+    { idDocument: "4", name: "Documento 4" },
+  ];
+
+  const mockDocumentsSelected: propsDocument[] = [
+    { idDocument: "1", name: "Documento 11231231" },
+    { idDocument: "2", name: "Documento 21231231" },
+    { idDocument: "3", name: "Documento 31231231" },
+    { idDocument: "4", name: "Documento 4231321" },
+  ];
+
+  const getDocument = async () => {
+    const token = localStorage.getItem("tokenClient");
+    try {
+        const resSelected = await axios.get(
+        `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: { documentGroupName: "Treinamentos e certificações", isSelected: true },
+        },
+      );
+      const resNonSelected = await axios.get(
+        `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: { documentGroupName: "Treinamentos e certificações", isSelected: false },
+        },
+      );
+      console.log("teste", resSelected.data);
+      console.log("teste", resNonSelected.data);
+
+      setNotSelectedDocument(resNonSelected.data)
+      setSelectedDocument(resSelected.data)
+    } catch (err) {
+      console.log("erro ao buscar documentos:", err);
+    }
+  };
+
+  useEffect(() => {
+    if(selectedBranch?.idBranch) {
+      getDocument()
+    }
+   
+  }, [selectedBranch?.idBranch])
+
+  return (
+    <div className="flex items-center justify-center gap-10 p-10">
+      <div>
+        <BoxNonSelected documents={mockDocumentsNonSelected} />
+      </div>
+      <div className="flex flex-col gap-5">
+        <div>
+          <AlertDialog>
+            <AlertDialogTrigger className="bg-realizaBlue w-[10vw] rounded-md p-4 text-white">
+              Confirmar Seleção
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
+              </AlertDialogHeader>
+              <div>
+                <ul>
+                  {nonSelected.length > 0 ? (
+                    nonSelected.map((doc) => (
+                      <li key={doc.idDocument}>{doc.name}</li>
+                    ))
+                  ) : (
+                    <p>Nenhum documento selecionado.</p>
+                  )}
+                </ul>
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction>Confirmar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+        <div>
+          <AlertDialog>
+            <AlertDialogTrigger className="w-[10vw] rounded-md bg-red-600 p-3 text-white">
+              Confirmar Remoção
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
+              </AlertDialogHeader>
+              <div>
+                <ul>
+                  {documents.length > 0 ? (
+                    documents.map((doc) => (
+                      <li key={doc.idDocument}>{doc.name}</li>
+                    ))
+                  ) : (
+                    <p>Nenhum documento selecionado.</p>
+                  )}
+                </ul>
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction>Confirmar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+      <div>
+        <BoxSelected documents={mockDocumentsSelected} />
+      </div>
+    </div>
+  );
+}

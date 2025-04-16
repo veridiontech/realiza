@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -136,5 +137,16 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         crudDocumentBranch.removeRequiredDocument(documentId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/document-matrix/{idBranch}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<List<DocumentResponseDto>> getAllFilteredDocumentBranch(
+            @PathVariable String idBranch,
+            @RequestParam String documentGroupName,
+            @RequestParam Boolean isSelected) {
+        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentGroupName,isSelected));
     }
 }

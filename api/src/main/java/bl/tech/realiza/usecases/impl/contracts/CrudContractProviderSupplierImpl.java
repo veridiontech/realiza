@@ -85,13 +85,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         switch (activity.getRisk()) {
             case LOW -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowRiskIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
+                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowRiskIsTrueAndIsActiveIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
             }
             case MEDIUM -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumRiskIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
+                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumRiskIsTrueAndIsActiveIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
             }
             case HIGH -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighRiskIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
+                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighRiskIsTrueAndIsActiveIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
             }
             default -> throw new BadRequestException("Invalid activity");
         }
@@ -353,7 +353,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         List<Branch> branches = new ArrayList<>();
         branches.add(branch);
 
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranch(contractAndSupplierCreateRequestDto.getBranch());
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch());
         List<DocumentMatrix> documentMatrixList = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
                 .toList();
@@ -398,13 +398,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         switch (activity.getRisk()) {
             case LOW -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowRiskIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
+                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowRiskIsTrueAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
             }
             case MEDIUM -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumRiskIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
+                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumRiskIsTrueAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
             }
             case HIGH -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighRiskIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
+                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighRiskIsTrueAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
             }
             default -> throw new BadRequestException("Invalid activity");
         }

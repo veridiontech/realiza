@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convite para Cadastro na Plataforma da Realiza Assessoria</title>
+    <title>Inconsistência no Cadastro de Fornecedor – Plataforma Realiza Assessoria</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -50,25 +50,6 @@
             color: #34495E;
             font-weight: 600;
         }
-        .cta-button {
-            display: inline-block;
-            background: #34495E;
-            color: white!important;
-            padding: 14px 32px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            margin: 25px 0;
-            transition: all 0.3s ease;
-        }
-        .cta-button:hover {
-            background: #2C3E50;
-            box-shadow: 0 4px 12px rgba(52,73,94,0.2);
-        }
-        .features {
-            margin: 25px 0;
-            padding-left: 20px;
-        }
         .footer {
             background: #f5f5f5;
             padding: 25px;
@@ -82,30 +63,23 @@
 <div class="container">
     <div class="email-card">
         <div class="header">
-            <div class="badge">Convite para Cadastro</div>
-            <h1>Conclua seu Cadastro na Plataforma da Realiza Assessoria</h1>
+            <div class="badge">Cadastro Reprovado</div>
+            <h1>Inconsistência no Cadastro de Fornecedor</h1>
         </div>
 
         <div class="content">
-            <p>Prezado(a) responsável pela #NOME_ENTERPRISE#,</p>
+            <p>Prezado(a) #RESPONSIBLE_NAME#,</p>
 
-            <p>Você foi indicado para fazer parte do processo de gestão e monitoramento de terceiros da <span class="highlight">Realiza Assessoria</span>, a serviço de nosso cliente <span class="highlight">#NAME_REQUESTER#</span>.</p>
+            <p>Identificamos que os dados preenchidos para o fornecedor <span class="highlight">#ENTERPRISE_NAME#</span> estão incompletos, o que impossibilitou a finalização do cadastro na plataforma de gestão da Realiza Assessoria.</p>
 
-            <p>Para dar continuidade à parceria, solicitamos que conclua seu cadastro em nossa plataforma, onde serão gerenciados documentos, conformidades e demais exigências legais relacionadas à sua atuação.</p>
+            <p><strong>Motivo da reprovação:</strong></p>
 
-            <p><strong>Detalhes do serviço solicitado:</strong></p>
-            <ul class="features">
-                <li><strong>Nome do serviço:</strong> #NOME_DO_SERVICO#</li>
-                <li><strong>Início:</strong> #DATA_DE_INICIO#</li>
-                <li><strong>Unidade Solicitante:</strong> #UNIDADE_SOLICITANTE#</li>
-                <li><strong>Gestor do contrato:</strong> #NOME_DO_GESTOR#</li>
-                <li><strong>Referência do contrato:</strong> #REFERENCIA_DO_CONTRATO#</li>
-            </ul>
+            <p>#REASON#</p>
 
-            <p><a href="https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=$#TOKEN_PLACEHOLDER#&id=#ID_PLACEHOLDER#&idBranch=#ID_BRANCH#&idSupplier=#ID_SUPPLIER#"
-                  class="cta-button">Iniciar Cadastro</a></p>
+            <p>Solicitamos, por gentileza, a revisão e correção dos dados. Fique à vontade para entrar em contato com nossa equipe de suporte em caso de dúvidas.</p>
 
-            <p>Caso tenha dúvidas ou precise de suporte, nossa equipe está à disposição para ajudá-lo(a).</p>
+            <p style="font-size: 17px;">Em caso de dúvidas ou dificuldades no processo de correção, nossa equipe de suporte estará à disposição:</p>
+
         </div>
 
         <div class="footer">
