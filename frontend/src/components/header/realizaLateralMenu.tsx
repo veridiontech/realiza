@@ -8,6 +8,9 @@ import {
   PersonStanding,
   LayoutPanelTop,
   Paperclip,
+  UserPlus,
+  UserRound,
+  LogOut,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { SheetContent } from "../ui/sheet";
@@ -15,7 +18,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 
 export function LateralMenu({ onClose }: { onClose: () => void }) {
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const getIdUser = user?.idUser;
 
   return (
@@ -91,6 +94,28 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
             <span className="ml-2 text-sm font-medium text-zinc-900">Gestão de documentos</span>
           </Button>
       </Link>
+
+      <div className="md:hidden">
+      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Gestão de perfil</h3>
+      <Link to={`/profile-user/${user?.idUser}`}>
+      <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
+          <UserRound  />
+            <span className="ml-2 text-sm font-medium text-zinc-900">Perfil</span>
+          </Button>
+      </Link>
+
+      <Link to={`/sistema/create-new-user/${user?.idUser}`}>
+      <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
+          <UserPlus />
+            <span className="ml-2 text-sm font-medium text-zinc-900">Criar novo usuário</span>
+          </Button>
+      </Link>
+
+      <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2" onClick={logout}>
+          <LogOut/>
+          <span className="ml-2 text-sm font-medium text-zinc-900">Sair</span>
+      </Button>
+      </div>
     </SheetContent>
   );
 }
