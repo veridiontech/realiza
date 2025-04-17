@@ -96,12 +96,12 @@ export function ProfilePic() {
       <DialogTrigger>
         <div>
           {base64Image ? (
-            <div>
-              <img
-                src={base64Image}
-                className="w-[10vw] rounded-full h-[20vh] object-cover hover:bg-gray-600"
-                alt="Foto de perfil"
-              />
+            <div className="w-24 aspect-square rounded-full overflow-hidden">
+  <img
+    src={base64Image}
+    alt="Foto de perfil"
+    className="w-full h-full object-cover"
+  />
               <Pencil className="relative bottom-[5.5vw] left-[4.5vw] text-gray-300 hover:text-gray-500" />
             </div>
           ) : user ? (

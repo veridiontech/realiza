@@ -316,7 +316,7 @@ export function ModalTesteSendSupplier() {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="bg-realizaBlue">Cadastrar novo prestador</Button>
+          <Button className="bg-realizaBlue hidden md:block">Cadastrar novo prestador</Button>
         </DialogTrigger>
         <DialogContent
           style={{
@@ -326,7 +326,7 @@ export function ModalTesteSendSupplier() {
         >
           <DialogHeader>
             <DialogTitle className="text-white">
-              Cadastrar novo Subcontratado
+              Cadastrar Subcontratado
             </DialogTitle>
           </DialogHeader>
           <div>

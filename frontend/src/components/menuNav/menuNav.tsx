@@ -34,7 +34,7 @@ export function MenuNav() {
                 : "text-black"
             }`
           }
-        >
+        > 
           Dados Pessoais
         </NavLink>
       </nav>
