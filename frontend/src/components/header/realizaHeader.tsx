@@ -142,7 +142,7 @@ export function Header() {
               </Sheet>
             </div>
   
-            <Link to={`/sistema/select-client/${getIdUser}`}>
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
               <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
             </Link>
           </div>
@@ -383,7 +383,7 @@ export function Header() {
             </Sheet>
           </div>
           <div className="hidden md:block">
-            <Link to={`/sistema/select-client/${getIdUser}`}>
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
             <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
           </Link>
           </div>
@@ -492,7 +492,7 @@ export function Header() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="ml-12 hidden md:flex flex items-center gap-8">
+          <div className="ml-12 hidden md:flex items-center gap-8">
             {/* <ToggleTheme /> */}
 
             <DropdownMenu>

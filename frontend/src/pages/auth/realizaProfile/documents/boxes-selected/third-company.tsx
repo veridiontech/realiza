@@ -17,6 +17,7 @@ import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
 import { propsDocument } from "@/types/interfaces";
+import { boolean } from "zod";
 
 export function ThirdCompany() {
   const { documents, nonSelected } = useDocument();
@@ -68,6 +69,39 @@ export function ThirdCompany() {
       console.log("erro ao buscar documentos:", err);
     }
   };
+  const filterIdDocuments = nonSelected
+  .map((document) => document.idDocument)
+  // .map((document) => document.idDocument);
+
+  const filterIdDocumentsSelected = documents
+  .map((document) => document.idDocument)
+  // .map((document) => document.idDocument);
+
+console.log("ids dos documentos", filterIdDocuments);
+console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
+  
+
+// Envio de documentos nao selecionados
+  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+    // const 
+    const token = localStorage.getItem("tokenClient")
+    try {
+      console.log("selecionando documentos não selecionados:", filterIdDocuments);
+      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          isSelected: {isSelected},
+        }
+      })
+
+      
+    }catch(err) {
+      console.log("erro ao enviar documento", err );
+      
+    }
+  }
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -106,7 +140,7 @@ export function ThirdCompany() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -136,7 +170,7 @@ export function ThirdCompany() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
