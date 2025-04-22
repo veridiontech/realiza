@@ -142,7 +142,7 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
         return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentGroupName,isSelected));
     }
 
-    @PatchMapping("/document-matrix/update")
+    @PostMapping("/document-matrix/update")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override

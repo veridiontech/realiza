@@ -1,6 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
-import bl.tech.realiza.domains.contract.ActivityRepo;
+import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ActivityRepoRepository;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRepoRequestDto;
@@ -11,9 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
