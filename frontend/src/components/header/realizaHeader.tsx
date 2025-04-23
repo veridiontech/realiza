@@ -142,7 +142,7 @@ export function Header() {
               </Sheet>
             </div>
   
-            <Link to={`/sistema/select-client/${getIdUser}`}>
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
               <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
             </Link>
           </div>
@@ -386,7 +386,7 @@ export function Header() {
             </Sheet>
           </div>
           <div className="hidden md:block">
-            <Link to={`/sistema/select-client/${getIdUser}`}>
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
             <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
           </Link>
           </div>
