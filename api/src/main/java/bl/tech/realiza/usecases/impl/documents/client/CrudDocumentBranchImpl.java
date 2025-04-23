@@ -399,51 +399,24 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(document -> DocumentResponseDto.builder()
                         .idDocumentation(document.getIdDocumentation())
                         .title(document.getTitle())
-                        .status(document.getStatus())
-                        .documentation(document.getDocumentation())
                         .build()).toList();
     }
 
     @Override
-    public String updateRequiredDocumentsByList(String id, List<String> documentCollection) {
+    public String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection) {
         if (documentCollection == null || documentCollection.isEmpty()) {
             throw new BadRequestException("Invalid documents");
         }
 
-        Branch branch = branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+        List<DocumentBranch> documentList = documentBranchRepository.findAllById(documentCollection);
 
-        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAllById(documentCollection);
-        if (documentMatrixList.isEmpty()) {
+        if (documentList.isEmpty()) {
             throw new NotFoundException("Documents not found");
         }
 
-        List<DocumentBranch> existingDocumentBranches = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(id);
+        documentList.forEach(documentBranch -> documentBranch.setIsActive(isSelected));
 
-        Set<DocumentMatrix> existingDocuments = existingDocumentBranches.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .collect(Collectors.toSet());
-
-        List<DocumentBranch> newDocumentBranches = documentMatrixList.stream()
-                .filter(doc -> !existingDocuments.contains(doc))
-                .map(doc -> DocumentBranch.builder()
-                        .title(doc.getName())
-                        .status(Document.Status.PENDENTE)
-                        .branch(branch)
-                        .documentMatrix(doc)
-                        .build())
-                .collect(Collectors.toList());
-
-        List<DocumentBranch> documentsToRemove = existingDocumentBranches.stream()
-                .filter(db -> !documentMatrixList.contains(db.getDocumentMatrix()))
-                .collect(Collectors.toList());
-
-        if (!documentsToRemove.isEmpty()) {
-            documentBranchRepository.deleteAll(documentsToRemove);
-        }
-
-        if (!newDocumentBranches.isEmpty()) {
-            documentBranchRepository.saveAll(newDocumentBranches);
-        }
+        documentBranchRepository.saveAll(documentList);
 
         return "Documents updated successfully";
     }

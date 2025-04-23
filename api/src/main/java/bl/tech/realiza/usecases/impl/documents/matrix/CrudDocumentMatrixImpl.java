@@ -34,8 +34,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
         DocumentMatrix newDocumentMatrix = DocumentMatrix.builder()
                 .name(documentMatrixRequestDto.getName())
-                .risk(documentMatrixRequestDto.getRisk())
-                .expiration(documentMatrixRequestDto.getExpiration())
                 .type(documentMatrixRequestDto.getType())
                 .doesBlock(documentMatrixRequestDto.getDoesBlock())
                 .subGroup(documentMatrixSubgroup)
@@ -46,8 +44,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .name(savedDocumentMatrix.getName())
                 .idDocumentMatrix(savedDocumentMatrix.getIdDocument())
-                .risk(savedDocumentMatrix.getRisk())
-                .expiration(savedDocumentMatrix.getExpiration())
                 .type(savedDocumentMatrix.getType())
                 .doesBlock(savedDocumentMatrix.getDoesBlock())
                 .idDocumentSubgroup(savedDocumentMatrix.getSubGroup().getIdDocumentSubgroup())
@@ -65,8 +61,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
                 .name(documentMatrix.getName())
-                .risk(documentMatrix.getRisk())
-                .expiration(documentMatrix.getExpiration())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
                 .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
@@ -83,8 +77,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
                         .name(documentMatrix.getName())
-                        .risk(documentMatrix.getRisk())
-                        .expiration(documentMatrix.getExpiration())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
                         .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
@@ -105,8 +97,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
         documentMatrix.setName(documentMatrixRequestDto.getName() != null ? documentMatrixRequestDto.getName() : documentMatrix.getName());
-        documentMatrix.setRisk(documentMatrixRequestDto.getRisk() != null ? documentMatrixRequestDto.getRisk() : documentMatrix.getRisk());
-        documentMatrix.setExpiration(documentMatrixRequestDto.getExpiration() != null ? documentMatrixRequestDto.getExpiration() : documentMatrix.getExpiration());
         documentMatrix.setType(documentMatrixRequestDto.getType() != null ? documentMatrixRequestDto.getType() : documentMatrix.getType());
         documentMatrix.setDoesBlock(documentMatrixRequestDto.getDoesBlock() != null ? documentMatrixRequestDto.getDoesBlock() : documentMatrix.getDoesBlock());
         documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null ? documentMatrixSubgroup : documentMatrix.getSubGroup());
@@ -114,8 +104,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
                 .name(documentMatrix.getName())
-                .risk(documentMatrix.getRisk())
-                .expiration(documentMatrix.getExpiration())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
                 .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
@@ -137,8 +125,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
                         .name(documentMatrix.getName())
-                        .risk(documentMatrix.getRisk())
-                        .expiration(documentMatrix.getExpiration())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
                         .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
@@ -156,8 +142,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
                         .name(documentMatrix.getName())
-                        .risk(documentMatrix.getRisk())
-                        .expiration(documentMatrix.getExpiration())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
                         .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())

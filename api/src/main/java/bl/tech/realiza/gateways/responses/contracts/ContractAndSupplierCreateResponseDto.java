@@ -1,6 +1,6 @@
 package bl.tech.realiza.gateways.responses.contracts;
 
-import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;

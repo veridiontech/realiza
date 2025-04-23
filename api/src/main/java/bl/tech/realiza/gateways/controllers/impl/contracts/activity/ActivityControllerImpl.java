@@ -1,8 +1,7 @@
-package bl.tech.realiza.gateways.controllers.impl.contracts;
+package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityControlller;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;

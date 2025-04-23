@@ -1,16 +1,12 @@
 package bl.tech.realiza.domains.clients;
 
-import bl.tech.realiza.domains.contract.Activity;
-import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.ultragaz.Center;
-import bl.tech.realiza.domains.ultragaz.Market;
 import bl.tech.realiza.domains.user.UserClient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

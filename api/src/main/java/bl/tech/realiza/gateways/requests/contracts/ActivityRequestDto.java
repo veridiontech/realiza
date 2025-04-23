@@ -1,7 +1,6 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
-import bl.tech.realiza.domains.contract.Activity;
-import jakarta.validation.constraints.NotEmpty;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import lombok.Data;
 
 @Data

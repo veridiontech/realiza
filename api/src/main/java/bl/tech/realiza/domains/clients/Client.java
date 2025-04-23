@@ -1,10 +1,6 @@
 package bl.tech.realiza.domains.clients;
 
-import bl.tech.realiza.domains.contract.Activity;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.ultragaz.Board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
