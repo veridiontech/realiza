@@ -408,15 +408,15 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             throw new BadRequestException("Invalid documents");
         }
 
-        List<DocumentMatrix> documentList = documentMatrixRepository.findAllById(documentCollection);
+        List<DocumentBranch> documentList = documentBranchRepository.findAllById(documentCollection);
 
         if (documentList.isEmpty()) {
             throw new NotFoundException("Documents not found");
         }
 
-        documentList.forEach(documentMatrix -> documentMatrix.setIsActive(isSelected));
+        documentList.forEach(documentBranch -> documentBranch.setIsActive(isSelected));
 
-        documentMatrixRepository.saveAll(documentList);
+        documentBranchRepository.saveAll(documentList);
 
         return "Documents updated successfully";
     }
