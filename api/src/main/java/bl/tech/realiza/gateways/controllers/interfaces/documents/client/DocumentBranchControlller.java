@@ -19,8 +19,8 @@ public interface DocumentBranchControlller {
     ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentBranch(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranchByBranch(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);
-    ResponseEntity<String> updateBranchDocuments(String id, List<String> documentList);
     ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
     ResponseEntity<Void> removeRequiredDocument(String documentId);
     ResponseEntity<List<DocumentResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentGroupName, Boolean isSelected);
+    ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, List<String> documentList);
 }
