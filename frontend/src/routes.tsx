@@ -89,6 +89,7 @@ export const router = createBrowserRouter([
       { path: "risk-matriz/:id", element: <RiskMatriz /> },
       { path: "controlPanel/:id", element: <ControlPanel /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
+      {path: "dashboard-details/:id", element: <MonittoringBis />}
     ],
   },
 

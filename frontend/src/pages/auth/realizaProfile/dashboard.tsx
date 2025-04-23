@@ -168,7 +168,7 @@ export function Dashboard() {
               <GraphicHomeRight />
             </div>
             <div className="mt-5 w-full text-right">
-              <NavLink to="/BIs">
+              <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
                 <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
                   Ver mais <ChevronRight />
                 </Button>
@@ -553,11 +553,11 @@ export function Dashboard() {
             <GraphicHomeRight />
           </div>
           <div className="mt-5 w-full text-right">
-            <NavLink to="/BIs">
+            <Link to={`/sistema/dashboard-details/${user?.idUser}`}>
               <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
                 Ver mais <ChevronRight />
               </Button>
-            </NavLink>
+            </Link>
           </div>
 
           <div className="pt-20">
