@@ -14,6 +14,8 @@ import { useUser } from "@/context/user-provider";
 // import { z } from "zod";
 // import { useForm } from "react-hook-form";
 // import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog, DialogTrigger} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // const profileLogoClientFormSchema = z.object({
 //   file: z
@@ -175,6 +177,11 @@ export function ProfileEnterpriseReprise() {
       <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
         <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
           <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" />
+          <Dialog>
+              <DialogTrigger asChild>
+              <Button className="md:hidden bg-white">Editar perfil empresarial</Button>
+              </DialogTrigger>
+            </Dialog>
           <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
               <div className="relative bottom-10 left-1 flex items-center gap-4">
@@ -185,7 +192,7 @@ export function ProfileEnterpriseReprise() {
                       </div>
                     </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
-                  <div className="text-lg font-medium text-sky-800">
+                  <div className="text-lg font-medium text-sky-800 mt-5">
                     {client ? (
                       <h2>{client.tradeName}</h2>
                     ) : (

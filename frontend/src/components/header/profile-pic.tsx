@@ -23,7 +23,7 @@ const profilePicFormSchema = z.object({
   file: z
     .instanceof(File, { message: "O arquivo deve ser uma imagem válida." })
     .refine(
-      (file) => file.size <= MAX_FILE_SIZE_MB * 1024 * 1024, 
+      (file) => file.size <= MAX_FILE_SIZE_MB * 1024 * 1024,
       `O arquivo deve ter no máximo ${MAX_FILE_SIZE_MB}MB.`
     )
     .refine(
@@ -87,7 +87,7 @@ export function ProfilePic() {
   const base64Image = getProfilePic
     ? `data:image/${getProfilePic.charAt(0) === '/' ? 'png' : 'jpeg'};base64,${getProfilePic}`
     : null;
-  
+
   const getNameUser = user?.firstName?.[0] || "";
   const getSurnameUser = user?.surname?.[0] || "";
 
@@ -97,11 +97,11 @@ export function ProfilePic() {
         <div>
           {base64Image ? (
             <div className="w-24 aspect-square rounded-full overflow-hidden">
-  <img
-    src={base64Image}
-    alt="Foto de perfil"
-    className="w-full h-full object-cover"
-  />
+              <img
+                src={base64Image}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+              />
               <Pencil className="relative bottom-[5.5vw] left-[4.5vw] text-gray-300 hover:text-gray-500" />
             </div>
           ) : user ? (

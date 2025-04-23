@@ -115,7 +115,10 @@ export function EditModalEnterprise() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-realizaBlue"><Pencil /></Button>
+        <Button className="hidden md:block bg-realizaBlue"><Pencil /></Button>
+      </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="md:hidden bg-realizaBlue">Editar perfil empresarial</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
