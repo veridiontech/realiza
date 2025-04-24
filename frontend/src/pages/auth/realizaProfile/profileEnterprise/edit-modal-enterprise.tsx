@@ -19,6 +19,7 @@ import { z } from "zod";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useClient } from "@/context/Client-Provider";
 import { toast } from "sonner";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 interface adressProps {
   city: string;
@@ -117,109 +118,112 @@ export function EditModalEnterprise() {
       <DialogTrigger asChild>
         <Button className="hidden md:block bg-realizaBlue"><Pencil /></Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogTrigger asChild>
+        <Button className="md:hidden bg-realizaBlue">Editar perfil empresarial</Button>
+      </DialogTrigger>
+      <DialogContent
+      style={{ backgroundImage: `url(${bgModalRealiza})` }}>
         <DialogHeader>
-          <DialogTitle>Editar empresa</DialogTitle>
+          <DialogTitle className="text-white">Editar empresa</DialogTitle>
         </DialogHeader>
-        <div className="">
+        <div>
           <ScrollArea className="h-[60vh] pr-5">
             <form
-              action=""
               onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-4"
             >
-              <div>
+              <div className="text-white">
                 <Label>CNPJ</Label>
-                {/* Campo fixo de CNPJ */}
-                <div>{client?.cnpj}</div> 
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-auto">
-                  <Label>Nome da empresa</Label>
-                  <Input className="w-full" {...register("corporateName")} />
-                </div>
-                <div className="w-auto">
-                  <Label>Nome fantasia</Label>
-                  <Input className="w-auto" {...register("tradeName")} />
-                </div>
+                <div>{client?.cnpj}</div>
               </div>
               <div>
-                <Label>Email corporativo</Label>
-                <Input {...register("email")} />
+                <Label className="text-white">Nome da empresa</Label>
+                <Input className="w-full" {...register("corporateName")} />
               </div>
               <div>
-                <Label>Telefone</Label>
-                <Input {...register("phone")} />
+                <Label className="text-white">Nome fantasia</Label>
+                <Input className="w-full" {...register("tradeName")} />
               </div>
-              <div className="flex items-end gap-3">
-                <div>
-                  <Label>CEP</Label>
+              <div>
+                <Label className="text-white">Email corporativo</Label>
+                <Input className="w-full" {...register("email")} />
+              </div>
+              <div>
+                <Label className="text-white">Telefone</Label>
+                <Input className="w-full" {...register("phone")} />
+              </div>
+              <div>
+                <Label className="text-white">CEP</Label>
+                <div className="flex gap-2 items-end">
                   <Input
-                    className="w-[21vw]"
+                    className="w-2/3 sm:w-[200px]"
                     onChange={(e) => setCep(e.target.value)}
                   />
+                  <Button
+                    className="bg-realizaBlue px-4"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      findCep();
+                    }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Puff
+                        visible={true}
+                        height="20"
+                        width="20"
+                        color="white"
+                        ariaLabel="puff-loading"
+                      />
+                    ) : (
+                      <Search size={16} />
+                    )}
+                  </Button>
                 </div>
-                <Button
-                  className="bg-realizaBlue"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    findCep();
-                  }}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Puff
-                      visible={true}
-                      height="80"
-                      width="80"
-                      color="white"
-                      ariaLabel="puff-loading"
-                    />
-                  ) : (
-                    <Search />
-                  )}
-                </Button>
               </div>
+
               <div>
-                <Label>Estado</Label>
+                <Label className="text-white">Estado</Label>
                 <Input
+                  className="w-full"
                   {...register("state")}
                   readOnly
                   placeholder="Preencha o CEP"
                 />
               </div>
               <div>
-                <Label>Cidade</Label>
+                <Label className="text-white">Cidade</Label>
                 <Input
+                  className="w-full"
                   {...register("city")}
                   readOnly
                   placeholder="Preencha o CEP"
                 />
               </div>
-              <div className="flex items-center gap-3">
-                <div>
-                  <Label>Endereço</Label>
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full md:w-[80%]">
+                  <Label className="text-white">Endereço</Label>
                   <Input
+                    className="w-full"
                     {...register("adress")}
                     readOnly
                     placeholder="Preencha o CEP"
-                    className="w-[20.6vw]"
                   />
                 </div>
-                <div>
-                  <Label>Número</Label>
-                  <Input className="w-[3vw]" {...register("number")} />
+                <div className="w-full md:w-[20%]">
+                  <Label className="text-white">Número</Label>
+                  <Input className="w-full" {...register("number")} />
                 </div>
               </div>
               <div>
-                <Label>Responsável pela unidade</Label>
-                <Input />
+                <Label className="text-white">Responsável pela unidade</Label>
+                <Input className="w-full" />
               </div>
-              <Button className="bg-realizaBlue">Confirmar edição</Button>
+              <Button className="bg-realizaBlue w-full md:w-auto">Confirmar edição</Button>
             </form>
           </ScrollArea>
         </div>
       </DialogContent>
     </Dialog>
   );
-}
+}  

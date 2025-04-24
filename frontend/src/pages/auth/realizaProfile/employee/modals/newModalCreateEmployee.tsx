@@ -142,16 +142,17 @@ export function NewModalCreateEmployee() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-realizaBlue">Cadastrar novo colaborador</Button>
+        <Button className="hidden md:block bg-realizaBlue">Cadastrar novo colaborador</Button>
+      </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="md:hidden bg-realizaBlue">+</Button>
       </DialogTrigger>
       <DialogContent
         style={{ backgroundImage: `url(${bgModalRealiza})` }}
-        className="max-w-[45vw]"
+        className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
       >
         <DialogHeader>
-          <DialogTitle className="text-white">
-            Cadastrar colaborador
-          </DialogTitle>
+          <DialogTitle className="text-white">Cadastrar colaborador</DialogTitle>
           <ScrollArea className="h-[75vh]">
             <div>
               <form
@@ -177,7 +178,7 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Estado civil</Label>
                   <select
                     {...register("maritalStatus")}
-                    className="flex flex-col rounded-md border p-2"
+                    className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione</option>
                     <option value="Masculino">Casado</option>
@@ -188,7 +189,7 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Tipo de contrato</Label>
                   <select
                     {...register("contractType")}
-                    className="flex flex-col rounded-md border p-2"
+                    className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione um tipo de contrato</option>
                     <option value="Autônomo">Autônomo</option>
@@ -216,17 +217,11 @@ export function NewModalCreateEmployee() {
                     <option value="Temporário">Temporário</option>
                   </select>
                 </div>
-
-                {/*                 
-                <div>
-                  <Label className="text-white">Email</Label>
-                  <Input type="text" {...register("email")} />
-                </div> */}
+  
                 <div>
                   <Label className="text-white">CPF:</Label>
                   <Input
                     type="text"
-                    // value={getValues("cpf")
                     {...register("cpf")}
                     onChange={(e) => {
                       const formattedCPF = formatCPF(e.target.value);
@@ -237,21 +232,6 @@ export function NewModalCreateEmployee() {
                   />
                   {errors.cpf && <span>{errors.cpf.message}</span>}
                 </div>
-                {/* <div>
-                  <Label className="text-white">RG:</Label>
-                  <Input
-                    type="text"
-                    // value={getValues("rg")}
-                    {...register("rg")}
-                    onChange={(e) => {
-                      const formattedRG = formatRG(e.target.value);
-                      setValue("rg", formattedRG);
-                    }}
-                    placeholder="00.000.000-0"
-                    maxLength={12}
-                  />
-                  {errors.rg && <span>{errors.rg.message}</span>}
-                </div> */}
                 <div>
                   <Label className="text-white">Data de admissão</Label>
                   <Input type="date" {...register("admissionDate")} />
@@ -260,7 +240,6 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Salário:</Label>
                   <Input
                     type="text"
-                    // value={getValues("salary")}
                     {...register("salary")}
                     onChange={(e) => {
                       const formattedSalary = formatSalary(e.target.value);
@@ -274,29 +253,27 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Sexo</Label>
                   <select
                     {...register("gender")}
-                    className="flex flex-col rounded-md border p-2"
+                    className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione</option>
                     <option value="Masculino">Masculino</option>
                     <option value="Feminino">Feminino</option>
                   </select>
                   {errors.gender && (
-                    <span className="text-red-600">
-                      {errors.gender.message}
-                    </span>
+                    <span className="text-red-600">{errors.gender.message}</span>
                   )}
                 </div>
-
-                <div className="flex gap-1">
+  
+                <div className="flex flex-col gap-1">
                   <div>
                     <Label className="text-white">CEP</Label>
-                    <div className="flex gap-2">
+                    <div className="flex w-full gap-2">
                       <Input
                         {...register("cep")}
                         onChange={(e) => setCep(e.target.value)}
                       />
                       <div
-                        className="bg-realizaBlue cursor-pointer rounded-md p-2 text-white hover:bg-gray-600"
+                        className="bg-realizaBlue cursor-pointer rounded-md p-2 text-white hover:bg-gray-600 flex items-center justify-center"
                         onClick={handleCep}
                       >
                         <Search />
@@ -313,12 +290,12 @@ export function NewModalCreateEmployee() {
                   <Input {...register("city")} />
                 </div>
                 <div>
-                  <Label className="text-white">Adress</Label>
+                  <Label className="text-white">Endereco</Label>
                   <Input {...register("address")} />
                 </div>
                 <div>
-                  <Label>Número</Label>
-                  <Input {...register("number")}/>
+                  <Label className="text-white">Número</Label>
+                  <Input {...register("number")} />
                 </div>
                 <div>
                   <Label className="text-white">Telefone</Label>
@@ -333,7 +310,7 @@ export function NewModalCreateEmployee() {
                   <Input {...register("position")} />
                 </div>
                 <div>
-                  <Label className="text-white">cbo</Label>
+                  <Label className="text-white">CBO</Label>
                   <Input {...register("cbo")} />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -367,38 +344,24 @@ export function NewModalCreateEmployee() {
                   <Label className="text-white">Situação</Label>
                   <select
                     {...register("situation")}
-                    className="flex flex-col rounded-md border p-2"
+                    className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione uma situação</option>
                     <option value="ALOCADO">Alocado</option>
                     <option value="DESALOCADO">Desalocado</option>
                     <option value="DEMITIDO">Demitido</option>
                     <option value="AFASTADO">Afastado</option>
-                    <option value="LICENCA_MATERNIDADE">
-                      Licença Maternidade
-                    </option>
+                    <option value="LICENCA_MATERNIDADE">Licença Maternidade</option>
                     <option value="LICENCA_MEDICA">Licença Médica</option>
                     <option value="LICENCA_MILITAR">Licença Militar</option>
                     <option value="FERIAS">Férias</option>
-                    <option value="ALISTAMENTO_MILITAR">
-                      Alistamento Militar
-                    </option>
+                    <option value="ALISTAMENTO_MILITAR">Alistamento Militar</option>
                     <option value="APOSENTADORIA_POR_INVALIDEZ">
                       Aposentadoria por Invalidez
                     </option>
                   </select>
                 </div>
-                {/* <div>
-                  <Label className="text-white">Acesso a plataforma</Label>
-                  <select
-                    {...register("platformAccess")}
-                    className="flex flex-col rounded-md border p-2"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="Sim">Sim</option>
-                    <option value="Não">Não</option>
-                  </select>
-                </div> */}
+  
                 <Button
                   type="submit"
                   className="bg-realizaBlue"
@@ -423,4 +386,4 @@ export function NewModalCreateEmployee() {
       </DialogContent>
     </Dialog>
   );
-}
+}  
