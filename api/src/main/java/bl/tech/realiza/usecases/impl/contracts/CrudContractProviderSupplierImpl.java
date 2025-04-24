@@ -1,7 +1,7 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.documents.Document;

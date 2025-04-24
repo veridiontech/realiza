@@ -1,9 +1,6 @@
 package bl.tech.realiza.domains.documents.matrix;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentClient;
-import bl.tech.realiza.domains.employees.Employee;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,14 +23,18 @@ public class DocumentMatrix {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idDocument;
     private String name;
-    private String risk;
-    private String expiration;
+    @Builder.Default
+    private Integer expirationDateAmount = 1;
+    @Builder.Default
+    private Unit expirationDateUnit = Unit.MONTHS;
     private String type;
     private String doesBlock;
     @Builder.Default
-    private Boolean isActive = true;
-    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    public enum Unit {
+        DAYS, WEEKS, MONTHS, YEARS
+    }
 
     // -------------------------------
     // Relacionamentos INERENTES

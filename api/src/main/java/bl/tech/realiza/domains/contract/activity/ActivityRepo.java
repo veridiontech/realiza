@@ -1,4 +1,4 @@
-package bl.tech.realiza.domains.contract;
+package bl.tech.realiza.domains.contract.activity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

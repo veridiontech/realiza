@@ -1,6 +1,7 @@
-package bl.tech.realiza.domains.contract;
+package bl.tech.realiza.domains.contract.activity;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
