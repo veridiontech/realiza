@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ActivityDocumentRepository extends JpaRepository<ActivityDocuments, String> {
     List<ActivityDocuments> findAllByActivity_IdActivity(String idActivity);
+    ActivityDocuments findByActivity_IdActivityAndDocumentBranch_IdDocumentation(String idActivity, String idDocumentBranch);
 }

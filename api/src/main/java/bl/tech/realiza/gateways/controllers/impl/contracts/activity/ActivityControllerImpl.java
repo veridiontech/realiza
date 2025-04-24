@@ -80,6 +80,14 @@ public class ActivityControllerImpl implements ActivityControlller {
         return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch));
     }
 
+    @PostMapping("/remove-document-from-activity/{idActivity}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> removeDocumentsFromActivity(@PathVariable String idActivity, @RequestParam String idDocumentBranch) {
+        ;
+        return ResponseEntity.ok(crudActivity.removeDocumentFromActivity(idActivity, idDocumentBranch));
+    }
+
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override

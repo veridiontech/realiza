@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"idActivity", "idDocumentation"}))
 public class ActivityDocuments {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

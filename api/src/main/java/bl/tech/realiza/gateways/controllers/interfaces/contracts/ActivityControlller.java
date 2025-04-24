@@ -18,6 +18,7 @@ public interface ActivityControlller {
     ResponseEntity<List<ActivityResponseDto>> getAllActivitiesByBranch(String idBranch);
     ResponseEntity<List<ActivityDocumentResponseDto>> getAllDocumentsByActivity(String idActivity);
     ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(String idActivity, String idDocumentBranch);
+    ResponseEntity<String> removeDocumentsFromActivity(String idActivity, String idDocumentBranch);
     ResponseEntity<Optional<ActivityResponseDto>> updateActivity(String id, ActivityRequestDto activityRequestDto);
     ResponseEntity<Void> deleteActivity(String id);
 }

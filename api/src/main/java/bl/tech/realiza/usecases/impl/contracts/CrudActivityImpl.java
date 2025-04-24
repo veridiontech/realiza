@@ -132,6 +132,15 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
+    public String removeDocumentFromActivity(String idActivity, String idDocumentBranch) {
+        ActivityDocuments savedActivityDocuments = activityDocumentRepository.findByActivity_IdActivityAndDocumentBranch_IdDocumentation(idActivity, idDocumentBranch);
+
+        activityDocumentRepository.delete(savedActivityDocuments);
+
+        return "Document removed successfully!";
+    }
+
+    @Override
     public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto) {
         Optional<Activity> activityOptional = activityRepository.findById(id);
 

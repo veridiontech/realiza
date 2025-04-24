@@ -18,6 +18,7 @@ public interface CrudActivity {
     List<ActivityResponseDto> findAllByBranch(String idBranch);
     List<ActivityDocumentResponseDto> findAllDocumentsByActivity(String idActivity);
     ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument);
+    String removeDocumentFromActivity(String idActivity, String idDocumentBranch);
     Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto);
     void delete(String id);
 }
