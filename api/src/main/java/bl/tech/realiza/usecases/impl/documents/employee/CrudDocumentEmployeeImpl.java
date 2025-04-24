@@ -218,6 +218,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 fileDocument = FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
+                        .owner(FileDocument.Owner.EMPLOYEE)
+                        .ownerId(documentEmployee.getEmployee().getIdEmployee())
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -239,9 +241,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         if (documentIAValidation.isAutoValidate()) {
             if (documentIAValidation.isValid()) {
-                documentEmployee.setStatus(Document.Status.APROVADO);
+                documentEmployee.setStatus(Document.Status.APROVADO_IA);
             } else {
-                documentEmployee.setStatus(Document.Status.REPROVADO);
+                documentEmployee.setStatus(Document.Status.REPROVADO_IA);
             }
         } else {
             documentEmployee.setStatus(Document.Status.EM_ANALISE);

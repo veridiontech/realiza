@@ -12,6 +12,7 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
@@ -149,15 +150,18 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
 
-        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
 
-        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+        DocumentBranch documentBranch = documentBranchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
                 fileDocument = FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
+                        .title(documentBranch.getTitle())
+                        .owner(FileDocument.Owner.BRANCH)
+                        .ownerId(documentBranch.getBranch().getIdBranch())
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -179,9 +183,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
         if (documentIAValidation.isAutoValidate()) {
             if (documentIAValidation.isValid()) {
-                documentBranch.setStatus(Document.Status.APROVADO);
+                documentBranch.setStatus(Document.Status.APROVADO_IA);
             } else {
-                documentBranch.setStatus(Document.Status.REPROVADO);
+                documentBranch.setStatus(Document.Status.REPROVADO_IA);
             }
         } else {
             documentBranch.setStatus(Document.Status.EM_ANALISE);

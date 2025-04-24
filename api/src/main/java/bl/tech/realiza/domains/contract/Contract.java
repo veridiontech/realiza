@@ -33,6 +33,8 @@ public abstract class Contract {
     private String description;
     private String allocatedLimit;
     @Builder.Default
+    private Boolean finished = false;
+    @Builder.Default
     private ExpenseType expenseType = ExpenseType.NENHUM;
     private Date dateStart;
     private Date endDate;

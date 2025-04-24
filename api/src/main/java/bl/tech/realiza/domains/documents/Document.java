@@ -51,6 +51,8 @@ public abstract class Document {
         EM_ANALISE,
         REPROVADO,
         APROVADO,
+        REPROVADO_IA,
+        APROVADO_IA,
         VENCIDO
     }
 
