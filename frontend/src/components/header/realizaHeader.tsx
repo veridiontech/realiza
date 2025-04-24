@@ -142,7 +142,7 @@ export function Header() {
               </Sheet>
             </div>
   
-            <Link to={`/sistema/select-client/${getIdUser}`}>
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
               <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
             </Link>
           </div>
@@ -257,7 +257,7 @@ export function Header() {
             {/* Seleção de cliente */}
           </div>
           {/* Perfil do usuário e demais itens */}
-          <div className="hidden items-center md:flex">
+          <div className="hidden items-center lg:flex md:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="cursor-pointer rounded-full bg-gray-300 p-2">
@@ -311,7 +311,7 @@ export function Header() {
   
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <ProfilePhoto />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
@@ -382,15 +382,16 @@ export function Header() {
               </SheetContent>
             </Sheet>
           </div>
-
-          <Link to={`/sistema/select-client/${getIdUser}`} className="hidden md:flex">
+          <div className="hidden md:block">
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
             <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
           </Link>
+          </div>
         </div>
 
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-4">
-            <span className="text-realizaBlue mr-4 text-xl">
+            <span className="text-realizaBlue mr-4 text-base">
               Cliente Selecionado:
             </span>
             <select
@@ -491,12 +492,12 @@ export function Header() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="ml-12 flex items-center gap-8">
+          <div className="ml-12 hidden md:flex items-center gap-8">
             {/* <ToggleTheme /> */}
 
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <ProfilePhoto />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="dark:bg-primary mr-5">
                 <DropdownMenuLabel>

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { BoxNonSelected } from "./box-non-selected";
 // import { BoxSelected } from "./box-selected";
 // import { propsDocument } from "@/types/interfaces";
@@ -18,9 +18,12 @@ import { ThirdCompany } from "../boxes-selected/third-company";
 import { ThirdCollaborators } from "../boxes-selected/third-collaborators";
 import { TrainingBox } from "../boxes-selected/services";
 import { OrtherRequirements } from "../boxes-selected/orther-requirements";
+import { useDocument } from "@/context/Document-provider";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
+    const { setDocuments, setNonSelected } = useDocument();
+  
   // const { documents, nonSelected } = useDocument();
 
   // const mockDocumentsNonSelected: propsDocument[] = [
@@ -37,6 +40,15 @@ export function NewDocumentBox() {
   //   { idDocument: "4", name: "Documento 4231321" },
   // ];
 
+  const handleClickToggle = () => {
+    setDocuments([])
+    setNonSelected([])
+  }
+
+  // useEffect(() => {
+
+  // }, [])
+
   return (
     <div className="relative">
       <div className="absolute left-0 right-0 top-0 z-10 rounded-lg bg-white p-5 shadow-md">
@@ -48,7 +60,7 @@ export function NewDocumentBox() {
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
             }`}
-            onClick={() => setSelectedTab("thirdCompany")}
+            onClick={() => {setSelectedTab("thirdCompany"), handleClickToggle()}}
           >
             Empresa terceiros
           </Button>
@@ -59,7 +71,7 @@ export function NewDocumentBox() {
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
             }`}
-            onClick={() => setSelectedTab("thirdCollaborators")}
+            onClick={() => {setSelectedTab("thirdCollaborators"), handleClickToggle()}}
           >
             Colaboradores terceiros
           </Button>
@@ -81,7 +93,7 @@ export function NewDocumentBox() {
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
             }`}
-            onClick={() => setSelectedTab("otherRequirements")}
+            onClick={() => {setSelectedTab("otherRequirements"), handleClickToggle()}}
           >
             Outras exigências
           </Button>          <Button
@@ -91,7 +103,7 @@ export function NewDocumentBox() {
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
             }`}
-            onClick={() => setSelectedTab("activities")}
+            onClick={() => {setSelectedTab("otherRequirements"), handleClickToggle()}}
           >
             Atividades
           </Button>

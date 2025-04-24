@@ -134,59 +134,64 @@ export function SignIn() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="flex h-3/6 flex-col justify-center">
-        <h1 className="text-center text-3xl font-bold dark:text-black">
-          Bem Vindo
-        </h1>
-        <span className="text-center dark:text-black">
-          Insira seu email e senha para continuar
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 sm:px-6 lg:px-8">
+      <div className="w-full 2xl:w-[20-vw] xl:w-[30vw] lg:w-[40vw] md:w-[40vw] bg-white rounded-xl p-6 sm:p-8">
+        <h1 className="text-center text-3xl font-bold text-gray-900">Bem Vindo</h1>
+        <span className="text-center block text-sm text-gray-600">
+          Insira seu e-mail e senha para continuar
         </span>
+  
         <Form
-          className="mt-16 flex flex-col dark:text-black"
+          className="mt-10 flex flex-col gap-4"
           onSubmit={handleSubmit(getUser)}
         >
-          <label htmlFor="email">E-mail</label>
-          <input
-            className="focus:ring-realizaBlue mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
-            placeholder="email@gmail.com"
-            type="email"
-            {...register("email")}
-          />
-          {errors.email && (
-            <span className="text-red-500 text-sm">{errors.email.message}</span>
-          )}
-
-          <label htmlFor="password">Senha</label>
-          <div className="relative">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              E-mail
+            </label>
             <input
-              className="focus:ring-realizaBlue mb-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
-              type={showPassword ? "text" : "password"}
-              {...register("password")}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
+              placeholder="email@gmail.com"
+              type="email"
+              {...register("email")}
             />
-            <button
-              type="button"
-              className="absolute right-2 top-2 text-gray-500"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "🔒" : "👁️"}
-            </button>
+            {errors.email && (
+              <span className="text-red-500 text-sm">{errors.email.message}</span>
+            )}
           </div>
-          {errors.password && (
-            <span className="text-red-500 text-sm">{errors.password.message}</span>
-          )}
-
-          <span className="mb-16 text-xs font-light text-gray-600">
+  
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Senha
+            </label>
+            <div className="relative">
+              <input
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
+                type={showPassword ? "text" : "password"}
+                {...register("password")}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "🔒" : "👁️"}
+              </button>
+            </div>
+            {errors.password && (
+              <span className="text-red-500 text-sm">{errors.password.message}</span>
+            )}
+          </div>
+  
+          <div className="text-xs text-gray-600">
             Esqueceu a senha?{" "}
-            <Link
-              to="/forgot-password"
-              className="text-realizaBlue hover:underline"
-            >
-              Recupere-a aqui!
+            <Link to="/forgot-password" className="text-realizaBlue hover:underline">
+              Recupere-se aqui!
             </Link>
-          </span>
+          </div>
+  
           <button
-            className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 font-bold text-white"
+            className="mt-4 w-full rounded bg-realizaBlue px-4 py-2 font-bold text-white hover:bg-blue-700"
             type="submit"
             disabled={loading}
           >
@@ -196,4 +201,4 @@ export function SignIn() {
       </div>
     </div>
   );
-}
+}    

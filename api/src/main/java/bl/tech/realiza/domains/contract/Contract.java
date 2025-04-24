@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contract;
 
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;

@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.controllers.impl.contracts;
+package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityRepoController;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRepoRequestDto;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController

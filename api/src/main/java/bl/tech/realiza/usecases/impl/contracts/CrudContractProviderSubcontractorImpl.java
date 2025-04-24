@@ -1,6 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
-import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;

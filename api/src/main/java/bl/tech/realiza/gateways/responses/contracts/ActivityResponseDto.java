@@ -1,6 +1,6 @@
 package bl.tech.realiza.gateways.responses.contracts;
 
-import bl.tech.realiza.domains.contract.Activity;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
