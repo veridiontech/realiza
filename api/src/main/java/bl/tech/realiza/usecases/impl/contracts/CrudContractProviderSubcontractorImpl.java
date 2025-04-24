@@ -14,7 +14,7 @@ import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
-import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;

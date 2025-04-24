@@ -19,7 +19,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/contract/activity-repo")
-@Tag(name = "Activity Repository")
+@Tag(name = "Activity Repository", description = "Alter the Activity Repository for the whole system")
 public class ActivityRepoControllerImpl implements ActivityRepoController {
     private final CrudActivityRepoImpl crudActivityRepoImpl;
 

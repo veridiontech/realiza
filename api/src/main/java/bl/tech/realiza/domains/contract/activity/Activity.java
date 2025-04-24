@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.contract.activity;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -49,4 +50,6 @@ public class Activity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<Contract> contracts;
 
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityDocuments> documentAssociations;
 }

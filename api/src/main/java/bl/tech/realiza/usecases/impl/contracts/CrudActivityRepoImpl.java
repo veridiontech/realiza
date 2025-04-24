@@ -2,7 +2,7 @@ package bl.tech.realiza.usecases.impl.contracts;
 
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.contracts.ActivityRepoRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRepoRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudActivityRepo;

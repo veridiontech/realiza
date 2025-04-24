@@ -2,12 +2,18 @@ package bl.tech.realiza.usecases.impl.contracts;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ActivityRepoRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ActivityRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudActivity;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +32,8 @@ public class CrudActivityImpl implements CrudActivity {
     private final ActivityRepository activityRepository;
     private final BranchRepository branchRepository;
     private final ActivityRepoRepository activityRepoRepository;
+    private final ActivityDocumentRepository activityDocumentRepository;
+    private final DocumentBranchRepository documentBranchRepository;
 
     @Override
     public ActivityResponseDto save(ActivityRequestDto activityRequestDto) {
@@ -86,6 +94,41 @@ public class CrudActivityImpl implements CrudActivity {
                                 .risk(activity.getRisk())
                                 .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ActivityDocumentResponseDto> findAllDocumentsByActivity(String idActivity) {
+        List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(idActivity);
+        return activityDocumentsList.stream().map(
+                activityDocuments -> ActivityDocumentResponseDto.builder()
+                        .idAssociation(activityDocuments.getId())
+                        .idActivity(activityDocuments.getActivity().getIdActivity())
+                        .idDocument(activityDocuments.getDocumentBranch().getIdDocumentation())
+                        .documentTitle(activityDocuments.getDocumentBranch().getTitle())
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument) {
+        Activity activity = activityRepository.findById(idActivity)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+        DocumentBranch documentBranch = documentBranchRepository.findById(idDocument)
+                .orElseThrow(() -> new NotFoundException("Documento not found"));
+
+        ActivityDocuments activityDocuments = ActivityDocuments.builder()
+                .activity(activity)
+                .documentBranch(documentBranch)
+                .build();
+        ActivityDocuments savedActivityDocuments = activityDocumentRepository.save(activityDocuments);
+
+        return ActivityDocumentResponseDto.builder()
+                .idAssociation(savedActivityDocuments.getId())
+                .idActivity(savedActivityDocuments.getActivity().getIdActivity())
+                .idDocument(savedActivityDocuments.getDocumentBranch().getIdDocumentation())
+                .documentTitle(savedActivityDocuments.getDocumentBranch().getTitle())
+                .build();
     }
 
     @Override

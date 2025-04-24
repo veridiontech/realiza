@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityControlller;
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/contract/activity")
-@Tag(name = "Activity")
+@Tag(name = "Activity", description = "Alter the branch activities")
 public class ActivityControllerImpl implements ActivityControlller {
 
     private final CrudActivityImpl crudActivity;
@@ -63,6 +64,20 @@ public class ActivityControllerImpl implements ActivityControlller {
     @Override
     public ResponseEntity<List<ActivityResponseDto>> getAllActivitiesByBranch(@PathVariable String idBranch) {
         return ResponseEntity.of(Optional.of(crudActivity.findAllByBranch(idBranch)));
+    }
+
+    @GetMapping("/find-document-by-activity/{idActivity}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<ActivityDocumentResponseDto>> getAllDocumentsByActivity(@PathVariable String idActivity) {
+        return ResponseEntity.ok(crudActivity.findAllDocumentsByActivity(idActivity));
+    }
+
+    @PostMapping("/add-document-to-activity/{idActivity}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(@PathVariable String idActivity, @RequestParam String idDocumentBranch) {
+        return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch));
     }
 
     @PutMapping("/{id}")
