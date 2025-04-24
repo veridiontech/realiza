@@ -91,7 +91,7 @@ export function NewDocumentBox() {
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
             }`}
-            onClick={() => setSelectedTab("otherRequirements")}
+            onClick={() => setSelectedTab("activities")}
           >
             Atividades
           </Button>

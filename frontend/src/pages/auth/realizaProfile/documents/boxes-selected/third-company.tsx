@@ -25,17 +25,30 @@ export function ThirdCompany() {
   const { selectedBranch } = useBranch();
 
   const mockDocumentsNonSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 1" },
-    { idDocument: "2", name: "Documento 2" },
-    { idDocument: "3", name: "Documento 3" },
-    { idDocument: "4", name: "Documento 4" },
+    { idDocument: "1", name: "PCMSO" },
+    { idDocument: "2", name: "ASO" },
+    { idDocument: "3", name: "PGR" },
+    { idDocument: "4", name: "FICHA DE EPI" },
+    {
+      idDocument: "5",
+      name: "NR 34 - Treinamento Básico Segurança para Trabalhos a Quente",
+    },
   ];
 
   const mockDocumentsSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 11231231" },
-    { idDocument: "2", name: "Documento 21231231" },
-    { idDocument: "3", name: "Documento 31231231" },
-    { idDocument: "4", name: "Documento 4231321" },
+    {
+      idDocument: "1",
+      name: "NR 6 - Certificado de Treinamento de uso do EPI",
+    },
+    { idDocument: "2", name: "NR 35 - Certificado de Trabalho em Altura" },
+    {
+      idDocument: "3",
+      name: "NR 18 - Certificado de Montador de Andaime, balancins, cadeira suspensa, plataformas de trabalhos",
+    },
+    {
+      idDocument: "4",
+      name: "NR 20 - Curso Básico para trabalho com inflamáveis e combustíveis",
+    },
   ];
 
   const getDocument = async () => {

@@ -587,6 +587,7 @@ export function ModalTesteSendSupplier() {
                             Selecione uma opção
                           </option>
                           <option value="AMBAS">AMBAS</option>
+                          <option value="">TRABALHISTA</option>
                           <option value="SSMA">SSMA</option>
                           <option value="TODAS">TODAS</option>
                         </select>
@@ -1036,7 +1037,7 @@ export function ModalTesteSendSupplier() {
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Tipo do Serviço</Label>
+                      <Label className="text-white">Gestão de terceiro</Label>
                       <select
                         {...registerContract("serviceType")}
                         className="rounded-md p-1"
@@ -1045,6 +1046,29 @@ export function ModalTesteSendSupplier() {
                           Selecione uma opção
                         </option>
                         <option value="AMBAS">AMBAS</option>
+                        <option value="">TRABALHISTA</option>
+                        <option value="SSMA">SSMA</option>
+                        <option value="TODAS">TODAS</option>
+                      </select>
+                      {errorsContract.expenseType && (
+                        <span className="text-red-500">
+                          {errorsContract.expenseType.message}
+                        </span>
+                      )}
+                    </div>
+
+                    
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-white">Tipo de serviço</Label>
+                      <select
+                        {...registerContract("serviceType")}
+                        className="rounded-md p-1"
+                      >
+                        <option value="" disabled>
+                          Selecione uma opção
+                        </option>
+                        <option value="AMBAS">AMBAS</option>
+                        <option value="">TRABALHISTA</option>
                         <option value="SSMA">SSMA</option>
                         <option value="TODAS">TODAS</option>
                       </select>
@@ -1065,7 +1089,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Tipo de atividade</Label>
+                      <Label className="text-white">Tipo de atividade / risco</Label>
                       <select
                         {...registerContract("idActivity")}
                         className="rounded-md border p-2"
