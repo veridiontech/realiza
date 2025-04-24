@@ -217,6 +217,8 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 fileDocument = FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
+                        .owner(FileDocument.Owner.SUBCONTRACTOR)
+                        .ownerId(documentProviderSubcontractor.getProviderSubcontractor().getIdProvider())
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -238,9 +240,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         if (documentIAValidation.isAutoValidate()) {
             if (documentIAValidation.isValid()) {
-                documentProviderSubcontractor.setStatus(Document.Status.APROVADO);
+                documentProviderSubcontractor.setStatus(Document.Status.APROVADO_IA);
             } else {
-                documentProviderSubcontractor.setStatus(Document.Status.REPROVADO);
+                documentProviderSubcontractor.setStatus(Document.Status.REPROVADO_IA);
             }
         } else {
             documentProviderSubcontractor.setStatus(Document.Status.EM_ANALISE);
