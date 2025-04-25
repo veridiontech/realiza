@@ -16,37 +16,28 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useBranch } from "@/context/Branch-provider";
+import { propsDocument } from "@/types/interfaces";
 
 export function OrtherRequirements() {
-    const { documents, nonSelected } = useDocument();
-    const [notSelectedDocument, setNotSelectedDocument] = useState([])
-    const [selectedDocument, setSelectedDocument] = useState<any>([])
-    const { selectedBranch } = useBranch();
-
-  // const mockDocumentsNonSelected: propsDocument[] = [
-  //   { idDocument: "1", name: "Documento 1" },
-  //   { idDocument: "2", name: "Documento 2" },
-  //   { idDocument: "3", name: "Documento 3" },
-  //   { idDocument: "4", name: "Documento 4" },
-  // ];
-
-  // const mockDocumentsSelected: propsDocument[] = [
-  //   { idDocument: "1", name: "Documento 11231231" },
-  //   { idDocument: "2", name: "Documento 21231231" },
-  //   { idDocument: "3", name: "Documento 31231231" },
-  //   { idDocument: "4", name: "Documento 4231321" },
-  // ];
+  const { setDocuments, documents, setNonSelected, nonSelected } =
+    useDocument();
+  const [notSelectedDocument, setNotSelectedDocument] = useState([]);
+  const [selectedDocument, setSelectedDocument] = useState<any>([]);
+  const { selectedBranch } = useBranch();
 
   const getDocument = async () => {
     const token = localStorage.getItem("tokenClient");
     try {
-        const resSelected = await axios.get(
+      const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentGroupName: "Documentos empresa-serviço", isSelected: true },
+          params: {
+            documentGroupName: "Documentos empresa-serviço",
+            isSelected: true,
+          },
         },
       );
       const resNonSelected = await axios.get(
@@ -55,27 +46,69 @@ export function OrtherRequirements() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentGroupName: "Documentos empresa-serviço", isSelected: false },
+          params: {
+            documentGroupName: "Documentos empresa-serviço",
+            isSelected: false,
+          },
         },
       );
       console.log("teste", resSelected.data);
       console.log("teste", resNonSelected.data);
 
-      setNotSelectedDocument(resNonSelected.data)
-      setSelectedDocument(resSelected.data)
+      setNotSelectedDocument(resNonSelected.data);
+      setSelectedDocument(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
     }
   };
 
-  useEffect(() => {
-    if(selectedBranch?.idBranch) {
-      getDocument()
+  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+    // const 
+    const token = localStorage.getItem("tokenClient")
+    try {
+      console.log("selecionando documentos não selecionados:", idDocumentation);
+      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          isSelected,
+        }
+      })
+      clearArray()
+      pullDatas()
+    }catch(err) {
+      console.log("erro ao enviar documento", err );
+      
     }
-   
-  }, [selectedBranch?.idBranch])
+  }
 
-  // 
+  const filterIdDocuments = nonSelected
+  .map((document: propsDocument) => document.idDocumentation)
+  // .map((document) => document.idDocumentation);
+
+  const filterIdDocumentsSelected = documents
+  .map((document: propsDocument) => document.idDocumentation)
+
+  useEffect(() => {
+    if (selectedBranch?.idBranch) {
+      getDocument();
+    }
+  }, [selectedBranch?.idBranch]);
+
+  
+  const clearArray = () => {
+    setDocuments([])
+    setNonSelected([])
+    setNotSelectedDocument([])
+    setSelectedDocument([])
+  }
+
+  const pullDatas = () => {
+    getDocument()
+  }
+
+  //
 
   return (
     <div className="flex items-center justify-center gap-10 p-10">
@@ -98,8 +131,8 @@ export function OrtherRequirements() {
               <div>
                 <ul>
                   {nonSelected.length > 0 ? (
-                    nonSelected.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                    nonSelected.map((doc: propsDocument) => (
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -108,7 +141,7 @@ export function OrtherRequirements() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -129,7 +162,7 @@ export function OrtherRequirements() {
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -138,7 +171,7 @@ export function OrtherRequirements() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

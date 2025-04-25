@@ -20,37 +20,11 @@ import { propsDocument } from "@/types/interfaces";
 import { boolean } from "zod";
 
 export function ThirdCompany() {
-  const { documents, nonSelected } = useDocument();
+  const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
   const [notSelectedDocument, setNotSelectedDocument] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState<any>([]);
   const { selectedBranch } = useBranch();
 
-  const mockDocumentsNonSelected: propsDocument[] = [
-    { idDocument: "1", name: "PCMSO" },
-    { idDocument: "2", name: "ASO" },
-    { idDocument: "3", name: "PGR" },
-    { idDocument: "4", name: "FICHA DE EPI" },
-    {
-      idDocument: "5",
-      name: "NR 34 - Treinamento Básico Segurança para Trabalhos a Quente",
-    },
-  ];
-
-  const mockDocumentsSelected: propsDocument[] = [
-    {
-      idDocument: "1",
-      name: "NR 6 - Certificado de Treinamento de uso do EPI",
-    },
-    { idDocument: "2", name: "NR 35 - Certificado de Trabalho em Altura" },
-    {
-      idDocument: "3",
-      name: "NR 18 - Certificado de Montador de Andaime, balancins, cadeira suspensa, plataformas de trabalhos",
-    },
-    {
-      idDocument: "4",
-      name: "NR 20 - Curso Básico para trabalho com inflamáveis e combustíveis",
-    },
-  ];
 
   const getDocument = async () => {
     const token = localStorage.getItem("tokenClient");
@@ -83,12 +57,12 @@ export function ThirdCompany() {
     }
   };
   const filterIdDocuments = nonSelected
-  .map((document) => document.idDocument)
-  // .map((document) => document.idDocument);
+  .map((document: propsDocument) => document.idDocumentation)
+  // .map((document) => document.idDocumentation);
 
   const filterIdDocumentsSelected = documents
-  .map((document) => document.idDocument)
-  // .map((document) => document.idDocument);
+  .map((document: propsDocument) => document.idDocumentation)
+  // .map((document) => document.idDocumentation);
 
 console.log("ids dos documentos", filterIdDocuments);
 console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
@@ -99,17 +73,17 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
     // const 
     const token = localStorage.getItem("tokenClient")
     try {
-      console.log("selecionando documentos não selecionados:", filterIdDocuments);
+      console.log("selecionando documentos não selecionados:", idDocumentation);
       await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         params: {
-          isSelected: {isSelected},
+          isSelected,
         }
       })
-
-      
+      clearArray()
+      pullDatas()
     }catch(err) {
       console.log("erro ao enviar documento", err );
       
@@ -122,10 +96,21 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
     }
   }, [selectedBranch?.idBranch]);
 
+  const clearArray = () => {
+    setDocuments([])
+    setNonSelected([])
+    setNotSelectedDocument([])
+    setSelectedDocument([])
+  }
+
+  const pullDatas = () => {
+    getDocument()
+  }
+
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={mockDocumentsNonSelected} />
+        <BoxNonSelected documents={notSelectedDocument} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -144,7 +129,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
                 <ul>
                   {nonSelected.length > 0 ? (
                     nonSelected.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -174,7 +159,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -190,7 +175,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
         </div>
       </div>
       <div>
-        <BoxSelected documents={mockDocumentsSelected} />
+        <BoxSelected documents={selectedDocument} />
       </div>
     </div>
   );

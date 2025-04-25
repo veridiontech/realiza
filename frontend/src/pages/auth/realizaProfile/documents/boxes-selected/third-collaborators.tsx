@@ -19,24 +19,10 @@ import { ip } from "@/utils/ip";
 import { propsDocument } from "@/types/interfaces";
 
 export function ThirdCollaborators() {
-    const { documents, nonSelected } = useDocument();
+    const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
     const [notSelectedDocument, setNotSelectedDocument] = useState([])
     const [selectedDocument, setSelectedDocument] = useState<any>([])
     const { selectedBranch } = useBranch();
-
-  const mockDocumentsNonSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 1" },
-    { idDocument: "2", name: "Documento 2" },
-    { idDocument: "3", name: "Documento 3" },
-    { idDocument: "4", name: "Documento 4" },
-  ];
-
-  const mockDocumentsSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 11231231" },
-    { idDocument: "2", name: "Documento 21231231" },
-    { idDocument: "3", name: "Documento 31231231" },
-    { idDocument: "4", name: "Documento 4231321" },
-  ];
 
   const getDocument = async () => {
     const token = localStorage.getItem("tokenClient");
@@ -69,6 +55,34 @@ export function ThirdCollaborators() {
     }
   };
 
+    const filterIdDocuments = nonSelected
+    .map((document: propsDocument) => document.idDocumentation)
+    // .map((document) => document.idDocumentation);
+  
+    const filterIdDocumentsSelected = documents
+    .map((document: propsDocument) => document.idDocumentation)
+
+  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+    // const 
+    const token = localStorage.getItem("tokenClient")
+    try {
+      console.log("selecionando documentos não selecionados:", idDocumentation);
+      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          isSelected,
+        }
+      })
+      clearArray()
+      pullDatas()
+    }catch(err) {
+      console.log("erro ao enviar documento", err );
+      
+    }
+  }
+
   useEffect(() => {
     if(selectedBranch?.idBranch) {
       getDocument()
@@ -76,10 +90,21 @@ export function ThirdCollaborators() {
    
   }, [selectedBranch?.idBranch])
 
+  const clearArray = () => {
+    setDocuments([])
+    setNonSelected([])
+    setNotSelectedDocument([])
+    setSelectedDocument([])
+  }
+
+  const pullDatas = () => {
+    getDocument()
+  }
+
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={mockDocumentsNonSelected} />
+        <BoxNonSelected documents={notSelectedDocument} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -94,8 +119,8 @@ export function ThirdCollaborators() {
               <div>
                 <ul>
                   {nonSelected.length > 0 ? (
-                    nonSelected.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                    nonSelected.map((doc: propsDocument) => (
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -104,7 +129,7 @@ export function ThirdCollaborators() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -122,7 +147,7 @@ export function ThirdCollaborators() {
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -131,14 +156,14 @@ export function ThirdCollaborators() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>
       </div>
       <div>
-        <BoxSelected documents={mockDocumentsSelected} />
+        <BoxSelected documents={selectedDocument} />
       </div>
     </div>
   );

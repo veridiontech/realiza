@@ -16,10 +16,10 @@ export function BoxNonSelected({ documents }: BoxNonSelectedDocuments) {
     setCheckedDocs((prev) =>
       prev.includes(id) ? prev.filter((docId) => docId !== id) : [...prev, id]
     );
-
+    
     setNonSelected((prevDocuments) => {
-      if (prevDocuments.some((doc) => doc.idDocument === id)) {
-        return prevDocuments.filter((doc) => doc.idDocument !== id);
+      if (prevDocuments.some((doc) => doc.idDocumentation === id)) {
+        return prevDocuments.filter((doc) => doc.idDocumentation !== id);
       } else {
         return [...prevDocuments, document];
       }
@@ -37,16 +37,16 @@ export function BoxNonSelected({ documents }: BoxNonSelectedDocuments) {
           {Array.isArray(documents) && documents.length > 0 ? (
             documents.map((document) => (
               <div
-                key={document.idDocument}
+                key={document.idDocumentation}
                 className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
-                onClick={() => toggleCheckbox(document.idDocument, document)} 
+                onClick={() => toggleCheckbox(document.idDocumentation, document)} 
               >
                 <input
                   type="checkbox"
-                  checked={checkedDocs.includes(document.idDocument)}
+                  checked={checkedDocs.includes(document.idDocumentation)}
                   onChange={() => {}} 
                 />
-                <span>{document.name || "Documento"}</span>
+                <span>{document.title || "Documento"}</span>
               </div>
             ))
           ) : (

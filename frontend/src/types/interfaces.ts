@@ -38,8 +38,8 @@ export interface propsClient {
 
 export interface propsDocument {
   documentId?: string;
-  idDocument: string;
-  name: string;
+  idDocumentation: string;
+  title: string;
   doesBlock?: boolean;
   idDocumentSubgroup?: string;
   typets?: string;
@@ -105,4 +105,10 @@ export interface propsBranchUltra {
   state: string;
   row: string;
   actions: string
+}
+
+export interface propsActivities {
+  idActivity: string,
+  title: string,
+  risk: string,
 }

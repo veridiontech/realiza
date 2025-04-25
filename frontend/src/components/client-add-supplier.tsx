@@ -58,6 +58,7 @@ export const contractFormSchema = z.object({
     .string()
     .nonempty("Referência do contrato é obrigatório"),
   idActivity: z.string().nonempty("Selecione uma atividade"),
+  typeManagement: z.string()
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -1051,7 +1052,7 @@ export function ModalTesteSendSupplier() {
                       <div className="flex flex-col items-start gap-3">
                         <div className="flex flex-row-reverse gap-2">
                           <Label className="text-[14px] text-white" >SSMA</Label>
-                          <input type="checkbox"checked={isSsma} onChange={() => setIsSsma(prev => !prev)}/>
+                          <input type="checkbox"checked={isSsma} onChange={() => setIsSsma(prev => !prev)} />
                         </div>
                         <div className="flex flex-row-reverse gap-2">
                           <Label className="text-[14px] text-white">TRABALHISTA</Label>
@@ -1076,7 +1077,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     {isSsma === true && (
-                    <div className="flex flex-col gap-1">
+                      <div><div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo de atividade</Label>
                       <select
                         {...registerContract("idActivity")}
@@ -1114,7 +1115,8 @@ export function ModalTesteSendSupplier() {
                           {errorsContract.description.message}
                         </span>
                       )}
-                    </div>
+                    </div></div>)}
+                    
                     {isLoading ? (
                       <Button className="bg-realizaBlue" type="submit">
                         <Oval
@@ -1141,4 +1143,5 @@ export function ModalTesteSendSupplier() {
       </DialogContent>
     </Dialog>
   );
+  
 }

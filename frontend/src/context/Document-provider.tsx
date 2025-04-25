@@ -1,4 +1,4 @@
-import { propsDocument } from "@/types/interfaces";
+import { propsActivities, propsDocument } from "@/types/interfaces";
 import { createContext, useContext, useState } from "react";
 
 interface DocumentContextProps {
@@ -8,6 +8,8 @@ interface DocumentContextProps {
   setDocuments: React.Dispatch<React.SetStateAction<propsDocument[]>>;
   nonSelected: propsDocument[];
   setNonSelected: React.Dispatch<React.SetStateAction<propsDocument[]>>;
+  activitieSelected: propsActivities | null;  // Alterando para armazenar uma atividade ou null
+  setActivitiesSelected: React.Dispatch<React.SetStateAction<propsActivities | null>>;  // Alterando para aceitar uma atividade ou null
 }
 
 const DocumentContext = createContext<DocumentContextProps | undefined>(
@@ -26,6 +28,7 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
   const [document, setDocument] = useState<propsDocument | null>(null);
   const [documents, setDocuments] = useState<propsDocument[]>([]);
   const [nonSelected, setNonSelected] = useState<propsDocument[]>([]);
+  const [activitieSelected, setActivitiesSelected] = useState<propsActivities | null>(null)
 
   return (
     <DocumentContext.Provider
@@ -35,7 +38,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
         documents,
         setDocuments,
         nonSelected,
-        setNonSelected
+        setNonSelected,
+        activitieSelected,
+        setActivitiesSelected
       }}
     >
       {children}
