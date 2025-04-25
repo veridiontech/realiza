@@ -41,20 +41,12 @@ interface ApiResponse {
 export function ControlPanel() {
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
 
-  // const [error, setError] = useState<Error | null>(null);
-
   const fetchSolicitations = async () => {
-    // setLoading(true);
     try {
-      const response = await axios.get<ApiResponse>(
-        `${ip}/item-management/new-provider`,
-      );
-      console.log("solicitacao:", response.data.content);
+      const response = await axios.get<ApiResponse>(`${ip}/item-management/new-provider`);
       setSolicitations(response.data.content);
-    } catch (err: any) {
-      // setError(err);
-    } finally {
-      // setLoading(false);
+    } catch (err) {
+      console.error("Erro ao buscar solicitações:", err);
     }
   };
 
@@ -63,18 +55,11 @@ export function ControlPanel() {
   }, []);
 
   const removeSolicitation = (idSolicitation: string) => {
-    setSolicitations((prev) =>
-      prev.filter((s) => s.idSolicitation !== idSolicitation),
-    );
+    setSolicitations((prev) => prev.filter((s) => s.idSolicitation !== idSolicitation));
   };
 
-  // if (loading) return <div>Carregando...</div>;
-  // if (error) return <div>Erro ao carregar as solicitações.</div>;
-
   const countStatus = (status: "APPROVED" | "DENIED" | "PENDING") => {
-    return solicitations.filter(
-      (solicitation) => solicitation.status === status,
-    ).length;
+    return solicitations.filter((solicitation) => solicitation.status === status).length;
   };
 
   return (
@@ -82,12 +67,8 @@ export function ControlPanel() {
       <div className="flex w-full flex-col items-center justify-center gap-9 rounded-md bg-white p-4 shadow-sm">
         <div className="flex w-full flex-row items-center justify-between gap-4">
           <div>
-            <h2 className="text-center text-lg font-semibold">
-              Painel de Controle
-            </h2>
-            <p className="text-[#2563EB]">
-              {solicitations.length} Solicitações
-            </p>
+            <h2 className="text-center text-lg font-semibold">Painel de Controle</h2>
+            <p className="text-[#2563EB]">{solicitations.length} Solicitações</p>
           </div>
           <Dialog>
             <DialogTrigger asChild>
@@ -101,8 +82,10 @@ export function ControlPanel() {
           </Dialog>
         </div>
       </div>
+
       <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
-        <div className="flex items-start justify-around">
+        {/* Ajuste do layout para telas pequenas e grandes */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div>
             <ColumnPanelControl
               lenghtControl={countStatus("PENDING")}
@@ -110,11 +93,10 @@ export function ControlPanel() {
               bgColor="bg-[#F9731640]"
               textColor="text-[#F97316]"
               icon={<Rotate3D className="text-[#F97316]" />}
-             
             />
             <div>
               <div className="bg-gray-100 p-8">
-                <ScrollArea className="h-[40vh] w-[20vw]">
+                <ScrollArea className="h-[40vh]">
                   {solicitations
                     .filter((solicitation) => solicitation.status === "PENDING")
                     .map((solicitation) => (
@@ -135,15 +117,12 @@ export function ControlPanel() {
               bgColor="bg-[#2563EB40]"
               textColor="text-[#2563EB]"
               icon={<CheckCircle className="text-[#2563EB]" />}
-              // isLoading={loading}
             />
             <div>
               <div className="bg-gray-100 p-8">
-                <ScrollArea className="h-[40vh] w-[20vw]">
+                <ScrollArea className="h-[40vh]">
                   {solicitations
-                    .filter(
-                      (solicitation) => solicitation.status === "APPROVED",
-                    )
+                    .filter((solicitation) => solicitation.status === "APPROVED")
                     .map((solicitation) => (
                       <CardPanelControl
                         key={solicitation.idSolicitation}
@@ -155,22 +134,20 @@ export function ControlPanel() {
               </div>
             </div>
           </div>
+
           <div>
             <ColumnPanelControl
               lenghtControl={countStatus("DENIED")}
               title="Solicitações Negadas"
-              bgColor="bg-[#FF464640]  "
-              textColor=" text-[#FF4646]"
+              bgColor="bg-[#FF464640]"
+              textColor="text-[#FF4646]"
               icon={<Ban className="text-[#FF4646]" />}
-              // isLoading={loading}
             />
             <div>
               <div className="bg-gray-100 p-8">
-                <ScrollArea className="h-[40vh] w-[20vw]">
+                <ScrollArea className="h-[40vh]">
                   {solicitations
-                    .filter(
-                      (solicitation) => solicitation.status === "DENIED",
-                    )
+                    .filter((solicitation) => solicitation.status === "DENIED")
                     .map((solicitation) => (
                       <CardPanelControl
                         key={solicitation.idSolicitation}
@@ -183,7 +160,7 @@ export function ControlPanel() {
             </div>
           </div>
         </div>
-        {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+                {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
           {solicitations.map((solicitation) => (
             <CardPanelControl
               key={solicitation.idSolicitation}
