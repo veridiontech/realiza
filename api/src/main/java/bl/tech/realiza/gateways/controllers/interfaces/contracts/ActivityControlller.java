@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.interfaces.contracts;
 
 import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,9 @@ public interface ActivityControlller {
     ResponseEntity<Optional<ActivityResponseDto>> getOneActivity(String id);
     ResponseEntity<Page<ActivityResponseDto>> getAllActivities(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<List<ActivityResponseDto>> getAllActivitiesByBranch(String idBranch);
+    ResponseEntity<List<ActivityDocumentResponseDto>> getAllDocumentsByActivity(String idActivity);
+    ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(String idActivity, String idDocumentBranch);
+    ResponseEntity<String> removeDocumentsFromActivity(String idActivity, String idDocumentBranch);
     ResponseEntity<Optional<ActivityResponseDto>> updateActivity(String id, ActivityRequestDto activityRequestDto);
     ResponseEntity<Void> deleteActivity(String id);
 }

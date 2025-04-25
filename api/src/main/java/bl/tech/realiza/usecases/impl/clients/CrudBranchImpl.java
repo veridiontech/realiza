@@ -2,10 +2,15 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
@@ -19,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +34,12 @@ public class CrudBranchImpl implements CrudBranch {
     private final ClientRepository clientRepository;
     private final CrudActivityImpl crudActivity;
     private final CenterRepository centerRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentBranchRepository documentBranchRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
-        List<Center> center = null;
+        List<Center> center = List.of();
         Client client = null;
 
         if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
@@ -58,6 +66,25 @@ public class CrudBranchImpl implements CrudBranch {
                 .build();
 
         Branch savedBranch = branchRepository.save(newBranch);
+
+        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
+
+        /*
+        matrix -> repo de docs
+        quando criar filial clona da matrix para o document branch e vira o repo de ref,
+            dentro fica o mais atual
+        mongo possui os owner e ownerId
+         */
+
+        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
+                .map(documentMatrix -> DocumentBranch.builder()
+                        .title(documentMatrix.getName())
+                        .status(Document.Status.PENDENTE)
+                        .branch(savedBranch)
+                        .build())
+                .collect(Collectors.toList());
+
+        documentBranchRepository.saveAll(documentBranchList);
 
         crudActivity.transferFromRepo(savedBranch.getIdBranch());
 

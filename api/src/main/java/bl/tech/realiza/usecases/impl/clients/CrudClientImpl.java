@@ -16,7 +16,9 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
+import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
+import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
@@ -45,6 +47,7 @@ public class CrudClientImpl implements CrudClient {
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final CrudActivityImpl crudActivity;
+    private final CrudBranchImpl crudBranchImpl;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -70,7 +73,8 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        Branch newBranch = Branch.builder()
+        crudBranchImpl.save(
+                BranchCreateRequestDto.builder()
                 .name(clientRequestDto.getCorporateName() + " Matriz")
                 .cnpj(clientRequestDto.getCnpj())
                 .cep(clientRequestDto.getCep())
@@ -80,14 +84,11 @@ public class CrudClientImpl implements CrudClient {
                 .telephone(clientRequestDto.getTelephone())
                 .address(clientRequestDto.getAddress())
                 .number(clientRequestDto.getNumber())
-                .client(savedClient)
-                .build();
+                .client(savedClient.getIdClient())
+                .build()
+        );
 
-        Branch savedBranch = branchRepository.save(newBranch);
-
-        crudActivity.transferFromRepo(savedBranch.getIdBranch());
-
-        ClientResponseDto clientResponse = ClientResponseDto.builder()
+        return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
                 .tradeName(savedClient.getTradeName())
@@ -101,8 +102,6 @@ public class CrudClientImpl implements CrudClient {
                 .number(savedClient.getNumber())
                 .isUltragaz(savedClient.getIsUltragaz())
                 .build();
-
-        return clientResponse;
     }
 
     @Override

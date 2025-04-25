@@ -216,6 +216,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 fileDocument = FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
+                        .owner(FileDocument.Owner.SUPPLIER)
+                        .ownerId(documentSupplier.getProviderSupplier().getIdProvider())
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -237,9 +239,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         if (documentIAValidation.isAutoValidate()) {
             if (documentIAValidation.isValid()) {
-                documentSupplier.setStatus(Document.Status.APROVADO);
+                documentSupplier.setStatus(Document.Status.APROVADO_IA);
             } else {
-                documentSupplier.setStatus(Document.Status.REPROVADO);
+                documentSupplier.setStatus(Document.Status.REPROVADO_IA);
             }
         } else {
             documentSupplier.setStatus(Document.Status.EM_ANALISE);

@@ -1,5 +1,7 @@
 package bl.tech.realiza.domains.services;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +20,21 @@ public class FileDocument {
 
     private String contentType;
     private byte[] data;
+    private String title;
+    @Enumerated(EnumType.STRING)
+    private Owner owner;
+    private String ownerId;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+
+    public enum Owner {
+        BRANCH,
+        SUPPLIER,
+        SUBCONTRACTOR,
+        EMPLOYEE,
+        CONTRACT_SUPPLIER,
+        CONTRACT_SUBCONTRACTOR
+    }
 
     // Retorna o ID como String para compatibilidade
     public String getIdDocumentAsString() {

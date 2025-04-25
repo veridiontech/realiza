@@ -1,6 +1,8 @@
 package bl.tech.realiza.domains.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import jakarta.persistence.*;
@@ -27,4 +29,7 @@ public class DocumentBranch extends Document {
     @ManyToOne
     @JoinColumn(name = "idBranch")
     private Branch branch;
+
+    @OneToMany(mappedBy = "documentBranch", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityDocuments> activityAssociations;
 }

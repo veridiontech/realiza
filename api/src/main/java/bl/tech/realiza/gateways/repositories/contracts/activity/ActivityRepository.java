@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.repositories.contracts;
+package bl.tech.realiza.gateways.repositories.contracts.activity;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.contract;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -53,9 +54,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         FileDocument fileDocument = null;
         String fileDocumentId = null;
 
-        Optional<Contract> contractOptional = contractRepository.findById(documentContractRequestDto.getContract());
-
-        Contract contract = contractOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        Contract contract = contractRepository.findById(documentContractRequestDto.getContract())
+                .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         try {
             fileDocument = FileDocument.builder()
@@ -157,9 +157,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
 
-        Optional<DocumentContract> documentContractOptional = documentContractRepository.findById(id);
-
-        DocumentContract documentContract = documentContractOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
+        DocumentContract documentContract = documentContractRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
@@ -217,6 +216,10 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 fileDocument = FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
+                        .owner(documentContract.getContract()
+                                instanceof ContractProviderSupplier
+                                ? FileDocument.Owner.CONTRACT_SUPPLIER : FileDocument.Owner.SUBCONTRACTOR)
+                        .ownerId(documentContract.getContract().getIdContract())
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -238,9 +241,9 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
 
         if (documentIAValidation.isAutoValidate()) {
             if (documentIAValidation.isValid()) {
-                documentContract.setStatus(Document.Status.APROVADO);
+                documentContract.setStatus(Document.Status.APROVADO_IA);
             } else {
-                documentContract.setStatus(Document.Status.REPROVADO);
+                documentContract.setStatus(Document.Status.REPROVADO_IA);
             }
         } else {
             documentContract.setStatus(Document.Status.EM_ANALISE);
