@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 const newBranchFormSchema = z.object({
   cnpj: z.string(),
@@ -139,9 +140,10 @@ export function AddNewBranch() {
       <DialogTrigger asChild>
         <Button className="bg-realizaBlue md:hidden">+</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+      style={{ backgroundImage: `url(${bgModalRealiza})` }}>
         <DialogHeader>
-          <DialogTitle>Cadastro de filial</DialogTitle>
+          <DialogTitle className="text-white">Cadastro de filial</DialogTitle>
         </DialogHeader>
         <ScrollArea className="h-[40vh] p-3">
           <form
@@ -149,7 +151,7 @@ export function AddNewBranch() {
             className="m-2 flex flex-col gap-5"
           >
             <div className="flex flex-col gap-2">
-              <Label>CNPJ</Label>
+              <Label className="text-white">CNPJ</Label>
               <div className="flex items-center gap-2">
                 <Input 
                   type="text"
@@ -187,7 +189,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Email</Label>
+              <Label className="text-white">Email</Label>
               <Input type="email" {...register("email")} />
               {errors.email && (
                 <span className="text-sm text-red-600">
@@ -197,7 +199,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Nome da filial</Label>
+              <Label className="text-white">Nome da filial</Label>
               <Input type="text" {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">
@@ -207,7 +209,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Razão social</Label>
+              <Label className="text-white">Razão social</Label>
               <Input type="text" {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">
@@ -217,7 +219,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>CEP</Label>
+              <Label className="text-white">CEP</Label>
               <Input type="text" {...register("cep")} />
               {errors.cep && (
                 <span className="text-sm text-red-600">
@@ -227,7 +229,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Cidade</Label>
+              <Label className="text-white">Cidade</Label>
               <Input type="text" {...register("city")} />
               {errors.city && (
                 <span className="text-sm text-red-600">
@@ -237,7 +239,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Endereço</Label>
+              <Label className="text-white">Endereço</Label>
               <Input type="text" {...register("address")} />
               {errors.address && (
                 <span className="text-sm text-red-600">
@@ -247,7 +249,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Número</Label>
+              <Label className="text-white">Número</Label>
               <Input type="text" {...register("number")} />
               {errors.number && (
                 <span className="text-sm text-red-600">
@@ -257,7 +259,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>País</Label>
+              <Label className="text-white">País</Label>
               <Input type="text" {...register("country")} />
               {errors.country && (
                 <span className="text-sm text-red-600">
@@ -267,7 +269,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Estado</Label>
+              <Label className="text-white">Estado</Label>
               <Input type="text" {...register("state")} />
               {errors.state && (
                 <span className="text-sm text-red-600">
@@ -277,7 +279,7 @@ export function AddNewBranch() {
             </div>
 
             <div>
-              <Label>Telefone</Label>
+              <Label className="text-white">Telefone</Label>
               <Input type="text" {...register("telephone")} />
               {errors.telephone && (
                 <span className="text-sm text-red-600">
