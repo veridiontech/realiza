@@ -72,7 +72,7 @@ export function ControlPanel() {
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="bg-realizaBlue">Todas solicitações</Button>
+              <Button className="hidden md:block bg-realizaBlue">Todas solicitações</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -84,7 +84,6 @@ export function ControlPanel() {
       </div>
 
       <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
-        {/* Ajuste do layout para telas pequenas e grandes */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div>
             <ColumnPanelControl

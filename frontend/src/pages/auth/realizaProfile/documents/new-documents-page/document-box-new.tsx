@@ -20,6 +20,7 @@ import { TrainingBox } from "../boxes-selected/services";
 import { OrtherRequirements } from "../boxes-selected/orther-requirements";
 import { useDocument } from "@/context/Document-provider";
 import { ActivitiesBox } from "../boxes-selected/activities";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
@@ -45,6 +46,32 @@ export function NewDocumentBox() {
     setDocuments([]);
     setNonSelected([]);
   };
+  
+  const tabsOrder = ["thirdCompany", "thirdCollaborators", "otherRequirements", "activities"];
+
+  const handlePrev = () => {
+    const currentIndex = tabsOrder.indexOf(selectedTab);
+    if (currentIndex > 0) {
+      setSelectedTab(tabsOrder[currentIndex - 1]);
+      handleClickToggle();
+    }
+  };
+
+  const handleNext = () => {
+    const currentIndex = tabsOrder.indexOf(selectedTab);
+    if (currentIndex < tabsOrder.length - 1) {
+      setSelectedTab(tabsOrder[currentIndex + 1]);
+      handleClickToggle();
+    }
+  };
+
+  const renderTabName = () => {
+    if (selectedTab === "thirdCompany") return "Empresa terceiros";
+    if (selectedTab === "thirdCollaborators") return "Colaboradores terceiros";
+    if (selectedTab === "otherRequirements") return "Outras exigências";
+    if (selectedTab === "activities") return "Atividades";
+    return "";
+  };
 
   // useEffect(() => {
 
@@ -52,35 +79,36 @@ export function NewDocumentBox() {
 
   return (
     <div className="relative">
-      <div className="absolute left-0 right-0 top-0 z-10 rounded-lg bg-white p-5 shadow-md">
-        <div className="flex gap-2">
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "thirdCompany"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("thirdCompany"), handleClickToggle();
-            }}
-          >
-            Empresa terceiros
-          </Button>
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "thirdCollaborators"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("thirdCollaborators"), handleClickToggle();
-            }}
-          >
-            Colaboradores terceiros
-          </Button>
-          {/* <Button
+      <div className="absolute left-0 right-0 top-0 z-10 hidden rounded-lg bg-white p-5 shadow-md md:flex gap-2">
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "thirdCompany"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("thirdCompany");
+            handleClickToggle();
+          }}
+        >
+          Empresa terceiros
+        </Button>
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "thirdCollaborators"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("thirdCollaborators");
+            handleClickToggle();
+          }}
+        >
+          Colaboradores terceiros
+        </Button>
+                          {/* <Button
             variant={"ghost"}
             className={`px-4 py-2 transition-all duration-300 ${
               selectedTab === "training"
@@ -91,33 +119,60 @@ export function NewDocumentBox() {
           >
             Treinamentos
           </Button> */}
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "otherRequirements"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("otherRequirements");
+            handleClickToggle();
+          }}
+        >
+          Outras exigências
+        </Button>
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "activities"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("activities");
+            handleClickToggle();
+          }}
+        >
+          Atividades
+        </Button>
+      </div>
+      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
+        <Button
+          variant={"ghost"}
+          onClick={handlePrev}
+          disabled={selectedTab === "thirdCompany"}
+          className={`text-realizaBlue ${selectedTab === "thirdCompany" ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </Button>
+        <div className="flex-1 flex justify-center">
           <Button
             variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "otherRequirements"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("otherRequirements"), handleClickToggle();
-            }}
+            className="bg-realizaBlue font-bold text-white shadow-lg px-6 py-3 pointer-events-none"
           >
-            Outras exigências
-          </Button>{" "}
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "activities"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("activities"), handleClickToggle();
-            }}
-          >
-            Atividades
+            {renderTabName()}
           </Button>
         </div>
+        <Button
+          variant={"ghost"}
+          onClick={handleNext}
+          disabled={selectedTab === "activities"}
+          className={`text-realizaBlue ${selectedTab === "activities" ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          <ChevronRight className="w-6 h-6" />
+        </Button>
       </div>
       <div className="bg-white pt-24 shadow-md">
         {selectedTab === "thirdCompany" && <ThirdCompany />}
