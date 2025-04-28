@@ -52,13 +52,15 @@ export const contractFormSchema = z.object({
   serviceType: z.string().nonempty("Tipo de despesa é obrigatório"),
   description: z.string().optional(),
   expenseType: z.string().nonempty("Tipo do serviço"),
+  labor: z.boolean(),
+  hse: z.string(),
   dateStart: z.string().nonempty("Início efetivo é obrigatório"),
   idResponsible: z.string().nonempty("Selecione um gestor"),
   contractReference: z
     .string()
     .nonempty("Referência do contrato é obrigatório"),
-  idActivity: z.string().nonempty("Selecione uma atividade"),
-  typeManagement: z.string()
+  // idActivity: z.string().nonempty("Selecione uma atividade"),
+  typeManagement: z.string(),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -86,8 +88,21 @@ export function ModalTesteSendSupplier() {
   const { datasSender, setDatasSender } = useDataSendEmailContext();
   const { supplier } = useSupplier();
   const [contracts, setContracts] = useState([]);
-  const [isSsma, setIsSsma] = useState(false)
+  const [isSsma, setIsSsma] = useState(false);
   // const [subContractDatas, setSubContractDatas] = useState({});
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [servicesType, setServicesType] = useState([])
+
+  const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedActivities(prev => [...prev, activityId]);
+    } else {
+      setSelectedActivities(prev => prev.filter(id => id !== activityId));
+    }
+  };
+
+  console.log("Atividades selecionadas:", selectedActivities);
+  
 
   const {
     register,
@@ -266,16 +281,14 @@ export function ModalTesteSendSupplier() {
       toast.error("Dados do prestador não encontrados. Reinicie o processo.");
       return;
     }
-
     setIsLoading(true);
     try {
       const payload = {
         ...data,
         idRequester: user?.idUser,
         providerDatas,
-        // idActivity: "ad4119e8-54c1-48e4-b1aa-9814eefc452b",
         idBranch: selectedBranch?.idBranch,
-        // idBranch: "4efd5225-14a3-46c1-b478-47b1d0d99c23",
+        idActivities: selectedActivities
       };
       console.log("enviando dados do contrato", payload);
       setDatasSender(payload);
@@ -299,6 +312,15 @@ export function ModalTesteSendSupplier() {
     }
   };
 
+  const getServicesType = async() => {
+    try{
+      const res = await axios.get(`${ip}/contract/service-type/${selectedBranch?.idBranch}`)
+      setServicesType(res.data)
+    }catch(err) {
+      console.log("Erro ao buscar serviços", err);
+    }
+  }
+
   // const handleRadioClick = (value: string) => {
   //   setSelectedRadio(value);
   // };
@@ -308,6 +330,7 @@ export function ModalTesteSendSupplier() {
 
   useEffect(() => {
     getActivities();
+    getServicesType()
   }, []);
 
   if (
@@ -581,15 +604,15 @@ export function ModalTesteSendSupplier() {
                       <div className="flex flex-col gap-1">
                         <Label className="text-white">Tipo de Gestão</Label>
                         <div>
-                        <div>
-                          <Label>SSMA</Label>
-                          <input type="checkbox" placeholder="SSMA"/>
+                          <div>
+                            <Label>SSMA</Label>
+                            <input type="checkbox" placeholder="SSMA" />
+                          </div>
+                          <div>
+                            <Label>TRABALHISTA</Label>
+                            <input type="checkbox" />
+                          </div>
                         </div>
-                        <div>
-                          <Label>TRABALHISTA</Label>
-                          <input type="checkbox" />
-                        </div>
-                      </div>
                         <select
                           {...registerContract("serviceType")}
                           className="rounded-md p-1"
@@ -620,28 +643,28 @@ export function ModalTesteSendSupplier() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <Label className="text-white">Tipo de atividade</Label>
-                        <select
+                        {/* <select
                           {...registerContract("idActivity")}
                           className="rounded-md border p-2"
                           defaultValue=""
-                        >
-                          <option value="" disabled>
+                        > */}
+                        {/* <option value="" disabled>
                             Selecione uma atividade
-                          </option>
-                          {activities.map((activitie: any) => (
-                            <option
-                              value={activitie.idActivity}
-                              key={activitie.idActivity}
-                            >
-                              {activitie.title}{" "}
-                            </option>
-                          ))}
-                        </select>
-                        {errorsContract.idActivity && (
+                          </option> */}
+                        {activities.map((activitie: any) => (
+                          <div
+                            // value={activitie.idActivity}
+                            key={activitie.idActivity}
+                          >
+                            {activitie.title}{" "}
+                          </div>
+                        ))}
+                        {/* </select> */}
+                        {/* {errorsContract.idActivity && (
                           <span className="text-red-500">
                             {errorsContract.idActivity.message}
                           </span>
-                        )}
+                        )} */}
                       </div>
                       <div className="flex flex-col gap-1">
                         <Label className="text-white">
@@ -1040,9 +1063,9 @@ export function ModalTesteSendSupplier() {
                         <option value="OPEX">OPEX</option>
                         <option value="Nenhuma">Nenhuma</option>
                       </select>
-                      {errorsContract.serviceType && (
+                      {errorsContract.expenseType && (
                         <span className="text-red-500">
-                          {errorsContract.serviceType.message}
+                          {errorsContract.expenseType.message}
                         </span>
                       )}
                     </div>
@@ -1051,61 +1074,75 @@ export function ModalTesteSendSupplier() {
                       <Label className="text-white">Tipo de Gestão</Label>
                       <div className="flex flex-col items-start gap-3">
                         <div className="flex flex-row-reverse gap-2">
-                          <Label className="text-[14px] text-white" >SSMA</Label>
-                          <input type="checkbox"checked={isSsma} onChange={() => setIsSsma(prev => !prev)} />
+                          <Label className="text-[14px] text-white">SSMA</Label>
+                          <input
+                            type="checkbox"
+                            checked={isSsma}
+                            {...registerContract("hse", {
+                              onChange: (e) => {
+                                setIsSsma(e.target.checked); 
+                              },
+                            })}
+                          />
                         </div>
                         <div className="flex flex-row-reverse gap-2">
-                          <Label className="text-[14px] text-white">TRABALHISTA</Label>
-                          <input type="checkbox" />
+                          <Label className="text-[14px] text-white">
+                            TRABALHISTA
+                          </Label>
+                          <input type="checkbox" {...registerContract("labor")}/>
                         </div>
                       </div>
-                      
+
                       {errorsContract.expenseType && (
                         <span className="text-red-500">
                           {errorsContract.expenseType.message}
                         </span>
                       )}
                     </div>
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
-                      <Input {...registerContract("serviceName")} />
-                      {errorsContract.serviceName && (
+                      <select  {...registerContract("serviceType")} className="rounded-md border p-2">
+                        <option value="" disabled>Selecione uma opção</option>
+                        {servicesType.map((serviceType: any) => (
+                          <option value={serviceType.idServiceType} key={serviceType.idServiceType}>{serviceType.title}</option>
+                        ))}
+                      </select>
+                      {errorsContract.serviceType && (
                         <span className="text-red-500">
-                          {errorsContract.serviceName.message}
+                          {errorsContract.serviceType.message}
                         </span>
                       )}
                     </div>
 
                     {isSsma === true && (
-                      <div><div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-2">
                       <Label className="text-white">Tipo de atividade</Label>
-                      <select
-                        {...registerContract("idActivity")}
-                        className="rounded-md border p-2"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          Selecione uma atividade
-                        </option>
-                        {activities.map((activitie: any) => (
-                          <option
-                            value={activitie.idActivity}
-                            key={activitie.idActivity}
-                          >
-                            {activitie.title}{" "}
-                          </option>
-                        ))}
-                      </select>
-                      {errorsContract.idActivity && (
-                        <span className="text-red-500">
-                          {errorsContract.idActivity.message}
-                        </span>
-                      )}
-                    </div>
-</div>)}
-
-
+                      <ScrollArea className="h-[15vh]">
 <div className="flex flex-col gap-1">
+      
+
+      {activities.map((activity: any) => (
+        <div key={activity.idActivity} className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            onChange={(e) => handleCheckboxChange(activity.idActivity, e.target.checked)}
+            checked={selectedActivities.includes(activity.idActivity)}
+          />
+          <p className="text-white">{activity.title}</p>
+        </div>
+      ))}
+
+      {/* {errorsContract.idActivity && (
+        <span className="text-red-500">
+          {errorsContract.idActivity.message}
+        </span>
+      )} */}
+    </div>
+                      </ScrollArea>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1">
                       <Label className="text-white">
                         Descrição detalhada do serviço
                       </Label>
@@ -1145,5 +1182,4 @@ export function ModalTesteSendSupplier() {
       </DialogContent>
     </Dialog>
   );
-  
 }

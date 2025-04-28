@@ -33,7 +33,7 @@ export function ThirdCollaborators() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentGroupName: "Treinamentos e certificações", isSelected: true },
+          params: { documenTypeName: "SAUDE", isSelected: true },
         },
       );
       const resNonSelected = await axios.get(
@@ -42,7 +42,7 @@ export function ThirdCollaborators() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentGroupName: "Treinamentos e certificações", isSelected: false },
+          params: { documenTypeName: "SAUDE", isSelected: false },
         },
       );
       console.log("teste", resSelected.data);

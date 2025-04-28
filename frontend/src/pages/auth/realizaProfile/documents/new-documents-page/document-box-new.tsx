@@ -20,6 +20,8 @@ import { TrainingBox } from "../boxes-selected/services";
 import { OrtherRequirements } from "../boxes-selected/orther-requirements";
 import { useDocument } from "@/context/Document-provider";
 import { ActivitiesBox } from "../boxes-selected/activities";
+import { AmbientBox } from "../boxes-selected/ambient-box";
+import { TrabalhistaBox } from "../boxes-selected/trabalhista-box";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
@@ -65,7 +67,7 @@ export function NewDocumentBox() {
               setSelectedTab("thirdCompany"), handleClickToggle();
             }}
           >
-            Empresa terceiros
+            Cadastro e certidões
           </Button>
           <Button
             variant={"ghost"}
@@ -78,7 +80,7 @@ export function NewDocumentBox() {
               setSelectedTab("thirdCollaborators"), handleClickToggle();
             }}
           >
-            Colaboradores terceiros
+            Saúde
           </Button>
           {/* <Button
             variant={"ghost"}
@@ -102,20 +104,46 @@ export function NewDocumentBox() {
               setSelectedTab("otherRequirements"), handleClickToggle();
             }}
           >
-            Outras exigências
+            Segurança do Trabalho
           </Button>{" "}
           <Button
             variant={"ghost"}
             className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "activities"
+              selectedTab === "ambient"
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
             }`}
             onClick={() => {
-              setSelectedTab("activities"), handleClickToggle();
+              setSelectedTab("ambient"), handleClickToggle();
             }}
           >
-            Atividades
+            Meio Ambiente
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "trabalhista"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("trabalhista"), handleClickToggle();
+            }}
+          >
+            Trabalhista
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "geral"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("geral"), handleClickToggle();
+            }}
+          >
+            Geral
           </Button>
         </div>
       </div>
@@ -124,7 +152,9 @@ export function NewDocumentBox() {
         {selectedTab === "thirdCollaborators" && <ThirdCollaborators />}
         {selectedTab === "training" && <TrainingBox />}
         {selectedTab === "otherRequirements" && <OrtherRequirements />}
-        {selectedTab === "activities" && <ActivitiesBox />}
+        {selectedTab === "geral" && <ActivitiesBox />}
+        {selectedTab === "ambient" && <AmbientBox />}
+        {selectedTab === "trabalhista" && <TrabalhistaBox />}
       </div>
     </div>
   );

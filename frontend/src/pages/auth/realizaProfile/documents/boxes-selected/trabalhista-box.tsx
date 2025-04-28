@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { useBranch } from "@/context/Branch-provider";
 import { propsDocument } from "@/types/interfaces";
 
-export function OrtherRequirements() {
+export function TrabalhistaBox() {
   const { setDocuments, documents, setNonSelected, nonSelected } =
     useDocument();
   const [notSelectedDocument, setNotSelectedDocument] = useState([]);
@@ -35,7 +35,7 @@ export function OrtherRequirements() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "SEGURANCA DO TRABALHO",
+            documenTypeName: "TRABALHISTA",
             isSelected: true,
           },
         },
@@ -47,7 +47,7 @@ export function OrtherRequirements() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "SEGURANCA DO TRABALHO",
+            documenTypeName: "TRABALHISTA",
             isSelected: false,
           },
         },
