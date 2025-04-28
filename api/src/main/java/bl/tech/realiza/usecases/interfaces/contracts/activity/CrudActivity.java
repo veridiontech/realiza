@@ -1,10 +1,8 @@
-package bl.tech.realiza.usecases.interfaces.contracts;
+package bl.tech.realiza.usecases.interfaces.contracts.activity;
 
-import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityDocumentResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
+import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

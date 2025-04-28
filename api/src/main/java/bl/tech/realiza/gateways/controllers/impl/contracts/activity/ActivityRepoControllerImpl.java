@@ -1,9 +1,9 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
-import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityRepoController;
-import bl.tech.realiza.gateways.requests.contracts.ActivityRepoRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudActivityRepoImpl;
+import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.ActivityRepoController;
+import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRepoRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityRepoResponseDto;
+import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityRepoImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

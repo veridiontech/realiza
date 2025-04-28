@@ -1,11 +1,11 @@
-package bl.tech.realiza.usecases.impl.contracts;
+package bl.tech.realiza.usecases.impl.contracts.activity;
 
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
-import bl.tech.realiza.gateways.requests.contracts.ActivityRepoRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudActivityRepo;
+import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRepoRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityRepoResponseDto;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivityRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

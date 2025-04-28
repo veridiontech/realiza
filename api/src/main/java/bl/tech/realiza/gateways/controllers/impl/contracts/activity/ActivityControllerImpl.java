@@ -1,10 +1,10 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
-import bl.tech.realiza.gateways.controllers.interfaces.contracts.ActivityControlller;
-import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityDocumentResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
+import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.ActivityControlller;
+import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
+import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

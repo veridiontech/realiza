@@ -15,7 +15,7 @@ import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudActivityImpl;
+import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -69,18 +69,12 @@ public class CrudBranchImpl implements CrudBranch {
 
         List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
 
-        /*
-        matrix -> repo de docs
-        quando criar filial clona da matrix para o document branch e vira o repo de ref,
-            dentro fica o mais atual
-        mongo possui os owner e ownerId
-         */
-
         List<DocumentBranch> documentBranchList = documentMatrixList.stream()
                 .map(documentMatrix -> DocumentBranch.builder()
                         .title(documentMatrix.getName())
                         .status(Document.Status.PENDENTE)
                         .branch(savedBranch)
+                        .documentMatrix(documentMatrix)
                         .build())
                 .collect(Collectors.toList());
 

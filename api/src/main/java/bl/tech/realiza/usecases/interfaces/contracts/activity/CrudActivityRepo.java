@@ -1,11 +1,10 @@
-package bl.tech.realiza.usecases.interfaces.contracts;
+package bl.tech.realiza.usecases.interfaces.contracts.activity;
 
-import bl.tech.realiza.gateways.requests.contracts.ActivityRepoRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityRepoResponseDto;
+import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRepoRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityRepoResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface CrudActivityRepo {
