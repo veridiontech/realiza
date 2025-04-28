@@ -9,26 +9,28 @@ import java.util.List;
 
 @Data
 public class ContractRequestDto {
-    private String serviceType;
+    // contract
     private String serviceDuration;
     private String serviceName;
+    private String contractReference;
     private String description;
     private String allocatedLimit;
     private String responsible;
     private Contract.ExpenseType expenseType;
+    private Boolean labor;
+    private Boolean hse;
     private Date startDate;
     private Date endDate;
-    private String contractReference;
-    private Boolean subcontractPermission;
-    private String supplierContractId;
-    private String idActivity;
-    private List<String> requirements;
     private String cnpj;
 
-    // supplier
-    private String providerSupplier; // also for subcontractor
-    private String branch;
+    // contract supplier
+    private Boolean subcontractPermission;
+    private String idServiceType;
+    private List<String> idActivityList;
+    private String idBranch;
+    private String idSupplierContract;
+    private String idProviderSupplier; // also for subcontractor
 
     // subcontractor
-    private String providerSubcontractor;
+    private String idProviderSubcontractor;
 }

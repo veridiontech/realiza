@@ -28,7 +28,7 @@ public class Requirement {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
-    @JsonIgnore
-    @ManyToMany(mappedBy = "requirements")
-    private List<Contract> contracts;
+//    @JsonIgnore
+//    @ManyToMany(mappedBy = "requirements")
+//    private List<Contract> contracts;
 }

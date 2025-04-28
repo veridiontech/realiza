@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.requests.contracts;
 
 import bl.tech.realiza.domains.contract.Contract;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -30,6 +31,10 @@ public class ContractSubcontractorPostRequestDto {
     private String idContractSupplier;
     @NotEmpty
     private String idActivity;
+    @NotNull
+    private Boolean managementLabor;
+    @NotNull
+    private Boolean managementHse;
     @NotEmpty
     private List<String> requirements;
     @NotEmpty

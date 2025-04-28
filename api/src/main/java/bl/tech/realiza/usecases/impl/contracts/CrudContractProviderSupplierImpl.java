@@ -4,6 +4,8 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
+import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
+import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
@@ -15,9 +17,11 @@ import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
+import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.contract.DocumentContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
@@ -61,11 +65,16 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final CrudProviderSupplier crudProviderSupplier;
     private final CrudItemManagementImpl crudItemManagementImpl;
+    private final ServiceTypeBranchRepository serviceTypeBranchRepository;
+    private final ActivityDocumentRepository activityDocumentRepository;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
-        List<Requirement> requirements = List.of();
+        List<Activity> activities = List.of();
+        List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentBranch> documentBranch = List.of();
+        List<DocumentContract> documentContract = List.of();
+        List<DocumentProviderSupplier> documentProviderSupplier = List.of();
 
         UserClient userClient = userClientRepository.findById(contractProviderSupplierRequestDto.getIdResponsible())
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -73,28 +82,23 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         Branch branch = branchRepository.findById(contractProviderSupplierRequestDto.getIdBranch())
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        Activity activity = activityRepository.findById(contractProviderSupplierRequestDto.getIdActivity())
-                .orElseThrow(() -> new NotFoundException("Activity not found"));
+        ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
+                .orElseThrow(() ->  new NotFoundException("Service Type not found"));
 
-        if (contractProviderSupplierRequestDto.getRequirements() != null && !contractProviderSupplierRequestDto.getRequirements().isEmpty()) {
-            requirements = requirementRepository.findAllById(contractProviderSupplierRequestDto.getRequirements());
-            if (requirements.isEmpty()) {
-                throw new NotFoundException("Requirements not found");
-            }
+        if (contractProviderSupplierRequestDto.getHse()) {
+            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
         }
 
-        switch (activity.getRisk()) {
-            case LOW -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowRiskIsTrueAndIsActiveIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
-            }
-            case MEDIUM -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumRiskIsTrueAndIsActiveIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
-            }
-            case HIGH -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighRiskIsTrueAndIsActiveIsTrue(contractProviderSupplierRequestDto.getIdBranch(), "Documentos empresa-serviço");
-            }
-            default -> throw new BadRequestException("Invalid activity");
-        }
+        activities.forEach(
+                activity -> {
+                    List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(activity.getIdActivity());
+                    activityDocumentsList.forEach(
+                            activityDocument -> {
+                                idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation());
+                            }
+                    );
+                }
+        );
 
         ProviderSupplier newProviderSupplier = providerSupplierRepository.save(ProviderSupplier.builder()
                 .cnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
@@ -105,32 +109,32 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .build());
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(ContractProviderSupplier.builder()
-                .serviceType(contractProviderSupplierRequestDto.getServiceType())
+                .serviceTypeBranch(serviceTypeBranch)
                 .serviceDuration(contractProviderSupplierRequestDto.getServiceDuration())
                 .serviceName(contractProviderSupplierRequestDto.getServiceName())
                 .contractReference(contractProviderSupplierRequestDto.getContractReference())
                 .description(contractProviderSupplierRequestDto.getDescription())
                 .allocatedLimit(contractProviderSupplierRequestDto.getAllocatedLimit())
                 .dateStart(contractProviderSupplierRequestDto.getDateStart())
+                .labor(contractProviderSupplierRequestDto.getLabor())
+                .hse(contractProviderSupplierRequestDto.getHse())
                 .responsible(userClient)
                 .expenseType(contractProviderSupplierRequestDto.getExpenseType())
                 .subcontractPermission(contractProviderSupplierRequestDto.getSubcontractPermission())
-                .activity(activity)
-                .requirements(requirements)
+                .activities(activities)
                 .providerSupplier(newProviderSupplier)
                 .branch(branch)
                 .build());
 
-        List<DocumentMatrix> documentMatrixList = documentBranch.stream()
-                .map(DocumentBranch::getDocumentMatrix)
-                .toList();
+        documentBranch = documentBranchRepository.findAllById(idDocuments);
 
-        List<DocumentContract> documentProviderSuppliers = documentMatrixList.stream()
-                .map(docMatrix -> DocumentContract.builder()
-                        .title(docMatrix.getName())
+        List<DocumentContract> documentProviderSuppliers = documentBranch.stream()
+                .map(document -> DocumentContract.builder()
+                        .title(document.getTitle())
                         .status(Document.Status.PENDENTE)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .isActive(true)
                         .contract(savedContractProviderSupplier)
-                        .documentMatrix(docMatrix)
                         .build())
                 .collect(Collectors.toList());
 
@@ -146,7 +150,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         return ContractSupplierResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())
-                .serviceType(savedContractProviderSupplier.getServiceType())
+                .serviceType(savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .contractReference(savedContractProviderSupplier.getContractReference())
@@ -156,8 +160,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .dateStart(savedContractProviderSupplier.getDateStart())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
-                .activity(savedContractProviderSupplier.getActivity())
-                .requirements(savedContractProviderSupplier.getRequirements())
+                .activities(savedContractProviderSupplier.getActivities()
+                        .stream().map(Activity::getIdActivity).toList())
                 .isActive(savedContractProviderSupplier.getIsActive())
                 .idSupplier(savedContractProviderSupplier.getProviderSupplier().getIdProvider())
                 .nameSupplier(savedContractProviderSupplier.getProviderSupplier().getCorporateName())
@@ -170,11 +174,12 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     public Optional<ContractResponseDto> findOne(String id) {
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(id);
 
-        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         ContractResponseDto contractResponseDto = ContractResponseDto.builder()
                 .idContract(contractProviderSupplier.getIdContract())
-                .serviceType(contractProviderSupplier.getServiceType())
+                .serviceType(contractProviderSupplier.getServiceTypeBranch().getIdServiceType())
                 .serviceDuration(contractProviderSupplier.getServiceDuration())
                 .serviceName(contractProviderSupplier.getServiceName())
                 .contractReference(contractProviderSupplier.getContractReference())
@@ -185,8 +190,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .dateStart(contractProviderSupplier.getDateStart())
                 .endDate(contractProviderSupplier.getEndDate())
                 .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
-                .activity(contractProviderSupplier.getActivity())
-                .requirements(contractProviderSupplier.getRequirements())
+                .activities(contractProviderSupplier.getActivities()
+                        .stream().map(Activity::getIdActivity).toList())
                 .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
                 .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                 .branch(contractProviderSupplier.getBranch().getIdBranch())
@@ -203,7 +208,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
-                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceType(contractProviderSupplier.getServiceTypeBranch().getIdServiceType())
                         .serviceDuration(contractProviderSupplier.getServiceDuration())
                         .serviceName(contractProviderSupplier.getServiceName())
                         .contractReference(contractProviderSupplier.getContractReference())
@@ -214,8 +219,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .dateStart(contractProviderSupplier.getDateStart())
                         .endDate(contractProviderSupplier.getEndDate())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
-                        .activity(contractProviderSupplier.getActivity())
-                        .requirements(contractProviderSupplier.getRequirements())
+                        .activities(contractProviderSupplier.getActivities()
+                                .stream().map(Activity::getIdActivity).toList())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
                         .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                         .branch(contractProviderSupplier.getBranch().getIdBranch())
@@ -230,27 +235,20 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(id);
 
-        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-        Optional<UserClient> userClientOptional = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible());
+        ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
+                .orElseThrow(() -> new NotFoundException("Service type not found"));
 
-        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        UserClient userClient = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible())
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        List<Activity> activities = List.of();
+        List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivityList());
         List<Requirement> requirements = List.of();
 
-        if (contractProviderSupplierRequestDto.getIdActivity() != null && !contractProviderSupplierRequestDto.getIdActivity().isEmpty()) {
-            activity = activityRepository.findById(contractProviderSupplierRequestDto.getIdActivity()).orElseThrow(() -> new NotFoundException("Activity not found"));
-        }
 
-        if (contractProviderSupplierRequestDto.getRequirements() != null && !contractProviderSupplierRequestDto.getRequirements().isEmpty()) {
-            requirements = requirementRepository.findAllById(contractProviderSupplierRequestDto.getRequirements());
-            if (requirements.isEmpty()) {
-                throw new NotFoundException("Requirements not found");
-            }
-        }
-
-        contractProviderSupplier.setServiceType(contractProviderSupplierRequestDto.getServiceType() != null ? contractProviderSupplierRequestDto.getServiceType() : contractProviderSupplier.getServiceType());
+        contractProviderSupplier.setServiceTypeBranch(contractProviderSupplierRequestDto.getIdServiceType() != null ? serviceTypeBranch : contractProviderSupplier.getServiceTypeBranch());
         contractProviderSupplier.setServiceDuration(contractProviderSupplierRequestDto.getServiceDuration() != null ? contractProviderSupplierRequestDto.getServiceDuration() : contractProviderSupplier.getServiceDuration());
         contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());
         contractProviderSupplier.setContractReference(contractProviderSupplierRequestDto.getContractReference() != null ? contractProviderSupplierRequestDto.getContractReference() : contractProviderSupplier.getContractReference());
@@ -260,14 +258,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         contractProviderSupplier.setExpenseType(contractProviderSupplierRequestDto.getExpenseType() != null ? contractProviderSupplierRequestDto.getExpenseType() : contractProviderSupplier.getExpenseType());
         contractProviderSupplier.setDateStart(contractProviderSupplierRequestDto.getStartDate() != null ? contractProviderSupplierRequestDto.getStartDate() : contractProviderSupplier.getDateStart());
         contractProviderSupplier.setEndDate(contractProviderSupplierRequestDto.getEndDate() != null ? contractProviderSupplierRequestDto.getEndDate() : contractProviderSupplier.getEndDate());
-        contractProviderSupplier.setActivity(contractProviderSupplierRequestDto.getIdActivity() != null ? activity : contractProviderSupplier.getActivity());
-        contractProviderSupplier.setRequirements(contractProviderSupplierRequestDto.getRequirements() != null ? requirements : contractProviderSupplier.getRequirements());
+        contractProviderSupplier.setActivities(!activities.isEmpty() ? activities : contractProviderSupplier.getActivities());
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(contractProviderSupplier);
 
         ContractResponseDto contractResponseDto = ContractResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())
-                .serviceType(savedContractProviderSupplier.getServiceType())
+                .serviceType(savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .contractReference(savedContractProviderSupplier.getContractReference())
@@ -278,8 +275,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .dateStart(savedContractProviderSupplier.getDateStart())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
-                .activity(savedContractProviderSupplier.getActivity())
-                .requirements(savedContractProviderSupplier.getRequirements())
+                .activities(contractProviderSupplier.getActivities()
+                        .stream().map(Activity::getIdActivity).toList())
                 .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
                 .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                 .branch(contractProviderSupplier.getBranch().getIdBranch())
@@ -321,7 +318,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
-                        .serviceType(contractProviderSupplier.getServiceType())
+                        .serviceType(contractProviderSupplier.getServiceTypeBranch().getIdServiceType())
                         .serviceDuration(contractProviderSupplier.getServiceDuration())
                         .serviceName(contractProviderSupplier.getServiceName())
                         .contractReference(contractProviderSupplier.getContractReference())
@@ -331,8 +328,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .dateStart(contractProviderSupplier.getDateStart())
                         .endDate(contractProviderSupplier.getEndDate())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
-                        .activity(contractProviderSupplier.getActivity())
-                        .requirements(contractProviderSupplier.getRequirements())
+                        .activities(contractProviderSupplier.getActivities()
+                                .stream().map(Activity::getIdActivity).toList())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
                         .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
                         .branch(contractProviderSupplier.getBranch().getIdBranch())
@@ -343,17 +340,19 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public ContractAndSupplierCreateResponseDto saveContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto) {
-        Activity activity = null;
+        List<Activity> activities = List.of();
         List<Requirement> requirements = List.of();
 
-        if (contractAndSupplierCreateRequestDto.getBranch() == null || contractAndSupplierCreateRequestDto.getBranch().isEmpty()) {
+        if (contractAndSupplierCreateRequestDto.getIdBranch() == null || contractAndSupplierCreateRequestDto.getIdBranch().isEmpty()) {
             throw new BadRequestException("Invalid branches");
         }
-        Branch branch = branchRepository.findById(contractAndSupplierCreateRequestDto.getBranch()).orElseThrow(() -> new NotFoundException("Branch not found"));
+        Branch branch = branchRepository.findById(contractAndSupplierCreateRequestDto.getIdBranch())
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
         List<Branch> branches = new ArrayList<>();
         branches.add(branch);
 
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch());
+        List<DocumentBranch> documentBranch = documentBranchRepository
+                .findAllByBranch_IdBranchAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getIdBranch());
         List<DocumentMatrix> documentMatrixList = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
                 .toList();
@@ -385,36 +384,16 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         documentProviderSupplierRepository.saveAll(documentProviderSuppliers);
 
 
-        UserClient userClient = userClientRepository.findById(contractAndSupplierCreateRequestDto.getResponsible()).orElseThrow(() -> new NotFoundException("User not found"));
+        UserClient userClient = userClientRepository.findById(contractAndSupplierCreateRequestDto.getIdResponsible())
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        activity = activityRepository.findById(contractAndSupplierCreateRequestDto.getIdActivity()).orElseThrow(() -> new NotFoundException("Activity not found"));
-
-        if (contractAndSupplierCreateRequestDto.getRequirements() != null && !contractAndSupplierCreateRequestDto.getRequirements().isEmpty()) {
-            requirements = requirementRepository.findAllById(contractAndSupplierCreateRequestDto.getRequirements());
-            if (requirements.isEmpty()) {
-                throw new NotFoundException("Requirements not found");
-            }
-        }
-
-        switch (activity.getRisk()) {
-            case LOW -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndLowRiskIsTrueAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
-            }
-            case MEDIUM -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndMediumRiskIsTrueAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
-            }
-            case HIGH -> {
-                documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndHighRiskIsTrueAndIsActiveIsTrue(contractAndSupplierCreateRequestDto.getBranch(), "Documentos empresa-serviço");
-            }
-            default -> throw new BadRequestException("Invalid activity");
-        }
+        activities = activityRepository.findAllById(contractAndSupplierCreateRequestDto.getIdActivityList());
 
         documentMatrixList = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)
                 .toList();
 
         ContractProviderSupplier newContractSupplier = ContractProviderSupplier.builder()
-                .serviceType(contractAndSupplierCreateRequestDto.getServiceType())
                 .serviceDuration(contractAndSupplierCreateRequestDto.getServiceDuration())
                 .serviceName(contractAndSupplierCreateRequestDto.getServiceName())
                 .contractReference(contractAndSupplierCreateRequestDto.getContractReference())
@@ -425,8 +404,6 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .dateStart(contractAndSupplierCreateRequestDto.getStartDate())
                 .endDate(contractAndSupplierCreateRequestDto.getEndDate())
                 .subcontractPermission(contractAndSupplierCreateRequestDto.getSubcontractPermission())
-                .activity(activity)
-                .requirements(requirements)
                 .providerSupplier(savedProviderSupplier)
                 .branch(branch)
                 .build();
@@ -462,7 +439,6 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                                         .build())
                         .collect(Collectors.toList()))
                 .idContract(savedContractProviderSupplier.getIdContract())
-                .serviceType(savedContractProviderSupplier.getServiceType())
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .contractReference(savedContractProviderSupplier.getContractReference())
@@ -473,8 +449,6 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .startDate(savedContractProviderSupplier.getDateStart())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
-                .activity(savedContractProviderSupplier.getActivity())
-                .requirements(savedContractProviderSupplier.getRequirements())
                 .providerSupplierName(savedContractProviderSupplier.getProviderSupplier().getCorporateName())
                 .idBranch(savedContractProviderSupplier.getBranch().getIdBranch())
                 .branchName(savedContractProviderSupplier.getBranch().getName())

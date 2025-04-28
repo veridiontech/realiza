@@ -46,8 +46,7 @@ public class Activity {
     private Branch branch;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "activity")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @ManyToMany(mappedBy = "activities")
     private List<Contract> contracts;
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.contract;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,10 @@ public class ContractProviderSupplier extends Contract {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "idServiceType")
+    private ServiceTypeBranch serviceTypeBranch;
+
     @ManyToOne
     @JoinColumn(name = "idProviderSuppllier")
     private ProviderSupplier providerSupplier;
