@@ -1066,9 +1066,8 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-
                     <div>
-                      <Label className="text-white">Nome do Serviço</Label>
+                      <Label className="text-white">Tipo do Serviço</Label>
                       <Input {...registerContract("serviceName")} />
                       {errorsContract.serviceName && (
                         <span className="text-red-500">
@@ -1076,6 +1075,7 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
+
                     {isSsma === true && (
                       <div><div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo de atividade</Label>
@@ -1102,7 +1102,10 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col gap-1">
+</div>)}
+
+
+<div className="flex flex-col gap-1">
                       <Label className="text-white">
                         Descrição detalhada do serviço
                       </Label>
@@ -1115,8 +1118,7 @@ export function ModalTesteSendSupplier() {
                           {errorsContract.description.message}
                         </span>
                       )}
-                    </div></div>)}
-                    
+                    </div>
                     {isLoading ? (
                       <Button className="bg-realizaBlue" type="submit">
                         <Oval

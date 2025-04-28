@@ -1,13 +1,13 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+//   AlertDialogTrigger,
+// } from "@/components/ui/alert-dialog";
 // import { BoxNonSelected } from "../new-documents-page/box-non-selected";
 import { useDocument } from "@/context/Document-provider";
 import { useBranch } from "@/context/Branch-provider";
@@ -62,33 +62,33 @@ export function ActivitiesBox() {
   };
 
   // Envio de documentos nao selecionados
-  const sendDocuments = async (
-    isSelected: boolean,
-    idDocumentation: string[],
-  ) => {
-    // const
-    const token = localStorage.getItem("tokenClient");
-    try {
-      console.log(
-        "selecionando documentos não selecionados:",
-        filterIdDocuments,
-      );
-      await axios.post(
-        `${ip}/document/branch/document-matrix/update`,
-        idDocumentation,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            isSelected: { isSelected },
-          },
-        },
-      );
-    } catch (err) {
-      console.log("erro ao enviar documento", err);
-    }
-  };
+  // const sendDocuments = async (
+  //   isSelected: boolean,
+  //   idDocumentation: string[],
+  // ) => {
+  //   // const
+  //   const token = localStorage.getItem("tokenClient");
+  //   try {
+  //     console.log(
+  //       "selecionando documentos não selecionados:",
+  //       filterIdDocuments,
+  //     );
+  //     await axios.post(
+  //       `${ip}/document/branch/document-matrix/update`,
+  //       idDocumentation,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params: {
+  //           isSelected: { isSelected },
+  //         },
+  //       },
+  //     );
+  //   } catch (err) {
+  //     console.log("erro ao enviar documento", err);
+  //   }
+  // };
 
   const filterIdDocuments = nonSelected.map(
     (document) => document.idDocumentation,
@@ -149,7 +149,7 @@ export function ActivitiesBox() {
       <div>
         <BoxActivities activities={activities} />
       </div>
-      <div className="flex flex-col gap-5">
+      {/* <div className="flex flex-col gap-5">
         <div>
           <AlertDialog>
             <AlertDialogTrigger
@@ -186,7 +186,7 @@ export function ActivitiesBox() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </div>
+      </div> */}
       <div>
         <div className="w-[35vw] border p-5 shadow-md">
           <div className="flex items-center gap-2 rounded-md border p-2">
