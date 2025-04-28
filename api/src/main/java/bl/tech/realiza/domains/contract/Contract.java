@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.contract;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
@@ -26,7 +27,6 @@ public abstract class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idContract;
-    private String serviceType;
     private String serviceDuration;
     private String serviceName;
     private String contractReference;
@@ -36,8 +36,13 @@ public abstract class Contract {
     private Boolean finished = false;
     @Builder.Default
     private ExpenseType expenseType = ExpenseType.NENHUM;
+    @Builder.Default
+    private Boolean labor = false;
+    @Builder.Default
+    private Boolean hse = false;
     private Date dateStart;
     private Date endDate;
+
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
@@ -48,21 +53,22 @@ public abstract class Contract {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
+
     @ManyToOne
     @JoinColumn(name = "idUser")
     private User responsible;
 
     @ManyToOne
-    @JoinColumn(name = "idActivity")
-    private Activity activity;
+    @JoinColumn(name = "idServiceType")
+    private ServiceTypeBranch serviceTypeBranch;
 
     @ManyToMany
     @JoinTable(
-            name = "CONTRACT_REQUIREMENTS",
+            name = "CONTRACT_ACTIVITY",
             joinColumns = @JoinColumn(name = "idContract"),
-            inverseJoinColumns = @JoinColumn(name = "idRequirement", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+            inverseJoinColumns = @JoinColumn(name = "idActivity", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
     )
-    private List<Requirement> requirements;
+    private List<Activity> activities;
 
     @ManyToMany(mappedBy = "contracts")
     private List<Employee> employees;

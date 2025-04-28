@@ -28,8 +28,7 @@ public class ContractResponseDto {
     private Date endDate;
     private Boolean subcontractPermission;
     private String contractSupplierId;
-    private Activity activity;
-    private List<Requirement> requirements;
+    private List<String> activities;
 
     // client
     private String branchName;
