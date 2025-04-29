@@ -2,15 +2,19 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Eye, Pencil, UserPlus, Ban } from "lucide-react";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 export function TableServiceProvider() {
   const [suppliers, setSuppliers] = useState<any>([]);
-  const [loading, setLoading] = useState<boolean>(false);  
+  const [loading, setLoading] = useState<boolean>(false);
   const { selectedBranch } = useBranch();
+  const [isOpen, setIsOpen] = useState(false);
+  const [action, setAction] = useState<string>("");
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
-    setLoading(true); 
+    setLoading(true);
     try {
       const res = await axios.get(
         `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
@@ -20,14 +24,24 @@ export function TableServiceProvider() {
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
     } finally {
-      setLoading(false);  
+      setLoading(false);
     }
+  };
+
+  const openModal = (actionType: string) => {
+    setAction(actionType);
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+    setAction("");
   };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
-      setSuppliers([]); 
+      setSuppliers([]);
     }
   }, [selectedBranch]);
 
@@ -53,6 +67,21 @@ export function TableServiceProvider() {
                   ? supplier.branches.map((b: any) => b.nameBranch).join(", ")
                   : "Nenhuma filial associada"}
               </p>
+              <p className="text-sm font-semibold text-gray-700">Ações:</p>
+              <div className="flex gap-2">
+                <button title="Visualizar contrato" onClick={() => openModal("Visualizar")}>
+                  <Eye className="w-5 h-5" />
+                </button>
+                <button title="Editar" onClick={() => openModal("Editar")}>
+                  <Pencil className="w-5 h-5" />
+                </button>
+                <button title="Alocar funcionário" onClick={() => openModal("Alocar")}>
+                  <UserPlus className="w-5 h-5" />
+                </button>
+                <button title="Finalizar" onClick={() => openModal("Finalizar")}>
+                  <Ban className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           ))
         ) : (
@@ -66,6 +95,7 @@ export function TableServiceProvider() {
               <th className="border border-gray-300 p-2 text-left">Nome do Fornecedor</th>
               <th className="border border-gray-300 p-2 text-left">CNPJ</th>
               <th className="border border-gray-300 p-2 text-left">Filiais que Atua</th>
+              <th className="border border-gray-300 p-2 text-left">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -85,6 +115,20 @@ export function TableServiceProvider() {
                       ? supplier.branches.map((b: any) => b.nameBranch).join(", ")
                       : "Nenhuma filial associada"}
                   </td>
+                  <td className="border border-gray-300 p-2 space-x-2">
+                    <button title="Visualizar contrato" onClick={() => openModal("Visualizar")}>
+                      <Eye className="w-5 h-5" />
+                    </button>
+                    <button title="Editar" onClick={() => openModal("Editar")}>
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button title="Alocar funcionário" onClick={() => openModal("Alocar")}>
+                      <UserPlus className="w-5 h-5" />
+                    </button>
+                    <button title="Finalizar" onClick={() => openModal("Finalizar")}>
+                      <Ban className="w-5 h-5" />
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -97,6 +141,24 @@ export function TableServiceProvider() {
           </tbody>
         </table>
       </div>
+      {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg w-96 relative"
+            style={{ backgroundImage: `url(${bgModalRealiza})`, backgroundSize: 'cover' }}
+          >
+            <h2 className="text-lg font-semibold text-white">{action}</h2>
+            <div className="flex justify-end">
+              <button
+                className="bg-realizaBlue text-white px-4 py-2 rounded"
+                onClick={closeModal}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
