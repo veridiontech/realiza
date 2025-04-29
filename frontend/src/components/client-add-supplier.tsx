@@ -340,7 +340,7 @@ export function ModalTesteSendSupplier() {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="bg-realizaBlue">Cadastrar novo prestador</Button>
+          <Button className="bg-realizaBlue hidden md:block">Cadastrar novo prestador</Button>
         </DialogTrigger>
         <DialogContent
           style={{
@@ -350,7 +350,7 @@ export function ModalTesteSendSupplier() {
         >
           <DialogHeader>
             <DialogTitle className="text-white">
-              Cadastrar novo Subcontratado
+              Cadastrar Subcontratado
             </DialogTitle>
           </DialogHeader>
           <div>
@@ -486,7 +486,7 @@ export function ModalTesteSendSupplier() {
             </form>
             <Dialog open={nextModal} onOpenChange={setNextModal}>
               <DialogContent
-                className="max-w-[45vw] border-none"
+                className="max-w-[95vw] md:max-w-[45vw] border-none"
                 style={{
                   backgroundImage: `url(${bgModalRealiza})`,
                 }}
@@ -711,13 +711,16 @@ export function ModalTesteSendSupplier() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-sky-700">Cadastrar novo prestador</Button>
+        <Button className=" bg-sky-700 hidden md:block">Cadastrar novo prestador</Button>
+      </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="bg-sky-700 md:hidden h-[8vw] w-[8vw]">+</Button>
       </DialogTrigger>
       <DialogContent
         style={{
           backgroundImage: `url(${bgModalRealiza})`,
         }}
-        className="max-w-[45vw]"
+        className="max-w-[90vw] md:max-w-[45vw]"
       >
         <DialogHeader>
           <DialogTitle className="text-white">
@@ -736,7 +739,7 @@ export function ModalTesteSendSupplier() {
         <div>
           <div className="flex flex-col gap-2">
             <Label className="text-white">Selecione uma das opções</Label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <label className="flex items-center gap-1 text-white">
                 <input
                   type="radio"
@@ -764,12 +767,12 @@ export function ModalTesteSendSupplier() {
             >
               <div className="relative">
                 <Label className="text-white">CNPJ</Label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Input
                     type="text"
                     placeholder="Insira o cnpj do prestador..."
                     {...register("cnpj")}
-                    className="pr-10"
+                    className="w-full"
                   />
                   {isLoading ? (
                     <div
@@ -839,13 +842,13 @@ export function ModalTesteSendSupplier() {
             >
               <div className="relative">
                 <Label className="text-white">CNPJ</Label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Input
                     type="text"
                     placeholder="Insira o cnpj do prestador..."
                     {...registerSubContract("cnpj")}
                     defaultValue={getValues("cnpj") || ""}
-                    className="pr-10"
+                    className="w-full"
                   />
                   {isLoading ? (
                     <div
@@ -957,7 +960,7 @@ export function ModalTesteSendSupplier() {
           )}
           <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent
-              className="max-w-[45vw] border-none"
+              className="max-w-[95vw] md:max-w-[45vw] border-none"
               style={{
                 backgroundImage: `url(${bgModalRealiza})`,
               }}

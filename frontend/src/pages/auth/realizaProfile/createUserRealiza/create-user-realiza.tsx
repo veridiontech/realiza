@@ -79,13 +79,13 @@ export function CreateUserRealiza() {
       for (const pair of formData.entries()) {
         console.log(`${pair[0]}:`, pair[1]);
       }
-  
+
       await axios.post(`${ip}/user/manager`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       console.log("Usuário criado com sucesso");
       toast.success("Sucesso ao criar novo usuário Realiza");
     } catch (err) {
@@ -103,13 +103,28 @@ export function CreateUserRealiza() {
   };
 
   return (
-    <div className="dark:bg-primary m-20 flex flex-col gap-8 rounded-md bg-white p-6 shadow-md lg:p-10">
+    <div className="dark:bg-primary md:m-20 flex flex-col gap-8 rounded-md bg-white p-6 shadow-md lg:p-10 w-[100vw] md:w-[90vw]">
       <h1 className="text-xl font-bold lg:text-2xl">
         Crie um novo usuário para Realiza
       </h1>
       <form onSubmit={handleSubmit(createUser)} className="flex flex-col gap-6">
         <div className="dark:bg-primary flex items-center justify-between gap-6 rounded-md border p-6 shadow-md">
           <div className="flex w-full flex-col gap-4 lg:w-[65%]">
+            
+          <div className="md:hidden flex w-full flex-col gap-4 lg:w-[30%]">
+            <div className="flex h-[25vh] md:w-[20vw] items-center justify-center rounded-md bg-gray-300 w-full">
+              {previewImage ? (
+                <img src={previewImage} className="h-full w-full object-cover rounded-md" alt="Preview" />
+              ) : (
+                <User size={94} />
+              )}
+            </div>
+            <div className="flex flex-col items-start">
+              <p className="font-semibold">Nome: {userPreview.firstName} {userPreview.surname}</p>
+              <p className="font-semibold">Email: {userPreview.email}</p>
+            </div>
+          </div>
+
             <h2 className="text-lg font-semibold">Informações Pessoais</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -155,26 +170,26 @@ export function CreateUserRealiza() {
               {errors.profilePicture && <p className="text-red-500">{errors.profilePicture.message}</p>}
             </div>
             <div>
-                <Label>Senha</Label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    {...register("password")}
-                    className="pr-10 dark:bg-white"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? "🔒" : "👁️"}
-                  </button>
-                </div>
-                {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+              <Label>Senha</Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  className="pr-10 dark:bg-white"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "🔒" : "👁️"}
+                </button>
               </div>
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+            </div>
           </div>
 
-          <div className="flex w-full flex-col gap-4 lg:w-[30%]">
+          <div className="hidden md:block w-full flex-col gap-4 lg:w-[30%]">
             <div className="flex h-[25vh] w-[20vw] items-center justify-center rounded-md bg-gray-300">
               {previewImage ? (
                 <img src={previewImage} className="h-full w-full object-cover rounded-md" alt="Preview" />

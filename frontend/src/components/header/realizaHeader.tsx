@@ -149,9 +149,12 @@ export function Header() {
   
           <div className="flex flex-col gap-3 items-center">
             <div className="flex items-center gap-4">
-              <span className="text-realizaBlue mr-4 text-xl">
+              <div className="hidden md:block text-realizaBlue mr-4 text-xl">
                 Cliente Selecionado:
-              </span>
+              </div>
+              <div className="block md:hidden text-realizaBlue mr-4 text-xl">
+                Cliente: 
+              </div>
               <select
                 onChange={(e) => handleSelectClient(e.target.value)}
                 defaultValue=""
@@ -391,9 +394,12 @@ export function Header() {
 
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-4">
-            <span className="text-realizaBlue mr-4 text-base">
-              Cliente Selecionado:
-            </span>
+          <div className="hidden md:block text-realizaBlue mr-4 text-xl">
+                Cliente Selecionado:
+              </div>
+              <div className="block md:hidden text-realizaBlue mr-4 text-xl">
+                Cliente: 
+              </div>
             <select
               onChange={(e) => handleSelectClient(e.target.value)}
               defaultValue=""

@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { AddNewBranch } from "./branchs/modals/add-new-branch";
 import { UltraSection } from "./ultra/ultra-branchs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
@@ -277,12 +278,13 @@ export function Dashboard() {
                         <DialogTrigger asChild>
                           <Button className="bg-realizaBlue md:hidden">+</Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent 
+                        style={{ backgroundImage: `url(${bgModalRealiza})` }}>
                           <DialogHeader>
-                            <DialogTitle className="flex flex-col md:flex-row md:items-center gap-2">
+                            <DialogTitle className="flex flex-col md:flex-row md:items-center gap-2 text-white">
                               Criar usuário para o cliente{" "}
                               {client ? (
-                                <span className="font-semibold text-realizaBlue">
+                                <span className="font-semibold text-white">
                                   {client.corporateName}
                                 </span>
                               ) : (
@@ -297,7 +299,7 @@ export function Dashboard() {
                               className="m-2 flex flex-col gap-5"
                             >
                               <div>
-                                <Label >Nome</Label>
+                                <Label className="text-white">Nome</Label>
                                 <Input type="text" {...register("firstName")} placeholder="Digite seu nome" />
                                 {errors.firstName && (
                                   <span className="text-sm text-red-600">
@@ -307,7 +309,7 @@ export function Dashboard() {
                               </div>
 
                               <div>
-                                <Label>Sobrenome</Label>
+                                <Label className="text-white">Sobrenome</Label>
                                 <Input type="text" {...register("surname")} placeholder="Digite seu sobrenome"/>
                                 {errors.surname && (
                                   <span className="text-sm text-red-600">
@@ -317,7 +319,7 @@ export function Dashboard() {
                               </div>
 
                               <div>
-                                <Label>Email</Label>
+                                <Label className="text-white">Email</Label>
                                 <Input type="email" {...register("email")} placeholder="Digite seu e-mail" />
                                 {errors.email && (
                                   <span className="text-sm text-red-600">
@@ -327,7 +329,7 @@ export function Dashboard() {
                               </div>
 
                               <div>
-                                <Label>CPF</Label>
+                                <Label className="text-white">CPF</Label>
                                 <Input type="text" {...register("cpf")} placeholder="Digite seu CPF" />
                                 {errors.cpf && (
                                   <span className="text-sm text-red-600">
@@ -337,7 +339,7 @@ export function Dashboard() {
                               </div>
 
                               <div>
-                                <Label>Telefone</Label>
+                                <Label className="text-white">Telefone</Label>
                                 <Input type="text" {...register("cellPhone")} placeholder="Digite seu telefone" />
                                 {errors.cellPhone && (
                                   <span className="text-sm text-red-600">
@@ -347,7 +349,7 @@ export function Dashboard() {
                               </div>
 
                               <div>
-                                <Label>Cargo</Label>
+                                <Label className="text-white">Cargo</Label>
                                 <Input
                                   type="text"
                                   {...register("position")}
@@ -361,7 +363,7 @@ export function Dashboard() {
                               </div>
 
                               <div>
-                                <Label>Senha</Label>
+                                <Label className="text-white">Senha</Label>
                                 <Input type="password" {...register("password")} placeholder="Digite sua senha"/>
                                 {errors.password && (
                                   <span className="text-sm text-red-600">

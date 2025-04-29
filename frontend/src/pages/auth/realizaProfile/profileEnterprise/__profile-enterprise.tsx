@@ -14,6 +14,8 @@ import { useUser } from "@/context/user-provider";
 // import { z } from "zod";
 // import { useForm } from "react-hook-form";
 // import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // const profileLogoClientFormSchema = z.object({
 //   file: z
@@ -101,7 +103,17 @@ export function ProfileEnterpriseReprise() {
         <Helmet title="profile" />
         <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
           <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
-            <div className="bg-realizaBlue min-h-[220px] w-full rounded-t-xl" />
+            <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" >
+            {/* <div className="md:hidden absolute right-0 top-0">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-white text-sky-800 shadow-sm hover:bg-gray-100 transition">
+                    Editar perfil empresarial
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
+            </div> */}
+            </div>
             <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
               <div className="flex flex-col items-center justify-between md:flex-row">
                 <div className="relative bottom-10 left-1 flex items-center gap-4">
@@ -153,7 +165,7 @@ export function ProfileEnterpriseReprise() {
                   <span>E-mail: {supplier?.email || "Não disponível"}</span>
                 </div>
                 <div className="flex flex-row items-center gap-2">
-                    <Locate/>
+                  <Locate />
                   <span className="flex items-center gap-2">
                     <span>Cep: </span>
                     <span>{supplier?.cep || "Não disponível"}</span>
@@ -167,25 +179,36 @@ export function ProfileEnterpriseReprise() {
       </>
     );
   }
-  
+
 
   return (
     <>
       <Helmet title="profile" />
       <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
         <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
-          <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" />
+          <div className="bg-realizaBlue relative min-h-[100px] w-full rounded-t-xl">
+            {/* <div className="md:hidden absolute right-0 top-0">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-white text-sky-800 shadow-sm hover:bg-gray-100 transition">
+                  Editar perfil empresarial
+                  </Button>
+                </DialogTrigger>
+                <EditModalEnterprise />
+              </Dialog>
+            </div> */}
+          </div>
           <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
               <div className="relative bottom-10 left-1 flex items-center gap-4">
-              <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
-                      <div className="text-[40px] text-white">
-                        {firstLetter}
-                        {lastLetter}
-                      </div>
-                    </div>
+                <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
+                  <div className="text-[40px] text-white">
+                    {firstLetter}
+                    {lastLetter}
+                  </div>
+                </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
-                  <div className="text-lg font-medium text-sky-800">
+                  <div className="text-lg font-medium text-sky-800 mt-5">
                     {client ? (
                       <h2>{client.tradeName}</h2>
                     ) : (

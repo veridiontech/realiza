@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import { Header } from "@/components/header/realizaHeader";
-import { ChatBotToggle } from "@/components/chat-bot/chat-bot-toggle";
+// import { ChatBotToggle } from "@/components/chat-bot/chat-bot-toggle";
 import { useUser } from "@/context/user-provider";
 import { Blocks } from "react-loader-spinner";
 
@@ -37,7 +37,7 @@ export function AppLayout() {
       <Header />
       <div className="dark:bg-primary-foreground flex-grow bg-[#F4F4F5]">
         <Outlet />
-        <ChatBotToggle />
+        {/* <ChatBotToggle /> */}
       </div>
     </div>
   );

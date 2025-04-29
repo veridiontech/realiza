@@ -20,8 +20,8 @@ export function EnterpriseResume() {
               <h3 className="text-lg font-medium">Cliente não selecionado</h3>
             )}
             <div className="flex items-center gap-2">
-              <strong className="font-medium">Empresa:</strong> 
-              {client ? (<h3>{client.corporateName}</h3>):(<Skeleton className="w-[100px] h-[8px] bg-gray-200 rounded-full" />)}
+              <strong className="font-medium md:font-md">Empresa:</strong> 
+              {client ? (<h3 >{client.corporateName}</h3>):(<Skeleton className="w-[100px] h-[8px] bg-gray-200 rounded-full" />)}
             </div>
             <div className="flex items-center gap-2">
               <strong className="font-medium">CNPJ:</strong> 
