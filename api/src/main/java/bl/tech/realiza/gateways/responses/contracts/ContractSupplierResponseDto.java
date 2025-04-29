@@ -26,8 +26,8 @@ public class ContractSupplierResponseDto {
     private Boolean subcontractPermission;
     private Date dateStart;
     private Contract.IsActive isActive;
-    private Activity activity;
-    private List<Requirement> requirements;
+    private List<String> activities;
+    private List<String> requirements;
     private String idBranch;
     private String nameBranch;
     private String idSupplier;

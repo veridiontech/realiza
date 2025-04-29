@@ -1,21 +1,20 @@
-package bl.tech.realiza.usecases.impl.contracts;
+package bl.tech.realiza.usecases.impl.contracts.activity;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
-import bl.tech.realiza.gateways.requests.contracts.ActivityRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityDocumentResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ActivityResponseDto;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudActivity;
+import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

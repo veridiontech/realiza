@@ -12,28 +12,98 @@ import { BoxNonSelected } from "../new-documents-page/box-non-selected";
 import { propsDocument } from "@/types/interfaces";
 import { BoxSelected } from "../new-documents-page/box-selected";
 import { useDocument } from "@/context/Document-provider";
+import { ip } from "@/utils/ip";
+import axios from "axios";
+import { useBranch } from "@/context/Branch-provider";
+import { useEffect, useState } from "react";
 
 export function TrainingBox() {
-  const { documents, nonSelected } = useDocument();
+    const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
+    const [notSelectedDocument, setNotSelectedDocument] = useState([])
+    const [selectedDocument, setSelectedDocument] = useState<any>([])
+    const { selectedBranch } = useBranch();
 
-  const mockDocumentsNonSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 1" },
-    { idDocument: "2", name: "Documento 2" },
-    { idDocument: "3", name: "Documento 3" },
-    { idDocument: "4", name: "Documento 4" },
-  ];
+  const getDocument = async () => {
+    const token = localStorage.getItem("tokenClient");
+    try {
+        const resSelected = await axios.get(
+        `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: { documenTypeName: "SAUDE", isSelected: true },
+        },
+      );
+      const resNonSelected = await axios.get(
+        `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: { documenTypeName: "SAUDE", isSelected: false },
+        },
+      );
+      console.log("teste", resSelected.data);
+      console.log("teste", resNonSelected.data);
 
-  const mockDocumentsSelected: propsDocument[] = [
-    { idDocument: "1", name: "Documento 11231231" },
-    { idDocument: "2", name: "Documento 21231231" },
-    { idDocument: "3", name: "Documento 31231231" },
-    { idDocument: "4", name: "Documento 4231321" },
-  ];
+      setNotSelectedDocument(resNonSelected.data)
+      setSelectedDocument(resSelected.data)
+    } catch (err) {
+      console.log("erro ao buscar documentos:", err);
+    }
+  };
+
+    const filterIdDocuments = nonSelected
+    .map((document: propsDocument) => document.idDocumentation)
+    // .map((document) => document.idDocumentation);
+  
+    const filterIdDocumentsSelected = documents
+    .map((document: propsDocument) => document.idDocumentation)
+
+  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+    // const 
+    const token = localStorage.getItem("tokenClient")
+    try {
+      console.log("selecionando documentos não selecionados:", idDocumentation);
+      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          isSelected,
+        }
+      })
+      clearArray()
+      pullDatas()
+    }catch(err) {
+      console.log("erro ao enviar documento", err );
+      
+    }
+  }
+
+  useEffect(() => {
+    if(selectedBranch?.idBranch) {
+      getDocument()
+    }
+   
+  }, [selectedBranch?.idBranch])
+
+  const clearArray = () => {
+    setDocuments([])
+    setNonSelected([])
+    setNotSelectedDocument([])
+    setSelectedDocument([])
+  }
+
+  const pullDatas = () => {
+    getDocument()
+  }
 
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={mockDocumentsNonSelected} />
+        <BoxNonSelected documents={notSelectedDocument} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -50,9 +120,9 @@ export function TrainingBox() {
               </AlertDialogHeader>
               <div>
                 <ul>
-                  {nonSelected.length > 0 ? (
+                  {filterIdDocuments.length > 0 ? (
                     nonSelected.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -61,7 +131,7 @@ export function TrainingBox() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -82,7 +152,7 @@ export function TrainingBox() {
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocument}>{doc.name}</li>
+                      <li key={doc.idDocumentation}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -98,7 +168,7 @@ export function TrainingBox() {
         </div>
       </div>
       <div>
-        <BoxSelected documents={mockDocumentsSelected} />
+        <BoxSelected documents={selectedDocument} />
       </div>
     </div>
   );

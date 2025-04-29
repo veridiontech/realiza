@@ -17,7 +17,7 @@ import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
 import { propsDocument } from "@/types/interfaces";
-import { boolean } from "zod";
+// import { boolean } from "zod";
 
 export function ThirdCompany() {
   const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
@@ -35,7 +35,7 @@ export function ThirdCompany() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentGroupName: "Documento empresa", isSelected: true },
+          params: { documenTypeName: "CADASTRO E CERTIDOES", isSelected: true },
         },
       );
       const resNonSelected = await axios.get(
@@ -44,7 +44,7 @@ export function ThirdCompany() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentGroupName: "Documento empresa", isSelected: false },
+          params: { documenTypeName: "CADASTRO E CERTIDOES", isSelected: false },
         },
       );
       console.log("teste", resSelected.data);

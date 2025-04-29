@@ -20,6 +20,8 @@ import { TrainingBox } from "../boxes-selected/services";
 import { OrtherRequirements } from "../boxes-selected/orther-requirements";
 import { useDocument } from "@/context/Document-provider";
 import { ActivitiesBox } from "../boxes-selected/activities";
+import { AmbientBox } from "../boxes-selected/ambient-box";
+import { TrabalhistaBox } from "../boxes-selected/trabalhista-box";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function NewDocumentBox() {
@@ -92,7 +94,7 @@ export function NewDocumentBox() {
             handleClickToggle();
           }}
         >
-          Empresa terceiros
+          Cadastro e certidões
         </Button>
         <Button
           variant={"ghost"}
@@ -106,7 +108,7 @@ export function NewDocumentBox() {
             handleClickToggle();
           }}
         >
-          Colaboradores terceiros
+          Saúde
         </Button>
                           {/* <Button
             variant={"ghost"}
@@ -119,36 +121,60 @@ export function NewDocumentBox() {
           >
             Treinamentos
           </Button> */}
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "otherRequirements"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("otherRequirements");
-            handleClickToggle();
-          }}
-        >
-          Outras exigências
-        </Button>
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "activities"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("activities");
-            handleClickToggle();
-          }}
-        >
-          Atividades
-        </Button>
-      </div>
-      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "otherRequirements"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("otherRequirements"), handleClickToggle();
+            }}
+          >
+            Segurança do Trabalho
+          </Button>{" "}
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "ambient"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("ambient"), handleClickToggle();
+            }}
+          >
+            Meio Ambiente
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "trabalhista"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("trabalhista"), handleClickToggle();
+            }}
+          >
+            Trabalhista
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "geral"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("geral"), handleClickToggle();
+            }}
+          >
+            Geral
+          </Button>
+        </div>
+        <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
         <Button
           variant={"ghost"}
           onClick={handlePrev}
@@ -179,7 +205,9 @@ export function NewDocumentBox() {
         {selectedTab === "thirdCollaborators" && <ThirdCollaborators />}
         {selectedTab === "training" && <TrainingBox />}
         {selectedTab === "otherRequirements" && <OrtherRequirements />}
-        {selectedTab === "activities" && <ActivitiesBox />}
+        {selectedTab === "geral" && <ActivitiesBox />}
+        {selectedTab === "ambient" && <AmbientBox />}
+        {selectedTab === "trabalhista" && <TrabalhistaBox />}
       </div>
     </div>
   );

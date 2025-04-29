@@ -28,16 +28,10 @@ public abstract class Document {
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isActive = false;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;
-    @Builder.Default
-    private Boolean lowRisk = true;
-    @Builder.Default
-    private Boolean mediumRisk = true;
-    @Builder.Default
-    private Boolean highRisk = true;
 
     // -------------------------------
     // Relacionamentos INERENTES

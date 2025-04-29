@@ -10,24 +10,26 @@ import java.util.List;
 
 @Data
 public class ContractSupplierPostRequestDto {
-    private String serviceType;
+    // contract
     private String serviceDuration;
     private String serviceName;
+    private String contractReference;
     private String description;
     private String allocatedLimit;
     private String idResponsible;
-    private String idRequester;
-    private Date dateStart;
     private Contract.ExpenseType expenseType;
-    private String contractReference;
+    private Boolean labor;
+    private Boolean hse;
+    private Date dateStart;
+    private String idServiceType;
+    private String idRequester;
     private Boolean subcontractPermission;
-    private String idActivity;
-    private List<String> requirements;
+    private List<String> activities;
     private String idBranch;
     private ProviderDatas providerDatas;
 
     @Data
-    public class ProviderDatas {
+    public static class ProviderDatas {
         private String corporateName;
         private String email;
         private String cnpj;
