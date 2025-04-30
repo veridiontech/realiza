@@ -28,6 +28,24 @@ export function TableServiceProvider() {
     }
   };
 
+  const getContractDetails = async (supplierId: string) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${ip}/contract/supplier/filtered-client`,
+        {
+          params: {
+            supplierId: { supplierId }
+          }
+        }
+      );
+      getContractDetails(res.data);
+    } catch (err) {
+      console.log("Erro ao buscar contrato", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const openModal = (actionType: string) => {
     setAction(actionType);
     setIsOpen(true);
