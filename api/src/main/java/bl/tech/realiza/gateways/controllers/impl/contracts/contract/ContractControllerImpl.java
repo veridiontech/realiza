@@ -24,4 +24,20 @@ public class ContractControllerImpl implements ContractController {
     public ResponseEntity<String> finishContract(@PathVariable String idContract) {
         return ResponseEntity.ok(crudContractImpl.finishContract(idContract));
     }
+
+    @PostMapping("/add-employee/{idContract}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
+    @Override
+    public ResponseEntity<String> addEmployeeToContract(@PathVariable String idContract, @RequestParam String idEmployee) {
+        return ResponseEntity.ok(crudContractImpl.addEmployeeToContract(idContract, idEmployee));
+    }
+
+    @PostMapping("/remove-employee/{idContract}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
+    @Override
+    public ResponseEntity<String> removeEmployeeToContract(@PathVariable String idContract, @RequestParam String idEmployee) {
+        return ResponseEntity.ok(crudContractImpl.removeEmployeeToContract(idContract, idEmployee));
+    }
 }
