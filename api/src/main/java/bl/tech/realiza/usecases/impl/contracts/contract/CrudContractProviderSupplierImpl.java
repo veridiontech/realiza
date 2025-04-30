@@ -1,4 +1,4 @@
-package bl.tech.realiza.usecases.impl.contracts;
+package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
@@ -36,7 +36,7 @@ import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSupplier;
+import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +86,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .orElseThrow(() ->  new NotFoundException("Service Type not found"));
 
         if (contractProviderSupplierRequestDto.getHse()) {
-            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
+            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
         }
 
         activities.forEach(

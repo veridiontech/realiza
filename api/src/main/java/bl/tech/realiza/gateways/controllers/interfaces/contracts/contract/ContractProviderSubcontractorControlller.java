@@ -1,6 +1,5 @@
-package bl.tech.realiza.gateways.controllers.interfaces.contracts;
+package bl.tech.realiza.gateways.controllers.interfaces.contracts.contract;
 
-import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;

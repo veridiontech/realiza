@@ -19,7 +19,7 @@ public interface CrudDocumentBranch {
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
-    List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentGroupName, Boolean isSelected);
+    List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected);
     String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection);
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
     void removeRequiredDocument(String documentId);

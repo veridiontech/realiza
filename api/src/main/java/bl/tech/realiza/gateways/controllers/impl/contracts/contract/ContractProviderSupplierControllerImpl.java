@@ -1,13 +1,13 @@
-package bl.tech.realiza.gateways.controllers.impl.contracts;
+package bl.tech.realiza.gateways.controllers.impl.contracts.contract;
 
-import bl.tech.realiza.gateways.controllers.interfaces.contracts.ContractProviderSupplierControlller;
+import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.ContractProviderSupplierControlller;
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudContractProviderSupplierImpl;
+import bl.tech.realiza.usecases.impl.contracts.contract.CrudContractProviderSupplierImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
