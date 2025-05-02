@@ -1,4 +1,4 @@
-package bl.tech.realiza.usecases.impl.contracts;
+package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
@@ -36,7 +36,7 @@ import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSupplier;
+import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +86,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .orElseThrow(() ->  new NotFoundException("Service Type not found"));
 
         if (contractProviderSupplierRequestDto.getHse()) {
-            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getActivities());
+            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
         }
 
         activities.forEach(
@@ -189,6 +189,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(contractProviderSupplier.getExpenseType())
                 .dateStart(contractProviderSupplier.getDateStart())
                 .endDate(contractProviderSupplier.getEndDate())
+                .finished(contractProviderSupplier.getFinished())
                 .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                 .activities(contractProviderSupplier.getActivities()
                         .stream().map(Activity::getIdActivity).toList())
@@ -208,23 +209,24 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
-                        .serviceType(contractProviderSupplier.getServiceTypeBranch().getIdServiceType())
+                        .serviceType(contractProviderSupplier.getServiceTypeBranch() != null ? contractProviderSupplier.getServiceTypeBranch().getIdServiceType() : null)
                         .serviceDuration(contractProviderSupplier.getServiceDuration())
                         .serviceName(contractProviderSupplier.getServiceName())
                         .contractReference(contractProviderSupplier.getContractReference())
                         .description(contractProviderSupplier.getDescription())
                         .allocatedLimit(contractProviderSupplier.getAllocatedLimit())
-                        .responsible(contractProviderSupplier.getResponsible().getIdUser())
+                        .responsible(contractProviderSupplier.getResponsible() != null ? contractProviderSupplier.getResponsible().getIdUser() : null)
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .dateStart(contractProviderSupplier.getDateStart())
                         .endDate(contractProviderSupplier.getEndDate())
+                        .finished(contractProviderSupplier.getFinished())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                         .activities(contractProviderSupplier.getActivities()
                                 .stream().map(Activity::getIdActivity).toList())
-                        .providerSupplier(contractProviderSupplier.getProviderSupplier().getIdProvider())
-                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getCorporateName())
-                        .branch(contractProviderSupplier.getBranch().getIdBranch())
-                        .branchName(contractProviderSupplier.getBranch().getName())
+                        .providerSupplier(contractProviderSupplier.getProviderSupplier() != null ? contractProviderSupplier.getProviderSupplier().getIdProvider() : null)
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier() != null ? contractProviderSupplier.getProviderSupplier().getCorporateName() : null)
+                        .branch(contractProviderSupplier.getBranch() != null ? contractProviderSupplier.getBranch().getIdBranch() : null)
+                        .branchName(contractProviderSupplier.getBranch() != null ? contractProviderSupplier.getBranch().getName() : null)
                         .build()
         );
     }
@@ -274,6 +276,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .dateStart(savedContractProviderSupplier.getDateStart())
                 .endDate(savedContractProviderSupplier.getEndDate())
+                .finished(savedContractProviderSupplier.getFinished())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
                 .activities(contractProviderSupplier.getActivities()
                         .stream().map(Activity::getIdActivity).toList())
@@ -327,6 +330,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .dateStart(contractProviderSupplier.getDateStart())
                         .endDate(contractProviderSupplier.getEndDate())
+                        .finished(contractProviderSupplier.getFinished())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                         .activities(contractProviderSupplier.getActivities()
                                 .stream().map(Activity::getIdActivity).toList())

@@ -21,6 +21,6 @@ public interface DocumentBranchControlller {
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);
     ResponseEntity<String> addRequiredDocument(String idEnterprise, String documentMatrixId);
     ResponseEntity<Void> removeRequiredDocument(String documentId);
-    ResponseEntity<List<DocumentResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentGroupName, Boolean isSelected);
+    ResponseEntity<List<DocumentResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentTypeName, Boolean isSelected);
     ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, List<String> documentList);
 }

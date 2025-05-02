@@ -10,26 +10,24 @@ import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import io.jsonwebtoken.Claims;
 
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
 
-    private final Dotenv dotenv;
     private final String SECRET_KEY;
     private final long EXPIRATION_TIME;
-    private final BranchRepository branchRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
 
     public JwtService(Dotenv dotenv1, Dotenv dotenv, BranchRepository branchRepository, ProviderSupplierRepository providerSupplierRepository) {
-        this.dotenv = dotenv1;
         this.SECRET_KEY = dotenv.get("SECRET_KEY");
         if (this.SECRET_KEY == null || this.SECRET_KEY.isEmpty()) {
             throw new IllegalArgumentException("SECRET_KEY is missing or empty in the environment variables.");
@@ -45,7 +43,6 @@ public class JwtService {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("EXPIRATION_TIME must be a valid long value.");
         }
-        this.branchRepository = branchRepository;
         this.providerSupplierRepository = providerSupplierRepository;
     }
 
@@ -189,7 +186,7 @@ public class JwtService {
                 .collect(Collectors.toList())
                 : List.of();
 
-        UserResponseDto userResponseDto = UserResponseDto.builder()
+        return UserResponseDto.builder()
                 .idUser((String) claims.getOrDefault("idUser", ""))
                 .branch((String) claims.getOrDefault("idBranch", ""))
                 .supplier((String) claims.getOrDefault("idSupplier", ""))
@@ -207,7 +204,22 @@ public class JwtService {
                 .corporateName((String) claims.getOrDefault("clientCorporateName", ""))
                 .branches(branchesIds)
                 .build();
+    }
 
-        return userResponseDto;
+    public String getIdBranchFromToken() {
+        // Pega o token do contexto de segurança (esse token será passado em cada requisição)
+        String token = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // Extraia o idClient a partir do token
+            return claims.get("idBranch", String.class);  // A chave "idClient" precisa ser a mesma que você usa no seu JWT
+        } catch (Exception e) {
+            return null;  // Se ocorrer algum erro ao ler o token, retorna null
+        }
     }
 }

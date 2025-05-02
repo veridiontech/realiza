@@ -1,8 +1,6 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
 import bl.tech.realiza.domains.contract.Contract;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.sql.Date;
@@ -11,11 +9,14 @@ import java.util.List;
 @Data
 public class ContractSupplierPostRequestDto {
     // contract
-    private String serviceDuration;
+    private String serviceDuration; // remover
     private String serviceName;
     private String contractReference;
     private String description;
-    private String allocatedLimit;
+    private String allocatedLimit; // remover
+    // fazer as rotas de service type
+    // contract/service-type path idBranch
+    // gestao de documentos, mudar documentGroupName para documentTypeName, nomes escritos normal, tratar maiuscula
     private String idResponsible;
     private Contract.ExpenseType expenseType;
     private Boolean labor;
@@ -24,7 +25,7 @@ public class ContractSupplierPostRequestDto {
     private String idServiceType;
     private String idRequester;
     private Boolean subcontractPermission;
-    private List<String> activities;
+    private List<String> idActivities;
     private String idBranch;
     private ProviderDatas providerDatas;
 

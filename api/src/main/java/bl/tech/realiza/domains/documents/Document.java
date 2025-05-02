@@ -22,6 +22,7 @@ public abstract class Document {
     private String title;
     @Enumerated(EnumType.STRING)
     private Status status;
+    private String type;
     private String documentation;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();

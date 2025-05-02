@@ -1,4 +1,4 @@
-package bl.tech.realiza.usecases.impl.contracts;
+package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
@@ -11,7 +11,6 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
-import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
@@ -29,7 +28,7 @@ import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementP
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudContractProviderSubcontractor;
+import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
