@@ -2,22 +2,55 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Eye, Pencil, UserPlus, Ban } from "lucide-react";
+import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
+function Modal({ title, onClose, children }: { title: string, onClose: () => void, children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div
+        className="bg-white p-6 rounded-lg shadow-lg w-96 relative"
+        style={{
+          backgroundImage: `url(${bgModalRealiza})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-white hover:text-gray-300"
+          title="Fechar"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <h2 className="text-lg font-semibold text-white mb-4 pr-6">{title}</h2>
+        <div>{children}</div>
+      </div>
+    </div>
+  );
+}
+
 export function TableServiceProvider() {
-  const [suppliers, setSuppliers] = useState<any>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { selectedBranch } = useBranch();
-  const [isOpen, setIsOpen] = useState(false);
-  const [action, setAction] = useState<string>("");
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAllocateModalOpen, setIsAllocateModalOpen] = useState(false);
+  const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
+  const [finalizeStep, setFinalizeStep] = useState(1);
+  const [selectedReason, setSelectedReason] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [allocateStep, setAllocateStep] = useState(1);
+
+
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
     try {
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`
       );
       console.log("Dados do supplier:", res.data.content);
       setSuppliers(res.data.content);
@@ -26,16 +59,6 @@ export function TableServiceProvider() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const openModal = (actionType: string) => {
-    setAction(actionType);
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-    setAction("");
   };
 
   useEffect(() => {
@@ -69,19 +92,20 @@ export function TableServiceProvider() {
               </p>
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
-                <button title="Visualizar contrato" onClick={() => openModal("Visualizar")}>
+                <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
                   <Eye className="w-5 h-5" />
                 </button>
-                <button title="Editar" onClick={() => openModal("Editar")}>
+                <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                   <Pencil className="w-5 h-5" />
                 </button>
-                <button title="Alocar funcionário" onClick={() => openModal("Alocar")}>
+                <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
                   <UserPlus className="w-5 h-5" />
                 </button>
-                <button title="Finalizar" onClick={() => openModal("Finalizar")}>
+                <button title="Finalizar" onClick={() => setIsFinalizeModalOpen(true)}>
                   <Ban className="w-5 h-5" />
                 </button>
               </div>
+              <p className="text-sm font-semibold text-gray-700">Status:</p>
             </div>
           ))
         ) : (
@@ -96,12 +120,13 @@ export function TableServiceProvider() {
               <th className="border border-gray-300 p-2 text-left">CNPJ</th>
               <th className="border border-gray-300 p-2 text-left">Filiais que Atua</th>
               <th className="border border-gray-300 p-2 text-left">Ações</th>
+              <th className="border border-gray-300 p-2 text-left">Status</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={3} className="border border-gray-300 p-2 text-center">
+                <td colSpan={4} className="border border-gray-300 p-2 text-center">
                   Carregando...
                 </td>
               </tr>
@@ -116,16 +141,16 @@ export function TableServiceProvider() {
                       : "Nenhuma filial associada"}
                   </td>
                   <td className="border border-gray-300 p-2 space-x-2">
-                    <button title="Visualizar contrato" onClick={() => openModal("Visualizar")}>
+                    <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
                       <Eye className="w-5 h-5" />
                     </button>
-                    <button title="Editar" onClick={() => openModal("Editar")}>
+                    <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                       <Pencil className="w-5 h-5" />
                     </button>
-                    <button title="Alocar funcionário" onClick={() => openModal("Alocar")}>
+                    <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
                       <UserPlus className="w-5 h-5" />
                     </button>
-                    <button title="Finalizar" onClick={() => openModal("Finalizar")}>
+                    <button title="Finalizar" onClick={() => setIsFinalizeModalOpen(true)}>
                       <Ban className="w-5 h-5" />
                     </button>
                   </td>
@@ -133,7 +158,7 @@ export function TableServiceProvider() {
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="border border-gray-300 p-2 text-center">
+                <td colSpan={4} className="border border-gray-300 p-2 text-center">
                   Nenhum fornecedor encontrado.
                 </td>
               </tr>
@@ -141,23 +166,166 @@ export function TableServiceProvider() {
           </tbody>
         </table>
       </div>
-      {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            className="bg-white p-6 rounded-lg shadow-lg w-96 relative"
-            style={{ backgroundImage: `url(${bgModalRealiza})`, backgroundSize: 'cover' }}
-          >
-            <h2 className="text-lg font-semibold text-white">{action}</h2>
-            <div className="flex justify-end">
-              <button
-                className="bg-realizaBlue text-white px-4 py-2 rounded"
-                onClick={closeModal}
-              >
-                Fechar
-              </button>
+
+      {isViewModalOpen && (
+        <Modal title="Visualizar Contrato" onClose={() => setIsViewModalOpen(false)}>
+          <p className="text-white">Conteúdo para visualizar o contrato.</p>
+        </Modal>
+      )}
+
+      {isEditModalOpen && (
+        <Modal title="Editar Fornecedor" onClose={() => setIsEditModalOpen(false)}>
+          <p className="text-white">Formulário de edição aqui.</p>
+        </Modal>
+      )}
+
+      {isAllocateModalOpen && (
+        <Modal
+          title="Alocar Funcionário"
+          onClose={() => {
+            setIsAllocateModalOpen(false);
+            setSearchTerm("");
+            setAllocateStep(1);
+          }}
+        >
+          {allocateStep === 1 ? (
+            <div className="text-white space-y-4">
+              <div>
+                <label className="block text-sm font-semibold">Buscar Colaborador:</label>
+                <input
+                  type="text"
+                  placeholder="Digite o nome do colaborador..."
+                  className="w-full px-3 py-2 rounded text-black"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setAllocateStep(2)}
+                  className="bg-realizaBlue px-4 py-2 rounded"
+                >
+                  Próximo
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          ) : (
+            <div className="text-white space-y-4">
+              <p>Você confirma que esses colaboradores selecionados serão alocados ao contrato?</p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setAllocateStep(1)}
+                  className="bg-gray-500 px-4 py-2 rounded"
+                >
+                  Voltar
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAllocateModalOpen(false);
+                    setSearchTerm("");
+                    setAllocateStep(1);
+                  }}
+                  className="bg-green-600 px-4 py-2 rounded"
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          )}
+        </Modal>
+      )}
+      
+      {isFinalizeModalOpen && (
+        <Modal title="Finalizar Contrato" onClose={() => {
+          setIsFinalizeModalOpen(false);
+          setFinalizeStep(1);
+          setSelectedReason("");
+        }}>
+          {finalizeStep === 1 && (
+            <div className="text-white">
+              <p className="mb-4">Deseja finalizar este contrato?</p>
+              <div className="flex gap-4 justify-end">
+                <button
+                  onClick={() => setIsFinalizeModalOpen(false)}
+                  className="bg-gray-600 px-4 py-2 rounded"
+                >
+                  Não
+                </button>
+                <button
+                  onClick={() => setFinalizeStep(2)}
+                  className="bg-red-600 px-4 py-2 rounded"
+                >
+                  Sim
+                </button>
+              </div>
+            </div>
+          )}
+
+          {finalizeStep === 2 && (
+            <div className="text-white space-y-3">
+              <p className="mb-2">Selecione o motivo da finalização:</p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedReason("Contrato Cancelado");
+                    setFinalizeStep(3);
+                  }}
+                  className="bg-red-500 px-4 py-2 rounded"
+                >
+                  Contrato Cancelado
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedReason("Contrato Suspenso");
+                    setFinalizeStep(3);
+                  }}
+                  className="bg-yellow-500 px-4 py-2 rounded"
+                >
+                  Contrato Suspenso
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedReason("Contrato Concluído");
+                    setFinalizeStep(3);
+                  }}
+                  className="bg-green-600 px-4 py-2 rounded"
+                >
+                  Contrato Concluído
+                </button>
+              </div>
+            </div>
+          )}
+
+          {finalizeStep === 3 && (
+            <div className="text-white">
+              <p className="mb-4">
+                Você confirma que está finalizando o contrato pelo motivo de:{" "}
+                <span className="font-bold">{selectedReason}</span>?
+              </p>
+              <div className="flex gap-4 justify-end">
+                <button
+                  onClick={() => {
+                    setFinalizeStep(2);
+                    setSelectedReason("");
+                  }}
+                  className="bg-gray-600 px-4 py-2 rounded"
+                >
+                  Voltar
+                </button>
+                <button
+                  onClick={() => {
+                    setIsFinalizeModalOpen(false);
+                    setFinalizeStep(1);
+                    setSelectedReason("");
+                  }}
+                  className="bg-realizaBlue px-4 py-2 rounded"
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          )}
+        </Modal>
       )}
     </div>
   );
