@@ -72,6 +72,7 @@ public class CrudBranchImpl implements CrudBranch {
         List<DocumentBranch> documentBranchList = documentMatrixList.stream()
                 .map(documentMatrix -> DocumentBranch.builder()
                         .title(documentMatrix.getName())
+                        .type(documentMatrix.getType())
                         .status(Document.Status.PENDENTE)
                         .branch(savedBranch)
                         .documentMatrix(documentMatrix)

@@ -396,7 +396,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     public List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected) {
         branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(id, documentTypeName, isSelected);
+        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(id, documentTypeName.toLowerCase(), isSelected);
 
         return documentBranch.stream()
                 .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
