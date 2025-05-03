@@ -42,7 +42,6 @@ public abstract class Contract {
     private Boolean hse = false;
     private Date dateStart;
     private Date endDate;
-
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
