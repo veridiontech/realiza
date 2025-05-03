@@ -17,11 +17,10 @@ public class ContractResponseDto {
     // provider
     private String idContract;
     private String serviceType;
-    private String serviceDuration;
     private String serviceName;
-    private String contractReference;
     private String description;
-    private String allocatedLimit;
+    private String idResponsible;
+    private String contractReference;
     private String responsible;
     private Contract.ExpenseType expenseType;
     private Boolean finished;

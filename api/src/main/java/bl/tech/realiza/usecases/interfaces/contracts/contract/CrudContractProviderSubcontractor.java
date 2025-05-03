@@ -11,8 +11,8 @@ import java.util.Optional;
 
 public interface CrudContractProviderSubcontractor {
     ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractRequestDto);
-    Optional<ContractResponseDto> findOne(String id);
-    Page<ContractResponseDto> findAll(Pageable pageable);
+    Optional<ContractSubcontractorResponseDto> findOne(String id);
+    Page<ContractSubcontractorResponseDto> findAll(Pageable pageable);
     Optional<ContractResponseDto> update(String id, ContractRequestDto contractRequestDto);
     void delete(String id);
     Page<ContractResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);

@@ -9,14 +9,9 @@ import java.util.List;
 @Data
 public class ContractSupplierPostRequestDto {
     // contract
-    private String serviceDuration; // remover
     private String serviceName;
     private String contractReference;
     private String description;
-    private String allocatedLimit; // remover
-    // fazer as rotas de service type
-    // contract/service-type path idBranch
-    // gestao de documentos, mudar documentGroupName para documentTypeName, nomes escritos normal, tratar maiuscula
     private String idResponsible;
     private Contract.ExpenseType expenseType;
     private Boolean labor;

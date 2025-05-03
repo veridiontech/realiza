@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
+import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class CrudBranchImpl implements CrudBranch {
     private final CenterRepository centerRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
+    private final CrudServiceTypeImpl crudServiceTypeImpl;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -74,14 +76,15 @@ public class CrudBranchImpl implements CrudBranch {
                         .title(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .status(Document.Status.PENDENTE)
+                        .isActive(true)
                         .branch(savedBranch)
                         .documentMatrix(documentMatrix)
                         .build())
                 .collect(Collectors.toList());
 
-        documentBranchRepository.saveAll(documentBranchList);
-
+        crudServiceTypeImpl.transferFromClientToBranch(savedBranch.getClient().getIdClient(),savedBranch.getIdBranch());
         crudActivity.transferFromRepo(savedBranch.getIdBranch());
+        documentBranchRepository.saveAll(documentBranchList);
 
         return BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())

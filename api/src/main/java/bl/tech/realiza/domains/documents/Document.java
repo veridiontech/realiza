@@ -29,7 +29,7 @@ public abstract class Document {
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
-    private Boolean isActive = false;
+    private Boolean isActive = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;
