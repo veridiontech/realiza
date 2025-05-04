@@ -9,7 +9,7 @@ import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 export function ServiceProvider() {
   const { client } = useClient();
-  console.log(client);
+  // console.log(client);
 
   const itemsPerPage = 5;
 

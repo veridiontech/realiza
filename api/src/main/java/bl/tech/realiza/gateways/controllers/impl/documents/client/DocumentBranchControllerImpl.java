@@ -137,9 +137,9 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<List<DocumentResponseDto>> getAllFilteredDocumentBranch(
             @PathVariable String idBranch,
-            @RequestParam String documentGroupName,
+            @RequestParam String documentTypeName,
             @RequestParam Boolean isSelected) {
-        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentGroupName,isSelected));
+        return ResponseEntity.ok(crudDocumentBranch.findAllFilteredDocuments(idBranch,documentTypeName,isSelected));
     }
 
     @PostMapping("/document-matrix/update")

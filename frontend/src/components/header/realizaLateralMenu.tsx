@@ -92,7 +92,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
       <Link to={`/sistema/documents/${user?.idUser}`}>
           <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
           <Paperclip/>
-            <span className="ml-2 text-sm font-medium text-zinc-900">Gestão de documentos</span>
+            <span className="ml-2 text-sm font-medium text-zinc-900">Painel do cliente</span>
           </Button>
       </Link>
 
