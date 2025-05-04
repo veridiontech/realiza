@@ -5,6 +5,25 @@ import { useEffect, useState } from "react";
 import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
+function StatusBadge({ status }: { status: string }) {
+  const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
+
+  const statusStyles: Record<string, string> = {
+    "Contrato Cancelado": "bg-red-600",
+    "Contrato Suspenso": "bg-yellow-400 text-black",
+    "Contrato Concluído": "bg-green-600",
+    "Indefinido": "bg-gray-400",
+  };
+
+  const style = statusStyles[status] || "bg-gray-400";
+
+  return (
+    <span className={`${baseClass} ${style}`}>
+      {status}
+    </span>
+  );
+}
+
 function Modal({ title, onClose, children }: { title: string, onClose: () => void, children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -42,8 +61,7 @@ export function TableServiceProvider() {
   const [selectedReason, setSelectedReason] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [allocateStep, setAllocateStep] = useState(1);
-
-
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -52,7 +70,6 @@ export function TableServiceProvider() {
       const res = await axios.get(
         `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`
       );
-      console.log("Dados do supplier:", res.data.content);
       setSuppliers(res.data.content);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
@@ -60,6 +77,7 @@ export function TableServiceProvider() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -101,17 +119,26 @@ export function TableServiceProvider() {
                 <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
                   <UserPlus className="w-5 h-5" />
                 </button>
-                <button title="Finalizar" onClick={() => setIsFinalizeModalOpen(true)}>
+                <button
+                  title="Finalizar"
+                  onClick={() => {
+                    setSelectedSupplierId(supplier.contract?.idContract);
+                    setIsFinalizeModalOpen(true);
+                  }}
+                >
                   <Ban className="w-5 h-5" />
                 </button>
+
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
+              <StatusBadge status={supplier.status || "Indefinido"} />
             </div>
           ))
         ) : (
           <p className="text-center text-gray-600">Nenhum fornecedor encontrado.</p>
         )}
       </div>
+
       <div className="hidden md:block overflow-x-auto rounded-lg border bg-white p-4 shadow-lg">
         <table className="w-full border-collapse border border-gray-300">
           <thead className="bg-gray-200">
@@ -126,7 +153,7 @@ export function TableServiceProvider() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="border border-gray-300 p-2 text-center">
+                <td colSpan={5} className="border border-gray-300 p-2 text-center">
                   Carregando...
                 </td>
               </tr>
@@ -150,15 +177,25 @@ export function TableServiceProvider() {
                     <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
                       <UserPlus className="w-5 h-5" />
                     </button>
-                    <button title="Finalizar" onClick={() => setIsFinalizeModalOpen(true)}>
+                    <button
+                      title="Finalizar"
+                      onClick={() => {
+                        setSelectedSupplierId(supplier.contract?.idContract);
+                        setIsFinalizeModalOpen(true);
+                      }}
+                    >
                       <Ban className="w-5 h-5" />
                     </button>
+
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <StatusBadge status={supplier.status || "Indefinido"} />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="border border-gray-300 p-2 text-center">
+                <td colSpan={5} className="border border-gray-300 p-2 text-center">
                   Nenhum fornecedor encontrado.
                 </td>
               </tr>
@@ -190,16 +227,14 @@ export function TableServiceProvider() {
         >
           {allocateStep === 1 ? (
             <div className="text-white space-y-4">
-              <div>
-                <label className="block text-sm font-semibold">Buscar Colaborador:</label>
-                <input
-                  type="text"
-                  placeholder="Digite o nome do colaborador..."
-                  className="w-full px-3 py-2 rounded text-black"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <label className="block text-sm font-semibold">Buscar Colaborador:</label>
+              <input
+                type="text"
+                placeholder="Digite o nome do colaborador..."
+                className="w-full px-3 py-2 rounded text-black"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
               <div className="flex justify-end">
                 <button
                   onClick={() => setAllocateStep(2)}
@@ -234,12 +269,13 @@ export function TableServiceProvider() {
           )}
         </Modal>
       )}
-      
+
       {isFinalizeModalOpen && (
         <Modal title="Finalizar Contrato" onClose={() => {
           setIsFinalizeModalOpen(false);
           setFinalizeStep(1);
           setSelectedReason("");
+          setSelectedSupplierId(null);
         }}>
           {finalizeStep === 1 && (
             <div className="text-white">
@@ -270,7 +306,7 @@ export function TableServiceProvider() {
                     setSelectedReason("Contrato Cancelado");
                     setFinalizeStep(3);
                   }}
-                  className="bg-red-500 px-4 py-2 rounded"
+                  className="bg-red-600 px-4 py-2 rounded"
                 >
                   Contrato Cancelado
                 </button>
@@ -279,7 +315,7 @@ export function TableServiceProvider() {
                     setSelectedReason("Contrato Suspenso");
                     setFinalizeStep(3);
                   }}
-                  className="bg-yellow-500 px-4 py-2 rounded"
+                  className="bg-yellow-400 text-black px-4 py-2 rounded"
                 >
                   Contrato Suspenso
                 </button>
@@ -313,10 +349,27 @@ export function TableServiceProvider() {
                   Voltar
                 </button>
                 <button
-                  onClick={() => {
-                    setIsFinalizeModalOpen(false);
-                    setFinalizeStep(1);
-                    setSelectedReason("");
+                  onClick={async () => {
+                    if (!selectedSupplierId) return;
+                    try {
+                      await axios.post(
+                        `${ip}/contract/finish/${selectedSupplierId}`,
+                        null,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
+                          },
+                        }
+                      );
+                      await getSupplier();
+                    } catch (err) {
+                      console.error("Erro ao finalizar contrato", err);
+                    } finally {
+                      setIsFinalizeModalOpen(false);
+                      setFinalizeStep(1);
+                      setSelectedReason("");
+                      setSelectedSupplierId(null);
+                    }
                   }}
                   className="bg-realizaBlue px-4 py-2 rounded"
                 >
