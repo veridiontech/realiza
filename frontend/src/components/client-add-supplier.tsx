@@ -49,18 +49,19 @@ export const modalSendEmailFormSchemaSubContractor = z.object({
 export const contractFormSchema = z.object({
   cnpj: z.string(),
   serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
-  serviceType: z.string().nonempty("Tipo de despesa é obrigatório"),
+  idServiceType: z.string().nonempty("Tipo de despesa é obrigatório"),
   description: z.string().optional(),
   expenseType: z.string().nonempty("Tipo do serviço"),
   labor: z.boolean(),
-  hse: z.string(),
+  hse: z.boolean(),
   dateStart: z.string().nonempty("Início efetivo é obrigatório"),
   idResponsible: z.string().nonempty("Selecione um gestor"),
   contractReference: z
     .string()
     .nonempty("Referência do contrato é obrigatório"),
+
   // idActivity: z.string().nonempty("Selecione uma atividade"),
-  typeManagement: z.string(),
+  // typeManagement: z.string(),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -101,7 +102,7 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  console.log("Atividades selecionadas:", selectedActivities);
+  // console.log("Atividades selecionadas:", selectedActivities);
   
 
   const {
@@ -181,7 +182,7 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  console.log("idBranch teste:", selectedBranch?.idBranch);
+  // console.log("idBranch teste:", selectedBranch?.idBranch);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -189,7 +190,7 @@ export function ModalTesteSendSupplier() {
       const res = await axios.get(
         `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
       );
-      console.log("Dados do supplier:", res.data.content);
+      // console.log("Dados do supplier:", res.data.content);
       setSuppliers(res.data.content);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
@@ -208,7 +209,7 @@ export function ModalTesteSendSupplier() {
       const activitieData = await axios.get(`${ip}/contract/activity`);
       // const requirementData = await axios.get(`${ip}/contract/requirement`);
       setActivities(activitieData.data.content);
-      console.log("atividades log teste:", activitieData.data.content);
+      // console.log("atividades log teste:", activitieData.data.content);
 
       // setRequirements(requirementData.data.content);
     } catch (err) {
@@ -256,7 +257,7 @@ export function ModalTesteSendSupplier() {
       );
       console.log(selectedBranch);
 
-      console.log("gestores:", res.data.content);
+      // console.log("gestores:", res.data.content);
       setManagers(res.data.content);
     } catch (err) {
       console.log(
@@ -288,7 +289,7 @@ export function ModalTesteSendSupplier() {
         idRequester: user?.idUser,
         providerDatas,
         idBranch: selectedBranch?.idBranch,
-        idActivities: selectedActivities
+        idActivities: selectedActivities,
       };
       console.log("enviando dados do contrato", payload);
       setDatasSender(payload);
@@ -314,7 +315,7 @@ export function ModalTesteSendSupplier() {
 
   const getServicesType = async() => {
     try{
-      const res = await axios.get(`${ip}/contract/service-type/${selectedBranch?.idBranch}`)
+      const res = await axios.get(`${ip}/contract/service-type`)
       setServicesType(res.data)
     }catch(err) {
       console.log("Erro ao buscar serviços", err);
@@ -594,9 +595,9 @@ export function ModalTesteSendSupplier() {
                           <option value="OPEX">OPEX</option>
                           <option value="Nenhuma">Nenhuma</option>
                         </select>
-                        {errorsContract.serviceType && (
+                        {errorsContract.idServiceType && (
                           <span className="text-red-500">
-                            {errorsContract.serviceType.message}
+                            {errorsContract.idServiceType.message}
                           </span>
                         )}
                       </div>
@@ -614,7 +615,7 @@ export function ModalTesteSendSupplier() {
                           </div>
                         </div>
                         <select
-                          {...registerContract("serviceType")}
+                          {...registerContract("idServiceType")}
                           className="rounded-md p-1"
                         >
                           <option value="" disabled>
@@ -1028,6 +1029,15 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
+                        <Label className="text-white">Nome do Serviço</Label>
+                        <Input {...registerContract("serviceName")} />
+                        {errorsContract.serviceName && (
+                          <span className="text-red-500">
+                            {errorsContract.serviceName.message}
+                          </span>
+                        )}
+                      </div>
+                    <div>
                       <Label className="text-white">
                         Data de início efetivo
                       </Label>
@@ -1101,15 +1111,15 @@ export function ModalTesteSendSupplier() {
                     </div>
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
-                      <select  {...registerContract("serviceType")} className="rounded-md border p-2">
+                      <select defaultValue="" {...registerContract("idServiceType")} className="rounded-md border p-2">
                         <option value="" disabled>Selecione uma opção</option>
-                        {servicesType.map((serviceType: any) => (
-                          <option value={serviceType.idServiceType} key={serviceType.idServiceType}>{serviceType.title}</option>
+                        {servicesType.map((idServiceType: any) => (
+                          <option value={idServiceType.idServiceType} key={idServiceType.idServiceType}>{idServiceType.title}</option>
                         ))}
                       </select>
-                      {errorsContract.serviceType && (
+                      {errorsContract.idServiceType && (
                         <span className="text-red-500">
-                          {errorsContract.serviceType.message}
+                          {errorsContract.idServiceType.message}
                         </span>
                       )}
                     </div>
