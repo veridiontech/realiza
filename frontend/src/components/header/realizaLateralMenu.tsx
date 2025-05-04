@@ -13,7 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { SheetContent } from "../ui/sheet";
+import { SheetContent, SheetTitle } from "../ui/sheet";
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 
@@ -28,6 +28,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
       onInteractOutside={onClose} // Fecha se clicar fora
       onEscapeKeyDown={onClose} // Fecha se pressionar "Esc"
     >
+      <SheetTitle  className="sr-only">Menu Lateral</SheetTitle >
       <Link to={`/sistema/select-client/${getIdUser}`} onClick={onClose}>
         <Button variant="ghost" className="w-full justify-start bg-zinc-100 px-4 py-2">
           <Home className="text-realizaBlue size-4" />

@@ -1,4 +1,4 @@
-package bl.tech.realiza.usecases.interfaces.contracts;
+package bl.tech.realiza.usecases.interfaces.contracts.contract;
 
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;

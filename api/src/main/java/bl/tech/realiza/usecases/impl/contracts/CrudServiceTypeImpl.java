@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeClient;
@@ -23,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -118,6 +121,44 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                                 .orElseThrow(() -> new NotFoundException("Client not found")))
                         .build()
         ));
+    }
+
+    public void transferFromRepoToClient(String idClient) {
+        Client client = clientRepository.findById(idClient)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
+        List<ServiceTypeRepo> serviceTypeRepos = serviceTypeRepoRepository.findAll();
+
+        List<ServiceTypeClient> serviceTypeClientList = serviceTypeRepos.stream().map(
+                        serviceTypeRepo -> ServiceTypeClient.builder()
+                                .title(serviceTypeRepo.getTitle())
+                                .risk(serviceTypeRepo.getRisk())
+                                .client(client)
+                                .build())
+                .collect(Collectors.toList());
+
+        serviceTypeClientRepository.saveAll(serviceTypeClientList);
+    }
+
+
+    public void transferFromClientToBranch(String idClient, String idBranch) {
+        clientRepository.findById(idClient)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
+        Branch branch = branchRepository.findById(idBranch)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        List<ServiceTypeClient> serviceTypeClientList = serviceTypeClientRepository.findAllByClient_IdClient(idClient);
+
+        List<ServiceTypeBranch> serviceTypeBranchList = serviceTypeClientList.stream().map(
+                        serviceTypeClient -> ServiceTypeBranch.builder()
+                                .title(serviceTypeClient.getTitle())
+                                .risk(serviceTypeClient.getRisk())
+                                .branch(branch)
+                                .build())
+                .collect(Collectors.toList());
+
+        serviceTypeBranchRepository.saveAll(serviceTypeBranchList);
     }
 
     private ServiceTypeResponseDto toResponse(ServiceType serviceType) {

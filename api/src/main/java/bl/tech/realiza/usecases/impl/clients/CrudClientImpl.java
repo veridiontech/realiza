@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import lombok.RequiredArgsConstructor;
@@ -40,14 +41,13 @@ public class CrudClientImpl implements CrudClient {
     private final DocumentBranchRepository documentBranchRepository;
     private final CrudActivityImpl crudActivity;
     private final CrudBranchImpl crudBranchImpl;
+    private final CrudServiceTypeImpl crudServiceTypeImpl;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
 
-        Optional<Client> clientOptional = clientRepository.findByCnpj(clientRequestDto.getCnpj());
-        if (clientOptional.isPresent()) {
-            throw new UnprocessableEntityException("CNPJ already exists");
-        }
+        clientRepository.findByCnpj(clientRequestDto.getCnpj())
+                .orElseThrow(() -> new UnprocessableEntityException("CNPJ already exists"));
 
         Client newClient = Client.builder()
                 .cnpj(clientRequestDto.getCnpj())
@@ -65,9 +65,11 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
+        crudServiceTypeImpl.transferFromRepoToClient(savedClient.getIdClient());
+
         crudBranchImpl.save(
                 BranchCreateRequestDto.builder()
-                .name(clientRequestDto.getCorporateName() + " Matriz")
+                .name(clientRequestDto.getCorporateName() + " Base")
                 .cnpj(clientRequestDto.getCnpj())
                 .cep(clientRequestDto.getCep())
                 .state(clientRequestDto.getState())

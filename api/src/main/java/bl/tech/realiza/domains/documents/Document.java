@@ -22,13 +22,14 @@ public abstract class Document {
     private String title;
     @Enumerated(EnumType.STRING)
     private Status status;
+    private String type;
     private String documentation;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
-    private Boolean isActive = false;
+    private Boolean isActive = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;

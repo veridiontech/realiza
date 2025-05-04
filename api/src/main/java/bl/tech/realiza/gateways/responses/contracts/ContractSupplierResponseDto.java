@@ -19,7 +19,6 @@ public class ContractSupplierResponseDto {
     private String serviceDuration;
     private String serviceName;
     private String description;
-    private String allocatedLimit;
     private String idResponsible;
     private Contract.ExpenseType expenseType;
     private String contractReference;
@@ -27,7 +26,6 @@ public class ContractSupplierResponseDto {
     private Date dateStart;
     private Contract.IsActive isActive;
     private List<String> activities;
-    private List<String> requirements;
     private String idBranch;
     private String nameBranch;
     private String idSupplier;

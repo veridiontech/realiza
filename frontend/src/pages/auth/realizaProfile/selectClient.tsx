@@ -31,6 +31,7 @@ import { useBoard } from "@/context/context-ultra/Board-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { propsBoard, propsBranchUltra, propsMarket } from "@/types/interfaces";
 import { Pagination } from "@/components/ui/pagination";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 interface CompanyData {
   razaoSocial: string;
@@ -1420,12 +1421,14 @@ export function SelectClient() {
                             <DialogTrigger asChild>
                               <Button className="bg-realizaBlue">+</Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-[30vw]">
+                            <DialogContent 
+                            style={{ backgroundImage: `url(${bgModalRealiza})` }}
+                            className="max-w-[30vw]">
                               <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
                                   Criar usuário para o cliente{" "}
                                   {client ? (
-                                    <p>{client.corporateName}</p>
+                                    <p className="text-white">{client.corporateName}</p>
                                   ) : (
                                     <p>Nenhum cliente selecionado</p>
                                   )}

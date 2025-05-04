@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Date;
 import java.util.List;
 
 @Data
@@ -15,17 +16,15 @@ import java.util.List;
 public class ContractSubcontractorResponseDto {
     private String idContract;
     private String serviceType;
-    private String serviceDuration;
     private String serviceName;
     private String description;
-    private String allocatedLimit;
     private String idResponsible;
     private Contract.ExpenseType expenseType;
     private String contractReference;
     private String idContractSupplier;
+    private Date dateStart;
     private Contract.IsActive isActive;
-    private Activity activity;
-    private List<Requirement> requirements;
+    private List<String> activities;
     private String idSupplier;
     private String nameSupplier;
     private String idSubcontractor;
