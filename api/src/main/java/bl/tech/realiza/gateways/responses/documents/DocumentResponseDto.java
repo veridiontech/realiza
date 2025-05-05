@@ -29,11 +29,11 @@ public class DocumentResponseDto {
     private Date expirationDate;
     private List<DocumentMatrixResponseDto> selectedDocumentsEnterprise;
     private List<DocumentMatrixResponseDto> selectedDocumentsPersonal;
-    private List<DocumentMatrixResponseDto> selectedDocumentsTrainning;
+    private List<DocumentMatrixResponseDto> selectedDocumentsTraining;
     private List<DocumentMatrixResponseDto> selectedDocumentsService;
     private List<DocumentMatrixResponseDto> nonSelectedDocumentsEnterprise;
     private List<DocumentMatrixResponseDto> nonSelectedDocumentsPersonal;
-    private List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning;
+    private List<DocumentMatrixResponseDto> nonSelectedDocumentsTraining;
     private List<DocumentMatrixResponseDto> nonSelectedDocumentsService;
 
     // gpt validation

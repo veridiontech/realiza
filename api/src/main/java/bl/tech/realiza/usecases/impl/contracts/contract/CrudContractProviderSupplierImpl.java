@@ -150,7 +150,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         documentBranch.forEach(
                 document -> {
                     switch (document.getDocumentMatrix().getSubGroup().getGroup().getGroupName().toLowerCase()) {
-                        case "documento empresa", "documento pessoa" -> {
+                        case "documento empresa", "documento pessoa", "treinamentos e certificações" -> {
                             documentProviderSupplier.add(DocumentProviderSupplier.builder()
                                     .title(document.getTitle())
                                     .status(Document.Status.PENDENTE)
