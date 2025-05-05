@@ -23,6 +23,7 @@ import { ActivitiesBox } from "../boxes-selected/activities";
 import { AmbientBox } from "../boxes-selected/ambient-box";
 import { TrabalhistaBox } from "../boxes-selected/trabalhista-box";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { GeralBox } from "../boxes-selected/geral";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
@@ -48,8 +49,13 @@ export function NewDocumentBox() {
     setDocuments([]);
     setNonSelected([]);
   };
-  
-  const tabsOrder = ["thirdCompany", "thirdCollaborators", "otherRequirements", "activities"];
+
+  const tabsOrder = [
+    "thirdCompany",
+    "thirdCollaborators",
+    "otherRequirements",
+    "activities",
+  ];
 
   const handlePrev = () => {
     const currentIndex = tabsOrder.indexOf(selectedTab);
@@ -81,7 +87,7 @@ export function NewDocumentBox() {
 
   return (
     <div className="relative">
-      <div className="absolute left-0 right-0 top-0 z-10 hidden rounded-lg bg-white p-5 shadow-md md:flex gap-2">
+      <div className="absolute left-0 right-0 top-0 z-10 hidden gap-2 rounded-lg bg-white p-5 shadow-md md:flex">
         <Button
           variant={"ghost"}
           className={`px-4 py-2 transition-all duration-300 ${
@@ -110,7 +116,7 @@ export function NewDocumentBox() {
         >
           Saúde
         </Button>
-                          {/* <Button
+        {/* <Button
             variant={"ghost"}
             className={`px-4 py-2 transition-all duration-300 ${
               selectedTab === "training"
@@ -121,72 +127,85 @@ export function NewDocumentBox() {
           >
             Treinamentos
           </Button> */}
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "otherRequirements"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("otherRequirements"), handleClickToggle();
-            }}
-          >
-            Segurança do Trabalho
-          </Button>{" "}
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "ambient"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("ambient"), handleClickToggle();
-            }}
-          >
-            Meio Ambiente
-          </Button>
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "trabalhista"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("trabalhista"), handleClickToggle();
-            }}
-          >
-            Trabalhista
-          </Button>
-          <Button
-            variant={"ghost"}
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "geral"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
-            }`}
-            onClick={() => {
-              setSelectedTab("geral"), handleClickToggle();
-            }}
-          >
-            Geral
-          </Button>
-        </div>
-        <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "otherRequirements"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("otherRequirements"), handleClickToggle();
+          }}
+        >
+          Segurança do Trabalho
+        </Button>{" "}
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "ambient"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("ambient"), handleClickToggle();
+          }}
+        >
+          Meio Ambiente
+        </Button>
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "trabalhista"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("trabalhista"), handleClickToggle();
+          }}
+        >
+          Trabalhista
+        </Button>
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "geral"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("geral"), handleClickToggle();
+          }}
+        >
+          Geral
+        </Button>
+        <Button
+          variant={"ghost"}
+          className={`px-4 py-2 transition-all duration-300 ${
+            selectedTab === "activities"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
+          }`}
+          onClick={() => {
+            setSelectedTab("activities"), handleClickToggle();
+          }}
+        >
+          Atividades
+        </Button>
+      </div>
+      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
         <Button
           variant={"ghost"}
           onClick={handlePrev}
           disabled={selectedTab === "thirdCompany"}
-          className={`text-realizaBlue ${selectedTab === "thirdCompany" ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`text-realizaBlue ${selectedTab === "thirdCompany" ? "cursor-not-allowed opacity-50" : ""}`}
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="h-6 w-6" />
         </Button>
-        <div className="flex-1 flex justify-center">
+        <div className="flex flex-1 justify-center">
           <Button
             variant={"ghost"}
-            className="bg-realizaBlue font-bold text-white shadow-lg px-6 py-3 pointer-events-none"
+            className="bg-realizaBlue pointer-events-none px-6 py-3 font-bold text-white shadow-lg"
           >
             {renderTabName()}
           </Button>
@@ -195,9 +214,9 @@ export function NewDocumentBox() {
           variant={"ghost"}
           onClick={handleNext}
           disabled={selectedTab === "activities"}
-          className={`text-realizaBlue ${selectedTab === "activities" ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`text-realizaBlue ${selectedTab === "activities" ? "cursor-not-allowed opacity-50" : ""}`}
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="h-6 w-6" />
         </Button>
       </div>
       <div className="bg-white pt-24 shadow-md">
@@ -205,7 +224,8 @@ export function NewDocumentBox() {
         {selectedTab === "thirdCollaborators" && <ThirdCollaborators />}
         {selectedTab === "training" && <TrainingBox />}
         {selectedTab === "otherRequirements" && <OrtherRequirements />}
-        {selectedTab === "geral" && <ActivitiesBox />}
+        {selectedTab === "geral" && <GeralBox />}
+        {selectedTab === "activities" && <ActivitiesBox />}
         {selectedTab === "ambient" && <AmbientBox />}
         {selectedTab === "trabalhista" && <TrabalhistaBox />}
       </div>

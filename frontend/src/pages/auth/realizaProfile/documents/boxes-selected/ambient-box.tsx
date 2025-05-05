@@ -35,7 +35,7 @@ export function AmbientBox() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "MEIO AMBIENTE",
+            documentTypeName: "MEIO AMBIENTE",
             isSelected: true,
           },
         },
@@ -47,7 +47,7 @@ export function AmbientBox() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "MEIO AMBIENTE",
+            documentTypeName: "MEIO AMBIENTE",
             isSelected: false,
           },
         },

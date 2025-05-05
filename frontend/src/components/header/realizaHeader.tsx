@@ -51,11 +51,11 @@ export function Header() {
     const getAllClients = async () => {
       try {
         const firstRes = await axios.get(`${ip}/client`, {
-          params: { page: 0, size: 100 },
+          params: { page: 0, size: 1000 },
         });
         const totalPages = firstRes.data.totalPages;
         const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
+          axios.get(`${ip}/client`, { params: { page: i + 1, size: 1000 } }),
         );
 
         const responses = await Promise.all(requests);

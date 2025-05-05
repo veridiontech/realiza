@@ -87,6 +87,7 @@ type CreateNewBoard = z.infer<typeof createNewBoard>;
 type CreateNewMarket = z.infer<typeof createNewMarket>;
 type CreateUserClient = z.infer<typeof createUserClient>;
 export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
+  // const [isLoading, setIsLoading] = useState(false)
   const [step, setStep] = useState(1);
   const [clientForm, setClientForm] = useState({
     cnpj: "",
@@ -152,7 +153,7 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
-
+    // setIsLoading(true)
     try {
       const sanitizedData = {
         ...formData,
@@ -175,6 +176,8 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
       toast.error("Erro ao cadastrar cliente!");
+    } finally {
+      // setIsLoading(false)
     }
   };
 
