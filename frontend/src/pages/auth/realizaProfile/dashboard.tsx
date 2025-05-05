@@ -10,8 +10,9 @@ import { Helmet } from "react-helmet-async";
 import { Link, NavLink } from "react-router-dom";
 
 import { EnterpriseResume } from "@/components/home/enterpriseResume";
-import { GraphicHomeLeft } from "@/components/home/graphicHomeLeft";
-import { GraphicHomeRight } from "@/components/home/graphicHomeRight";
+// import { GraphicHomeLeft } from "@/components/home/graphicHomeLeft";
+// import { GraphicHomeRight } from "@/components/home/graphicHomeRight";
+import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
 import { Button } from "@/components/ui/button";
 import { MainCard } from "@/components/quickActions/mainCard";
 import { ActionButton } from "@/components/quickActions/actionButton";
@@ -38,6 +39,7 @@ import { AddNewBranch } from "./branchs/modals/add-new-branch";
 import { UltraSection } from "./ultra/ultra-branchs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
+import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChat";
 
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
@@ -165,8 +167,8 @@ export function Dashboard() {
               )}
             </div>
             <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
-              <GraphicHomeLeft />
-              <GraphicHomeRight />
+              <StatusDocumentChart />
+              <ConformityGaugeChart percentage={71.29} />
             </div>
             <div className="mt-5 w-full text-right">
               <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
@@ -551,8 +553,8 @@ export function Dashboard() {
             </div>
           </div>
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
-            <GraphicHomeLeft />
-            <GraphicHomeRight />
+            <StatusDocumentChart />
+            <ConformityGaugeChart percentage={71.29} />
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>
