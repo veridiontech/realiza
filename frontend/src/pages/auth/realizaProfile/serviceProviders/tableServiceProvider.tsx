@@ -4,6 +4,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
+import path from "path";
+import { log } from "console";
 
 function StatusBadge({ status }: { status: string }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
@@ -62,15 +64,23 @@ export function TableServiceProvider() {
   const [searchTerm, setSearchTerm] = useState("");
   const [allocateStep, setAllocateStep] = useState(1);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
     try {
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`
+        `${ip}/contract/supplier/filtered-client`,
+        {
+          params: {
+            idSearch: selectedBranch.idBranch
+          }
+        }
       );
-      setSuppliers(res.data.content);
+      console.log("Exemplo de item:",res.data.content);
+      setSuppliers(res.data.content); 
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
     } finally {
@@ -78,13 +88,26 @@ export function TableServiceProvider() {
     }
   };
 
+  const getEmployees = async () => {
+    try {
+      const res = await axios.get(`${ip}/employee/list`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
+      });
+      setEmployees(res.data.content);
+    } catch (err) {
+      console.error("Erro ao buscar colaboradores", err);
+    }
+  };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
-      setSuppliers([]);
     }
   }, [selectedBranch]);
+
+    useEffect(() => {
+    if (isAllocateModalOpen) getEmployees();
+  }, [isAllocateModalOpen]);
 
   return (
     <div className="p-5 md:p-10">
@@ -99,15 +122,17 @@ export function TableServiceProvider() {
               className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
             >
               <p className="text-sm font-semibold text-gray-700">Nome:</p>
-              <p className="mb-2 text-realizaBlue">{supplier.tradeName}</p>
+              <p className="mb-2 text-realizaBlue">{supplier.providerSupplierName
+              }</p>
               <p className="text-sm font-semibold text-gray-700">CNPJ:</p>
               <p className="mb-2 text-gray-800">{supplier.cnpj}</p>
               <p className="text-sm font-semibold text-gray-700">Filiais:</p>
-              <p className="text-gray-800">
+              {/* <p className="text-gray-800">
                 {supplier.branches && supplier.branches.length > 0
-                  ? supplier.branches.map((b: any) => b.nameBranch).join(", ")
+                  ? supplier.branches.map((b: any) => b.branchName).join(", ")
                   : "Nenhuma filial associada"}
-              </p>
+              </p> */}
+              <p className="mb-2 text-gray-800">{supplier.branchName}</p>
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
                 <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
@@ -160,13 +185,15 @@ export function TableServiceProvider() {
             ) : suppliers.length > 0 ? (
               suppliers.map((supplier: any) => (
                 <tr key={supplier.idProvider}>
-                  <td className="border border-gray-300 p-2">{supplier.tradeName}</td>
+                  <td className="border border-gray-300 p-2">{supplier.providerSupplierName
+                  }</td>
                   <td className="border border-gray-300 p-2">{supplier.cnpj}</td>
-                  <td className="border border-gray-300 p-2">
+                  {/* <td className="border border-gray-300 p-2">
                     {supplier.branches && supplier.branches.length > 0
-                      ? supplier.branches.map((b: any) => b.nameBranch).join(", ")
+                      ? supplier.branches.map((b: any) => b.branchName).join(", ")
                       : "Nenhuma filial associada"}
-                  </td>
+                  </td> */}
+                  <td className="border border-gray-300 p-2">{supplier.branchName}</td>
                   <td className="border border-gray-300 p-2 space-x-2">
                     <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
                       <Eye className="w-5 h-5" />
@@ -180,7 +207,7 @@ export function TableServiceProvider() {
                     <button
                       title="Finalizar"
                       onClick={() => {
-                        setSelectedSupplierId(supplier.contract?.idContract);
+                        setSelectedSupplierId(supplier.idContract);
                         setIsFinalizeModalOpen(true);
                       }}
                     >
@@ -189,7 +216,7 @@ export function TableServiceProvider() {
 
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <StatusBadge status={supplier.status || "Indefinido"} />
+                  <StatusBadge status={supplier.status || "Indefinido"} />
                   </td>
                 </tr>
               ))
@@ -283,13 +310,13 @@ export function TableServiceProvider() {
               <div className="flex gap-4 justify-end">
                 <button
                   onClick={() => setIsFinalizeModalOpen(false)}
-                  className="bg-gray-600 px-4 py-2 rounded"
+                  className="bg-red-600 px-4 py-2 rounded"
                 >
                   Não
                 </button>
                 <button
                   onClick={() => setFinalizeStep(2)}
-                  className="bg-red-600 px-4 py-2 rounded"
+                  className="bg-gray-600 px-4 py-2 rounded"
                 >
                   Sim
                 </button>
@@ -354,7 +381,7 @@ export function TableServiceProvider() {
                     try {
                       await axios.post(
                         `${ip}/contract/finish/${selectedSupplierId}`,
-                        null,
+                        { status: selectedReason },
                         {
                           headers: {
                             Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
