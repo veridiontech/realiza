@@ -60,6 +60,9 @@ export function NewModalCreateEmployee() {
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
 
+  console.log("teste", supplier);
+  
+
   const {
     register,
     handleSubmit,
@@ -95,7 +98,7 @@ export function NewModalCreateEmployee() {
     setIsLoading(true);
     const payload = {
       ...data,
-      supplier: supplier?.idProvider,
+      supplier: supplier
     };
     console.log("Enviando dados:", payload);
     try {

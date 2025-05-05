@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { propsDocument } from "@/types/interfaces";
 // import { boolean } from "zod";
 
-export function ThirdCompany() {
+export function GeralBox() {
   const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
   const [notSelectedDocument, setNotSelectedDocument] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState<any>([]);
@@ -35,7 +35,7 @@ export function ThirdCompany() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentTypeName: "CADASTRO E CERTIDOES", isSelected: true },
+          params: { documentTypeName: "GERAL", isSelected: true },
         },
       );
       const resNonSelected = await axios.get(
@@ -44,11 +44,11 @@ export function ThirdCompany() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documentTypeName: "CADASTRO E CERTIDOES", isSelected: false },
+          params: { documentTypeName: "GERAL", isSelected: false },
         },
       );
-      console.log("teste", resSelected.data);
-      console.log("teste", resNonSelected.data);
+      console.log("teste geral", resSelected.data);
+      console.log("teste geral", resNonSelected.data);
 
       setNotSelectedDocument(resNonSelected.data);
       setSelectedDocument(resSelected.data);

@@ -33,7 +33,7 @@ export function ThirdCollaborators() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documenTypeName: "SAUDE", isSelected: true },
+          params: { documentTypeName: "SAUDE", isSelected: true },
         },
       );
       const resNonSelected = await axios.get(
@@ -42,7 +42,7 @@ export function ThirdCollaborators() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: { documenTypeName: "SAUDE", isSelected: false },
+          params: { documentTypeName: "SAUDE", isSelected: false },
         },
       );
       console.log("teste", resSelected.data);

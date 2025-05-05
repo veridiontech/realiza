@@ -1,4 +1,3 @@
-// Modal.tsx
 import React from "react";
 import bgImage from "@/assets/modalBG.jpeg";
 import { FieldType } from "@/types/fieldModal";
@@ -25,6 +24,7 @@ interface ModalProps {
   onSubmit?: (formData: Record<string, any>) => void;
   onClose: () => void;
   children?: React.ReactNode;
+  loading?: boolean;
 }
 
 export function Modal({
@@ -33,6 +33,7 @@ export function Modal({
   onSubmit,
   onClose,
   children,
+  loading = false,
 }: ModalProps) {
   const [formData, setFormData] = React.useState<Record<string, any>>(
     fields.reduce(
@@ -178,14 +179,18 @@ export function Modal({
                 type="button"
                 className="rounded bg-gray-300 px-4 py-2 text-black hover:bg-gray-400"
                 onClick={onClose}
+                disabled={loading}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 text-white"
+                disabled={loading}
+                className={`rounded px-4 py-2 text-white ${
+                  loading ? "bg-gray-500" : "bg-realizaBlue hover:bg-realizaBlue"
+                }`}
               >
-                Enviar
+                {loading ? "Enviando..." : "Enviar"}
               </button>
             </div>
           </form>

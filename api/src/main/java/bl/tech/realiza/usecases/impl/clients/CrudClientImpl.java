@@ -46,8 +46,12 @@ public class CrudClientImpl implements CrudClient {
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
 
-        clientRepository.findByCnpj(clientRequestDto.getCnpj())
-                .orElseThrow(() -> new UnprocessableEntityException("CNPJ already exists"));
+        Client client = clientRepository.findByCnpj(clientRequestDto.getCnpj())
+                .orElse(null);
+
+        if (client != null) {
+            throw new UnprocessableEntityException("CNPJ already exists!");
+        }
 
         Client newClient = Client.builder()
                 .cnpj(clientRequestDto.getCnpj())
