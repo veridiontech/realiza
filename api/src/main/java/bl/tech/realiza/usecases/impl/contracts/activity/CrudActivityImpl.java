@@ -3,10 +3,13 @@ package bl.tech.realiza.usecases.impl.contracts.activity;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
+import bl.tech.realiza.domains.contract.activity.ActivityDocumentsRepo;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
@@ -20,8 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +35,7 @@ public class CrudActivityImpl implements CrudActivity {
     private final ActivityRepoRepository activityRepoRepository;
     private final ActivityDocumentRepository activityDocumentRepository;
     private final DocumentBranchRepository documentBranchRepository;
+    private final ActivityDocumentRepoRepository activityDocumentRepoRepository;
 
     @Override
     public ActivityResponseDto save(ActivityRequestDto activityRequestDto) {
@@ -164,14 +167,47 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     public void transferFromRepo(String idBranch) {
-        Branch branch = branchRepository.findById(idBranch).orElseThrow(() -> new NotFoundException("Branch not found"));
-        List<ActivityRepo> activityRepos = activityRepoRepository.findAll();
-        List<Activity> activityList = activityRepos.stream().map(activityRepo -> Activity.builder()
-                .title(activityRepo.getTitle())
-                .risk(activityRepo.getRisk())
-                .branch(branch)
-                .build()).toList();
+        Branch branch = branchRepository.findById(idBranch)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        activityRepository.saveAll(activityList);
+        List<ActivityRepo> activityRepos = activityRepoRepository.findAll();
+        List<Activity> newActivities = new ArrayList<>();
+        Map<String, Activity> repoToNewActivityMap = new HashMap<>();
+
+        for (ActivityRepo repo : activityRepos) {
+            Activity newActivity = Activity.builder()
+                    .title(repo.getTitle())
+                    .risk(repo.getRisk())
+                    .branch(branch)
+                    .build();
+            newActivities.add(newActivity);
+            repoToNewActivityMap.put(repo.getIdActivity(), newActivity);
+        }
+        activityRepository.saveAll(newActivities);
+
+        List<DocumentBranch> allBranchDocs = documentBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch());
+        Map<String, DocumentBranch> matrixIdToBranchDocMap = allBranchDocs.stream()
+                .filter(doc -> doc.getDocumentMatrix() != null)
+                .collect(Collectors.toMap(doc -> doc.getDocumentMatrix().getIdDocument(), doc -> doc));
+
+        List<ActivityDocumentsRepo> docsRepo = activityDocumentRepoRepository.findAll();
+        List<ActivityDocuments> newActivityDocs = new ArrayList<>();
+
+        for (ActivityDocumentsRepo docRepo : docsRepo) {
+            Activity newActivity = repoToNewActivityMap.get(docRepo.getActivity().getIdActivity());
+            DocumentMatrix matrix = docRepo.getDocumentMatrix();
+            if (newActivity == null || matrix == null) continue;
+
+            DocumentBranch branchDoc = matrixIdToBranchDocMap.get(matrix.getIdDocument());
+            if (branchDoc == null) continue;
+
+            newActivityDocs.add(ActivityDocuments.builder()
+                    .activity(newActivity)
+                    .documentBranch(branchDoc)
+                    .isSelected(true)
+                    .build());
+        }
+
+        activityDocumentRepository.saveAll(newActivityDocs);
     }
 }

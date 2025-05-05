@@ -127,7 +127,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         documentSupplier.forEach(
                 document -> {
                     switch (document.getDocumentMatrix().getSubGroup().getGroup().getGroupName().toLowerCase()) {
-                        case "documento empresa", "documento pessoa" -> {
+                        case "documento empresa", "documento pessoa", "treinamentos e certificações" -> {
                             documentProviderSubcontractor.add(DocumentProviderSubcontractor.builder()
                                     .title(document.getTitle())
                                     .status(Document.Status.PENDENTE)
@@ -239,8 +239,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
     @Override
     public Optional<ContractResponseDto> update(String id, ContractRequestDto contractProviderSubcontractorRequestDto) {
-        Activity activity = null;
-        List<Requirement> requirements = List.of();
 
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(id);
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new NotFoundException("Contract not found"));

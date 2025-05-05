@@ -285,7 +285,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
                         .build())
                 .collect(Collectors.toList());
-        List<DocumentMatrixResponseDto> selectedDocumentsTrainning = documentBranch.stream()
+        List<DocumentMatrixResponseDto> selectedDocumentsTraining = documentBranch.stream()
                 .filter(doc -> "Treinamentos e certificações".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
@@ -335,7 +335,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .groupName(doc.getSubGroup().getGroup().getGroupName())
                         .build())
                 .toList();
-        List<DocumentMatrixResponseDto> allDocumentsTrainning = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
+        List<DocumentMatrixResponseDto> allDocumentsTraining = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
                 .stream()
                 .sorted(Comparator.comparing(DocumentMatrix::getName))
                 .map(doc -> DocumentMatrixResponseDto.builder()
@@ -360,7 +360,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
                 .collect(Collectors.toSet());
 
-        Set<String> selectedDocumentTrainningIds = selectedDocumentsTrainning.stream()
+        Set<String> selectedDocumentTrainingIds = selectedDocumentsTraining.stream()
                 .map(DocumentMatrixResponseDto::getIdDocumentMatrix)
                 .collect(Collectors.toSet());
 
@@ -376,8 +376,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .filter(doc -> !selectedDocumentServiceIds.contains(doc.getIdDocumentMatrix()))
                 .collect(Collectors.toList());
 
-        List<DocumentMatrixResponseDto> nonSelectedDocumentsTrainning = allDocumentsTrainning.stream()
-                .filter(doc -> !selectedDocumentTrainningIds.contains(doc.getIdDocumentMatrix()))
+        List<DocumentMatrixResponseDto> nonSelectedDocumentsTraining = allDocumentsTraining.stream()
+                .filter(doc -> !selectedDocumentTrainingIds.contains(doc.getIdDocumentMatrix()))
                 .collect(Collectors.toList());
 
         return DocumentResponseDto.builder()
@@ -387,8 +387,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .nonSelectedDocumentsPersonal(nonSelectedDocumentsPersonal)
                 .selectedDocumentsService(selectedDocumentsService)
                 .nonSelectedDocumentsService(nonSelectedDocumentsService)
-                .selectedDocumentsTrainning(selectedDocumentsTrainning)
-                .nonSelectedDocumentsTrainning(nonSelectedDocumentsTrainning)
+                .selectedDocumentsTraining(selectedDocumentsTraining)
+                .nonSelectedDocumentsTraining(nonSelectedDocumentsTraining)
                 .build();
     }
 
