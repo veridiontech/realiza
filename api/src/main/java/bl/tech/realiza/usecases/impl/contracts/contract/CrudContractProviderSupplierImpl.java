@@ -150,7 +150,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         documentBranch.forEach(
                 document -> {
                     switch (document.getDocumentMatrix().getSubGroup().getGroup().getGroupName().toLowerCase()) {
-                        case "documento empresa", "documento pessoa" -> {
+                        case "documento empresa", "documento pessoa", "treinamentos e certificações" -> {
                             documentProviderSupplier.add(DocumentProviderSupplier.builder()
                                     .title(document.getTitle())
                                     .status(Document.Status.PENDENTE)
@@ -265,11 +265,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Optional<ContractResponseDto> update(String id, ContractRequestDto contractProviderSupplierRequestDto) {
-        Activity activity = null;
-
-        Optional<ContractProviderSupplier> providerSupplierOptional = contractProviderSupplierRepository.findById(id);
-
-        ContractProviderSupplier contractProviderSupplier = providerSupplierOptional
+        ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
@@ -279,8 +275,6 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivityList());
-        List<Requirement> requirements = List.of();
-
 
         contractProviderSupplier.setServiceTypeBranch(contractProviderSupplierRequestDto.getIdServiceType() != null ? serviceTypeBranch : contractProviderSupplier.getServiceTypeBranch());
         contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());

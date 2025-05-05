@@ -35,7 +35,7 @@ export function OrtherRequirements() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "SEGURANCA DO TRABALHO",
+            documentTypeName: "SEGURANCA DO TRABALHO",
             isSelected: true,
           },
         },
@@ -47,7 +47,7 @@ export function OrtherRequirements() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "SEGURANCA DO TRABALHO",
+            documentTypeName: "SEGURANCA DO TRABALHO",
             isSelected: false,
           },
         },

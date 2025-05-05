@@ -182,7 +182,7 @@ export function AddNewBranch() {
                 </span>
               )}
               {razaoSocial && (
-                <p className="mt-1 text-sm text-gray-700">
+                <p className="mt-1 text-sm text-white">
                   Razão social: <strong>{razaoSocial}</strong>
                 </p>
               )}

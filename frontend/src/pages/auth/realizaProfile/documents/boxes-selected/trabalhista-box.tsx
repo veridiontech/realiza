@@ -35,7 +35,7 @@ export function TrabalhistaBox() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "TRABALHISTA",
+            documentTypeName: "TRABALHISTA",
             isSelected: true,
           },
         },
@@ -47,7 +47,7 @@ export function TrabalhistaBox() {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            documenTypeName: "TRABALHISTA",
+            documentTypeName: "TRABALHISTA",
             isSelected: false,
           },
         },

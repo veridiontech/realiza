@@ -36,7 +36,7 @@ export const EmployeesTable = (): JSX.Element => {
     useState<propsSupplier | null>(null);
   const [getSubcontractorList, setGetSubcontractorList] = useState([]);
   const { user } = useUser();
-  const { supplier } = useSupplier();
+  const { supplier, setSupplier } = useSupplier();
   // const [employees, setEmployees] = useState([])
 
   // const handlePageChange = (page: number) => {

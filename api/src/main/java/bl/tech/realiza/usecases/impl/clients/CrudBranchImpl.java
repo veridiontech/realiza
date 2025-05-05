@@ -20,6 +20,7 @@ import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -82,9 +83,10 @@ public class CrudBranchImpl implements CrudBranch {
                         .build())
                 .collect(Collectors.toList());
 
+        documentBranchRepository.saveAll(documentBranchList);
         crudServiceTypeImpl.transferFromClientToBranch(savedBranch.getClient().getIdClient(),savedBranch.getIdBranch());
         crudActivity.transferFromRepo(savedBranch.getIdBranch());
-        documentBranchRepository.saveAll(documentBranchList);
+
 
         return BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())

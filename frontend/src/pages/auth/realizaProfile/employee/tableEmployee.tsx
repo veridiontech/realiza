@@ -36,7 +36,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   // };
 
   const getEmployee = async () => {
-    console.log("idProvider watch:", idProvider);
+    // console.log("idProvider watch:", idProvider);
     try {
       const res = await axios.get(
         `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
@@ -315,7 +315,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                 {employee.situation}
               </p> 
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
-              <Link to={`/fornecedor/detailsEmployees/${employee.idEmployee}`}>
+              <Link to={`/sistema/detailsEmployees/${employee.idEmployee}`}>
                 <button className="text-realizaBlue ml-4 hover:underline">
                   <Settings2 />
                 </button>

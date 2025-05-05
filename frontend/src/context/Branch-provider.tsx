@@ -35,11 +35,15 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
     }
   }, [client?.idClient]);
 
-  const getBranch = async (idClient: string) => {
+  const getBranch = async (idClient: string, size: number = 1000) => {
     try {
       if(client?.isUltragaz === true) {}
       const res = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${idClient}`,
+        `${ip}/branch/filtered-client?idSearch=${idClient}`, {
+          params: {
+            size,
+          }
+        }
       );
       setBranch(res.data.content || []);
     } catch (err) {
