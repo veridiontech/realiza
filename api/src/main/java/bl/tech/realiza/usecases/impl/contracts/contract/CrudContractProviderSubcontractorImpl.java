@@ -239,8 +239,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
     @Override
     public Optional<ContractResponseDto> update(String id, ContractRequestDto contractProviderSubcontractorRequestDto) {
-        Activity activity = null;
-        List<Requirement> requirements = List.of();
 
         Optional<ContractProviderSubcontractor> contractProviderSubcontractorOptional = contractProviderSubcontractorRepository.findById(id);
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorOptional.orElseThrow(() -> new NotFoundException("Contract not found"));
