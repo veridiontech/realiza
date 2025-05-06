@@ -71,6 +71,7 @@ export function TableServiceProvider() {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
     try {
+      console.log("Requisição ao finalizar");
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-client`,
         {
@@ -79,8 +80,8 @@ export function TableServiceProvider() {
           }
         }
       );
-      console.log("Exemplo de item:",res.data.content);
-      setSuppliers(res.data.content); 
+      console.log("Exemplo de item:", res.data.content);
+      setSuppliers(res.data.content);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
     } finally {
@@ -90,9 +91,10 @@ export function TableServiceProvider() {
 
   const getEmployees = async () => {
     try {
-      const res = await axios.get(`${ip}/employee/list`, {
+      const res = await axios.get(`${ip}/employee/brazilian`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
       });
+      console.log("Colaboradores retornados:",res.data.content);
       setEmployees(res.data.content);
     } catch (err) {
       console.error("Erro ao buscar colaboradores", err);
@@ -105,7 +107,7 @@ export function TableServiceProvider() {
     }
   }, [selectedBranch]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (isAllocateModalOpen) getEmployees();
   }, [isAllocateModalOpen]);
 
@@ -141,9 +143,16 @@ export function TableServiceProvider() {
                 <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                   <Pencil className="w-5 h-5" />
                 </button>
-                <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
+                <button
+                  title="Alocar funcionário"
+                  onClick={() => {
+                    setSelectedSupplierId(supplier.idContract);
+                    setIsAllocateModalOpen(true);
+                  }}
+                >
                   <UserPlus className="w-5 h-5" />
                 </button>
+
                 <button
                   title="Finalizar"
                   onClick={() => {
@@ -201,9 +210,16 @@ export function TableServiceProvider() {
                     <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                       <Pencil className="w-5 h-5" />
                     </button>
-                    <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
+                    <button
+                      title="Alocar funcionário"
+                      onClick={() => {
+                        setSelectedSupplierId(supplier.idContract);
+                        setIsAllocateModalOpen(true);
+                      }}
+                    >
                       <UserPlus className="w-5 h-5" />
                     </button>
+
                     <button
                       title="Finalizar"
                       onClick={() => {
@@ -216,7 +232,7 @@ export function TableServiceProvider() {
 
                   </td>
                   <td className="border border-gray-300 p-2">
-                  <StatusBadge status={supplier.status || "Indefinido"} />
+                    <StatusBadge status={supplier.status || "Indefinido"} />
                   </td>
                 </tr>
               ))
@@ -262,10 +278,32 @@ export function TableServiceProvider() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              <div className="max-h-40 overflow-y-auto">
+                {employees
+                  .filter(emp => emp.name && emp.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(emp => (
+                    <div key={emp.idEmployee} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedEmployees.includes(emp.idEmployee)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedEmployees(prev => [...prev, emp.idEmployee]);
+                          } else {
+                            setSelectedEmployees(prev => prev.filter(id => id !== emp.idEmployee));
+                          }
+                        }}
+                      />
+                      <span>{emp.name}</span>
+                    </div>
+                  ))}
+              </div>
               <div className="flex justify-end">
                 <button
                   onClick={() => setAllocateStep(2)}
                   className="bg-realizaBlue px-4 py-2 rounded"
+                  disabled={selectedEmployees.length === 0}
                 >
                   Próximo
                 </button>
@@ -274,6 +312,13 @@ export function TableServiceProvider() {
           ) : (
             <div className="text-white space-y-4">
               <p>Você confirma que esses colaboradores selecionados serão alocados ao contrato?</p>
+              <ul className="list-disc list-inside">
+                {employees
+                  .filter(emp => selectedEmployees.includes(emp.idEmployee))
+                  .map(emp => (
+                    <li key={emp.idEmployee}>{emp.name}</li>
+                  ))}
+              </ul>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setAllocateStep(1)}
@@ -282,10 +327,28 @@ export function TableServiceProvider() {
                   Voltar
                 </button>
                 <button
-                  onClick={() => {
-                    setIsAllocateModalOpen(false);
-                    setSearchTerm("");
-                    setAllocateStep(1);
+                  onClick={async () => {
+                    if (!selectedSupplierId) return;
+                    try {
+                      console.log("Lista de obj", selectedEmployees);
+                      await axios.post(
+                        `${ip}/contract/add-employee/${selectedSupplierId}`,
+                        { idEmployees: selectedEmployees },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
+                          },
+                        }
+                      );
+                      await getSupplier();
+                    } catch (err) {
+                      console.error("Erro ao alocar colaboradores", err);
+                    } finally {
+                      setIsAllocateModalOpen(false);
+                      setSearchTerm("");
+                      setAllocateStep(1);
+                      setSelectedEmployees([]);
+                    }
                   }}
                   className="bg-green-600 px-4 py-2 rounded"
                 >
