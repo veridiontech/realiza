@@ -98,7 +98,7 @@ export function NewModalCreateEmployee() {
     setIsLoading(true);
     const payload = {
       ...data,
-      supplier: supplier
+      supplier: supplier?.idProvider
     };
     console.log("Enviando dados:", payload);
     try {
