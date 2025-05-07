@@ -67,7 +67,7 @@ export function DocumentBox({
       <ScrollArea className="h-[25vh] w-full overflow-auto">
         <div className="flex flex-col gap-3 p-2">
           {Array.isArray(documents) && documents.length > 0 ? (
-            documents.map((document) => (
+            documents.map((document: any) => (
               <div
                 key={document.idDocument}
                 onClick={() => {

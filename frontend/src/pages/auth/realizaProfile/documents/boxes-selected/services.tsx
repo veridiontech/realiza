@@ -161,7 +161,7 @@ export function TrainingBox() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
