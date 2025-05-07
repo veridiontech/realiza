@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useUser } from "@/context/user-provider";
 import { useFormDataContext } from "@/context/formDataProvider";
+import { ip } from "@/utils/ip";
 
 const enterprisePageEmailFormSchema = z.object({
   tradeName: z.string().optional(),
@@ -30,46 +31,66 @@ export function EnterprisePageEmail() {
   const { setEnterpriseData } = useFormDataContext();
 
   const [isValidToken, setIsValidToken] = useState(false);
-  const findIdCompany = searchParams.get("id");
+  const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const findBranchId = searchParams.get("idBranch");
+  // const findIdSupplier = searchParams.get("idSupplier")
   const [isLoading, setIsLoading] = useState(false);
-
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState<EnterprisePageEmailFormSchema | null>(null);
-
-  useEffect(() => {
-    const validateToken = async () => {
-      try {
-        const res = await axios.get(
-          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${tokenFromUrl}`,
-        );
-        if (res.status === 200) {
-          setIsValidToken(true);
-        } else {
-          console.log("Erro ao validar token.");
-        }
-      } catch (err) {
-        console.log("Não foi possível validar o token", err);
-        setIsValidToken(false);
-      }
-    };
-
-    if (tokenFromUrl) {
-      validateToken();
-    } else {
-      console.log("Token não encontrado.");
-    }
-  }, [tokenFromUrl]);
 
   const {
     register,
     handleSubmit,
     formState: { isValid },
+    setValue,
   } = useForm<EnterprisePageEmailFormSchema>({
     resolver: zodResolver(enterprisePageEmailFormSchema),
     mode: "onChange",
   });
+
+  useEffect(() => {
+    const validateToken = async () => {
+      try {
+        const res = await axios.get(
+          `https://realiza-1.onrender.com/email/Enterprise-sign-up/validate?token=${tokenFromUrl}`
+        );
+        if (res.status === 200) setIsValidToken(true);
+      } catch (err) {
+        console.log("Não foi possível validar o token", err);
+        setIsValidToken(false);
+      }
+    };
+    if (tokenFromUrl) validateToken();
+  }, [tokenFromUrl]);
+
+  useEffect(() => {
+    const fetchBranchData = async () => {
+      if (!findBranchId) return;
+      try {
+        const response = await axios.get(`${ip}/supplier/${findId}`);
+        console.log("testando dados do supplier", response.data);
+        const branchData = response.data;
+        if (branchData) {
+          setValue("cnpj", branchData.cnpj);
+          setValue("corporateName", branchData.corporateName);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados da filial:", error);
+      }
+    };
+    fetchBranchData();
+  }, [findBranchId, setValue]);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("enterpriseForm");
+    if (savedData && typeof savedData === "string") {
+      const parsed = JSON.parse(savedData) as Partial<EnterprisePageEmailFormSchema>;
+      Object.entries(parsed).forEach(([key, value]) => {
+        setValue(key as keyof EnterprisePageEmailFormSchema, value ?? "");
+      });
+    }
+  }, [setValue]);
 
   const onSubmit = async (data: EnterprisePageEmailFormSchema) => {
     setFormData(data);
@@ -78,16 +99,16 @@ export function EnterprisePageEmail() {
 
   const handleConfirm = () => {
     if (!formData) return;
-
+    localStorage.setItem("enterpriseForm", JSON.stringify(formData));
     setIsLoading(true);
-    let payload;
 
+    let payload: any;
     switch (findCompany) {
       case "SUBCONTRACTOR":
         payload = {
           ...formData,
-          idCompany: findIdCompany || "",
-          company: findCompany || "",
+          idCompany: findId || "",
+          company: findCompany,
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
           role: "ROLE_SUPPLIER_RESPONSIBLE",
@@ -96,28 +117,18 @@ export function EnterprisePageEmail() {
       case "CLIENT":
         payload = {
           ...formData,
-          idCompany: findIdCompany || "",
-          company: findCompany || "",
+          idCompany: findId || "",
+          company: findCompany,
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
           role: "ROLE_CLIENT_RESPONSIBLE",
-        };
-        break;
-      case "SUPPLIER":
-        payload = {
-          ...formData,
-          idBranch: findBranchId || "",
-          idCompany: findIdCompany || "",
-          company: findCompany || "SUPPLIER",
-          fantasyName: formData.tradeName || "",
-          socialReason: formData.corporateName,
         };
         break;
       default:
         payload = {
           ...formData,
           idBranch: findBranchId || "",
-          idCompany: findIdCompany || "",
+          idCompany: findId || "",
           company: "SUPPLIER",
           fantasyName: formData.tradeName || "",
           socialReason: formData.corporateName,
@@ -125,12 +136,19 @@ export function EnterprisePageEmail() {
         break;
     }
 
-    console.log("enviando cadastro", payload);
     setEnterpriseData(payload);
     navigate(`/email/Sign-Up?token=${token}`);
     setIsLoading(false);
     setShowConfirmModal(false);
   };
+
+  if (!isValidToken) {
+    return (
+      <div className="text-red-600">
+        Token inválido ou expirado. Por favor, solicite um novo convite.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -163,6 +181,7 @@ export function EnterprisePageEmail() {
               placeholder="Digite o CNPJ"
               className="w-[27vw]"
               {...register("cnpj")}
+              disabled
             />
           </div>
           <div className="flex items-center gap-5">
@@ -182,6 +201,7 @@ export function EnterprisePageEmail() {
                 placeholder="*Razão social"
                 className="w-[13vw]"
                 {...register("corporateName")}
+                disabled
               />
             </div>
           </div>
@@ -209,24 +229,26 @@ export function EnterprisePageEmail() {
         </form>
       </div>
       {showConfirmModal && formData && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-[90vw] max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-[#1d314a] text-white p-6 rounded-xl shadow-xl w-[90vw] max-w-md">
             <h2 className="text-xl font-semibold mb-4">Confirmar CNPJ</h2>
             <p className="mb-4">
-              Você confirma que o <strong>CNPJ</strong> informado é o mesmo em que o funcionario está registrado?
+              Você confirma que o <strong className="font-semibold">CNPJ</strong> informado é o mesmo em que o funcionário está registrado? Caso não, entre em contato com o suporte!
             </p>
-            <p className="mb-4 text-blue-600 font-medium">{formData.cnpj} - {formData.corporateName}</p>
+            <strong className="block text-center text-yellow-300 font-medium mb-4">
+              {formData.cnpj} - {formData.corporateName}
+            </strong>
             <div className="flex justify-end gap-4">
               <Button
                 type="button"
-                className="bg-gray-300 text-black hover:bg-gray-400"
+                className="bg-white text-[#1d314a] font-semibold px-4 py-2 rounded-lg hover:bg-gray-200"
                 onClick={() => setShowConfirmModal(false)}
               >
                 Cancelar
               </Button>
               <Button
                 type="button"
-                className="bg-realizaBlue"
+                className="bg-white text-[#1d314a] font-semibold px-4 py-2 rounded-lg hover:bg-gray-200"
                 onClick={handleConfirm}
               >
                 Confirmar

@@ -48,6 +48,7 @@ public class EmployeeResponseDto {
     // brazilian
     private String rg;
     private Date admissionDate;
+    private String cpf;
 
     // foreigner
     private String rneRnmFederalPoliceProtocol;

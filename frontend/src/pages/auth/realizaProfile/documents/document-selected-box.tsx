@@ -49,7 +49,7 @@ export function DocumentSelectedBox({
             <option value="" disabled>
               Selecionados
             </option>
-            {documents.map((doc) => (
+            {documents.map((doc: any) => (
               <option key={doc.idDocument} value={doc.idDocument}>
                 {doc.name}
               </option>
@@ -71,7 +71,7 @@ export function DocumentSelectedBox({
           <option value="" disabled>
             Selecionados
           </option>
-          {documents.map((doc) => (
+          {documents.map((doc: any) => (
             <option key={doc.idDocument} value={doc.idDocument}>
               {doc.name}
             </option>
@@ -81,7 +81,7 @@ export function DocumentSelectedBox({
       <ScrollArea className="h-[25vh] w-full overflow-auto">
         <div className="flex flex-col gap-3 p-5">
           {documents.length > 0 ? (
-            documents.map((doc) => (
+            documents.map((doc: any) => (
               <div
                 className="cursor-pointer rounded-md p-2 hover:bg-gray-200"
                 key={doc.idDocument}

@@ -7,6 +7,7 @@ import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 
+
 function StatusBadge({ status }: { status: string }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
 

@@ -100,7 +100,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
               </div>
               <div className="flex flex-col gap-44 items-end">
                 <div>
-                  <Button className="bg-realizaBlue">+  </Button>
+                  <Button className="bg-realizaBlue">+</Button>
                 </div>
                 <div className="flex items-end gap-5">
                   <div className="flex flex-col">

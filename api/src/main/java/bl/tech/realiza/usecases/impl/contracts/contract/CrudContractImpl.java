@@ -17,8 +17,12 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,18 +51,13 @@ public class CrudContractImpl implements CrudContract {
     }
 
     @Override
-    public String addEmployeeToContract(String idContract, String idEmployee) {
+    public String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         List<DocumentEmployee> documentEmployee = new java.util.ArrayList<>(List.of());
         Contract contract = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
-        Employee employee = employeeRepository.findById(idEmployee)
-                .orElseThrow(() -> new NotFoundException("Employee not found"));
+        List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
-            if (!Objects.equals(contractProviderSupplier.getProviderSupplier().getIdProvider(),
-                    employee.getSupplier().getIdProvider())) {
-                throw new IllegalArgumentException("Contract provider does not match employee provider");
-            }
             ProviderSupplier providerSupplier = contractProviderSupplier.getProviderSupplier();
             List<DocumentProviderSupplier> personalDocuments = documentProviderSupplierRepository
                     .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
@@ -66,35 +65,40 @@ public class CrudContractImpl implements CrudContract {
             List<DocumentProviderSupplier> trainingAndCertificates = documentProviderSupplierRepository
                     .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
                             providerSupplier.getIdProvider(),"Treinamentos e certificações",true);
-            personalDocuments.forEach(
-                    documentProviderSupplier -> {
-                        documentEmployee.add(DocumentEmployee.builder()
+            employees.forEach(
+                employee -> {
+                    if (!Objects.equals(contractProviderSupplier.getProviderSupplier().getIdProvider(),
+                            employee.getSupplier().getIdProvider())) {
+                        throw new IllegalArgumentException("Contract provider does not match employee provider");
+                    }
+                    personalDocuments.forEach(
+                            documentProviderSupplier -> {
+                                documentEmployee.add(DocumentEmployee.builder()
+                                                .title(documentProviderSupplier.getTitle())
+                                                .status(Document.Status.PENDENTE)
+                                                .type(documentProviderSupplier.getType())
+                                                .isActive(true)
+                                                .documentMatrix(documentProviderSupplier.getDocumentMatrix())
+                                                .employee(employee)
+                                        .build());
+                            }
+                    );
+                    trainingAndCertificates.forEach(
+                            documentProviderSupplier -> {
+                                documentEmployee.add(DocumentEmployee.builder()
                                         .title(documentProviderSupplier.getTitle())
                                         .status(Document.Status.PENDENTE)
                                         .type(documentProviderSupplier.getType())
                                         .isActive(true)
                                         .documentMatrix(documentProviderSupplier.getDocumentMatrix())
                                         .employee(employee)
-                                .build());
-                    }
+                                        .build());
+                            }
+                    );
+                }
             );
-            trainingAndCertificates.forEach(
-                    documentProviderSupplier -> {
-                        documentEmployee.add(DocumentEmployee.builder()
-                                .title(documentProviderSupplier.getTitle())
-                                .status(Document.Status.PENDENTE)
-                                .type(documentProviderSupplier.getType())
-                                .isActive(true)
-                                .documentMatrix(documentProviderSupplier.getDocumentMatrix())
-                                .employee(employee)
-                                .build());
-                    }
-            );
+
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
-            if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(),
-                    employee.getSubcontract().getIdProvider())) {
-                throw new IllegalArgumentException("Contract provider does not match employee provider");
-            }
             ProviderSubcontractor subcontractor = contractProviderSubcontractor.getProviderSubcontractor();
             List<DocumentProviderSubcontractor> personalDocuments = documentProviderSubcontractorRepository
                     .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
@@ -102,35 +106,44 @@ public class CrudContractImpl implements CrudContract {
             List<DocumentProviderSubcontractor> trainingAndCertificates = documentProviderSubcontractorRepository
                     .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
                             subcontractor.getIdProvider(),"Treinamentos e certificações",true);
-            personalDocuments.forEach(
-                    documentProviderSubcontractor -> {
-                        documentEmployee.add(DocumentEmployee.builder()
-                                .title(documentProviderSubcontractor.getTitle())
-                                .status(Document.Status.PENDENTE)
-                                .type(documentProviderSubcontractor.getType())
-                                .isActive(true)
-                                .documentMatrix(documentProviderSubcontractor.getDocumentMatrix())
-                                .employee(employee)
-                                .build());
+            employees.forEach(
+                employee -> {
+                    if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(),
+                            employee.getSubcontract().getIdProvider())) {
+                        throw new IllegalArgumentException("Contract provider does not match employee provider");
                     }
+                    personalDocuments.forEach(
+                            documentProviderSubcontractor -> {
+                                documentEmployee.add(DocumentEmployee.builder()
+                                        .title(documentProviderSubcontractor.getTitle())
+                                        .status(Document.Status.PENDENTE)
+                                        .type(documentProviderSubcontractor.getType())
+                                        .isActive(true)
+                                        .documentMatrix(documentProviderSubcontractor.getDocumentMatrix())
+                                        .employee(employee)
+                                        .build());
+                            }
+                    );
+                    trainingAndCertificates.forEach(
+                            documentProviderSubcontractor -> {
+                                documentEmployee.add(DocumentEmployee.builder()
+                                        .title(documentProviderSubcontractor.getTitle())
+                                        .status(Document.Status.PENDENTE)
+                                        .type(documentProviderSubcontractor.getType())
+                                        .isActive(true)
+                                        .documentMatrix(documentProviderSubcontractor.getDocumentMatrix())
+                                        .employee(employee)
+                                        .build());
+                            }
+                    );
+                }
             );
-            trainingAndCertificates.forEach(
-                    documentProviderSubcontractor -> {
-                        documentEmployee.add(DocumentEmployee.builder()
-                                .title(documentProviderSubcontractor.getTitle())
-                                .status(Document.Status.PENDENTE)
-                                .type(documentProviderSubcontractor.getType())
-                                .isActive(true)
-                                .documentMatrix(documentProviderSubcontractor.getDocumentMatrix())
-                                .employee(employee)
-                                .build());
-                    }
-            );
+
         } else {
             throw new NotFoundException("Invalid contract type");
         }
 
-        contract.getEmployees().add(employee);
+        contract.getEmployees().addAll(employees);
         contractRepository.save(contract);
         documentEmployeeRepository.saveAll(documentEmployee);
 
@@ -138,30 +151,49 @@ public class CrudContractImpl implements CrudContract {
     }
 
     @Override
-    public String removeEmployeeToContract(String idContract, String idEmployee) {
+    public String removeEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         Contract contract = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
-        Employee employee = employeeRepository.findById(idEmployee)
-                .orElseThrow(() -> new NotFoundException("Employee not found"));
+        List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
-            if (!Objects.equals(contractProviderSupplier.getProviderSupplier().getIdProvider(),
-                    employee.getSupplier().getIdProvider())) {
-                throw new IllegalArgumentException("Contract provider does not match employee provider");
-            }
+            employees.forEach(
+                employee -> {
+                    if (!Objects.equals(contractProviderSupplier.getProviderSupplier().getIdProvider(),
+                            employee.getSupplier().getIdProvider())) {
+                        throw new IllegalArgumentException("Contract provider does not match employee provider");
+                    }
+                }
+            );
 
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
-            if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(),
-                    employee.getSubcontract().getIdProvider())) {
-                throw new IllegalArgumentException("Contract provider does not match employee provider");
-            }
+            employees.forEach(
+                employee -> {
+                    if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(),
+                            employee.getSubcontract().getIdProvider())) {
+                        throw new IllegalArgumentException("Contract provider does not match employee provider");
+                    }
+                }
+            );
         } else {
             throw new NotFoundException("Invalid contract type");
         }
 
-        contract.getEmployees().remove(employee);
+        contract.getEmployees().removeAll(employees);
         contractRepository.save(contract);
 
         return "Employee added successfully";
+    }
+
+    @Override
+    public Page<ContractByEmployeeResponseDto> getContractByEmployee(Pageable pageable, String idEmployee) {
+        Page<Contract> contracts = contractRepository.findAllByEmployees_IdEmployee(idEmployee, pageable);
+
+        return contracts.map(
+                contract -> ContractByEmployeeResponseDto.builder()
+                        .idContract(contract.getIdContract())
+                        .contractReference(contract.getContractReference())
+                        .build()
+        );
     }
 }
