@@ -1,11 +1,11 @@
 import {
-  ArrowLeft,
-  ArrowRight,
+  // ArrowLeft,
+  // ArrowRight,
   Building2,
   ChevronRight,
   Files,
   MessageCircle,
-  Search,
+  // Search,
   // Search,
   Settings2,
   University,
@@ -65,13 +65,11 @@ const createUserClient = z.object({
 type CreateUserClient = z.infer<typeof createUserClient>;
 export function Dashboard() {
   const [selectedTab, setSelectedTab] = useState("filiais");
-  const [branches, setBranches] = useState([]);
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   // const [searchBranches, setSearchBranches] = useState([])
   const { client } = useClient();
   const { selectedBranch } = useBranch();
   const { user } = useUser();
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
