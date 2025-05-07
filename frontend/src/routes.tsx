@@ -9,7 +9,7 @@ import { NewPassword2 } from "./pages/app/new-password2";
 import { SignIn } from "./pages/app/sign-in";
 import MonittoringBis from "./pages/auth/realizaProfile/bis";
 import { Collaborators } from "./pages/auth/realizaProfile/collaborators";
-import { Dashboard } from "./pages/auth/realizaProfile/dashboard";
+import { Dashboard } from "./pages/auth/realizaProfile/home/__dashboard";
 import { Enterprise } from "./pages/auth/realizaProfile/enterprises/enterprise";
 import { MonittoringTable } from "./pages/auth/realizaProfile/monittoringTable";
 import { ProfileClient } from "./pages/auth/realizaProfile/profileClient";

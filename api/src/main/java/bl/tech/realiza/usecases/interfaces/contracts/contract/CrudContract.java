@@ -1,7 +1,14 @@
 package bl.tech.realiza.usecases.interfaces.contracts.contract;
 
+import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface CrudContract {
     String finishContract(String idContract);
-    String addEmployeeToContract(String idContract, String idEmployee);
-    String removeEmployeeToContract(String idContract, String idEmployee);
+    String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
+    String removeEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
+
+    Page<ContractByEmployeeResponseDto> getContractByEmployee(Pageable pageable, String idEmployee);
 }

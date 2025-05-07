@@ -16,6 +16,7 @@ import { Button } from "../ui/button";
 import { SheetContent, SheetTitle } from "../ui/sheet";
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 export function LateralMenu({ onClose }: { onClose: () => void }) {
   const { user, logout } = useUser();
@@ -23,31 +24,32 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
 
   return (
     <SheetContent
-      className="h-full overflow-auto dark:bg-white"
+      className="h-full overflow-auto dark:bg-white bg-right bg-cover"
       side="left"
       onInteractOutside={onClose} // Fecha se clicar fora
       onEscapeKeyDown={onClose} // Fecha se pressionar "Esc"
+      style={{backgroundImage: `url(${bgModalRealiza})`}}
     >
       <SheetTitle  className="sr-only">Menu Lateral</SheetTitle >
       <Link to={`/sistema/select-client/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="w-full justify-start bg-zinc-100 px-4 py-2">
-          <Home className="text-realizaBlue size-4" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
+        <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <Home  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Início</span>
         </Button>
       </Link>
 
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Prestadores de serviço</h3>
+      <h3 className="pl-4 pt-6 text-xs text-white">Prestadores de serviço</h3>
       <Link to={`/sistema/serviceProviders/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <Users2 className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">Ver prestadores</span>
+        <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <Users2  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Ver prestadores</span>
         </Button>
       </Link>
 
       <Link to={`/sistema/dashboard/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="mt-1 w-full justify-start px-4 py-2">
-          <ChartPie className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">Ver BI’s</span>
+        <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <ChartPie  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Ver BI’s</span>
         </Button>
       </Link>
 
@@ -59,62 +61,62 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         </Button>
       </Link> */}
 
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
+      <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <Link to={`/sistema/profile/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <Building2 className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">Empresa</span>
+        <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <Building2  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Empresa</span>
         </Button>
       </Link>
 
       <Link to={`/sistema/branch/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <Factory className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">Filiais</span>
+        <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <Factory  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Filiais</span>
         </Button>
       </Link>
 
       <Link to={`/sistema/employees/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <PersonStanding className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">Colaboradores</span>
+        <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <PersonStanding  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Colaboradores</span>
         </Button>
       </Link>
 
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Funcionalidades</h3>
+      <h3 className="pl-4 pt-6 text-xs text-white">Funcionalidades</h3>
       <Link to={`/sistema/controlPanel/${user?.idUser}`}>
-          <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-            <LayoutPanelTop />
-            <span className="ml-2 text-sm font-medium text-zinc-900">Painel de solicitação</span>
+          <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+            <LayoutPanelTop  className="text-white"/>
+            <span className="ml-2 text-sm font-medium text-white">Painel de solicitação</span>
           </Button>
       </Link>
 
       <Link to={`/sistema/documents/${user?.idUser}`}>
-          <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <Paperclip/>
-            <span className="ml-2 text-sm font-medium text-zinc-900">Painel do cliente</span>
+          <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <Paperclip  className="text-white"/>
+            <span className="ml-2 text-sm font-medium text-white">Painel do cliente</span>
           </Button>
       </Link>
 
       <div className="md:hidden">
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Gestão de perfil</h3>
+      <h3 className="pl-4 pt-6 text-xs text-white">Gestão de perfil</h3>
       <Link to={`/profile-user/${user?.idUser}`}>
       <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <UserRound  />
-            <span className="ml-2 text-sm font-medium text-zinc-900">Perfil</span>
+          <UserRound   className="text-white"/>
+            <span className="ml-2 text-sm font-medium text-white">Perfil</span>
           </Button>
       </Link>
 
       <Link to={`/sistema/create-new-user/${user?.idUser}`}>
       <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2">
-          <UserPlus />
-            <span className="ml-2 text-sm font-medium text-zinc-900">Criar novo usuário</span>
+          <UserPlus   className="text-white"/>
+            <span className="ml-2 text-sm font-medium text-white">Criar novo usuário</span>
           </Button>
       </Link>
 
       <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2" onClick={logout}>
-          <LogOut/>
-          <span className="ml-2 text-sm font-medium text-zinc-900">Sair</span>
+          <LogOut className="text-white"/>
+          <span className="ml-2 text-sm font-medium text-white">Sair</span>
       </Button>
       </div>
     </SheetContent>

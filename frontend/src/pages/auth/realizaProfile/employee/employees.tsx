@@ -36,7 +36,7 @@ export const EmployeesTable = (): JSX.Element => {
     useState<propsSupplier | null>(null);
   const [getSubcontractorList, setGetSubcontractorList] = useState([]);
   const { user } = useUser();
-  const { supplier, setSupplier } = useSupplier();
+  const { supplier } = useSupplier();
   // const [employees, setEmployees] = useState([])
 
   // const handlePageChange = (page: number) => {
@@ -165,7 +165,7 @@ export const EmployeesTable = (): JSX.Element => {
                   <div>
                     {getSubcontractorList.map((subcontractor: any) => (
                       <div key={subcontractor.idProvider}>
-                        <span>{subcontractor.corporateName}teste</span>
+                        <span>{subcontractor.corporateName} </span>
                       </div>
                     ))}
                   </div>

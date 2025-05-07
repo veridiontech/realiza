@@ -34,6 +34,7 @@ public class EmployeeBrazilianRequestDto {
     private String cbo;
     private Employee.Situation situation;
     private String rg;
+    private String cpf;
     private Date admissionDate;
     private String branch;
     private String supplier;

@@ -129,6 +129,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cbo(employeeBrazilianRequestDto.getCbo())
                 .situation(employeeBrazilianRequestDto.getSituation())
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
+                .cpf(employeeBrazilianRequestDto.getCpf())
                 .branch(branch)
                 .supplier(providerSupplier)
                 .subcontract(providerSubcontractor)
@@ -175,6 +176,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cbo(savedEmployeeBrazilian.getCbo())
                 .situation(savedEmployeeBrazilian.getSituation())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
+                .cpf(savedEmployeeBrazilian.getCpf())
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
@@ -229,6 +231,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cbo(employeeBrazilian.getCbo())
                 .situation(employeeBrazilian.getSituation())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
+                .cpf(employeeBrazilian.getCpf())
                 .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
@@ -247,7 +250,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     public Page<EmployeeResponseDto> findAll(Pageable pageable) {
         Page<EmployeeBrazilian> employeeBrazilianPage = employeeBrazilianRepository.findAll(pageable);
 
-        Page<EmployeeResponseDto> employeeBrazilianResponseDtoPage = employeeBrazilianPage.map(
+        return employeeBrazilianPage.map(
                 employeeBrazilian -> {
                     FileDocument fileDocument = null;
                     if (employeeBrazilian.getProfilePicture() != null && !employeeBrazilian.getProfilePicture().isEmpty()) {
@@ -283,6 +286,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .cbo(employeeBrazilian.getCbo())
                             .situation(employeeBrazilian.getSituation())
                             .admissionDate(employeeBrazilian.getAdmissionDate())
+                            .cpf(employeeBrazilian.getCpf())
                             .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                             .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
@@ -295,8 +299,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .build();
                 }
         );
-
-        return employeeBrazilianResponseDtoPage;
     }
 
     @Override
@@ -340,6 +342,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null ? employeeBrazilianRequestDto.getSituation() : employeeBrazilian.getSituation());
         employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
         employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null ? contracts : employeeBrazilian.getContracts());
+        employeeBrazilian.setCpf(employeeBrazilianRequestDto.getCpf() != null ? employeeBrazilianRequestDto.getCpf() : employeeBrazilian.getCpf());
 
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(employeeBrazilian);
 
@@ -370,6 +373,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cbo(savedEmployeeBrazilian.getCbo())
                 .situation(savedEmployeeBrazilian.getSituation())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
+                .cpf(savedEmployeeBrazilian.getCpf())
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)

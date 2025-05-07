@@ -4,8 +4,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import path from "path";
-import { log } from "console";
 
 function StatusBadge({ status }: { status: string }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
