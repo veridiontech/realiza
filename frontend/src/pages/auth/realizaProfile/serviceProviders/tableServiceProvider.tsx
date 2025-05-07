@@ -79,8 +79,8 @@ export function TableServiceProvider() {
           }
         }
       );
-      console.log("Exemplo de item:",res.data.content);
-      setSuppliers(res.data.content); 
+      console.log("Exemplo de item:", res.data.content);
+      setSuppliers(res.data.content);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
     } finally {
@@ -90,7 +90,7 @@ export function TableServiceProvider() {
 
   const getEmployees = async () => {
     try {
-      const res = await axios.get(`${ip}/employee/list`, {
+      const res = await axios.get(`${ip}/employee/brazilian`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
       });
       setEmployees(res.data.content);
@@ -105,7 +105,7 @@ export function TableServiceProvider() {
     }
   }, [selectedBranch]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (isAllocateModalOpen) getEmployees();
   }, [isAllocateModalOpen]);
 
@@ -216,7 +216,7 @@ export function TableServiceProvider() {
 
                   </td>
                   <td className="border border-gray-300 p-2">
-                  <StatusBadge status={supplier.status || "Indefinido"} />
+                    <StatusBadge status={supplier.status || "Indefinido"} />
                   </td>
                 </tr>
               ))
@@ -250,18 +250,38 @@ export function TableServiceProvider() {
             setIsAllocateModalOpen(false);
             setSearchTerm("");
             setAllocateStep(1);
+            setSelectedEmployees([]);
           }}
         >
           {allocateStep === 1 ? (
             <div className="text-white space-y-4">
-              <label className="block text-sm font-semibold">Buscar Colaborador:</label>
               <input
                 type="text"
-                placeholder="Digite o nome do colaborador..."
+                placeholder="Buscar colaborador..."
                 className="w-full px-3 py-2 rounded text-black"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              <div className="max-h-40 overflow-y-auto">
+                {employees
+                  .filter(emp => emp.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .map(emp => (
+                    <div key={emp.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedEmployees.includes(emp.id)}
+                        onChange={() => {
+                          setSelectedEmployees(prev =>
+                            prev.includes(emp.id)
+                              ? prev.filter(id => id !== emp.id)
+                              : [...prev, emp.id]
+                          );
+                        }}
+                      />
+                      <label>{emp.employeeName}</label>
+                    </div>
+                  ))}
+              </div>
               <div className="flex justify-end">
                 <button
                   onClick={() => setAllocateStep(2)}
@@ -282,10 +302,25 @@ export function TableServiceProvider() {
                   Voltar
                 </button>
                 <button
-                  onClick={() => {
-                    setIsAllocateModalOpen(false);
-                    setSearchTerm("");
-                    setAllocateStep(1);
+                  onClick={async () => {
+                    if (!selectedSupplierId || selectedEmployees.length === 0) return;
+                    try {
+                      await axios.post(
+                        `${ip}/contract/addEmployee/${selectedSupplierId}`,
+                        { employees: selectedEmployees },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
+                          },
+                        }
+                      );
+                      setIsAllocateModalOpen(false);
+                      setAllocateStep(1);
+                      setSelectedEmployees([]);
+                      setSearchTerm("");
+                    } catch (err) {
+                      console.error("Erro ao alocar colaboradores", err);
+                    }
                   }}
                   className="bg-green-600 px-4 py-2 rounded"
                 >
