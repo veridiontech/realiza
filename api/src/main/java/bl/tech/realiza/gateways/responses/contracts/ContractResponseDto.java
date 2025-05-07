@@ -26,6 +26,7 @@ public class ContractResponseDto {
     private Boolean finished;
     private Date dateStart;
     private Date endDate;
+    private Contract.IsActive isActive;
     private Boolean subcontractPermission;
     private String contractSupplierId;
     private List<String> activities;
