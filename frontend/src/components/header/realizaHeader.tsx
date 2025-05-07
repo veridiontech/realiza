@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Building, ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
+import { Bell, ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "@/assets/logoRealiza/Logo Realiza Completo 1.png";
 import { Button } from "../ui/button";
