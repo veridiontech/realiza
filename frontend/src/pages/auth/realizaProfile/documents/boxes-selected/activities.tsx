@@ -41,7 +41,7 @@ export function ActivitiesBox() {
           },
         },
       );
-      console.log("teste", resSelected.data);
+      console.log("atividades", resSelected.data);
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
@@ -61,44 +61,13 @@ export function ActivitiesBox() {
     }
   };
 
-  // Envio de documentos nao selecionados
-  // const sendDocuments = async (
-  //   isSelected: boolean,
-  //   idDocumentation: string[],
-  // ) => {
-  //   // const
-  //   const token = localStorage.getItem("tokenClient");
-  //   try {
-  //     console.log(
-  //       "selecionando documentos não selecionados:",
-  //       filterIdDocuments,
-  //     );
-  //     await axios.post(
-  //       `${ip}/document/branch/document-matrix/update`,
-  //       idDocumentation,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         params: {
-  //           isSelected: { isSelected },
-  //         },
-  //       },
-  //     );
-  //   } catch (err) {
-  //     console.log("erro ao enviar documento", err);
-  //   }
-  // };
-
   const filterIdDocuments = nonSelected.map(
     (document) => document.idDocumentation,
   );
-  // .map((document) => document.idDocument);
 
   const filterIdDocumentsSelected = documents.map(
     (document) => document.idDocumentation,
   );
-  // .map((document) => document.idDocument);
 
   console.log("ids dos documentos", filterIdDocuments);
   console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
