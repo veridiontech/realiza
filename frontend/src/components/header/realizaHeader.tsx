@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Bell, ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
+import { Bell, Building, ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
+import realizaLogo from "@/assets/logoRealiza/Logo Realiza Completo 1.png";
 import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { LateralMenu } from "./realizaLateralMenu";
@@ -27,6 +27,7 @@ import { useBoard } from "@/context/context-ultra/Board-provider";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
+import bannerHeader from "@/assets/banner/Rectangle 42203.png"
 
 interface ApiResponse {
   content: Solicitation[];
@@ -356,7 +357,7 @@ export function Header() {
   } 
 
   return (
-    <header className="dark:bg-primary relative p-5">
+    <header className="bg-transparent relative p-5 " style={{ backgroundImage: `url(${bannerHeader})`}}>
       <div>{/* seach */}</div>
       <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
@@ -392,24 +393,21 @@ export function Header() {
           </div>
         </div>
 
-        <div className="flex flex-col items-start">
+        <div className="flex gap-10 items-start">
           <div className="flex items-center gap-4">
-          <div className="hidden md:block text-realizaBlue mr-4 text-xl">
-                Cliente Selecionado:
-              </div>
               <div className="block md:hidden text-realizaBlue mr-4 text-xl">
                 Cliente: 
               </div>
             <select
               onChange={(e) => handleSelectClient(e.target.value)}
               defaultValue=""
-              className="rounded-md border p-1 text-black"
+              className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
             >
               <option value="" disabled>
-                Selecione um cliente
+                  Selecione um cliente
               </option>
               {clients.map((client) => (
-                <option key={client.idClient} value={client.idClient}>
+                <option key={client.idClient} value={client.idClient} className="text-black">
                   {client.tradeName}
                 </option>
               ))}
@@ -418,7 +416,6 @@ export function Header() {
 
           <div className="flex items-center gap-5">
             <div>
-              <span className="text-realizaBlue text-[14px]">Filial: </span>
               <select
                 value={selectedBranch?.idBranch || ""}
                 onChange={(e) => {
@@ -427,7 +424,7 @@ export function Header() {
                   );
                   setSelectedBranch(selected || null);
                 }}
-                className="text-[12px]"
+                className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
               >
                 <option value="">Selecione uma filial</option>
                 {Array.isArray(branch) &&
