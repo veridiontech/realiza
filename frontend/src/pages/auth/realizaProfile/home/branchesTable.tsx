@@ -65,9 +65,9 @@ export function BranchesTable() {
                 key={branch.idBranch}
                 className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
               >
-                <p className="text-sm font-semibold text-gray-700">Filial:</p>
+                <p className="text-sm font-semibold text-gray-700 bg-[#345D5C33]">Filial:</p>
                 <p className="text-realizaBlue mb-2">{branch.name}</p>
-                <p className="text-sm font-semibold text-gray-700">CNPJ:</p>
+                <p className="text-sm font-semibold text-gray-700 bg-[#345D5C33]">CNPJ:</p>
                 <p className="text-gray-800">{branch.cnpj}</p>
               </div>
             ))
@@ -92,20 +92,20 @@ export function BranchesTable() {
           <table className="mt-4 w-full border-collapse border border-gray-300">
             <thead>
               <tr>
-                <th className="border border-gray-300 px-4 py-2 text-start">
+                <th className="border bg-[#345D5C33] px-4 py-2 text-start">
                   Filiais
                 </th>
-                <th className="border">CNPJ</th>
+                <th className="border bg-[#345D5C33]">CNPJ</th>
               </tr>
             </thead>
             <tbody>
               {filteredBranches && filteredBranches.length > 0 ? (
                 filteredBranches.map((branch: any) => (
-                  <tr key={branch.idBranch}>
-                    <td className="border border-gray-300 px-4 py-2">
-                      <li className="text-realizaBlue">{branch.name}</li>
+                  <tr key={branch.idBranch} className="">
+                    <td className=" px-4 py-2 rounded-b-md">
+                      <li className="text-realizaBlue ">{branch.name}</li>
                     </td>
-                    <td className="border border-gray-300 text-center">
+                    <td className=" text-center rounded-b-md">
                       {branch.cnpj}
                     </td>
                   </tr>
