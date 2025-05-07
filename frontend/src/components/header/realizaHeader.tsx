@@ -357,8 +357,7 @@ export function Header() {
   } 
 
   return (
-    <header className="bg-transparent relative p-5 " style={{ backgroundImage: `url(${bannerHeader})`}}>
-      <div>{/* seach */}</div>
+    <header className="bg-transparent relative p-5 h-[27vh] rounded-b-xl" style={{ backgroundImage: `url(${bannerHeader})`}}>
       <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">
@@ -392,7 +391,8 @@ export function Header() {
           </Link>
           </div>
         </div>
-
+        {/* Perfil do usuário e demais itens */}
+        <div className="hidden items-center gap-14 md:flex">
         <div className="flex gap-10 items-start">
           <div className="flex items-center gap-4">
               <div className="block md:hidden text-realizaBlue mr-4 text-xl">
@@ -438,8 +438,7 @@ export function Header() {
           </div>
           {/* Seleção de cliente */}
         </div>
-        {/* Perfil do usuário e demais itens */}
-        <div className="hidden items-center md:flex">
+        <div className="flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="cursor-pointer rounded-full bg-gray-300 p-2 relative">
@@ -500,7 +499,7 @@ export function Header() {
 
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="dark:bg-primary mr-5">
                 <DropdownMenuLabel>
@@ -534,6 +533,7 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
           </div>
         </div>
       </div>

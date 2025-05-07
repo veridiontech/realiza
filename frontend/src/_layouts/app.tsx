@@ -35,7 +35,7 @@ export function AppLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <div className="dark:bg-primary-foreground flex-grow bg-[#F4F4F5]">
+      <div className="dark:bg-primary-foreground bg-[#DEE3EE]">
         <Outlet />
         {/* <ChatBotToggle /> */}
       </div>
