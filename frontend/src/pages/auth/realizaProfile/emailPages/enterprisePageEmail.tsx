@@ -132,6 +132,14 @@ export function EnterprisePageEmail() {
     setShowConfirmModal(false);
   };
 
+  if (!isValidToken) {
+    return (
+      <div className="text-red-600">
+        Token inválido ou expirado. Por favor, solicite um novo convite.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-center">

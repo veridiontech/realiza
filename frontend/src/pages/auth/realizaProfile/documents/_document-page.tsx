@@ -25,12 +25,12 @@ export function DocumentPage() {
   const { selectedBranch, setBranch } = useBranch();
 
   // Estados para Documentos Empresa Terceiro
-  const [enterpriseSelectedDocs, setEnterpriseSelectedDocs] = useState<
-    { idDocument: string; name: string }[]
-  >([]);
-  const [enterpriseNonSelectedDocs, setEnterpriseNonSelectedDocs] = useState<
-    any[]
-  >([]);
+  // const [enterpriseSelectedDocs, setEnterpriseSelectedDocs] = useState<
+  //   { idDocument: string; name: string }[]
+  // >([]);
+  // const [enterpriseNonSelectedDocs, setEnterpriseNonSelectedDocs] = useState<
+  //   any[]
+  // >([]);
 
   // Estados para Documentos Colaboradores Terceiro
   const [personalSelectedDocs, setPersonalSelectedDocs] = useState<any[]>([]);
@@ -81,8 +81,8 @@ export function DocumentPage() {
     setIsLoading(true);
 
     // Reseta os arrays antes de buscar novos dados
-    setEnterpriseNonSelectedDocs([]);
-    setEnterpriseSelectedDocs([]);
+    // setEnterpriseNonSelectedDocs([]);
+    // setEnterpriseSelectedDocs([]);
     setPersonalNonSelectedDocs([]);
     setPersonalSelectedDocs([]);
     setServiceNonSelectedDocs([]);
@@ -96,16 +96,16 @@ export function DocumentPage() {
       );
 
       // Documentos Empresa Terceiro
-      if (Array.isArray(res.data.nonSelectedDocumentsEnterprise)) {
-        setEnterpriseNonSelectedDocs(res.data.nonSelectedDocumentsEnterprise);
-        console.log(
-          "Enterprise não selecionados:",
-          res.data.nonSelectedDocumentsEnterprise
-        );
-      }
-      if (Array.isArray(res.data.selectedDocumentsEnterprise)) {
-        setEnterpriseSelectedDocs(res.data.selectedDocumentsEnterprise);
-      }
+      // if (Array.isArray(res.data.nonSelectedDocumentsEnterprise)) {
+      //   setEnterpriseNonSelectedDocs(res.data.nonSelectedDocumentsEnterprise);
+      //   console.log(
+      //     "Enterprise não selecionados:",
+      //     res.data.nonSelectedDocumentsEnterprise
+      //   );
+      // }
+      // if (Array.isArray(res.data.selectedDocumentsEnterprise)) {
+      //   setEnterpriseSelectedDocs(res.data.selectedDocumentsEnterprise);
+      // }
 
       // Documentos Colaboradores Terceiro
       if (Array.isArray(res.data.nonSelectedDocumentsPersonal)) {
@@ -136,7 +136,7 @@ export function DocumentPage() {
     } catch (err) {
       console.error("Erro ao buscar documentos:", err);
       // Em caso de erro, zera os arrays
-      setEnterpriseSelectedDocs([]);
+      // setEnterpriseSelectedDocs([]);
       setPersonalSelectedDocs([]);
       setServiceSelectedDocs([]);
       setOtherServiceSelectedDocs([]);
@@ -147,17 +147,17 @@ export function DocumentPage() {
 
   // Funções para mover documentos da lista não selecionada para a lista selecionada em cada categoria
 
-  const handleSelectEnterpriseDocument = (docId: string) => {
-    const doc = enterpriseNonSelectedDocs.find(
-      (d: any) => d.idDocument === docId
-    );
-    if (doc) {
-      setEnterpriseNonSelectedDocs((prev) =>
-        prev.filter((d: any) => d.idDocument !== docId)
-      );
-      setEnterpriseSelectedDocs((prev) => [...prev, doc]);
-    }
-  };
+  // const handleSelectEnterpriseDocument = (docId: string) => {
+  //   const doc = enterpriseNonSelectedDocs.find(
+  //     (d: any) => d.idDocument === docId
+  //   );
+  //   if (doc) {
+  //     setEnterpriseNonSelectedDocs((prev) =>
+  //       prev.filter((d: any) => d.idDocument !== docId)
+  //     );
+  //     setEnterpriseSelectedDocs((prev) => [...prev, doc]);
+  //   }
+  // };
 
   const handleSelectPersonalDocument = (docId: string) => {
     const doc = personalNonSelectedDocs.find(
@@ -264,15 +264,15 @@ export function DocumentPage() {
                 Documentos Empresa Terceiro
               </h2>
               <div className="flex items-center justify-around">
-                <DocumentBox
+                {/* <DocumentBox
                   isLoading={isLoading}
                   documents={enterpriseNonSelectedDocs}
-                  onSelectDocument={handleSelectEnterpriseDocument}
-                />
-                <DocumentSelectedBox
+                  // onSelectDocument={handleSelectEnterpriseDocument}
+                /> */}
+                {/* <DocumentSelectedBox
                   isLoading={isLoading}
                   selectedDocuments={enterpriseSelectedDocs}
-                />
+                /> */}
               </div>
             </div>
             {/* Documentos Colaboradores Terceiro */}
