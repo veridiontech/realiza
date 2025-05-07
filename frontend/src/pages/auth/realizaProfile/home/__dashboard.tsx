@@ -1,11 +1,15 @@
 import {
   ArrowLeft,
   ArrowRight,
+  Building2,
   ChevronRight,
   Files,
   MessageCircle,
+  Search,
+  // Search,
   Settings2,
   University,
+  Users,
   UsersRound,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
@@ -37,11 +41,12 @@ import { useUser } from "@/context/user-provider";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { AddNewBranch } from "./branchs/modals/add-new-branch";
-import { UltraSection } from "./ultra/ultra-branchs";
+import { AddNewBranch } from "../branchs/modals/add-new-branch";
+import { UltraSection } from "../ultra/ultra-branchs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChat";
+import { BranchesTable } from "./branchesTable";
 
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
@@ -61,11 +66,8 @@ type CreateUserClient = z.infer<typeof createUserClient>;
 export function Dashboard() {
   const [selectedTab, setSelectedTab] = useState("filiais");
   const [branches, setBranches] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Página atual
-  const [totalPages, setTotalPages] = useState(0); // Total de páginas
   const [usersFromBranch, setUsersFromBranch] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredBranches, setFilteredBranches] = useState([]);
+  // const [searchBranches, setSearchBranches] = useState([])
   const { client } = useClient();
   const { selectedBranch } = useBranch();
   const { user } = useUser();
@@ -122,57 +124,19 @@ export function Dashboard() {
     }
   };
 
-  const fetchBranches = async (page = 1) => {
-    setLoading(true); // Inicia o carregamento
-    try {
-      const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
-        {
-          params: {
-            page: page - 1, // Páginas geralmente começam de 0
-          },
-        },
-      );
-      const { content, totalPages: total } = response.data;
-      setBranches(content);
-      setFilteredBranches(content);
-      setTotalPages(total); // Atualiza total de páginas
-    } catch (err) {
-      console.error("Erro ao buscar filiais:", err);
-    } finally {
-      setLoading(false); // Finaliza o carregamento
-    }
-  };
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const term = event.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = branches.filter(
-      (branch: any) =>
-        branch.name.toLowerCase().includes(term) || branch.cnpj.includes(term),
-    );
-    setFilteredBranches(filtered);
-  };
-
   useEffect(() => {
-    console.log("id da branch:", selectedBranch);
-
     if (selectedBranch?.idBranch) {
       getUsersFromBranch();
     }
   }, [selectedBranch?.idBranch]);
 
-  useEffect(() => {
-    if (client?.idClient) {
-      fetchBranches(currentPage);
-    }
-  }, [client?.idClient, currentPage]);
+
 
   if (client?.isUltragaz) {
     return (
       <>
         <Helmet title="Dashboard" />
-        <section className="relative bottom-[20vw] pb-10 pt-14">
+        <section className="relative bottom-[5vw] pb-10 pt-14">
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col gap-10">
               <EnterpriseResume />
@@ -259,35 +223,37 @@ export function Dashboard() {
           <div className="flex flex-col gap-10">
             <EnterpriseResume />
             <div className="flex items-center gap-5">
-              <div className="h-[60vh] w-[80vw] rounded-lg border bg-white p-8 shadow-sm">
+              <div className="h-[60vh] w-[95vw] rounded-lg border bg-white p-8 shadow-sm">
                 <div className="flex flex-col gap-4">
                   <div>
                     <nav className="flex items-center justify-between">
-                      <div>
+                      <div className="flex items-center gap-5">
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
                             selectedTab === "filiais"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
-                              : "text-realizaBlue bg-white"
+                              : "text-realizaBlue bg-white border border-realizaBlue"
                           }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
-                          Filiais
+                          <Building2 /> Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
                             selectedTab === "usuarios"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
+                              : "text-realizaBlue bg-white border border-realizaBlue"
                           }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
-                          Usuários
+                          <Users/> Usuários
                         </Button>
                       </div>
-                      {selectedTab === "filiais" && <AddNewBranch />}
+                      {selectedTab === "filiais" && (
+                          <AddNewBranch />
+                      )}
                       {selectedTab === "usuarios" && (
                         <Dialog>
                           <DialogTrigger asChild>
@@ -442,133 +408,10 @@ export function Dashboard() {
                   </div>
                   {selectedTab === "filiais" && (
                     <div>
-                      <div className="flex flex-col gap-5">
-                        <div className="flex items-center gap-4">
-                          <div className="hidden text-sm font-semibold text-sky-900 md:block">
-                            Buscar Filial:
-                          </div>
-                          <div className="block text-sm font-semibold text-sky-900 md:hidden">
-                            Buscar:
-                          </div>
-                          <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={handleSearch}
-                            placeholder="Pesquisar filiais"
-                            className="w-64 rounded-md border p-2"
-                          />
-                        </div>
 
-                        <div className="block space-y-4 md:hidden">
-                          {filteredBranches && filteredBranches.length > 0 ? (
-                            filteredBranches.map((branch: any) => (
-                              <div
-                                key={branch.idBranch}
-                                className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
-                              >
-                                <p className="text-sm font-semibold text-gray-700">
-                                  Filial:
-                                </p>
-                                <p className="text-realizaBlue mb-2">
-                                  {branch.name}
-                                </p>
+                        <BranchesTable />
 
-                                <p className="text-sm font-semibold text-gray-700">
-                                  CNPJ:
-                                </p>
-                                <p className="text-gray-800">{branch.cnpj}</p>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-center text-gray-600">
-                              Nenhuma filial encontrada
-                            </p>
-                          )}
-                        </div>
-                        <div className="hidden overflow-x-auto rounded-lg border bg-white p-4 shadow-lg md:block">
-                          <table className="mt-4 w-full border-collapse border border-gray-300">
-                            <thead>
-                              <tr>
-                                <th className="border border-gray-300 px-4 py-2 text-start">
-                                  Filiais
-                                </th>
-                                <th className="border">CNPJ</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {filteredBranches &&
-                              filteredBranches.length > 0 ? (
-                                filteredBranches.map((branch: any) => (
-                                  <tr key={branch.idBranch}>
-                                    <td className="border border-gray-300 px-4 py-2">
-                                      <li className="text-realizaBlue">
-                                        {branch.name}
-                                      </li>
-                                    </td>
-                                    <td className="border border-gray-300 text-center">
-                                      {branch.cnpj}
-                                    </td>
-                                  </tr>
-                                ))
-                              ) : (
-                                <tr>
-                                  <td
-                                    colSpan={2}
-                                    className="border border-gray-300 px-4 py-2 text-center"
-                                  >
-                                    Nenhuma filial encontrada
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                        <div className="mt-4 flex flex-col items-end justify-center">
-                          <div className="mt-4 flex gap-2">
-                            <button
-                              className={`${
-                                currentPage === 1 || loading
-                                  ? "cursor-not-allowed bg-neutral-300"
-                                  : "bg-realizaBlue"
-                              } rounded-md px-4 py-2 text-white`}
-                              onClick={() =>
-                                setCurrentPage((prev) => Math.max(prev - 1, 1))
-                              }
-                              disabled={currentPage === 1 || loading}
-                            >
-                              <ArrowLeft />
-                            </button>
 
-                            {/* Botão Próximo */}
-                            <button
-                              className={`${
-                                currentPage === totalPages || loading
-                                  ? "cursor-not-allowed bg-neutral-300"
-                                  : "bg-realizaBlue"
-                              } rounded-md px-4 py-2 text-white`}
-                              onClick={() =>
-                                setCurrentPage((prev) =>
-                                  Math.min(prev + 1, totalPages),
-                                )
-                              }
-                              disabled={currentPage === totalPages || loading}
-                            >
-                              <ArrowRight />
-                            </button>
-                          </div>
-                          {loading ? (
-                            <div className="text-center text-gray-600">
-                              Carregando...
-                            </div>
-                          ) : (
-                            <div className="text-center">
-                              <span>
-                                Página {currentPage} de {totalPages}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
                     </div>
                   )}
                   {selectedTab === "usuarios" && (
@@ -695,59 +538,6 @@ export function Dashboard() {
                 Ver mais <ChevronRight />
               </Button>
             </Link>
-          </div>
-
-          <div className="pt-20">
-            <h2 className="pb-6 text-xl font-medium">Ações rápidas</h2>
-
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              <MainCard
-                title="Fornecedores"
-                value={324}
-                icon={<UsersRound size={28} />}
-              />
-              <MainCard
-                title="Mensagens"
-                value={12}
-                icon={<MessageCircle size={28} />}
-              />
-              <MainCard
-                title="Unidades"
-                value={4}
-                icon={<University size={28} />}
-              />
-              <MainCard
-                title="Contratos"
-                value={72}
-                icon={<Files size={28} />}
-              />
-            </div>
-
-            <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
-              <ActionButton
-                label="Adicionar fornecedor"
-                icon={<ChevronRight />}
-              />
-              <ActionButton label="Enviar documento" icon={<ChevronRight />} />
-              <ActionButton label="Criar contato" icon={<ChevronRight />} />
-              <ActionButton label="Gerar relatório" icon={<ChevronRight />} />
-              <ActionButton
-                label="Atualizar documentos"
-                icon={<ChevronRight />}
-              />
-              <ActionButton
-                label="Consultar contratos"
-                icon={<ChevronRight />}
-              />
-              <ActionButton
-                label="Aprovar solicitações"
-                icon={<ChevronRight />}
-              />
-              <ActionButton
-                label="Editar colaboradores"
-                icon={<ChevronRight />}
-              />
-            </div>
           </div>
         </div>
       </section>

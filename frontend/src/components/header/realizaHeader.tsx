@@ -426,10 +426,10 @@ export function Header() {
                 }}
                 className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
               >
-                <option value="">Selecione uma filial</option>
+                <option value="" className="text-black">Selecione uma filial</option>
                 {Array.isArray(branch) &&
                   branch.map((b) => (
-                    <option value={b.idBranch} key={b.idBranch}>
+                    <option value={b.idBranch} key={b.idBranch} className="text-black">
                       {b.name}
                     </option>
                   ))}
