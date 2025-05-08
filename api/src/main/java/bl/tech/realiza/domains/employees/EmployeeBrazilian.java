@@ -19,4 +19,5 @@ import java.sql.Date;
 @DiscriminatorValue("BRAZILIAN")
 public class EmployeeBrazilian extends Employee {
     private Date admissionDate;
+    private String cpf;
 }

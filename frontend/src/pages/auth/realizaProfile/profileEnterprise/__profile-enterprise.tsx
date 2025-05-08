@@ -4,98 +4,15 @@ import { EditModalEnterprise } from "./edit-modal-enterprise";
 import { useClient } from "@/context/Client-Provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplier } from "@/context/Supplier-context";
-// import axios from "axios";
-// import { ip } from "@/utils/ip";
-// import { useEffect, useState } from "react";
+
 import { useUser } from "@/context/user-provider";
-// import axios from "axios";
-// import { ip } from "@/utils/ip";
-// import { useEffect } from "react";
-// import { z } from "zod";
-// import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-
-// const profileLogoClientFormSchema = z.object({
-//   file: z
-//     .instanceof(File, { message: "O arquivo deve ser uma imagem válida." })
-//     .refine(
-//       (file) => file.size <= 2 * 1024 * 1024,
-//       "O arquivo deve ter no máximo 2MB.",
-//     )
-//     .refine(
-//       (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
-//       "Apenas imagens PNG ou JPG são permitidas.",
-//     ),
-// });
-
-// type ProfileLogoClientFormSchema = z.infer<typeof profileLogoClientFormSchema>
 export function ProfileEnterpriseReprise() {
-  // const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  // const [logoClient, setLogoClient] = useState<string | null>(null);
   const { client } = useClient();
   const { supplier } = useSupplier();
   const { user } = useUser();
-  // const [supplierData, setSupplierData] = useState(null);
+
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
-
-  // const {
-  //   // handleSubmit,
-  //   setValue,
-  //   // formState: { errors },
-  // } = useForm<ProfileLogoClientFormSchema>({
-  //   resolver: zodResolver(profileLogoClientFormSchema)
-  // })
-
-  // const getLogoClient = async () => {
-  //   try {
-  //     const res = await axios.get(
-  //       `${ip}/client/change-logo/${client?.idClient}`,
-  //     );
-  //     // setLogoClient(res.data);
-  //   } catch (err) {
-  //     console.log("erro ao buscar logo:", err);
-  //   }
-  // };
-
-  // const handleFileUpload = async () => {
-  //   if (!selectedFile) {
-  //     console.error("Nenhum arquivo selecionado.");
-  //     return;
-  //   }
-  // }
-
-  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (file) {
-  //     setSelectedFile(file);
-  //     setValue("file", file);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   getLogoClient();
-  // });
-
-  // const getSupplier = async () => {
-  //   if (!supplier?.idProvider) return; 
-  //   try {
-  //     const res = await axios.get(`${ip}/supplier/${supplier.idProvider}`);
-  //     setSupplierData(res.data);
-  //   } catch (error) {
-  //     console.error("Erro ao buscar fornecedor:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if( supplier?.idProvider) {
-  //     getSupplier()
-  //   }
-  // }, [supplier?.idProvider])
-
-  // console.log(user)
 
   if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE") {
     return (

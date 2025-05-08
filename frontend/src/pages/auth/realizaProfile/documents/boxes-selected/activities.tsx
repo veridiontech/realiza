@@ -16,9 +16,9 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 // import { BoxSelected } from "../new-documents-page/box-selected";
 import { BoxActivities } from "../new-documents-page/box-activitie";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Search } from "lucide-react";
 import { propsDocument } from "@/types/interfaces";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ActivitiesBox() {
   // const [activitiesCheck, setCheckedActivities] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function ActivitiesBox() {
     useDocument();
   const [documentsByActivitie, setDocumentByActivitie] = useState([]);
   const [activities, setActivities] = useState<any>([]);
-  const { selectedBranch } = useBranch() 
+  const { selectedBranch } = useBranch();
   // const [activitiesAll, setActivitiesAll] = useState([])
 
   const getDocument = async () => {
@@ -41,7 +41,7 @@ export function ActivitiesBox() {
           },
         },
       );
-      console.log("teste", resSelected.data);
+      console.log("atividades", resSelected.data);
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
@@ -61,44 +61,13 @@ export function ActivitiesBox() {
     }
   };
 
-  // Envio de documentos nao selecionados
-  // const sendDocuments = async (
-  //   isSelected: boolean,
-  //   idDocumentation: string[],
-  // ) => {
-  //   // const
-  //   const token = localStorage.getItem("tokenClient");
-  //   try {
-  //     console.log(
-  //       "selecionando documentos não selecionados:",
-  //       filterIdDocuments,
-  //     );
-  //     await axios.post(
-  //       `${ip}/document/branch/document-matrix/update`,
-  //       idDocumentation,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         params: {
-  //           isSelected: { isSelected },
-  //         },
-  //       },
-  //     );
-  //   } catch (err) {
-  //     console.log("erro ao enviar documento", err);
-  //   }
-  // };
-
   const filterIdDocuments = nonSelected.map(
     (document) => document.idDocumentation,
   );
-  // .map((document) => document.idDocument);
 
   const filterIdDocumentsSelected = documents.map(
     (document) => document.idDocumentation,
   );
-  // .map((document) => document.idDocument);
 
   console.log("ids dos documentos", filterIdDocuments);
   console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
@@ -194,31 +163,27 @@ export function ActivitiesBox() {
             <input className="outline-none" />
           </div>
           <ScrollArea className="h-[30vh]">
-            <div>
-              {Array.isArray(documentsByActivitie) &&
-              documentsByActivitie.length > 0 ? (
-                documentsByActivitie.map((document: any) => (
-                  <div
-                    key={document.idDocument}
-                    className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
-                    onClick={() =>
-                      toggleCheckbox(document.idDocument, document)
-                    }
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checkedDocs.includes(document.idDocument)}
-                      onChange={() => {}}
-                    />
-                    <span>{document.documentTitle || "Documento"}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">
-                  Nenhum documento encontrado.
-                </p>
-              )}
-            </div>
+            {Array.isArray(documentsByActivitie) &&
+            documentsByActivitie.length > 0 ? (
+              documentsByActivitie.map((document: any) => (
+                <div
+                  key={document.idDocument}
+                  className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
+                  onClick={() => toggleCheckbox(document.idDocument, document)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checkedDocs.includes(document.idDocument)}
+                    onChange={() => {}}
+                  />
+                  <span>{document.documentTitle || "Documento"}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">
+                Nenhum documento encontrado.
+              </p>
+            )}
           </ScrollArea>
         </div>
       </div>

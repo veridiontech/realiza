@@ -18,17 +18,13 @@ import { Oval, Radio } from "react-loader-spinner";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-// import { useUser } from "@/context/user-provider";
-// import { useClient } from "@/context/Client-Provider";
 import { useBranch } from "@/context/Branch-provider";
 import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 import { useSupplier } from "@/context/Supplier-context";
-// import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 
-// Torna o campo idClient opcional, pois vamos atribuí-lo via código
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string(),
@@ -59,9 +55,6 @@ export const contractFormSchema = z.object({
   contractReference: z
     .string()
     .nonempty("Referência do contrato é obrigatório"),
-
-  // idActivity: z.string().nonempty("Selecione uma atividade"),
-  // typeManagement: z.string(),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -74,14 +67,11 @@ type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ModalTesteSendSupplier() {
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
-  // const [setRequirements] = useState<any>([]);
-  // const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
   const [providerDatas, setProviderDatas] = useState({});
   const { user } = useUser();
-  // const { client } = useClient();
   const { selectedBranch } = useBranch();
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
@@ -90,20 +80,16 @@ export function ModalTesteSendSupplier() {
   const { supplier } = useSupplier();
   const [contracts, setContracts] = useState([]);
   const [isSsma, setIsSsma] = useState(false);
-  // const [subContractDatas, setSubContractDatas] = useState({});
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
-  const [servicesType, setServicesType] = useState([])
+  const [servicesType, setServicesType] = useState([]);
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
-      setSelectedActivities(prev => [...prev, activityId]);
+      setSelectedActivities((prev) => [...prev, activityId]);
     } else {
-      setSelectedActivities(prev => prev.filter(id => id !== activityId));
+      setSelectedActivities((prev) => prev.filter((id) => id !== activityId));
     }
   };
-
-  // console.log("Atividades selecionadas:", selectedActivities);
-  
 
   const {
     register,
@@ -182,15 +168,12 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  // console.log("idBranch teste:", selectedBranch?.idBranch);
-
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     try {
       const res = await axios.get(
         `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
       );
-      // console.log("Dados do supplier:", res.data.content);
       setSuppliers(res.data.content);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
@@ -206,12 +189,12 @@ export function ModalTesteSendSupplier() {
 
   const getActivities = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
-      // const requirementData = await axios.get(`${ip}/contract/requirement`);
+      const activitieData = await axios.get(`${ip}/contract/activity`, {
+        params: {
+          size: 1000
+        }
+      });
       setActivities(activitieData.data.content);
-      // console.log("atividades log teste:", activitieData.data.content);
-
-      // setRequirements(requirementData.data.content);
     } catch (err) {
       console.log(err);
     }
@@ -256,8 +239,6 @@ export function ModalTesteSendSupplier() {
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
       );
       console.log(selectedBranch);
-
-      // console.log("gestores:", res.data.content);
       setManagers(res.data.content);
     } catch (err) {
       console.log(
@@ -313,25 +294,18 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  const getServicesType = async() => {
-    try{
-      const res = await axios.get(`${ip}/contract/service-type`)
-      setServicesType(res.data)
-    }catch(err) {
+  const getServicesType = async () => {
+    try {
+      const res = await axios.get(`${ip}/contract/service-type`);
+      setServicesType(res.data);
+    } catch (err) {
       console.log("Erro ao buscar serviços", err);
     }
-  }
-
-  // const handleRadioClick = (value: string) => {
-  //   setSelectedRadio(value);
-  // };
-
-  // const shouldShowServiceType =
-  //   selectedRadio === null || selectedRadio === "nao";
+  };
 
   useEffect(() => {
     getActivities();
-    getServicesType()
+    getServicesType();
   }, []);
 
   if (
@@ -341,7 +315,9 @@ export function ModalTesteSendSupplier() {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button className="bg-realizaBlue hidden md:block">Cadastrar novo prestador</Button>
+          <Button className="bg-realizaBlue hidden md:block">
+            Cadastrar novo prestador
+          </Button>
         </DialogTrigger>
         <DialogContent
           style={{
@@ -487,7 +463,7 @@ export function ModalTesteSendSupplier() {
             </form>
             <Dialog open={nextModal} onOpenChange={setNextModal}>
               <DialogContent
-                className="max-w-[95vw] md:max-w-[45vw] border-none"
+                className="max-w-[95vw] border-none md:max-w-[45vw]"
                 style={{
                   backgroundImage: `url(${bgModalRealiza})`,
                 }}
@@ -712,10 +688,12 @@ export function ModalTesteSendSupplier() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className=" bg-sky-700 hidden md:block">Cadastrar novo prestador</Button>
+        <Button className="hidden bg-sky-700 md:block">
+          Cadastrar novo prestador
+        </Button>
       </DialogTrigger>
       <DialogTrigger asChild>
-        <Button className="bg-sky-700 md:hidden h-[8vw] w-[8vw]">+</Button>
+        <Button className="h-[8vw] w-[8vw] bg-sky-700 md:hidden">+</Button>
       </DialogTrigger>
       <DialogContent
         style={{
@@ -740,7 +718,7 @@ export function ModalTesteSendSupplier() {
         <div>
           <div className="flex flex-col gap-2">
             <Label className="text-white">Selecione uma das opções</Label>
-            <div className="flex flex-col md:flex-row gap-2">
+            <div className="flex flex-col gap-2 md:flex-row">
               <label className="flex items-center gap-1 text-white">
                 <input
                   type="radio"
@@ -961,7 +939,7 @@ export function ModalTesteSendSupplier() {
           )}
           <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent
-              className="max-w-[95vw] md:max-w-[45vw] border-none"
+              className="max-w-[95vw] border-none md:max-w-[45vw]"
               style={{
                 backgroundImage: `url(${bgModalRealiza})`,
               }}
@@ -1032,14 +1010,14 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                        <Label className="text-white">Nome do Serviço</Label>
-                        <Input {...registerContract("serviceName")} />
-                        {errorsContract.serviceName && (
-                          <span className="text-red-500">
-                            {errorsContract.serviceName.message}
-                          </span>
-                        )}
-                      </div>
+                      <Label className="text-white">Nome do Serviço</Label>
+                      <Input {...registerContract("serviceName")} />
+                      {errorsContract.serviceName && (
+                        <span className="text-red-500">
+                          {errorsContract.serviceName.message}
+                        </span>
+                      )}
+                    </div>
                     <div>
                       <Label className="text-white">
                         Data de início efetivo
@@ -1093,7 +1071,7 @@ export function ModalTesteSendSupplier() {
                             checked={isSsma}
                             {...registerContract("hse", {
                               onChange: (e) => {
-                                setIsSsma(e.target.checked); 
+                                setIsSsma(e.target.checked);
                               },
                             })}
                           />
@@ -1102,7 +1080,10 @@ export function ModalTesteSendSupplier() {
                           <Label className="text-[14px] text-white">
                             TRABALHISTA
                           </Label>
-                          <input type="checkbox" {...registerContract("labor")}/>
+                          <input
+                            type="checkbox"
+                            {...registerContract("labor")}
+                          />
                         </div>
                       </div>
 
@@ -1114,10 +1095,21 @@ export function ModalTesteSendSupplier() {
                     </div>
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
-                      <select defaultValue="" {...registerContract("idServiceType")} className="rounded-md border p-2">
-                        <option value="" disabled>Selecione uma opção</option>
+                      <select
+                        defaultValue=""
+                        {...registerContract("idServiceType")}
+                        className="rounded-md border p-2"
+                      >
+                        <option value="" disabled>
+                          Selecione uma opção
+                        </option>
                         {servicesType.map((idServiceType: any) => (
-                          <option value={idServiceType.idServiceType} key={idServiceType.idServiceType}>{idServiceType.title}</option>
+                          <option
+                            value={idServiceType.idServiceType}
+                            key={idServiceType.idServiceType}
+                          >
+                            {idServiceType.title}
+                          </option>
                         ))}
                       </select>
                       {errorsContract.idServiceType && (
@@ -1129,29 +1121,37 @@ export function ModalTesteSendSupplier() {
 
                     {isSsma === true && (
                       <div className="flex flex-col gap-2">
-                      <Label className="text-white">Tipo de atividade</Label>
-                      <ScrollArea className="h-[15vh]">
-<div className="flex flex-col gap-1">
-      
+                        <Label className="text-white">Tipo de atividade</Label>
+                        <ScrollArea className="h-[15vh]">
+                          <div className="flex flex-col gap-1">
+                            {activities.map((activity: any) => (
+                              <div
+                                key={activity.idActivity}
+                                className="flex items-center gap-2"
+                              >
+                                <input
+                                  type="checkbox"
+                                  onChange={(e) =>
+                                    handleCheckboxChange(
+                                      activity.idActivity,
+                                      e.target.checked,
+                                    )
+                                  }
+                                  checked={selectedActivities.includes(
+                                    activity.idActivity,
+                                  )}
+                                />
+                                <p className="text-white">{activity.title}</p>
+                              </div>
+                            ))}
 
-      {activities.map((activity: any) => (
-        <div key={activity.idActivity} className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            onChange={(e) => handleCheckboxChange(activity.idActivity, e.target.checked)}
-            checked={selectedActivities.includes(activity.idActivity)}
-          />
-          <p className="text-white">{activity.title}</p>
-        </div>
-      ))}
-
-      {/* {errorsContract.idActivity && (
+                            {/* {errorsContract.idActivity && (
         <span className="text-red-500">
           {errorsContract.idActivity.message}
         </span>
       )} */}
-    </div>
-                      </ScrollArea>
+                          </div>
+                        </ScrollArea>
                       </div>
                     )}
 
