@@ -4,8 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import path from "path";
-import { log } from "console";
+
 
 function StatusBadge({ status }: { status: string }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
@@ -63,7 +62,8 @@ export function TableServiceProvider() {
   const [selectedReason, setSelectedReason] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [allocateStep, setAllocateStep] = useState(1);
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+  const [selectedsupplierId, setSelectedsuppierId] = useState<string | null>(null);
   const [employees, setEmployees] = useState<any[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
 
@@ -91,10 +91,16 @@ export function TableServiceProvider() {
 
   const getEmployees = async () => {
     try {
-      const res = await axios.get(`${ip}/employee/brazilian`, {
+      console.log("supplier" , selectedsupplierId);
+      
+      const res = await axios.get(`${ip}/employee`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
+        params: {
+          enterprise: "SUPPLIER",
+          idSearch: selectedsupplierId,
+        }
       });
-      console.log("Colaboradores retornados:",res.data.content);
+      console.log("Colaboradores retornados:", res.data.content);
       setEmployees(res.data.content);
     } catch (err) {
       console.error("Erro ao buscar colaboradores", err);
@@ -108,8 +114,11 @@ export function TableServiceProvider() {
   }, [selectedBranch]);
 
   useEffect(() => {
-    if (isAllocateModalOpen) getEmployees();
-  }, [isAllocateModalOpen]);
+    if (isAllocateModalOpen && selectedsupplierId) {
+      getEmployees();
+    }
+  }, [isAllocateModalOpen, selectedsupplierId]);
+  
 
   return (
     <div className="p-5 md:p-10">
@@ -146,7 +155,10 @@ export function TableServiceProvider() {
                 <button
                   title="Alocar funcionário"
                   onClick={() => {
-                    setSelectedSupplierId(supplier.idContract);
+                    console.log("verificação" , supplier);
+                    setSelectedContractId(supplier.idContract);
+                    setSelectedsuppierId(supplier.providerSupplier);
+                    //como a da linha 154 colocar o id do supplier em uma variavel
                     setIsAllocateModalOpen(true);
                   }}
                 >
@@ -156,7 +168,7 @@ export function TableServiceProvider() {
                 <button
                   title="Finalizar"
                   onClick={() => {
-                    setSelectedSupplierId(supplier.contract?.idContract);
+                    setSelectedContractId(supplier.contract?.idContract);
                     setIsFinalizeModalOpen(true);
                   }}
                 >
@@ -213,7 +225,7 @@ export function TableServiceProvider() {
                     <button
                       title="Alocar funcionário"
                       onClick={() => {
-                        setSelectedSupplierId(supplier.idContract);
+                        setSelectedContractId(supplier.idContract);
                         setIsAllocateModalOpen(true);
                       }}
                     >
@@ -223,7 +235,7 @@ export function TableServiceProvider() {
                     <button
                       title="Finalizar"
                       onClick={() => {
-                        setSelectedSupplierId(supplier.idContract);
+                        setSelectedContractId(supplier.idContract);
                         setIsFinalizeModalOpen(true);
                       }}
                     >
@@ -263,6 +275,7 @@ export function TableServiceProvider() {
         <Modal
           title="Alocar Funcionário"
           onClose={() => {
+            
             setIsAllocateModalOpen(false);
             setSearchTerm("");
             setAllocateStep(1);
@@ -328,11 +341,11 @@ export function TableServiceProvider() {
                 </button>
                 <button
                   onClick={async () => {
-                    if (!selectedSupplierId) return;
+                    if (!selectedContractId) return;
                     try {
                       console.log("Lista de obj", selectedEmployees);
                       await axios.post(
-                        `${ip}/contract/add-employee/${selectedSupplierId}`,
+                        `${ip}/contract/add-employee/${selectedContractId}`,
                         { idEmployees: selectedEmployees },
                         {
                           headers: {
@@ -365,7 +378,7 @@ export function TableServiceProvider() {
           setIsFinalizeModalOpen(false);
           setFinalizeStep(1);
           setSelectedReason("");
-          setSelectedSupplierId(null);
+          setSelectedContractId(null);
         }}>
           {finalizeStep === 1 && (
             <div className="text-white">
@@ -440,10 +453,10 @@ export function TableServiceProvider() {
                 </button>
                 <button
                   onClick={async () => {
-                    if (!selectedSupplierId) return;
+                    if (!selectedContractId) return;
                     try {
                       await axios.post(
-                        `${ip}/contract/finish/${selectedSupplierId}`,
+                        `${ip}/contract/finish/${selectedContractId}`,
                         { status: selectedReason },
                         {
                           headers: {
@@ -458,7 +471,7 @@ export function TableServiceProvider() {
                       setIsFinalizeModalOpen(false);
                       setFinalizeStep(1);
                       setSelectedReason("");
-                      setSelectedSupplierId(null);
+                      setSelectedContractId(null);
                     }
                   }}
                   className="bg-realizaBlue px-4 py-2 rounded"
