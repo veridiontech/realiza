@@ -13,8 +13,8 @@ public interface CrudContractProviderSubcontractor {
     ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractRequestDto);
     Optional<ContractSubcontractorResponseDto> findOne(String id);
     Page<ContractSubcontractorResponseDto> findAll(Pageable pageable);
-    Optional<ContractResponseDto> update(String id, ContractRequestDto contractRequestDto);
+    Optional<ContractSubcontractorResponseDto> update(String id, ContractRequestDto contractRequestDto);
     void delete(String id);
-    Page<ContractResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
-    Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
+    Page<ContractSubcontractorResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
+    Page<ContractSubcontractorResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
 }

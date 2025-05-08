@@ -22,6 +22,7 @@ public class ContractSubcontractorResponseDto {
     private Contract.ExpenseType expenseType;
     private String contractReference;
     private String idContractSupplier;
+    private Boolean finished;
     private Date dateStart;
     private Contract.IsActive isActive;
     private List<String> activities;
