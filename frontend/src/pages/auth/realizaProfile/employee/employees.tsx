@@ -20,6 +20,7 @@ import { useBranch } from "@/context/Branch-provider";
 import { useSupplier } from "@/context/Supplier-context";
 import { useUser } from "@/context/user-provider";
 import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
+import { Cog, Users2Icon } from "lucide-react";
 
 export const EmployeesTable = (): JSX.Element => {
   const [selectedTab, setSelectedTab] = useState("fornecedor");
@@ -110,10 +111,10 @@ export const EmployeesTable = (): JSX.Element => {
     "ROLE_SUPPLIER_RESPONSIBLE"
   ) {
     return (
-      <div className="m-4 flex justify-center">
-        <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl">Colaboradores</h1>
+      <div className="m-4 flex flex-col items-center">
+        <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md relative bottom-[5vw]">
+          <div className="mb-6 flex items-center justify-between bg-realizaBlue p-5 rounded-md">
+            <h1 className="text-2xl text-white font-medium flex items-center gap-1"><Users2Icon size={30} className="text-[#FFCE50]"/> Colaboradores</h1>
             <NewModalCreateEmployee />
           </div>
           <div className="mb-4 flex">
@@ -140,7 +141,12 @@ export const EmployeesTable = (): JSX.Element => {
               Subcontratado
             </Button>
           </div>
-          <div>
+          <div className="flex gap-1">
+          <Cog />
+          <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
+          </div>
+        </div>
+        <div>
             {loading ? (
               <div className="text-center text-gray-600">
                 Carregando colaboradores...
@@ -149,8 +155,7 @@ export const EmployeesTable = (): JSX.Element => {
               <div className="text-center text-red-500">{error}</div>
             ) : selectedTab === "fornecedor" ? (
               <div>
-                <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
-                <div>
+                <div className="">
                   <TableEmployee idProvider={supplier?.idProvider ?? null} />
                 </div>
               </div>
@@ -173,12 +178,6 @@ export const EmployeesTable = (): JSX.Element => {
               </div>
             )}
           </div>
-          {/* <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          /> */}
-        </div>
       </div>
     );
   }

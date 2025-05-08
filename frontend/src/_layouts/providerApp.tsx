@@ -33,7 +33,7 @@ export function ProviderAppLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <HeaderProvider />
-      <div className="dark:bg-primary-foreground flex-grow bg-[#F4F4F5]">
+      <div className="dark:bg-primary-foreground flex-grow bg-[#DEE3EE]">
         <Outlet />
       </div>
     </div>

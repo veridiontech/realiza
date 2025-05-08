@@ -145,7 +145,7 @@ export function NewModalCreateEmployee() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="hidden md:block bg-realizaBlue">Cadastrar novo colaborador</Button>
+        <Button className="hidden md:block bg-realizaBlue border border-white rounded-md">Cadastrar novo colaborador +</Button>
       </DialogTrigger>
       <DialogTrigger asChild>
         <Button className="md:hidden bg-realizaBlue">+</Button>
