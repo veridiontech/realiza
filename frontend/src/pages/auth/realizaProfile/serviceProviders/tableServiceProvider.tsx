@@ -82,6 +82,7 @@ export function TableServiceProvider() {
           }
         }
       );
+      console.log("Resposta da API:", res.data);
       console.log("Exemplo de item:", res.data.content);
       setSuppliers(res.data.content);
     } catch (err) {
@@ -93,7 +94,11 @@ export function TableServiceProvider() {
 
   const getEmployees = async () => {
     try {
-      const res = await axios.get(`${ip}/employee/brazilian`, {
+      const res = await axios.get(`${ip}/employee`, { 
+        params: {
+          enterprise: "SUPPLIER",
+          idSearch: selectedBranch?.idBranch
+        },
         headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
       });
       setEmployees(res.data.content);
@@ -102,10 +107,9 @@ export function TableServiceProvider() {
     }
   };
 
-
-  const getContract = async (contractId: string, setValue: any) => {
+  const getContract = async (selectedSupplierId: string, setValue: any) => {
     try {
-      const res = await axios.get(`${ip}/contract/subcontractor${contractId}`);
+      const res = await axios.get(`${ip}/contract/subcontractor${selectedSupplierId}`);
       const contractData = res.data;
       setValue("cnpj", contractData.cnpj || "");
       setValue("idResponsible", contractData.idResponsible || "");
@@ -158,7 +162,7 @@ export function TableServiceProvider() {
 
   useEffect(() => {
     if (selectedSupplierId) {
-      getContract(selectedSupplierId, setValue);
+      // getContract(selectedSupplierId, setValue);
     }
   }, [selectedSupplierId, setValue]);
 
