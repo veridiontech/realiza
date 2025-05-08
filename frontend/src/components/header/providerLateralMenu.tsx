@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { SheetContent } from "../ui/sheet";
 import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 export function ProviderLateralMenu() {
   const { user } = useUser();
@@ -19,7 +20,7 @@ export function ProviderLateralMenu() {
 
   if(user?.role === "ROLE_SUBCONTRACTOR_RESPONSIBLE") {
     return (
-      <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
+      <SheetContent className="h-full overflow-auto " side={"left"}  style={{backgroundImage: `url(${bgModalRealiza})`}}>
       <Link to={`/fornecedor/home/${getIdUser}`}>
       <Button
         variant={"ghost"}
@@ -97,26 +98,26 @@ export function ProviderLateralMenu() {
   }
 
   return (
-    <SheetContent className="h-full overflow-auto dark:bg-white" side={"left"}>
+    <SheetContent className="h-full overflow-auto dark:bg-white bg-right bg-cover" side={"left"}  style={{backgroundImage: `url(${bgModalRealiza})`}}>
       <Link to={`/fornecedor/home/${getIdUser}`}>
       <Button
         variant={"ghost"}
-        className="w-full justify-start bg-zinc-100 px-4 py-2"
+        className="w-full justify-start hover:bg-neutral-500 px-4 py-2"
       >
-        <Home className="text-realizaBlue size-4" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
+        <Home className="size-4 text-white" />
+        <span className="ml-2 text-sm font-medium text-white ">Início</span>
       </Button>
       </Link>
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">
+      <h3 className="pl-4 pt-6 text-xs text-white">
         Prestadores de serviço
       </h3>
       <Link to={`/fornecedor/quartered/${getIdUser}`}>
         <Button
           variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2"
+          className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
         >
-          <Users2 className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
+          <Users2 className="size-4 text-white" />
+          <span className="ml-2 text-sm font-medium text-white">
             Ver prestadores
           </span>
         </Button>
@@ -124,10 +125,10 @@ export function ProviderLateralMenu() {
       <Link to={`/fornecedor/dashboard/${getIdUser}`}>
         <Button
           variant={"ghost"}
-          className="mt-1 w-full justify-start px-4 py-2"
+          className="mt-1 w-full justify-start px-4 py-2 hover:bg-neutral-500"
         >
-          <ChartPie className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
+          <ChartPie className="size-4 text-white" />
+          <span className="ml-2 text-sm font-medium text-white">
             Ver BI’s
           </span>
         </Button>
@@ -146,14 +147,14 @@ export function ProviderLateralMenu() {
           </span>
         </Button>
       </Link> */}
-      <h3 className="pl-4 pt-6 text-xs text-zinc-800">Sobre a empresa</h3>
+      <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <Link to={`/fornecedor/profile/${getIdUser}`}>
         <Button
           variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2"
+          className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
         >
-          <Building2 className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
+          <Building2 className="size-4 text-white" />
+          <span className="ml-2 text-sm font-medium text-white">
             Empresa
           </span>
         </Button>
@@ -162,10 +163,10 @@ export function ProviderLateralMenu() {
       <Link to={`/fornecedor/employees/${getIdUser}`}>
         <Button
           variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2"
+          className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
         >
-          <PersonStanding className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
+          <PersonStanding className="size-4 text-white" />
+          <span className="ml-2 text-sm font-medium text-white">
             Colaboradores
           </span>
         </Button>

@@ -196,9 +196,144 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
 
   if (user?.role === "ROLE_CLIENT_RESPONSIBLE" && "ROLE_CLIENT_MANAGER") {
     return (
-      <div className="flex flex-wrap justify-center gap-5">
-        {employees.map((employee: any) => (
-          <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-lg">
+      <div className="flex flex-col items-center justify-center gap-5">
+      <div className="flex items-center gap-2">
+        <span>Filtrar colaborador</span>
+        <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500 bg-white p-2">
+          <Search />
+          <input
+            type="text"
+            placeholder="Pesquisar por nome"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="bg-transparent outline-none"
+          />
+        </div>
+      </div>
+      {isLoading ? (
+        <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
+          <Blocks
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="blocks-loading"
+            wrapperStyle={{}}
+            wrapperClass="blocks-wrapper"
+            visible={true}
+          />
+        </div>
+      ) : (
+        <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
+          {filteredEmployees.map((employee: any) => (
+            <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl">
+              <div className="flex w-[20vw] flex-col gap-9 p-10">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-[20px]">Contratos</h1>
+                  <Button className="bg-realizaBlue">
+                    Adicionar contratos +
+                  </Button>
+                </div>
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-realizaBlue font-medium">
+                      Industria Ultra gás - altura
+                    </h2>
+                    <div>
+                      <Eye />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-realizaBlue font-medium">
+                      Industria Ultra gás - altura
+                    </h2>
+                    <div>
+                      <Eye />
+                    </div>
+                  </div>
+                </div>
+                <Button className="bg-realizaBlue">
+                  Ver todos os contratos
+                </Button>
+              </div>
+              <div key={employee.idEmployee} className="w-[15vw] p-4">
+                <div className="flex flex-col gap-5">
+                  <div className="flex gap-2">
+                    <div className="rounded-full bg-neutral-200 p-2">
+                      <User />
+                    </div>
+                    <div>
+                      <h3 className="font-medium">
+                        {employee.name} {employee.surname}
+                      </h3>
+                      <p className="text-[12px] text-sky-950 underline">
+                        {employee.position}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-5">
+                    <span className="text-[14px] font-medium text-sky-950">
+                      Informações do colaborador
+                    </span>
+                    <div className="flex items-center gap-1 text-[14px]">
+                      <p>Nome completo:</p>
+                      <p>
+                        {employee.name} {employee.surname}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 text-[14px]">
+                      <p>Status:</p>
+                      <p>{employee.situation}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-[14px]">
+                      <p>Tipo de contrato:</p>
+                      <p>{employee.contractType}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-[14px]">
+                      <p>CBO:</p>
+                      <p>{employee.cbo}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-5">
+    <div className="flex items-center gap-2">
+      <span>Filtrar colaborador</span>
+      <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500 bg-white p-2">
+        <Search />
+        <input
+          type="text"
+          placeholder="Pesquisar por nome"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="bg-transparent outline-none"
+        />
+      </div>
+    </div>
+    {isLoading ? (
+      <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
+        <Blocks
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="blocks-loading"
+          wrapperStyle={{}}
+          wrapperClass="blocks-wrapper"
+          visible={true}
+        />
+      </div>
+    ) : (
+      <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
+        {filteredEmployees.map((employee: any) => (
+          <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl">
             <div className="flex w-[20vw] flex-col gap-9 p-10">
               <div className="flex items-center justify-between">
                 <h1 className="text-[20px]">Contratos</h1>
@@ -224,7 +359,9 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                   </div>
                 </div>
               </div>
-              <Button className="bg-realizaBlue">Ver todos os contratos</Button>
+              <Button className="bg-realizaBlue">
+                Ver todos os contratos
+              </Button>
             </div>
             <div key={employee.idEmployee} className="w-[15vw] p-4">
               <div className="flex flex-col gap-5">
@@ -269,80 +406,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
           </div>
         ))}
       </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-wrap justify-center gap-5">
-      {employees.map((employee: any) => (
-        <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-lg">
-          <div className="flex w-[20vw] flex-col gap-9 p-10">
-            <div className="flex items-center justify-between">
-              <h1 className="text-[20px]">Contratos</h1>
-              <Button className="bg-realizaBlue">Adicionar contratos +</Button>
-            </div>
-            <div className="flex flex-col gap-5">
-              <div className="flex items-center justify-between">
-                <h2 className="text-realizaBlue font-medium">
-                  Industria Ultra gás - altura
-                </h2>
-                <div>
-                  <Eye />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <h2 className="text-realizaBlue font-medium">
-                  Industria Ultra gás - altura
-                </h2>
-                <div>
-                  <Eye />
-                </div>
-              </div>
-            </div>
-            <Button className="bg-realizaBlue">Ver todos os contratos</Button>
-          </div>
-          <div key={employee.idEmployee} className="w-[15vw] p-4">
-            <div className="flex flex-col gap-5">
-              <div className="flex gap-2">
-                <div className="rounded-full bg-neutral-200 p-2">
-                  <User />
-                </div>
-                <div>
-                  <h3 className="font-medium">
-                    {employee.name} {employee.surname}
-                  </h3>
-                  <p className="text-[12px] text-sky-950 underline">
-                    {employee.position}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-5">
-                <span className="text-[14px] font-medium text-sky-950">
-                  Informações do colaborador
-                </span>
-                <div className="flex items-center gap-1 text-[14px]">
-                  <p>Nome completo:</p>
-                  <p>
-                    {employee.name} {employee.surname}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-[14px]">
-                  <p>Status:</p>
-                  <p>{employee.situation}</p>
-                </div>
-                <div className="flex items-center gap-1 text-[14px]">
-                  <p>Tipo de contrato:</p>
-                  <p>{employee.contractType}</p>
-                </div>
-                <div className="flex items-center gap-1 text-[14px]">
-                  <p>CBO:</p>
-                  <p>{employee.cbo}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
+    )}
+  </div>
   );
 }
