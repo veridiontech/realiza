@@ -13,6 +13,7 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
@@ -394,15 +395,35 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected) {
-        branchRepository.findById(id).orElseThrow(() -> new NotFoundException("Branch not found"));
+        branchRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(id, documentTypeName.toLowerCase(), isSelected);
+        List<DocumentBranch> documentBranch = documentBranchRepository
+                .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(id, documentTypeName.toLowerCase(), isSelected);
 
         return documentBranch.stream()
                 .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
                 .map(document -> DocumentResponseDto.builder()
                         .idDocumentation(document.getIdDocumentation())
                         .title(document.getTitle())
+                        .build()).toList();
+    }
+
+    @Override
+    public List<DocumentExpirationResponseDto> findAllFilteredDocumentsExpiration(String idBranch, String documentTypeName, Boolean isSelected) {
+        branchRepository.findById(idBranch)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        List<DocumentBranch> documentBranch = documentBranchRepository
+                .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(idBranch, documentTypeName.toLowerCase(), isSelected);
+
+        return documentBranch.stream()
+                .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
+                .map(document -> DocumentExpirationResponseDto.builder()
+                        .idDocumentation(document.getIdDocumentation())
+                        .title(document.getTitle())
+                        .expirationDateAmount(document.getExpirationDateAmount())
+                        .expirationDateUnit(document.getExpirationDateUnit())
                         .build()).toList();
     }
 
