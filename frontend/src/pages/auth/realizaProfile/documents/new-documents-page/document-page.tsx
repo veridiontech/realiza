@@ -1,10 +1,11 @@
 import { Search } from "lucide-react";
 import { NewDocumentBox } from "./document-box-new";
 
+
 export function DocumentPageNew() {
     return (
         <div className="p-6 md:p-10 flex flex-col gap-6 md:gap-10">
-            <div className="shadow-lg rounded-lg bg-white p-6 md:p-8 flex flex-col gap-6 md:gap-10">
+            <div className="shadow-lg rounded-lg bg-white p-6 md:p-8 flex flex-col gap-6 md:gap-10 relative bottom-[8vw]">
                 <h1 className="text-2xl md:text-[25px]">Matriz de Documentos</h1>
                 <div className="bg-[#7CA1F3] w-full h-[1px]" />
                 <div>

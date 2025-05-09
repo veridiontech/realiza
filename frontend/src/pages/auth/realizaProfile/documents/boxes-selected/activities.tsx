@@ -1,96 +1,114 @@
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-//   AlertDialogTrigger,
-// } from "@/components/ui/alert-dialog";
-// import { BoxNonSelected } from "../new-documents-page/box-non-selected";
 import { useDocument } from "@/context/Document-provider";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
-// import { BoxSelected } from "../new-documents-page/box-selected";
 import { BoxActivities } from "../new-documents-page/box-activitie";
 import { Search } from "lucide-react";
-import { propsDocument } from "@/types/interfaces";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { propsDocument } from "@/types/interfaces";
 
 export function ActivitiesBox() {
-  // const [activitiesCheck, setCheckedActivities] = useState<string | null>(null);
-  const [checkedDocs, setCheckedDocs] = useState<string[]>([]);
-  const { documents, nonSelected, activitieSelected, setDocuments } =
-    useDocument();
+  const [checkedDocs, setCheckedDocs] = useState<string[]>([]); // Array para armazenar os documentos selecionados
+  const { documents, nonSelected, activitieSelected, setDocuments } = useDocument();
   const [documentsByActivitie, setDocumentByActivitie] = useState([]);
   const [activities, setActivities] = useState<any>([]);
   const { selectedBranch } = useBranch();
-  // const [activitiesAll, setActivitiesAll] = useState([])
+  const [activitiesAll, setActivitiesAll] = useState([]);
+  const [loadingActivitie, setLoadingActivitie] = useState(false);
+  const [loadingAllDocuments, setLoadingAllDocuments] = useState(false);
+  const [loadingDocumentsByActivity, setLoadingDocumentsByActivity] =
+    useState(false);
 
-  const getDocument = async () => {
+  // Função para buscar todas as atividades
+  const getActivitie = async () => {
+    setLoadingActivitie(true);
     const token = localStorage.getItem("tokenClient");
     try {
       const resSelected = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
-      console.log("atividades", resSelected.data);
       setActivities(resSelected.data);
     } catch (err) {
-      console.log("erro ao buscar documentos:", err);
+      console.log("erro ao buscar atividades:", err);
+    } finally {
+      setLoadingActivitie(false);
     }
   };
 
+  // Função para buscar todos os documentos da filial
+  const getAllDocuments = async () => {
+    setLoadingAllDocuments(true);
+    try {
+      const res = await axios.get(`${ip}/document/branch/filtered-branch`, {
+        params: {
+          idSearch: selectedBranch?.idBranch,
+          size: 1000,
+        },
+      });
+      console.log(res.data.content);
+      setActivitiesAll(res.data.content);
+    } catch (err) {
+      console.log("Erro ao buscar todos documentos da filial:", err);
+    } finally {
+      setLoadingAllDocuments(false);
+    }
+  };
+
+  // Função para buscar documentos relacionados à atividade selecionada
   const getDocumentByActivitie = async () => {
+    setLoadingDocumentsByActivity(true); // Ativa o loading
     try {
       const res = await axios.get(
         `${ip}/contract/activity/find-document-by-activity/${activitieSelected?.idActivity}`,
       );
-      console.log("documento das atividades:", res.data);
+      console.log("Documentos da atividade:", res.data);
 
-      setDocumentByActivitie(res.data);
+      // Resposta já é um array de IDs
+      const selectedDocumentsIds = res.data; // Aqui, res.data é diretamente um array de IDs de documentos
+
+      // Atualizar o estado de checkedDocs com os IDs dos documentos da atividade
+      setCheckedDocs((prevCheckedDocs) => [
+        ...new Set([...prevCheckedDocs, ...selectedDocumentsIds]), // Garantir que não haja duplicação
+      ]);
     } catch (err) {
-      console.log("erro ao buscar por documentos:", err);
+      console.log("Erro ao buscar documentos da atividade:", err);
+    } finally {
+      setLoadingDocumentsByActivity(false); // Desativa o loading
     }
   };
 
-  const filterIdDocuments = nonSelected.map(
-    (document) => document.idDocumentation,
-  );
-
-  const filterIdDocumentsSelected = documents.map(
-    (document) => document.idDocumentation,
-  );
-
-  console.log("ids dos documentos", filterIdDocuments);
-  console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
-
+  // Atualizar os documentos ao selecionar uma atividade
   useEffect(() => {
     if (selectedBranch?.idBranch) {
-      getDocument();
+      getActivitie();
+      getAllDocuments();
     }
   }, [selectedBranch?.idBranch]);
 
+  // Atualizar os documentos ao selecionar uma atividade
   useEffect(() => {
     if (activitieSelected?.idActivity) {
       getDocumentByActivitie();
     }
   }, [activitieSelected?.idActivity]);
 
-  console.log("testando atividade selecionada:", activitieSelected);
-
+  // Função de alternância de seleção de documentos
   const toggleCheckbox = (id: string, document: propsDocument) => {
-    setCheckedDocs((prev) =>
-      prev.includes(id) ? prev.filter((docId) => docId !== id) : [...prev, id],
-    );
+    setCheckedDocs((prev) => {
+      // Se o documento já estiver selecionado, removemos da seleção
+      if (prev.includes(id)) {
+        return prev.filter((docId) => docId !== id);
+      } else {
+        // Caso contrário, adicionamos à seleção
+        return [...prev, id];
+      }
+    });
 
+    // Atualizando o estado global de documentos selecionados
     setDocuments((prevDocuments) => {
       if (prevDocuments.some((doc) => doc.idDocumentation === id)) {
         return prevDocuments.filter((doc) => doc.idDocumentation !== id);
@@ -100,62 +118,11 @@ export function ActivitiesBox() {
     });
   };
 
-  // const getActivitiesAll = async() => {
-  //   try{
-  //       const res = await axios.get(`${ip}/contract/activity`)
-  //       setActivitiesAll(res.data)
-  //   }catch(err) {
-  //       console.log("erro ao buscar todas as atividades:", err);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   getActivitiesAll()
-  // }, [])
-
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
         <BoxActivities activities={activities} />
       </div>
-      {/* <div className="flex flex-col gap-5">
-        <div>
-          <AlertDialog>
-            <AlertDialogTrigger
-              className={`w-[10vw] rounded-md p-4 transition-all duration-300 ${nonSelected.length === 0 ? "cursor-not-allowed bg-gray-300 text-gray-500" : "bg-realizaBlue text-white"}`}
-              disabled={documents.length === 0}
-            >
-              Confirmar Seleção
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
-              </AlertDialogHeader>
-              <div>
-                <ul>
-                  {documents.length > 0 ? (
-                    documents.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
-                    ))
-                  ) : (
-                    <p>Nenhuma atividade encontrada.</p>
-                  )}
-                </ul>
-              </div>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() =>
-                    sendDocuments(false, filterIdDocumentsSelected)
-                  }
-                >
-                  Confirmar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div> */}
       <div>
         <div className="w-[35vw] border p-5 shadow-md">
           <div className="flex items-center gap-2 rounded-md border p-2">
@@ -163,9 +130,10 @@ export function ActivitiesBox() {
             <input className="outline-none" />
           </div>
           <ScrollArea className="h-[30vh]">
-            {Array.isArray(documentsByActivitie) &&
-            documentsByActivitie.length > 0 ? (
-              documentsByActivitie.map((document: any) => (
+            {loadingAllDocuments ? (
+              <p>Carregando documentos...</p>
+            ) : Array.isArray(activitiesAll) && activitiesAll.length > 0 ? (
+              activitiesAll.map((document: any) => (
                 <div
                   key={document.idDocument}
                   className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
@@ -173,10 +141,10 @@ export function ActivitiesBox() {
                 >
                   <input
                     type="checkbox"
-                    checked={checkedDocs.includes(document.idDocument)}
-                    onChange={() => {}}
+                    checked={checkedDocs.includes(document.idDocument)} // Marcar checkbox se idDocument estiver em checkedDocs
+                    onChange={() => toggleCheckbox(document.idDocument, document)} // Adicionar onChange para atualizar o estado
                   />
-                  <span>{document.documentTitle || "Documento"}</span>
+                  <span>{document.title || "Documento"}</span>
                 </div>
               ))
             ) : (

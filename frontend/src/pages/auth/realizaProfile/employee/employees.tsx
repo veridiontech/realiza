@@ -184,7 +184,7 @@ export const EmployeesTable = (): JSX.Element => {
 
   return (
     <div className="m-4 flex justify-center">
-      <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
+      <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md relative bottom-[8vw]">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Colaboradores</h1>
           <NewModalCreateEmployee />

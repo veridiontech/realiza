@@ -86,8 +86,8 @@ export function NewDocumentBox() {
   // }, [])
 
   return (
-    <div className="relative">
-      <div className="absolute left-0 right-0 top-0 z-10 hidden gap-2 rounded-lg bg-white p-5 shadow-md md:flex">
+    <div className="relative bottom-[8vw]">
+      <div className="absolute left-0 right-0 top-0 z-10 hidden gap-2 rounded-lg bg-white p-5 shadow-md md:flex ">
         <Button
           variant={"ghost"}
           className={`px-4 py-2 transition-all duration-300 ${
