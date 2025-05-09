@@ -10,19 +10,19 @@ import { propsDocument } from "@/types/interfaces";
 
 export function ActivitiesBox() {
   const [checkedDocs, setCheckedDocs] = useState<string[]>([]); // Array para armazenar os documentos selecionados
-  const { documents, nonSelected, activitieSelected, setDocuments } = useDocument();
-  const [documentsByActivitie, setDocumentByActivitie] = useState([]);
+  const { activitieSelected, setDocuments } = useDocument();
+  // const [documentsByActivitie, setDocumentByActivitie] = useState([]);
   const [activities, setActivities] = useState<any>([]);
   const { selectedBranch } = useBranch();
   const [activitiesAll, setActivitiesAll] = useState([]);
-  const [loadingActivitie, setLoadingActivitie] = useState(false);
+  // const [loadingActivitie, setLoadingActivitie] = useState(false);
   const [loadingAllDocuments, setLoadingAllDocuments] = useState(false);
-  const [loadingDocumentsByActivity, setLoadingDocumentsByActivity] =
-    useState(false);
+  // const [loadingDocumentsByActivity, setLoadingDocumentsByActivity] =
+  //   useState(false);
 
   // Função para buscar todas as atividades
   const getActivitie = async () => {
-    setLoadingActivitie(true);
+
     const token = localStorage.getItem("tokenClient");
     try {
       const resSelected = await axios.get(
@@ -34,9 +34,7 @@ export function ActivitiesBox() {
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
-    } finally {
-      setLoadingActivitie(false);
-    }
+    } 
   };
 
   // Função para buscar todos os documentos da filial
@@ -60,7 +58,6 @@ export function ActivitiesBox() {
 
   // Função para buscar documentos relacionados à atividade selecionada
   const getDocumentByActivitie = async () => {
-    setLoadingDocumentsByActivity(true); // Ativa o loading
     try {
       const res = await axios.get(
         `${ip}/contract/activity/find-document-by-activity/${activitieSelected?.idActivity}`,
@@ -76,9 +73,7 @@ export function ActivitiesBox() {
       ]);
     } catch (err) {
       console.log("Erro ao buscar documentos da atividade:", err);
-    } finally {
-      setLoadingDocumentsByActivity(false); // Desativa o loading
-    }
+    } 
   };
 
   // Atualizar os documentos ao selecionar uma atividade
