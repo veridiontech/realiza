@@ -25,4 +25,6 @@ public interface CrudDocumentBranch {
     String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection);
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
     void removeRequiredDocument(String documentId);
+
+    DocumentExpirationResponseDto updateSelectedDocumentExpiration();
 }

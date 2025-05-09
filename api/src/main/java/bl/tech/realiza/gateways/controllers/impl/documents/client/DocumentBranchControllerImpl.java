@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.controllers.interfaces.documents.client.DocumentBranchControlller;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentBranchImpl;
@@ -162,5 +163,15 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
             @RequestParam Boolean isSelected,
             @RequestBody List<String> documentList) {
         return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocuments(isSelected, documentList));
+    }
+
+    @PostMapping("/document-matrix/expiration/update/{idDocumentation}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(
+            @PathVariable String idDocumentation,
+            @RequestBody DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto) {
+        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocumentExpiration());
     }
 }

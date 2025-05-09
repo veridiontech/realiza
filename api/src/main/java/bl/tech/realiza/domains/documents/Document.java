@@ -31,7 +31,7 @@ public abstract class Document {
     @Builder.Default
     private Integer expirationDateAmount = 1;
     @Builder.Default
-    private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.DAYS;
+    private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
     @Builder.Default
     private Boolean isActive = true;
     @Enumerated(EnumType.STRING)

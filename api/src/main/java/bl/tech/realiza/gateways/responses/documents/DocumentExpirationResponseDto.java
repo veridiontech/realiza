@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DocumentExpirationResponseDto {
-    private String idDocumentation;
+    private String idDocument;
     private String title;
     private Integer expirationDateAmount;
     private DocumentMatrix.Unit expirationDateUnit;

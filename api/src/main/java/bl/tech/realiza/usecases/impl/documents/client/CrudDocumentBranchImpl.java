@@ -12,7 +12,6 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
-import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
@@ -53,7 +52,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .idDocumentation(documentBranch.getIdDocumentation())
+                .idDocument(documentBranch.getIdDocumentation())
                 .title(documentBranch.getTitle())
                 .status(documentBranch.getStatus())
                 .documentation(documentBranch.getDocumentation())
@@ -80,7 +79,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentBranch.getIdDocumentation())
+                            .idDocument(documentBranch.getIdDocumentation())
                             .title(documentBranch.getTitle())
                             .status(documentBranch.getStatus())
                             .documentation(documentBranch.getDocumentation())
@@ -134,7 +133,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentBranch.getIdDocumentation())
+                .idDocument(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
@@ -197,7 +196,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentBranch.getIdDocumentation())
+                .idDocument(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
@@ -222,7 +221,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentBranch.getIdDocumentation())
+                            .idDocument(documentBranch.getIdDocumentation())
                             .title(documentBranch.getTitle())
                             .status(documentBranch.getStatus())
                             .documentation(documentBranch.getDocumentation())
@@ -404,7 +403,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         return documentBranch.stream()
                 .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
                 .map(document -> DocumentResponseDto.builder()
-                        .idDocumentation(document.getIdDocumentation())
+                        .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())
                         .build()).toList();
     }
@@ -420,7 +419,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         return documentBranch.stream()
                 .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
                 .map(document -> DocumentExpirationResponseDto.builder()
-                        .idDocumentation(document.getIdDocumentation())
+                        .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())
                         .expirationDateAmount(document.getExpirationDateAmount())
                         .expirationDateUnit(document.getExpirationDateUnit())
@@ -474,5 +473,10 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             throw new NotFoundException("Invalid documents");
         }
         documentBranchRepository.deleteById(documentId);
+    }
+
+    @Override
+    public DocumentExpirationResponseDto updateSelectedDocumentExpiration() {
+        return null;
     }
 }

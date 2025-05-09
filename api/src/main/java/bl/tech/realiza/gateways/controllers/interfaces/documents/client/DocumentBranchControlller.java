@@ -3,6 +3,7 @@ package bl.tech.realiza.gateways.controllers.interfaces.documents.client;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import org.springframework.data.domain.Page;
@@ -25,4 +26,5 @@ public interface DocumentBranchControlller {
     ResponseEntity<List<DocumentResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentTypeName, Boolean isSelected);
     ResponseEntity<List<DocumentExpirationResponseDto>> getAllFilteredDocumentBranchExpiration(String idBranch, String documentTypeName, Boolean isSelected);
     ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, List<String> documentList);
+    ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto);
 }

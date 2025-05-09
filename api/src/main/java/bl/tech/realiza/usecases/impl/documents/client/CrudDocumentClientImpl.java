@@ -2,7 +2,6 @@ package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -81,7 +80,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentClient savedDocumentClient = documentClientRepository.save(newDocumentClient);
 
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentClient.getIdDocumentation())
+                .idDocument(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
@@ -103,7 +102,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentClientResponseDto = DocumentResponseDto.builder()
-                .idDocumentation(documentClient.getIdDocumentation())
+                .idDocument(documentClient.getIdDocumentation())
                 .title(documentClient.getTitle())
                 .status(documentClient.getStatus())
                 .documentation(documentClient.getDocumentation())
@@ -130,7 +129,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentClient.getIdDocumentation())
+                            .idDocument(documentClient.getIdDocumentation())
                             .title(documentClient.getTitle())
                             .status(documentClient.getStatus())
                             .documentation(documentClient.getDocumentation())
@@ -183,7 +182,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentClient.getIdDocumentation())
+                .idDocument(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
@@ -246,7 +245,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 
         DocumentResponseDto documentClientResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentClient.getIdDocumentation())
+                .idDocument(savedDocumentClient.getIdDocumentation())
                 .title(savedDocumentClient.getTitle())
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
@@ -271,7 +270,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentClient.getIdDocumentation())
+                            .idDocument(documentClient.getIdDocumentation())
                             .title(documentClient.getTitle())
                             .status(documentClient.getStatus())
                             .documentation(documentClient.getDocumentation())

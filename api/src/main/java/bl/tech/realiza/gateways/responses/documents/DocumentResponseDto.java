@@ -1,10 +1,8 @@
 package bl.tech.realiza.gateways.responses.documents;
 
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +15,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DocumentResponseDto {
     // document
-    private String idDocumentation;
+    private String idDocument;
     private String title;
     private Document.Status status;
     private String documentation;
