@@ -29,6 +29,10 @@ public abstract class Document {
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
+    private Integer expirationDateAmount = 1;
+    @Builder.Default
+    private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
+    @Builder.Default
     private Boolean isActive = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default

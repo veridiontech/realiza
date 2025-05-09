@@ -1,9 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.contract;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.contract.Contract;
@@ -87,7 +85,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         DocumentContract savedDocumentSubcontractor = documentContractRepository.save(newDocumentSubcontractor);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentSubcontractor.getDocumentation())
+                .idDocument(savedDocumentSubcontractor.getDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
@@ -108,7 +106,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocumentation(documentContract.getDocumentation())
+                .idDocument(documentContract.getDocumentation())
                 .title(documentContract.getTitle())
                 .status(documentContract.getStatus())
                 .documentation(documentContract.getDocumentation())
@@ -135,7 +133,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentContract.getDocumentation())
+                            .idDocument(documentContract.getDocumentation())
                             .title(documentContract.getTitle())
                             .status(documentContract.getStatus())
                             .documentation(documentContract.getDocumentation())
@@ -187,7 +185,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         DocumentContract savedDocumentSubcontractor = documentContractRepository.save(documentContract);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentSubcontractor.getDocumentation())
+                .idDocument(savedDocumentSubcontractor.getDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
@@ -254,7 +252,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         DocumentContract savedDocumentContract = documentContractRepository.save(documentContract);
 
         DocumentResponseDto documentContractResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentContract.getIdDocumentation())
+                .idDocument(savedDocumentContract.getIdDocumentation())
                 .title(savedDocumentContract.getTitle())
                 .status(savedDocumentContract.getStatus())
                 .documentation(savedDocumentContract.getDocumentation())
@@ -279,7 +277,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentContract.getDocumentation())
+                            .idDocument(documentContract.getDocumentation())
                             .title(documentContract.getTitle())
                             .status(documentContract.getStatus())
                             .documentation(documentContract.getDocumentation())

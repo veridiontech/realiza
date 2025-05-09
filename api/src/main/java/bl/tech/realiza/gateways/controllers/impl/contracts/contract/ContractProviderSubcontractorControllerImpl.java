@@ -3,7 +3,6 @@ package bl.tech.realiza.gateways.controllers.impl.contracts.contract;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.ContractProviderSubcontractorControlller;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.contract.CrudContractProviderSubcontractorImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,8 +61,8 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSubcontractor(@PathVariable String id, @RequestBody @Valid ContractRequestDto contractSubcontractorRequestDto) {
-        Optional<ContractResponseDto> subcontractor = crudSubcontractor.update(id, contractSubcontractorRequestDto);
+    public ResponseEntity<Optional<ContractSubcontractorResponseDto>> updateContractProviderSubcontractor(@PathVariable String id, @RequestBody @Valid ContractRequestDto contractSubcontractorRequestDto) {
+        Optional<ContractSubcontractorResponseDto> subcontractor = crudSubcontractor.update(id, contractSubcontractorRequestDto);
 
         return ResponseEntity.of(Optional.of(subcontractor));
     }
@@ -95,14 +94,14 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
     @GetMapping("/filtered-by-supplier")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<ContractResponseDto>> getAllBySupplier(@RequestParam(defaultValue = "0") int page,
-                                                                      @RequestParam(defaultValue = "5") int size,
-                                                                      @RequestParam(defaultValue = "idContract") String sort,
-                                                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction,
-                                                                      @RequestParam String idSupplier) {
+    public ResponseEntity<Page<ContractSubcontractorResponseDto>> getAllBySupplier(@RequestParam(defaultValue = "0") int page,
+                                                                                   @RequestParam(defaultValue = "5") int size,
+                                                                                   @RequestParam(defaultValue = "idContract") String sort,
+                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                   @RequestParam String idSupplier) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSubcontractor = crudSubcontractor.findAllBySupplier(idSupplier, pageable);
+        Page<ContractSubcontractorResponseDto> pageContractSubcontractor = crudSubcontractor.findAllBySupplier(idSupplier, pageable);
 
         return ResponseEntity.ok(pageContractSubcontractor);
     }

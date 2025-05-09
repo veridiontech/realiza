@@ -86,7 +86,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(newDocumentSupplier);
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentSupplier.getDocumentation())
+                .idDocument(savedDocumentSupplier.getDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
@@ -107,7 +107,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .idDocumentation(documentSupplier.getDocumentation())
+                .idDocument(documentSupplier.getDocumentation())
                 .title(documentSupplier.getTitle())
                 .status(documentSupplier.getStatus())
                 .documentation(documentSupplier.getDocumentation())
@@ -134,7 +134,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentSupplier.getDocumentation())
+                            .idDocument(documentSupplier.getDocumentation())
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
@@ -187,7 +187,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentSupplier.getDocumentation())
+                .idDocument(savedDocumentSupplier.getDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
@@ -252,7 +252,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentSupplier.getIdDocumentation())
+                .idDocument(savedDocumentSupplier.getIdDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
@@ -277,7 +277,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentSupplier.getDocumentation())
+                            .idDocument(documentSupplier.getDocumentation())
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
