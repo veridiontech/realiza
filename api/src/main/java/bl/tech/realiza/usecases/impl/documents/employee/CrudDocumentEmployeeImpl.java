@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.employee;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
@@ -89,7 +87,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(newDocumentEmployee);
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentEmployee.getIdDocumentation())
+                .idDocument(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
@@ -109,7 +107,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
-                .idDocumentation(documentEmployee.getIdDocumentation())
+                .idDocument(documentEmployee.getIdDocumentation())
                 .title(documentEmployee.getTitle())
                 .status(documentEmployee.getStatus())
                 .documentation(documentEmployee.getDocumentation())
@@ -136,7 +134,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentEmployee.getIdDocumentation())
+                            .idDocument(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
                             .status(documentEmployee.getStatus())
                             .documentation(documentEmployee.getDocumentation())
@@ -189,7 +187,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentEmployee.getIdDocumentation())
+                .idDocument(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
@@ -254,7 +252,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
         DocumentResponseDto documentEmployeeResponse = DocumentResponseDto.builder()
-                .idDocumentation(savedDocumentEmployee.getIdDocumentation())
+                .idDocument(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
@@ -279,7 +277,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocumentation(documentEmployee.getIdDocumentation())
+                            .idDocument(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
                             .status(documentEmployee.getStatus())
                             .documentation(documentEmployee.getDocumentation())
