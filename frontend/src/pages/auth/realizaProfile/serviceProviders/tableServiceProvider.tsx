@@ -4,9 +4,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-
 
 function StatusBadge({ status }: { status: string }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
@@ -67,13 +64,12 @@ export function TableServiceProvider() {
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
   const [employees, setEmployees] = useState<any[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const { register, handleSubmit, setValue, formState: {} } = useForm();
-  const [isLoading, setIsLoading] = useState(false);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
     try {
+      console.log("Requisição ao finalizar");
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-client`,
         {
@@ -96,53 +92,10 @@ export function TableServiceProvider() {
       const res = await axios.get(`${ip}/employee/brazilian`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
       });
+      console.log("Colaboradores retornados:",res.data.content);
       setEmployees(res.data.content);
     } catch (err) {
       console.error("Erro ao buscar colaboradores", err);
-    }
-  };
-
-
-  const getContract = async (contractId: string, setValue: any) => {
-    try {
-      const res = await axios.get(`${ip}/contract/subcontractor${contractId}`);
-      const contractData = res.data;
-      setValue("cnpj", contractData.cnpj || "");
-      setValue("idResponsible", contractData.idResponsible || "");
-      setValue("dateStart", contractData.dateStart || "");
-      setValue("contractReference", contractData.contractReference || "");
-      setValue("expenseType", contractData.expenseType || "");
-      setValue("idServiceType", contractData.idServiceType || "");
-      setValue("serviceName", contractData.serviceName || "");
-      setValue("description", contractData.description || "");
-      console.log("Teste" , res.data);
-    } catch (err) {
-      console.error("Erro ao buscar contrato", err);
-      toast.error("Erro ao buscar dados do contrato.");
-    }
-  };
-
-  const updateContract = async (contractId: string, updatedData: any) => {
-    try {
-      await axios.put(`${ip}/contract/subcontractor${contractId}`, updatedData);
-      toast.success("Contrato atualizado com sucesso!");
-    } catch (err) {
-      console.error("Erro ao atualizar contrato", err);
-      toast.error("Erro ao atualizar contrato.");
-    }
-  };
-
-  const onSubmit = async (data: any) => {
-    setIsLoading(true);
-    try {
-      if (selectedSupplierId) {
-        await updateContract(selectedSupplierId, data);
-      }
-    } catch (err) {
-      console.error("Erro ao salvar alterações do contrato", err);
-    } finally {
-      setIsLoading(false);
-      setIsEditModalOpen(false);
     }
   };
 
@@ -155,15 +108,6 @@ export function TableServiceProvider() {
   useEffect(() => {
     if (isAllocateModalOpen) getEmployees();
   }, [isAllocateModalOpen]);
-
-  useEffect(() => {
-    if (selectedSupplierId) {
-      getContract(selectedSupplierId, setValue);
-    }
-  }, [selectedSupplierId, setValue]);
-
-console.log("supplier" , selectedSupplierId);
-
 
   return (
     <div className="p-5 md:p-10">
@@ -197,9 +141,16 @@ console.log("supplier" , selectedSupplierId);
                 <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                   <Pencil className="w-5 h-5" />
                 </button>
-                <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
+                <button
+                  title="Alocar funcionário"
+                  onClick={() => {
+                    setSelectedSupplierId(supplier.idContract);
+                    setIsAllocateModalOpen(true);
+                  }}
+                >
                   <UserPlus className="w-5 h-5" />
                 </button>
+
                 <button
                   title="Finalizar"
                   onClick={() => {
@@ -257,9 +208,16 @@ console.log("supplier" , selectedSupplierId);
                     <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                       <Pencil className="w-5 h-5" />
                     </button>
-                    <button title="Alocar funcionário" onClick={() => setIsAllocateModalOpen(true)}>
+                    <button
+                      title="Alocar funcionário"
+                      onClick={() => {
+                        setSelectedSupplierId(supplier.idContract);
+                        setIsAllocateModalOpen(true);
+                      }}
+                    >
                       <UserPlus className="w-5 h-5" />
                     </button>
+
                     <button
                       title="Finalizar"
                       onClick={() => {
@@ -294,53 +252,9 @@ console.log("supplier" , selectedSupplierId);
       )}
 
       {isEditModalOpen && (
-        <Modal title="Editar Contrato" onClose={() => setIsEditModalOpen(false)}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="form-group">
-            <label htmlFor="cnpj" className="text-white font-semibold">CNPJ</label>
-            <input id="cnpj" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("cnpj", { required: "CNPJ é obrigatório" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="idResponsible" className="text-white font-semibold">Gestor Responsável</label>
-            <input id="idResponsible" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("idResponsible", { required: "Gestor responsável é obrigatório" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="dateStart" className="text-white font-semibold">Data de Início</label>
-            <input type="date" id="dateStart" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("dateStart", { required: "Data de início é obrigatória" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="contractReference" className="text-white font-semibold">Referência do Contrato</label>
-            <input id="contractReference" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("contractReference", { required: "Referência do contrato é obrigatória" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="expenseType" className="text-white font-semibold">Tipo de Despesa</label>
-            <input id="expenseType" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("expenseType", { required: "Tipo de despesa é obrigatório" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="idServiceType" className="text-white font-semibold">Tipo de Serviço</label>
-            <input id="idServiceType" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("idServiceType", { required: "Tipo de serviço é obrigatório" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="serviceName" className="text-white font-semibold">Nome do Serviço</label>
-            <input id="serviceName" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("serviceName", { required: "Nome do serviço é obrigatório" })} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description" className="text-white font-semibold">Descrição</label>
-            <textarea id="description" className="w-full px-4 py-2 rounded-md border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" {...register("description")} />
-          </div>
-
-          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700" disabled={isLoading}>
-            {isLoading ? "Salvando..." : "Salvar Alterações"}
-          </button>
-        </form>
-      </Modal>
+        <Modal title="Editar Fornecedor" onClose={() => setIsEditModalOpen(false)}>
+          <p className="text-white">Formulário de edição aqui.</p>
+        </Modal>
       )}
 
       {isAllocateModalOpen && (
@@ -350,35 +264,36 @@ console.log("supplier" , selectedSupplierId);
             setIsAllocateModalOpen(false);
             setSearchTerm("");
             setAllocateStep(1);
-            setSelectedEmployees([]);
           }}
         >
           {allocateStep === 1 ? (
             <div className="text-white space-y-4">
+              <label className="block text-sm font-semibold">Buscar Colaborador:</label>
               <input
                 type="text"
-                placeholder="Buscar colaborador..."
+                placeholder="Digite o nome do colaborador..."
                 className="w-full px-3 py-2 rounded text-black"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <div className="max-h-40 overflow-y-auto">
                 {employees
-                  .filter(emp => emp.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .filter(emp => emp.name && emp.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .sort((a, b) => a.name.localeCompare(b.name))
                   .map(emp => (
-                    <div key={emp.id} className="flex items-center gap-2">
+                    <div key={emp.idEmployee} className="flex items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={selectedEmployees.includes(emp.id)}
-                        onChange={() => {
-                          setSelectedEmployees(prev =>
-                            prev.includes(emp.id)
-                              ? prev.filter(id => id !== emp.id)
-                              : [...prev, emp.id]
-                          );
+                        checked={selectedEmployees.includes(emp.idEmployee)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedEmployees(prev => [...prev, emp.idEmployee]);
+                          } else {
+                            setSelectedEmployees(prev => prev.filter(id => id !== emp.idEmployee));
+                          }
                         }}
                       />
-                      <label>{emp.employeeName}</label>
+                      <span>{emp.name}</span>
                     </div>
                   ))}
               </div>
@@ -386,6 +301,7 @@ console.log("supplier" , selectedSupplierId);
                 <button
                   onClick={() => setAllocateStep(2)}
                   className="bg-realizaBlue px-4 py-2 rounded"
+                  disabled={selectedEmployees.length === 0}
                 >
                   Próximo
                 </button>
@@ -394,6 +310,13 @@ console.log("supplier" , selectedSupplierId);
           ) : (
             <div className="text-white space-y-4">
               <p>Você confirma que esses colaboradores selecionados serão alocados ao contrato?</p>
+              <ul className="list-disc list-inside">
+                {employees
+                  .filter(emp => selectedEmployees.includes(emp.idEmployee))
+                  .map(emp => (
+                    <li key={emp.idEmployee}>{emp.name}</li>
+                  ))}
+              </ul>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setAllocateStep(1)}
@@ -403,23 +326,26 @@ console.log("supplier" , selectedSupplierId);
                 </button>
                 <button
                   onClick={async () => {
-                    if (!selectedSupplierId || selectedEmployees.length === 0) return;
+                    if (!selectedSupplierId) return;
                     try {
+                      console.log("Lista de obj", selectedEmployees);
                       await axios.post(
-                        `${ip}/contract/addEmployee/${selectedSupplierId}`,
-                        { employees: selectedEmployees },
+                        `${ip}/contract/add-employee/${selectedSupplierId}`,
+                        { idEmployees: selectedEmployees },
                         {
                           headers: {
                             Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
                           },
                         }
                       );
-                      setIsAllocateModalOpen(false);
-                      setAllocateStep(1);
-                      setSelectedEmployees([]);
-                      setSearchTerm("");
+                      await getSupplier();
                     } catch (err) {
                       console.error("Erro ao alocar colaboradores", err);
+                    } finally {
+                      setIsAllocateModalOpen(false);
+                      setSearchTerm("");
+                      setAllocateStep(1);
+                      setSelectedEmployees([]);
                     }
                   }}
                   className="bg-green-600 px-4 py-2 rounded"
