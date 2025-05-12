@@ -30,6 +30,7 @@ import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementP
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final DocumentContractRepository documentContractRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
-    private final CrudItemManagementImpl crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagementImpl;
     private final ActivityDocumentRepository activityDocumentRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 

@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpda
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentBranchImpl;
+import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ import java.util.Optional;
 @Tag(name = "Document Branch")
 public class DocumentBranchControllerImpl implements DocumentBranchControlller {
 
-    private final CrudDocumentBranchImpl crudDocumentBranch;
+    private final CrudDocumentBranch crudDocumentBranch;
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

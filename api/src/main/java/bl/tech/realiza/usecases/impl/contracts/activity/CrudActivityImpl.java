@@ -167,7 +167,7 @@ public class CrudActivityImpl implements CrudActivity {
         activityRepository.deleteById(id);
     }
 
-    @Async
+    @Override
     public void transferFromRepo(String idBranch) {
         Branch branch = branchRepository.findById(idBranch)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));

@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.RequirementCont
 import bl.tech.realiza.gateways.requests.contracts.RequirementRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.RequirementResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudRequirementImpl;
+import bl.tech.realiza.usecases.interfaces.contracts.CrudRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Tag(name = "Requirement")
 public class RequirementControllerImpl implements RequirementControlller {
 
-    private final CrudRequirementImpl crudRequirement;
+    private final CrudRequirement crudRequirement;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

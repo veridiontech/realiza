@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.client.Document
 import bl.tech.realiza.gateways.requests.documents.client.DocumentClientRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.client.CrudDocumentClientImpl;
+import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,7 +32,7 @@ import java.util.Optional;
 @Tag(name = "Document Client")
 public class DocumentClientControllerImpl implements DocumentClientControlller {
 
-    private final CrudDocumentClientImpl crudDocumentClient;
+    private final CrudDocumentClient crudDocumentClient;
 
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)

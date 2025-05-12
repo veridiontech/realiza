@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementU
 import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementUserResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Item Management")
 public class ItemManagementControllerImpl implements ItemManagementController {
 
-    private final CrudItemManagementImpl crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagementImpl;
 
     @PostMapping("/new-user")
     @ResponseStatus(HttpStatus.CREATED)

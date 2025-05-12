@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.matrix.Document
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixGroupRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.usecases.impl.documents.matrix.CrudDocumentMatrixGroupImpl;
+import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrixGroup;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ import java.util.Optional;
 @Tag(name = "Document Matrix Group")
 public class DocumentMatrixGroupControllerImpl implements DocumentMatrixGroupController {
 
-    private final CrudDocumentMatrixGroupImpl crudDocumentMatrixGroup;
+    private final CrudDocumentMatrixGroup crudDocumentMatrixGroup;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -9,10 +9,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public interface UserManagerController {
-    ResponseEntity<UserResponseDto> createUserManager(UserManagerRequestDto userManagerRequestDto, MultipartFile file);
+    ResponseEntity<UserResponseDto> createUserManager(UserManagerRequestDto userManagerRequestDto, MultipartFile file) throws IOException;
     ResponseEntity<Optional<UserResponseDto>> getOneUserManager(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersManager(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<UserResponseDto>> updateUserManager(String id, UserManagerRequestDto userManagerRequestDto);

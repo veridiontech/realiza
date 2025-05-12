@@ -124,7 +124,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         ));
     }
 
-    @Async
+    @Override
     public void transferFromRepoToClient(String idClient) {
         Client client = clientRepository.findById(idClient)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
@@ -142,7 +142,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         serviceTypeClientRepository.saveAll(serviceTypeClientList);
     }
 
-    @Async
+    @Override
     public void transferFromClientToBranch(String idClient, String idBranch) {
         clientRepository.findById(idClient)
                 .orElseThrow(() -> new NotFoundException("Client not found"));

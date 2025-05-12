@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/contract/service-type")
 @Tag(name = "Service Type")
 public class ServiceTypeControllerImpl implements ServiceTypeController {
-    private final CrudServiceTypeImpl crudServiceTypeImpl;
+    private final CrudServiceType crudServiceTypeImpl;
 
     @PostMapping("/repository")
     @ResponseStatus(HttpStatus.CREATED)

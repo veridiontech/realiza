@@ -18,6 +18,8 @@ import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
+import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -34,11 +36,11 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
-    private final CrudActivityImpl crudActivity;
+    private final CrudActivity crudActivity;
     private final CenterRepository centerRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
-    private final CrudServiceTypeImpl crudServiceTypeImpl;
+    private final CrudServiceType crudServiceTypeImpl;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {

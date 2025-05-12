@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.services.EnterpriseContro
 import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
 import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.usecases.impl.CrudEnterpriseAndUserImpl;
+import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.Optional;
 @Tag(name = "Enterprise and User")
 public class EnterpriseControllerImpl implements EnterpriseController {
 
-    private final CrudEnterpriseAndUserImpl crudEnterpriseAndUser;
+    private final CrudEnterpriseAndUser crudEnterpriseAndUser;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

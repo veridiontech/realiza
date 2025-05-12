@@ -20,4 +20,4 @@ spring:
       authentication-database: admin
 logging:
   level:
-    root: error
+    root: info

@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.Activi
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRepoRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityRepoResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityRepoImpl;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivityRepo;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +22,8 @@ import java.util.Optional;
 @RequestMapping("/contract/activity-repo")
 @Tag(name = "Activity Repository", description = "Alter the Activity Repository for the whole system")
 public class ActivityRepoControllerImpl implements ActivityRepoController {
-    private final CrudActivityRepoImpl crudActivityRepoImpl;
+
+    private final CrudActivityRepo crudActivityRepoImpl;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

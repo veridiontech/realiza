@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;
+import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.Optional;
 @Tag(name = "Client")
 public class ClientControllerImpl implements ClientControlller {
 
-    private final CrudClientImpl crudClient;
+    private final CrudClient crudClient;
     private final TokenManagerService tokenManagerService;
 
     @PostMapping

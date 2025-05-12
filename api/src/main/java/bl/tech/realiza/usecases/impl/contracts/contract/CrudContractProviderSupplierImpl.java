@@ -38,6 +38,7 @@ import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final DocumentContractRepository documentContractRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final CrudProviderSupplier crudProviderSupplier;
-    private final CrudItemManagementImpl crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagementImpl;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final ActivityDocumentRepository activityDocumentRepository;
     private final UserRepository userRepository;
