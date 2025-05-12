@@ -10,8 +10,6 @@ public class UserCreateRequestDto {
     @NotEmpty
     private String cpf;
     private String description;
-    @NotEmpty
-    private String password;
     private String position;
     @NotNull
     private User.Role role;

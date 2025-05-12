@@ -172,6 +172,6 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     public ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(
             @PathVariable String idDocumentation,
             @RequestBody DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto) {
-        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocumentExpiration());
+        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocumentExpiration(idDocumentation, documentExpirationUpdateRequestDto));
     }
 }

@@ -270,6 +270,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     public String createNewUserActivated(UserCreateRequestDto userCreateRequestDto) {
 
         String randomPassword = randomPasswordService.generateRandomPassword();
+        String encryptedPassword = passwordEncryptionService.encryptPassword(randomPassword);
 
         switch (userCreateRequestDto.getEnterprise()) {
             case REALIZA -> {
@@ -283,7 +284,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
-                            .password(randomPassword)
+                            .password(encryptedPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .isActive(true)
@@ -307,7 +308,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                                     .firstName(userCreateRequestDto.getFirstName())
                                     .surname(userCreateRequestDto.getSurname())
                                     .email(userCreateRequestDto.getEmail())
-                                    .password(randomPassword)
+                                    .password(encryptedPassword)
                                     .telephone(userCreateRequestDto.getTelephone())
                                     .cellphone(userCreateRequestDto.getCellphone())
                                     .branch(branch)
@@ -331,7 +332,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
-                            .password(randomPassword)
+                            .password(encryptedPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .providerSupplier(supplier)
@@ -355,7 +356,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
-                            .password(randomPassword)
+                            .password(encryptedPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .providerSubcontractor(subcontractor)
