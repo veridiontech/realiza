@@ -47,6 +47,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChat";
 import { BranchesTable } from "./branchesTable";
+import { Modal } from "@/components/modal";
+import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
+
+interface CompanyData {
+  razaoSocial: string;
+  nomeFantasia: string;
+  cep: string;
+  email: string;
+  state: string;
+  city: string;
+  address: string;
+  number: string;
+  telefone?: string;
+}
 
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
@@ -62,8 +76,228 @@ const createUserClient = z.object({
   role: z.string().default("ROLE_CLIENT_MANAGER"),
 });
 
+export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
+  const sanitizeNumber = (value: string) => value.replace(/\D/g, "");
+  // const [isLoading, setIsLoading] = useState(false)
+  const [step, setStep] = useState(1);
+  const [clientForm, setClientForm] = useState({
+    cnpj: "",
+    tradeName: "",
+    corporateName: "",
+    email: "",
+    telephone: "",
+    cep: "",
+    state: "",
+    city: "",
+    address: "",
+    number: "",
+  });
+
+  const [, setUserForm] = useState({
+    cpf: "",
+    firstName: "",
+    surname: "",
+    email: "",
+    telephone: "",
+    cellphone: "",
+    password: "",
+    branch: "",
+  });
+
+  const handleStep1Submit = async (formData: Record<string, any>) => {
+    try {
+      const { cnpj } = formData;
+      const res: CompanyData = await fetchCompanyByCNPJ(cnpj);
+      setClientForm({
+        cnpj: sanitizeNumber(cnpj),
+        tradeName: res.nomeFantasia,
+        corporateName: res.razaoSocial,
+        email: res.email,
+        telephone: res.telefone ? sanitizeNumber(res.telefone) : "",
+        cep: sanitizeNumber(res.cep),
+        state: res.state,
+        city: res.city,
+        address: res.address,
+        number: res.number,
+      });
+      setStep(2);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleStep2Submit = async (formData: Record<string, any>) => {
+    const requiredFields = [
+      "cnpj",
+      "tradeName",
+      "corporateName",
+      "email",
+      "telephone",
+      "cep",
+      "state",
+      "city",
+      "address",
+      "number",
+    ];
+
+    if (requiredFields.some((field) => !formData[field])) {
+      toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+    // setIsLoading(true)
+    try {
+      const sanitizedData = {
+        ...formData,
+        cnpj: sanitizeNumber(formData.cnpj),
+        telephone: sanitizeNumber(formData.telephone),
+        cep: sanitizeNumber(formData.cep),
+      };
+
+      console.log("Dados enviados para /client:", sanitizedData);
+
+      const response = await axios.post(`${ip}/client`, sanitizedData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      toast.success("Cliente cadastrado com sucesso!");
+      setUserForm((prev) => ({ ...prev, branch: response.data.idClient }));
+      // Em vez de avançar para step 3, feche o modal após um pequeno delay
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (error) {
+      console.error("Erro ao cadastrar cliente:", error);
+      toast.error("Erro ao cadastrar cliente!");
+    } finally {
+      // setIsLoading(false)
+    }
+  };
+
+  const handleStep3Submit = async (formData: Record<string, any>) => {
+    const requiredFields = ["cpf", "firstName", "surname", "email", "password"];
+    if (requiredFields.some((field) => !formData[field])) {
+      toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    try {
+      await axios.post(`${ip}/user/client`, formData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      toast.success("Usuário cadastrado com sucesso!");
+      onClose();
+    } catch (error) {
+      console.error("Erro ao cadastrar usuário:", error);
+      toast.error("Erro ao cadastrar usuário!");
+    }
+  };
+
+  if (step === 1) {
+    return (
+      <Modal
+        key="step1"
+        title="Buscar CNPJ"
+        fields={[
+          {
+            name: "cnpj",
+            label: "CNPJ",
+            type: "text",
+            placeholder: "Digite o CNPJ",
+            required: true,
+          },
+        ]}
+        onSubmit={handleStep1Submit}
+        onClose={onClose}
+      />
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <Modal
+        key={`step2-${clientForm.cnpj}`}
+        title="Cadastrar Cliente"
+        fields={[
+          {
+            name: "cnpj",
+            label: "CNPJ",
+            type: "text",
+            defaultValue: clientForm.cnpj,
+            required: true,
+          },
+          {
+            name: "tradeName",
+            label: "Nome Fantasia",
+            type: "text",
+            defaultValue: clientForm.tradeName,
+            required: true,
+          },
+          {
+            name: "corporateName",
+            label: "Razão Social",
+            type: "text",
+            defaultValue: clientForm.corporateName,
+            required: true,
+          },
+          {
+            name: "email",
+            label: "E-mail",
+            type: "email",
+            defaultValue: clientForm.email,
+            required: true,
+          },
+          {
+            name: "telephone",
+            label: "Telefone",
+            type: "text",
+            defaultValue: clientForm.telephone,
+            required: true,
+          },
+          {
+            name: "cep",
+            label: "CEP",
+            type: "text",
+            defaultValue: clientForm.cep,
+            required: true,
+          },
+          {
+            name: "state",
+            label: "Estado",
+            type: "text",
+            defaultValue: clientForm.state,
+            required: true,
+          },
+          {
+            name: "city",
+            label: "Cidade",
+            type: "text",
+            defaultValue: clientForm.city,
+            required: true,
+          },
+          {
+            name: "address",
+            label: "Endereço",
+            type: "text",
+            defaultValue: clientForm.address,
+            required: true,
+          },
+          {
+            name: "number",
+            label: "Número",
+            type: "text",
+            defaultValue: clientForm.number,
+            required: true,
+          },
+        ]}
+        onSubmit={handleStep2Submit}
+        onClose={onClose}
+      />
+    );
+  }
+} 
+
 type CreateUserClient = z.infer<typeof createUserClient>;
 export function Dashboard() {
+    const [showAddWorkflow, setShowAddWorkflow] = useState(false);
   const [selectedTab, setSelectedTab] = useState("filiais");
   const [usersFromBranch, setUsersFromBranch] = useState([]);
   // const [searchBranches, setSearchBranches] = useState([])
@@ -220,6 +454,9 @@ export function Dashboard() {
         <div className="container relative bottom-[6vw] mx-auto max-w-7xl">
           <div className="flex flex-col gap-10">
             <EnterpriseResume />
+                          {showAddWorkflow && (
+                <AddClientWorkflow onClose={() => setShowAddWorkflow(false)} />
+              )}
             <div className="flex items-center gap-5">
               <div className="h-[60vh] w-[95vw] rounded-lg border bg-white p-8 shadow-sm">
                 <div className="flex flex-col gap-4">

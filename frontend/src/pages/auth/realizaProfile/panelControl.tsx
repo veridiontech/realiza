@@ -77,7 +77,7 @@ export function ControlPanel() {
               Painel de Controle
             </h2>
             <p className="text-[#2563EB]">
-              {solicitations.length} Solicitações
+              {countStatus("PENDING")} Solicitações
             </p>
           </div>
           <Dialog>
@@ -95,7 +95,7 @@ export function ControlPanel() {
         </div>
       </div>
 
-      <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
+      <div className="relative bottom-[4vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div>
             <ColumnPanelControl
@@ -130,8 +130,9 @@ export function ControlPanel() {
               icon={<CheckCircle className="text-[#2563EB]" />}
             />
             <div>
-              <div className="bg-gray-100 p-8">
-                <ScrollArea className="h-[40vh]">
+              <div className="bg-gray-100 p-8 ">
+                <ScrollArea className="h-[40vh] ">
+                  <div className=" flex flex-col gap-2">
                   {solicitations
                     .filter(
                       (solicitation) => solicitation.status === "APPROVED",
@@ -143,6 +144,7 @@ export function ControlPanel() {
                         onActionCompleted={removeSolicitation}
                       />
                     ))}
+                    </div>
                 </ScrollArea>
               </div>
             </div>
