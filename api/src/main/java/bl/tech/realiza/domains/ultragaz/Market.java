@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.ultragaz;
 
+import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogMarket;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,4 +36,8 @@ public class Market {
     @JsonIgnore
     @OneToMany(mappedBy = "market", cascade = CascadeType.REMOVE)
     private List<Center> centers;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogMarket> auditLogMarkets;
 }

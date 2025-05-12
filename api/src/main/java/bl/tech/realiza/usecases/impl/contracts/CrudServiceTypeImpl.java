@@ -21,6 +21,7 @@ import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeBaseRe
 import bl.tech.realiza.gateways.responses.contracts.serviceType.*;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -123,6 +124,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         ));
     }
 
+    @Async
     public void transferFromRepoToClient(String idClient) {
         Client client = clientRepository.findById(idClient)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
@@ -140,7 +142,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         serviceTypeClientRepository.saveAll(serviceTypeClientList);
     }
 
-
+    @Async
     public void transferFromClientToBranch(String idClient, String idBranch) {
         clientRepository.findById(idClient)
                 .orElseThrow(() -> new NotFoundException("Client not found"));

@@ -38,6 +38,7 @@ public class ContractResponseDto {
     // supplier
     private String providerSupplierName;
     private String providerSupplier;
+    private String providerSupplierCnpj;
 
     // subcontractor
     private String providerSubcontractorName;

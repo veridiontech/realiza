@@ -1,10 +1,12 @@
 package bl.tech.realiza.domains.contract;
 
+import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,6 +76,14 @@ public abstract class Contract {
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     private List<DocumentContract> documentContracts;
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogContract> auditLogContracts;
 
     public enum ExpenseType {
         CAPEX,

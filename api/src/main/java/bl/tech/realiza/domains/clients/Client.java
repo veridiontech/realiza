@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.clients;
 
+import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.ultragaz.Board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -55,4 +56,8 @@ public class Client {
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
     private List<DocumentClient> documentClients;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogClient> auditLogClients;
 }
