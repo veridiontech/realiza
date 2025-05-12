@@ -87,7 +87,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(newDocumentSubcontractor);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocument(savedDocumentSubcontractor.getDocumentation())
+                .idDocument(savedDocumentSubcontractor.getIdDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
@@ -108,7 +108,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocument(documentSubcontractor.getDocumentation())
+                .idDocument(documentSubcontractor.getIdDocumentation())
                 .title(documentSubcontractor.getTitle())
                 .status(documentSubcontractor.getStatus())
                 .documentation(documentSubcontractor.getDocumentation())
@@ -135,7 +135,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocument(documentSubcontractor.getDocumentation())
+                            .idDocument(documentSubcontractor.getIdDocumentation())
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
@@ -188,7 +188,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
-                .idDocument(savedDocumentSubcontractor.getDocumentation())
+                .idDocument(savedDocumentSubcontractor.getIdDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
@@ -278,7 +278,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                     }
 
                     return DocumentResponseDto.builder()
-                            .idDocument(documentSubcontractor.getDocumentation())
+                            .idDocument(documentSubcontractor.getIdDocumentation())
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
                             .documentation(documentSubcontractor.getDocumentation())
