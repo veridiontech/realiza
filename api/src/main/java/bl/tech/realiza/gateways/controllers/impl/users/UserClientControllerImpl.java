@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.users.UserClientControlle
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserClientImpl;
+import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Tag(name = "User Client")
 public class UserClientControllerImpl implements UserClientController {
 
-    private final CrudUserClientImpl crudUserClient;
+    private final CrudUserClient crudUserClient;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

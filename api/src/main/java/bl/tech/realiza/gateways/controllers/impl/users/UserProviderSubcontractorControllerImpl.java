@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.users.UserProviderSubcont
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserProviderSubcontractorImpl;
+import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Tag(name = "User Subcontractor")
 public class UserProviderSubcontractorControllerImpl implements UserProviderSubcontractorController {
 
-    private final CrudUserProviderSubcontractorImpl crudUserSubcontractor;
+    private final CrudUserProviderSubcontractor crudUserSubcontractor;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

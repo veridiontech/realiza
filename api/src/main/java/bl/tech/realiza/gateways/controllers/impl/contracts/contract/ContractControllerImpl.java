@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.Contra
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.contract.CrudContractImpl;
+import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Contract")
 public class ContractControllerImpl implements ContractController {
 
-    private final CrudContractImpl crudContractImpl;
+    private final CrudContract crudContractImpl;
 
     @PostMapping("/finish/{idContract}")
     @ResponseStatus(HttpStatus.OK)

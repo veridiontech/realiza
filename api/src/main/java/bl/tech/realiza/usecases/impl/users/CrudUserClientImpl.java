@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -36,7 +37,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
-    private final CrudItemManagementImpl crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagementImpl;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {

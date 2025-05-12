@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.interfaces.documents.client;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import org.springframework.data.domain.Page;
@@ -26,5 +27,5 @@ public interface CrudDocumentBranch {
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
     void removeRequiredDocument(String documentId);
 
-    DocumentExpirationResponseDto updateSelectedDocumentExpiration();
+    DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto);
 }

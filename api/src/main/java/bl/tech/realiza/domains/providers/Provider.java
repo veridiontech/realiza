@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.providers;
 
+import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
 import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -8,6 +9,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -46,6 +48,10 @@ public abstract class Provider {
     @JsonIgnore
     @OneToOne(mappedBy = "newProvider", cascade = CascadeType.REMOVE)
     private ItemManagement newProviderSolicitation;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogProvider> auditLogProviders;
 
     public enum Company {
         CLIENT,

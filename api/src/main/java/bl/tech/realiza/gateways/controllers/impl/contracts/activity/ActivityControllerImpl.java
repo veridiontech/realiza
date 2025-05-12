@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Tag(name = "Activity", description = "Alter the branch activities")
 public class ActivityControllerImpl implements ActivityControlller {
 
-    private final CrudActivityImpl crudActivity;
+    private final CrudActivity crudActivity;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.provider.Docume
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.provider.CrudDocumentProviderSubcontractorImpl;
+import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.Optional;
 @Tag(name = "Document Subcontractor")
 public class DocumentProviderSubcontractorControllerImpl implements DocumentProviderSubcontractorControlller {
 
-    private final CrudDocumentProviderSubcontractorImpl crudDocumentSubcontractor;
+    private final CrudDocumentProviderSubcontractor crudDocumentSubcontractor;
 
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)

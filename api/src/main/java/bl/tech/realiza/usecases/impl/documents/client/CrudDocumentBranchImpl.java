@@ -12,6 +12,7 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
+import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
@@ -476,7 +477,20 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public DocumentExpirationResponseDto updateSelectedDocumentExpiration() {
-        return null;
+    public DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto) {
+        DocumentBranch documentBranch = documentBranchRepository.findById(idDocumentation)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        documentBranch.setExpirationDateAmount(documentExpirationUpdateRequestDto.getExpirationDateAmount() != null ? documentExpirationUpdateRequestDto.getExpirationDateAmount() : documentBranch.getExpirationDateAmount());
+        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateUnit() != null ? documentExpirationUpdateRequestDto.getExpirationDateUnit() : documentBranch.getExpirationDateUnit());
+
+        documentBranchRepository.save(documentBranch);
+
+        return DocumentExpirationResponseDto.builder()
+                .idDocument(documentBranch.getIdDocumentation())
+                .title(documentBranch.getTitle())
+                .expirationDateAmount(documentBranch.getExpirationDateAmount())
+                .expirationDateUnit(documentBranch.getExpirationDateUnit())
+                .build();
     }
 }

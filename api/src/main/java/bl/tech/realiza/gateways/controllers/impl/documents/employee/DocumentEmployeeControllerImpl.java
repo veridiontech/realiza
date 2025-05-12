@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.employee.Docume
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.employee.CrudDocumentEmployeeImpl;
+import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.Optional;
 @Tag(name = "Document Employee")
 public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlller {
 
-    private final CrudDocumentEmployeeImpl crudDocumentEmployeeImpl;
+    private final CrudDocumentEmployee crudDocumentEmployeeImpl;
 
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)

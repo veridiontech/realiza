@@ -22,6 +22,7 @@ import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final PasswordEncryptionService passwordEncryptionService;
     private final BranchRepository branchRepository;
-    private final CrudActivityImpl crudActivity;
+    private final CrudActivity crudActivity;
 
     @Override
     public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {

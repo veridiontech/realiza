@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.users.NotificationControl
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudNotificationImpl;
+import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Tag(name = "Notification")
 public class NotificationControllerImpl implements NotificationController {
 
-    private final CrudNotificationImpl crudNotification;
+    private final CrudNotification crudNotification;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

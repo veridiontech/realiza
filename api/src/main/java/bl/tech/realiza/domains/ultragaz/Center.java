@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.ultragaz;
 
+import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogCenter;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
@@ -35,4 +36,8 @@ public class Center {
     @JsonIgnore
     @ManyToMany(mappedBy = "center")
     private List<Branch> branches;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogCenter> auditLogCenters;
 }

@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateRes
 import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.contract.CrudContractProviderSupplierImpl;
+import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.Optional;
 @Tag(name = "Contract Supplier")
 public class ContractProviderSupplierControllerImpl implements ContractProviderSupplierControlller {
 
-    private final CrudContractProviderSupplierImpl crudSupplier;
+    private final CrudContractProviderSupplier crudSupplier;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

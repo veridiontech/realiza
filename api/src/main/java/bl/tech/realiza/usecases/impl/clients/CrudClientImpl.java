@@ -17,7 +17,10 @@ import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
+import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
+import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -39,9 +42,9 @@ public class CrudClientImpl implements CrudClient {
     private final BranchRepository branchRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
-    private final CrudActivityImpl crudActivity;
-    private final CrudBranchImpl crudBranchImpl;
-    private final CrudServiceTypeImpl crudServiceTypeImpl;
+    private final CrudActivity crudActivity;
+    private final CrudBranch crudBranchImpl;
+    private final CrudServiceType crudServiceTypeImpl;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {

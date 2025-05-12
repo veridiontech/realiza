@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.matrix.Document
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.usecases.impl.documents.matrix.CrudDocumentMatrixImpl;
+import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrix;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Tag(name = "Document Matrix")
 public class DocumentMatrixControllerImpl implements DocumentMatrixController {
 
-    private final CrudDocumentMatrixImpl crudDocumentMatrix;
+    private final CrudDocumentMatrix crudDocumentMatrix;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

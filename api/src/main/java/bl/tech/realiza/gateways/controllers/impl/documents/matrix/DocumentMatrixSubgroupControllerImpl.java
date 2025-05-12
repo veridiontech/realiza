@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.matrix.Document
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixSubgroupRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.usecases.impl.documents.matrix.CrudDocumentMatrixSubgroupImpl;
+import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrixSubgroup;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Tag(name = "Document Matrix Subgroup")
 public class DocumentMatrixSubgroupControllerImpl implements DocumentMatrixSubgroupController {
 
-    private final CrudDocumentMatrixSubgroupImpl documentMatrixSubgroup;
+    private final CrudDocumentMatrixSubgroup documentMatrixSubgroup;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

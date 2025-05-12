@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.employees;
 
+import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
@@ -7,6 +8,7 @@ import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -88,6 +90,10 @@ public abstract class Employee {
     // -------------------------------
     @OneToMany(mappedBy = "employee", cascade = CascadeType.REMOVE)
     private List<DocumentEmployee> documentEmployees;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogEmployee> auditLogEmployees;
 
     public enum Situation {
         ALOCADO,
