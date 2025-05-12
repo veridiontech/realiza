@@ -31,7 +31,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
       style={{backgroundImage: `url(${bgModalRealiza})`}}
     >
       <SheetTitle  className="sr-only">Menu Lateral</SheetTitle >
-      <Link to={`/sistema/select-client/${getIdUser}`} onClick={onClose}>
+      <Link to={`/sistema/dashboard/${getIdUser}`} onClick={onClose}>
         <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
           <Home  className="text-white" />
           <span className="ml-2 text-sm font-medium text-white">Início</span>
