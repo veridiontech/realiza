@@ -17,7 +17,6 @@ const createUserRealizaSchema = z.object({
   email: z.string().email("Insira um email válido"),
   cpf: z.string().nonempty("Insira um CPF"),
   telephone: z.string().nonempty("Insira um telefone"),
-  password: z.string().nonempty("Insira uma senha"),
   position: z.string().nonempty("Insira um cargo"),
   role: z.string().default("ROLE_REALIZA_BASIC"),
   enterprise: z.string().default("REALIZA")
@@ -25,7 +24,6 @@ const createUserRealizaSchema = z.object({
 
 type CreateUserRealizaSchema = z.infer<typeof createUserRealizaSchema>;
 export function FormCreateUserRealiza() {
-  const [showPassword, setShowPassword] = useState(false);
 //   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [userPreview, setUserPreview] = useState({
     firstName: "",
@@ -161,26 +159,6 @@ const createUser = async (data: CreateUserRealizaSchema) => {
                 <p className="text-red-500">{errors.telephone.message}</p>
               )}
             </div>
-          </div>
-          <div>
-            <Label>Senha</Label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                {...register("password")}
-                className="pr-10 dark:bg-white"
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "🔒" : "👁️"}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-red-500">{errors.password.message}</p>
-            )}
           </div>
         </div>
 
