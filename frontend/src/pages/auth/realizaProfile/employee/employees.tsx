@@ -20,6 +20,7 @@ import { useBranch } from "@/context/Branch-provider";
 import { useSupplier } from "@/context/Supplier-context";
 import { useUser } from "@/context/user-provider";
 import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
+import { ManageEmployeesModal } from "./modals/ManageEmployeesModal";
 import { Cog, Users2Icon } from "lucide-react";
 
 export const EmployeesTable = (): JSX.Element => {
@@ -114,70 +115,71 @@ export const EmployeesTable = (): JSX.Element => {
       <div className="m-4 flex flex-col items-center">
         <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md relative bottom-[5vw]">
           <div className="mb-6 flex items-center justify-between bg-realizaBlue p-5 rounded-md">
-            <h1 className="text-2xl text-white font-medium flex items-center gap-1"><Users2Icon size={30} className="text-[#FFCE50]"/> Colaboradores</h1>
-            <NewModalCreateEmployee />
+            <h1 className="text-2xl text-white font-medium flex items-center gap-1"><Users2Icon size={30} className="text-[#FFCE50]" /> Colaboradores</h1>
+            <div className="flex gap-2">
+              <NewModalCreateEmployee />
+              <ManageEmployeesModal idProvider={supplier?.idProvider ?? null} />
+            </div>
           </div>
           <div className="mb-4 flex">
             <Button
               variant="ghost"
-              className={`px-4 py-2 transition-all duration-300 ${
-                selectedTab === "fornecedor"
+              className={`px-4 py-2 transition-all duration-300 ${selectedTab === "fornecedor"
                   ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                   : "text-realizaBlue bg-white"
-              }`}
+                }`}
               onClick={() => setSelectedTab("fornecedor")}
             >
               Fornecedor
             </Button>
             <Button
               variant="ghost"
-              className={`px-4 py-2 transition-all duration-300 ${
-                selectedTab === "subcontratado"
+              className={`px-4 py-2 transition-all duration-300 ${selectedTab === "subcontratado"
                   ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                   : "text-realizaBlue bg-white"
-              }`}
+                }`}
               onClick={() => setSelectedTab("subcontratado")}
             >
               Subcontratado
             </Button>
           </div>
           <div className="flex gap-1">
-          <Cog />
-          <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
+            <Cog />
+            <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
           </div>
         </div>
         <div>
-            {loading ? (
-              <div className="text-center text-gray-600">
-                Carregando colaboradores...
+          {loading ? (
+            <div className="text-center text-gray-600">
+              Carregando colaboradores...
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500">{error}</div>
+          ) : selectedTab === "fornecedor" ? (
+            <div>
+              <div className="">
+                <TableEmployee idProvider={supplier?.idProvider ?? null} />
               </div>
-            ) : error ? (
-              <div className="text-center text-red-500">{error}</div>
-            ) : selectedTab === "fornecedor" ? (
-              <div>
-                <div className="">
-                  <TableEmployee idProvider={supplier?.idProvider ?? null} />
+            </div>
+          ) : (
+            <div>
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center gap-2">
+                  {" "}
+                  <strong>Fornecedor: </strong>
+                  <h1>{supplier?.corporateName}</h1>
+                </div>
+                <div>
+                  {getSubcontractorList.map((subcontractor: any) => (
+                    <div key={subcontractor.idProvider}>
+                      <span>{subcontractor.corporateName} </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ) : (
-              <div>
-                <div className="flex flex-col gap-5">
-                  <div className="flex items-center gap-2">
-                    {" "}
-                    <strong>Fornecedor: </strong>
-                    <h1>{supplier?.corporateName}</h1>
-                  </div>
-                  <div>
-                    {getSubcontractorList.map((subcontractor: any) => (
-                      <div key={subcontractor.idProvider}>
-                        <span>{subcontractor.corporateName} </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -187,27 +189,29 @@ export const EmployeesTable = (): JSX.Element => {
       <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md relative bottom-[8vw]">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Colaboradores</h1>
-          <NewModalCreateEmployee />
+          <div className="flex gap-2">
+            <NewModalCreateEmployee />
+            <ManageEmployeesModal idProvider={supplier?.idProvider ?? null} />
+          </div>
+
         </div>
         <div className="mb-4 flex">
           <Button
             variant="ghost"
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "fornecedor"
+            className={`px-4 py-2 transition-all duration-300 ${selectedTab === "fornecedor"
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
-            }`}
+              }`}
             onClick={() => setSelectedTab("fornecedor")}
           >
             Fornecedor
           </Button>
           <Button
             variant="ghost"
-            className={`px-4 py-2 transition-all duration-300 ${
-              selectedTab === "subcontratado"
+            className={`px-4 py-2 transition-all duration-300 ${selectedTab === "subcontratado"
                 ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                 : "text-realizaBlue bg-white"
-            }`}
+              }`}
             onClick={() => setSelectedTab("subcontratado")}
           >
             Subcontratado
