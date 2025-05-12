@@ -43,7 +43,9 @@ export function ControlPanel() {
 
   const fetchSolicitations = async () => {
     try {
-      const response = await axios.get<ApiResponse>(`${ip}/item-management/new-provider`);
+      const response = await axios.get<ApiResponse>(
+        `${ip}/item-management/new-provider`,
+      );
       setSolicitations(response.data.content);
     } catch (err) {
       console.error("Erro ao buscar solicitações:", err);
@@ -55,24 +57,34 @@ export function ControlPanel() {
   }, []);
 
   const removeSolicitation = (idSolicitation: string) => {
-    setSolicitations((prev) => prev.filter((s) => s.idSolicitation !== idSolicitation));
+    setSolicitations((prev) =>
+      prev.filter((s) => s.idSolicitation !== idSolicitation),
+    );
   };
 
   const countStatus = (status: "APPROVED" | "DENIED" | "PENDING") => {
-    return solicitations.filter((solicitation) => solicitation.status === status).length;
+    return solicitations.filter(
+      (solicitation) => solicitation.status === status,
+    ).length;
   };
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
-      <div className="flex w-full flex-col items-center justify-center gap-9 rounded-md bg-white p-4 shadow-sm">
+      <div className="relative bottom-[3vw] flex w-full flex-col items-center justify-center gap-9 rounded-md bg-white p-4 shadow-sm">
         <div className="flex w-full flex-row items-center justify-between gap-4">
           <div>
-            <h2 className="text-center text-lg font-semibold">Painel de Controle</h2>
-            <p className="text-[#2563EB]">{solicitations.length} Solicitações</p>
+            <h2 className="text-center text-lg font-semibold">
+              Painel de Controle
+            </h2>
+            <p className="text-[#2563EB]">
+              {solicitations.length} Solicitações
+            </p>
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="hidden md:block bg-realizaBlue">Todas solicitações</Button>
+              <Button className="bg-realizaBlue hidden md:block">
+                Todas solicitações
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -83,7 +95,7 @@ export function ControlPanel() {
         </div>
       </div>
 
-      <div className="flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
+      <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div>
             <ColumnPanelControl
@@ -121,7 +133,9 @@ export function ControlPanel() {
               <div className="bg-gray-100 p-8">
                 <ScrollArea className="h-[40vh]">
                   {solicitations
-                    .filter((solicitation) => solicitation.status === "APPROVED")
+                    .filter(
+                      (solicitation) => solicitation.status === "APPROVED",
+                    )
                     .map((solicitation) => (
                       <CardPanelControl
                         key={solicitation.idSolicitation}
@@ -159,7 +173,7 @@ export function ControlPanel() {
             </div>
           </div>
         </div>
-                {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+        {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
           {solicitations.map((solicitation) => (
             <CardPanelControl
               key={solicitation.idSolicitation}
