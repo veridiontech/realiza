@@ -4,8 +4,10 @@ import { EditModalEnterprise } from "./edit-modal-enterprise";
 import { useClient } from "@/context/Client-Provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplier } from "@/context/Supplier-context";
+import { UploadDocumentButton } from "@/components/ui/upload-document-button";
 
 import { useUser } from "@/context/user-provider";
+
 export function ProfileEnterpriseReprise() {
   const { client } = useClient();
   const { supplier } = useSupplier();
@@ -20,17 +22,7 @@ export function ProfileEnterpriseReprise() {
         <Helmet title="profile" />
         <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
           <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
-            <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" >
-            {/* <div className="md:hidden absolute right-0 top-0">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-white text-sky-800 shadow-sm hover:bg-gray-100 transition">
-                    Editar perfil empresarial
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
-            </div> */}
-            </div>
+            <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" />
             <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
               <div className="flex flex-col items-center justify-between md:flex-row">
                 <div className="relative bottom-10 left-1 flex items-center gap-4">
@@ -67,8 +59,9 @@ export function ProfileEnterpriseReprise() {
                     </div>
                   </div>
                 </div>
-                <div>
-                  <EditModalEnterprise />
+                <div className="flex space-x-4">
+                  <UploadDocumentButton /> {/* Coloquei o botão de upload à esquerda */}
+                  <EditModalEnterprise /> {/* O botão de edição à direita */}
                 </div>
               </div>
             </div>
@@ -97,24 +90,12 @@ export function ProfileEnterpriseReprise() {
     );
   }
 
-
   return (
     <>
       <Helmet title="profile" />
       <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
         <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
-          <div className="bg-realizaBlue relative min-h-[100px] w-full rounded-t-xl">
-            {/* <div className="md:hidden absolute right-0 top-0">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-white text-sky-800 shadow-sm hover:bg-gray-100 transition">
-                  Editar perfil empresarial
-                  </Button>
-                </DialogTrigger>
-                <EditModalEnterprise />
-              </Dialog>
-            </div> */}
-          </div>
+          <div className="bg-realizaBlue relative min-h-[100px] w-full rounded-t-xl" />
           <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col items-center justify-between md:flex-row">
               <div className="relative bottom-10 left-1 flex items-center gap-4">
@@ -151,9 +132,10 @@ export function ProfileEnterpriseReprise() {
                   </div>
                 </div>
               </div>
-              <div>
-                <EditModalEnterprise />
-              </div>
+              <div className="flex space-x-4">
+                  <UploadDocumentButton /> {/* Coloquei o botão de upload à esquerda */}
+                  <EditModalEnterprise /> {/* O botão de edição à direita */}
+                </div>
             </div>
           </div>
         </div>
