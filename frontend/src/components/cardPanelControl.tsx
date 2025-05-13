@@ -4,6 +4,7 @@ import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Oval } from "react-loader-spinner";
 import { useState } from "react";
+import { MoreDetails } from "@/pages/auth/realizaProfile/panel-control/more-details";
 
 interface CardPanelControlProps {
   data: {
@@ -15,9 +16,13 @@ interface CardPanelControlProps {
       idUser: string;
       firstName: string;
       surname: string;
+      nameEnterprise?: string | undefined ;
+      cpf?: string | undefined;
     };
-    newUser: {
-      idUser: string;
+    newProvider: {
+      cnpj?: string | undefined;
+      corporateName?: string | undefined;
+      telephone?: string | undefined;
     };
   };
   // Callback opcional para atualizar a lista após a ação
@@ -48,7 +53,7 @@ export function CardPanelControl({
       if (onActionCompleted) {
         onActionCompleted(data.idSolicitation);
       }
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
       console.error("Erro ao aprovar solicitação:", error);
       toast.error("Erro ao aceitar solicitação");
@@ -73,12 +78,23 @@ export function CardPanelControl({
   };
 
   return (
-    <div className="flex flex-col items-start justify-center gap-2 rounded-md border border-neutral-300 bg-white p-4 shadow-md">
-      <div className="flex w-full flex-row gap-2">
-        <User color="#2563EB" />
-        <span className="font-semibold text-[#2563EB]">
-          Solicitação de: {data.requester.firstName} {data.requester.surname}
-        </span>
+    <div className="flex flex-col justify-center gap-2 rounded-md border border-neutral-300 bg-white p-4 shadow-md">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <User color="#2563EB" />
+          <span className="font-semibold text-[#2563EB]">
+            Solicitação de: {data.requester.firstName} {data.requester.surname}
+          </span>
+        </div>
+        <MoreDetails
+          idSolicitation={data.idSolicitation}
+          firstName={data.requester.firstName}
+          surname={data.requester.surname}
+          nameEnterprise={data.requester.nameEnterprise}
+          cpf={data.requester.cpf}
+          corporateName={data.newProvider.corporateName}
+          cnpj={data.newProvider.cnpj}
+        />{" "}
       </div>
       <div className="flex w-full flex-col gap-2 border-y border-[#7CA1F333] py-4">
         <h3 className="mb-3 text-sm font-semibold text-[#2563EB]">

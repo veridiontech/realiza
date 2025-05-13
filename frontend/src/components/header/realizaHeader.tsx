@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfilePhoto } from "./profile-photo";
 import { useBranch } from "@/context/Branch-provider";
-import { Solicitation } from "@/pages/auth/realizaProfile/panelControl";
+import { Solicitation } from "@/pages/auth/realizaProfile/panel-control/panelControl";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useBoard } from "@/context/context-ultra/Board-provider";
 import { useMarket } from "@/context/context-ultra/Market-provider";

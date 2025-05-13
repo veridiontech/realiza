@@ -510,7 +510,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                   Ver todos os contratos
                 </Button>
               </div>
-              <div key={employee.idEmployee} className="w-[15vw] p-4">
+              <Link to={`/sistema/detailsEmployees/${employee.idEmployee}`} key={employee.idEmployee} className="w-[15vw] p-4">
                 <div className="flex flex-col gap-5">
                   <div className="flex gap-2">
                     <div className="rounded-full bg-neutral-200 p-2">
@@ -549,7 +549,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           ))}
         </div>
