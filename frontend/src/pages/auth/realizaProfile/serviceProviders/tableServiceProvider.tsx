@@ -227,6 +227,7 @@ export function TableServiceProvider() {
         <Modal
           title="Alocar Funcionário"
           onClose={() => {
+            
             setIsAllocateModalOpen(false);
             setSearchTerm("");
             setAllocateStep(1);
@@ -292,11 +293,11 @@ export function TableServiceProvider() {
                 </button>
                 <button
                   onClick={async () => {
-                    if (!selectedSupplierId) return;
+                    if (!selectedContractId) return;
                     try {
                       console.log("Lista de obj", selectedEmployees);
                       await axios.post(
-                        `${ip}/contract/add-employee/${selectedSupplierId}`,
+                        `${ip}/contract/add-employee/${selectedContractId}`,
                         { idEmployees: selectedEmployees },
                         {
                           headers: {
