@@ -122,7 +122,7 @@ export function TableServiceProvider() {
                 <button
                   title="Finalizar"
                   onClick={() => {
-                    setSelectedContractId(supplier.contract?.idContract);
+                    setSelectedSupplierId(supplier.contract?.idContract);
                     setIsFinalizeModalOpen(true);
                   }}
                 >
@@ -187,7 +187,7 @@ export function TableServiceProvider() {
                     <button
                       title="Finalizar"
                       onClick={() => {
-                        setSelectedContractId(supplier.idContract);
+                        setSelectedSupplierId(supplier.idContract);
                         setIsFinalizeModalOpen(true);
                       }}
                     >

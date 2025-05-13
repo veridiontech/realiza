@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
@@ -13,109 +12,164 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 
 interface Employee {
-    idEmployee: string;
-    name: string;
-    surname: string;
+  idEmployee: string;
+  name: string;
+  surname: string;
 }
 
 interface ManageEmployeesModalProps {
-    idProvider: string | null;
+  idProvider: string | null;
 }
 
 export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) {
-    const [activeTab, setActiveTab] = useState<"alocar" | "desalocar">("alocar");
-    const [employees, setEmployees] = useState<Employee[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"alocar" | "desalocar">("alocar");
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [mainModalOpen, setMainModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
-    const getEmployee = async () => {
-        if (!idProvider) return;
-        setIsLoading(true);
-        try {
-            const res = await axios.get(
-                `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
-            );
-            console.log("employees:", res.data.content);
-            setEmployees(res.data.content);
-        } catch (error) {
-            console.log("Erro ao buscar colaboradores:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const getEmployees = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`);
+      setEmployees(res.data.content || res.data);
+    } catch (error) {
+      console.error("Erro ao buscar colaboradores:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        if (idProvider) {
-            getEmployee();
-        }
-    }, [idProvider]);
+  useEffect(() => {
+    if (mainModalOpen) {
+      getEmployees();
+      setSelectedEmployees([]);
+    }
+  }, [mainModalOpen]);
 
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button className="hidden md:block bg-realizaBlue border border-white rounded-md">
-                    Gerenciar colaboradores
-                </Button>
-            </DialogTrigger>
-            <DialogTrigger asChild>
-                <Button className="md:hidden bg-realizaBlue">⚙️</Button>
-            </DialogTrigger>
-
-            <DialogContent
-                style={{ backgroundImage: `url(${bgModalRealiza})` }}
-                className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
-            >
-                <DialogHeader>
-                    <DialogTitle className="text-white">Gerenciar colaboradores</DialogTitle>
-                </DialogHeader>
-
-                <ScrollArea className="h-[75vh]">
-                    {/* Tabs */}
-                    <div className="flex gap-2 bg-[#1F2A40] rounded-md p-1 w-fit mb-6">
-                        <button
-                            onClick={() => setActiveTab("alocar")}
-                            className={`px-5 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "alocar"
-                                    ? "bg-white text-[#1F2A40]"
-                                    : "text-white opacity-60 hover:opacity-100"
-                                }`}
-                        >
-                            Alocar funcionário
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("desalocar")}
-                            className={`px-5 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${activeTab === "desalocar"
-                                    ? "bg-white text-[#1F2A40]"
-                                    : "text-white opacity-60 hover:opacity-100"
-                                }`}
-                        >
-                            Desalocar funcionário
-                        </button>
-                    </div>
-
-                    {/* ALOCAÇÃO */}
-                    {activeTab === "alocar" && (
-                        <div className="text-white space-y-2">
-                            {isLoading ? (
-                                <p>Carregando colaboradores...</p>
-                            ) : employees.length > 0 ? (
-                                employees.map((emp) => (
-                                    <div key={emp.idEmployee} className="bg-[#2E3C57] p-2 rounded-md">
-                                        {emp.name} {emp.surname}
-                                    </div>
-                                ))
-                            ) : (
-                                <p>Nenhum colaborador encontrado.</p>
-                            )}
-                        </div>
-                    )}
-
-                    {/* DESALOCAÇÃO */}
-                    {activeTab === "desalocar" && (
-                        <div className="text-white">
-                            <p>Em breve: desalocar funcionários...</p>
-                        </div>
-                    )}
-                </ScrollArea>
-            </DialogContent>
-        </Dialog>
+  const toggleSelect = (id: string) => {
+    setSelectedEmployees((prev) =>
+      prev.includes(id)
+        ? prev.filter((e) => e !== id)
+        : [...prev, id]
     );
+  };
+
+  const handleConfirm = () => {
+    if (selectedEmployees.length === 0) return;
+
+    if (activeTab === "alocar") {
+      console.log("Alocando IDs:", selectedEmployees);
+      // chamada para API de alocação aqui
+    } else {
+      console.log("Desalocando IDs:", selectedEmployees);
+      // chamada para API de desalocação aqui
+    }
+
+    // Fecha modal após ação (opcional)
+    setMainModalOpen(false);
+  };
+
+  return (
+    <>
+      <Button
+        onClick={() => setConfirmModalOpen(true)}
+        className="hidden md:block bg-realizaBlue border border-white rounded-md"
+      >
+        Gerenciar colaboradores
+      </Button>
+      <Button
+        onClick={() => setConfirmModalOpen(true)}
+        className="md:hidden bg-realizaBlue"
+      >
+        ⚙️
+      </Button>
+
+      <Dialog open={confirmModalOpen} onOpenChange={setConfirmModalOpen}>
+        <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white text-center text-lg">
+              O que você deseja fazer?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 mt-6">
+            <Button
+              onClick={() => {
+                setActiveTab("alocar");
+                setConfirmModalOpen(false);
+                setMainModalOpen(true);
+              }}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md shadow"
+            >
+              Alocar Colaborador
+            </Button>
+            <Button
+              onClick={() => {
+                setActiveTab("desalocar");
+                setConfirmModalOpen(false);
+                setMainModalOpen(true);
+              }}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-md shadow"
+            >
+              Desalocar Colaborador
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={mainModalOpen} onOpenChange={setMainModalOpen}>
+        <DialogContent
+          style={{ backgroundImage: `url(${bgModalRealiza})` }}
+          className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw] text-white"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              {activeTab === "alocar"
+                ? "Alocar Colaboradores"
+                : "Desalocar Colaboradores"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <ScrollArea className="h-[60vh] mt-2 space-y-2">
+            {loading ? (
+              <p>Carregando colaboradores...</p>
+            ) : employees.length > 0 ? (
+              employees.map((emp) => {
+                const isSelected = selectedEmployees.includes(emp.idEmployee);
+                return (
+                  <button
+                    key={emp.idEmployee}
+                    onClick={() => toggleSelect(emp.idEmployee)}
+                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
+                      isSelected
+                        ? "bg-green-600 border-green-400"
+                        : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                    }`}
+                  >
+                    {emp.name} {emp.surname}
+                  </button>
+                );
+              })
+            ) : (
+              <p>Nenhum colaborador encontrado.</p>
+            )}
+          </ScrollArea>
+
+          {selectedEmployees.length > 0 && (
+            <div className="mt-4 flex justify-end">
+              <Button
+                onClick={handleConfirm}
+                className={`${
+                  activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
+                } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
+              >
+                Confirmar {activeTab === "alocar" ? "Alocação" : "Desalocação"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
