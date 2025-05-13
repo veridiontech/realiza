@@ -8,6 +8,9 @@ import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeBrazilianImpl;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeForeignerImpl;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeImpl;
+import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
+import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeBrazilian;
+import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeForeigner;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +32,9 @@ import java.util.Optional;
 @Tag(name = "Employee")
 public class EmployeeControllerImpl implements EmployeeController {
 
-    private final CrudEmployeeBrazilianImpl crudEmployeeBrazilian;
-    private final CrudEmployeeForeignerImpl crudEmployeeForeigner;
-    private final CrudEmployeeImpl crudEmployee;
+    private final CrudEmployeeBrazilian crudEmployeeBrazilian;
+    private final CrudEmployeeForeigner crudEmployeeForeigner;
+    private final CrudEmployee crudEmployee;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

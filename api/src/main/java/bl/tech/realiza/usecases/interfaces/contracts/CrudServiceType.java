@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeBranc
 import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeClientResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeRepoResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeResponseDto;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 
@@ -28,6 +29,12 @@ public interface CrudServiceType {
 
     // Client
     ServiceTypeClientResponseDto saveServiceTypeClient(ServiceTypeClientRequestDto serviceTypeClientRequestDto);
+
+    @Async
+    void transferFromRepoToClient(String idClient);
+
+    @Async
+    void transferFromClientToBranch(String idClient, String idBranch);
 
     public enum Owner {
         REPO,

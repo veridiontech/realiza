@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.clients;
 
+import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
@@ -108,4 +109,8 @@ public class Branch {
     @OneToMany(mappedBy = "branch")
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private List<Activity> activities;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogBranch> auditLogBranches;
 }

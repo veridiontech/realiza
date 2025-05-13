@@ -29,7 +29,7 @@ import {
     ]
   
     return (
-      <Card className="w-full h-[300px]">
+      <Card className="w-full h-[60vh]">
         <CardHeader className="pb-0">
           <CardTitle className="text-muted-foreground text-base">
             Conformidade

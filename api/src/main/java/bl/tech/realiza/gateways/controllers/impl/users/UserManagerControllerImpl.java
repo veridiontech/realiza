@@ -7,6 +7,7 @@ import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserManagerImpl;
+import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,13 @@ import java.util.Optional;
 @Tag(name = "User Manager")
 public class UserManagerControllerImpl implements UserManagerController {
 
-    private final CrudUserManagerImpl crudUserManager;
+    private final CrudUserManager crudUserManager;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<UserResponseDto> createUserManager(@RequestPart("userManagerRequestDto") @Valid UserManagerRequestDto userManagerRequestDto,
-                                                             @RequestPart(value = "file", required = false) MultipartFile file) {
+                                                             @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         UserResponseDto userManager = crudUserManager.save(userManagerRequestDto, file);
 
         return ResponseEntity.of(Optional.of(userManager));

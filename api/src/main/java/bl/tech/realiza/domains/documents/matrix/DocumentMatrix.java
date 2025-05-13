@@ -33,7 +33,10 @@ public class DocumentMatrix {
     private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Unit {
-        DAYS, WEEKS, MONTHS, YEARS
+        DAYS,
+        WEEKS,
+        MONTHS,
+        YEARS
     }
 
     // -------------------------------

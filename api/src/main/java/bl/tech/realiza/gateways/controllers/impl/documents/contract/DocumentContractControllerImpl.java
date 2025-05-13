@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.documents.contract.Docume
 import bl.tech.realiza.gateways.requests.documents.contract.DocumentContractRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.usecases.impl.documents.contract.CrudDocumentContractImpl;
+import bl.tech.realiza.usecases.interfaces.documents.contract.CrudDocumentContract;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.Optional;
 @Tag(name = "Document Contract")
 public class DocumentContractControllerImpl implements DocumentContractController {
 
-    private final CrudDocumentContractImpl crudDocumentContract;
+    private final CrudDocumentContract crudDocumentContract;
 
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)

@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
@@ -25,12 +26,15 @@ import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -270,6 +274,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     public String createNewUserActivated(UserCreateRequestDto userCreateRequestDto) {
 
         String randomPassword = randomPasswordService.generateRandomPassword();
+        String encryptedPassword = passwordEncryptionService.encryptPassword(randomPassword);
 
         switch (userCreateRequestDto.getEnterprise()) {
             case REALIZA -> {
@@ -283,7 +288,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
-                            .password(randomPassword)
+                            .password(encryptedPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .isActive(true)
@@ -297,7 +302,13 @@ public class CrudUserManagerImpl implements CrudUserManager {
                         userCreateRequestDto.getRole() == User.Role.ROLE_CLIENT_MANAGER) {
 
                     Branch branch = branchRepository.findById(userCreateRequestDto.getIdEnterprise())
-                                    .orElseThrow(() -> new NotFoundException("Branch not found"));
+                                    .orElse(null);
+                    if (branch == null) {
+                        Client client = clientRepository.findById(userCreateRequestDto.getIdEnterprise())
+                                .orElseThrow(() -> new NotFoundException("Client not found"));
+
+                        branch = branchRepository.findFirstByClient_IdClientOrderByCreationDateAsc(client.getIdClient());
+                    }
 
                     userClientRepository.save(UserClient.builder()
                                     .cpf(userCreateRequestDto.getCpf())
@@ -307,7 +318,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                                     .firstName(userCreateRequestDto.getFirstName())
                                     .surname(userCreateRequestDto.getSurname())
                                     .email(userCreateRequestDto.getEmail())
-                                    .password(randomPassword)
+                                    .password(encryptedPassword)
                                     .telephone(userCreateRequestDto.getTelephone())
                                     .cellphone(userCreateRequestDto.getCellphone())
                                     .branch(branch)
@@ -331,7 +342,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
-                            .password(randomPassword)
+                            .password(encryptedPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .providerSupplier(supplier)
@@ -355,7 +366,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .firstName(userCreateRequestDto.getFirstName())
                             .surname(userCreateRequestDto.getSurname())
                             .email(userCreateRequestDto.getEmail())
-                            .password(randomPassword)
+                            .password(encryptedPassword)
                             .telephone(userCreateRequestDto.getTelephone())
                             .cellphone(userCreateRequestDto.getCellphone())
                             .providerSubcontractor(subcontractor)

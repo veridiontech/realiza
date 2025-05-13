@@ -1,12 +1,15 @@
 package bl.tech.realiza.domains.documents;
 
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -29,6 +32,10 @@ public abstract class Document {
     private LocalDateTime versionDate;
     private LocalDateTime expirationDate;
     @Builder.Default
+    private Integer expirationDateAmount = 1;
+    @Builder.Default
+    private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
+    @Builder.Default
     private Boolean isActive = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -40,6 +47,14 @@ public abstract class Document {
     @ManyToOne
     @JoinColumn(name = "idDocument")
     private DocumentMatrix documentMatrix;
+
+    // -------------------------------
+    // Relacionamentos CONTRATUAIS
+    // -------------------------------
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogDocument> auditLogDocuments;
 
     public enum Status {
         PENDENTE,

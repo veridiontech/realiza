@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.usecases.impl.users.CrudUserProviderSupplierImpl;
+import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.Optional;
 @Tag(name = "User Supplier")
 public class UserProviderSupplierControllerImpl implements UserProviderSupplierController {
 
-    private final CrudUserProviderSupplierImpl crudUserSupplier;
+    private final CrudUserProviderSupplier crudUserSupplier;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

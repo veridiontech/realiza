@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentRes
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,7 @@ public interface CrudActivity {
     String removeDocumentFromActivity(String idActivity, String idDocumentBranch);
     Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto);
     void delete(String id);
+
+    @Async
+    void transferFromRepo(String idBranch);
 }

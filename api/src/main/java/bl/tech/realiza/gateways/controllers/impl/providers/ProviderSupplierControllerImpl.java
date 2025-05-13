@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.providers.ProviderSupplie
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.usecases.impl.providers.CrudProviderSupplierImpl;
+import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.Optional;
 @Tag(name = "Supplier")
 public class ProviderSupplierControllerImpl implements ProviderSupplierController {
 
-    private final CrudProviderSupplierImpl crudProviderSupplier;
+    private final CrudProviderSupplier crudProviderSupplier;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -4,6 +4,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchControlller
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.usecases.impl.clients.CrudBranchImpl;
+import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Tag(name = "Branch")
 public class BranchControllerImpl implements BranchControlller {
 
-    private final CrudBranchImpl crudBranch;
+    private final CrudBranch crudBranch;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -112,3 +112,73 @@ export interface propsActivities {
   title: string,
   risk: string,
 }
+
+export interface propsCompanyData {
+  updated: string;
+  taxId: string;
+  alias: string | null;
+  founded: string;
+  head: boolean;
+  company: {
+    members: any[]; // pode ser ajustado se souber a estrutura dos membros
+    id: number;
+    name: string;
+    equity: number;
+    nature: {
+      id: number;
+      text: string;
+    };
+    size: {
+      id: number;
+      acronym: string;
+      text: string;
+    };
+    simples: {
+      optant: boolean;
+      since: string;
+    };
+    simei: {
+      optant: boolean;
+      since: string;
+    };
+  };
+  statusDate: string;
+  status: {
+    id: number;
+    text: string;
+  };
+  address: {
+    municipality: number;
+    street: string;
+    number: string;
+    district: string;
+    city: string;
+    state: string;
+    details: string | null;
+    zip: string;
+    country: {
+      id: number;
+      name: string;
+    };
+  };
+  mainActivity: {
+    id: number;
+    text: string;
+  };
+  phones: {
+    type: string;
+    area: string;
+    number: string;
+  }[];
+  emails: {
+    ownership: string;
+    address: string;
+    domain: string;
+  }[];
+  sideActivities: {
+    id: number;
+    text: string;
+  }[];
+  registrations: any[]; 
+  suframa: any[];       
+}

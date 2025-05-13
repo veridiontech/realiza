@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.auditLogs.AuditLog;
 import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -72,6 +73,10 @@ public abstract class User {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Notification> notifications;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idUser", cascade = CascadeType.REMOVE)
+    private List<AuditLog> auditLogs;
 
     public enum Role {
         ROLE_ADMIN,

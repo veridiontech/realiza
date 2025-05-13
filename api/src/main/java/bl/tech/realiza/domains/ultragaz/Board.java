@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.ultragaz;
 
+import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogBoard;
 import bl.tech.realiza.domains.clients.Client;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -34,4 +35,8 @@ public class Board {
     @JsonIgnore
     @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
     private List<Market> markets;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
+    private List<AuditLogBoard> auditLogBoards;
 }

@@ -21,6 +21,7 @@ import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -166,6 +167,7 @@ public class CrudActivityImpl implements CrudActivity {
         activityRepository.deleteById(id);
     }
 
+    @Override
     public void transferFromRepo(String idBranch) {
         Branch branch = branchRepository.findById(idBranch)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));

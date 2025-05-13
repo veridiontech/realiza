@@ -45,8 +45,8 @@ export function BoxActivities({ activities }: BoxActivitiesProps) {
               >
                 <input
                   type="checkbox"
-                  checked={activitiesCheck === activitie.idActivity} // Verifica se o ID da atividade está no estado
-                  onChange={() => {}} // Não é necessário alterar diretamente aqui
+                  checked={activitiesCheck === activitie.idActivity} 
+                  onChange={() => {}} 
                 />
                 <span>{activitie.title || "Documento"}</span>
               </div>

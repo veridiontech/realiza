@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.services.ContactControlll
 import bl.tech.realiza.gateways.requests.services.ContactRequestDto;
 import bl.tech.realiza.gateways.responses.services.ContactResponseDto;
 import bl.tech.realiza.usecases.impl.CrudContactImpl;
+import bl.tech.realiza.usecases.interfaces.CrudContact;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ import java.util.Optional;
 @Tag(name = "Contact")
 public class ContactControllerImpl implements ContactControlller {
 
-    private final CrudContactImpl crudContact;
+    private final CrudContact crudContact;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

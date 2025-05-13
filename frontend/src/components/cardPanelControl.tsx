@@ -73,7 +73,7 @@ export function CardPanelControl({
   };
 
   return (
-    <div className="flex flex-col items-start justify-center gap-2 rounded-md border-[#C3C3C3CC] bg-white p-4 shadow-md">
+    <div className="flex flex-col items-start justify-center gap-2 rounded-md border border-neutral-300 bg-white p-4 shadow-md">
       <div className="flex w-full flex-row gap-2">
         <User color="#2563EB" />
         <span className="font-semibold text-[#2563EB]">
