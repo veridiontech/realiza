@@ -2,25 +2,19 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Eye, Pencil, UserPlus, Ban, X } from "lucide-react";
+import { Eye, Pencil, Ban, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
-
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ finished }: { finished?: boolean }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
+  const isFinalizado = finished === true;
 
-  const statusStyles: Record<string, string> = {
-    "Contrato Cancelado": "bg-red-600",
-    "Contrato Suspenso": "bg-yellow-400 text-black",
-    "Contrato Concluído": "bg-green-600",
-    "Indefinido": "bg-gray-400",
-  };
-
-  const style = statusStyles[status] || "bg-gray-400";
+  const statusText = isFinalizado ? "Finalizado" : "Ativo";
+  const statusStyle = isFinalizado ? "bg-red-600" : "bg-green-600";
 
   return (
-    <span className={`${baseClass} ${style}`}>
-      {status}
+    <span className={`${baseClass} ${statusStyle}`}>
+      {statusText}
     </span>
   );
 }
@@ -56,16 +50,8 @@ export function TableServiceProvider() {
   const { selectedBranch } = useBranch();
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAllocateModalOpen, setIsAllocateModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
-  const [finalizeStep, setFinalizeStep] = useState(1);
-  const [selectedReason, setSelectedReason] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [allocateStep, setAllocateStep] = useState(1);
-  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
-  const [selectedsupplierId, setSelectedsuppierId] = useState<string | null>(null);
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -89,36 +75,11 @@ export function TableServiceProvider() {
     }
   };
 
-  const getEmployees = async () => {
-    try {
-      console.log("supplier" , selectedsupplierId);
-      
-      const res = await axios.get(`${ip}/employee`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
-        params: {
-          enterprise: "SUPPLIER",
-          idSearch: selectedsupplierId,
-        }
-      });
-      console.log("Colaboradores retornados:", res.data.content);
-      setEmployees(res.data.content);
-    } catch (err) {
-      console.error("Erro ao buscar colaboradores", err);
-    }
-  };
-
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
     }
   }, [selectedBranch]);
-
-  useEffect(() => {
-    if (isAllocateModalOpen && selectedsupplierId) {
-      getEmployees();
-    }
-  }, [isAllocateModalOpen, selectedsupplierId]);
-  
 
   return (
     <div className="p-5 md:p-10">
@@ -132,18 +93,24 @@ export function TableServiceProvider() {
               key={supplier.idProvider}
               className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
             >
+              <p className="text-sm font-semibold text-gray-700">Referência do Contrato:</p>
+              <p className="mb-2 text-gray-800">{supplier.contractReference}</p>
               <p className="text-sm font-semibold text-gray-700">Nome:</p>
               <p className="mb-2 text-realizaBlue">{supplier.providerSupplierName
               }</p>
               <p className="text-sm font-semibold text-gray-700">CNPJ:</p>
-              <p className="mb-2 text-gray-800">{supplier.cnpj}</p>
-              <p className="text-sm font-semibold text-gray-700">Filiais:</p>
+              <p className="mb-2 text-gray-800">{supplier.providerSupplierCnpj}</p>
+              <p className="text-sm font-semibold text-gray-700">Nome do Serviço:</p>
+              <p className="mb-2 text-gray-800">{supplier.serviceName}</p>
+              <p className="text-sm font-semibold text-gray-700">Data de Início:</p>
+              <p className="mb-2 text-gray-800">
+                {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
+              </p>
               {/* <p className="text-gray-800">
                 {supplier.branches && supplier.branches.length > 0
                   ? supplier.branches.map((b: any) => b.branchName).join(", ")
                   : "Nenhuma filial associada"}
               </p> */}
-              <p className="mb-2 text-gray-800">{supplier.branchName}</p>
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
                 <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
@@ -152,19 +119,6 @@ export function TableServiceProvider() {
                 <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                   <Pencil className="w-5 h-5" />
                 </button>
-                <button
-                  title="Alocar funcionário"
-                  onClick={() => {
-                    console.log("verificação" , supplier);
-                    setSelectedContractId(supplier.idContract);
-                    setSelectedsuppierId(supplier.providerSupplier);
-                    //como a da linha 154 colocar o id do supplier em uma variavel
-                    setIsAllocateModalOpen(true);
-                  }}
-                >
-                  <UserPlus className="w-5 h-5" />
-                </button>
-
                 <button
                   title="Finalizar"
                   onClick={() => {
@@ -177,7 +131,8 @@ export function TableServiceProvider() {
 
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
-              <StatusBadge status={supplier.status || "Indefinido"} />
+              <StatusBadge finished={supplier.finished} />
+
             </div>
           ))
         ) : (
@@ -189,9 +144,11 @@ export function TableServiceProvider() {
         <table className="w-full border-collapse border border-gray-300">
           <thead className="bg-gray-200">
             <tr>
+              <th className="border border-gray-300 p-2 text-left">Referência do Contrato</th>
               <th className="border border-gray-300 p-2 text-left">Nome do Fornecedor</th>
               <th className="border border-gray-300 p-2 text-left">CNPJ</th>
-              <th className="border border-gray-300 p-2 text-left">Filiais que Atua</th>
+              <th className="border border-gray-300 p-2 text-left">Nome do Serviço</th>
+              <th className="border border-gray-300 p-2 text-left">Data de Início</th>
               <th className="border border-gray-300 p-2 text-left">Ações</th>
               <th className="border border-gray-300 p-2 text-left">Status</th>
             </tr>
@@ -206,15 +163,20 @@ export function TableServiceProvider() {
             ) : suppliers.length > 0 ? (
               suppliers.map((supplier: any) => (
                 <tr key={supplier.idProvider}>
+                  <td className="border border-gray-300 p-2">{supplier.contractReference}</td>
                   <td className="border border-gray-300 p-2">{supplier.providerSupplierName
                   }</td>
-                  <td className="border border-gray-300 p-2">{supplier.cnpj}</td>
+                  <td className="border border-gray-300 p-2">{supplier.providerSupplierCnpj}</td>
                   {/* <td className="border border-gray-300 p-2">
                     {supplier.branches && supplier.branches.length > 0
                       ? supplier.branches.map((b: any) => b.branchName).join(", ")
                       : "Nenhuma filial associada"}
                   </td> */}
-                  <td className="border border-gray-300 p-2">{supplier.branchName}</td>
+                  <td className="border border-gray-300 p-2">{supplier.serviceName}</td>
+                  <td className="border border-gray-300 p-2">
+                    {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
+                  </td>
+
                   <td className="border border-gray-300 p-2 space-x-2">
                     <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
                       <Eye className="w-5 h-5" />
@@ -222,16 +184,6 @@ export function TableServiceProvider() {
                     <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
                       <Pencil className="w-5 h-5" />
                     </button>
-                    <button
-                      title="Alocar funcionário"
-                      onClick={() => {
-                        setSelectedContractId(supplier.idContract);
-                        setIsAllocateModalOpen(true);
-                      }}
-                    >
-                      <UserPlus className="w-5 h-5" />
-                    </button>
-
                     <button
                       title="Finalizar"
                       onClick={() => {
@@ -244,7 +196,7 @@ export function TableServiceProvider() {
 
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <StatusBadge status={supplier.status || "Indefinido"} />
+                    <StatusBadge finished={supplier.finished} />
                   </td>
                 </tr>
               ))
@@ -271,7 +223,7 @@ export function TableServiceProvider() {
         </Modal>
       )}
 
-      {isAllocateModalOpen && (
+      {/* {isAllocateModalOpen && (
         <Modal
           title="Alocar Funcionário"
           onClose={() => {
@@ -371,116 +323,52 @@ export function TableServiceProvider() {
             </div>
           )}
         </Modal>
-      )}
+      )} */}
 
       {isFinalizeModalOpen && (
-        <Modal title="Finalizar Contrato" onClose={() => {
-          setIsFinalizeModalOpen(false);
-          setFinalizeStep(1);
-          setSelectedReason("");
-          setSelectedContractId(null);
-        }}>
-          {finalizeStep === 1 && (
-            <div className="text-white">
-              <p className="mb-4">Deseja finalizar este contrato?</p>
-              <div className="flex gap-4 justify-end">
-                <button
-                  onClick={() => setIsFinalizeModalOpen(false)}
-                  className="bg-red-600 px-4 py-2 rounded"
-                >
-                  Não
-                </button>
-                <button
-                  onClick={() => setFinalizeStep(2)}
-                  className="bg-gray-600 px-4 py-2 rounded"
-                >
-                  Sim
-                </button>
-              </div>
+        <Modal
+          title="Finalizar Contrato"
+          onClose={() => {
+            setIsFinalizeModalOpen(false);
+            setSelectedSupplierId(null);
+          }}
+        >
+          <div className="text-white">
+            <p className="mb-4">Deseja realmente finalizar este contrato?</p>
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => setIsFinalizeModalOpen(false)}
+                className="bg-red-600 px-4 py-2 rounded"
+              >
+                Não
+              </button>
+              <button
+                onClick={async () => {
+                  if (!selectedSupplierId) return;
+                  try {
+                    await axios.post(
+                      `${ip}/contract/finish/${selectedSupplierId}`,
+                      { status: "Contrato Cancelado" },
+                      {
+                        headers: {
+                          Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
+                        },
+                      }
+                    );
+                    await getSupplier();
+                  } catch (err) {
+                    console.error("Erro ao cancelar contrato", err);
+                  } finally {
+                    setIsFinalizeModalOpen(false);
+                    setSelectedSupplierId(null);
+                  }
+                }}
+                className="bg-green-600 px-4 py-2 rounded"
+              >
+                Sim
+              </button>
             </div>
-          )}
-
-          {finalizeStep === 2 && (
-            <div className="text-white space-y-3">
-              <p className="mb-2">Selecione o motivo da finalização:</p>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedReason("Contrato Cancelado");
-                    setFinalizeStep(3);
-                  }}
-                  className="bg-red-600 px-4 py-2 rounded"
-                >
-                  Contrato Cancelado
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedReason("Contrato Suspenso");
-                    setFinalizeStep(3);
-                  }}
-                  className="bg-yellow-400 text-black px-4 py-2 rounded"
-                >
-                  Contrato Suspenso
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedReason("Contrato Concluído");
-                    setFinalizeStep(3);
-                  }}
-                  className="bg-green-600 px-4 py-2 rounded"
-                >
-                  Contrato Concluído
-                </button>
-              </div>
-            </div>
-          )}
-
-          {finalizeStep === 3 && (
-            <div className="text-white">
-              <p className="mb-4">
-                Você confirma que está finalizando o contrato pelo motivo de:{" "}
-                <span className="font-bold">{selectedReason}</span>?
-              </p>
-              <div className="flex gap-4 justify-end">
-                <button
-                  onClick={() => {
-                    setFinalizeStep(2);
-                    setSelectedReason("");
-                  }}
-                  className="bg-gray-600 px-4 py-2 rounded"
-                >
-                  Voltar
-                </button>
-                <button
-                  onClick={async () => {
-                    if (!selectedContractId) return;
-                    try {
-                      await axios.post(
-                        `${ip}/contract/finish/${selectedContractId}`,
-                        { status: selectedReason },
-                        {
-                          headers: {
-                            Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
-                          },
-                        }
-                      );
-                      await getSupplier();
-                    } catch (err) {
-                      console.error("Erro ao finalizar contrato", err);
-                    } finally {
-                      setIsFinalizeModalOpen(false);
-                      setFinalizeStep(1);
-                      setSelectedReason("");
-                      setSelectedContractId(null);
-                    }
-                  }}
-                  className="bg-realizaBlue px-4 py-2 rounded"
-                >
-                  Confirmar
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
         </Modal>
       )}
     </div>
