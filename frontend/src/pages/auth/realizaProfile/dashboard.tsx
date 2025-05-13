@@ -168,7 +168,7 @@ export function Dashboard() {
             </div>
             <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
               <StatusDocumentChart />
-              <ConformityGaugeChart percentage={71.29} />
+              <ConformityGaugeChart />
             </div>
             <div className="mt-5 w-full text-right">
               <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
@@ -554,7 +554,7 @@ export function Dashboard() {
           </div>
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
             <StatusDocumentChart />
-            <ConformityGaugeChart percentage={71.29} />
+            <ConformityGaugeChart />
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>
