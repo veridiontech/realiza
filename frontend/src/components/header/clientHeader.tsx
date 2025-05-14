@@ -42,9 +42,14 @@ export function HeaderClient() {
   };
 
   const getClientWithUser = async () => {
+    const token = localStorage.getItem("tokenClient")
     try {
       const res = await axios.get(
-        `${ip}/client/find-by-branch/${user?.branch}`,
+        `${ip}/client/find-by-branch/${user?.branch}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
       setClients(res.data);
       setClient(res.data);
