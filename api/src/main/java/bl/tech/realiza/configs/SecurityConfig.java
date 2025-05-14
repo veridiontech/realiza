@@ -35,8 +35,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll() // Permitir acesso ao Swagger
                         .requestMatchers("/v3/api-docs/**").permitAll() // Permitir acesso à documentação Swagger JSON
 //                        .requestMatchers("/h2-console/**").permitAll()
-//                        .anyRequest().permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
+//                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
