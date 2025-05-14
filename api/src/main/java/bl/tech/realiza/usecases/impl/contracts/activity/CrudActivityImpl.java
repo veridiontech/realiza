@@ -101,15 +101,32 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public List<ActivityDocumentResponseDto> findAllDocumentsByActivity(String idActivity) {
+        Activity activity = activityRepository.findById(idActivity)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
         List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(idActivity);
-        return activityDocumentsList.stream().map(
-                activityDocuments -> ActivityDocumentResponseDto.builder()
-                        .idAssociation(activityDocuments.getId())
-                        .idActivity(activityDocuments.getActivity().getIdActivity())
-                        .idDocument(activityDocuments.getDocumentBranch().getIdDocumentation())
-                        .documentTitle(activityDocuments.getDocumentBranch().getTitle())
-                        .build()
-        ).toList();
+        List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranch(activity.getBranch() != null ? activity.getBranch().getIdBranch() : null);
+        List<String> documentBranchIds = activityDocumentsList.stream()
+                .map(documents -> documents.getDocumentBranch() != null ? documents.getDocumentBranch().getIdDocumentation() : null)
+                .toList();
+
+        return documentBranches.stream()
+                .map(documentBranch -> {
+                    boolean isSelected = documentBranchIds.contains(documentBranch.getIdDocumentation());
+
+                    ActivityDocuments associatedActivityDocument = activityDocumentsList.stream()
+                            .filter(documents -> documents.getDocumentBranch().getIdDocumentation().equals(documentBranch.getIdDocumentation()))
+                            .findFirst()
+                            .orElse(null);
+
+                    return ActivityDocumentResponseDto.builder()
+                            .idAssociation(associatedActivityDocument != null ? associatedActivityDocument.getId() : null)
+                            .idDocument(documentBranch.getIdDocumentation())
+                            .documentTitle(documentBranch.getTitle())
+                            .idActivity(idActivity)
+                            .selected(isSelected)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

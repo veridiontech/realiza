@@ -2,8 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts.contract;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.ContractController;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.contract.CrudContractImpl;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

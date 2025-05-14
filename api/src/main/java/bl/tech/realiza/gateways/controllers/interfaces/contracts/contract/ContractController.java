@@ -1,13 +1,10 @@
 package bl.tech.realiza.gateways.controllers.interfaces.contracts.contract;
 
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 public interface ContractController {
     ResponseEntity<String> finishContract(String idContract);
