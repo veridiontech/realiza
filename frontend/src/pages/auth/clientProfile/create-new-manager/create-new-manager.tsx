@@ -49,8 +49,12 @@ export function CreateNewManagerClient() {
       idUser: user?.idUser,
     };
     try {
-       await axios.post(`${ip}/user/client`, payload);
-       toast.success("Sucesso ao solicitar novo usuário")
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/user/client`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
+      toast.success("Sucesso ao solicitar novo usuário")
     } catch (err) {
       console.log("erro ao criar gerente:", err);
       toast.error("Erro ao criar nova solicitação")

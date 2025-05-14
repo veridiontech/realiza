@@ -20,8 +20,10 @@ export function useEmployees() {
     setLoading(true);
     setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(API_URL, {
         params: { size: limit, page, idEnterprise, idSearch },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
 
       const { content, totalPages } = response.data;

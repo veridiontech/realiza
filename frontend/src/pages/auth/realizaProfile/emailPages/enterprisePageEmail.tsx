@@ -29,7 +29,6 @@ export function EnterprisePageEmail() {
   const tokenFromUrl = searchParams.get("token");
   const { token } = useUser();
   const { setEnterpriseData } = useFormDataContext();
-
   const [isValidToken, setIsValidToken] = useState(false);
   const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");
@@ -68,7 +67,11 @@ export function EnterprisePageEmail() {
     const fetchBranchData = async () => {
       if (!findBranchId) return;
       try {
-        const response = await axios.get(`${ip}/supplier/${findId}`);
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const response = await axios.get(`${ip}/supplier/${findId}`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        );
         console.log("testando dados do supplier", response.data);
         const branchData = response.data;
         if (branchData) {

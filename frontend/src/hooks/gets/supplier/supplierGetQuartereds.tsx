@@ -42,12 +42,14 @@ export function useSupplierQuartereds() {
     setError(null);
 
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(API_URL, {
         params: {
           _limit: limit,
           _page: page,
           idSearch: supplierId, // Filtra pelo ID do supplier
         },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
 
       const mappedSubcontractors = response.data.content.map((sub: any) => ({

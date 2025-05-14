@@ -23,24 +23,28 @@ export function useBranchUltra() {
 
 export function BranchUltraProvider({ children }: { children: React.ReactNode }) {
   const [branchUltra, setBranchUltra] = useState<propsBranchUltra[]>([]);
-  const [selectedBranchUltra, setSelectedBranchUltra] = useState<propsBranchUltra| null>(null)
-  const {selectedCenter} = useCenter()
+  const [selectedBranchUltra, setSelectedBranchUltra] = useState<propsBranchUltra | null>(null)
+  const { selectedCenter } = useCenter()
 
   useEffect(() => {
-    if(selectedCenter?.idCenter) {
-        getBranchUltra(selectedCenter.idCenter)
+    if (selectedCenter?.idCenter) {
+      getBranchUltra(selectedCenter.idCenter)
     }
-  },[selectedCenter?.idCenter])
+  }, [selectedCenter?.idCenter])
 
   const getBranchUltra = async (idCenter: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res =
         await axios.get(`${ip}/branch/find-by-center?idCenter=${idCenter}
-`);
+`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        );
       setBranchUltra(res.data.content)
     } catch (err) {
-        console.log("Erro ao buscar diretoria no BranchUltraProvider", err);
-        
+      console.log("Erro ao buscar diretoria no BranchUltraProvider", err);
+
     }
   };
 

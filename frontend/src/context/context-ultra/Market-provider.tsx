@@ -23,24 +23,28 @@ export function useMarket() {
 
 export function MarketProvider({ children }: { children: React.ReactNode }) {
   const [markets, setMarkets] = useState<propsMarket[]>([]);
-  const [selectedMarket, setSelectedMarket] = useState<propsMarket| null>(null)
-  const {selectedBoard} = useBoard()
+  const [selectedMarket, setSelectedMarket] = useState<propsMarket | null>(null)
+  const { selectedBoard } = useBoard()
 
   useEffect(() => {
-    if(selectedBoard?.idBoard) {
-        getBoard(selectedBoard.idBoard)
+    if (selectedBoard?.idBoard) {
+      getBoard(selectedBoard.idBoard)
     }
-  },[selectedBoard?.idBoard])
+  }, [selectedBoard?.idBoard])
 
   const getBoard = async (idBoard: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res =
         await axios.get(`${ip}/ultragaz/market/find-by-board?idBoard=${idBoard}
-`);
+`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        );
       setMarkets(res.data.content)
     } catch (err) {
-        console.log("Erro ao buscar diretoria no boardProvider", err);
-        
+      console.log("Erro ao buscar diretoria no boardProvider", err);
+
     }
   };
 

@@ -57,13 +57,15 @@ export function TableServiceProvider() {
     if (!selectedBranch?.idBranch) return;
     setLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Requisição ao finalizar");
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-client`,
         {
           params: {
             idSearch: selectedBranch.idBranch
-          }
+          },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         }
       );
       console.log("Exemplo de item:", res.data.content);
@@ -346,13 +348,12 @@ export function TableServiceProvider() {
                 onClick={async () => {
                   if (!selectedSupplierId) return;
                   try {
+                    const tokenFromStorage = localStorage.getItem("tokenClient");
                     await axios.post(
                       `${ip}/contract/finish/${selectedSupplierId}`,
                       { status: "Contrato Cancelado" },
                       {
-                        headers: {
-                          Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
-                        },
+                        headers: { Authorization: `Bearer ${tokenFromStorage}` },
                       }
                     );
                     await getSupplier();

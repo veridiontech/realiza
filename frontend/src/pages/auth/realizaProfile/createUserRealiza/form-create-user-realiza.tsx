@@ -24,7 +24,7 @@ const createUserRealizaSchema = z.object({
 
 type CreateUserRealizaSchema = z.infer<typeof createUserRealizaSchema>;
 export function FormCreateUserRealiza() {
-//   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  //   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [userPreview, setUserPreview] = useState({
     firstName: "",
     surname: "",
@@ -50,29 +50,32 @@ export function FormCreateUserRealiza() {
     setUserPreview({ firstName, surname, email });
   }, [firstName, surname, email]);
 
-const createUser = async (data: CreateUserRealizaSchema) => {
-  setIsLoading(true);
-//   const payload = {
-//     ...data,
-//     idEnterprise: 
-//   }
+  const createUser = async (data: CreateUserRealizaSchema) => {
+    setIsLoading(true);
+    //   const payload = {
+    //     ...data,
+    //     idEnterprise: 
+    //   }
     console.log("enviando dados:", data);
-    
-  try {
-    await axios.post(`${ip}/user/manager/new-user`, data, {
-    });
-    toast.success("Sucesso ao criar novo usuário Realiza");
-  } catch (err: any) {
-    if (err.response?.status === 500) {
-      console.log("Erro 500 - Erro interno do servidor:", err.response.data);
-    } else {
-      console.error("Erro ao criar novo usuário", err);
+
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/user/manager/new-user`, data, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
+      toast.success("Sucesso ao criar novo usuário Realiza");
+    } catch (err: any) {
+      if (err.response?.status === 500) {
+        console.log("Erro 500 - Erro interno do servidor:", err.response.data);
+      } else {
+        console.error("Erro ao criar novo usuário", err);
+      }
+      toast.error("Erro ao criar um novo usuário, tente novamente");
+    } finally {
+      setIsLoading(false);
     }
-    toast.error("Erro ao criar um novo usuário, tente novamente");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <form onSubmit={handleSubmit(createUser)} className="flex flex-col gap-6">
@@ -81,8 +84,8 @@ const createUser = async (data: CreateUserRealizaSchema) => {
           <div className="flex w-full flex-col gap-4 md:hidden lg:w-[30%]">
             <div className="flex h-[25vh] w-full items-center justify-center rounded-md bg-gray-300 md:w-[20vw]">
 
-                <User size={94} />
-              
+              <User size={94} />
+
             </div>
             <div className="flex flex-col items-start">
               <p className="font-semibold">
@@ -166,7 +169,7 @@ const createUser = async (data: CreateUserRealizaSchema) => {
           <div className="flex h-[25vh] w-[20vw] items-center justify-center rounded-md bg-gray-300">
 
 
-              <User size={94} />
+            <User size={94} />
 
           </div>
           <div className="flex flex-col items-start">

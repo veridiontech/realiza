@@ -47,7 +47,12 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
     const fetchFileData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${ip}/document/employee/${documentId}`);
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const res = await axios.get(`${ip}/document/employee/${documentId}`,
+          {
+            headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          }
+        );
         const fileData = res.data.fileData;
 
         if (fileData) {

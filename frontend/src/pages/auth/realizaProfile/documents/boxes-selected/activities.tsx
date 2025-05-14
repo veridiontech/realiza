@@ -14,17 +14,46 @@ export function ActivitiesBox() {
   const { selectedBranch } = useBranch();
 
   const getActivitie = async () => {
+<<<<<<< HEAD
+
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+=======
     const token = localStorage.getItem("tokenClient");
+>>>>>>> d182f36b144dc13a8a11a2a31cba6fa4171f1e00
     try {
       const resSelected = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         },
       );
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
+<<<<<<< HEAD
+    }
+  };
+
+  // Função para buscar todos os documentos da filial
+  const getAllDocuments = async () => {
+    setLoadingAllDocuments(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/document/branch/filtered-branch`, {
+        params: {
+          idSearch: selectedBranch?.idBranch,
+          size: 1000,
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        },
+      });
+      console.log(res.data.content);
+      setActivitiesAll(res.data.content);
+    } catch (err) {
+      console.log("Erro ao buscar todos documentos da filial:", err);
+    } finally {
+      setLoadingAllDocuments(false);
+=======
+>>>>>>> d182f36b144dc13a8a11a2a31cba6fa4171f1e00
     }
   };
 
@@ -32,8 +61,16 @@ export function ActivitiesBox() {
     console.log("id selecionado", id);
 
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
+<<<<<<< HEAD
+        `${ip}/contract/activity/find-document-by-activity/${activitieSelected?.idActivity}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+=======
         `${ip}/contract/activity/find-document-by-activity/${id}`,
+>>>>>>> d182f36b144dc13a8a11a2a31cba6fa4171f1e00
       );
       console.log(res.data.content);
       console.log(res.data);

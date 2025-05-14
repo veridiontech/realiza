@@ -28,8 +28,11 @@ export function HomeClient() {
 
   const fetchBranches = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       const { content } = response.data;
       setBranches(content);
@@ -51,11 +54,14 @@ export function HomeClient() {
   const getEmployee = async () => {
     setEmployees([]);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`,
+        `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       console.log(res.data.content);
-      
+
       setEmployees(res.data.content);
     } catch (error) {
       console.log("Erro ao buscar colaboradores:", error);
@@ -184,22 +190,20 @@ export function HomeClient() {
             <nav className="flex items-center">
               <Button
                 variant={"ghost"}
-                className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                  selectTab === "filiais"
+                className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectTab === "filiais"
                     ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                     : "text-realizaBlue bg-white"
-                }`}
+                  }`}
                 onClick={() => setSelectedTab("filiais")}
               >
                 Filiais
               </Button>
               <Button
                 variant={"ghost"}
-                className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                  selectTab === "usuarios"
+                className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectTab === "usuarios"
                     ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                     : "text-realizaBlue bg-white"
-                }`}
+                  }`}
                 onClick={() => setSelectedTab("usuarios")}
               >
                 Usuários

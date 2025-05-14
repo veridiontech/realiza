@@ -41,12 +41,17 @@ export function CardPanelControl({
 
   const handleApprove = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       // Define o loading como true antes de começar a requisição
       setIsLoading(true);
 
       console.log("teste id da solicitacao", data.idSolicitation);
 
-      await axios.patch(`${ip}/item-management/${data.idSolicitation}/approve`);
+      await axios.patch(`${ip}/item-management/${data.idSolicitation}/approve`, 
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
 
       toast.success("Solicitação aprovada");
 
@@ -67,9 +72,14 @@ export function CardPanelControl({
 
   const handleDeny = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.patch(
         `${ip}/item-management/${data.idSolicitation}/deny`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
+
       alert(response.data);
       // Remove o item negado da lista se houver callback
       if (onActionCompleted) {

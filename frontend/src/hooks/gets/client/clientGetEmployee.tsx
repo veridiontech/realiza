@@ -17,9 +17,11 @@ export function clientGetEmployee() {
     setLoading(true);
     setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const branchId = user?.branch || "";
       const response = await axios.get(API_URL, {
         params: { size: limit, page, enterprise, idSearch: branchId },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
       const { content, totalPages } = response.data;
       setEmployees(

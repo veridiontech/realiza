@@ -19,10 +19,10 @@ export function ProtectedRoute({
 
   useEffect(() => {
     async function fetchUser() {
-      const token = localStorage.getItem("tokenClient");
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const userId = localStorage.getItem("userId");
       const role = localStorage.getItem("role")
-      if (token && userId && role) {
+      if (tokenFromStorage && userId && role) {
         let url = "";
         switch (role) {
           case "ROLE_ADMIN":
@@ -51,7 +51,7 @@ export function ProtectedRoute({
         if (url) {
           try {
             const res = await axios.get(url, {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: { Authorization: `Bearer ${tokenFromStorage}` },
             });
             setUser(res.data);
           } catch (error) {}

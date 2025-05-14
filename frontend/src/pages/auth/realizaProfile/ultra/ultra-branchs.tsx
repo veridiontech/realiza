@@ -86,8 +86,13 @@ export function UltraSection() {
       idClient: client?.idClient,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/board`, payload);
+      await axios.post(`${ip}/ultragaz/board`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err) {
       toast.error("erro ao criar nova diretoria");
@@ -101,7 +106,12 @@ export function UltraSection() {
       idBoard: selectedBoard?.idBoard,
     };
     try {
-      console.log("Enviando dados da nova diretoria:", payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      console.log("Enviando dados da nova diretoria:", payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       await axios.post(`${ip}/ultragaz/market`, payload);
       toast.success("Sucesso ao criar novo ");
     } catch (err) {
@@ -116,8 +126,13 @@ export function UltraSection() {
       idMarket: selectedMarket?.idMarket,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/center`, payload);
+      await axios.post(`${ip}/ultragaz/center`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err) {
       toast.error("erro ao criar nova diretoria");
@@ -131,8 +146,13 @@ export function UltraSection() {
       center: selectedCenter?.idCenter,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/branch`, payload);
+      await axios.post(`${ip}/branch`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -166,44 +186,40 @@ export function UltraSection() {
                       <div>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTabUltra === "diretoria"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTabUltra === "diretoria"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTabUltra("diretoria")}
                         >
                           Diretoria
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTabUltra === "mercado"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "mercado"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTabUltra("mercado")}
                         >
                           Mercado
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTabUltra === "nucleo"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "nucleo"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTabUltra("nucleo")}
                         >
                           Núcleo
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTabUltra === "filial"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "filial"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTabUltra("filial")}
                         >
                           Unidade

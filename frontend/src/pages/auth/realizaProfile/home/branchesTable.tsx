@@ -16,16 +16,18 @@ export function BranchesTable() {
   const fetchBranches = async (page = 1) => {
     setLoading(true); // Inicia o carregamento
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
         {
           params: {
             page: page - 1, // Páginas geralmente começam de 0
           },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         },
       );
       const { content, totalPages: total } = response.data;
-        setBranches(content);
+      setBranches(content);
       setFilteredBranches(content);
       setTotalPages(total); // Atualiza total de páginas
       // setSearchBranches(content)
@@ -126,11 +128,10 @@ export function BranchesTable() {
         <div className="mt-4 flex flex-col items-end justify-center">
           <div className="mt-4 flex gap-2">
             <button
-              className={`${
-                currentPage === 1 || loading
+              className={`${currentPage === 1 || loading
                   ? "cursor-not-allowed bg-neutral-300"
                   : "bg-realizaBlue"
-              } rounded-md px-4 py-2 text-white`}
+                } rounded-md px-4 py-2 text-white`}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1 || loading}
             >
@@ -139,11 +140,10 @@ export function BranchesTable() {
 
             {/* Botão Próximo */}
             <button
-              className={`${
-                currentPage === totalPages || loading
+              className={`${currentPage === totalPages || loading
                   ? "cursor-not-allowed bg-neutral-300"
                   : "bg-realizaBlue"
-              } rounded-md px-4 py-2 text-white`}
+                } rounded-md px-4 py-2 text-white`}
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }

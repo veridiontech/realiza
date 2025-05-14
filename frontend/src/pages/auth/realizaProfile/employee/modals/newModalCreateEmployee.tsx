@@ -61,7 +61,7 @@ export function NewModalCreateEmployee() {
   const { supplier } = useSupplier();
 
   console.log("teste", supplier);
-  
+
 
   const {
     register,
@@ -102,7 +102,12 @@ export function NewModalCreateEmployee() {
     };
     console.log("Enviando dados:", payload);
     try {
-      const response = await axios.post(`${ip}/employee/brazilian`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const response = await axios.post(`${ip}/employee/brazilian`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       console.log("Sucesso na requisição!", response.data);
       toast.success("Sucesso ao cadastrar novo usuário");
     } catch (err) {
@@ -220,7 +225,7 @@ export function NewModalCreateEmployee() {
                     <option value="Temporário">Temporário</option>
                   </select>
                 </div>
-  
+
                 <div>
                   <Label className="text-white">CPF:</Label>
                   <Input
@@ -266,7 +271,7 @@ export function NewModalCreateEmployee() {
                     <span className="text-red-600">{errors.gender.message}</span>
                   )}
                 </div>
-  
+
                 <div className="flex flex-col gap-1">
                   <div>
                     <Label className="text-white">CEP</Label>
@@ -364,7 +369,7 @@ export function NewModalCreateEmployee() {
                     </option>
                   </select>
                 </div>
-  
+
                 <Button
                   type="submit"
                   className="bg-realizaBlue"

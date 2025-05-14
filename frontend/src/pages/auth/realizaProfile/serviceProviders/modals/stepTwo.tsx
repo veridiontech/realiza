@@ -58,6 +58,7 @@ export function StepTwoServiceProviders({
 
   const handleSubmit = async (data: Record<string, any>) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const validatedData = stepTwoSchema.parse({
         ...data,
         allocatedLimit: Number(data.allocatedLimit),
@@ -66,6 +67,9 @@ export function StepTwoServiceProviders({
       const response = await axios.post(
         `${ip}/contract/supplier`,
         validatedData,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
 
       onSubmit(response.data);
@@ -75,7 +79,7 @@ export function StepTwoServiceProviders({
       } else if (axios.isAxiosError(error)) {
         alert(
           error.response?.data?.message ||
-            "Erro ao enviar os dados. Verifique sua conexão ou tente novamente.",
+          "Erro ao enviar os dados. Verifique sua conexão ou tente novamente.",
         );
       }
     }

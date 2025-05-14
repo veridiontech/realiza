@@ -14,6 +14,7 @@ export function useContracts() {
   // Função para buscar o `provider_supplier_id_provider` baseado no `clientId`
   async function fetchProviderSupplierId(clientId: string): Promise<string | null> {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       if (!clientId) {
         throw new Error("ID do cliente não fornecido.");
       }
@@ -26,6 +27,7 @@ export function useContracts() {
   
       const response = await axios.get(`${ip}/contract/supplier/filtered-client`, {
         params: { idSearch: selectedBranch.idBranch },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
   
       console.log("Resposta da API fornecedores:", response.data);
@@ -63,6 +65,7 @@ export function useContracts() {
     setError(null);
   
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const providerSupplierId = await fetchProviderSupplierId(clientId);
   
       if (!providerSupplierId) {
@@ -79,6 +82,7 @@ export function useContracts() {
           _page: page,
           idSearch: providerSupplierId,
         },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
   
       console.log("Resposta da API contratos:", response.data);

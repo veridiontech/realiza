@@ -67,12 +67,14 @@ export function StepOneEmployee({
   useEffect(() => {
     const getAllClients = async () => {
       try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
         const firstRes = await axios.get(`${ip}/client`, {
           params: { page: 0, size: 100 },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         });
         const totalPages = firstRes.data.totalPaages;
         const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 } }),
+          axios.get(`${ip}/client`, { params: { page: i + 1, size: 100 }, headers: { Authorization: `Bearer ${tokenFromStorage}` } }),
         );
 
         const responses = await Promise.all(requests);
@@ -92,15 +94,17 @@ export function StepOneEmployee({
 
   const getBranches = async (clientId: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       // Faz a primeira requisição para obter o número total de páginas
       const firstRes = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${clientId}`,
-        { params: { page: 0, size: 100 } },
+        { params: { page: 0, size: 100 }, headers: { Authorization: `Bearer ${tokenFromStorage}` } },
       );
       const totalPages = firstRes.data.totalPages; // Obtém o total de páginas disponíveis
       const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
         axios.get(`${ip}/branch/filtered-client?idSearch=${clientId}`, {
           params: { page: i + 1, size: 100 },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         }),
       );
 
@@ -130,10 +134,15 @@ export function StepOneEmployee({
   const onFormSubmit = async (data: EmployeeFormSchema) => {
     const filterIdClient = client?.idClient;
     console.log("id da branch teste:", idbranch);
-    
+
     const payload = { ...data, client: filterIdClient, id_branch: idbranch };
     try {
-      const response = await axios.post(`${ip}/employee/brazilian`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const response = await axios.post(`${ip}/employee/brazilian`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       onSubmit(response.data);
       toast.success("Sucesso ao criar colaborador");
     } catch (error: any) {
@@ -281,7 +290,7 @@ export function StepOneEmployee({
                 <span className="text-red-600">{errors.gender.message}</span>
               )}
             </div>
-            <div> 
+            <div>
               <Label className="text-white">Estado Civil</Label>
               <select
                 {...register("maritalStatus")}

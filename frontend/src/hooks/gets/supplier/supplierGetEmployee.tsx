@@ -32,6 +32,7 @@ export function SupplierGetEmployee() {
       idSearch,
     });
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(API_URL, {
         params: {
           size: limit,
@@ -39,6 +40,7 @@ export function SupplierGetEmployee() {
           enterprise,
           idSearch,
         },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
       console.log("fetchEmployees response:", response.data);
       const { content, totalPages } = response.data;

@@ -137,8 +137,12 @@ export function ModalTesteSendSupplier() {
 
   const getContracts = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-supplier?idSearch=${supplier?.idProvider}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       console.log("contratos:", res.data.content);
 
@@ -171,8 +175,11 @@ export function ModalTesteSendSupplier() {
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       setSuppliers(res.data.content);
     } catch (err) {
@@ -189,10 +196,12 @@ export function ModalTesteSendSupplier() {
 
   const getActivities = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const activitieData = await axios.get(`${ip}/contract/activity`, {
         params: {
           size: 1000
-        }
+        },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
       setActivities(activitieData.data.content);
     } catch (err) {
@@ -235,8 +244,11 @@ export function ModalTesteSendSupplier() {
 
   const getManager = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       console.log(selectedBranch);
       setManagers(res.data.content);
@@ -265,6 +277,7 @@ export function ModalTesteSendSupplier() {
     }
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const payload = {
         ...data,
         idRequester: user?.idUser,
@@ -276,7 +289,9 @@ export function ModalTesteSendSupplier() {
       setDatasSender(payload);
       console.log("dados recebidos:", datasSender);
 
-      await axios.post(`${ip}/contract/supplier`, payload);
+      await axios.post(`${ip}/contract/supplier`, payload), {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      };
       toast.success("Contrato criado com sucesso!");
     } catch (err: any) {
       if (err.response) {
@@ -296,7 +311,10 @@ export function ModalTesteSendSupplier() {
 
   const getServicesType = async () => {
     try {
-      const res = await axios.get(`${ip}/contract/service-type`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/contract/service-type`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      });
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);

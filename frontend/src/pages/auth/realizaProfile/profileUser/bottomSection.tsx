@@ -32,9 +32,13 @@ export function BottomSection() {
   const newPassword = async (data: ProfileFormData) => {
     console.log(data);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.patch(
         `${ip}/user/manager/change-password/${user?.idUser}`,
         data,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       toast.success(`Senha alterada com sucesso ${user?.firstName}`);
     } catch (err: any) {
@@ -66,11 +70,10 @@ export function BottomSection() {
           <input
             type={showPassword ? "text" : "password"}
             {...register("password")}
-            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-              errors.password
+            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${errors.password
                 ? "border-red-500 focus:ring-red-500"
                 : "focus:ring-realizaBlue border-gray-300"
-            }`}
+              }`}
             placeholder="Digite sua senha"
             title={errors.password?.message}
           />
@@ -89,11 +92,10 @@ export function BottomSection() {
           <input
             type={showPassword ? "text" : "password"}
             {...register("newPassword")}
-            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${
-              errors.newPassword
+            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${errors.newPassword
                 ? "border-red-500 focus:ring-red-500"
                 : "focus:ring-realizaBlue border-gray-300"
-            }`}
+              }`}
             placeholder="Digite sua nova senha"
           />
           <button

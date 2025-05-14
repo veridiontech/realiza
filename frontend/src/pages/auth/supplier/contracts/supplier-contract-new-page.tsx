@@ -15,8 +15,12 @@ export function SupplierContractNewPage() {
 
   const getContracts = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-supplier?idSearch=${supplier?.idProvider}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       console.log("contratos:", res.data.content);
       setContracts(res.data.content);

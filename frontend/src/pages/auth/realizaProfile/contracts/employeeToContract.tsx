@@ -31,17 +31,21 @@ export default function EmployeeToContract() {
     }
     setUpdating(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log(
         `Associando funcionário ${employee.id} ao contrato ${contractId}`,
       );
       const updatedEmployee = {
         ...employee,
-        idContracts: [...(employee.idContracts ?? []), contractId], 
+        idContracts: [...(employee.idContracts ?? []), contractId],
       };
 
       await axios.put(
         `${ip}/employee/brazilian/${employee.id}`,
-        updatedEmployee,
+        updatedEmployee, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+
       );
       alert("Funcionário associado ao contrato com sucesso!");
     } catch (error) {

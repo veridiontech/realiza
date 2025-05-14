@@ -61,7 +61,10 @@ export function FormCreateUserSupplier() {
     console.log("enviando dados:", data);
 
     try {
-      await axios.post(`${ip}/user/manager/new-user`, data, {});
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/user/manager/new-user`, data, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      });
       toast.success("Sucesso ao criar novo usuário Realiza");
     } catch (err: any) {
       if (err.response?.status === 500) {
@@ -76,11 +79,11 @@ export function FormCreateUserSupplier() {
   };
 
   const getAllSupplier = async () => {
-    const token = localStorage.getItem("tokenClient");
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const res = await axios.get(`${ip}/supplier`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokenFromStorage}`,
         },
         params: {
           size: 10000,

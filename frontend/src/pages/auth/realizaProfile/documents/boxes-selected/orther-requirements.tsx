@@ -26,13 +26,13 @@ export function OrtherRequirements() {
   const { selectedBranch } = useBranch();
 
   const getDocument = async () => {
-    const token = localStorage.getItem("tokenClient");
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenFromStorage}`,
           },
           params: {
             documentTypeName: "SEGURANCA DO TRABALHO",
@@ -44,7 +44,7 @@ export function OrtherRequirements() {
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenFromStorage}`,
           },
           params: {
             documentTypeName: "SEGURANCA DO TRABALHO",
@@ -64,12 +64,12 @@ export function OrtherRequirements() {
 
   const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
     // const 
-    const token = localStorage.getItem("tokenClient")
+    const tokenFromStorage = localStorage.getItem("tokenClient")
     try {
       console.log("selecionando documentos não selecionados:", idDocumentation);
       await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokenFromStorage}`,
         },
         params: {
           isSelected,

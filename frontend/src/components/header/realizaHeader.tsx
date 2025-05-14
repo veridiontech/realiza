@@ -36,27 +36,29 @@ interface ApiResponse {
 
 export function Header() {
   const [clients, setClients] = useState<propsClient[]>([]);
-  const { client ,setClient } = useClient();
+  const { client, setClient } = useClient();
   const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
-  const {boards, setSelectedBoard, selectedBoard} = useBoard()
-  const {markets, setSelectedMarket, selectedMarket} = useMarket()
-  const {center, selectedCenter, setSelectedCenter} = useCenter()
-  const {branchUltra, setSelectedBranchUltra, selectedBranchUltra} = useBranchUltra()
+  const { boards, setSelectedBoard, selectedBoard } = useBoard()
+  const { markets, setSelectedMarket, selectedMarket } = useMarket()
+  const { center, selectedCenter, setSelectedCenter } = useCenter()
+  const { branchUltra, setSelectedBranchUltra, selectedBranchUltra } = useBranchUltra()
   const getIdUser = user?.idUser;
 
   // Busca clientes
   useEffect(() => {
     const getAllClients = async () => {
       try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
         const firstRes = await axios.get(`${ip}/client`, {
           params: { page: 0, size: 1000 },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         });
         const totalPages = firstRes.data.totalPages;
         const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-          axios.get(`${ip}/client`, { params: { page: i + 1, size: 1000 } }),
+          axios.get(`${ip}/client`, { params: { page: i + 1, size: 1000 }, headers: { Authorization: `Bearer ${tokenFromStorage}` } }),
         );
 
         const responses = await Promise.all(requests);
@@ -77,7 +79,12 @@ export function Header() {
 
   const handleSelectClient = async (id: string) => {
     try {
-      const res = await axios.get(`${ip}/client/${id}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/client/${id}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       setClient(res.data);
     } catch (err) {
       console.error("Erro ao selecionar cliente", err);
@@ -87,8 +94,11 @@ export function Header() {
   const fetchSolicitations = async () => {
     // setLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get<ApiResponse>(
-        `${ip}/item-management/new-provider`,
+        `${ip}/item-management/new-provider`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       console.log("solicitacao:", response.data.content);
       setSolicitations(response.data.content);
@@ -101,17 +111,17 @@ export function Header() {
 
   console.log("diretorias: ", boards);
   console.log("diretoria selecionada:", selectedBoard);
-  
-  
+
+
 
   const handleMouseEnter = () => setMenuOpen(true);
   const handleMouseLeave = () => setMenuOpen(false);
-  
+
   const pendingSolicitationsCount = solicitations.filter(
     (solicitation) => solicitation.status === "PENDING",
   ).length;
 
-  if(client?.isUltragaz === true) {
+  if (client?.isUltragaz === true) {
     return (
       <header className="dark:bg-primary relative p-5">
         <div>{/* seach */}</div>
@@ -142,19 +152,19 @@ export function Header() {
                 </SheetContent>
               </Sheet>
             </div>
-  
+
             <Link to={`/sistema/dashboard/${getIdUser}`}>
               <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
             </Link>
           </div>
-  
+
           <div className="flex flex-col gap-3 items-center">
             <div className="flex items-center gap-4">
               <div className="hidden md:block text-realizaBlue mr-4 text-xl">
                 Cliente Selecionado:
               </div>
               <div className="block md:hidden text-realizaBlue mr-4 text-xl">
-                Cliente: 
+                Cliente:
               </div>
               <select
                 onChange={(e) => handleSelectClient(e.target.value)}
@@ -171,12 +181,12 @@ export function Header() {
                 ))}
               </select>
             </div>
-  
+
             <div className="flex items-center gap-5">
               <div>
                 <span className="text-realizaBlue text-[14px]">Diretoria: </span>
                 <select
-                  value={selectedBoard?.idBoard|| ""}
+                  value={selectedBoard?.idBoard || ""}
                   onChange={(e) => {
                     const selected = boards.find(
                       (b) => b.idBoard === e.target.value,
@@ -312,7 +322,7 @@ export function Header() {
             </DropdownMenu>
             <div className="ml-12 flex items-center gap-8">
               {/* <ToggleTheme /> */}
-  
+
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
@@ -354,10 +364,10 @@ export function Header() {
         </div>
       </header>
     );
-  } 
+  }
 
   return (
-    <header className="bg-transparent relative p-5 h-[27vh] rounded-b-xl" style={{ backgroundImage: `url(${bannerHeader})`}}>
+    <header className="bg-transparent relative p-5 h-[27vh] rounded-b-xl" style={{ backgroundImage: `url(${bannerHeader})` }}>
       <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">
@@ -387,153 +397,153 @@ export function Header() {
           </div>
           <div className="hidden md:block">
             <Link to={`/sistema/dashboard/${getIdUser}`}>
-            <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
-          </Link>
+              <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
+            </Link>
           </div>
         </div>
         {/* Perfil do usuário e demais itens */}
         <div className="hidden items-center gap-14 md:flex">
-        <div className="flex gap-10 items-start">
-          <div className="flex items-center gap-4">
+          <div className="flex gap-10 items-start">
+            <div className="flex items-center gap-4">
               <div className="block md:hidden text-realizaBlue mr-4 text-xl">
-                Cliente: 
+                Cliente:
               </div>
-            <select
-              onChange={(e) => handleSelectClient(e.target.value)}
-              defaultValue=""
-              className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
-            >
-              <option value="" disabled>
-                  Selecione um cliente
-              </option>
-              {clients.map((client) => (
-                <option key={client.idClient} value={client.idClient} className="text-black">
-                  {client.tradeName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-5">
-            <div>
               <select
-                value={selectedBranch?.idBranch || ""}
-                onChange={(e) => {
-                  const selected = branch.find(
-                    (b) => b.idBranch === e.target.value,
-                  );
-                  setSelectedBranch(selected || null);
-                }}
+                onChange={(e) => handleSelectClient(e.target.value)}
+                defaultValue=""
                 className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
               >
-                <option value="" className="text-black">Selecione uma filial</option>
-                {Array.isArray(branch) &&
-                  branch.map((b) => (
-                    <option value={b.idBranch} key={b.idBranch} className="text-black">
-                      {b.name}
-                    </option>
-                  ))}
+                <option value="" disabled>
+                  Selecione um cliente
+                </option>
+                {clients.map((client) => (
+                  <option key={client.idClient} value={client.idClient} className="text-black">
+                    {client.tradeName}
+                  </option>
+                ))}
               </select>
             </div>
-          </div>
-          {/* Seleção de cliente */}
-        </div>
-        <div className="flex items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="cursor-pointer rounded-full bg-gray-300 p-2 relative">
-                <Bell />
-                {/* Exibir contagem de notificações pendentes */}
-                {pendingSolicitationsCount > 0 && (
-                  <span className="absolute top-0 right-0 rounded-full bg-red-500 text-white text-xs px-2 py-1">
-                    {pendingSolicitationsCount}
-                  </span>
-                )}
+
+            <div className="flex items-center gap-5">
+              <div>
+                <select
+                  value={selectedBranch?.idBranch || ""}
+                  onChange={(e) => {
+                    const selected = branch.find(
+                      (b) => b.idBranch === e.target.value,
+                    );
+                    setSelectedBranch(selected || null);
+                  }}
+                  className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
+                >
+                  <option value="" className="text-black">Selecione uma filial</option>
+                  {Array.isArray(branch) &&
+                    branch.map((b) => (
+                      <option value={b.idBranch} key={b.idBranch} className="text-black">
+                        {b.name}
+                      </option>
+                    ))}
+                </select>
               </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="mr-32 flex flex-col gap-2 p-5">
-              {/* Verificando se solicitations existe e se há itens pendentes */}
-              {solicitations && solicitations.length > 0 ? (
-                <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
-                  {solicitations.filter(
-                    (solicitation) => solicitation.status === "PENDING",
-                  ).length > 0 ? (
-                    solicitations
-                      .filter(
-                        (solicitation) => solicitation.status === "PENDING",
-                      )
-                      .map((solicitation) => (
-                        <div
-                          className="border p-4 shadow-md border-l-[#F97316] border-l-[10px] "
-                          key={solicitation.idSolicitation}
-                        >
-                          <div className="flex flex-col gap-2 ">
-                            <div className="flex items-center gap-2 ">
-                              <strong>Título:</strong>
-                              <span>{solicitation.title}</span>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <strong>Detalhes da solicitação:</strong>{" "}
-                              <span className="text-[14px]">
-                                {solicitation.details}
-                              </span>
+            </div>
+            {/* Seleção de cliente */}
+          </div>
+          <div className="flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="cursor-pointer rounded-full bg-gray-300 p-2 relative">
+                  <Bell />
+                  {/* Exibir contagem de notificações pendentes */}
+                  {pendingSolicitationsCount > 0 && (
+                    <span className="absolute top-0 right-0 rounded-full bg-red-500 text-white text-xs px-2 py-1">
+                      {pendingSolicitationsCount}
+                    </span>
+                  )}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="mr-32 flex flex-col gap-2 p-5">
+                {/* Verificando se solicitations existe e se há itens pendentes */}
+                {solicitations && solicitations.length > 0 ? (
+                  <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
+                    {solicitations.filter(
+                      (solicitation) => solicitation.status === "PENDING",
+                    ).length > 0 ? (
+                      solicitations
+                        .filter(
+                          (solicitation) => solicitation.status === "PENDING",
+                        )
+                        .map((solicitation) => (
+                          <div
+                            className="border p-4 shadow-md border-l-[#F97316] border-l-[10px] "
+                            key={solicitation.idSolicitation}
+                          >
+                            <div className="flex flex-col gap-2 ">
+                              <div className="flex items-center gap-2 ">
+                                <strong>Título:</strong>
+                                <span>{solicitation.title}</span>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <strong>Detalhes da solicitação:</strong>{" "}
+                                <span className="text-[14px]">
+                                  {solicitation.details}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <span className="text-black">Nenhuma notificação</span>
-                    </div>
-                  )}
-                </ScrollArea>
-              ) : (
-                <div>
-                  <span className="text-black">Nenhuma notificação</span>
-                </div>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div className="ml-12 hidden md:flex items-center gap-8">
-            {/* <ToggleTheme /> */}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="dark:bg-primary mr-5">
-                <DropdownMenuLabel>
-                  {user?.firstName} {user?.surname}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <Link to={`/profile-user/${user?.idUser}`}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
-                    <div className="flex items-center gap-1">
-                      <User />
-                      <p>Perfil</p>
-                    </div>
-                  </DropdownMenuItem>
-                </Link>
-                <Link to={`/sistema/create-new-user/${user?.idUser}`}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
-                    <div className="flex items-center gap-1">
-                      <Plus />
-                      <p>Criar usuário</p>
-                    </div>
-                  </DropdownMenuItem>
-                </Link>
-                <DropdownMenuItem
-                  onClick={logout}
-                  className="cursor-pointer hover:bg-gray-200"
-                >
-                  <div className="flex items-center gap-1">
-                    <LogOut />
-                    <p>Sair</p>
+                        ))
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <span className="text-black">Nenhuma notificação</span>
+                      </div>
+                    )}
+                  </ScrollArea>
+                ) : (
+                  <div>
+                    <span className="text-black">Nenhuma notificação</span>
                   </div>
-                </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+            <div className="ml-12 hidden md:flex items-center gap-8">
+              {/* <ToggleTheme /> */}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="dark:bg-primary mr-5">
+                  <DropdownMenuLabel>
+                    {user?.firstName} {user?.surname}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Link to={`/profile-user/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <User />
+                        <p>Perfil</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link to={`/sistema/create-new-user/${user?.idUser}`}>
+                    <DropdownMenuItem className="cursor-pointer hover:bg-gray-200">
+                      <div className="flex items-center gap-1">
+                        <Plus />
+                        <p>Criar usuário</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer hover:bg-gray-200"
+                  >
+                    <div className="flex items-center gap-1">
+                      <LogOut />
+                      <p>Sair</p>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>

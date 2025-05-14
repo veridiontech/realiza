@@ -30,8 +30,11 @@ export function DocumentSelectedBox({
     );
 
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const req = await axios.delete(
-        `${ip}/document/branch/document-matrix?documentId=${documentId}`,
+        `${ip}/document/branch/document-matrix?documentId=${documentId}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       toast.success("Documento movido com sucesso");
       console.log("Resposta da API:", req.data);

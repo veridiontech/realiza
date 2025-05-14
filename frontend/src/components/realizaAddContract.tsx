@@ -54,7 +54,11 @@ export function ModalAddContract() {
 
   const getActivities = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const activitieData = await axios.get(`${ip}/contract/activity`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       // const requirementData = await axios.get(`${ip}/contract/requirement`);
       setActivities(activitieData.data.content);
       // setRequirements(requirementData.data.content);
@@ -72,8 +76,12 @@ export function ModalAddContract() {
       branch: selectedBranch?.idBranch,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Criando contrato:", payload);
-      await axios.post(`${ip}/contract/supplier`, payload);
+      await axios.post(`${ip}/contract/supplier`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       toast.success("Contrato criado com sucesso!");
     } catch (err) {
       console.error("Erro ao criar contrato", err);
@@ -88,14 +96,17 @@ export function ModalAddContract() {
   //     const res = await axios.get(`${ip}/`)
   //   }catch(err) {
   //     console.log(err);
-      
+
   //   }
   //  }
 
   const getManager = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       console.log("gestores:", res.data.content);
       setManagers(res.data.content);
@@ -281,7 +292,7 @@ export function ModalAddContract() {
               <select
                 {...register("idActivity")}
                 className="w-full rounded-md border p-2"
-                
+
               >
                 {activities.map((activity: any) => (
                   <option key={activity.idActivity} value={activity.idActivity}>
@@ -326,20 +337,20 @@ export function ModalAddContract() {
             </div>  */}
 
             <div className="flex justify-end">
-              {isLoading ? ( <Button className="bg-green-600" type="submit">
+              {isLoading ? (<Button className="bg-green-600" type="submit">
                 <Oval
-  visible={true}
-  height="80"
-  width="80"
-  color="#4fa94d"
-  ariaLabel="oval-loading"
-  wrapperStyle={{}}
-  wrapperClass=""
-  />
-              </Button>):( <Button className="bg-green-600" type="submit">
+                  visible={true}
+                  height="80"
+                  width="80"
+                  color="#4fa94d"
+                  ariaLabel="oval-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                />
+              </Button>) : (<Button className="bg-green-600" type="submit">
                 Criar Contrato
               </Button>)}
-             
+
             </div>
           </form>
         </ScrollArea>

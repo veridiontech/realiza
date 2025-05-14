@@ -23,24 +23,28 @@ export function useCenter() {
 
 export function CenterProvider({ children }: { children: React.ReactNode }) {
   const [center, setCenter] = useState<propsCenter[]>([]);
-  const [selectedCenter, setSelectedCenter] = useState<propsCenter| null>(null)
-  const {selectedMarket} = useMarket()
+  const [selectedCenter, setSelectedCenter] = useState<propsCenter | null>(null)
+  const { selectedMarket } = useMarket()
 
   useEffect(() => {
-    if(selectedMarket?.idMarket) {
-        getCenter(selectedMarket.idMarket)
+    if (selectedMarket?.idMarket) {
+      getCenter(selectedMarket.idMarket)
     }
-  },[selectedMarket?.idMarket])
+  }, [selectedMarket?.idMarket])
 
   const getCenter = async (idMarket: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res =
         await axios.get(`${ip}/ultragaz/center/find-by-market?idMarket=${idMarket}
-`);
+`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        );
       setCenter(res.data.content)
     } catch (err) {
-        console.log("Erro ao buscar diretoria no CenterProvider", err);
-        
+      console.log("Erro ao buscar diretoria no CenterProvider", err);
+
     }
   };
 

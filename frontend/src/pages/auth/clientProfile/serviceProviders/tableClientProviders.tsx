@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
 
 export function TableClientServiceProvider() {
   const [suppliers, setSuppliers] = useState<any>([]);
-  const {selectedBranch} = useBranch()
-  
+  const { selectedBranch } = useBranch()
+
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`,
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       console.log("Dados do supplier:", res.data.content);
       setSuppliers(res.data.content);
@@ -21,7 +24,7 @@ export function TableClientServiceProvider() {
   };
 
   useEffect(() => {
-    if(selectedBranch?.idBranch) {
+    if (selectedBranch?.idBranch) {
       getSupplier()
       setSuppliers([])
     }
@@ -54,8 +57,8 @@ export function TableClientServiceProvider() {
                 <td className="border border-gray-300 p-2">
                   {supplier.branches && supplier.branches.length > 0
                     ? supplier.branches
-                        .map((branch: any) => branch.nameBranch)
-                        .join(", ")
+                      .map((branch: any) => branch.nameBranch)
+                      .join(", ")
                     : "Nenhuma filial associada"}
                 </td>
               </tr>

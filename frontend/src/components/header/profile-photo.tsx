@@ -55,17 +55,17 @@ export function ProfilePhoto() {
 
     try {
       console.log("Enviando arquivo:", selectedFile.name);
-
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.patch(
         `${ip}/user/manager/change-profile-picture/${user?.idUser}`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${tokenFromStorage}`,
           },
         }
       );
-
       console.log("Imagem enviada com sucesso!", response.data);
     } catch (error) {
       console.error("Erro ao enviar imagem:", error);
@@ -84,7 +84,7 @@ export function ProfilePhoto() {
   const base64Image = getProfilePic
     ? `data:image/${getProfilePic.charAt(0) === '/' ? 'png' : 'jpeg'};base64,${getProfilePic}`
     : null;
-  
+
   const getNameUser = user?.firstName?.[0] || "";
   const getSurnameUser = user?.surname?.[0] || "";
 

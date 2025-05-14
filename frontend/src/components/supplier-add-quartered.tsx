@@ -118,8 +118,15 @@ export default function SupplierAddQuartered() {
   // Busca atividades e requisitos
   const getActivitiesAndRequirements = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
-      const requirementData = await axios.get(`${ip}/contract/requirement`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const activitieData = await axios.get(`${ip}/contract/activity`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
+      const requirementData = await axios.get(`${ip}/contract/requirement`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       setActivities(activitieData.data.content);
       setRequirements(requirementData.data.content);
     } catch (err) {
@@ -130,8 +137,12 @@ export default function SupplierAddQuartered() {
   // Busca gestores (filtrando pelo id do fornecedor)
   const getManagers = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${user?.supplier}`,
+        `${ip}/user/client/filtered-client?idSearch=${user?.supplier}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+
       );
       setManagers(res.data.content);
     } catch (err) {
@@ -142,8 +153,12 @@ export default function SupplierAddQuartered() {
   // Busca contratos do fornecedor
   const getSupplierContracts = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/contract/supplier/filtered-supplier?idSearch=${user?.supplier}`,
+        `${ip}/contract/supplier/filtered-supplier?idSearch=${user?.supplier}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+
       );
       setSupplierContracts(res.data.content);
     } catch (err) {
@@ -165,12 +180,16 @@ export default function SupplierAddQuartered() {
   const onSubmitInvite = async (data: SubcontractorInviteSchema) => {
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/invite`, {
         email: data.email,
         idCompany: user?.supplier,
         company: "SUBCONTRACTOR",
         cnpj: data.cnpj,
-      });
+      }, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       toast.success("Email de cadastro enviado para novo subcontratado");
       setInviteData(data);
       await getManagers();
@@ -191,6 +210,7 @@ export default function SupplierAddQuartered() {
     }
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const payload = {
         ...data,
         // Força o valor de cnpj a vir do convite
@@ -203,7 +223,9 @@ export default function SupplierAddQuartered() {
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
       };
-      await axios.post(`${ip}/contract/subcontractor`, payload);
+      await axios.post(`${ip}/contract/subcontractor`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      });
       toast.success("Contrato criado com sucesso");
     } catch (error) {
       console.error("Erro ao criar contrato:", error);

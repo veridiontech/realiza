@@ -37,9 +37,11 @@ export function SignIn() {
   const getUser = async (data: loginFormData) => {
     setLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.post(`${ip}/login`, {
         email: data.email,
         password: data.password,
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
       console.log("token: ", res.data);
 

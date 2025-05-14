@@ -36,8 +36,13 @@ export function MiddleSection() {
       password: "40028922",
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log(payload);
-      await axios.put(`${ip}/user/manager/${user?.idUser}`, payload);
+      await axios.put(`${ip}/user/manager/${user?.idUser}`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       window.location.reload();
     } catch (err) {
       console.log("erro ao atualizar usuário", err);
@@ -70,9 +75,8 @@ export function MiddleSection() {
         <input
           type="text"
           {...register("firstName")}
-          className={`w-full rounded border p-3 ${
-            errors.firstName ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full rounded border p-3 ${errors.firstName ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Digite seu nome completo"
         />
         {errors.firstName && (
@@ -87,9 +91,8 @@ export function MiddleSection() {
         <input
           type="text"
           {...register("surname")}
-          className={`w-full rounded border p-3 ${
-            errors.surname ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full rounded border p-3 ${errors.surname ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Digite seu nome completo"
         />
         {errors.surname && (
@@ -104,9 +107,8 @@ export function MiddleSection() {
         <input
           type="email"
           {...register("email")}
-          className={`w-full rounded border p-3 ${
-            errors.email ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full rounded border p-3 ${errors.email ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Digite seu e-mail"
         />
         {errors.email && (
@@ -121,9 +123,8 @@ export function MiddleSection() {
         <input
           type="text"
           {...register("telephone")}
-          className={`w-full rounded border p-3 ${
-            errors.telephone ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full rounded border p-3 ${errors.telephone ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="+55 11 91234-5678"
         />
         {errors.telephone && (
@@ -136,9 +137,8 @@ export function MiddleSection() {
         <input
           type="text"
           {...register("cpf")}
-          className={`w-full rounded border p-3 ${
-            errors.cpf ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full rounded border p-3 ${errors.cpf ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="123.456.789-00"
         />
         {errors.cpf && (
@@ -152,9 +152,8 @@ export function MiddleSection() {
         </label>
         <textarea
           {...register("description")}
-          className={`w-full rounded border p-3 ${
-            errors.description ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full rounded border p-3 ${errors.description ? "border-red-500" : "border-gray-300"
+            }`}
           placeholder="Digite uma descrição sobre você"
           rows={4}
         ></textarea>

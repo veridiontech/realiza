@@ -37,13 +37,15 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
 
   const getBranch = async (idClient: string, size: number = 1000) => {
     try {
-      if(client?.isUltragaz === true) {}
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      if (client?.isUltragaz === true) { }
       const res = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${idClient}`, {
-          params: {
-            size,
-          }
-        }
+        params: {
+          size,
+        },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       setBranch(res.data.content || []);
     } catch (err) {

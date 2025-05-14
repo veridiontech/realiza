@@ -38,7 +38,12 @@ export function ModalSendEmailSupplier() {
 
   const getClient = async () => {
     try {
-      const getIdClient = await axios.get(`${ip}/client`);
+
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const getIdClient = await axios.get(`${ip}/client`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       setIdClient(getIdClient.data.id);
       console.log(getIdClient.data.id);
     } catch (err) {
@@ -50,11 +55,16 @@ export function ModalSendEmailSupplier() {
   const createClient = async (data: ModalSendEmailFormSchema) => {
     console.log("teste");
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/invite`, {
         email: data.email,
         id_client: idClient,
         company: data.company,
-      });
+      },
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       console.log("sucesso");
     } catch (err) {
       console.log("erro ao enviar email para usuario", err);
