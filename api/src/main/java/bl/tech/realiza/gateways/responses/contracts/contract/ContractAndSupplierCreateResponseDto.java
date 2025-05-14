@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.responses.contracts;
+package bl.tech.realiza.gateways.responses.contracts.contract;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.Contract;

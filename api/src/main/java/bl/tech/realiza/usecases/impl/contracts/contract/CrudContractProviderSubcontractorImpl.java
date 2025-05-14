@@ -27,9 +27,7 @@ import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepositor
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractSubcontractorResponseDto;
-import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractSubcontractorResponseDto;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
 import lombok.RequiredArgsConstructor;

@@ -22,12 +22,12 @@ public abstract class Provider {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idProvider;
-    private String cnpj; //
-    private String tradeName;
-    private String corporateName; //
+    private String cnpj;
+    private String tradeName; // nome fantasia
+    private String corporateName; // razão social
     private String logo;
-    private String email; //
-    private String telephone; //
+    private String email;
+    private String telephone;
     private String cep;
     private String state;
     private String city;

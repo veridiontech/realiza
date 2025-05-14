@@ -1,7 +1,7 @@
 package bl.tech.realiza.usecases.interfaces.contracts.contract;
 
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

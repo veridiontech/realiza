@@ -12,4 +12,5 @@ public class ActivityDocumentResponseDto {
     private String idDocument;
     private String idActivity;
     private String documentTitle;
+    private Boolean selected;
 }
