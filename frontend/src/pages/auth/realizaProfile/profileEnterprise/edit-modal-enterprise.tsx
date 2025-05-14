@@ -56,7 +56,12 @@ export function EditModalEnterprise() {
 
   const getDatasEnterprise = async () => {
     try {
-      const res = await axios.get(`${ip}/client/${client?.idClient}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/client/${client?.idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       const data = res.data;
       setValue("cnpj", data.cnpj || "");
       setValue("corporateName", data.corporateName || "");
@@ -98,7 +103,12 @@ export function EditModalEnterprise() {
 
   const onSubmit = async (data: EditModalEnterpriseSchema) => {
     try {
-      await axios.put(`${ip}/client/${client?.idClient}`, data);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.put(`${ip}/client/${client?.idClient}`, data,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao atualizar cliente");
       window.location.reload();
     } catch (err) {
@@ -122,7 +132,7 @@ export function EditModalEnterprise() {
         <Button className="md:hidden bg-realizaBlue">Editar perfil empresarial</Button>
       </DialogTrigger>
       <DialogContent
-      style={{ backgroundImage: `url(${bgModalRealiza})` }}>
+        style={{ backgroundImage: `url(${bgModalRealiza})` }}>
         <DialogHeader>
           <DialogTitle className="text-white">Editar empresa</DialogTitle>
         </DialogHeader>

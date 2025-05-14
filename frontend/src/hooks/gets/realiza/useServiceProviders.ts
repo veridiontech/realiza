@@ -24,12 +24,14 @@ export function useFetchServiceProviders() {
     setLoading(true);
     setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(API_URL, {
         params: {
           _limit: limit,
           _page: page,
           idSearch,
         },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
 
       const mappedProviders = response.data.content.map((provider: any) => ({

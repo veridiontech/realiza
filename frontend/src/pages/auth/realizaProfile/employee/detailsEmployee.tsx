@@ -36,7 +36,12 @@ export function DetailsEmployee() {
 
   const fetchEmployee = async () => {
     try {
-      const response = await axios.get(`${ip}/employee/brazilian/${id}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const response = await axios.get(`${ip}/employee/brazilian/${id}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       console.log("teste", response.data);
 
       setEmployee(response.data);
@@ -49,6 +54,7 @@ export function DetailsEmployee() {
 
   const fetchDocuments = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
         `${ip}/document/employee/filtered-employee`,
         {
@@ -59,6 +65,7 @@ export function DetailsEmployee() {
             sort: "creationDate",
             direction: "DESC",
           },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         },
       );
       setDocuments(response.data.content || []);
@@ -131,9 +138,8 @@ export function DetailsEmployee() {
       label: "Status",
       render: (status: string) => (
         <span
-          className={`text-sm font-medium ${
-            status === "ativo" ? "text-green-600" : "text-red-600"
-          }`}
+          className={`text-sm font-medium ${status === "ativo" ? "text-green-600" : "text-red-600"
+            }`}
         >
           {status}
         </span>

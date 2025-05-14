@@ -94,11 +94,15 @@ export function ModalTesteSendSupplier() {
 
   const getActivities = async () => {
     try {
-      const activitieData = await axios.get(`${ip}/contract/activity`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const activitieData = await axios.get(`${ip}/contract/activity`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       // const requirementData = await axios.get(`${ip}/contract/requirement`);
       setActivities(activitieData.data.content);
       console.log("atividades log teste:", activitieData.data.content);
-      
+
       // setRequirements(requirementData.data.content);
     } catch (err) {
       console.log(err);
@@ -124,11 +128,15 @@ export function ModalTesteSendSupplier() {
   const createClient = async (data: ModalSendEmailFormSchema) => {
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/invite`, {
         email: data.email,
         company: data.company,
         cnpj: data.cnpj,
-      });
+      }, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       const supplierData = {
         ...data,
         branch: selectedBranch,
@@ -153,7 +161,11 @@ export function ModalTesteSendSupplier() {
     const payload = { ...supplierInfo, ...data };
     console.log("Payload do contrato:", payload);
     try {
-      await axios.post(`${ip}/contract/supplier/new-supplier`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/contract/supplier/new-supplier`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       toast.success("Contrato criado com sucesso");
     } catch (err) {
       console.log("Erro ao criar contrato:", err);
@@ -170,8 +182,11 @@ export function ModalTesteSendSupplier() {
 
   const getManager = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       console.log("gestores:", res.data.content);
       setManagers(res.data.content);

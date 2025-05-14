@@ -50,6 +50,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   const getEmployee = async () => {
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
         {
@@ -57,6 +58,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
             page: page,
             limit: limit,
           },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         },
       );
       console.log("employees:", res.data.content);

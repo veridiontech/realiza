@@ -99,8 +99,13 @@ export function AddNewBranch() {
     };
     setLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("enviando dados:", payload);
-      await axios.post(`${ip}/branch`, payload);
+      await axios.post(`${ip}/branch`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar filial");
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -141,7 +146,7 @@ export function AddNewBranch() {
         <Button className="bg-realizaBlue md:hidden">+</Button>
       </DialogTrigger>
       <DialogContent
-      style={{ backgroundImage: `url(${bgModalRealiza})` }}>
+        style={{ backgroundImage: `url(${bgModalRealiza})` }}>
         <DialogHeader>
           <DialogTitle className="text-white">Cadastro de filial</DialogTitle>
         </DialogHeader>
@@ -153,7 +158,7 @@ export function AddNewBranch() {
             <div className="flex flex-col gap-2">
               <Label className="text-white">CNPJ</Label>
               <div className="flex items-center gap-2">
-                <Input 
+                <Input
                   type="text"
                   value={cnpjValue}
                   onChange={(e) => {

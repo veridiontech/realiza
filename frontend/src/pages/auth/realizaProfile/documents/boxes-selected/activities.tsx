@@ -23,28 +23,30 @@ export function ActivitiesBox() {
   // Função para buscar todas as atividades
   const getActivitie = async () => {
 
-    const token = localStorage.getItem("tokenClient");
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const resSelected = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         },
       );
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
-    } 
+    }
   };
 
   // Função para buscar todos os documentos da filial
   const getAllDocuments = async () => {
     setLoadingAllDocuments(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/document/branch/filtered-branch`, {
         params: {
           idSearch: selectedBranch?.idBranch,
           size: 1000,
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
         },
       });
       console.log(res.data.content);
@@ -59,8 +61,12 @@ export function ActivitiesBox() {
   // Função para buscar documentos relacionados à atividade selecionada
   const getDocumentByActivitie = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/contract/activity/find-document-by-activity/${activitieSelected?.idActivity}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       console.log("Documentos da atividade:", res.data);
 
@@ -73,7 +79,7 @@ export function ActivitiesBox() {
       ]);
     } catch (err) {
       console.log("Erro ao buscar documentos da atividade:", err);
-    } 
+    }
   };
 
   // Atualizar os documentos ao selecionar uma atividade

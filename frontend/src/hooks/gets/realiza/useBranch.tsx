@@ -20,8 +20,10 @@ export function useBranches() {
     setLoading(true);
     setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(API_URL, {
         params: { size: limit, page, sort, direction },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
 
       const { content, totalPages } = response.data;

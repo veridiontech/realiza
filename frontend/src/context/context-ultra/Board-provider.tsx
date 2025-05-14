@@ -23,24 +23,26 @@ export function useBoard() {
 
 export function BoardProvider({ children }: { children: React.ReactNode }) {
   const [boards, setBoards] = useState<propsBoard[]>([]);
-  const [selectedBoard, setSelectedBoard] = useState<propsBoard| null>(null)
-  const {client} = useClient()
+  const [selectedBoard, setSelectedBoard] = useState<propsBoard | null>(null)
+  const { client } = useClient()
 
   useEffect(() => {
-    if(client?.idClient) {
-        getBoard(client.idClient)
+    if (client?.idClient) {
+      getBoard(client.idClient)
     }
-  },[client?.idClient])
+  }, [client?.idClient])
 
   const getBoard = async (idClient: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res =
         await axios.get(`${ip}/ultragaz/board/find-by-client?idClient=${idClient}
-`);
+`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        });
       setBoards(res.data.content)
     } catch (err) {
-        console.log("Erro ao buscar diretoria no boardProvider", err);
-        
+      console.log("Erro ao buscar diretoria no boardProvider", err);
     }
   };
 

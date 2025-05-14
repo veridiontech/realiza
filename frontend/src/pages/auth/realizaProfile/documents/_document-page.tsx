@@ -54,8 +54,11 @@ export function DocumentPage() {
     if (!client?.idClient) return;
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client.idClient}`
+        `${ip}/branch/filtered-client?idSearch=${client.idClient}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       setBranchs(res.data.content);
       console.log("Filiais:", res.data.content);
@@ -68,7 +71,10 @@ export function DocumentPage() {
 
   const getUniqueBranch = async (idBranch: string) => {
     try {
-      const res = await axios.get(`${ip}/branch/${idBranch}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/branch/${idBranch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      });
       console.log("Dados da filial:", res.data);
       setBranch(res.data);
     } catch (err) {
@@ -91,8 +97,11 @@ export function DocumentPage() {
     setOtherServiceSelectedDocs([]);
 
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/document/branch/${idBranch}/document-matrix`
+        `${ip}/document/branch/${idBranch}/document-matrix`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
 
       // Documentos Empresa Terceiro

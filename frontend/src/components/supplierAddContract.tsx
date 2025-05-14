@@ -76,9 +76,16 @@ export function SupplierAddContract() {
   // Carrega atividades e requisitos
   const getActivitiesAndRequirements = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const [activitieData, requirementData] = await Promise.all([
-        axios.get(`${ip}/contract/activity`),
-        axios.get(`${ip}/contract/requirement`),
+        axios.get(`${ip}/contract/activity`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        ),
+        axios.get(`${ip}/contract/requirement`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        ),
       ]);
       setActivities(activitieData.data.content);
       setRequirements(requirementData.data.content);
@@ -90,8 +97,12 @@ export function SupplierAddContract() {
   // Busca os gestores usando o ID do fornecedor
   const getManagers = async (supplier: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/supplier/filtered-supplier?idSearch=${supplier}`,
+        `${ip}/user/supplier/filtered-supplier?idSearch=${supplier}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+
       );
       setManagers(res.data.content);
     } catch (err) {
@@ -103,6 +114,7 @@ export function SupplierAddContract() {
     setIsLoading(true);
     try {
       // Monta o payload com os dados do formulário e o supplier obtido do contexto
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const payload = {
         ...data,
         subcontractPermission: true, // sempre true para contrato de subcontratado
@@ -110,7 +122,10 @@ export function SupplierAddContract() {
       };
 
       console.log("Criando contrato de subcontratado:", payload);
-      await axios.post(`${ip}/contract/subcontractor`, payload);
+      await axios.post(`${ip}/contract/subcontractor`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       toast.success("Contrato criado com sucesso!");
     } catch (err) {
       console.error("Erro ao criar contrato", err);

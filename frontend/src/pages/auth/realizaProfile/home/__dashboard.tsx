@@ -88,7 +88,12 @@ export function Dashboard() {
     };
     console.log("Enviando dados do novo usuário:", payload);
     try {
-      await axios.post(`${ip}/user/manager/new-user`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/user/manager/new-user`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar usuário");
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -107,8 +112,12 @@ export function Dashboard() {
     // setLoading(true);
     // setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       const { content } = res.data;
       console.log("usuários da branch:", content);
@@ -226,22 +235,20 @@ export function Dashboard() {
                       <div className="flex items-center gap-5">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTab === "filiais"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
                               : "text-realizaBlue border-realizaBlue border bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           <Building2 /> Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTab === "usuarios"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue border-realizaBlue border bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           <Users /> Usuários

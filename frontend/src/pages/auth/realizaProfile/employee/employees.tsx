@@ -49,8 +49,12 @@ export const EmployeesTable = (): JSX.Element => {
 
   const suppliers = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       setSuppliersList(res.data.content);
     } catch (error) {
@@ -60,7 +64,12 @@ export const EmployeesTable = (): JSX.Element => {
 
   const uniqueSupplier = async () => {
     try {
-      const res = await axios.get(`${ip}/supplier/${selectedSupplier}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/supplier/${selectedSupplier}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       setGetUniqueSupplier(res.data);
     } catch (err) {
       console.log("erro ao buscar unico supplier:", err);
@@ -70,8 +79,13 @@ export const EmployeesTable = (): JSX.Element => {
   const getSubcontractor = async () => {
     setLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+
       );
       setGetSubcontractorList(res.data.content);
     } catch (err) {
@@ -125,8 +139,8 @@ export const EmployeesTable = (): JSX.Element => {
             <Button
               variant="ghost"
               className={`px-4 py-2 transition-all duration-300 ${selectedTab === "fornecedor"
-                  ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                  : "text-realizaBlue bg-white"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
                 }`}
               onClick={() => setSelectedTab("fornecedor")}
             >
@@ -135,8 +149,8 @@ export const EmployeesTable = (): JSX.Element => {
             <Button
               variant="ghost"
               className={`px-4 py-2 transition-all duration-300 ${selectedTab === "subcontratado"
-                  ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                  : "text-realizaBlue bg-white"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
                 }`}
               onClick={() => setSelectedTab("subcontratado")}
             >
@@ -199,8 +213,8 @@ export const EmployeesTable = (): JSX.Element => {
           <Button
             variant="ghost"
             className={`px-4 py-2 transition-all duration-300 ${selectedTab === "fornecedor"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
               }`}
             onClick={() => setSelectedTab("fornecedor")}
           >
@@ -209,8 +223,8 @@ export const EmployeesTable = (): JSX.Element => {
           <Button
             variant="ghost"
             className={`px-4 py-2 transition-all duration-300 ${selectedTab === "subcontratado"
-                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                : "text-realizaBlue bg-white"
+              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+              : "text-realizaBlue bg-white"
               }`}
             onClick={() => setSelectedTab("subcontratado")}
           >

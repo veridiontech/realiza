@@ -29,11 +29,15 @@ export function HeaderClient() {
   const [clients, setClients] = useState<any>(null);
   const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const [uniqueBranch, setUniqueBranch] = useState<propsBranch | null>(null);
-  const { client ,setClient } = useClient();
+  const { client, setClient } = useClient();
 
   const getBranch = async () => {
     try {
-      const res = await axios.get(`${ip}/branch/${user?.branch}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/branch/${user?.branch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       setUniqueBranch(res.data);
       setSelectedBranch(res.data)
     } catch (err) {
@@ -43,8 +47,12 @@ export function HeaderClient() {
 
   const getClientWithUser = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/client/find-by-branch/${user?.branch}`,
+        `${ip}/client/find-by-branch/${user?.branch}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+
       );
       setClients(res.data);
       setClient(res.data);
@@ -56,7 +64,11 @@ export function HeaderClient() {
 
   const fetchBranchesByClient = async (idClient: string) => {
     try {
-      const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       setSelectedBranch(res.data);
     } catch (err) {
       console.error("Erro ao buscar filiais:", err);
@@ -77,7 +89,7 @@ export function HeaderClient() {
 
   useEffect(() => {
     if (client && client.idClient && user?.role === "ROLE_CLIENT_RESPONSIBLE") {
-      fetchBranchesByClient(client.idClient); 
+      fetchBranchesByClient(client.idClient);
     }
   }, [client?.idClient]);
 

@@ -155,17 +155,19 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
     }
     // setIsLoading(true)
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const sanitizedData = {
         ...formData,
         cnpj: sanitizeNumber(formData.cnpj),
         telephone: sanitizeNumber(formData.telephone),
         cep: sanitizeNumber(formData.cep),
       };
-
       console.log("Dados enviados para /client:", sanitizedData);
-
       const response = await axios.post(`${ip}/client`, sanitizedData, {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenFromStorage}`
+        },
       });
       toast.success("Cliente cadastrado com sucesso!");
       setUserForm((prev) => ({ ...prev, branch: response.data.idClient }));
@@ -189,8 +191,12 @@ export function AddClientWorkflow({ onClose }: { onClose: () => void }) {
     }
 
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/user/client`, formData, {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenFromStorage}`
+        },
       });
       toast.success("Usuário cadastrado com sucesso!");
       onClose();
@@ -380,8 +386,12 @@ export function SelectClient() {
       idClient: client?.idClient,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/board`, payload);
+      await axios.post(`${ip}/ultragaz/board`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err) {
       toast.error("erro ao criar nova diretoria");
@@ -395,8 +405,12 @@ export function SelectClient() {
       idBoard: selectedBoard?.idBoard,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/market`, payload);
+      await axios.post(`${ip}/ultragaz/market`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err) {
       toast.error("erro ao criar nova diretoria");
@@ -410,8 +424,13 @@ export function SelectClient() {
       idMarket: selectedMarket?.idMarket,
     };
     try {
-      console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/ultragaz/center`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      console.log("Enviando dados da nova diretoria:", payload,);
+      await axios.post(`${ip}/ultragaz/center`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err) {
       toast.error("erro ao criar nova diretoria");
@@ -425,8 +444,13 @@ export function SelectClient() {
       center: selectedCenter?.idCenter,
     };
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Enviando dados da nova diretoria:", payload);
-      await axios.post(`${ip}/branch`, payload);
+      await axios.post(`${ip}/branch`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar novo ");
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -455,7 +479,12 @@ export function SelectClient() {
     };
     console.log("Enviando dados do novo usuário:", payload);
     try {
-      await axios.post(`${ip}/user/client`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/user/client`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sucesso ao criar usuário");
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -472,8 +501,12 @@ export function SelectClient() {
 
   const fetchBranches = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       const { content } = response.data;
       setBranches(content);
@@ -496,8 +529,12 @@ export function SelectClient() {
     setLoading(true);
     setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       const { content, totalPages: total } = res.data;
       console.log("usuários da branch:", content);
@@ -583,44 +620,40 @@ export function SelectClient() {
                         <div>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                              selectedTabUltra === "diretoria"
-                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                                : "text-realizaBlue bg-white"
-                            }`}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTabUltra === "diretoria"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                              }`}
                             onClick={() => setSelectedTabUltra("diretoria")}
                           >
                             Diretoria
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "mercado"
-                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                                : "text-realizaBlue bg-white"
-                            }`}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "mercado"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                              }`}
                             onClick={() => setSelectedTabUltra("mercado")}
                           >
                             Mercado
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "nucleo"
-                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                                : "text-realizaBlue bg-white"
-                            }`}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "nucleo"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                              }`}
                             onClick={() => setSelectedTabUltra("nucleo")}
                           >
                             Núcleo
                           </Button>
                           <Button
                             variant={"ghost"}
-                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                              selectedTabUltra === "filial"
-                                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                                : "text-realizaBlue bg-white"
-                            }`}
+                            className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTabUltra === "filial"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue bg-white"
+                              }`}
                             onClick={() => setSelectedTabUltra("filial")}
                           >
                             Unidade
@@ -1263,22 +1296,20 @@ export function SelectClient() {
                       <nav className="flex items-center">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTab === "filiais"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
-                          }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                            }`}
                           onClick={() => setSelectedTabUltra("filiais")}
                         >
                           Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`px-4 py-2 transition-all duration-300 text-white${
-                            selectedTab === "usuarios"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
-                          }`}
+                          className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                            }`}
                           onClick={() => setSelectedTabUltra("usuarios")}
                         >
                           Usuários
@@ -1397,22 +1428,20 @@ export function SelectClient() {
                       <div>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTab === "filiais"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
-                          }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                            }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTab === "usuarios"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue bg-white"
-                          }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue bg-white"
+                            }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           Usuários
@@ -1424,9 +1453,9 @@ export function SelectClient() {
                             <DialogTrigger asChild>
                               <Button className="bg-realizaBlue">+</Button>
                             </DialogTrigger>
-                            <DialogContent 
-                            style={{ backgroundImage: `url(${bgModalRealiza})` }}
-                            className="max-w-[30vw]">
+                            <DialogContent
+                              style={{ backgroundImage: `url(${bgModalRealiza})` }}
+                              className="max-w-[30vw]">
                               <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
                                   Criar usuário para o cliente{" "}
@@ -1688,22 +1717,20 @@ export function SelectClient() {
                     <nav className="flex items-center">
                       <Button
                         variant={"ghost"}
-                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                          selectedTab === "filiais"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
-                        }`}
+                        className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
+                          ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                          : "text-realizaBlue bg-white"
+                          }`}
                         onClick={() => setSelectedTab("filiais")}
                       >
                         Filiais
                       </Button>
                       <Button
                         variant={"ghost"}
-                        className={`px-4 py-2 transition-all duration-300 text-white${
-                          selectedTab === "usuarios"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue bg-white"
-                        }`}
+                        className={`px-4 py-2 transition-all duration-300 text-white${selectedTab === "usuarios"
+                          ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                          : "text-realizaBlue bg-white"
+                          }`}
                         onClick={() => setSelectedTab("usuarios")}
                       >
                         Usuários

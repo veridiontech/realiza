@@ -79,7 +79,7 @@ export function ModalCreateCliente() {
   }, [cnpjData, setValue]);
 
   const createCliente = async (data: CreateClientFormSchema) => {
-    const token = localStorage.getItem("tokenClient");
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     const payload = {
       ...data,
       cnpj: sanitizedCnpj,
@@ -88,7 +88,7 @@ export function ModalCreateCliente() {
     try {
       await axios.post(`${ip}/client`, payload, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
       toast.success("Sucesso ao criar cliente ");

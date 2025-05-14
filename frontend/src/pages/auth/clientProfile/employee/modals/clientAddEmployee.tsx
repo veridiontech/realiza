@@ -20,7 +20,12 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
       branch: filterIdBranch,
     };
     try {
-      const response = await axios.post(`${ip}/employee/brazilian`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const response = await axios.post(`${ip}/employee/brazilian`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       console.log("Colaborador criado com sucesso:", response.data);
       onSubmit(response.data);
     } catch (error: any) {

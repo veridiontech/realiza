@@ -68,7 +68,11 @@ export function EnterprisePageEmail() {
     const fetchBranchData = async () => {
       if (!findBranchId) return;
       try {
-        const response = await axios.get(`${ip}/supplier/${findId}`);
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const response = await axios.get(`${ip}/supplier/${findId}`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+        );
         console.log("testando dados do supplier", response.data);
         const branchData = response.data;
         if (branchData) {

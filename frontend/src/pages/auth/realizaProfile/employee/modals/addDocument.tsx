@@ -56,11 +56,16 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
     data.append("file", selectedFile); // Adiciona o arquivo selecionado
 
     console.log("teste", data);
-    
+
     try {
-      await axios.post(`${ip}/document/employee`, data);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/document/employee`, data,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       setStatus("Arquivo enviado com sucesso!");
-      setSelectedFile(null); 
+      setSelectedFile(null);
     } catch (error) {
       console.error(error);
       setStatus("Erro ao enviar o arquivo. Tente novamente.");

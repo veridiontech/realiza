@@ -39,10 +39,15 @@ export function ModalSendEmail() {
     console.log("teste");
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/invite`, {
         email: data.email,
         company: data.company,
-      });
+      },
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Email enviado ao novo cliente");
     } catch (err) {
       toast.error("Erro ao enviar email. Tente novamente");

@@ -24,6 +24,7 @@ export function NewBranchModal({ onClose, onSubmit }: NewBranchModalProps) {
 
   const handleSubmit = async (data: Record<string, any>) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const validatedData = newBranchSchema.parse(data);
       const formData = new FormData();
 
@@ -37,9 +38,12 @@ export function NewBranchModal({ onClose, onSubmit }: NewBranchModalProps) {
         idClient: client?.idClient,
       };
       console.log("enviando obj:", payload);
-      
+
       const response = await axios.post(`${ip}/branch`, payload, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${tokenFromStorage}`
+        }
       });
 
       onSubmit(response.data);

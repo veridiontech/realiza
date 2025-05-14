@@ -27,37 +27,41 @@ export function Branch() {
     label: string;
     render?: (value: any, row: propsBranch) => JSX.Element;
   }[] = [
-    { key: "name", label: "Nome da Filial" },
-    { key: "cnpj", label: "CNPJ" },
-    { key: "address", label: "Endereço" },
-    {
-      key: "actions",
-      label: "Ações",
-      render: (_value, row: propsBranch) => (
-        <div>
-          {user?.role === "ROLE_CLIENT_RESPONSIBLE" ? (
-            <Link to={`/cliente/profileBranch/${row.idBranch}`}>
-              <Eye />
-            </Link>
-          ) : (
-            <Link
-              to={`/sistema/profileBranch/${row.idBranch}`}
-              onClick={() => setSelectedBranch(row)}
-            >
-              <Eye />
-            </Link>
-          )}
-        </div>
-      ),
-    },
-  ];
+      { key: "name", label: "Nome da Filial" },
+      { key: "cnpj", label: "CNPJ" },
+      { key: "address", label: "Endereço" },
+      {
+        key: "actions",
+        label: "Ações",
+        render: (_value, row: propsBranch) => (
+          <div>
+            {user?.role === "ROLE_CLIENT_RESPONSIBLE" ? (
+              <Link to={`/cliente/profileBranch/${row.idBranch}`}>
+                <Eye />
+              </Link>
+            ) : (
+              <Link
+                to={`/sistema/profileBranch/${row.idBranch}`}
+                onClick={() => setSelectedBranch(row)}
+              >
+                <Eye />
+              </Link>
+            )}
+          </div>
+        ),
+      },
+    ];
 
   const fetchBranches = async () => {
     setLoading(true);
     setError(null);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       const { content, totalPages: total } = response.data;
       setBranches(content);

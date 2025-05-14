@@ -55,7 +55,12 @@ export function CreateNewManagerSupplier() {
     console.log("DADOS SENDO ENVIADOS: ", payload);
 
     try {
-      await axios.post(`${ip}/user/supplier`, payload);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      await axios.post(`${ip}/user/supplier`, payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       toast.success("Sua solicitação foi enviada para realiza");
     } catch (err) {
       console.log("erro ao criar gerente:", err);
@@ -68,7 +73,12 @@ export function CreateNewManagerSupplier() {
   const getUniqueBranch = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get(`${ip}/supplier/${user?.supplier}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/supplier/${user?.supplier}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       setUniqueSupplier(res.data);
       console.log(res.data);
     } catch (err) {

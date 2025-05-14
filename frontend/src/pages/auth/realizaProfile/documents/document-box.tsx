@@ -10,7 +10,7 @@ import { toast } from "sonner";
 interface DocumentBoxProps {
   isLoading: boolean;
   documents: propsDocument[]
-  onSelectDocument: (documentId: string) => void; 
+  onSelectDocument: (documentId: string) => void;
 }
 
 export function DocumentBox({
@@ -22,9 +22,12 @@ export function DocumentBox({
 
   const selectDocument = async (documentId: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("selecionando documento");
       await axios.post(
-        `${ip}/document/branch/${selectedBranch?.idBranch}/document-matrix?documentId=${documentId}`,
+        `${ip}/document/branch/${selectedBranch?.idBranch}/document-matrix?documentId=${documentId}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      },
       );
       console.log("documento selecionado com sucesso");
       toast.success("Documento selecionado enviado com sucesso");
@@ -32,7 +35,7 @@ export function DocumentBox({
 
       onSelectDocument(documentId);
     } catch (err) {
-      console.log("erro ao selecionar documento", err); 
+      console.log("erro ao selecionar documento", err);
       toast.error("Erro ao selecionar documento");
     }
   };
@@ -71,7 +74,7 @@ export function DocumentBox({
               <div
                 key={document.idDocument}
                 onClick={() => {
-                  if(document.idDocumentMatrix) {
+                  if (document.idDocumentMatrix) {
                     selectDocument(document.idDocumentMatrix);
                   }
                 }}

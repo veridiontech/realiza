@@ -26,7 +26,11 @@ export function HeaderProvider() {
 
   const getSupplier = async () => {
     try {
-      const res = await axios.get(`${ip}/supplier/${user?.supplier}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/supplier/${user?.supplier}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       setSupplier(res.data);
     } catch (err) {
       console.log("erro ao buscar supplier:", err);

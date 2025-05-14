@@ -45,8 +45,12 @@ export function ControlPanel() {
 
   const fetchSolicitations = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get<ApiResponse>(
         `${ip}/item-management/new-provider`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       setSolicitations(response.data.content);
     } catch (err) {
@@ -135,18 +139,18 @@ export function ControlPanel() {
               <div className="bg-gray-100 p-8 ">
                 <ScrollArea className="h-[40vh] ">
                   <div className=" flex flex-col gap-2">
-                  {solicitations
-                    .filter(
-                      (solicitation) => solicitation.status === "APPROVED",
-                    )
-                    .map((solicitation) => (
-                      <CardPanelControl
-                        key={solicitation.idSolicitation}
-                        data={solicitation}
-                        onActionCompleted={removeSolicitation}
-                      />
-                    ))}
-                    </div>
+                    {solicitations
+                      .filter(
+                        (solicitation) => solicitation.status === "APPROVED",
+                      )
+                      .map((solicitation) => (
+                        <CardPanelControl
+                          key={solicitation.idSolicitation}
+                          data={solicitation}
+                          onActionCompleted={removeSolicitation}
+                        />
+                      ))}
+                  </div>
                 </ScrollArea>
               </div>
             </div>

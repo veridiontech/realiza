@@ -54,6 +54,7 @@ export function SignUpPageEmail() {
   const onSubmit = async (data: SignUpEmailFormSchema) => {
     setIsLoading(true);
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       setUserData(data);
       const role =
         enterpriseData.company === "CLIENT"
@@ -68,13 +69,17 @@ export function SignUpPageEmail() {
         company: enterpriseData.company,
       };
       console.log("enviando dados:", allDatas);
-      
-      const response = await axios.post(`${ip}/sign-enterprise`, allDatas);
+
+      const response = await axios.post(`${ip}/sign-enterprise`, allDatas,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+      );
       if (response.status === 200) {
         localStorage.removeItem("enterpriseForm");
         window.location.href = "https://realiza-1.onrender.com/";
       }
-      
+
       window.location.href = "https://realiza-1.onrender.com/";
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -94,9 +99,9 @@ export function SignUpPageEmail() {
     setIsOpenEye(!isOpenEye);
   };
 
-    const handleGoBack = () => {
-      window.history.back();
-    };
+  const handleGoBack = () => {
+    window.history.back();
+  };
 
   return (
     <div>
@@ -236,7 +241,7 @@ export function SignUpPageEmail() {
           </Button>
         )}
         <div>
-                <Button className="bg-realizaBlue h-[5vh]" onClick={handleGoBack}>
+          <Button className="bg-realizaBlue h-[5vh]" onClick={handleGoBack}>
             Voltar
           </Button>
         </div>

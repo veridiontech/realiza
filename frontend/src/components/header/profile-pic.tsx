@@ -57,13 +57,14 @@ export function ProfilePic() {
 
     try {
       console.log("Enviando arquivo:", formData);
-
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.patch(
         `${ip}/user/manager/change-profile-picture/${user?.idUser}`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${tokenFromStorage}`,
           },
         }
       );

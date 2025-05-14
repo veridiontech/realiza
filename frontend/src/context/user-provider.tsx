@@ -149,7 +149,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             break;
           case "ROLE_VIEWER":
             try {
-              const resClient = await axios.get(`${ip}/user/client`);
+              const resClient = await axios.get(`${ip}/user/client`, {
+                headers: { Authorization: `Bearer ${tokenFromStorage}` }
+              });
               if (resClient.data?.content) {
                 const dataClient = resClient.data.content;
                 if (dataClient.branch) {
@@ -167,7 +169,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               } else {
                 logout();
               }
-              const resSupplier = await axios.get(`${ip}/user/supplier`);
+              const resSupplier = await axios.get(`${ip}/user/supplier`, {
+                headers: { Authorization: `Bearer ${tokenFromStorage}` }
+              });
               if (resSupplier.data.content) {
                 const dataSupplier = resSupplier.data.content;
                 if (dataSupplier.supplier) {
@@ -190,7 +194,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               } else {
                 logout();
               }
-              const resSubcontractor = await axios.get(`${ip}/user/subcontractor`);
+              const resSubcontractor = await axios.get(`${ip}/user/subcontractor`, {
+                headers: { Authorization: `Bearer ${tokenFromStorage}` }
+              });
               if (resSubcontractor.data.content) {
                 const dataSubcontractor = resSubcontractor.data.content;
                 if (dataSubcontractor.subcontrator) {

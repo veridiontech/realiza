@@ -21,23 +21,22 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
 
   const fetchDocuments = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       let idSearch = null;
-
       if (user?.role === 'ROLE_SUPPLIER_RESPONSIBLE' || user?.role === 'ROLE_SUPPLIER_MANAGER') {
         idSearch = user.supplier;
       } else if (user?.role === 'ROLE_CLIENT_RESPONSIBLE') {
         idSearch = client?.idClient;
       }
-
       if (!idSearch) {
         console.warn("ID de busca indefinido para esse tipo de usuário.");
         return;
       }
-
       const response = await axios.get(`${ip}/document/supplier/filtered-supplier`, {
         params: { size: 100000, idSearch },
-      });
-
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      },
+      );
       const docs = Array.isArray(response.data.content) ? response.data.content : [];
       setDocuments(docs);
     } catch (error) {
@@ -50,8 +49,12 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
     formData.append('file', file);
 
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/document/supplier/${docId}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${tokenFromStorage}`,
+        },
       });
       alert('Upload feito com sucesso!');
     } catch (error) {
@@ -79,7 +82,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
 
   if (!isOpen) return null;
 
-return (
+  return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-8 rounded-lg w-[900px] max-h-[700px] overflow-y-auto shadow-xl">
         <div className="overflow-y-auto max-h-[500px]">

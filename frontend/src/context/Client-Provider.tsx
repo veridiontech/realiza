@@ -36,7 +36,11 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
 
   const getUser = async (idClient: string) => {
     try {
-      const res = await axios.get(`${ip}/client/${idClient}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/client/${idClient}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
+      );
       if (res.data) {
         setClient(res.data);
       } else {
@@ -51,8 +55,12 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
 
   const getBranches = async (idClient: string) => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
       );
       setBranches(res.data.content);
     } catch (err) {

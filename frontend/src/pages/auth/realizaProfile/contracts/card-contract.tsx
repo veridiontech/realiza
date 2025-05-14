@@ -18,8 +18,13 @@ export function CardContract() {
 
   const getContract = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/contract/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+
       );
       setContracts(res.data.content);
     } catch (err) {
@@ -29,7 +34,13 @@ export function CardContract() {
 
   const getSupplier = async (supplierId: string) => {
     try {
-      const res = await axios.get(`${ip}/supplier/${supplierId}`);
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/supplier/${supplierId}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        }
+
+      );
       setSupplierData(res.data);
     } catch (err) {
       console.log("Erro ao buscar fornecedor:", err);

@@ -28,25 +28,42 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-
-  const getEmployees = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`);
-      setEmployees(res.data.content || res.data);
-    } catch (error) {
-      console.error("Erro ao buscar colaboradores:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [selectContractsModalOpen, setSelectContractsModalOpen] = useState(false);
 
   useEffect(() => {
     if (mainModalOpen) {
-      getEmployees();
-      setSelectedEmployees([]);
+      const fetchAndSortEmployees = async () => {
+        setLoading(true);
+        try {
+          const tokenFromStorage = localStorage.getItem("tokenClient");
+          const res = await axios.get(`${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
+            {
+              headers: { Authorization: `Bearer ${tokenFromStorage}` }
+            }
+          );
+          const data = res.data.content || res.data;
+          const sorted = [...data].sort((a: Employee, b: Employee) =>
+            `${a.name} ${a.surname}`.localeCompare(`${b.name} ${b.surname}`)
+          );
+          setEmployees(sorted);
+        } catch (error) {
+          console.error("Erro ao buscar colaboradores:", error);
+        } finally {
+          setLoading(false);
+          setSelectedEmployees([]);
+        }
+      };
+      fetchAndSortEmployees();
     }
   }, [mainModalOpen]);
+
+  const toggleSelectAll = () => {
+    if (selectedEmployees.length === employees.length) {
+      setSelectedEmployees([]);
+    } else {
+      setSelectedEmployees(employees.map((emp) => emp.idEmployee));
+    }
+  };
 
   const toggleSelect = (id: string) => {
     setSelectedEmployees((prev) =>
@@ -58,17 +75,8 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
   const handleConfirm = () => {
     if (selectedEmployees.length === 0) return;
-
-    if (activeTab === "alocar") {
-      console.log("Alocando IDs:", selectedEmployees);
-      // chamada para API de alocação aqui
-    } else {
-      console.log("Desalocando IDs:", selectedEmployees);
-      // chamada para API de desalocação aqui
-    }
-
-    // Fecha modal após ação (opcional)
     setMainModalOpen(false);
+    setSelectContractsModalOpen(true);
   };
 
   return (
@@ -121,7 +129,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       <Dialog open={mainModalOpen} onOpenChange={setMainModalOpen}>
         <DialogContent
           style={{ backgroundImage: `url(${bgModalRealiza})` }}
-          className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw] text-white"
+          className="max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white"
         >
           <DialogHeader>
             <DialogTitle className="text-white">
@@ -130,6 +138,14 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                 : "Desalocar Colaboradores"}
             </DialogTitle>
           </DialogHeader>
+          <Button
+            onClick={toggleSelectAll}
+            className="mb-3 bg-[#3A4C70] hover:bg-[#506A93] text-white font-medium px-4 py-2 rounded-md"
+          >
+            {selectedEmployees.length === employees.length
+              ? "Limpar Seleção"
+              : "Selecionar Todos"}
+          </Button>
 
           <ScrollArea className="h-[60vh] mt-2 space-y-2">
             {loading ? (
@@ -141,11 +157,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                   <button
                     key={emp.idEmployee}
                     onClick={() => toggleSelect(emp.idEmployee)}
-                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
-                      isSelected
-                        ? "bg-green-600 border-green-400"
-                        : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                    }`}
+                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
+                      ? "bg-green-600 border-green-400"
+                      : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                      }`}
                   >
                     {emp.name} {emp.surname}
                   </button>
@@ -160,14 +175,31 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
             <div className="mt-4 flex justify-end">
               <Button
                 onClick={handleConfirm}
-                className={`${
-                  activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
-                } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
+                className={`${activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
+                  } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
               >
                 Confirmar {activeTab === "alocar" ? "Alocação" : "Desalocação"}
               </Button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={selectContractsModalOpen} onOpenChange={setSelectContractsModalOpen}>
+        <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white text-center text-lg">
+              Selecione os contratos que deseja alocar esses funcionários
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={() => setSelectContractsModalOpen(false)}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md"
+            >
+              Confirmar
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

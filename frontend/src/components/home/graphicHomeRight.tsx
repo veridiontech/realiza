@@ -25,8 +25,11 @@ export function GraphicHomeRight() {
 
   const fetchBranches = async () => {
     try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      }
       );
       const { content } = response.data;
       setBranches(content);
