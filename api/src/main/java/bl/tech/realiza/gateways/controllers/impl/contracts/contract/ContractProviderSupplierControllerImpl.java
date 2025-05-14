@@ -4,13 +4,16 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.Contra
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.contract.CrudContractProviderSupplierImpl;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplierCreateResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
+import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -29,6 +33,7 @@ import java.util.Optional;
 public class ContractProviderSupplierControllerImpl implements ContractProviderSupplierControlller {
 
     private final CrudContractProviderSupplier crudSupplier;
+    private final CrudContractProviderSubcontractor contractProviderSubcontractor;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -134,5 +139,13 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
         ContractAndSupplierCreateResponseDto supplier = crudSupplier.saveContractAndSupplier(contractAndSupplierCreateRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
+    }
+
+    @GetMapping("/subcontract-permission")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca os contratos entre fornecedor e cliente que permitem subcontratação utilizando id da filial")
+    @Override
+    public ResponseEntity<List<ContractSupplierPermissionResponseDto>> getByBranchAndSubcontractPermission(@RequestParam String idBranch) {
+        return ResponseEntity.ok(crudSupplier.findAllByBranchAndSubcontractPermission(idBranch));
     }
 }

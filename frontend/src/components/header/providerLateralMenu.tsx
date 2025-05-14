@@ -27,7 +27,7 @@ export function ProviderLateralMenu() {
         className="w-full justify-start bg-zinc-100 px-4 py-2"
       >
         <Home className="text-realizaBlue size-4" />
-        <span className="ml-2 text-sm font-medium text-zinc-900">Início</span>
+        <span className="ml-2 text-sm font-medium text-zinc-900">Contratos</span>
       </Button>
       </Link>
       <h3 className="pl-4 pt-6 text-xs text-zinc-800">
@@ -105,7 +105,7 @@ export function ProviderLateralMenu() {
         className="w-full justify-start hover:bg-neutral-500 px-4 py-2"
       >
         <Home className="size-4 text-white" />
-        <span className="ml-2 text-sm font-medium text-white ">Início</span>
+        <span className="ml-2 text-sm font-medium text-white ">Contratos</span>
       </Button>
       </Link>
       <h3 className="pl-4 pt-6 text-xs text-white">

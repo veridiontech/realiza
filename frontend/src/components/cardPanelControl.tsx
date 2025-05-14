@@ -4,7 +4,7 @@ import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Oval } from "react-loader-spinner";
 import { useState } from "react";
-import { MoreDetails } from "@/pages/auth/realizaProfile/panel-control/more-details";
+import { MoreDetailsUser } from "@/pages/auth/realizaProfile/panel-control/more-details-user";
 
 interface CardPanelControlProps {
   data: {
@@ -19,10 +19,14 @@ interface CardPanelControlProps {
       nameEnterprise?: string | undefined;
       cpf?: string | undefined;
     };
-    newProvider: {
-      cnpj?: string | undefined;
-      corporateName?: string | undefined;
-      telephone?: string | undefined;
+    newUser: {
+      idUser: string;
+      firstName: string;
+      surname: string;
+      nameEnterprise?: string | undefined;
+      cpf?: string | undefined;
+      email?: string | undefined;
+      enterprise?: string | undefined;
     };
   };
   // Callback opcional para atualizar a lista após a ação
@@ -96,15 +100,17 @@ export function CardPanelControl({
             Solicitação de: {data.requester.firstName} {data.requester.surname}
           </span>
         </div>
-        <MoreDetails
+        <MoreDetailsUser
           idSolicitation={data.idSolicitation}
-          firstName={data.requester.firstName}
-          surname={data.requester.surname}
+          requesterFirstName={data.requester.firstName}
+          requesterSurname={data.requester.surname}
+          requesterCpf={data.requester.cpf}
           nameEnterprise={data.requester.nameEnterprise}
-          cpf={data.requester.cpf}
-          corporateName={data.newProvider.corporateName}
-          cnpj={data.newProvider.cnpj}
-        />{" "}
+          newUserFirstName={data.newUser.firstName}
+          newUserSurname={data.newUser.surname}
+          newUserEmail={data.newUser.email}
+          newUserEnterprise={data.newUser.enterprise}
+        />
       </div>
       <div className="flex w-full flex-col gap-2 border-y border-[#7CA1F333] py-4">
         <h3 className="mb-3 text-sm font-semibold text-[#2563EB]">

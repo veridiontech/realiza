@@ -6,9 +6,10 @@ import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
+import { useSearchParams } from "react-router-dom";
 import { z } from "zod";
 
 const signUpEmailFormSchema = z
@@ -38,6 +39,9 @@ export function SignUpPageEmail() {
   const { enterpriseData, setUserData } = useFormDataContext();
   const [isOpenEye, setIsOpenEye] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const findBranchId = searchParams.get("idBranch");
+  const [branch, setBranch] = useState<any>(null);
   const {
     register,
     handleSubmit,
@@ -46,10 +50,25 @@ export function SignUpPageEmail() {
     resolver: zodResolver(signUpEmailFormSchema),
     mode: "onChange",
   });
+  
 
   if (!enterpriseData) {
     return <div>Dados da empresa não encontrados.</div>;
   }
+
+  const getBranch = async () => {
+    try {
+      const res = await axios.get(`${ip}/branch/${findBranchId}`)
+      console.log("aaa" , res.data);
+      setBranch(res.data)
+    } catch (err:any){
+      console.log("Erro ao selecionar branch:" , err);
+    }
+  }
+
+  useEffect (()=>{
+    getBranch()
+  },[])
 
   const onSubmit = async (data: SignUpEmailFormSchema) => {
     setIsLoading(true);
@@ -107,6 +126,9 @@ export function SignUpPageEmail() {
     <div>
       <div className="flex justify-center">
         <h1 className="text-[40px]">Cadastro</h1>
+        <div>
+          <p>Empresa: {branch?.name}</p>
+        </div>
       </div>
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex items-center gap-5">

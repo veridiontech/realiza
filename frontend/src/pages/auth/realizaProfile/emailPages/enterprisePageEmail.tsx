@@ -29,7 +29,6 @@ export function EnterprisePageEmail() {
   const tokenFromUrl = searchParams.get("token");
   const { token } = useUser();
   const { setEnterpriseData } = useFormDataContext();
-
   const [isValidToken, setIsValidToken] = useState(false);
   const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");

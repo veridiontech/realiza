@@ -38,7 +38,7 @@ import ChatPage from "./pages/auth/realizaProfile/chat";
 // import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
 import RiskMatriz from "./pages/auth/realizaProfile/documents/risk-matriz";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
-import { ControlPanel } from "./pages/auth/realizaProfile/panel-control/panelControl";
+import { ControlPanel } from "./pages/auth/realizaProfile/panel-control/_panelControl";
 
 import { Quartered } from "./pages/auth/supplier/quartered/quartered";
 import { ProviderAppLayout } from "./_layouts/providerApp";

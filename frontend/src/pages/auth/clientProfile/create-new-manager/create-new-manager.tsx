@@ -41,8 +41,6 @@ export function CreateNewManagerClient() {
     resolver: zodResolver(createClientManageFormSchema),
   });
 
-  console.log(selectedBranch);
-
   const createClientManager = async (data: CreateClientManagerFormSchema) => {
     setIsLoading(true);
     const payload = {

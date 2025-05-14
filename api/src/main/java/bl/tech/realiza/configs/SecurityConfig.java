@@ -30,9 +30,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Ativar CORS no Spring Security
                 .csrf(csrf -> csrf.disable()) // Desativa CSRF para APIs Stateless
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/login", "/user/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/login", "/user/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll() // Permitir acesso ao Swagger
+                        .requestMatchers("/v3/api-docs/**").permitAll() // Permitir acesso à documentação Swagger JSON
+//                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
+//                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
