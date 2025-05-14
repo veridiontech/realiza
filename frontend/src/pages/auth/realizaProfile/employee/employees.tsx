@@ -191,7 +191,7 @@ export const EmployeesTable = (): JSX.Element => {
           <h1 className="text-2xl">Colaboradores</h1>
           <div className="flex gap-2">
             <NewModalCreateEmployee />
-            <ManageEmployeesModal idProvider={supplier?.idProvider ?? null} />
+            <ManageEmployeesModal idProvider={selectedSupplier} />
           </div>
 
         </div>
