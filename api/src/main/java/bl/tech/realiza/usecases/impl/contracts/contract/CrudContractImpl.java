@@ -18,7 +18,7 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractByEmployeeResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

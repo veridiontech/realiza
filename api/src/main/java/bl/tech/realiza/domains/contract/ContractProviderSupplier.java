@@ -4,10 +4,7 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -23,7 +20,8 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorValue("SUPPLIER")
 public class ContractProviderSupplier extends Contract {
-    private Boolean subcontractPermission;
+    @Builder.Default
+    private Boolean subcontractPermission = true;
 
     // -------------------------------
     // Relacionamentos INERENTES

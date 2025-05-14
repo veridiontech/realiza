@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface ContractProviderSupplierRepository extends JpaRepository<ContractProviderSupplier, String> {
     Page<ContractProviderSupplier> findAllByProviderSupplier_IdProvider(String idSearch, Pageable pageable);
     Page<ContractProviderSupplier> findAllByBranch_IdBranch(String idSearch, Pageable pageable);
@@ -14,4 +16,5 @@ public interface ContractProviderSupplierRepository extends JpaRepository<Contra
     Page<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
     Page<ContractProviderSupplier> findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(String idBranch, String idSupplier, Pageable pageable);
     ContractProviderSupplier findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(String idCompany);
+    List<ContractProviderSupplier> findAllByBranch_IdBranchAndSubcontractPermissionIsTrue(String idBranch);
 }

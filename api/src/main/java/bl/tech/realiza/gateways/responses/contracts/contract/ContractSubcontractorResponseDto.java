@@ -1,8 +1,6 @@
-package bl.tech.realiza.gateways.responses.contracts;
+package bl.tech.realiza.gateways.responses.contracts.contract;
 
-import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.Requirement;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -13,21 +11,21 @@ import java.util.List;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ContractSupplierResponseDto {
+public class ContractSubcontractorResponseDto {
     private String idContract;
     private String serviceType;
-    private String serviceDuration;
     private String serviceName;
     private String description;
     private String idResponsible;
     private Contract.ExpenseType expenseType;
     private String contractReference;
-    private Boolean subcontractPermission;
+    private String idContractSupplier;
+    private Boolean finished;
     private Date dateStart;
     private Contract.IsActive isActive;
     private List<String> activities;
-    private String idBranch;
-    private String nameBranch;
     private String idSupplier;
     private String nameSupplier;
+    private String idSubcontractor;
+    private String nameSubcontractor;
 }

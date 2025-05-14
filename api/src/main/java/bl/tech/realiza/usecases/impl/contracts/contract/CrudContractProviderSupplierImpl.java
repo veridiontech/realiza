@@ -33,11 +33,11 @@ import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequ
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractAndSupplierCreateResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.ContractSupplierResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplierCreateResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
-import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
@@ -464,5 +464,17 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .idBranch(savedContractProviderSupplier.getBranch().getIdBranch())
                 .branchName(savedContractProviderSupplier.getBranch().getName())
                 .build();
+    }
+
+    @Override
+    public List<ContractSupplierPermissionResponseDto> findAllByBranchAndSubcontractPermission(String idBranch) {
+        List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllByBranch_IdBranchAndSubcontractPermissionIsTrue(idBranch);
+        return contractProviderSuppliers.stream().map(
+                contractProviderSupplier -> ContractSupplierPermissionResponseDto.builder()
+                        .idContract(contractProviderSupplier.getIdContract())
+                        .contractReference(contractProviderSupplier.getContractReference())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getTradeName())
+                        .build()
+        ).toList();
     }
 }
