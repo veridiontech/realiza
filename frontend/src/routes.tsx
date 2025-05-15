@@ -7,6 +7,7 @@ import { ForgotPassword } from "./pages/app/forgot-password";
 import { NewPassword } from "./pages/app/new-password";
 import { NewPassword2 } from "./pages/app/new-password2";
 import { SignIn } from "./pages/app/sign-in";
+import {MonittoringBis} from "./pages/auth/realizaProfile/bis";
 import { Collaborators } from "./pages/auth/realizaProfile/collaborators";
 import { Dashboard } from "./pages/auth/realizaProfile/home/__dashboard";
 import { Enterprise } from "./pages/auth/realizaProfile/enterprises/enterprise";
