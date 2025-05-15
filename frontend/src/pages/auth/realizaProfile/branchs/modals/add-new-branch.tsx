@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,24 +22,37 @@ import { toast } from "sonner";
 import { z } from "zod";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
+const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
+const cepRegex = /^\d{5}-?\d{3}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
 const newBranchFormSchema = z.object({
-  cnpj: z.string(),
+  cnpj: z.string()
+    .nonempty("CNPJ é obrigatório")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato XX.XXX.XXX/XXXX-XX"),
   name: z.string().min(1, "O nome da filial é obrigatório"),
   email: z.string().email("Insira um email válido"),
-  cep: z.string().min(8, "O CEP deve ter pelo menos 8 caracteres."),
+  cep: z.string()
+    .nonempty("CEP é obrigatório")
+    .regex(cepRegex, "CEP inválido, use o formato 12345-678"),
   country: z.string().min(1, "O país é obrigatório."),
   state: z.string().min(1, "O estado é obrigatório."),
   city: z.string().min(1, "A cidade é obrigatória."),
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
-  telephone: z.string().nonempty("Insira um telefone"),
+  telephone: z.string()
+    .nonempty("Telefone é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
 });
+
 
 type NewBranchFormSchema = z.infer<typeof newBranchFormSchema>;
 export function AddNewBranch() {
   const { client } = useClient();
   const [loading, setLoading] = useState(false);
   const [cnpjValue, setCnpjValue] = useState("");
+  const [cepValue, setCepValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
   const [razaoSocial, setRazaoSocial] = useState<string | null>(null);
 
   const {
@@ -50,6 +64,21 @@ export function AddNewBranch() {
   } = useForm<NewBranchFormSchema>({
     resolver: zodResolver(newBranchFormSchema),
   });
+
+  useEffect(() => {
+    const rawCNPJ = getValues("cnpj") || "";
+    const formatted = formatCNPJ(rawCNPJ);
+    setCnpjValue(formatted);
+  }, [getValues]);
+
+  useEffect(() => {
+    const rawCEP = getValues("cep") || "";
+    const rawPhone = getValues("telephone") || "";
+
+    setCepValue(formatCEP(rawCEP));
+    setPhoneValue(formatPhone(rawPhone));
+  }, [getValues]);
+
 
   const handleCnpj = async () => {
     const cnpj = getValues("cnpj").replace(/\D/g, "");
@@ -136,6 +165,22 @@ export function AddNewBranch() {
       .replace(/(\d{3})(\d{4})$/, "$1/$2")
       .replace(/(\d{4})(\d{2})$/, "$1-$2");
   };
+
+  const formatCEP = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 9);
+  };
+
+  const formatPhone = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/g, "($1) $2")
+      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
+      .slice(0, 15);
+  };
+
 
   return (
     <Dialog>
@@ -225,12 +270,18 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">CEP</Label>
-              <Input type="text" {...register("cep")} />
-              {errors.cep && (
-                <span className="text-sm text-red-600">
-                  {errors.cep.message}
-                </span>
-              )}
+              <Input
+                type="text"
+                value={cepValue}
+                onChange={(e) => {
+                  const formattedCEP = formatCEP(e.target.value);
+                  setCepValue(formattedCEP);
+                  setValue("cep", formattedCEP);
+                }}
+                placeholder="00000-000"
+                maxLength={9}
+              />
+              {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
             </div>
 
             <div>
@@ -283,14 +334,19 @@ export function AddNewBranch() {
               )}
             </div>
 
-            <div>
+            <div className="flex flex-col gap-2">
               <Label className="text-white">Telefone</Label>
-              <Input type="text" {...register("telephone")} />
-              {errors.telephone && (
-                <span className="text-sm text-red-600">
-                  {errors.telephone.message}
-                </span>
-              )}
+              <Input
+                type="text"
+                value={phoneValue}
+                onChange={(e) => {
+                  const formattedPhone = formatPhone(e.target.value);
+                  setPhoneValue(formattedPhone);
+                  setValue("telephone", formattedPhone);
+                }}
+                placeholder="(00) 00000-0000"
+                maxLength={15}
+              />
             </div>
 
             <div className="flex justify-end">
