@@ -19,10 +19,14 @@ import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useUser } from "@/context/user-provider";
 
+const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
+
 // Schema do convite (primeiro modal)
 const subcontractorInviteSchema = z.object({
   email: z.string().email("Insira um email válido"),
-  cnpj: z.string().nonempty("Insira o CNPJ"),
+  cnpj: z.string()
+    .nonempty("Insira o CNPJ")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato XX.XXX.XXX/XXXX-XX"),
 });
 
 // Schema do contrato (segundo modal)
@@ -31,7 +35,9 @@ const subcontractorInviteSchema = z.object({
 // - "responsible" é exigido e deve ser um id válido (não pode ser vazio);
 // - "activities" e "requirements" são arrays.
 const contractFormSchema = z.object({
-  cnpj: z.string().nonempty("CNPJ obrigatório"),
+  cnpj: z.string()
+    .nonempty("CNPJ obrigatório")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato XX.XXX.XXX/XXXX-XX"),
   serviceType: z.string().nonempty("O tipo de serviço é obrigatório"),
   serviceDuration: z.string().nonempty("A duração do serviço é obrigatória"),
   serviceName: z.string().nonempty("O nome do serviço é obrigatório"),
