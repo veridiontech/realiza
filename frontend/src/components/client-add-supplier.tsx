@@ -82,6 +82,7 @@ export function ModalTesteSendSupplier() {
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
+  const [isMainModalOpen, setIsMainModalOpen] = useState(false);  // controla o primeiro modal 
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -250,7 +251,6 @@ export function ModalTesteSendSupplier() {
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       }
       );
-      console.log(selectedBranch);
       setManagers(res.data.content);
     } catch (err) {
       console.log(
@@ -270,51 +270,58 @@ export function ModalTesteSendSupplier() {
     getActivities();
   }, []);
 
-  const createContract = async (data: ContractFormSchema) => {
-    if (!providerDatas) {
-      toast.error("Dados do prestador não encontrados. Reinicie o processo.");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const payload = {
-        ...data,
-        idRequester: user?.idUser,
-        providerDatas,
-        idBranch: selectedBranch?.idBranch,
-        idActivities: selectedActivities,
-      };
-      console.log("enviando dados do contrato", payload);
-      setDatasSender(payload);
-      console.log("dados recebidos:", datasSender);
+const createContract = async (data: ContractFormSchema) => {
+  if (!providerDatas) {
+    toast.error("Dados do prestador não encontrados. Reinicie o processo.");
+    return;
+  }
+  setIsLoading(true);
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const payload = {
+      ...data,
+      idRequester: user?.idUser,
+      providerDatas,
+      idBranch: selectedBranch?.idBranch,
+      idActivities: selectedActivities,
+    };
+    console.log("enviando dados do contrato", payload);
+    setDatasSender(payload);
+    console.log("dados recebidos:", datasSender);
 
-      await axios.post(`${ip}/contract/supplier`, payload), {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      };
-      toast.success("Contrato criado com sucesso!");
-    } catch (err: any) {
-      if (err.response) {
-        console.error("Erro no servidor:", err.response.data);
-        toast.error(`Erro ao criar contrato: Erro desconhecido.`);
-      } else if (err.request) {
-        console.error("Erro na requisição:", err.request);
-        toast.error("Erro na requisição ao servidor.");
-      } else {
-        console.error("Erro ao configurar requisição:", err.message);
-        toast.error("Erro ao criar contrato. Tente novamente.");
-      }
-    } finally {
-      setIsLoading(false);
+    await axios.post(`${ip}/contract/supplier`, payload, {
+      headers: { Authorization: `Bearer ${tokenFromStorage}` },
+    });
+    toast.success("Contrato criado com sucesso!");
+    setNextModal(false);
+    setIsMainModalOpen(false);
+
+  } catch (err: any) {
+    if (err.response) {
+      console.error("Erro no servidor:", err.response.data);
+      toast.error("Erro ao criar contrato: Erro desconhecido.");
+    } else if (err.request) {
+      console.error("Erro na requisição:", err.request);
+      toast.error("Erro na requisição ao servidor.");
+    } else {
+      console.error("Erro ao configurar requisição:", err.message);
+      toast.error("Erro ao criar contrato. Tente novamente.");
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const getServicesType = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/contract/service-type`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      });
+        params: {
+          owner: "BRANCH",
+          idOwner: selectedBranch?.idBranch
+        },
+        headers: { Authorization: `Bearer ${tokenFromStorage}`,}
+      }, );
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);
@@ -704,8 +711,8 @@ export function ModalTesteSendSupplier() {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
+      <DialogTrigger asChild >
         <Button className="hidden bg-sky-700 md:block">
           Cadastrar novo prestador
         </Button>

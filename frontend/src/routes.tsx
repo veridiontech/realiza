@@ -7,7 +7,6 @@ import { ForgotPassword } from "./pages/app/forgot-password";
 import { NewPassword } from "./pages/app/new-password";
 import { NewPassword2 } from "./pages/app/new-password2";
 import { SignIn } from "./pages/app/sign-in";
-import MonittoringBis from "./pages/auth/realizaProfile/bis";
 import { Collaborators } from "./pages/auth/realizaProfile/collaborators";
 import { Dashboard } from "./pages/auth/realizaProfile/home/__dashboard";
 import { Enterprise } from "./pages/auth/realizaProfile/enterprises/enterprise";
@@ -52,6 +51,7 @@ import { HomeClient } from "./pages/auth/clientProfile/home/homeClient";
 import { ProfileBranch } from "./pages/auth/realizaProfile/profileEnterprise/profileBranch";
 import { SupplierContractNewPage } from "./pages/auth/supplier/contracts/supplier-contract-new-page";
 import { DocumentPageNew } from "./pages/auth/realizaProfile/documents/new-documents-page/document-page";
+import { MonittoringBis } from "./pages/auth/realizaProfile/bis";
 
 
 export const router = createBrowserRouter([

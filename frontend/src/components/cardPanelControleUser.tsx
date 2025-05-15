@@ -21,8 +21,8 @@ interface CardPanelControlProps {
     };
     newUser: {
       idUser: string;
-      firstName: string;
-      surname: string;
+      firstName?: string | undefined;
+      surname?:  string | undefined;
       nameEnterprise?: string | undefined;
       cpf?: string | undefined;
       email?: string | undefined;
@@ -33,7 +33,7 @@ interface CardPanelControlProps {
   onActionCompleted?: (idSolicitation: string) => void;
 }
 
-export function CardPanelControl({
+export function CardPanelControlUser({
   data,
   onActionCompleted,
 }: CardPanelControlProps) {
@@ -47,10 +47,11 @@ export function CardPanelControl({
 
       console.log("teste id da solicitacao", data.idSolicitation);
 
-      await axios.patch(`${ip}/item-management/${data.idSolicitation}/approve`, 
+      await axios.patch(
+        `${ip}/item-management/${data.idSolicitation}/approve`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        },
       );
 
       toast.success("Solicitação aprovada");
@@ -76,8 +77,8 @@ export function CardPanelControl({
       const response = await axios.patch(
         `${ip}/item-management/${data.idSolicitation}/deny`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        },
       );
 
       alert(response.data);
@@ -100,6 +101,7 @@ export function CardPanelControl({
             Solicitação de: {data.requester.firstName} {data.requester.surname}
           </span>
         </div>
+        {}
         <MoreDetailsUser
           idSolicitation={data.idSolicitation}
           requesterFirstName={data.requester.firstName}

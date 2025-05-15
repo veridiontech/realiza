@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { CardPanelControl } from "@/components/cardPanelControl";
+import { CardPanelControl } from "@/components/cardPanelControlProvider";
 import { Button } from "@/components/ui/button";
 import { ColumnPanelControl } from "@/components/column-panel-control";
 import { ScrollArea } from "@/components/ui/scroll-area";

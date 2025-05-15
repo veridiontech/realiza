@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Ban, CheckCircle, Rotate3D } from "lucide-react";
 import { ip } from "@/utils/ip";
-
-
-import { CardPanelControl } from "@/components/cardPanelControl";
 import { ColumnPanelControl } from "@/components/column-panel-control";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CardPanelControlUser } from "@/components/cardPanelControleUser";
 
 interface Requester {
   idUser: string;
@@ -90,7 +88,7 @@ export function UserSolicitations() {
                           {solicitations
                             .filter((solicitation) => solicitation.status === "PENDING")
                             .map((solicitation) => (
-                              <CardPanelControl
+                              <CardPanelControlUser
                                 key={solicitation.idSolicitation}
                                 data={solicitation}
                                 onActionCompleted={removeSolicitation}
@@ -117,7 +115,7 @@ export function UserSolicitations() {
                               (solicitation) => solicitation.status === "APPROVED",
                             )
                             .map((solicitation) => (
-                              <CardPanelControl
+                              <CardPanelControlUser
                                 key={solicitation.idSolicitation}
                                 data={solicitation}
                                 onActionCompleted={removeSolicitation}
@@ -143,7 +141,7 @@ export function UserSolicitations() {
                           {solicitations
                             .filter((solicitation) => solicitation.status === "DENIED")
                             .map((solicitation) => (
-                              <CardPanelControl
+                              <CardPanelControlUser
                                 key={solicitation.idSolicitation}
                                 data={solicitation}
                                 onActionCompleted={removeSolicitation}
