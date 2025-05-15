@@ -1140,8 +1140,8 @@ export function ModalTesteSendSupplier() {
                     {isSsma === true && (
                       <div className="flex flex-col gap-2">
                         <Label className="text-white">Tipo de atividade</Label>
-                        <ScrollArea className="h-[15vh]">
-                          <div className="flex flex-col gap-1">
+                        <ScrollArea className="h-[20vh] p-2 rounded-lg">
+                          <div className="flex flex-col gap-1 bg-white p-2 rounded-lg">
                             {activities.map((activity: any) => (
                               <div
                                 key={activity.idActivity}
@@ -1159,7 +1159,7 @@ export function ModalTesteSendSupplier() {
                                     activity.idActivity,
                                   )}
                                 />
-                                <p className="text-white">{activity.title}</p>
+                                <p className="text-black">{activity.title}</p>
                               </div>
                             ))}
 
