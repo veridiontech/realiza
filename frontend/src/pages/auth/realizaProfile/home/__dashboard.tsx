@@ -58,7 +58,7 @@ const createUserClient = z.object({
     .email("Formato de email inválido")
     .nonempty("Email é obrigatório"),
   position: z.string().nonempty("Seu cargo é obrigatório"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  // password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   role: z.string().default("ROLE_CLIENT_MANAGER"),
 });
 
@@ -75,6 +75,7 @@ export function Dashboard() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<CreateUserClient>({
     resolver: zodResolver(createUserClient),
   });
@@ -95,6 +96,8 @@ export function Dashboard() {
         }
       );
       toast.success("Sucesso ao criar usuário");
+      await getUsersFromBranch();
+      reset();
     } catch (err: any) {
       if (err.response && err.response.data) {
         const mensagemBackend =
@@ -126,8 +129,6 @@ export function Dashboard() {
     } catch (err) {
       console.error("erro ao buscar usuários:", err);
       // setError("Erro ao buscar usuários.");
-    } finally {
-      // setLoading(false);
     }
   };
 
@@ -378,7 +379,7 @@ export function Dashboard() {
                                   )}
                                 </div>
 
-                                <div>
+                                {/* <div>
                                   <Label className="text-white">Senha</Label>
                                   <Input
                                     type="password"
@@ -390,7 +391,7 @@ export function Dashboard() {
                                       {errors.password.message}
                                     </span>
                                   )}
-                                </div>
+                                </div> */}
 
                                 <div className="flex justify-end">
                                   <Button
