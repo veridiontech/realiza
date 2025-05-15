@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Upload } from 'lucide-react';
+import React, { useState } from 'react';
+import { Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { UploadDocumentModal } from '@/components/ui/upload-document-modal'; 
+import { UploadDocumentModal } from '@/components/ui/upload-document-modal';
 
 export const UploadDocumentButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);  // Estado para controle do modal
@@ -22,7 +22,7 @@ export const UploadDocumentButton = () => {
         onClick={handleOpenModal}
         className="bg-realizaBlue text-white p-2 hover:bg-blue-700 w-[40px] h-[40px] flex items-center justify-center"
       >
-        <Upload size={20} />
+        <Book size={20} />
       </Button>
 
       {/* Modal de upload de documento */}
