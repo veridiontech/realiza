@@ -1,10 +1,20 @@
 import axios from "axios";
-import { CalendarDays, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { CalendarDays, ThumbsUp, User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Oval } from "react-loader-spinner";
 import { useState } from "react";
 import { MoreDetails } from "@/pages/auth/realizaProfile/panel-control/more-details";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CardPanelControlProps {
   data: {
@@ -27,11 +37,13 @@ interface CardPanelControlProps {
   };
   // Callback opcional para atualizar a lista após a ação
   onActionCompleted?: (idSolicitation: string) => void;
+  status: string,
 }
 
 export function CardPanelControlProvider({
   data,
   onActionCompleted,
+  status
 }: CardPanelControlProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,7 +59,7 @@ export function CardPanelControlProvider({
         `${ip}/item-management/${data.idSolicitation}/approve`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        },
+        }
       );
 
       toast.success("Solicitação aprovada");
@@ -74,7 +86,7 @@ export function CardPanelControlProvider({
         `${ip}/item-management/${data.idSolicitation}/deny`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        },
+        }
       );
 
       alert(response.data);
@@ -102,7 +114,11 @@ export function CardPanelControlProvider({
           idSolicitation={data.idSolicitation}
           requesterFirstName={data.requester.firstName}
           requesterSurname={data.requester.surname}
-          requesterCpf={data.requester.cpf} nameEnterprise={data.requester.nameEnterprise} corporateName={data.newProvider.corporateName} cnpj={data.newProvider.cnpj}        />
+          requesterCpf={data.requester.cpf}
+          nameEnterprise={data.requester.nameEnterprise}
+          corporateName={data.newProvider.corporateName}
+          cnpj={data.newProvider.cnpj}
+        />
       </div>
       <div className="flex w-full flex-col gap-2 border-y border-[#7CA1F333] py-4">
         <h3 className="mb-3 text-sm font-semibold text-[#2563EB]">
@@ -119,13 +135,29 @@ export function CardPanelControlProvider({
             {new Date(data.creationDate).toLocaleString()}
           </span>
         </div>
-        <div className="flex flex-row items-center justify-center gap-2">
-          <button
-            onClick={handleDeny}
-            className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#FF464633] p-1 text-xs text-[#FF4646]"
-          >
-            Dispensar <ThumbsDown size={15} />
-          </button>
+          {status === "APPROVED" || status === "DENIED"? (<div></div>): (<div className="flex flex-row items-center justify-center gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger>
+              {" "}
+              <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300">
+                Dispensar <ThumbsUp size={15} />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Deseja mesmo dispensar a solicitação de acesso de{" "}
+                  {data.newProvider.corporateName} ao sistema?
+                </AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeny}>
+                  Dispensar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {isLoading ? (
             <button
               onClick={handleApprove}
@@ -142,14 +174,30 @@ export function CardPanelControlProvider({
               />
             </button>
           ) : (
-            <button
-              onClick={handleApprove}
-              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
-            >
-              Aceitar <ThumbsUp size={15} />
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger>
+                {" "}
+                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300">
+                  Aceitar <ThumbsUp size={15} />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Deseja mesmo confirmar o acesso de{" "}
+                    {data.newProvider.corporateName} ao sistema?
+                  </AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="bg-red-300 hover:bg-red-400">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleApprove} className="bg-green-800 text-white">
+                      Aceitar
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
-        </div>
+        </div>)}
       </div>
     </div>
   );

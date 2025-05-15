@@ -1,10 +1,20 @@
 import axios from "axios";
-import { CalendarDays, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { CalendarDays, ThumbsUp, User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Oval } from "react-loader-spinner";
 import { useState } from "react";
 import { MoreDetailsUser } from "@/pages/auth/realizaProfile/panel-control/more-details-user";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CardPanelControlProps {
   data: {
@@ -22,7 +32,7 @@ interface CardPanelControlProps {
     newUser: {
       idUser: string;
       firstName?: string | undefined;
-      surname?:  string | undefined;
+      surname?: string | undefined;
       nameEnterprise?: string | undefined;
       cpf?: string | undefined;
       email?: string | undefined;
@@ -51,7 +61,7 @@ export function CardPanelControlUser({
         `${ip}/item-management/${data.idSolicitation}/approve`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        },
+        }
       );
 
       toast.success("Solicitação aprovada");
@@ -78,7 +88,7 @@ export function CardPanelControlUser({
         `${ip}/item-management/${data.idSolicitation}/deny`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        },
+        }
       );
 
       alert(response.data);
@@ -130,34 +140,79 @@ export function CardPanelControlUser({
           </span>
         </div>
         <div className="flex flex-row items-center justify-center gap-2">
-          <button
-            onClick={handleDeny}
-            className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#FF464633] p-1 text-xs text-[#FF4646]"
-          >
-            Dispensar <ThumbsDown size={15} />
-          </button>
-          {isLoading ? (
-            <button
-              onClick={handleApprove}
-              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
-            >
-              <Oval
-                visible={true}
-                height="20"
-                width="20"
-                color="#4fa94d"
-                ariaLabel="oval-loading"
-                wrapperStyle={{}}
-                wrapperClass=""
-              />
-            </button>
+          {status === "APPROVED" || status === "DENIED"? (
+            <div></div>
           ) : (
-            <button
-              onClick={handleApprove}
-              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
-            >
-              Aceitar <ThumbsUp size={15} />
-            </button>
+            <div className="flex flex-row items-center justify-center gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  {" "}
+                  <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300">
+                    Dispensar <ThumbsUp size={15} />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Deseja mesmo dispensar a solicitação de acesso de{" "}
+                      {data.newUser.firstName} {data.newUser.surname} ao
+                      sistema?
+                    </AlertDialogTitle>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeny}>
+                      Dispensar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              {isLoading ? (
+                <button
+                  onClick={handleApprove}
+                  className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
+                >
+                  <Oval
+                    visible={true}
+                    height="20"
+                    width="20"
+                    color="#4fa94d"
+                    ariaLabel="oval-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                  />
+                </button>
+              ) : (
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    {" "}
+                    <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300">
+                      Aceitar <ThumbsUp size={15} />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Deseja mesmo confirmar o acesso de{" "}
+                        {data.newUser.firstName} {data.newUser.surname}ao
+                        sistema?
+                      </AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-red-300 hover:bg-red-400">
+                        Cancelar
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleApprove}
+                        className="bg-green-800 text-white"
+                      >
+                        Aceitar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
           )}
         </div>
       </div>

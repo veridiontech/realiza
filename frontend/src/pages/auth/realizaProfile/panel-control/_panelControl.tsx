@@ -1,12 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ProviderSolicitations } from "./provider-solicitations";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useState } from "react";
 import { UserSolicitations } from "./users-solicitation";
 
@@ -23,31 +16,24 @@ export function ControlPanel() {
             </h2>
             <div className="flex items-center gap-2">
               <Button
-                className="bg-realizaBlue"
+                className={`${
+                  selectTab === "provider" ? "bg-realizaBlue" : "bg-transparent border text-black border-black hover:bg-neutral-300"
+                }`}
                 onClick={() => setSelectTab("provider")}
               >
                 Empresas solicitantes
               </Button>
+
               <Button
-                className="bg-realizaBlue"
+                className={`${
+                  selectTab === "user" ? "bg-realizaBlue" : "bg-transparent border text-black border-black hover:bg-neutral-300"
+                }`}
                 onClick={() => setSelectTab("user")}
               >
                 Usuários solicitantes
               </Button>
             </div>
           </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-realizaBlue hidden md:block">
-                Todas solicitações
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Are you absolutely sure?</DialogTitle>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
       {selectTab === "provider" && <ProviderSolicitations />}
