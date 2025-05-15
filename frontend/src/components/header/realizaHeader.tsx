@@ -21,13 +21,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfilePhoto } from "./profile-photo";
 import { useBranch } from "@/context/Branch-provider";
-import { Solicitation } from "@/pages/auth/realizaProfile/panel-control/_panelControl";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { useBoard } from "@/context/context-ultra/Board-provider";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
 import bannerHeader from "@/assets/banner/Rectangle 42203.png"
+import { Solicitation } from "@/pages/auth/realizaProfile/panel-control/provider-solicitations";
 
 interface ApiResponse {
   content: Solicitation[];

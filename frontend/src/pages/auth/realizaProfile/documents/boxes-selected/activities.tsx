@@ -5,6 +5,8 @@ import { ip } from "@/utils/ip";
 import { BoxActivities } from "../new-documents-page/box-activitie";
 import { Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+import { Blocks } from "react-loader-spinner";
 
 export function ActivitiesBox() {
   // const [checkedDocs, setCheckedDocs] = useState<string[]>([]); // Array para armazenar os documentos selecionados
@@ -12,14 +14,12 @@ export function ActivitiesBox() {
   const [activities, setActivities] = useState<any>([]);
   const [documentsByActivitie, setDocumentsByActivitie] = useState([]);
   const { selectedBranch } = useBranch();
+  const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(
+    null,
+  );
 
   const getActivitie = async () => {
-<<<<<<< HEAD
-
     const tokenFromStorage = localStorage.getItem("tokenClient");
-=======
-    const token = localStorage.getItem("tokenClient");
->>>>>>> d182f36b144dc13a8a11a2a31cba6fa4171f1e00
     try {
       const resSelected = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
@@ -30,32 +30,29 @@ export function ActivitiesBox() {
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
-<<<<<<< HEAD
     }
   };
 
-  // Função para buscar todos os documentos da filial
-  const getAllDocuments = async () => {
-    setLoadingAllDocuments(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/document/branch/filtered-branch`, {
-        params: {
-          idSearch: selectedBranch?.idBranch,
-          size: 1000,
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        },
-      });
-      console.log(res.data.content);
-      setActivitiesAll(res.data.content);
-    } catch (err) {
-      console.log("Erro ao buscar todos documentos da filial:", err);
-    } finally {
-      setLoadingAllDocuments(false);
-=======
->>>>>>> d182f36b144dc13a8a11a2a31cba6fa4171f1e00
-    }
-  };
+  // // Função para buscar todos os documentos da filial
+  // const getAllDocuments = async () => {
+  //   setLoadingAllDocuments(true);
+  //   try {
+  //     const tokenFromStorage = localStorage.getItem("tokenClient");
+  //     const res = await axios.get(`${ip}/document/branch/filtered-branch`, {
+  //       params: {
+  //         idSearch: selectedBranch?.idBranch,
+  //         size: 1000,
+  //         headers: { Authorization: `Bearer ${tokenFromStorage}` }
+  //       },
+  //     });
+  //     console.log(res.data.content);
+  //     setActivitiesAll(res.data.content);
+  //   } catch (err) {
+  //     console.log("Erro ao buscar todos documentos da filial:", err);
+  //   } finally {
+  //     setLoadingAllDocuments(false);
+  //   }
+  // };
 
   const getDocumentByActivitie = async (id: string) => {
     console.log("id selecionado", id);
@@ -63,14 +60,10 @@ export function ActivitiesBox() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-<<<<<<< HEAD
         `${ip}/contract/activity/find-document-by-activity/${activitieSelected?.idActivity}`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-=======
-        `${ip}/contract/activity/find-document-by-activity/${id}`,
->>>>>>> d182f36b144dc13a8a11a2a31cba6fa4171f1e00
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        },
       );
       console.log(res.data.content);
       console.log(res.data);
@@ -80,29 +73,87 @@ export function ActivitiesBox() {
     }
   };
 
-  // const removeDocumentByActivitie = async(idActivity: string) => {
-  //   const token = localStorage.getItem("tokenClient")
-  //   try{
-  //     await axios.post(`${ip}/contract/activity/remove-document-from-activity/${idActivity}`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     })
-  //   }catch(err: any){
-  //     console.log("Erro ao remover documento:", err);
-      
-  //   }
-  // }
+  const removeDocumentByActivitie = async (
+    idActivity: string,
+    idDocumentBranch: string,
+  ) => {
+    const token = localStorage.getItem("tokenClient");
+    try {
+      const res = await axios.post(
+        `${ip}/contract/activity/remove-document-from-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      console.log(res.data);
+      toast.success("Sucesso ao remover documento");
+    } catch (err: any) {
+      console.log("Erro ao remover documento:", err);
+      toast.error("Erro ao remover documento");
+    }
+  };
 
-  //   const addDocumentByActivitie = async(idActivity: string) => {
-  //   const token = localStorage.getItem("tokenClient")
-  //   try{
-  //     await axios.post(`${ip}/contract/activity/remove-document-from-activity/${idActivity}`)
-  //   }catch(err: any){
-  //     console.log("Erro ao remover documento:", err);
-      
-  //   }
-  // }
+  const addDocumentByActivitie = async (
+    idActivity: string,
+    idDocumentBranch: string,
+  ) => {
+    const token = localStorage.getItem("tokenClient");
+    try {
+      const res = await axios.post(
+        `${ip}/contract/activity/add-document-to-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      console.log(res.data);
+      toast.success("Sucesso ao adicionar documento à atividade");
+    } catch (err: any) {
+      console.log("Erro ao adicionar documento:", err);
+      toast.error("Erro ao adicionar documento à atividade");
+    }
+  };
+
+const handleSelectDocument = async (document: any, idDocument: string) => {
+  const idActivity = activitieSelected?.idActivity;
+  if (!idActivity) return;
+
+  setLoadingDocumentId(idDocument);
+
+  try {
+    if (document.selected === true) {
+      await removeDocumentByActivitie(idActivity, idDocument);
+
+      // Atualiza visualmente o documento removido
+      setDocumentsByActivitie((prevDocs: any) =>
+        prevDocs.map((doc: any) =>
+          doc.idDocument === idDocument
+            ? { ...doc, selected: false }
+            : doc
+        )
+      );
+    } else {
+      await addDocumentByActivitie(idActivity, idDocument);
+
+      setDocumentsByActivitie((prevDocs: any) =>
+        prevDocs.map((doc: any) =>
+          doc.idDocument === idDocument
+            ? { ...doc, selected: true }
+            : doc
+        )
+      );
+    }
+
+    // Você ainda pode manter a chamada real de atualização, se quiser garantir os dados
+    // await getDocumentByActivitie(idActivity);
+  } finally {
+    setLoadingDocumentId(null);
+  }
+};
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -138,11 +189,25 @@ export function ActivitiesBox() {
                 key={document.idDocument}
                 className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
               >
-                <input
-                  type="checkbox"
-                  checked={document.selected === true}
-                  onChange={() => document.idDocument} // o certo é aqui
-                />
+                {loadingDocumentId === document.idDocument ? (
+                  <Blocks
+                    height="50"
+                    width="50"
+                    color="#4fa94d"
+                    ariaLabel="blocks-loading"
+                    visible={true}
+                  />
+                ) : (
+                  <input
+                    type="checkbox"
+                    checked={document.selected === true}
+                    onChange={() =>
+                      handleSelectDocument(document, document.idDocument)
+                    }
+                    className="cursor-pointer"
+                  />
+                )}
+
                 <span>{document.documentTitle || "Documento"}</span>
               </div>
             ))}

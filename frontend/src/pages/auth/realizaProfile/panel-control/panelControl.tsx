@@ -27,10 +27,13 @@ export interface Solicitation {
   details: string;
   creationDate: string;
   requester: Requester;
-  newProvider: {
-    cnpj?: string | undefined;
-    corporateName?: string | undefined;
-    telephone?: string | undefined;
+  newUser: {
+      idUser: string;
+      firstName: string;
+      surname: string;
+      nameEnterprise?: string | undefined ;
+      cpf?: string | undefined;
+      email:string | undefined;
   };
   status: string;
 }
