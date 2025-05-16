@@ -79,7 +79,7 @@ export function Dashboard() {
   const { selectedBranch } = useBranch();
   const { user } = useUser();
   const [phoneValue, setPhoneValue] = useState("");
-  const [cpfValue, setCpfValue] = useState("");
+  // const [cpfValue, setCpfValue] = useState("");
 
   const {
     register,
@@ -92,14 +92,14 @@ export function Dashboard() {
   });
 
 
-  const formatCPF = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-      .slice(0, 14);
-  };
+  // const formatCPF = (value: string) => {
+  //   return value
+  //     .replace(/\D/g, "")
+  //     .replace(/(\d{3})(\d)/, "$1.$2")
+  //     .replace(/(\d{3})(\d)/, "$1.$2")
+  //     .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+  //     .slice(0, 14);
+  // };
 
   // Máscara telefone
   const formatPhone = (value: string) => {
