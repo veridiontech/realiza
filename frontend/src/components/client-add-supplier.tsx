@@ -93,8 +93,6 @@ export function ModalTesteSendSupplier() {
   const [suppliers, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
   const { datasSender, setDatasSender } = useDataSendEmailContext();
-  const { supplier } = useSupplier();
-  const [contracts, setContracts] = useState([]);
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
@@ -134,8 +132,6 @@ export function ModalTesteSendSupplier() {
     register: registerSubContract,
     handleSubmit: handleSubmitSubContract,
     formState: { errors: errorsSubContract },
-    setValue: setValueSub,
-    getValues: getValuesSub,
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
@@ -174,43 +170,6 @@ export function ModalTesteSendSupplier() {
     } catch (error) {
       console.log("erro ao buscar cnpj", error);
 
-      toast.error("Erro ao buscar dados do CNPJ");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getContracts = async () => {
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(
-        `${ip}/contract/supplier/filtered-supplier?idSearch=${supplier?.idProvider}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
-      console.log("contratos:", res.data.content);
-
-      setContracts(res.data.content);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    if (supplier?.idProvider) {
-      getContracts();
-    }
-  }, [supplier?.idProvider]);
-
-  const handleCNPJSearchSub = async () => {
-    const cnpjValue = getValuesSub("cnpj");
-    console.log("CNPJ no form de subcontratado:", cnpjValue);
-    setIsLoading(true);
-    try {
-      const companyData = await fetchCompanyByCNPJ(cnpjValue);
-      setValueSub("corporateName", companyData.razaoSocial || "");
-    } catch (error) {
       toast.error("Erro ao buscar dados do CNPJ");
     } finally {
       setIsLoading(false);
@@ -447,18 +406,18 @@ export function ModalTesteSendSupplier() {
                   <Input
                     type="text"
                     placeholder="00.000.0000000-00"
-                    // value={cnpjValue}
-                    // onChange={(e) => {
-                    //   const formatted = formatCNPJ(e.target.value);
-                    //   setCnpjValue(formatted);
-                    //   setValue("cnpj", formatted, { shouldValidate: true });
-                    // }}
+                    value={cnpjValue}
+                    onChange={(e) => {
+                      const formatted = formatCNPJ(e.target.value);
+                      setCnpjValue(formatted);
+                      setValue("cnpj", formatted, { shouldValidate: true });
+                    }}
                     className="w-full"
-                    {...register("cnpj")}
+                    // {...register("cnpj")}
                   />
                   {isLoading ? (
                     <div
-                      onClick={handleCNPJSearchSub}
+                      onClick={handleCNPJSearch}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Oval
@@ -473,7 +432,7 @@ export function ModalTesteSendSupplier() {
                     </div>
                   ) : (
                     <div
-                      onClick={handleCNPJSearchSub}
+                      onClick={handleCNPJSearch}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Search />
@@ -547,7 +506,7 @@ export function ModalTesteSendSupplier() {
                   />
                   {isLoading ? (
                     <div
-                      onClick={handleCNPJSearchSub}
+                      onClick={handleCNPJSearch}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Oval
@@ -562,7 +521,7 @@ export function ModalTesteSendSupplier() {
                     </div>
                   ) : (
                     <div
-                      onClick={handleCNPJSearchSub}
+                      onClick={handleCNPJSearch}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Search />
