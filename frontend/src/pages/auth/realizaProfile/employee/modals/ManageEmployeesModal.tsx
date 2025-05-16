@@ -21,6 +21,11 @@ interface ManageEmployeesModalProps {
   idProvider: string | null;
 }
 
+interface Contract {
+  idContract: string;
+  contractName: string;
+}
+
 export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) {
   const [activeTab, setActiveTab] = useState<"alocar" | "desalocar">("alocar");
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -29,6 +34,8 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectContractsModalOpen, setSelectContractsModalOpen] = useState(false);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
 
   useEffect(() => {
     if (mainModalOpen) {
@@ -56,7 +63,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       fetchAndSortEmployees();
     }
   }, [mainModalOpen]);
-
+  
   const toggleSelectAll = () => {
     if (selectedEmployees.length === employees.length) {
       setSelectedEmployees([]);
@@ -77,6 +84,35 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
     if (selectedEmployees.length === 0) return;
     setMainModalOpen(false);
     setSelectContractsModalOpen(true);
+  };
+
+  const getContracts = async () => {
+      try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const res = await axios.get(
+          `${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`,
+          {
+            headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          }
+        );
+        console.log("contratos:", res.data.content);
+  
+        setContracts(res.data.content);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+  
+    useEffect(() => {
+      if (idProvider) {
+        getContracts();
+      }
+    }, [idProvider]);
+
+      const toggleSelectContract = (id: string) => {
+    setSelectedContracts((prev) =>
+      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+    );
   };
 
   return (
@@ -190,6 +226,28 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
           <DialogHeader>
             <DialogTitle className="text-white text-center text-lg">
               Selecione os contratos que deseja alocar esses funcionários
+              <ScrollArea className="h-[50vh] mt-4 space-y-2">
+    {contracts.length > 0 ? (
+      contracts.map((contract) => {
+        const isSelected = selectedContracts.includes(contract.idContract);
+        return (
+          <button
+            key={contract.idContract}
+            onClick={() => toggleSelectContract(contract.idContract)}
+            className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
+              isSelected
+                ? "bg-green-600 border-green-400"
+                : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+            }`}
+          >
+            {contract.contractName}
+          </button>
+        );
+      })
+    ) : (
+      <p>Nenhum contrato disponível.</p>
+    )}
+  </ScrollArea>
             </DialogTitle>
           </DialogHeader>
           <div className="mt-6 flex justify-end">
