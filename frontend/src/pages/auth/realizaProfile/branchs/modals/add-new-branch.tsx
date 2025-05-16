@@ -158,13 +158,26 @@ export function AddNewBranch() {
   };
 
   const formatCNPJ = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{2})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{4})$/, "$1/$2")
-      .replace(/(\d{4})(\d{2})$/, "$1-$2");
+    const digits = value.replace(/\D/g, "");
+
+    let formatted = digits;
+
+    if (digits.length > 2) {
+      formatted = digits.replace(/^(\d{2})(\d+)/, "$1.$2");
+    }
+    if (digits.length > 5) {
+      formatted = formatted.replace(/^(\d{2})\.(\d{3})(\d+)/, "$1.$2.$3");
+    }
+    if (digits.length > 8) {
+      formatted = formatted.replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d+)/, "$1.$2.$3/$4");
+    }
+    if (digits.length > 12) {
+      formatted = formatted.replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d{0,2})/, "$1.$2.$3/$4-$5");
+    }
+
+    return formatted;
   };
+
 
   const formatCEP = (value: string) => {
     return value
@@ -240,7 +253,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Email</Label>
-              <Input type="email" {...register("email")} />
+              <Input type="email"
+                placeholder="Digite seu e-mail"
+                {...register("email")} />
               {errors.email && (
                 <span className="text-sm text-red-600">
                   {errors.email.message}
@@ -250,7 +265,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Nome da filial</Label>
-              <Input type="text" {...register("name")} />
+              <Input type="text"
+                placeholder="Digite o nome da filial"
+                {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">
                   {errors.name.message}
@@ -260,7 +277,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Razão social</Label>
-              <Input type="text" {...register("name")} />
+              <Input type="text"
+                placeholder="Digite a razão social"
+                {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">
                   {errors.name.message}
@@ -286,7 +305,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Cidade</Label>
-              <Input type="text" {...register("city")} />
+              <Input type="text"
+                placeholder="Digite sua cidade"
+                {...register("city")} />
               {errors.city && (
                 <span className="text-sm text-red-600">
                   {errors.city.message}
@@ -296,7 +317,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Endereço</Label>
-              <Input type="text" {...register("address")} />
+              <Input type="text"
+                placeholder="Digite seu endereço"
+                {...register("address")} />
               {errors.address && (
                 <span className="text-sm text-red-600">
                   {errors.address.message}
@@ -306,7 +329,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Número</Label>
-              <Input type="text" {...register("number")} />
+              <Input type="text"
+                placeholder="Digite o número"
+                {...register("number")} />
               {errors.number && (
                 <span className="text-sm text-red-600">
                   {errors.number.message}
@@ -316,7 +341,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">País</Label>
-              <Input type="text" {...register("country")} />
+              <Input type="text"
+                placeholder="Digite seu país"
+                {...register("country")} />
               {errors.country && (
                 <span className="text-sm text-red-600">
                   {errors.country.message}
@@ -326,7 +353,9 @@ export function AddNewBranch() {
 
             <div>
               <Label className="text-white">Estado</Label>
-              <Input type="text" {...register("state")} />
+              <Input type="text"
+                placeholder="Digite seu estado"
+                {...register("state")} />
               {errors.state && (
                 <span className="text-sm text-red-600">
                   {errors.state.message}

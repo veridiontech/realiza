@@ -25,17 +25,33 @@ import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 import { useSupplier } from "@/context/Supplier-context";
 
+const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
+
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z.string(),
-  cnpj: z.string().nonempty("Insira o cnpj"),
+  phone: z
+    .string()
+    .nonempty("Telefone é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  cnpj: z
+    .string()
+    .nonempty("Insira o CNPJ")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato 00.000.000/0000-00"),
   corporateName: z.string().nonempty("Insira o nome da empresa"),
 });
 
 export const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z.string(),
-  cnpj: z.string().nonempty("Insira o cnpj"),
+  phone: z
+    .string()
+    .nonempty("Telefone é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  cnpj: z
+    .string()
+    .nonempty("Insira o CNPJ")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato 00.000.000/0000-00"),
   corporateName: z.string().nonempty("Insira o nome da empresa"),
   providerSubcontractor: z
     .string()
@@ -82,7 +98,11 @@ export function ModalTesteSendSupplier() {
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
-  const [isMainModalOpen, setIsMainModalOpen] = useState(false);  // controla o primeiro modal 
+  const [isMainModalOpen, setIsMainModalOpen] = useState(false);  // controla o primeiro modal
+  const [cnpjValue, setCnpjValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
+
+
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -119,6 +139,30 @@ export function ModalTesteSendSupplier() {
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
+
+  const formatCNPJ = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2")
+      .slice(0, 18);
+  };
+
+  const formatPhone = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/g, "($1) $2")
+      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
+      .slice(0, 15);
+  };
+
+  useEffect(() => {
+    setCnpjValue(getValues("cnpj") || "");
+    setPhoneValue(getValues("phone") || "");
+  }, [getValues]);
+
 
   const handleCNPJSearch = async () => {
     const cnpjValue = getValues("cnpj");
@@ -270,47 +314,47 @@ export function ModalTesteSendSupplier() {
     getActivities();
   }, []);
 
-const createContract = async (data: ContractFormSchema) => {
-  if (!providerDatas) {
-    toast.error("Dados do prestador não encontrados. Reinicie o processo.");
-    return;
-  }
-  setIsLoading(true);
-  try {
-    const tokenFromStorage = localStorage.getItem("tokenClient");
-    const payload = {
-      ...data,
-      idRequester: user?.idUser,
-      providerDatas,
-      idBranch: selectedBranch?.idBranch,
-      idActivities: selectedActivities,
-    };
-    console.log("enviando dados do contrato", payload);
-    setDatasSender(payload);
-    console.log("dados recebidos:", datasSender);
-
-    await axios.post(`${ip}/contract/supplier`, payload, {
-      headers: { Authorization: `Bearer ${tokenFromStorage}` },
-    });
-    toast.success("Contrato criado com sucesso!");
-    setNextModal(false);
-    setIsMainModalOpen(false);
-
-  } catch (err: any) {
-    if (err.response) {
-      console.error("Erro no servidor:", err.response.data);
-      toast.error("Erro ao criar contrato: Erro desconhecido.");
-    } else if (err.request) {
-      console.error("Erro na requisição:", err.request);
-      toast.error("Erro na requisição ao servidor.");
-    } else {
-      console.error("Erro ao configurar requisição:", err.message);
-      toast.error("Erro ao criar contrato. Tente novamente.");
+  const createContract = async (data: ContractFormSchema) => {
+    if (!providerDatas) {
+      toast.error("Dados do prestador não encontrados. Reinicie o processo.");
+      return;
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const payload = {
+        ...data,
+        idRequester: user?.idUser,
+        providerDatas,
+        idBranch: selectedBranch?.idBranch,
+        idActivities: selectedActivities,
+      };
+      console.log("enviando dados do contrato", payload);
+      setDatasSender(payload);
+      console.log("dados recebidos:", datasSender);
+
+      await axios.post(`${ip}/contract/supplier`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+      toast.success("Contrato criado com sucesso!");
+      setNextModal(false);
+      setIsMainModalOpen(false);
+
+    } catch (err: any) {
+      if (err.response) {
+        console.error("Erro no servidor:", err.response.data);
+        toast.error("Erro ao criar contrato: Erro desconhecido.");
+      } else if (err.request) {
+        console.error("Erro na requisição:", err.request);
+        toast.error("Erro na requisição ao servidor.");
+      } else {
+        console.error("Erro ao configurar requisição:", err.message);
+        toast.error("Erro ao criar contrato. Tente novamente.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getServicesType = async () => {
     try {
@@ -320,8 +364,8 @@ const createContract = async (data: ContractFormSchema) => {
           owner: "BRANCH",
           idOwner: selectedBranch?.idBranch
         },
-        headers: { Authorization: `Bearer ${tokenFromStorage}`,}
-      }, );
+        headers: { Authorization: `Bearer ${tokenFromStorage}`, }
+      },);
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);
@@ -374,9 +418,8 @@ const createContract = async (data: ContractFormSchema) => {
                 <div className="flex items-center gap-2">
                   <Input
                     type="text"
-                    placeholder="Insira o cnpj do prestador..."
+                    placeholder="00.000.000/0000-00"
                     {...registerSubContract("cnpj")}
-                    defaultValue={getValues("cnpj") || ""}
                     className="pr-10"
                   />
                   {isLoading ? (
@@ -430,18 +473,21 @@ const createContract = async (data: ContractFormSchema) => {
                   </span>
                 )}
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-white">Telefone</Label>
                 <Input
-                  placeholder="Digite o telefone"
-                  {...registerSubContract("phone")}
+                  type="text"
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const formattedPhone = formatPhone(e.target.value);
+                    setPhoneValue(formattedPhone);
+                    setValue("phone", formattedPhone, { shouldValidate: true });
+                  }}
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
                 />
-                {errorsSubContract.phone && (
-                  <span className="text-red-600">
-                    {errorsSubContract.phone.message}
-                  </span>
-                )}
               </div>
+
               <div className="flex flex-col gap-1">
                 <Label className="text-white">Selecione um fornecedor</Label>
                 <select
@@ -515,22 +561,45 @@ const createContract = async (data: ContractFormSchema) => {
                       className="flex flex-col gap-2"
                       onSubmit={handleSubmitContract(createContract)}
                     >
-                      <div>
-                        <Label className="text-white">
-                          CNPJ do novo prestador
-                        </Label>
-                        <div>
+                      <div className="relative">
+                        <Label className="text-white">CNPJ</Label>
+                        <div className="flex items-center gap-3">
                           <Input
                             type="text"
-                            {...registerContract("cnpj")}
-                            value={pushCnpj || "erro ao puxar cnpj"}
+                            placeholder="00.000.000/0000-00"
+                            value={cnpjValue}
+                            onChange={(e) => {
+                              const formatted = formatCNPJ(e.target.value);
+                              setCnpjValue(formatted);
+                              setValue("cnpj", formatted, { shouldValidate: true });
+                            }}
+                            className="w-full"
                           />
-                          {errorsContract.cnpj && (
-                            <span className="text-red-600">
-                              {errorsContract.cnpj.message}
-                            </span>
+                          {isLoading ? (
+                            <div
+                              onClick={handleCNPJSearch}
+                              className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                            >
+                              <Oval
+                                visible={true}
+                                height="30"
+                                width="40"
+                                color="#34495E"
+                                ariaLabel="oval-loading"
+                                wrapperStyle={{}}
+                                wrapperClass=""
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              onClick={handleCNPJSearch}
+                              className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                            >
+                              <Search />
+                            </div>
                           )}
                         </div>
+                        {errors.cnpj && <span className="text-red-600">{errors.cnpj.message}</span>}
                       </div>
 
                       <div className="flex flex-col gap-2">
@@ -774,13 +843,19 @@ const createContract = async (data: ContractFormSchema) => {
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
-                    placeholder="Insira o cnpj do prestador..."
-                    {...register("cnpj")}
+                    placeholder="00.000.0000000-00"
+                    // value={cnpjValue}
+                    // onChange={(e) => {
+                    //   const formatted = formatCNPJ(e.target.value);
+                    //   setCnpjValue(formatted);
+                    //   setValue("cnpj", formatted, { shouldValidate: true });
+                    // }}
                     className="w-full"
+                    {...register("cnpj")}
                   />
                   {isLoading ? (
                     <div
-                      onClick={handleCNPJSearch}
+                      onClick={handleCNPJSearchSub}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Oval
@@ -795,17 +870,18 @@ const createContract = async (data: ContractFormSchema) => {
                     </div>
                   ) : (
                     <div
-                      onClick={handleCNPJSearch}
+                      onClick={handleCNPJSearchSub}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Search />
                     </div>
                   )}
                 </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
+                {errorsSubContract.cnpj && (
+                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
                 )}
               </div>
+
               <div className="mb-1">
                 <Label className="text-white">Razão Social</Label>
                 <Input
@@ -827,13 +903,21 @@ const createContract = async (data: ContractFormSchema) => {
                   <span className="text-red-600">{errors.email.message}</span>
                 )}
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-white">Telefone</Label>
-                <Input placeholder="Digite o telefone" {...register("phone")} />
-                {errors.phone && (
-                  <span className="text-red-600">{errors.phone.message}</span>
-                )}
+                <Input
+                  type="text"
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const formattedPhone = formatPhone(e.target.value);
+                    setPhoneValue(formattedPhone);
+                    setValue("phone", formattedPhone, { shouldValidate: true });
+                  }}
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
+                />
               </div>
+
               <div className="flex justify-end">
                 <Button className="bg-realizaBlue">Próximo</Button>
               </div>
@@ -849,9 +933,13 @@ const createContract = async (data: ContractFormSchema) => {
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
-                    placeholder="Insira o cnpj do prestador..."
-                    {...registerSubContract("cnpj")}
-                    defaultValue={getValues("cnpj") || ""}
+                    placeholder="00.000.000/0000-00"
+                    value={cnpjValue}
+                    onChange={(e) => {
+                      const formatted = formatCNPJ(e.target.value);
+                      setCnpjValue(formatted);
+                      setValue("cnpj", formatted, { shouldValidate: true });
+                    }}
                     className="w-full"
                   />
                   {isLoading ? (
@@ -878,9 +966,19 @@ const createContract = async (data: ContractFormSchema) => {
                     </div>
                   )}
                 </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
+                {errorsSubContract.cnpj && (
+                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
                 )}
+              </div>
+
+              <div className="mb-1">
+                <Label className="text-white">Razão Social</Label>
+                <Input
+                  type="corporateName"
+                  placeholder="Digite a razão social do novo prestador"
+                  {...register("corporateName")}
+                  className="w-full"
+                />
               </div>
               <div className="mb-1">
                 <Label className="text-white">Razão Social</Label>
@@ -905,17 +1003,19 @@ const createContract = async (data: ContractFormSchema) => {
                   </span>
                 )}
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-white">Telefone</Label>
                 <Input
-                  placeholder="Digite o telefone"
-                  {...registerSubContract("phone")}
+                  type="text"
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const formattedPhone = formatPhone(e.target.value);
+                    setPhoneValue(formattedPhone);
+                    setValue("phone", formattedPhone, { shouldValidate: true });
+                  }}
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
                 />
-                {errorsSubContract.phone && (
-                  <span className="text-red-600">
-                    {errorsSubContract.phone.message}
-                  </span>
-                )}
               </div>
               <div className="flex flex-col gap-1">
                 <Label className="text-white">Selecione um fornecedor</Label>

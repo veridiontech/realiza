@@ -93,7 +93,7 @@ export function StatusDocumentChart() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Status de Documentos</CardTitle>
+        <CardTitle>Total de contratos ativos e Total de colaboradores</CardTitle>
         <div className="text-sm text-muted-foreground flex gap-4">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 bg-blue-500 rounded-full inline-block"></span>

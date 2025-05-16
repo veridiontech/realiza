@@ -60,7 +60,7 @@ const createUserClient = z.object({
     .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
   cpf: z.string()
     .nonempty("Cpf é obrigatório")
-    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00 ou 00000000000"),
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00"),
   email: z
     .string()
     .email("Formato de email inválido")
@@ -370,13 +370,17 @@ export function Dashboard() {
                                   <Label className="text-white">CPF</Label>
                                   <Input
                                     type="text"
-                                    {...register("cpf")}
-                                    placeholder="Digite seu CPF"
+                                    value={cpfValue}
+                                    onChange={(e) => {
+                                      const formattedCpf = formatCPF(e.target.value);
+                                      setCpfValue(formattedCpf);
+                                      setValue("cpf", formattedCpf, { shouldValidate: true });
+                                    }}
+                                    placeholder="000.000.000-00"
+                                    maxLength={14}
                                   />
                                   {errors.cpf && (
-                                    <span className="text-sm text-red-600">
-                                      {errors.cpf.message}
-                                    </span>
+                                    <span className="text-sm text-red-600">{errors.cpf.message}</span>
                                   )}
                                 </div>
 
@@ -555,7 +559,7 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <ConformityGaugeChart percentage={71.29} />
+              <ConformityGaugeChart percentage={0} />
             </div>
           </div>
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
