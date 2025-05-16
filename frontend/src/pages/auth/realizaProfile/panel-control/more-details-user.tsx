@@ -12,8 +12,8 @@ interface MoreDetailsProps {
   requesterSurname: string;
   requesterCpf: string | undefined;
   nameEnterprise: string | undefined;
-  newUserFirstName: string;
-  newUserSurname: string;
+  newUserFirstName:  string | undefined;
+  newUserSurname: string | undefined;
   newUserEmail:  string | undefined;
   newUserEnterprise:  string | undefined;
 }

@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Ban, CheckCircle, Rotate3D } from "lucide-react";
 import { ip } from "@/utils/ip";
-
-
-import { CardPanelControl } from "@/components/cardPanelControl";
 import { ColumnPanelControl } from "@/components/column-panel-control";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CardPanelControlUser } from "@/components/cardPanelControleUser";
 
 interface Requester {
   idUser: string;
@@ -73,8 +71,8 @@ export function UserSolicitations() {
 
     return(
           <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
-              <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
-                <h1>Usuários solicitantes</h1>
+              <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 shadow-sm">
+                <h1 className="font-semibold text-[30px]">Usuários solicitantes</h1>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
                   <div>
                     <ColumnPanelControl
@@ -90,7 +88,7 @@ export function UserSolicitations() {
                           {solicitations
                             .filter((solicitation) => solicitation.status === "PENDING")
                             .map((solicitation) => (
-                              <CardPanelControl
+                              <CardPanelControlUser
                                 key={solicitation.idSolicitation}
                                 data={solicitation}
                                 onActionCompleted={removeSolicitation}
@@ -117,7 +115,7 @@ export function UserSolicitations() {
                               (solicitation) => solicitation.status === "APPROVED",
                             )
                             .map((solicitation) => (
-                              <CardPanelControl
+                              <CardPanelControlUser
                                 key={solicitation.idSolicitation}
                                 data={solicitation}
                                 onActionCompleted={removeSolicitation}
@@ -143,7 +141,7 @@ export function UserSolicitations() {
                           {solicitations
                             .filter((solicitation) => solicitation.status === "DENIED")
                             .map((solicitation) => (
-                              <CardPanelControl
+                              <CardPanelControlUser
                                 key={solicitation.idSolicitation}
                                 data={solicitation}
                                 onActionCompleted={removeSolicitation}

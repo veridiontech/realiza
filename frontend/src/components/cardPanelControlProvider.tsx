@@ -1,10 +1,20 @@
 import axios from "axios";
-import { CalendarDays, ThumbsDown, ThumbsUp, User } from "lucide-react";
+import { CalendarDays, ThumbsUp, User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Oval } from "react-loader-spinner";
 import { useState } from "react";
-import { MoreDetailsUser } from "@/pages/auth/realizaProfile/panel-control/more-details-user";
+import { MoreDetails } from "@/pages/auth/realizaProfile/panel-control/more-details";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CardPanelControlProps {
   data: {
@@ -19,23 +29,21 @@ interface CardPanelControlProps {
       nameEnterprise?: string | undefined;
       cpf?: string | undefined;
     };
-    newUser: {
-      idUser: string;
-      firstName: string;
-      surname: string;
-      nameEnterprise?: string | undefined;
-      cpf?: string | undefined;
-      email?: string | undefined;
-      enterprise?: string | undefined;
+    newProvider: {
+      cnpj?: string | undefined;
+      corporateName?: string | undefined;
+      telephone: string | undefined;
     };
   };
   // Callback opcional para atualizar a lista após a ação
   onActionCompleted?: (idSolicitation: string) => void;
+  status: string,
 }
 
-export function CardPanelControl({
+export function CardPanelControlProvider({
   data,
   onActionCompleted,
+  status
 }: CardPanelControlProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,9 +55,10 @@ export function CardPanelControl({
 
       console.log("teste id da solicitacao", data.idSolicitation);
 
-      await axios.patch(`${ip}/item-management/${data.idSolicitation}/approve`, 
+      await axios.patch(
+        `${ip}/item-management/${data.idSolicitation}/approve`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
 
@@ -76,7 +85,7 @@ export function CardPanelControl({
       const response = await axios.patch(
         `${ip}/item-management/${data.idSolicitation}/deny`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
 
@@ -100,16 +109,15 @@ export function CardPanelControl({
             Solicitação de: {data.requester.firstName} {data.requester.surname}
           </span>
         </div>
-        <MoreDetailsUser
+        {}
+        <MoreDetails
           idSolicitation={data.idSolicitation}
           requesterFirstName={data.requester.firstName}
           requesterSurname={data.requester.surname}
           requesterCpf={data.requester.cpf}
           nameEnterprise={data.requester.nameEnterprise}
-          newUserFirstName={data.newUser.firstName}
-          newUserSurname={data.newUser.surname}
-          newUserEmail={data.newUser.email}
-          newUserEnterprise={data.newUser.enterprise}
+          corporateName={data.newProvider.corporateName}
+          cnpj={data.newProvider.cnpj}
         />
       </div>
       <div className="flex w-full flex-col gap-2 border-y border-[#7CA1F333] py-4">
@@ -127,13 +135,29 @@ export function CardPanelControl({
             {new Date(data.creationDate).toLocaleString()}
           </span>
         </div>
-        <div className="flex flex-row items-center justify-center gap-2">
-          <button
-            onClick={handleDeny}
-            className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#FF464633] p-1 text-xs text-[#FF4646]"
-          >
-            Dispensar <ThumbsDown size={15} />
-          </button>
+          {status === "APPROVED" || status === "DENIED"? (<div></div>): (<div className="flex flex-row items-center justify-center gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger>
+              {" "}
+              <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300">
+                Dispensar <ThumbsUp size={15} />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Deseja mesmo dispensar a solicitação de acesso de{" "}
+                  {data.newProvider.corporateName} ao sistema?
+                </AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeny}>
+                  Dispensar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {isLoading ? (
             <button
               onClick={handleApprove}
@@ -150,14 +174,30 @@ export function CardPanelControl({
               />
             </button>
           ) : (
-            <button
-              onClick={handleApprove}
-              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
-            >
-              Aceitar <ThumbsUp size={15} />
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger>
+                {" "}
+                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300">
+                  Aceitar <ThumbsUp size={15} />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Deseja mesmo confirmar o acesso de{" "}
+                    {data.newProvider.corporateName} ao sistema?
+                  </AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="bg-red-300 hover:bg-red-400">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleApprove} className="bg-green-800 text-white">
+                      Aceitar
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
-        </div>
+        </div>)}
       </div>
     </div>
   );

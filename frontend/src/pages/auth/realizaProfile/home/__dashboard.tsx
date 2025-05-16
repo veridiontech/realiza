@@ -48,11 +48,19 @@ import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChat";
 import { BranchesTable } from "./branchesTable";
 
+
+const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
-  cellPhone: z.string().nonempty("Celular é obrigatório"),
-  cpf: z.string().nonempty("Cpf é obrigatório"),
+  cellPhone: z.string()
+    .nonempty("Celular é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  cpf: z.string()
+    .nonempty("Cpf é obrigatório")
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00 ou 00000000000"),
   email: z
     .string()
     .email("Formato de email inválido")
@@ -70,15 +78,37 @@ export function Dashboard() {
   const { client } = useClient();
   const { selectedBranch } = useBranch();
   const { user } = useUser();
+  const [phoneValue, setPhoneValue] = useState("");
+  const [cpfValue, setCpfValue] = useState("");
 
   const {
     register,
     handleSubmit,
+    setValue,        // <== Adicione aqui
     formState: { errors },
     reset,
   } = useForm<CreateUserClient>({
     resolver: zodResolver(createUserClient),
   });
+
+
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
+
+  // Máscara telefone
+  const formatPhone = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/g, "($1) $2")
+      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
+      .slice(0, 15);
+  };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const payload = {
@@ -237,8 +267,8 @@ export function Dashboard() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
-                              : "text-realizaBlue border-realizaBlue border bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
+                            : "text-realizaBlue border-realizaBlue border bg-white"
                             }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
@@ -247,8 +277,8 @@ export function Dashboard() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue border-realizaBlue border bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue border-realizaBlue border bg-white"
                             }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
@@ -351,18 +381,19 @@ export function Dashboard() {
                                   )}
                                 </div>
 
-                                <div>
+                                <div className="flex flex-col gap-2">
                                   <Label className="text-white">Telefone</Label>
                                   <Input
                                     type="text"
-                                    {...register("cellPhone")}
-                                    placeholder="Digite seu telefone"
+                                    value={phoneValue}
+                                    onChange={(e) => {
+                                      const formattedPhone = formatPhone(e.target.value);
+                                      setPhoneValue(formattedPhone);
+                                      setValue("cellPhone", formattedPhone, { shouldValidate: true });
+                                    }}
+                                    placeholder="(00) 00000-0000"
+                                    maxLength={15}
                                   />
-                                  {errors.cellPhone && (
-                                    <span className="text-sm text-red-600">
-                                      {errors.cellPhone.message}
-                                    </span>
-                                  )}
                                 </div>
 
                                 <div>

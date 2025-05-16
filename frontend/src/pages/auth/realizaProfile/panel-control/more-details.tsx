@@ -8,20 +8,20 @@ import {
 
 interface MoreDetailsProps {
   idSolicitation: string;
-  firstName: string;
-  surname: string;
+  requesterFirstName: string;
+  requesterSurname: string;
   nameEnterprise: string | undefined;
-  cpf: string | undefined;
+  requesterCpf: string | undefined;
   corporateName: string | undefined;
-  cnpj: string | undefined,
+  cnpj: string | undefined;
 }
 
 export function MoreDetails({
   idSolicitation,
-  firstName,
+ requesterFirstName,
   nameEnterprise,
-  surname,
-  cpf,
+  requesterSurname,
+  requesterCpf,
   corporateName,
   cnpj,
 }: MoreDetailsProps) {
@@ -40,7 +40,7 @@ export function MoreDetails({
             <div className="flex items-center gap-1">
               <p className="font-medium">Nome do solicitante:</p>
               <span>
-                {firstName} {surname}
+                {requesterFirstName} {requesterSurname}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -49,7 +49,7 @@ export function MoreDetails({
             </div>
             <div className="flex items-center gap-1">
                 <p className="font-medium">CPF:</p>
-                <span>{cpf}</span>
+                <span>{requesterCpf}</span>
             </div>
             <div className="bg-neutral-900 h-[1px] w-full"></div>
             <div>

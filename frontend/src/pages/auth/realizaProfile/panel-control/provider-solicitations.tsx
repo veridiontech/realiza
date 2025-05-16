@@ -3,8 +3,7 @@ import axios from "axios";
 import { Ban, CheckCircle, Rotate3D } from "lucide-react";
 import { ip } from "@/utils/ip";
 
-
-import { CardPanelControl } from "@/components/cardPanelControl";
+import { CardPanelControlProvider } from "@/components/cardPanelControlProvider";
 import { ColumnPanelControl } from "@/components/column-panel-control";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -20,13 +19,19 @@ export interface Solicitation {
   details: string;
   creationDate: string;
   requester: Requester;
+  newProvider: {
+    cnpj: string | undefined;
+    corporateName: string | undefined;
+    telephone: string | undefined;
+  };
   newUser: {
-      idUser: string;
-      firstName: string;
-      surname: string;
-      nameEnterprise?: string | undefined ;
-      cpf?: string | undefined;
-      email:string | undefined;
+    idUser: string;
+    firstName?:string | undefined;
+    surname?: string | undefined;
+    nameEnterprise?: string | undefined;
+    cpf?: string | undefined;
+    email?: string | undefined;
+    enterprise?: string | undefined;
   };
   status: string;
 }
@@ -37,120 +42,122 @@ interface ApiResponse {
 }
 
 export function ProviderSolicitations() {
+  const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
 
-     const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
-    
-      const fetchSolicitations = async () => {
-        try {
-          const response = await axios.get<ApiResponse>(
-            `${ip}/item-management/new-provider`,
-          );
-          setSolicitations(response.data.content);
-        } catch (err) {
-          console.error("Erro ao buscar solicitações:", err);
-        }
-      };
-    
-      useEffect(() => {
-        fetchSolicitations();
-      }, []);
-    
-      const removeSolicitation = (idSolicitation: string) => {
-        setSolicitations((prev) =>
-          prev.filter((s) => s.idSolicitation !== idSolicitation),
-        );
-      };
-    
-      const countStatus = (status: "APPROVED" | "DENIED" | "PENDING") => {
-        return solicitations.filter(
-          (solicitation) => solicitation.status === status,
-        ).length;
-      };
-    
+  const fetchSolicitations = async () => {
+    try {
+      const response = await axios.get<ApiResponse>(
+        `${ip}/item-management/new-provider`,
+      );
+      setSolicitations(response.data.content);
+    } catch (err) {
+      console.error("Erro ao buscar solicitações:", err);
+    }
+  };
 
-    return(
-          <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
-              <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 pt-16 shadow-sm">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-                  <div>
-                    <ColumnPanelControl
-                      lenghtControl={countStatus("PENDING")}
-                      title="Solicitações pendentes"
-                      bgColor="bg-[#F9731640]"
-                      textColor="text-[#F97316]"
-                      icon={<Rotate3D className="text-[#F97316]" />}
-                    />
-                    <div>
-                      <div className="bg-gray-100 p-8">
-                        <ScrollArea className="h-[40vh]">
-                          {solicitations
-                            .filter((solicitation) => solicitation.status === "PENDING")
-                            .map((solicitation) => (
-                              <CardPanelControl
-                                key={solicitation.idSolicitation}
-                                data={solicitation}
-                                onActionCompleted={removeSolicitation}
-                              />
-                            ))}
-                        </ScrollArea>
-                      </div>
-                    </div>
+  useEffect(() => {
+    fetchSolicitations();
+  }, []);
+
+  const removeSolicitation = (idSolicitation: string) => {
+    setSolicitations((prev) =>
+      prev.filter((s) => s.idSolicitation !== idSolicitation),
+    );
+  };
+
+  const countStatus = (status: "APPROVED" | "DENIED" | "PENDING") => {
+    return solicitations.filter(
+      (solicitation) => solicitation.status === status,
+    ).length;
+  };
+
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-9 p-4">
+      <div className="relative bottom-[3vw] flex h-full w-full flex-col gap-6 rounded-md bg-white p-4 shadow-sm">
+        <h1 className="font-semibold text-[30px]">Empresas Solicitantes </h1>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          <div>
+            <ColumnPanelControl
+              lenghtControl={countStatus("PENDING")}
+              title="Solicitações pendentes"
+              bgColor="bg-[#F9731640]"
+              textColor="text-[#F97316]"
+              icon={<Rotate3D className="text-[#F97316]" />}
+            />
+            <div>
+              <div className="bg-gray-100 p-8">
+                <ScrollArea className="h-[40vh]">
+                  {solicitations
+                    .filter((solicitation) => solicitation.status === "PENDING")
+                    .map((solicitation) => (
+                      <CardPanelControlProvider
+                        key={solicitation.idSolicitation}
+                        data={solicitation}
+                        onActionCompleted={removeSolicitation}
+                        status="PENDING"
+                      />
+                    ))}
+                </ScrollArea>
+              </div>
+            </div>
+          </div>
+          <div>
+            <ColumnPanelControl
+              lenghtControl={countStatus("APPROVED")}
+              title="Solicitações Confirmadas"
+              bgColor="bg-[#2563EB40]"
+              textColor="text-[#2563EB]"
+              icon={<CheckCircle className="text-[#2563EB]" />}
+            />
+            <div>
+              <div className="bg-gray-100 p-8">
+                <ScrollArea className="h-[40vh]">
+                  <div className="flex flex-col gap-2">
+                    {solicitations
+                      .filter(
+                        (solicitation) => solicitation.status === "APPROVED",
+                      )
+                      .map((solicitation) => (
+                        <CardPanelControlProvider
+                          key={solicitation.idSolicitation}
+                          data={solicitation}
+                          onActionCompleted={removeSolicitation}
+                          status="APPROVED"
+                        />
+                      ))}
                   </div>
-                  <div>
-                    <ColumnPanelControl
-                      lenghtControl={countStatus("APPROVED")}
-                      title="Solicitações Confirmadas"
-                      bgColor="bg-[#2563EB40]"
-                      textColor="text-[#2563EB]"
-                      icon={<CheckCircle className="text-[#2563EB]" />}
-                    />
-                    <div>
-                      <div className="bg-gray-100 p-8 ">
-                        <ScrollArea className="h-[40vh] ">
-                          <div className=" flex flex-col gap-2">
-                          {solicitations
-                            .filter(
-                              (solicitation) => solicitation.status === "APPROVED",
-                            )
-                            .map((solicitation) => (
-                              <CardPanelControl
-                                key={solicitation.idSolicitation}
-                                data={solicitation}
-                                onActionCompleted={removeSolicitation}
-                              />
-                            ))}
-                            </div>
-                        </ScrollArea>
-                      </div>
-                    </div>
-                  </div>
-        
-                  <div>
-                    <ColumnPanelControl
-                      lenghtControl={countStatus("DENIED")}
-                      title="Solicitações Negadas"
-                      bgColor="bg-[#FF464640]"
-                      textColor="text-[#FF4646]"
-                      icon={<Ban className="text-[#FF4646]" />}
-                    />
-                    <div>
-                      <div className="bg-gray-100 p-8">
-                        <ScrollArea className="h-[40vh]">
-                          {solicitations
-                            .filter((solicitation) => solicitation.status === "DENIED")
-                            .map((solicitation) => (
-                              <CardPanelControl
-                                key={solicitation.idSolicitation}
-                                data={solicitation}
-                                onActionCompleted={removeSolicitation}
-                              />
-                            ))}
-                        </ScrollArea>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+                </ScrollArea>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <ColumnPanelControl
+              lenghtControl={countStatus("DENIED")}
+              title="Solicitações Negadas"
+              bgColor="bg-[#FF464640]"
+              textColor="text-[#FF4646]"
+              icon={<Ban className="text-[#FF4646]" />}
+            />
+            <div>
+              <div className="bg-gray-100 p-8">
+                <ScrollArea className="h-[40vh]">
+                  {solicitations
+                    .filter((solicitation) => solicitation.status === "DENIED")
+                    .map((solicitation) => (
+                      <CardPanelControlProvider
+                        key={solicitation.idSolicitation}
+                        data={solicitation}
+                        onActionCompleted={removeSolicitation}
+                        status="DENIED"
+                      />
+                    ))}
+                </ScrollArea>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* <div className="grid grid-cols-1 gap-5 rounded-md p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
                   {solicitations.map((solicitation) => (
                     <CardPanelControl
                       key={solicitation.idSolicitation}
@@ -159,9 +166,9 @@ export function ProviderSolicitations() {
                     />
                   ))}
                 </div> */}
-        
-                {/* Controles de Paginação */}
-              </div>
-            </div>
-    )
+
+        {/* Controles de Paginação */}
+      </div>
+    </div>
+  );
 }
