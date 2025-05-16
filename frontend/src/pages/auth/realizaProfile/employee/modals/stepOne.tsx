@@ -301,6 +301,8 @@ export function StepOneEmployee({
                 <option value="Casado(a)">Casado(a)</option>
                 <option value="Divorciado(a)">Divorciado(a)</option>
                 <option value="Viúvo(a)">Viúvo(a)</option>
+                <option value="Separado Judicialmente">Separado judicialmente </option>
+                <option value="União Estável">União estável</option>
               </select>
               {errors.maritalStatus && (
                 <span className="text-red-600">
@@ -398,6 +400,18 @@ export function StepOneEmployee({
                 <option value="Ensino Fundamental Completo">
                   Ensino Fundamental Completo
                 </option>
+                <option value="Fundamental I incompleto">
+                  Ensino Fundamental I incompleto
+                </option>
+                <option value="Fundamental I completo">
+                  Ensino Fundamental I completo
+                </option>
+                <option value="Fundamental II incompleto">
+                  Ensino Fundamental II incompleto
+                </option>
+                <option value="Fundamental II completo">
+                  Ensino Fundamental II completo
+                </option>
                 <option value="Ensino Médio Incompleto">
                   Ensino Médio Incompleto
                 </option>
@@ -409,6 +423,18 @@ export function StepOneEmployee({
                 </option>
                 <option value="Ensino Superior Completo">
                   Ensino Superior Completo
+                </option>
+                <option value="Pós-graduação">
+                  Pós-graduação
+                </option>
+                <option value="Mestrado">
+                  Mestrado
+                </option>
+                <option value="Doutorado">
+                  Doutorado
+                </option>
+                <option value="Ph.D">
+                  Ph.D
                 </option>
               </select>
               {errors.education && (

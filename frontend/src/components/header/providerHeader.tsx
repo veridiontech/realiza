@@ -19,10 +19,12 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect } from "react";
 import bannerHeader from "@/assets/banner/Rectangle 42203.png";
+import { useState } from "react";
 
 export function HeaderProvider() {
   const { user, logout } = useUser();
   const { supplier, setSupplier } = useSupplier();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const getSupplier = async () => {
     try {
@@ -49,7 +51,7 @@ export function HeaderProvider() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="flex items-center">
-              <Sheet>
+              <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant={"ghost"}
@@ -58,7 +60,7 @@ export function HeaderProvider() {
                     <ChartNoAxesGantt className="text-white" />
                   </Button>
                 </SheetTrigger>
-                <ProviderLateralMenu />
+                <ProviderLateralMenu onClose={() => setMenuOpen(false)}/>
               </Sheet>
               <Link to={`/fornecedor/home/${user?.idUser}`}>
                 <img src={realizaLogo} alt="" className="w-[6vw]" />
@@ -119,7 +121,7 @@ export function HeaderProvider() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-5">
           <div className="flex items-center">
-            <Sheet>
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant={"ghost"}
@@ -128,7 +130,7 @@ export function HeaderProvider() {
                   <ChartNoAxesGantt className="text-white" />
                 </Button>
               </SheetTrigger>
-              <ProviderLateralMenu />
+              <ProviderLateralMenu onClose={() => setMenuOpen(false)}/>
             </Sheet>
             <Link to={`/fornecedor/home/${user?.idUser}`}>
               <img src={realizaLogo} alt="" className="w-[6vw]" />

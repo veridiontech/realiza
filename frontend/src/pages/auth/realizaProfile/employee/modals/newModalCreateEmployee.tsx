@@ -42,10 +42,11 @@ const createNewEmployeeFormSchema = z.object({
   city: z.string(),
   address: z.string(),
   number: z.string(),
+  complement: z.string(),
   phone: z.string().optional(),
   mobile: z.string(),
   position: z.string(),
-  situation: z.string(),
+  // situation: z.string(),
   education: z.string(),
   cbo: z.string().optional(),
   // platformAccess: z.string(),
@@ -88,11 +89,11 @@ export function NewModalCreateEmployee() {
   //     .replace(/(\d{3})(\d{1})$/, "$1-$2");
   // };
 
-  const formatSalary = (value: string) => {
-    return value
-      .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  // const formatSalary = (value: string) => {
+  //   return value
+  //     .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
+  //     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // };
 
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
@@ -191,6 +192,10 @@ export function NewModalCreateEmployee() {
                     <option value="">Selecione</option>
                     <option value="Masculino">Casado</option>
                     <option value="Feminino">Solteiro</option>
+                    <option value="Divorciado">Divorciado</option>
+                    <option value="Viúvo">Viúvo </option>
+                    <option value="Separado Judicialmente">Separado judicialmente </option>
+                    <option value="União Estável">União estável</option>
                   </select>
                 </div>
                 <div>
@@ -249,10 +254,10 @@ export function NewModalCreateEmployee() {
                   <Input
                     type="text"
                     {...register("salary")}
-                    onChange={(e) => {
-                      const formattedSalary = formatSalary(e.target.value);
-                      setValue("salary", formattedSalary);
-                    }}
+                    // onChange={(e) => {
+                    //   const formattedSalary = formatSalary(e.target.value);
+                    //   setValue("salary", formattedSalary);
+                    // }}
                     placeholder="000.000,00"
                   />
                   {errors.salary && <span>{errors.salary.message}</span>}
@@ -306,6 +311,10 @@ export function NewModalCreateEmployee() {
                   <Input {...register("number")} />
                 </div>
                 <div>
+                  <Label className="text-white">Complemento</Label>
+                  <Input {...register("complement")} />
+                </div>
+                <div>
                   <Label className="text-white">Telefone</Label>
                   <Input {...register("phone")} />
                 </div>
@@ -334,6 +343,18 @@ export function NewModalCreateEmployee() {
                     <option value="Ensino Fundamental Completo">
                       Ensino Fundamental Completo
                     </option>
+                    <option value="Fundamental I incompleto">
+                      Ensino Fundamental I incompleto
+                    </option>
+                    <option value="Fundamental I completo">
+                      Ensino Fundamental I completo
+                    </option>
+                    <option value="Fundamental II incompleto">
+                      Ensino Fundamental II incompleto
+                    </option>
+                    <option value="Fundamental II completo">
+                      Ensino Fundamental II completo
+                    </option>
                     <option value="Ensino Médio Incompleto">
                       Ensino Médio Incompleto
                     </option>
@@ -346,9 +367,21 @@ export function NewModalCreateEmployee() {
                     <option value="Ensino Superior Completo">
                       Ensino Superior Completo
                     </option>
+                    <option value="Pós-graduação">
+                      Pós-graduação
+                    </option>
+                    <option value="Mestrado">
+                      Mestrado
+                    </option>
+                    <option value="Doutorado">
+                      Doutorado
+                    </option>
+                    <option value="Ph.D">
+                      Ph.D
+                    </option>
                   </select>
                 </div>
-                <div>
+                {/* <div>
                   <Label className="text-white">Situação</Label>
                   <select
                     {...register("situation")}
@@ -368,7 +401,7 @@ export function NewModalCreateEmployee() {
                       Aposentadoria por Invalidez
                     </option>
                   </select>
-                </div>
+                </div> */}
 
                 <Button
                   type="submit"

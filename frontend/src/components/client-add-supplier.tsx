@@ -222,11 +222,16 @@ export function ModalTesteSendSupplier() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`, {
+        `${ip}/contract/supplier/subcontract-permission`, {
+          params: {
+            idBranch: selectedBranch.idBranch
+          },
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       }
       );
-      setSuppliers(res.data.content);
+      console.log(res.data);
+      
+      setSuppliers(res.data);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
     }
@@ -376,408 +381,6 @@ export function ModalTesteSendSupplier() {
     getActivities();
     getServicesType();
   }, []);
-
-  if (
-    user?.role === "ROLE_SUPPLIER_RESPONSIBLE" &&
-    "ROLE_SUPPLIER_RESPONSIBLE"
-  ) {
-    return (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="bg-realizaBlue hidden md:block">
-            Cadastrar novo prestador
-          </Button>
-        </DialogTrigger>
-        <DialogContent
-          style={{
-            backgroundImage: `url(${bgModalRealiza})`,
-          }}
-          className="max-w-[45vw]"
-        >
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Cadastrar Subcontratado
-            </DialogTitle>
-          </DialogHeader>
-          <div>
-            {supplier ? (
-              <span className="text-white">
-                <strong>Filial:</strong> {supplier.corporateName}
-              </span>
-            ) : (
-              <span className="text-white">Nenhuma filial encontrada</span>
-            )}
-          </div>
-          <div>
-            <form
-              onSubmit={handleSubmitSubContract(createClient)}
-              className="flex flex-col gap-4"
-            >
-              <div className="relative">
-                <Label className="text-white">CNPJ</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="text"
-                    placeholder="00.000.000/0000-00"
-                    {...registerSubContract("cnpj")}
-                    className="pr-10"
-                  />
-                  {isLoading ? (
-                    <div
-                      onClick={handleCNPJSearchSub}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
-                    >
-                      <Oval
-                        visible={true}
-                        height="30"
-                        width="40"
-                        color="#34495E"
-                        ariaLabel="oval-loading"
-                        wrapperStyle={{}}
-                        wrapperClass=""
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      onClick={handleCNPJSearchSub}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
-                    >
-                      <Search />
-                    </div>
-                  )}
-                </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
-                )}
-              </div>
-              <div className="mb-1">
-                <Label className="text-white">Razão Social</Label>
-                <Input
-                  type="corporateName"
-                  placeholder="Digite a razão social do novo prestador"
-                  {...registerSubContract("corporateName")}
-                  className="w-full"
-                />
-              </div>
-              <div className="mb-1">
-                <Label className="text-white">Email</Label>
-                <Input
-                  type="email"
-                  placeholder="Digite o email do novo prestador"
-                  {...registerSubContract("email")}
-                  className="w-full"
-                />
-                {errorsSubContract.email && (
-                  <span className="text-red-600">
-                    {errorsSubContract.email.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-white">Telefone</Label>
-                <Input
-                  type="text"
-                  value={phoneValue}
-                  onChange={(e) => {
-                    const formattedPhone = formatPhone(e.target.value);
-                    setPhoneValue(formattedPhone);
-                    setValue("phone", formattedPhone, { shouldValidate: true });
-                  }}
-                  placeholder="(00) 00000-0000"
-                  maxLength={15}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Label className="text-white">Selecione um fornecedor</Label>
-                <select
-                  defaultValue={""}
-                  className="rounded-lg p-2"
-                  {...registerSubContract("providerSubcontractor")}
-                >
-                  <option value="" disabled>
-                    Selecione uma opção
-                  </option>
-                  {contracts.map((supplier: any) => (
-                    <option
-                      value={supplier.idContract}
-                      key={supplier.idContract}
-                    >
-                      {supplier.serviceName}
-                    </option>
-                  ))}
-                </select>
-                {errorsSubContract.providerSubcontractor && (
-                  <span className="text-red-600">
-                    {errorsSubContract.providerSubcontractor.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex justify-end">
-                {isLoading ? (
-                  <Button>
-                    <Radio
-                      visible={true}
-                      height="80"
-                      width="80"
-                      ariaLabel="radio-loading"
-                      wrapperStyle={{}}
-                      wrapperClass=""
-                    />
-                  </Button>
-                ) : (
-                  <Button className="bg-realizaBlue" type="submit">
-                    Próximo
-                  </Button>
-                )}
-              </div>
-            </form>
-            <Dialog open={nextModal} onOpenChange={setNextModal}>
-              <DialogContent
-                className="max-w-[95vw] border-none md:max-w-[45vw]"
-                style={{
-                  backgroundImage: `url(${bgModalRealiza})`,
-                }}
-              >
-                <DialogHeader>
-                  <DialogTitle className="text-white">
-                    Faça o contrato
-                  </DialogTitle>
-                </DialogHeader>
-                <div>
-                  {selectedBranch ? (
-                    <span className="text-white">
-                      <strong>Filial:</strong> {selectedBranch?.name}
-                    </span>
-                  ) : (
-                    <span className="text-white">
-                      Nenhuma filial selecionada
-                    </span>
-                  )}
-                </div>
-                <ScrollArea className="h-[60vh] w-full px-5">
-                  <div className="p-4">
-                    <form
-                      className="flex flex-col gap-2"
-                      onSubmit={handleSubmitContract(createContract)}
-                    >
-                      <div className="relative">
-                        <Label className="text-white">CNPJ</Label>
-                        <div className="flex items-center gap-3">
-                          <Input
-                            type="text"
-                            placeholder="00.000.000/0000-00"
-                            value={cnpjValue}
-                            onChange={(e) => {
-                              const formatted = formatCNPJ(e.target.value);
-                              setCnpjValue(formatted);
-                              setValue("cnpj", formatted, { shouldValidate: true });
-                            }}
-                            className="w-full"
-                          />
-                          {isLoading ? (
-                            <div
-                              onClick={handleCNPJSearch}
-                              className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
-                            >
-                              <Oval
-                                visible={true}
-                                height="30"
-                                width="40"
-                                color="#34495E"
-                                ariaLabel="oval-loading"
-                                wrapperStyle={{}}
-                                wrapperClass=""
-                              />
-                            </div>
-                          ) : (
-                            <div
-                              onClick={handleCNPJSearch}
-                              className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
-                            >
-                              <Search />
-                            </div>
-                          )}
-                        </div>
-                        {errors.cnpj && <span className="text-red-600">{errors.cnpj.message}</span>}
-                      </div>
-
-                      <div className="flex flex-col gap-2">
-                        <Label className="text-white">Gestor do serviço</Label>
-                        <select
-                          key={getIdManager}
-                          className="rounded-md border p-2"
-                          {...registerContract("idResponsible")} // Associando ao idResponsible
-                        >
-                          <option value="" disabled>
-                            Selecione um gestor
-                          </option>
-                          {Array.isArray(managers) &&
-                            managers.map((manager: any) => (
-                              <option
-                                value={manager.idUser}
-                                onClick={() => setGetIdManager(manager.idUser)}
-                                key={manager.idUser}
-                              >
-                                {manager.firstName} {manager.surname}{" "}
-                              </option>
-                            ))}
-                        </select>
-                        {errorsContract.idResponsible && (
-                          <span className="text-red-600">
-                            {errorsContract.idResponsible.message}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-white">
-                          Data de início efetivo
-                        </Label>
-                        <Input type="date" {...registerContract("dateStart")} />
-                        {errorsContract.dateStart && (
-                          <span className="text-red-600">
-                            {errorsContract.dateStart.message}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-white">
-                          Referência do contrato
-                        </Label>
-                        <Input {...registerContract("contractReference")} />
-                        {errorsContract.contractReference && (
-                          <span className="text-red-500">
-                            {errorsContract.contractReference.message}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Tipo de despesa</Label>
-                        <select
-                          {...registerContract("expenseType")}
-                          className="rounded-md border p-2"
-                          defaultValue=""
-                        >
-                          <option value="" disabled>
-                            Selecione uma opção
-                          </option>
-                          <option value="CAPEX">CAPEX</option>
-                          <option value="OPEX">OPEX</option>
-                          <option value="Nenhuma">Nenhuma</option>
-                        </select>
-                        {errorsContract.idServiceType && (
-                          <span className="text-red-500">
-                            {errorsContract.idServiceType.message}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Tipo de Gestão</Label>
-                        <div>
-                          <div>
-                            <Label>SSMA</Label>
-                            <input type="checkbox" placeholder="SSMA" />
-                          </div>
-                          <div>
-                            <Label>TRABALHISTA</Label>
-                            <input type="checkbox" />
-                          </div>
-                        </div>
-                        <select
-                          {...registerContract("idServiceType")}
-                          className="rounded-md p-1"
-                        >
-                          <option value="" disabled>
-                            Selecione uma opção
-                          </option>
-                          <option value="AMBAS">AMBAS</option>
-                          <option value="">TRABALHISTA</option>
-                          <option value="SSMA">SSMA</option>
-                          <option value="TODAS">TODAS</option>
-                        </select>
-                        {errorsContract.expenseType && (
-                          <span className="text-red-500">
-                            {errorsContract.expenseType.message}
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label className="text-white">Nome do Serviço</Label>
-                        <Input {...registerContract("serviceName")} />
-                        {errorsContract.serviceName && (
-                          <span className="text-red-500">
-                            {errorsContract.serviceName.message}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Tipo de atividade</Label>
-                        {/* <select
-                          {...registerContract("idActivity")}
-                          className="rounded-md border p-2"
-                          defaultValue=""
-                        > */}
-                        {/* <option value="" disabled>
-                            Selecione uma atividade
-                          </option> */}
-                        {activities.map((activitie: any) => (
-                          <div
-                            // value={activitie.idActivity}
-                            key={activitie.idActivity}
-                          >
-                            {activitie.title}{" "}
-                          </div>
-                        ))}
-                        {/* </select> */}
-                        {/* {errorsContract.idActivity && (
-                          <span className="text-red-500">
-                            {errorsContract.idActivity.message}
-                          </span>
-                        )} */}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">
-                          Descrição detalhada do serviço
-                        </Label>
-                        <textarea
-                          {...registerContract("description")}
-                          className="rounded-md border p-2"
-                        />
-                        {errorsContract.description && (
-                          <span className="text-red-500">
-                            {errorsContract.description.message}
-                          </span>
-                        )}
-                      </div>
-                      {isLoading ? (
-                        <Button className="bg-realizaBlue" type="submit">
-                          <Oval
-                            visible={true}
-                            height="80"
-                            width="80"
-                            color="#4fa94d"
-                            ariaLabel="oval-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                          />
-                        </Button>
-                      ) : (
-                        <Button className="bg-realizaBlue" type="submit">
-                          Enviar contrato
-                        </Button>
-                      )}
-                    </form>
-                  </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
@@ -1018,7 +621,7 @@ export function ModalTesteSendSupplier() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label className="text-white">Selecione um fornecedor</Label>
+                <Label className="text-white">Selecione um contrato</Label>
                 <select
                   defaultValue={""}
                   className="rounded-lg p-2"
@@ -1027,12 +630,12 @@ export function ModalTesteSendSupplier() {
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  {suppliers.map((supplier: any) => (
+                  {Array.isArray (suppliers) && suppliers.map((supplier: any) => (
                     <option
-                      value={supplier.idProvider}
-                      key={supplier.idProvider}
+                      value={supplier.idContract}
+                      key={supplier.idContract}
                     >
-                      {supplier.tradeName} {supplier.cnpj}
+                    {supplier.providerSupplierName} - {supplier.contractReference} 
                     </option>
                   ))}
                 </select>
@@ -1269,12 +872,6 @@ export function ModalTesteSendSupplier() {
                                 <p className="text-black">{activity.title}</p>
                               </div>
                             ))}
-
-                            {/* {errorsContract.idActivity && (
-        <span className="text-red-500">
-          {errorsContract.idActivity.message}
-        </span>
-      )} */}
                           </div>
                         </ScrollArea>
                       </div>

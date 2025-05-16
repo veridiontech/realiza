@@ -22,6 +22,7 @@ export function ClientLateralMenu({ onClose }: { onClose: () => void }) {
     <SheetContent
       className="h-full overflow-auto dark:bg-white"
       side={"left"}
+      onMouseLeave={onClose}
       onInteractOutside={onClose}
       onEscapeKeyDown={onClose}
     >

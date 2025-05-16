@@ -26,6 +26,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
     <SheetContent
       className="h-full overflow-auto dark:bg-white bg-right bg-cover"
       side="left"
+      onMouseLeave={onClose}
       onInteractOutside={onClose} // Fecha se clicar fora
       onEscapeKeyDown={onClose} // Fecha se pressionar "Esc"
       style={{backgroundImage: `url(${bgModalRealiza})`}}

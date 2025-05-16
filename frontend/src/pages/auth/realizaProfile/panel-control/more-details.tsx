@@ -32,19 +32,19 @@ export function MoreDetails({
       </DialogTrigger>
       <DialogContent className="min-w-[45vw]">
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogTitle>DETALHES DA SOLICITAÇÃO</DialogTitle>
         </DialogHeader>
         <div className="" key={idSolicitation}>
           <div className="flex flex-col gap-2">
             <h1 className="font-semibold">Solicitante:</h1>
             <div className="flex items-center gap-1">
-              <p className="font-medium">Nome do solicitante:</p>
+              <p className="font-medium">Nome: </p>
               <span>
                 {requesterFirstName} {requesterSurname}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <p className="font-medium">Nome da empresa solicitante: </p>
+              <p className="font-medium">Empresa: </p>
               <span>{nameEnterprise}</span>
             </div>
             <div className="flex items-center gap-1">
