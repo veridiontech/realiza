@@ -23,7 +23,6 @@ import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
-import { useSupplier } from "@/context/Supplier-context";
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
 const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
