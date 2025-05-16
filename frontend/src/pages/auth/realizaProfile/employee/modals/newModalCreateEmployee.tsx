@@ -34,7 +34,7 @@ const createNewEmployeeFormSchema = z.object({
   surname: z.string(),
   // email: z.string(),
   cpf: z.string(),
-  salary: z.string(),
+  salary: z.string().regex(/^\d{1,3}(\.\d{3})*,\d{2}$/),
   gender: z.string(),
   maritalStatus: z.string(),
   cep: z.string(),
@@ -89,17 +89,25 @@ export function NewModalCreateEmployee() {
   //     .replace(/(\d{3})(\d{1})$/, "$1-$2");
   // };
 
-  // const formatSalary = (value: string) => {
-  //   return value
-  //     .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
-  //     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  // };
+ const formatSalary = (value: string) => {
+  const number = Number(value.replace(/\D/g, "")) / 100;
+  return number.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+  }).replace("R$", "").trim();
+};
+
+  const normalizeSalary = (value: string) => {
+  return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+};
 
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
     const payload = {
       ...data,
-      supplier: supplier?.idProvider
+      supplier: supplier?.idProvider,
+      salary: normalizeSalary(data.salary)
     };
     console.log("Enviando dados:", payload);
     try {
@@ -254,10 +262,10 @@ export function NewModalCreateEmployee() {
                   <Input
                     type="text"
                     {...register("salary")}
-                    // onChange={(e) => {
-                    //   const formattedSalary = formatSalary(e.target.value);
-                    //   setValue("salary", formattedSalary);
-                    // }}
+                    onChange={(e) => {
+                      const formattedSalary = formatSalary(e.target.value);
+                      setValue("salary", formattedSalary);
+                    }}
                     placeholder="000.000,00"
                   />
                   {errors.salary && <span>{errors.salary.message}</span>}
