@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
+import bl.tech.realiza.services.setup.ClientSetupAsynService;
 import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
@@ -45,6 +46,7 @@ public class CrudClientImpl implements CrudClient {
     private final CrudActivity crudActivity;
     private final CrudBranch crudBranchImpl;
     private final CrudServiceType crudServiceTypeImpl;
+    private final ClientSetupAsynService clientSetupAsynService;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -72,22 +74,7 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        crudServiceTypeImpl.transferFromRepoToClient(savedClient.getIdClient());
-
-        crudBranchImpl.save(
-                BranchCreateRequestDto.builder()
-                .name(clientRequestDto.getCorporateName() + " Base")
-                .cnpj(clientRequestDto.getCnpj())
-                .cep(clientRequestDto.getCep())
-                .state(clientRequestDto.getState())
-                .city(clientRequestDto.getCity())
-                .email(clientRequestDto.getEmail())
-                .telephone(clientRequestDto.getTelephone())
-                .address(clientRequestDto.getAddress())
-                .number(clientRequestDto.getNumber())
-                .client(savedClient.getIdClient())
-                .build()
-        );
+        clientSetupAsynService.setupClient(savedClient);
 
         return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())

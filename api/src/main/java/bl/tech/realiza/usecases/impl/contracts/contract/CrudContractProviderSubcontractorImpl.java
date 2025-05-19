@@ -10,6 +10,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
@@ -153,8 +154,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         // criar solicitação
         crudItemManagementImpl.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
-                .title(String.format("Novo fornecedor %s", newProviderSubcontractor.getCorporateName()))
-                .details(String.format("Solicitação de adição do fornecedor %s - %s a plataforma",newProviderSubcontractor.getCorporateName(),newProviderSubcontractor.getCnpj()))
+                .solicitationType(ItemManagement.SolicitationType.CREATION)
                 .idRequester(contractProviderSubcontractorRequestDto.getIdRequester())
                 .idNewProvider(newProviderSubcontractor.getIdProvider())
                 .build());
