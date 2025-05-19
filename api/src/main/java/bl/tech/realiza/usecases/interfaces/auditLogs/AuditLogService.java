@@ -18,15 +18,25 @@ import bl.tech.realiza.domains.ultragaz.Board;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.ultragaz.Market;
 import bl.tech.realiza.domains.user.User;
+import org.springframework.scheduling.annotation.Async;
 
 public interface AuditLogService {
-    Void createAuditLogContract(Contract contract, AuditLogContract.AuditLogContractActions action, User userResponsible);
-    Void createAuditLogEmployee(Employee employee, AuditLogEmployee.AuditLogEmployeeActions action, User userResponsible);
-    Void createAuditLogBranch(Branch branch, AuditLogBranch.AuditLogBranchActions action, User userResponsible);
-    Void createAuditLogClient(Client client, AuditLogClient.AuditLogClientActions action, User userResponsible);
-    Void createAuditLogProvider(Provider provider, AuditLogProvider.AuditLogProviderActions action, User userResponsible);
-    Void createAuditLogBoard(Board board, AuditLogBoard.AuditLogBoardActions action, User userResponsible);
-    Void createAuditLogCenter(Center center, AuditLogCenter.AuditLogCenterActions action, User userResponsible);
-    Void createAuditLogMarket(Market market, AuditLogMarket.AuditLogMarketActions action, User userResponsible);
-    Void createAuditLogUser(User user, AuditLogUser.AuditLogUserActions action, User userResponsible);
+    @Async
+    void createAuditLogContract(Contract contract,String description, AuditLogContract.AuditLogContractActions action, User userResponsible);
+    @Async
+    void createAuditLogEmployee(Employee employee,String description, AuditLogEmployee.AuditLogEmployeeActions action, User userResponsible);
+    @Async
+    void createAuditLogBranch(Branch branch,String description, AuditLogBranch.AuditLogBranchActions action, User userResponsible);
+    @Async
+    void createAuditLogClient(Client client,String description, AuditLogClient.AuditLogClientActions action, User userResponsible);
+    @Async
+    void createAuditLogProvider(Provider provider,String description, AuditLogProvider.AuditLogProviderActions action, User userResponsible);
+    @Async
+    void createAuditLogBoard(Board board,String description, AuditLogBoard.AuditLogBoardActions action, User userResponsible);
+    @Async
+    void createAuditLogCenter(Center center,String description, AuditLogCenter.AuditLogCenterActions action, User userResponsible);
+    @Async
+    void createAuditLogMarket(Market market,String description, AuditLogMarket.AuditLogMarketActions action, User userResponsible);
+    @Async
+    void createAuditLogUser(User user,String description, AuditLogUser.AuditLogUserActions action, User userResponsible);
 }
