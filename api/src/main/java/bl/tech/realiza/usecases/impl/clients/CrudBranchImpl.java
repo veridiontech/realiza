@@ -1,28 +1,30 @@
 package bl.tech.realiza.usecases.impl.clients;
 
+import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.ultragaz.Center;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
-import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
+import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,8 @@ public class CrudBranchImpl implements CrudBranch {
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final CrudServiceType crudServiceTypeImpl;
+    private final AuditLogService auditLogService;
+    private final UserRepository userRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -89,6 +93,17 @@ public class CrudBranchImpl implements CrudBranch {
         crudServiceTypeImpl.transferFromClientToBranch(savedBranch.getClient().getIdClient(),savedBranch.getIdBranch());
         crudActivity.transferFromRepo(savedBranch.getIdBranch());
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogService.createAuditLogBranch(
+                        savedBranch,
+                        userResponsible.getEmail() + " created branch " + savedBranch.getName(),
+                        AuditLogBranch.AuditLogBranchActions.CREATE,
+                        userResponsible);
+            }
+        }
 
         return BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
@@ -185,6 +200,17 @@ public class CrudBranchImpl implements CrudBranch {
         branch.setAddress(branchCreateRequestDto.getAddress() != null ? branchCreateRequestDto.getAddress() : branch.getAddress());
         branch.setNumber(branchCreateRequestDto.getNumber() != null ? branchCreateRequestDto.getNumber() : branch.getNumber());
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogService.createAuditLogBranch(
+                        branch,
+                        userResponsible.getEmail() + " updated branch " + branch.getName(),
+                        AuditLogBranch.AuditLogBranchActions.UPDATE,
+                        userResponsible);
+            }
+        }
 
         Branch savedBranch = branchRepository.save(branch);
 
@@ -219,6 +245,19 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public void delete(String id) {
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            Branch branch = branchRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Branch not found"));
+            if (userResponsible != null) {
+                auditLogService.createAuditLogBranch(
+                        branch,
+                        userResponsible.getEmail() + " deleted branch " + branch.getName(),
+                        AuditLogBranch.AuditLogBranchActions.DELETE,
+                        userResponsible);
+            }
+        }
         branchRepository.deleteById(id);
     }
 

@@ -16,14 +16,15 @@ public class EmployeeResponseDto {
     // employee
     private String idEmployee;
     private String pis;
-    private String maritalStatus;
-    private String contractType;
+    private Employee.MaritalStatus maritalStatus;
+    private Employee.ContractType contractType;
     private String cep;
     private String name;
     private String surname;
     private String profilePictureId;
     private byte[] profilePictureData;
     private String address;
+    private String addressLine2;
     private String country;
     private String acronym;
     private String state;
@@ -39,8 +40,8 @@ public class EmployeeResponseDto {
     private String telephone;
     private String directory;
     private String email;
-    private String levelOfEducation;
-    private String cbo;
+    private Employee.LevelOfEducation levelOfEducation;
+    private String cboId;
     private Employee.Situation situation;
     private List<ContractDto> contracts;
     private List<DocumentMatrix> documents;

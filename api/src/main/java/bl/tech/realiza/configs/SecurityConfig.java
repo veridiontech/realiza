@@ -32,8 +32,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers(HttpMethod.POST, "/login", "/user/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll() // Permitir acesso ao Swagger
-                        .requestMatchers("/v3/api-docs/**").permitAll() // Permitir acesso à documentação Swagger JSON
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
 //                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
 //                        .anyRequest().authenticated()

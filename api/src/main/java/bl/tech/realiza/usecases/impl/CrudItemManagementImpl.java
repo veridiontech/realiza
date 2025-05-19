@@ -6,8 +6,8 @@ import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
-import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
@@ -17,12 +17,14 @@ import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailEnterpriseInviteRequestDto;
-import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.services.email.EmailRegistrationDeniedRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
-import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
-import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementUserResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserResponseDto;
+import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import lombok.RequiredArgsConstructor;
@@ -41,64 +43,62 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final UserManagerRepository userManagerRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final ContractRepository contractRepository;
+    private final TokenManagerService tokenManagerService;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
 
-        UserClient requester = userClientRepository.findById(itemManagementUserRequestDto.getIdRequester())
+        User requester = userClientRepository.findById(itemManagementUserRequestDto.getIdRequester())
                 .orElseThrow(() -> new NotFoundException("Requester not found"));
 
-        UserClient newUser = userClientRepository.findById(itemManagementUserRequestDto.getIdNewUser())
+        User newUser = userClientRepository.findById(itemManagementUserRequestDto.getIdNewUser())
                 .orElseThrow(() -> new NotFoundException("New user not found"));
 
         ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
-                .title(itemManagementUserRequestDto.getTitle())
-                .details(itemManagementUserRequestDto.getDetails())
+                .solicitationType(itemManagementUserRequestDto.getSolicitationType())
                 .requester(requester)
                 .newUser(newUser)
                 .build());
 
-        return getItemManagementUserResponseDto(solicitation, requester, newUser);
-    }
-
-    @Override
-    public ItemManagementProviderResponseDto saveProviderSolicitation(ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
-
-        UserManager requesterManager = userManagerRepository.findById(itemManagementProviderRequestDto.getIdRequester())
-                .orElse(null);
-
-        UserClient requesterClient = userClientRepository.findById(itemManagementProviderRequestDto.getIdRequester())
-                .orElse(null);
-
-        ProviderSupplier newProviderSupplier = providerSupplierRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
-                .orElseThrow(() -> new NotFoundException("New Provider not found"));
-
-        ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
-                .title(itemManagementProviderRequestDto.getTitle())
-                .details(itemManagementProviderRequestDto.getDetails())
-                .requester(requesterManager != null ? requesterManager : requesterClient)
-                .newProvider(newProviderSupplier)
-                .status(ItemManagement.Status.PENDING)
-                .build());
-
-        return getItemManagementProviderResponseDto(solicitation, requesterClient, requesterManager);
+        return toItemManagementUserResponseDto(solicitation, requester, newUser);
     }
 
     @Override
     public Page<ItemManagementUserResponseDto> findAllUserSolicitation(Pageable pageable) {
-
         Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByNewUserIsNotNull(pageable);
 
         return itemManagementPage.map(
-                itemManagement -> {
-                    UserClient requester = userClientRepository.findById(itemManagement.getRequester().getIdUser())
-                            .orElseThrow(() -> new NotFoundException("Requester not found"));
+                itemManagement ->
+                        toItemManagementUserResponseDto(
+                                itemManagement,
+                                itemManagement.getRequester(),
+                                itemManagement.getNewUser()));
+    }
 
-                    UserClient newUser = userClientRepository.findById(itemManagement.getNewUser().getIdUser())
-                            .orElseThrow(() -> new NotFoundException("New user not found"));
-                    return getItemManagementUserResponseDto(itemManagement, requester, newUser);
-                }
-        );
+    @Override
+    public ItemManagementUserDetailsResponseDto findUserSolicitationDetails(String idSolicitation) {
+        ItemManagement itemManagement = itemManagementRepository.findById(idSolicitation)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found"));
+
+        return toItemManagementUserDetailsResponseDto(itemManagement);
+    }
+    // já finalizado, verificar as rotas e depois as chamadas
+    @Override
+    public ItemManagementProviderResponseDto saveProviderSolicitation(ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
+
+        User requester = userClientRepository.findById(itemManagementProviderRequestDto.getIdRequester())
+                .orElseThrow(() -> new NotFoundException("Requester not found"));
+
+        Provider newProviderSupplier = providerSupplierRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
+                .orElseThrow(() -> new NotFoundException("New Provider not found"));
+
+        ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
+                .solicitationType(itemManagementProviderRequestDto.getSolicitationType())
+                .requester(requester)
+                .newProvider(newProviderSupplier)
+                .build());
+
+        return toItemManagementProviderResponseDto(solicitation, requester, newProviderSupplier);
     }
 
     @Override
@@ -107,26 +107,25 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByNewProviderIsNotNull(pageable);
 
         return itemManagementPage.map(
-                itemManagement -> {
-                    UserClient requesterClient = userClientRepository.findById(itemManagement.getRequester().getIdUser())
-                            .orElse(null);
-
-                    UserManager requesterManager = userManagerRepository.findById(itemManagement.getRequester().getIdUser())
-                            .orElse(null);
-
-                    return getItemManagementProviderResponseDto(itemManagement, requesterClient, requesterManager);
-                }
+                itemManagement ->
+                        toItemManagementProviderResponseDto(
+                                itemManagement,
+                                itemManagement.getRequester(),
+                                itemManagement.getNewProvider())
         );
     }
 
     @Override
-    public void deleteSolicitation(String id) {
-        itemManagementRepository.deleteById(id);
+    public ItemManagementProviderDetailsResponseDto findProviderSolicitationDetails(String idSolicitation) {
+        ItemManagement itemManagement = itemManagementRepository.findById(idSolicitation)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found"));
+
+        return toItemManagementProviderDetailsResponseDto(itemManagement);
     }
 
     @Override
-    public String approveSolicitation(String id) {
-        ItemManagement solicitation = itemManagementRepository.findById(id)
+    public String approveSolicitation(String idSolicitation) {
+        ItemManagement solicitation = itemManagementRepository.findById(idSolicitation)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
         if (solicitation.getNewUser() != null) {
@@ -149,8 +148,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
 
             Contract contract = contractRepository.findById(
-                    contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
+                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+            String token = tokenManagerService.generateToken();
+            solicitation.setInvitationToken(token);
+            itemManagementRepository.save(solicitation);
 
             if (provider.getEmail() != null) {
                 emailSender.sendNewProviderEmail(EmailEnterpriseInviteRequestDto.builder()
@@ -165,7 +168,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .idCompany(provider.getIdProvider())
                         .idBranch(contract instanceof ContractProviderSupplier ? ((ContractProviderSupplier) contract).getBranch().getIdBranch() : null)
                         .idSupplier(contract instanceof ContractProviderSubcontractor ? ((ContractProviderSubcontractor) contract).getContractProviderSupplier().getProviderSupplier().getIdProvider() : null)
-                        .build());
+                        .build(), token);
             }
         }
 
@@ -177,9 +180,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     @Override
-    public String denySolicitation(String id) {
+    public String denySolicitation(String idSolicitation) {
 
-        ItemManagement solicitation = itemManagementRepository.findById(id)
+        ItemManagement solicitation = itemManagementRepository.findById(idSolicitation)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found"));
 
         if (solicitation.getNewUser() != null) {
@@ -201,6 +204,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
 
+            String token = tokenManagerService.generateToken();
+            solicitation.setInvitationToken(token);
+
             if (provider.getEmail() != null) {
                 emailSender.sendNewProviderDeniedEmail(EmailRegistrationDeniedRequestDto.builder()
                         .email(provider.getEmail())
@@ -216,55 +222,103 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
         itemManagementRepository.save(solicitation);
 
+        if (solicitation.getInvitationToken() != null) {
+            tokenManagerService.revokeToken(solicitation.getInvitationToken());
+            solicitation.setInvitationToken(null); // limpa do banco também
+        }
+
+
         return "Solicitation denied";
     }
 
-    private ItemManagementUserResponseDto getItemManagementUserResponseDto(ItemManagement itemManagement, UserClient requester, UserClient newUser) {
+    @Override
+    public void deleteSolicitation(String idSolicitation) {
+        itemManagementRepository.deleteById(idSolicitation);
+    }
+
+    private ItemManagementUserResponseDto toItemManagementUserResponseDto(ItemManagement itemManagement, User requester, User newUser) {
+        if (!(newUser instanceof UserClient userClient)) {
+            throw new IllegalArgumentException("Not a valid user");
+        }
+
         return ItemManagementUserResponseDto.builder()
                 .idSolicitation(itemManagement.getIdSolicitation())
-                .title(itemManagement.getTitle())
-                .details(itemManagement.getDetails())
+                .userFullName(newUser.getFirstName() + " " + newUser.getSurname())
+                .solicitationType(itemManagement.getSolicitationType())
+                .clientTradeName(userClient.getBranch().getClient().getTradeName())
+                .clientCnpj(userClient.getBranch().getClient().getCnpj())
+                .requesterFullName(requester.getFirstName() + " " + requester.getSurname())
+                .requesterEmail(requester.getEmail())
                 .status(itemManagement.getStatus())
                 .creationDate(itemManagement.getCreationDate())
-                .requester(ItemManagementUserResponseDto.Requester.builder()
-                        .idUser(itemManagement.getRequester().getIdUser())
-                        .cpf(itemManagement.getRequester().getCpf())
-                        .email(itemManagement.getRequester().getEmail())
-                        .firstName(itemManagement.getRequester().getFirstName())
-                        .surname(itemManagement.getRequester().getSurname())
-                        .nameEnterprise(requester.getBranch().getName())
+                .build();
+    }
+
+    private ItemManagementProviderResponseDto toItemManagementProviderResponseDto(ItemManagement itemManagement, User requester, Provider newProvider) {
+        if (!(newProvider instanceof ProviderSupplier providerSupplier)) {
+            throw new IllegalArgumentException("Not a valid provider");
+        }
+
+        return ItemManagementProviderResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .enterpriseName(providerSupplier.getTradeName())
+                .solicitationType(itemManagement.getSolicitationType())
+                .clientName(providerSupplier.getBranches().get(0).getClient().getTradeName())
+                .clientCnpj(providerSupplier.getBranches().get(0).getClient().getCnpj())
+                .requesterName(requester.getFirstName() + " " + requester.getSurname())
+                .requesterEmail(requester.getEmail())
+                .status(itemManagement.getStatus())
+                .creationDate(itemManagement.getCreationDate())
+                .build();
+    }
+
+    private ItemManagementUserDetailsResponseDto toItemManagementUserDetailsResponseDto(ItemManagement itemManagement) {
+        if (!(itemManagement.getNewUser() instanceof UserClient userClient)) {
+            throw new IllegalArgumentException("Not a valid user");
+        }
+
+        return ItemManagementUserDetailsResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .solicitationType(itemManagement.getSolicitationType())
+                .creationDate(itemManagement.getCreationDate())
+                .client(ItemManagementUserDetailsResponseDto.Client.builder()
+                        .cnpj(userClient.getBranch().getClient().getCnpj())
+                        .tradeName(userClient.getBranch().getClient().getTradeName())
                         .build())
-                .newUser(ItemManagementUserResponseDto.NewUser.builder()
-                        .idUser(itemManagement.getNewUser().getIdUser())
+                .newUser(ItemManagementUserDetailsResponseDto.NewUser.builder()
+                        .fullName(itemManagement.getNewUser().getFirstName() + " " + itemManagement.getNewUser().getSurname())
                         .cpf(itemManagement.getNewUser().getCpf())
                         .email(itemManagement.getNewUser().getEmail())
-                        .firstName(itemManagement.getNewUser().getFirstName())
-                        .surname(itemManagement.getNewUser().getSurname())
-                        .enterprise(newUser.getBranch().getName())
+                        .build())
+                .requester(ItemManagementUserDetailsResponseDto.Requester.builder()
+                        .fullName(itemManagement.getRequester().getFirstName() + " " + itemManagement.getRequester().getSurname())
+                        .email(itemManagement.getRequester().getEmail())
                         .build())
                 .build();
     }
 
-    private ItemManagementProviderResponseDto getItemManagementProviderResponseDto(ItemManagement itemManagement, UserClient requesterClient, UserManager requesterManager) {
-        return ItemManagementProviderResponseDto.builder()
+    private ItemManagementProviderDetailsResponseDto toItemManagementProviderDetailsResponseDto(ItemManagement itemManagement) {
+        if (!(itemManagement.getNewProvider() instanceof ProviderSupplier providerSupplier)) {
+            throw new IllegalArgumentException("Not a valid provider");
+        }
+
+        return ItemManagementProviderDetailsResponseDto.builder()
                 .idSolicitation(itemManagement.getIdSolicitation())
-                .title(itemManagement.getTitle())
-                .details(itemManagement.getDetails())
-                .status(itemManagement.getStatus())
+                .solicitationType(itemManagement.getSolicitationType())
                 .creationDate(itemManagement.getCreationDate())
-                .requester(ItemManagementProviderResponseDto.Requester.builder()
-                        .idUser(itemManagement.getRequester().getIdUser())
-                        .cpf(itemManagement.getRequester().getCpf())
-                        .email(itemManagement.getRequester().getEmail())
-                        .firstName(itemManagement.getRequester().getFirstName())
-                        .surname(itemManagement.getRequester().getSurname())
-                        .nameEnterprise(requesterManager != null ? "Realiza Assessoria" : requesterClient.getBranch().getName())
+                .client(ItemManagementProviderDetailsResponseDto.Client.builder()
+                        .cnpj(providerSupplier.getBranches().get(0).getClient().getCnpj())
+                        .tradeName(providerSupplier.getBranches().get(0).getClient().getTradeName())
                         .build())
-                .newProvider(ItemManagementProviderResponseDto.NewProvider.builder()
-                        .cnpj(itemManagement.getNewProvider().getCnpj())
-                        .telephone(itemManagement.getNewProvider().getTelephone())
-                        .corporateName(itemManagement.getNewProvider().getCorporateName())
+                .newProvider(ItemManagementProviderDetailsResponseDto.NewProvider.builder()
+                        .cnpj(providerSupplier.getCnpj())
+                        .corporateName(providerSupplier.getCorporateName())
+                        .build())
+                .requester(ItemManagementProviderDetailsResponseDto.Requester.builder()
+                        .fullName(itemManagement.getRequester().getFirstName() + " " + itemManagement.getRequester().getSurname())
+                        .email(itemManagement.getRequester().getEmail())
                         .build())
                 .build();
     }
+
 }

@@ -8,6 +8,8 @@ import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.employees.Cbo;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -20,6 +22,7 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.employees.CboRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -54,6 +57,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final CboRepository cboRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
@@ -103,6 +107,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                     .toList();
         }
 
+        Cbo cbo = cboRepository.findById(employeeBrazilianRequestDto.getCboId())
+                .orElseThrow(() -> new NotFoundException("CBO not found"));
+
         newEmployeeBrazilian = EmployeeBrazilian.builder()
                 .pis(employeeBrazilianRequestDto.getPis())
                 .maritalStatus(employeeBrazilianRequestDto.getMaritalStatus())
@@ -113,6 +120,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .address(employeeBrazilianRequestDto.getAddress())
                 .country(employeeBrazilianRequestDto.getCountry())
                 .acronym(employeeBrazilianRequestDto.getAcronym())
+                .addressLine2(employeeBrazilianRequestDto.getAddressLine2())
                 .state(employeeBrazilianRequestDto.getState())
                 .birthDate(employeeBrazilianRequestDto.getBirthDate())
                 .city(employeeBrazilianRequestDto.getCity())
@@ -126,8 +134,8 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .telephone(employeeBrazilianRequestDto.getTelephone())
                 .directory(employeeBrazilianRequestDto.getDirectory())
                 .levelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation())
-                .cbo(employeeBrazilianRequestDto.getCbo())
-                .situation(employeeBrazilianRequestDto.getSituation())
+                .cbo(cbo)
+                .situation(Employee.Situation.DESALOCADO)
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
                 .cpf(employeeBrazilianRequestDto.getCpf())
                 .branch(branch)
@@ -158,6 +166,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .name(savedEmployeeBrazilian.getName())
                 .surname(savedEmployeeBrazilian.getSurname())
                 .address(savedEmployeeBrazilian.getAddress())
+                .addressLine2(savedEmployeeBrazilian.getAddressLine2())
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())
                 .state(savedEmployeeBrazilian.getState())
@@ -173,7 +182,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .telephone(savedEmployeeBrazilian.getTelephone())
                 .directory(savedEmployeeBrazilian.getDirectory())
                 .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
-                .cbo(savedEmployeeBrazilian.getCbo())
+                .cboId(savedEmployeeBrazilian.getCbo().getId())
                 .situation(savedEmployeeBrazilian.getSituation())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .cpf(savedEmployeeBrazilian.getCpf())
@@ -213,6 +222,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .surname(employeeBrazilian.getSurname())
                 .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
                 .address(employeeBrazilian.getAddress())
+                .addressLine2(employeeBrazilian.getAddressLine2())
                 .country(employeeBrazilian.getCountry())
                 .acronym(employeeBrazilian.getAcronym())
                 .state(employeeBrazilian.getState())
@@ -228,7 +238,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .telephone(employeeBrazilian.getTelephone())
                 .directory(employeeBrazilian.getDirectory())
                 .levelOfEducation(employeeBrazilian.getLevelOfEducation())
-                .cbo(employeeBrazilian.getCbo())
+                .cboId(employeeBrazilian.getCbo().getId())
                 .situation(employeeBrazilian.getSituation())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
                 .cpf(employeeBrazilian.getCpf())
@@ -274,6 +284,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .birthDate(employeeBrazilian.getBirthDate())
                             .city(employeeBrazilian.getCity())
                             .postalCode(employeeBrazilian.getPostalCode())
+                            .addressLine2(employeeBrazilian.getAddressLine2())
                             .gender(employeeBrazilian.getGender())
                             .position(employeeBrazilian.getPosition())
                             .registration(employeeBrazilian.getRegistration())
@@ -283,7 +294,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .telephone(employeeBrazilian.getTelephone())
                             .directory(employeeBrazilian.getDirectory())
                             .levelOfEducation(employeeBrazilian.getLevelOfEducation())
-                            .cbo(employeeBrazilian.getCbo())
+                            .cboId(employeeBrazilian.getCbo().getId())
                             .situation(employeeBrazilian.getSituation())
                             .admissionDate(employeeBrazilian.getAdmissionDate())
                             .cpf(employeeBrazilian.getCpf())
@@ -304,6 +315,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     @Override
     public Optional<EmployeeResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         List<Contract> contracts = List.of();
+        Cbo cbo = null;
 
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
 
@@ -314,6 +326,11 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
             if (contracts.isEmpty()) {
                 throw new NotFoundException("Contracts not found");
             }
+        }
+
+        if (employeeBrazilianRequestDto.getCboId() != null) {
+            cbo = cboRepository.findById(employeeBrazilianRequestDto.getCboId())
+                    .orElseThrow(() -> new NotFoundException("CBO not found"));
         }
 
         employeeBrazilian.setPis(employeeBrazilianRequestDto.getPis() != null ? employeeBrazilianRequestDto.getPis() : employeeBrazilian.getPis());
@@ -329,6 +346,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setBirthDate(employeeBrazilianRequestDto.getBirthDate() != null ? employeeBrazilianRequestDto.getBirthDate() : employeeBrazilian.getBirthDate());
         employeeBrazilian.setCity(employeeBrazilianRequestDto.getCity() != null ? employeeBrazilianRequestDto.getCity() : employeeBrazilian.getCity());
         employeeBrazilian.setPostalCode(employeeBrazilianRequestDto.getPostalCode() != null ? employeeBrazilianRequestDto.getPostalCode() : employeeBrazilian.getPostalCode());
+        employeeBrazilian.setAddressLine2(employeeBrazilianRequestDto.getAddressLine2() != null ? employeeBrazilianRequestDto.getAddressLine2() : employeeBrazilian.getAddressLine2());
         employeeBrazilian.setGender(employeeBrazilianRequestDto.getGender() != null ? employeeBrazilianRequestDto.getGender() : employeeBrazilian.getGender());
         employeeBrazilian.setPosition(employeeBrazilianRequestDto.getPosition() != null ? employeeBrazilianRequestDto.getPosition() : employeeBrazilian.getPosition());
         employeeBrazilian.setRegistration(employeeBrazilianRequestDto.getRegistration() != null ? employeeBrazilianRequestDto.getRegistration() : employeeBrazilian.getRegistration());
@@ -338,7 +356,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setTelephone(employeeBrazilianRequestDto.getTelephone() != null ? employeeBrazilianRequestDto.getTelephone() : employeeBrazilian.getTelephone());
         employeeBrazilian.setDirectory(employeeBrazilianRequestDto.getDirectory() != null ? employeeBrazilianRequestDto.getDirectory() : employeeBrazilian.getDirectory());
         employeeBrazilian.setLevelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation() != null ? employeeBrazilianRequestDto.getLevelOfEducation() : employeeBrazilian.getLevelOfEducation());
-        employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCbo() != null ? employeeBrazilianRequestDto.getCbo() : employeeBrazilian.getCbo());
+        employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCboId() != null ? cbo : employeeBrazilian.getCbo());
         employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null ? employeeBrazilianRequestDto.getSituation() : employeeBrazilian.getSituation());
         employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
         employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null ? contracts : employeeBrazilian.getContracts());
@@ -355,6 +373,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .name(savedEmployeeBrazilian.getName())
                 .surname(savedEmployeeBrazilian.getSurname())
                 .address(savedEmployeeBrazilian.getAddress())
+                .addressLine2(savedEmployeeBrazilian.getAddressLine2())
                 .country(savedEmployeeBrazilian.getCountry())
                 .acronym(savedEmployeeBrazilian.getAcronym())
                 .state(savedEmployeeBrazilian.getState())
@@ -370,7 +389,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .telephone(savedEmployeeBrazilian.getTelephone())
                 .directory(savedEmployeeBrazilian.getDirectory())
                 .levelOfEducation(savedEmployeeBrazilian.getLevelOfEducation())
-                .cbo(savedEmployeeBrazilian.getCbo())
+                .cboId(savedEmployeeBrazilian.getCbo().getId())
                 .situation(savedEmployeeBrazilian.getSituation())
                 .admissionDate(savedEmployeeBrazilian.getAdmissionDate())
                 .cpf(savedEmployeeBrazilian.getCpf())

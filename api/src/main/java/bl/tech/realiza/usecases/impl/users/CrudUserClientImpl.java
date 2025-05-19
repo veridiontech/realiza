@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -74,24 +75,15 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .build();
 
         UserClient userClient = userClientRepository.findById(userClientRequestDto.getIdUser())
-                .orElse(null);
-        if (userClient == null) {
-            newUserClient.setIsActive(true);
-        }
+                .orElseThrow(() -> new NotFoundException("User requester not found"));
+
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
-
-        if (userClient == null) {
-            // criar solicitação
-            crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
-                    .title(String.format("Novo usuário %s %s", savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "", savedUserClient.getSurname() != null ? savedUserClient.getSurname() : ""))
-                    .details(String.format("Solicitação de adição do usuário %s %s da empresa %s a plataforma",
-                            savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "",
-                            savedUserClient.getSurname() != null ? savedUserClient.getSurname() : "", savedUserClient.getBranch().getName() != null ? savedUserClient.getBranch().getName() : ""))
-                    .idRequester(userClientRequestDto.getIdUser())
-                    .idNewUser(savedUserClient.getIdUser())
-                    .build());
-        }
+        crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
+                .solicitationType(ItemManagement.SolicitationType.CREATION)
+                .idRequester(savedUserClient.getIdUser())
+                .idNewUser(userClient.getIdUser())
+                .build());
 
         return UserResponseDto.builder()
                 .idUser(savedUserClient.getIdUser())

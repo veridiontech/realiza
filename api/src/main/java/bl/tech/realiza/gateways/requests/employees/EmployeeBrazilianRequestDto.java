@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 public class EmployeeBrazilianRequestDto {
     private String pis;
-    private String maritalStatus;
-    private String contractType;
+    private Employee.MaritalStatus maritalStatus;
+    private Employee.ContractType contractType;
     private String cep;
     private String name;
     private String surname;
@@ -20,6 +20,7 @@ public class EmployeeBrazilianRequestDto {
     private String state;
     private Date birthDate;
     private String city;
+    private String addressLine2;
     private String postalCode;
     private String gender;
     private String position;
@@ -30,8 +31,8 @@ public class EmployeeBrazilianRequestDto {
     private String telephone;
     private String directory;
     private String email;
-    private String levelOfEducation;
-    private String cbo;
+    private Employee.LevelOfEducation levelOfEducation;
+    private String cboId;
     private Employee.Situation situation;
     private String rg;
     private String cpf;
