@@ -15,33 +15,29 @@ public class EmailControllerImpl {
     private final EmailSender emailSender;
     private final TokenManagerService tokenManagerService;
 
-    @PostMapping
+    @PostMapping("/invite")
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/invite")
     public ResponseEntity<String> sendEmailInvite(@RequestBody EmailEnterpriseInviteRequestDto email) {
         try {
-            emailSender.sendNewProviderEmail(email);
+            emailSender.sendNewProviderEmail(email, "");
             return ResponseEntity.ok("Success!");
         } catch (Exception e) {
             return ResponseEntity.ok(e.getMessage());
         }
     }
 
-    @PostMapping
+    @PostMapping("/validate")
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/validate")
     public ResponseEntity<?> validate(@RequestParam String token) {
         boolean isValid = tokenManagerService.validateToken(token);
-        if (isValid){
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
+        if (!isValid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido ou expirado.");
         }
+        return ResponseEntity.ok("Token válido");
     }
 
-    @PostMapping
+    @PostMapping("/password-recovery")
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/password-recovery")
     public ResponseEntity<String> sendEmailPasswordRecovery(@RequestParam String email) {
         try {
             emailSender.sendPasswordRecoveryEmail(email);

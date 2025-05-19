@@ -24,6 +24,7 @@ import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemM
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserResponseDto;
+import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final UserManagerRepository userManagerRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final ContractRepository contractRepository;
+    private final TokenManagerService tokenManagerService;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -149,6 +151,10 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
 
+            String token = tokenManagerService.generateToken();
+            solicitation.setInvitationToken(token);
+            itemManagementRepository.save(solicitation);
+
             if (provider.getEmail() != null) {
                 emailSender.sendNewProviderEmail(EmailEnterpriseInviteRequestDto.builder()
                         .email(provider.getEmail())
@@ -162,7 +168,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .idCompany(provider.getIdProvider())
                         .idBranch(contract instanceof ContractProviderSupplier ? ((ContractProviderSupplier) contract).getBranch().getIdBranch() : null)
                         .idSupplier(contract instanceof ContractProviderSubcontractor ? ((ContractProviderSubcontractor) contract).getContractProviderSupplier().getProviderSupplier().getIdProvider() : null)
-                        .build());
+                        .build(), token);
             }
         }
 
@@ -198,6 +204,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
 
+            String token = tokenManagerService.generateToken();
+            solicitation.setInvitationToken(token);
+
             if (provider.getEmail() != null) {
                 emailSender.sendNewProviderDeniedEmail(EmailRegistrationDeniedRequestDto.builder()
                         .email(provider.getEmail())
@@ -212,6 +221,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         solicitation.setStatus(ItemManagement.Status.DENIED);
 
         itemManagementRepository.save(solicitation);
+
+        if (solicitation.getInvitationToken() != null) {
+            tokenManagerService.revokeToken(solicitation.getInvitationToken());
+            solicitation.setInvitationToken(null); // limpa do banco também
+        }
+
 
         return "Solicitation denied";
     }

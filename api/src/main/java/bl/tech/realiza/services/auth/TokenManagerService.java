@@ -36,4 +36,9 @@ public class TokenManagerService {
         tokenStore.remove(token);
         return true;
     }
+
+    public void revokeToken(String token) {
+        tokenStore.remove(token);
+    }
+
 }

@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -79,10 +80,7 @@ public class CrudUserClientImpl implements CrudUserClient {
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
         crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
-                .title(String.format("Novo usuário %s %s", savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "", savedUserClient.getSurname() != null ? savedUserClient.getSurname() : ""))
-                .details(String.format("Solicitação de adição do usuário %s %s da empresa %s a plataforma",
-                        savedUserClient.getFirstName() != null ? savedUserClient.getFirstName() : "",
-                        savedUserClient.getSurname() != null ? savedUserClient.getSurname() : "", savedUserClient.getBranch().getName() != null ? savedUserClient.getBranch().getName() : ""))
+                .solicitationType(ItemManagement.SolicitationType.CREATION)
                 .idRequester(savedUserClient.getIdUser())
                 .idNewUser(userClient.getIdUser())
                 .build());

@@ -26,6 +26,7 @@ public class ItemManagement {
     private Status status = Status.PENDING;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+    private String invitationToken;
 
     // -------------------------------
     // Relacionamentos INERENTES

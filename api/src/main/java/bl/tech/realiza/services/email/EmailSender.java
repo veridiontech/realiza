@@ -27,7 +27,7 @@ public class EmailSender {
     private final TokenManagerService tokenManagerService;
     private final UserRepository userRepository;
 
-    public void sendNewProviderEmail(EmailEnterpriseInviteRequestDto emailEnterpriseInviteRequestDto) {
+    public void sendNewProviderEmail(EmailEnterpriseInviteRequestDto emailEnterpriseInviteRequestDto, String token) {
         String email = emailEnterpriseInviteRequestDto.getEmail();
         String companyName = emailEnterpriseInviteRequestDto.getCompanyName();
         String requesterName = emailEnterpriseInviteRequestDto.getRequesterName();
@@ -41,7 +41,6 @@ public class EmailSender {
         String idSupplier = emailEnterpriseInviteRequestDto.getIdSupplier();
 
         try {
-            String token = tokenManagerService.generateToken();
             String emailBody;
 
             try (var inputStream = Objects.requireNonNull(
