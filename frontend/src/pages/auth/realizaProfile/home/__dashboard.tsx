@@ -60,7 +60,7 @@ const createUserClient = z.object({
     .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
   cpf: z.string()
     .nonempty("Cpf é obrigatório")
-    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00 ou 00000000000"),
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00"),
   email: z
     .string()
     .email("Formato de email inválido")
@@ -101,13 +101,18 @@ export function Dashboard() {
       .slice(0, 14);
   };
 
-  // Máscara telefone
   const formatPhone = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/^(\d{2})(\d)/g, "($1) $2")
-      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
-      .slice(0, 15);
+    const digits = value.replace(/\D/g, "");
+
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
   };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
@@ -180,7 +185,7 @@ export function Dashboard() {
             </div>
             <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
               <StatusDocumentChart />
-              <ConformityGaugeChart percentage={29} />
+              <ConformityGaugeChart />
             </div>
             <div className="mt-5 w-full text-right">
               <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
@@ -371,13 +376,17 @@ export function Dashboard() {
                                   <Label className="text-white">CPF</Label>
                                   <Input
                                     type="text"
-                                    {...register("cpf")}
-                                    placeholder="Digite seu CPF"
+                                    value={cpfValue}
+                                    onChange={(e) => {
+                                      const formattedCpf = formatCPF(e.target.value);
+                                      setCpfValue(formattedCpf);
+                                      setValue("cpf", formattedCpf, { shouldValidate: true });
+                                    }}
+                                    placeholder="000.000.000-00"
+                                    maxLength={14}
                                   />
                                   {errors.cpf && (
-                                    <span className="text-sm text-red-600">
-                                      {errors.cpf.message}
-                                    </span>
+                                    <span className="text-sm text-red-600">{errors.cpf.message}</span>
                                   )}
                                 </div>
 
@@ -389,7 +398,7 @@ export function Dashboard() {
                                     onChange={(e) => {
                                       const formattedPhone = formatPhone(e.target.value);
                                       setPhoneValue(formattedPhone);
-                                      setValue("cellPhone", formattedPhone, { shouldValidate: true });
+                                      setValue("cellPhone", formattedPhone);
                                     }}
                                     placeholder="(00) 00000-0000"
                                     maxLength={15}
@@ -556,7 +565,7 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <ConformityGaugeChart percentage={71.29} />
+              <ConformityGaugeChart />
             </div>
           </div>
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">

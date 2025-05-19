@@ -62,7 +62,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const roleUser = localStorage.getItem("role");
 
       if (tokenFromStorage && isTokenValid(tokenFromStorage) && userId && roleUser) {
-        // Salva o token em memória
         setToken(tokenFromStorage);
         switch (roleUser) {
           case "ROLE_ADMIN":

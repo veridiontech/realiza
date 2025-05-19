@@ -23,19 +23,34 @@ import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
-import { useSupplier } from "@/context/Supplier-context";
+
+const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
 
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z.string(),
-  cnpj: z.string().nonempty("Insira o cnpj"),
+  phone: z
+    .string()
+    .nonempty("Telefone é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  cnpj: z
+    .string()
+    .nonempty("Insira o CNPJ")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato 00.000.000/0000-00"),
   corporateName: z.string().nonempty("Insira o nome da empresa"),
 });
 
 export const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z.string(),
-  cnpj: z.string().nonempty("Insira o cnpj"),
+  phone: z
+    .string()
+    .nonempty("Telefone é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  cnpj: z
+    .string()
+    .nonempty("Insira o CNPJ")
+    .regex(cnpjRegex, "CNPJ inválido, use o formato 00.000.000/0000-00"),
   corporateName: z.string().nonempty("Insira o nome da empresa"),
   providerSubcontractor: z
     .string()
@@ -77,12 +92,14 @@ export function ModalTesteSendSupplier() {
   const [suppliers, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
   const { datasSender, setDatasSender } = useDataSendEmailContext();
-  const { supplier } = useSupplier();
-  const [contracts, setContracts] = useState([]);
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
-  const [isMainModalOpen, setIsMainModalOpen] = useState(false);  // controla o primeiro modal 
+  const [isMainModalOpen, setIsMainModalOpen] = useState(false);  // controla o primeiro modal
+  const [cnpjValue, setCnpjValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
+
+
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -114,11 +131,40 @@ export function ModalTesteSendSupplier() {
     register: registerSubContract,
     handleSubmit: handleSubmitSubContract,
     formState: { errors: errorsSubContract },
-    setValue: setValueSub,
-    getValues: getValuesSub,
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
+
+  const formatCNPJ = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2")
+      .slice(0, 18);
+  };
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
+  };
+
+
+  useEffect(() => {
+    setCnpjValue(getValues("cnpj") || "");
+    setPhoneValue(getValues("phone") || "");
+  }, [getValues]);
+
 
   const handleCNPJSearch = async () => {
     const cnpjValue = getValues("cnpj");
@@ -136,53 +182,21 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  const getContracts = async () => {
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(
-        `${ip}/contract/supplier/filtered-supplier?idSearch=${supplier?.idProvider}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
-      console.log("contratos:", res.data.content);
-
-      setContracts(res.data.content);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    if (supplier?.idProvider) {
-      getContracts();
-    }
-  }, [supplier?.idProvider]);
-
-  const handleCNPJSearchSub = async () => {
-    const cnpjValue = getValuesSub("cnpj");
-    console.log("CNPJ no form de subcontratado:", cnpjValue);
-    setIsLoading(true);
-    try {
-      const companyData = await fetchCompanyByCNPJ(cnpjValue);
-      setValueSub("corporateName", companyData.razaoSocial || "");
-    } catch (error) {
-      toast.error("Erro ao buscar dados do CNPJ");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/supplier/filtered-client?idSearch=${selectedBranch.idBranch}`, {
+        `${ip}/contract/supplier/subcontract-permission`, {
+        params: {
+          idBranch: selectedBranch.idBranch
+        },
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       }
       );
-      setSuppliers(res.data.content);
+      console.log(res.data);
+
+      setSuppliers(res.data);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
     }
@@ -270,47 +284,47 @@ export function ModalTesteSendSupplier() {
     getActivities();
   }, []);
 
-const createContract = async (data: ContractFormSchema) => {
-  if (!providerDatas) {
-    toast.error("Dados do prestador não encontrados. Reinicie o processo.");
-    return;
-  }
-  setIsLoading(true);
-  try {
-    const tokenFromStorage = localStorage.getItem("tokenClient");
-    const payload = {
-      ...data,
-      idRequester: user?.idUser,
-      providerDatas,
-      idBranch: selectedBranch?.idBranch,
-      idActivities: selectedActivities,
-    };
-    console.log("enviando dados do contrato", payload);
-    setDatasSender(payload);
-    console.log("dados recebidos:", datasSender);
-
-    await axios.post(`${ip}/contract/supplier`, payload, {
-      headers: { Authorization: `Bearer ${tokenFromStorage}` },
-    });
-    toast.success("Contrato criado com sucesso!");
-    setNextModal(false);
-    setIsMainModalOpen(false);
-
-  } catch (err: any) {
-    if (err.response) {
-      console.error("Erro no servidor:", err.response.data);
-      toast.error("Erro ao criar contrato: Erro desconhecido.");
-    } else if (err.request) {
-      console.error("Erro na requisição:", err.request);
-      toast.error("Erro na requisição ao servidor.");
-    } else {
-      console.error("Erro ao configurar requisição:", err.message);
-      toast.error("Erro ao criar contrato. Tente novamente.");
+  const createContract = async (data: ContractFormSchema) => {
+    if (!providerDatas) {
+      toast.error("Dados do prestador não encontrados. Reinicie o processo.");
+      return;
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const payload = {
+        ...data,
+        idRequester: user?.idUser,
+        providerDatas,
+        idBranch: selectedBranch?.idBranch,
+        idActivities: selectedActivities,
+      };
+      console.log("enviando dados do contrato", payload);
+      setDatasSender(payload);
+      console.log("dados recebidos:", datasSender);
+
+      await axios.post(`${ip}/contract/supplier`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+      toast.success("Contrato criado com sucesso!");
+      setNextModal(false);
+      setIsMainModalOpen(false);
+
+    } catch (err: any) {
+      if (err.response) {
+        console.error("Erro no servidor:", err.response.data);
+        toast.error("Erro ao criar contrato: Erro desconhecido.");
+      } else if (err.request) {
+        console.error("Erro na requisição:", err.request);
+        toast.error("Erro na requisição ao servidor.");
+      } else {
+        console.error("Erro ao configurar requisição:", err.message);
+        toast.error("Erro ao criar contrato. Tente novamente.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getServicesType = async () => {
     try {
@@ -320,8 +334,8 @@ const createContract = async (data: ContractFormSchema) => {
           owner: "BRANCH",
           idOwner: selectedBranch?.idBranch
         },
-        headers: { Authorization: `Bearer ${tokenFromStorage}`,}
-      }, );
+        headers: { Authorization: `Bearer ${tokenFromStorage}`, }
+      },);
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);
@@ -332,383 +346,6 @@ const createContract = async (data: ContractFormSchema) => {
     getActivities();
     getServicesType();
   }, []);
-
-  if (
-    user?.role === "ROLE_SUPPLIER_RESPONSIBLE" &&
-    "ROLE_SUPPLIER_RESPONSIBLE"
-  ) {
-    return (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="bg-realizaBlue hidden md:block">
-            Cadastrar novo prestador
-          </Button>
-        </DialogTrigger>
-        <DialogContent
-          style={{
-            backgroundImage: `url(${bgModalRealiza})`,
-          }}
-          className="max-w-[45vw]"
-        >
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Cadastrar Subcontratado
-            </DialogTitle>
-          </DialogHeader>
-          <div>
-            {supplier ? (
-              <span className="text-white">
-                <strong>Filial:</strong> {supplier.corporateName}
-              </span>
-            ) : (
-              <span className="text-white">Nenhuma filial encontrada</span>
-            )}
-          </div>
-          <div>
-            <form
-              onSubmit={handleSubmitSubContract(createClient)}
-              className="flex flex-col gap-4"
-            >
-              <div className="relative">
-                <Label className="text-white">CNPJ</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Insira o cnpj do prestador..."
-                    {...registerSubContract("cnpj")}
-                    defaultValue={getValues("cnpj") || ""}
-                    className="pr-10"
-                  />
-                  {isLoading ? (
-                    <div
-                      onClick={handleCNPJSearchSub}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
-                    >
-                      <Oval
-                        visible={true}
-                        height="30"
-                        width="40"
-                        color="#34495E"
-                        ariaLabel="oval-loading"
-                        wrapperStyle={{}}
-                        wrapperClass=""
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      onClick={handleCNPJSearchSub}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
-                    >
-                      <Search />
-                    </div>
-                  )}
-                </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
-                )}
-              </div>
-              <div className="mb-1">
-                <Label className="text-white">Razão Social</Label>
-                <Input
-                  type="corporateName"
-                  placeholder="Digite a razão social do novo prestador"
-                  {...registerSubContract("corporateName")}
-                  className="w-full"
-                />
-              </div>
-              <div className="mb-1">
-                <Label className="text-white">Email</Label>
-                <Input
-                  type="email"
-                  placeholder="Digite o email do novo prestador"
-                  {...registerSubContract("email")}
-                  className="w-full"
-                />
-                {errorsSubContract.email && (
-                  <span className="text-red-600">
-                    {errorsSubContract.email.message}
-                  </span>
-                )}
-              </div>
-              <div>
-                <Label className="text-white">Telefone</Label>
-                <Input
-                  placeholder="Digite o telefone"
-                  {...registerSubContract("phone")}
-                />
-                {errorsSubContract.phone && (
-                  <span className="text-red-600">
-                    {errorsSubContract.phone.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label className="text-white">Selecione um fornecedor</Label>
-                <select
-                  defaultValue={""}
-                  className="rounded-lg p-2"
-                  {...registerSubContract("providerSubcontractor")}
-                >
-                  <option value="" disabled>
-                    Selecione uma opção
-                  </option>
-                  {contracts.map((supplier: any) => (
-                    <option
-                      value={supplier.idContract}
-                      key={supplier.idContract}
-                    >
-                      {supplier.serviceName}
-                    </option>
-                  ))}
-                </select>
-                {errorsSubContract.providerSubcontractor && (
-                  <span className="text-red-600">
-                    {errorsSubContract.providerSubcontractor.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex justify-end">
-                {isLoading ? (
-                  <Button>
-                    <Radio
-                      visible={true}
-                      height="80"
-                      width="80"
-                      ariaLabel="radio-loading"
-                      wrapperStyle={{}}
-                      wrapperClass=""
-                    />
-                  </Button>
-                ) : (
-                  <Button className="bg-realizaBlue" type="submit">
-                    Próximo
-                  </Button>
-                )}
-              </div>
-            </form>
-            <Dialog open={nextModal} onOpenChange={setNextModal}>
-              <DialogContent
-                className="max-w-[95vw] border-none md:max-w-[45vw]"
-                style={{
-                  backgroundImage: `url(${bgModalRealiza})`,
-                }}
-              >
-                <DialogHeader>
-                  <DialogTitle className="text-white">
-                    Faça o contrato
-                  </DialogTitle>
-                </DialogHeader>
-                <div>
-                  {selectedBranch ? (
-                    <span className="text-white">
-                      <strong>Filial:</strong> {selectedBranch?.name}
-                    </span>
-                  ) : (
-                    <span className="text-white">
-                      Nenhuma filial selecionada
-                    </span>
-                  )}
-                </div>
-                <ScrollArea className="h-[60vh] w-full px-5">
-                  <div className="p-4">
-                    <form
-                      className="flex flex-col gap-2"
-                      onSubmit={handleSubmitContract(createContract)}
-                    >
-                      <div>
-                        <Label className="text-white">
-                          CNPJ do novo prestador
-                        </Label>
-                        <div>
-                          <Input
-                            type="text"
-                            {...registerContract("cnpj")}
-                            value={pushCnpj || "erro ao puxar cnpj"}
-                          />
-                          {errorsContract.cnpj && (
-                            <span className="text-red-600">
-                              {errorsContract.cnpj.message}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-2">
-                        <Label className="text-white">Gestor do serviço</Label>
-                        <select
-                          key={getIdManager}
-                          className="rounded-md border p-2"
-                          {...registerContract("idResponsible")} // Associando ao idResponsible
-                        >
-                          <option value="" disabled>
-                            Selecione um gestor
-                          </option>
-                          {Array.isArray(managers) &&
-                            managers.map((manager: any) => (
-                              <option
-                                value={manager.idUser}
-                                onClick={() => setGetIdManager(manager.idUser)}
-                                key={manager.idUser}
-                              >
-                                {manager.firstName} {manager.surname}{" "}
-                              </option>
-                            ))}
-                        </select>
-                        {errorsContract.idResponsible && (
-                          <span className="text-red-600">
-                            {errorsContract.idResponsible.message}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-white">
-                          Data de início efetivo
-                        </Label>
-                        <Input type="date" {...registerContract("dateStart")} />
-                        {errorsContract.dateStart && (
-                          <span className="text-red-600">
-                            {errorsContract.dateStart.message}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-white">
-                          Referência do contrato
-                        </Label>
-                        <Input {...registerContract("contractReference")} />
-                        {errorsContract.contractReference && (
-                          <span className="text-red-500">
-                            {errorsContract.contractReference.message}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Tipo de despesa</Label>
-                        <select
-                          {...registerContract("expenseType")}
-                          className="rounded-md border p-2"
-                          defaultValue=""
-                        >
-                          <option value="" disabled>
-                            Selecione uma opção
-                          </option>
-                          <option value="CAPEX">CAPEX</option>
-                          <option value="OPEX">OPEX</option>
-                          <option value="Nenhuma">Nenhuma</option>
-                        </select>
-                        {errorsContract.idServiceType && (
-                          <span className="text-red-500">
-                            {errorsContract.idServiceType.message}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Tipo de Gestão</Label>
-                        <div>
-                          <div>
-                            <Label>SSMA</Label>
-                            <input type="checkbox" placeholder="SSMA" />
-                          </div>
-                          <div>
-                            <Label>TRABALHISTA</Label>
-                            <input type="checkbox" />
-                          </div>
-                        </div>
-                        <select
-                          {...registerContract("idServiceType")}
-                          className="rounded-md p-1"
-                        >
-                          <option value="" disabled>
-                            Selecione uma opção
-                          </option>
-                          <option value="AMBAS">AMBAS</option>
-                          <option value="">TRABALHISTA</option>
-                          <option value="SSMA">SSMA</option>
-                          <option value="TODAS">TODAS</option>
-                        </select>
-                        {errorsContract.expenseType && (
-                          <span className="text-red-500">
-                            {errorsContract.expenseType.message}
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label className="text-white">Nome do Serviço</Label>
-                        <Input {...registerContract("serviceName")} />
-                        {errorsContract.serviceName && (
-                          <span className="text-red-500">
-                            {errorsContract.serviceName.message}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">Tipo de atividade</Label>
-                        {/* <select
-                          {...registerContract("idActivity")}
-                          className="rounded-md border p-2"
-                          defaultValue=""
-                        > */}
-                        {/* <option value="" disabled>
-                            Selecione uma atividade
-                          </option> */}
-                        {activities.map((activitie: any) => (
-                          <div
-                            // value={activitie.idActivity}
-                            key={activitie.idActivity}
-                          >
-                            {activitie.title}{" "}
-                          </div>
-                        ))}
-                        {/* </select> */}
-                        {/* {errorsContract.idActivity && (
-                          <span className="text-red-500">
-                            {errorsContract.idActivity.message}
-                          </span>
-                        )} */}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Label className="text-white">
-                          Descrição detalhada do serviço
-                        </Label>
-                        <textarea
-                          {...registerContract("description")}
-                          className="rounded-md border p-2"
-                        />
-                        {errorsContract.description && (
-                          <span className="text-red-500">
-                            {errorsContract.description.message}
-                          </span>
-                        )}
-                      </div>
-                      {isLoading ? (
-                        <Button className="bg-realizaBlue" type="submit">
-                          <Oval
-                            visible={true}
-                            height="80"
-                            width="80"
-                            color="#4fa94d"
-                            ariaLabel="oval-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                          />
-                        </Button>
-                      ) : (
-                        <Button className="bg-realizaBlue" type="submit">
-                          Enviar contrato
-                        </Button>
-                      )}
-                    </form>
-                  </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
@@ -774,9 +411,15 @@ const createContract = async (data: ContractFormSchema) => {
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
-                    placeholder="Insira o cnpj do prestador..."
-                    {...register("cnpj")}
+                    placeholder="00.000.000/0000-00"
+                    value={cnpjValue}
+                    onChange={(e) => {
+                      const formatted = formatCNPJ(e.target.value);
+                      setCnpjValue(formatted);
+                      setValue("cnpj", formatted, { shouldValidate: true });
+                    }}
                     className="w-full"
+                  // {...register("cnpj")}
                   />
                   {isLoading ? (
                     <div
@@ -802,10 +445,11 @@ const createContract = async (data: ContractFormSchema) => {
                     </div>
                   )}
                 </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
+                {errorsSubContract.cnpj && (
+                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
                 )}
               </div>
+
               <div className="mb-1">
                 <Label className="text-white">Razão Social</Label>
                 <Input
@@ -827,13 +471,21 @@ const createContract = async (data: ContractFormSchema) => {
                   <span className="text-red-600">{errors.email.message}</span>
                 )}
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-white">Telefone</Label>
-                <Input placeholder="Digite o telefone" {...register("phone")} />
-                {errors.phone && (
-                  <span className="text-red-600">{errors.phone.message}</span>
-                )}
+                <Input
+                  type="text"
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const formattedPhone = formatPhone(e.target.value);
+                    setPhoneValue(formattedPhone);
+                    setValue("phone", formattedPhone, { shouldValidate: true });
+                  }}
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
+                />
               </div>
+
               <div className="flex justify-end">
                 <Button className="bg-realizaBlue">Próximo</Button>
               </div>
@@ -849,14 +501,18 @@ const createContract = async (data: ContractFormSchema) => {
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
-                    placeholder="Insira o cnpj do prestador..."
-                    {...registerSubContract("cnpj")}
-                    defaultValue={getValues("cnpj") || ""}
+                    placeholder="00.000.000/0000-00"
+                    value={cnpjValue}
+                    onChange={(e) => {
+                      const formatted = formatCNPJ(e.target.value);
+                      setCnpjValue(formatted);
+                      setValue("cnpj", formatted, { shouldValidate: true });
+                    }}
                     className="w-full"
                   />
                   {isLoading ? (
                     <div
-                      onClick={handleCNPJSearchSub}
+                      onClick={handleCNPJSearch}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Oval
@@ -871,16 +527,26 @@ const createContract = async (data: ContractFormSchema) => {
                     </div>
                   ) : (
                     <div
-                      onClick={handleCNPJSearchSub}
+                      onClick={handleCNPJSearch}
                       className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
                     >
                       <Search />
                     </div>
                   )}
                 </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
+                {errorsSubContract.cnpj && (
+                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
                 )}
+              </div>
+
+              <div className="mb-1">
+                <Label className="text-white">Razão Social</Label>
+                <Input
+                  type="corporateName"
+                  placeholder="Digite a razão social do novo prestador"
+                  {...register("corporateName")}
+                  className="w-full"
+                />
               </div>
               <div className="mb-1">
                 <Label className="text-white">Razão Social</Label>
@@ -905,20 +571,22 @@ const createContract = async (data: ContractFormSchema) => {
                   </span>
                 )}
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-white">Telefone</Label>
                 <Input
-                  placeholder="Digite o telefone"
-                  {...registerSubContract("phone")}
+                  type="text"
+                  value={phoneValue}
+                  onChange={(e) => {
+                    const formattedPhone = formatPhone(e.target.value);
+                    setPhoneValue(formattedPhone);
+                    setValue("phone", formattedPhone, { shouldValidate: true });
+                  }}
+                  placeholder="(00) 00000-0000"
+                  maxLength={15}
                 />
-                {errorsSubContract.phone && (
-                  <span className="text-red-600">
-                    {errorsSubContract.phone.message}
-                  </span>
-                )}
               </div>
               <div className="flex flex-col gap-1">
-                <Label className="text-white">Selecione um fornecedor</Label>
+                <Label className="text-white">Selecione um contrato</Label>
                 <select
                   defaultValue={""}
                   className="rounded-lg p-2"
@@ -927,12 +595,12 @@ const createContract = async (data: ContractFormSchema) => {
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  {suppliers.map((supplier: any) => (
+                  {Array.isArray(suppliers) && suppliers.map((supplier: any) => (
                     <option
-                      value={supplier.idProvider}
-                      key={supplier.idProvider}
+                      value={supplier.idContract}
+                      key={supplier.idContract}
                     >
-                      {supplier.tradeName} {supplier.cnpj}
+                      {supplier.providerSupplierName} - {supplier.contractReference}
                     </option>
                   ))}
                 </select>
@@ -1169,12 +837,6 @@ const createContract = async (data: ContractFormSchema) => {
                                 <p className="text-black">{activity.title}</p>
                               </div>
                             ))}
-
-                            {/* {errorsContract.idActivity && (
-        <span className="text-red-500">
-          {errorsContract.idActivity.message}
-        </span>
-      )} */}
                           </div>
                         </ScrollArea>
                       </div>

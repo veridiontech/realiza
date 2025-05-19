@@ -51,7 +51,7 @@ export function BoxActivities({
                 }} // aqui que faltava!
               >
                 <input
-                  type="checkbox"
+                  type="radio"
                   checked={activitiesCheck === activitie.idActivity}
                   readOnly // evita warning do React
                 />

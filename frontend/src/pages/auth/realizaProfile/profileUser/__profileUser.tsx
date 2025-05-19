@@ -4,7 +4,7 @@ import { BottomSection } from "./bottomSection.tsx";
 
 export function ProfileUser() {
   return (
-    <div className="flex h-full w-full flex-col bg-white p-6">
+    <div className="flex h-full w-full flex-col bg-white p-6 relative bottom-[5vw] rounded-md">
       <h1 className="text-realizaBlue mb-6 text-2xl font-semibold">
         Meu Perfil
       </h1>

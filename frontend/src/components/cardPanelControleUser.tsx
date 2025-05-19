@@ -194,7 +194,7 @@ export function CardPanelControlUser({
                     <AlertDialogHeader>
                       <AlertDialogTitle>
                         Deseja mesmo confirmar o acesso de{" "}
-                        {data.newUser.firstName} {data.newUser.surname}ao
+                        {data.newUser.firstName} {data.newUser.surname} ao
                         sistema?
                       </AlertDialogTitle>
                     </AlertDialogHeader>
