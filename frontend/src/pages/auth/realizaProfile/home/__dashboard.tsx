@@ -79,7 +79,7 @@ export function Dashboard() {
   const { selectedBranch } = useBranch();
   const { user } = useUser();
   const [phoneValue, setPhoneValue] = useState("");
-  // const [cpfValue, setCpfValue] = useState("");
+  const [cpfValue, setCpfValue] = useState("");
 
   const {
     register,
@@ -92,22 +92,27 @@ export function Dashboard() {
   });
 
 
-  // const formatCPF = (value: string) => {
-  //   return value
-  //     .replace(/\D/g, "")
-  //     .replace(/(\d{3})(\d)/, "$1.$2")
-  //     .replace(/(\d{3})(\d)/, "$1.$2")
-  //     .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-  //     .slice(0, 14);
-  // };
-
-  // Máscara telefone
-  const formatPhone = (value: string) => {
+  const formatCPF = (value: string) => {
     return value
       .replace(/\D/g, "")
-      .replace(/^(\d{2})(\d)/g, "($1) $2")
-      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
-      .slice(0, 15);
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
   };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
@@ -180,7 +185,7 @@ export function Dashboard() {
             </div>
             <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
               <StatusDocumentChart />
-              <ConformityGaugeChart percentage={29} />
+              <ConformityGaugeChart />
             </div>
             <div className="mt-5 w-full text-right">
               <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
@@ -393,7 +398,7 @@ export function Dashboard() {
                                     onChange={(e) => {
                                       const formattedPhone = formatPhone(e.target.value);
                                       setPhoneValue(formattedPhone);
-                                      setValue("cellPhone", formattedPhone, { shouldValidate: true });
+                                      setValue("cellPhone", formattedPhone);
                                     }}
                                     placeholder="(00) 00000-0000"
                                     maxLength={15}
@@ -560,7 +565,7 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <ConformityGaugeChart percentage={0} />
+              <ConformityGaugeChart />
             </div>
           </div>
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
