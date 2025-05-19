@@ -187,13 +187,18 @@ export function AddNewBranch() {
   };
 
   const formatPhone = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/^(\d{2})(\d)/g, "($1) $2")
-      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
-      .slice(0, 15);
-  };
+    const digits = value.replace(/\D/g, "");
 
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
+  };
 
   return (
     <Dialog>
@@ -220,9 +225,9 @@ export function AddNewBranch() {
                   type="text"
                   value={cnpjValue}
                   onChange={(e) => {
-                    const formattedCNPJ = formatCNPJ(e.target.value);
-                    setCnpjValue(formattedCNPJ);
-                    setValue("cnpj", formattedCNPJ);
+                    const formatted = formatCNPJ(e.target.value);
+                    setCnpjValue(formatted);
+                    setValue("cnpj", formatted, { shouldValidate: true });
                   }}
                   placeholder="00.000.000/0000-00"
                   maxLength={18}

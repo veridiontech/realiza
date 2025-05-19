@@ -146,12 +146,19 @@ export function ModalTesteSendSupplier() {
   };
 
   const formatPhone = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/^(\d{2})(\d)/g, "($1) $2")
-      .replace(/(\d{4,5})(\d{4})$/, "$1-$2")
-      .slice(0, 15);
+    const digits = value.replace(/\D/g, "");
+
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
   };
+
 
   useEffect(() => {
     setCnpjValue(getValues("cnpj") || "");
@@ -181,14 +188,14 @@ export function ModalTesteSendSupplier() {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/contract/supplier/subcontract-permission`, {
-          params: {
-            idBranch: selectedBranch.idBranch
-          },
+        params: {
+          idBranch: selectedBranch.idBranch
+        },
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       }
       );
       console.log(res.data);
-      
+
       setSuppliers(res.data);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
@@ -404,7 +411,7 @@ export function ModalTesteSendSupplier() {
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
-                    placeholder="00.000.0000000-00"
+                    placeholder="00.000.000/0000-00"
                     value={cnpjValue}
                     onChange={(e) => {
                       const formatted = formatCNPJ(e.target.value);
@@ -412,7 +419,7 @@ export function ModalTesteSendSupplier() {
                       setValue("cnpj", formatted, { shouldValidate: true });
                     }}
                     className="w-full"
-                    // {...register("cnpj")}
+                  // {...register("cnpj")}
                   />
                   {isLoading ? (
                     <div
@@ -588,12 +595,12 @@ export function ModalTesteSendSupplier() {
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  {Array.isArray (suppliers) && suppliers.map((supplier: any) => (
+                  {Array.isArray(suppliers) && suppliers.map((supplier: any) => (
                     <option
                       value={supplier.idContract}
                       key={supplier.idContract}
                     >
-                    {supplier.providerSupplierName} - {supplier.contractReference} 
+                      {supplier.providerSupplierName} - {supplier.contractReference}
                     </option>
                   ))}
                 </select>
