@@ -8,6 +8,7 @@ import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.employees.Cbo;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
@@ -21,6 +22,7 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.employees.CboRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -55,6 +57,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final CboRepository cboRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
@@ -102,6 +105,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                     .toList();
         }
 
+        Cbo cbo = cboRepository.findById(employeeForeignerRequestDto.getCboId())
+                .orElseThrow(() -> new NotFoundException("CBO not found"));
+
 
         newEmployeeForeigner = EmployeeForeigner.builder()
                 .pis(employeeForeignerRequestDto.getPis())
@@ -127,7 +133,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .telephone(employeeForeignerRequestDto.getTelephone())
                 .directory(employeeForeignerRequestDto.getDirectory())
                 .levelOfEducation(employeeForeignerRequestDto.getLevelOfEducation())
-                .cbo(employeeForeignerRequestDto.getCboId())
+                .cbo(cbo)
                 .situation(Employee.Situation.DESALOCADO)
                 .rneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate())
@@ -176,7 +182,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .telephone(savedEmployeeForeigner.getTelephone())
                 .directory(savedEmployeeForeigner.getDirectory())
                 .levelOfEducation(savedEmployeeForeigner.getLevelOfEducation())
-                .cboId(savedEmployeeForeigner.getCbo())
+                .cboId(savedEmployeeForeigner.getCbo().getId())
                 .situation(savedEmployeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
@@ -233,7 +239,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .telephone(employeeForeigner.getTelephone())
                 .directory(employeeForeigner.getDirectory())
                 .levelOfEducation(employeeForeigner.getLevelOfEducation())
-                .cboId(employeeForeigner.getCbo())
+                .cboId(employeeForeigner.getCbo().getId())
                 .situation(employeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
@@ -289,7 +295,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .telephone(employeeForeigner.getTelephone())
                             .directory(employeeForeigner.getDirectory())
                             .levelOfEducation(employeeForeigner.getLevelOfEducation())
-                            .cboId(employeeForeigner.getCbo())
+                            .cboId(employeeForeigner.getCbo().getId())
                             .situation(employeeForeigner.getSituation())
                             .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                             .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
@@ -313,6 +319,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     @Override
     public Optional<EmployeeResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         List<Contract> contracts = List.of();
+        Cbo cbo = null;
         
         Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
 
@@ -323,6 +330,11 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             if (contracts.isEmpty()) {
                 throw new NotFoundException("Contracts not found");
             }
+        }
+
+        if (employeeForeignerRequestDto.getCboId() != null) {
+            cbo = cboRepository.findById(employeeForeignerRequestDto.getCboId())
+                    .orElseThrow(() -> new NotFoundException("Cbo not found"));
         }
         
         employeeForeigner.setPis(employeeForeignerRequestDto.getPis() != null ? employeeForeignerRequestDto.getPis() : employeeForeigner.getPis());
@@ -348,7 +360,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         employeeForeigner.setTelephone(employeeForeignerRequestDto.getTelephone() != null ? employeeForeignerRequestDto.getTelephone() : employeeForeigner.getTelephone());
         employeeForeigner.setDirectory(employeeForeignerRequestDto.getDirectory() != null ? employeeForeignerRequestDto.getDirectory() : employeeForeigner.getDirectory());
         employeeForeigner.setLevelOfEducation(employeeForeignerRequestDto.getLevelOfEducation() != null ? employeeForeignerRequestDto.getLevelOfEducation() : employeeForeigner.getLevelOfEducation());
-        employeeForeigner.setCbo(employeeForeignerRequestDto.getCboId() != null ? employeeForeignerRequestDto.getCboId() : employeeForeigner.getCbo());
+        employeeForeigner.setCbo(employeeForeignerRequestDto.getCboId() != null ? cbo : employeeForeigner.getCbo());
         employeeForeigner.setSituation(employeeForeignerRequestDto.getSituation() != null ? employeeForeignerRequestDto.getSituation() : employeeForeigner.getSituation());
         employeeForeigner.setRneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() != null ? employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() : employeeForeigner.getRneRnmFederalPoliceProtocol());
         employeeForeigner.setPassport(employeeForeignerRequestDto.getPassport() != null ? employeeForeignerRequestDto.getPassport() : employeeForeigner.getPassport());
@@ -382,7 +394,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .telephone(savedEmployeeForeigner.getTelephone())
                 .directory(savedEmployeeForeigner.getDirectory())
                 .levelOfEducation(savedEmployeeForeigner.getLevelOfEducation())
-                .cboId(savedEmployeeForeigner.getCbo())
+                .cboId(savedEmployeeForeigner.getCbo().getId())
                 .situation(savedEmployeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(savedEmployeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(savedEmployeeForeigner.getBrazilEntryDate())
