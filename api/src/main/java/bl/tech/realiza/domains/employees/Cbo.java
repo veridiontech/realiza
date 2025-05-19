@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"code", "title"}))
 public class Cbo {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
