@@ -49,7 +49,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
 
         User requester = userClientRepository.findById(itemManagementUserRequestDto.getIdRequester())
-                .orElseThrow(() -> new NotFoundException("Requester not found"));
+                .orElse(null);
+
+        if (requester == null) {
+            requester = userManagerRepository.findById(itemManagementUserRequestDto.getIdRequester())
+                    .orElseThrow(() -> new NotFoundException("Requester not found"));
+        }
 
         User newUser = userClientRepository.findById(itemManagementUserRequestDto.getIdNewUser())
                 .orElseThrow(() -> new NotFoundException("New user not found"));
