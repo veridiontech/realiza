@@ -198,12 +198,12 @@ export function NewModalCreateEmployee() {
                     className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione</option>
-                    <option value="Masculino">Casado</option>
-                    <option value="Feminino">Solteiro</option>
-                    <option value="Divorciado">Divorciado</option>
-                    <option value="Viúvo">Viúvo </option>
-                    <option value="Separado Judicialmente">Separado judicialmente </option>
-                    <option value="União Estável">União estável</option>
+                    <option value="CASADO">Casado</option>
+                    <option value="SOLTEIRO">Solteiro</option>
+                    <option value="DIVORCIADO">Divorciado</option>
+                    <option value="VIUVO">Viúvo </option>
+                    <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente </option>
+                    <option value="UNIAO_ESTAVEL">União estável</option>
                   </select>
                 </div>
                 <div>
@@ -213,29 +213,29 @@ export function NewModalCreateEmployee() {
                     className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione um tipo de contrato</option>
-                    <option value="Autônomo">Autônomo</option>
-                    <option value="Avulso (Sindicato)">
+                    <option value="AUTONOMO">Autônomo</option>
+                    <option value="AVULSO_SINDICATO">
                       Avulso (Sindicato)
                     </option>
-                    <option value="CLT - Horista">CLT - Horista</option>
-                    <option value="CLT - Tempo Determinado">
+                    <option value="CLT_HORISTA">CLT - Horista</option>
+                    <option value="CLT_TEMPO_DETERMINADO">
                       CLT - Tempo Determinado
                     </option>
-                    <option value="CLT - Tempo Indeterminado">
+                    <option value="CLT_TEMPO_INDETERMINADO">
                       CLT - Tempo Indeterminado
                     </option>
-                    <option value="Cooperado">Cooperado</option>
-                    <option value="Estágio / Bolsa">Estágio / Bolsa</option>
-                    <option value="Estrangeiro - Imigrante">
+                    <option value="COOPERADO">Cooperado</option>
+                    <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
+                    <option value="ESTRANGEIRO_IMIGRANTE">
                       Estrangeiro - Imigrante
                     </option>
-                    <option value="Estrangeiro - Temporário">
+                    <option value="ESTRANGEIRO_TEMPORARIO">
                       Estrangeiro - Temporário
                     </option>
-                    <option value="Intermitente">Intermitente</option>
-                    <option value="Jovem Aprendiz">Jovem Aprendiz</option>
-                    <option value="Sócio">Sócio</option>
-                    <option value="Temporário">Temporário</option>
+                    <option value="INTERMITENTE">Intermitente</option>
+                    <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
+                    <option value="SOCIO">Sócio</option>
+                    <option value="TEMPORARIO">Temporário</option>
                   </select>
                 </div>
 

@@ -39,7 +39,7 @@ const employeeFormSchema = z.object({
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
   role: z.string().nonempty("Cargo é obrigatório"),
   education: z.string().nonempty("Grau de instrução é obrigatório"),
-  cbo: z.string().optional(),
+  cboId: z.string().optional(),
   platformAccess: z.string().nonempty("Acesso à plataforma é obrigatório"),
 });
 
@@ -219,27 +219,27 @@ export function StepOneEmployee({
                 className="flex flex-col rounded-md border p-2"
               >
                 <option value="">Selecione um tipo</option>
-                <option value="Autônomo">Autônomo</option>
-                <option value="Avulso (Sindicato)">Avulso (Sindicato)</option>
-                <option value="CLT - Horista">CLT - Horista</option>
-                <option value="CLT - Tempo Determinado">
+                <option value="AUTONOMO">Autônomo</option>
+                <option value="AVULSO_SINDICATO">Avulso (Sindicato)</option>
+                <option value="CLT_HORISTA">CLT - Horista</option>
+                <option value="CLT_TEMPO_DETERMINADO">
                   CLT - Tempo Determinado
                 </option>
-                <option value="CLT - Tempo Indeterminado">
+                <option value="CLT_TEMPO_INDETERMINADO">
                   CLT - Tempo Indeterminado
                 </option>
-                <option value="Cooperado">Cooperado</option>
-                <option value="Estágio / Bolsa">Estágio / Bolsa</option>
-                <option value="Estrangeiro - Imigrante">
+                <option value="COOPERADO">Cooperado</option>
+                <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
+                <option value="ESTRANGEIRO_IMIGRANTE">
                   Estrangeiro - Imigrante
                 </option>
-                <option value="Estrangeiro - Temporário">
+                <option value="ESTRANGEIRO_TEMPORARIO">
                   Estrangeiro - Temporário
                 </option>
-                <option value="Intermitente">Intermitente</option>
-                <option value="Jovem Aprendiz">Jovem Aprendiz</option>
-                <option value="Sócio">Sócio</option>
-                <option value="Temporário">Temporário</option>
+                <option value="INTERMITENTE">Intermitente</option>
+                <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
+                <option value="SOCIO">Sócio</option>
+                <option value="TEMPORARIO">Temporário</option>
               </select>
               {errors.contractType && (
                 <span className="text-red-600">
@@ -297,12 +297,12 @@ export function StepOneEmployee({
                 className="flex flex-col rounded-md border p-2"
               >
                 <option value="">Selecione</option>
-                <option value="Solteiro(a)">Solteiro(a)</option>
-                <option value="Casado(a)">Casado(a)</option>
-                <option value="Divorciado(a)">Divorciado(a)</option>
-                <option value="Viúvo(a)">Viúvo(a)</option>
-                <option value="Separado Judicialmente">Separado judicialmente </option>
-                <option value="União Estável">União estável</option>
+                <option value="SOLTEIRO">Solteiro(a)</option>
+                <option value="CASADO">Casado(a)</option>
+                <option value="DIVORCIADO">Divorciado(a)</option>
+                <option value="VIUVO">Viúvo(a)</option>
+                <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente </option>
+                <option value="UNIAO_ESTAVEL">União estável</option>
               </select>
               {errors.maritalStatus && (
                 <span className="text-red-600">
@@ -443,9 +443,9 @@ export function StepOneEmployee({
             </div>
             <div>
               <Label className="text-white">CBO</Label>
-              <Input type="text" placeholder="CBO" {...register("cbo")} />
-              {errors.cbo && (
-                <span className="text-red-600">{errors.cbo.message}</span>
+              <Input type="text" placeholder="CBO" {...register("cboId")} />
+              {errors.cboId && (
+                <span className="text-red-600">{errors.cboId.message}</span>
               )}
             </div>
             <div>
