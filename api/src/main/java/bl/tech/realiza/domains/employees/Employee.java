@@ -9,6 +9,7 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,8 +33,8 @@ public abstract class Employee {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idEmployee;
     private String pis;
-    private String maritalStatus;
-    private String contractType;
+    private MaritalStatus maritalStatus;
+    private ContractType contractType;
     private String cep;
     private String name;
     private String surname;
@@ -45,6 +46,7 @@ public abstract class Employee {
     private String city;
     private String state;
     private String country;
+    private String addressLine2;
     private String gender;
     private String position;
     private String registration;
@@ -53,8 +55,7 @@ public abstract class Employee {
     private String platformAccess;
     private String telephone;
     private String directory;
-    private String levelOfEducation;
-    private String cbo;
+    private LevelOfEducation levelOfEducation;
     @Builder.Default
     private Situation situation = Situation.DESALOCADO;
     @Builder.Default
@@ -65,6 +66,10 @@ public abstract class Employee {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "id")
+    private Cbo cbo;
+
     @ManyToOne
     @JoinColumn(name = "idBranch")
     private Branch branch;
@@ -106,5 +111,45 @@ public abstract class Employee {
         FERIAS,
         ALISTAMENTO_MILITAR,
         APOSENTADORIA_POR_INVALIDEZ
+    }
+
+    public enum LevelOfEducation {
+        FUNDAMENTAL_I_INCOMPLETO,
+        FUNDAMENTAL_I_COMPLETO,
+        FUNDAMENTAL_II_INCOMPLETO,
+        FUNDAMENTAL_II_COMPLETO,
+        MEDIO_INCOMPLETO,
+        MEDIO_COMPLETO,
+        SUPERIOR_INCOMPLETO,
+        SUPERIOR_COMPLETO,
+        POS_GRADUACAO,
+        MESTRADO,
+        DOUTORADO,
+        PHD
+    }
+
+    public enum MaritalStatus {
+        CASADO,
+        SOLTEIRO,
+        DIVORCIADO,
+        VIUVO,
+        SEPARADO_JUDICIALMENTE,
+        UNIAO_ESTAVEL
+    }
+
+    public enum ContractType {
+        AUTONOMO,
+        AVULSO_SINDICATO,
+        CLT_HORISTA,
+        CLT_TEMPO_DETERMINADO,
+        CLT_TEMPO_INDETERMINADO,
+        COOPERADO,
+        ESTAGIO_BOLSA,
+        ESTRANGEIRO_IMIGRANTE,
+        ESTRANGEIRO_TEMPORARIO,
+        INTERMITENTE,
+        JOVEM_APRENDIZ,
+        SOCIO,
+        TEMPORARIO
     }
 }

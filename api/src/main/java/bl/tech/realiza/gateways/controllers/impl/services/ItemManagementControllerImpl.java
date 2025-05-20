@@ -3,9 +3,10 @@ package bl.tech.realiza.gateways.controllers.impl.services;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
-import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementProviderResponseDto;
-import bl.tech.realiza.gateways.responses.services.itemManagement.ItemManagementUserResponseDto;
-import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserResponseDto;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,14 +26,14 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Item Management")
 public class ItemManagementControllerImpl implements ItemManagementController {
 
-    private final CrudItemManagement crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagement;
 
     @PostMapping("/new-user")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cria uma solicitação para adicionar um usuário")
     @Override
     public ResponseEntity<ItemManagementUserResponseDto> createUserSolicitation(@RequestBody @Valid ItemManagementUserRequestDto itemManagementUserRequestDto) {
-        ItemManagementUserResponseDto itemManagementUserResponseDto = crudItemManagementImpl.saveUserSolicitation(itemManagementUserRequestDto);
+        ItemManagementUserResponseDto itemManagementUserResponseDto = crudItemManagement.saveUserSolicitation(itemManagementUserRequestDto);
 
         return ResponseEntity.ok(itemManagementUserResponseDto);
     }
@@ -42,7 +43,7 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Operation(summary = "Cria uma solicitação para adicionar uma empresa")
     @Override
     public ResponseEntity<ItemManagementProviderResponseDto> createProviderSolicitation(@RequestBody @Valid ItemManagementProviderRequestDto itemManagementProviderRequestDto) {
-        ItemManagementProviderResponseDto itemManagementProviderResponseDto = crudItemManagementImpl.saveProviderSolicitation(itemManagementProviderRequestDto);
+        ItemManagementProviderResponseDto itemManagementProviderResponseDto = crudItemManagement.saveProviderSolicitation(itemManagementProviderRequestDto);
 
         return ResponseEntity.ok(itemManagementProviderResponseDto);
     }
@@ -57,9 +58,17 @@ public class ItemManagementControllerImpl implements ItemManagementController {
                                                                                 @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ItemManagementUserResponseDto> itemManagementResponse = crudItemManagementImpl.findAllUserSolicitation(pageable);
+        Page<ItemManagementUserResponseDto> itemManagementResponse = crudItemManagement.findAllUserSolicitation(pageable);
 
         return ResponseEntity.ok(itemManagementResponse);
+    }
+
+    @GetMapping("/new-user/details")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca detalhes da solicitação de adicionar usuário")
+    @Override
+    public ResponseEntity<ItemManagementUserDetailsResponseDto> getUserSolicitationDetails(String idSolicitation) {
+        return ResponseEntity.ok(crudItemManagement.findUserSolicitationDetails(idSolicitation));
     }
 
     @GetMapping("/new-provider")
@@ -72,9 +81,17 @@ public class ItemManagementControllerImpl implements ItemManagementController {
                                                                                     @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ItemManagementProviderResponseDto> itemManagementResponse = crudItemManagementImpl.findAllProviderSolicitation(pageable);
+        Page<ItemManagementProviderResponseDto> itemManagementResponse = crudItemManagement.findAllProviderSolicitation(pageable);
 
         return ResponseEntity.ok(itemManagementResponse);
+    }
+
+    @GetMapping("/new-provider/details")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca detalhes da solicitação de adicionar usuário")
+    @Override
+    public ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(String idSolicitation) {
+        return ResponseEntity.ok(crudItemManagement.findProviderSolicitationDetails(idSolicitation));
     }
 
     @PatchMapping("/{idSolicitation}/approve")
@@ -82,7 +99,7 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Operation(summary = "Aprova uma solicitação")
     @Override
     public ResponseEntity<String> approveSolicitation(@PathVariable String idSolicitation) {
-        return ResponseEntity.ok(crudItemManagementImpl.approveSolicitation(idSolicitation));
+        return ResponseEntity.ok(crudItemManagement.approveSolicitation(idSolicitation));
     }
 
     @PatchMapping("/{idSolicitation}/deny")
@@ -90,7 +107,7 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Operation(summary = "Nega uma solicitação")
     @Override
     public ResponseEntity<String> denySolicitation(@PathVariable String idSolicitation) {
-        return ResponseEntity.ok(crudItemManagementImpl.denySolicitation(idSolicitation));
+        return ResponseEntity.ok(crudItemManagement.denySolicitation(idSolicitation));
     }
 
     @DeleteMapping("/{idSolicitation}")
@@ -98,7 +115,7 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Operation(summary = "Deleta uma solicitação")
     @Override
     public ResponseEntity<Void> deleteSolicitation(@PathVariable String idSolicitation) {
-        crudItemManagementImpl.deleteSolicitation(idSolicitation);
+        crudItemManagement.deleteSolicitation(idSolicitation);
         return ResponseEntity.noContent().build();
     }
 }

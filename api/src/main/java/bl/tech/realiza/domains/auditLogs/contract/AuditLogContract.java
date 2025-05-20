@@ -24,7 +24,7 @@ public class AuditLogContract extends AuditLog {
 
     @ManyToOne
     @JoinColumn(name = "idContract")
-    private Contract idContract;
+    private Contract contract;
 
     public enum AuditLogContractActions {
         CREATE,

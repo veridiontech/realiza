@@ -20,6 +20,7 @@ import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRepoDt
 import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeBaseRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.*;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -139,7 +140,9 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                                 .build())
                 .collect(Collectors.toList());
 
-        serviceTypeClientRepository.saveAll(serviceTypeClientList);
+        List<List<ServiceTypeClient>> partitioned = Lists.partition(serviceTypeClientList, 50);
+        partitioned.forEach(serviceTypeClientRepository::saveAll);
+
     }
 
     @Override

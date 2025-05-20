@@ -21,12 +21,12 @@ public class ItemManagement {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idSolicitation;
-    private String title;
-    private String details;
+    private SolicitationType solicitationType;
     @Builder.Default
     private Status status = Status.PENDING;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+    private String invitationToken;
 
     // -------------------------------
     // Relacionamentos INERENTES
@@ -48,5 +48,10 @@ public class ItemManagement {
         APPROVED,
         DENIED,
         PENDING
+    }
+
+    public enum SolicitationType {
+        CREATION,
+        INACTIVATION
     }
 }
