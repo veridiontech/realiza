@@ -41,11 +41,12 @@ public class EmployeeControllerImpl implements EmployeeController {
     @Override
     public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByEnterprise(@RequestParam(defaultValue = "0") int page,
                                                                                  @RequestParam(defaultValue = "5") int size,
-                                                                                 @RequestParam(defaultValue = "idEmployee") String sort,
+                                                                                 @RequestParam(defaultValue = "name") String sort,
                                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                  @RequestParam Provider.Company enterprise,
                                                                                  @RequestParam String idSearch) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort, "surname"));
+
 
         Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee. findAllByEnterprise(idSearch, enterprise, pageable);
 
@@ -82,9 +83,9 @@ public class EmployeeControllerImpl implements EmployeeController {
     @Override
     public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesBrazilian(@RequestParam(defaultValue = "0") int page,
                                                                               @RequestParam(defaultValue = "5") int size,
-                                                                              @RequestParam(defaultValue = "idEmployee") String sort,
+                                                                              @RequestParam(defaultValue = "name") String sort,
                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort, "surname"));
 
         Page<EmployeeResponseDto> pageEmployeeBrazilian = crudEmployeeBrazilian.findAll(pageable);
 
@@ -158,9 +159,9 @@ public class EmployeeControllerImpl implements EmployeeController {
     @Override
     public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesForeigner(@RequestParam(defaultValue = "0") int page,
                                                                               @RequestParam(defaultValue = "5") int size,
-                                                                              @RequestParam(defaultValue = "idEmployee") String sort,
+                                                                              @RequestParam(defaultValue = "name") String sort,
                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort, "surname"));
 
         Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployeeForeigner.findAll(pageable);
 

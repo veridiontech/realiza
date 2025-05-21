@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl.employees;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.employees.Cbo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.employees.CboRepository;
@@ -9,6 +10,7 @@ import bl.tech.realiza.usecases.interfaces.employees.CrudCbo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -63,6 +65,7 @@ public class CrudCboImpl implements CrudCbo {
 
     private List<CboResponseDto> toResponse(List<Cbo> cboList) {
         return cboList.stream()
+                .sorted(Comparator.comparing(Cbo::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                 .map(this::toResponse)
                 .toList();
     }

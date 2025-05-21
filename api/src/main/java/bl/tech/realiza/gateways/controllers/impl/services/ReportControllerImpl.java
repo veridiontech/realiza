@@ -47,13 +47,13 @@ public class ReportControllerImpl implements ReportController {
 
     @GetMapping("/adherece/{idEnterprise}")
     @Override
-    public ResponseEntity<Long> countAdherenceByEnterprise(String idEnterprise, Provider.Company companyDegree) {
+    public ResponseEntity<Long> countAdherenceByEnterprise(@PathVariable String idEnterprise, Provider.Company companyDegree) {
         return null;
     }
 
     @GetMapping("/accordance/{idEnterprise}")
     @Override
-    public ResponseEntity<Long> countAccordanceByEnterprise(String idEnterprise, Provider.Company companyDegree) {
+    public ResponseEntity<Long> countAccordanceByEnterprise(@PathVariable String idEnterprise, Provider.Company companyDegree) {
         return null;
     }
 }

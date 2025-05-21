@@ -55,6 +55,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -517,6 +518,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .contractReference(contractProviderSupplier.getContractReference())
                         .providerSupplierName(contractProviderSupplier.getProviderSupplier().getTradeName())
                         .build()
-        ).toList();
+        )
+                .sorted(Comparator.comparing(ContractSupplierPermissionResponseDto::getContractReference, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                .toList();
     }
 }

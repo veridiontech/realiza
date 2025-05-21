@@ -49,7 +49,7 @@ public class NotificationControllerImpl implements NotificationController {
     @Override
     public ResponseEntity<Page<NotificationResponseDto>> getAllNotifications(@RequestParam(defaultValue = "0") int page,
                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                             @RequestParam(defaultValue = "idNotification") String sort,
+                                                                             @RequestParam(defaultValue = "title") String sort,
                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -81,7 +81,7 @@ public class NotificationControllerImpl implements NotificationController {
     @Override
     public ResponseEntity<Page<NotificationResponseDto>> getAllNotificationsByUser(@RequestParam(defaultValue = "0") int page,
                                                                                    @RequestParam(defaultValue = "5") int size,
-                                                                                   @RequestParam(defaultValue = "idNotification") String sort,
+                                                                                   @RequestParam(defaultValue = "title") String sort,
                                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                    @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

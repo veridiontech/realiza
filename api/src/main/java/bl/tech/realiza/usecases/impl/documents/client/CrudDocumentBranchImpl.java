@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -402,7 +403,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(id, documentTypeName.toLowerCase(), isSelected);
 
         return documentBranch.stream()
-                .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
+                .sorted(Comparator.comparing(Document::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                 .map(document -> DocumentResponseDto.builder()
                         .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())
@@ -418,7 +419,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(idBranch, documentTypeName.toLowerCase(), isSelected);
 
         return documentBranch.stream()
-                .sorted(Comparator.comparing(document -> document.getDocumentMatrix().getName()))
+                .sorted(Comparator.comparing(Document::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                 .map(document -> DocumentExpirationResponseDto.builder()
                         .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())

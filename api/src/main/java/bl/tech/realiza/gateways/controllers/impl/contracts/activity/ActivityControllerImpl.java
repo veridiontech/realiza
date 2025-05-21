@@ -51,7 +51,7 @@ public class ActivityControllerImpl implements ActivityControlller {
     @Override
     public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(@RequestParam(defaultValue = "0") int page,
                                                                       @RequestParam(defaultValue = "5") int size,
-                                                                      @RequestParam(defaultValue = "idActivity") String sort,
+                                                                      @RequestParam(defaultValue = "title") String sort,
                                                                       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
