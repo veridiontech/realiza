@@ -78,6 +78,22 @@ export function TableServiceProvider() {
     }
   };
 
+  const updateSupplier = async (idContract: string, updatedData: any) => {
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    await axios.put(
+      `${ip}/contract/supplier/${idContract}`,
+      updatedData,
+      {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      }
+    );
+    await getSupplier();
+  } catch (error) {
+    console.error("Erro ao atualizar fornecedor", error);
+  }
+};
+
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
