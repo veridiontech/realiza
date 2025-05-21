@@ -47,8 +47,22 @@ public class EmployeeControllerImpl implements EmployeeController {
                                                                                  @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort, "surname"));
 
-
         Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee. findAllByEnterprise(idSearch, enterprise, pageable);
+
+        return ResponseEntity.ok(pageEmployeeForeigner);
+    }
+
+    @GetMapping("/filtered-by-contract")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByContract(@RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "5") int size,
+                                                                               @RequestParam(defaultValue = "name") String sort,
+                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                               @RequestParam String idContract) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort, "surname"));
+
+        Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee. findAllByContract(idContract, pageable);
 
         return ResponseEntity.ok(pageEmployeeForeigner);
     }
