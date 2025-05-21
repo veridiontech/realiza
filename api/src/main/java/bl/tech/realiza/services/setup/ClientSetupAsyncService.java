@@ -2,7 +2,6 @@ package bl.tech.realiza.services.setup;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
-import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ClientSetupAsynService {
+public class ClientSetupAsyncService {
 
     private final CrudServiceType crudServiceType;
     private final CrudBranch crudBranch;

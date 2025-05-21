@@ -14,6 +14,7 @@ import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
@@ -49,7 +50,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final EmployeeBrazilianRepository employeeBrazilianRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
-    private final ClientRepository clientRepository;
     private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
@@ -61,6 +61,13 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
+        if ((employeeBrazilianRequestDto.getBranch() == null || employeeBrazilianRequestDto.getBranch().isEmpty()) &&
+        (employeeBrazilianRequestDto.getSupplier() == null || employeeBrazilianRequestDto.getSupplier().isEmpty()) &&
+        (employeeBrazilianRequestDto.getSubcontract() == null || employeeBrazilianRequestDto.getSubcontract().isEmpty())
+        ) {
+            throw new BadRequestException("Employee without enterprise");
+        }
+
         List<Contract> contracts = List.of();
         EmployeeBrazilian newEmployeeBrazilian = null;
         Branch branch = null;

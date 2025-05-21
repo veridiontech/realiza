@@ -51,9 +51,9 @@ public class UserClientControllerImpl implements UserClientController {
     @Override
     public ResponseEntity<Page<UserResponseDto>> getAllUsersClient(@RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "5") int size,
-                                                                   @RequestParam(defaultValue = "idUser") String sort,
+                                                                   @RequestParam(defaultValue = "firstName") String sort,
                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort, "surname"));
 
         Page<UserResponseDto> pageUserClient = crudUserClient.findAll(pageable);
 
@@ -97,10 +97,10 @@ public class UserClientControllerImpl implements UserClientController {
     @Override
     public ResponseEntity<Page<UserResponseDto>> getAllUsersClientByClient(@RequestParam(defaultValue = "0") int page,
                                                                            @RequestParam(defaultValue = "5") int size,
-                                                                           @RequestParam(defaultValue = "idUser") String sort,
+                                                                           @RequestParam(defaultValue = "firstName") String sort,
                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                            @RequestParam String idSearch) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort, "surname"));
 
         Page<UserResponseDto> pageUserClient = crudUserClient.findAllByClient(idSearch, pageable);
 

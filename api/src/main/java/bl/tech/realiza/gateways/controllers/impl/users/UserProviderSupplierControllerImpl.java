@@ -52,9 +52,9 @@ public class UserProviderSupplierControllerImpl implements UserProviderSupplierC
     @Override
     public ResponseEntity<Page<UserResponseDto>> getAllUserSuppliers(@RequestParam(defaultValue = "0") int page,
                                                                      @RequestParam(defaultValue = "5") int size,
-                                                                     @RequestParam(defaultValue = "idUser") String sort,
+                                                                     @RequestParam(defaultValue = "firstName") String sort,
                                                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort, "surname"));
 
         Page<UserResponseDto> pageUserSupplier = crudUserSupplier.findAll(pageable);
 
@@ -98,10 +98,10 @@ public class UserProviderSupplierControllerImpl implements UserProviderSupplierC
     @Override
     public ResponseEntity<Page<UserResponseDto>> getAllUserSuppliersBySupplier(@RequestParam(defaultValue = "0") int page,
                                                                                @RequestParam(defaultValue = "5") int size,
-                                                                               @RequestParam(defaultValue = "idUser") String sort,
+                                                                               @RequestParam(defaultValue = "firstName") String sort,
                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                @RequestParam String idSearch) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort, "surname"));
 
         Page<UserResponseDto> pageUserSupplier = crudUserSupplier.findAllBySupplier(idSearch, pageable);
 

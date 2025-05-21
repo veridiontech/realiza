@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.impl.contracts.contract;
 
+import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
@@ -19,6 +21,7 @@ import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
@@ -39,7 +42,10 @@ import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +55,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,18 +67,17 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ActivityRepository activityRepository;
-    private final RequirementRepository requirementRepository;
     private final UserClientRepository userClientRepository;
-    private final ClientRepository clientRepository;
     private final BranchRepository branchRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final DocumentContractRepository documentContractRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
-    private final CrudProviderSupplier crudProviderSupplier;
     private final CrudItemManagement crudItemManagementImpl;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final ActivityDocumentRepository activityDocumentRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogServiceImpl;
+    private final ContractRepository contractRepository;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
@@ -144,6 +150,18 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .providerSupplier(newProviderSupplier)
                 .branch(branch)
                 .build());
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogContract(
+                        savedContractProviderSupplier,
+                        userResponsible.getEmail() + " created contract " + savedContractProviderSupplier.getContractReference(),
+                        AuditLogContract.AuditLogContractActions.CREATE,
+                        userResponsible);
+            }
+        }
 
         // salvar por tipagem de contrato / supplier
         documentBranch = documentBranchRepository.findAllById(idDocuments);
@@ -269,6 +287,18 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(contractProviderSupplier);
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogContract(
+                        savedContractProviderSupplier,
+                        userResponsible.getEmail() + " updated contract " + savedContractProviderSupplier.getContractReference(),
+                        AuditLogContract.AuditLogContractActions.UPDATE,
+                        userResponsible);
+            }
+        }
+
         return getContractResponseDto(contractProviderSupplier, savedContractProviderSupplier);
     }
 
@@ -299,6 +329,19 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public void delete(String id) {
+        Contract contract = contractRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogContract(
+                        contract,
+                        userResponsible.getEmail() + " deleted contract " + contract.getContractReference(),
+                        AuditLogContract.AuditLogContractActions.DELETE,
+                        userResponsible);
+            }
+        }
         contractProviderSupplierRepository.deleteById(id);
     }
 
@@ -475,6 +518,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .contractReference(contractProviderSupplier.getContractReference())
                         .providerSupplierName(contractProviderSupplier.getProviderSupplier().getTradeName())
                         .build()
-        ).toList();
+        )
+                .sorted(Comparator.comparing(ContractSupplierPermissionResponseDto::getContractReference, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                .toList();
     }
 }

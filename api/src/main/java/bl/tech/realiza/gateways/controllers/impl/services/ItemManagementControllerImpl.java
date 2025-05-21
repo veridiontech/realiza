@@ -54,8 +54,8 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Override
     public ResponseEntity<Page<ItemManagementUserResponseDto>> getUserSolicitations(@RequestParam(defaultValue = "0") int page,
                                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                                @RequestParam(defaultValue = "idSolicitation") String sort,
-                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+                                                                                @RequestParam(defaultValue = "creationDate") String sort,
+                                                                                @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
         Page<ItemManagementUserResponseDto> itemManagementResponse = crudItemManagement.findAllUserSolicitation(pageable);
@@ -77,8 +77,8 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Override
     public ResponseEntity<Page<ItemManagementProviderResponseDto>> getProviderSolicitations(@RequestParam(defaultValue = "0") int page,
                                                                                     @RequestParam(defaultValue = "10") int size,
-                                                                                    @RequestParam(defaultValue = "idSolicitation") String sort,
-                                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+                                                                                    @RequestParam(defaultValue = "creationDate") String sort,
+                                                                                    @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
         Page<ItemManagementProviderResponseDto> itemManagementResponse = crudItemManagement.findAllProviderSolicitation(pageable);
