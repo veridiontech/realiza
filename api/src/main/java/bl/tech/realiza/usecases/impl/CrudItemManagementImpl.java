@@ -28,6 +28,7 @@ import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -246,13 +247,15 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     private ItemManagementUserResponseDto toItemManagementUserResponseDto(ItemManagement itemManagement, User requester, User newUser) {
-        if (!(newUser instanceof UserClient userClient)) {
+        User actualUser = (User) Hibernate.unproxy(newUser);
+
+        if (!(actualUser instanceof UserClient userClient)) {
             throw new IllegalArgumentException("Not a valid user");
         }
 
         return ItemManagementUserResponseDto.builder()
                 .idSolicitation(itemManagement.getIdSolicitation())
-                .userFullName(newUser.getFirstName() + " " + newUser.getSurname())
+                .userFullName(userClient.getFirstName() + " " + userClient.getSurname())
                 .solicitationType(itemManagement.getSolicitationType())
                 .clientTradeName(userClient.getBranch().getClient().getTradeName())
                 .clientCnpj(userClient.getBranch().getClient().getCnpj())
@@ -264,7 +267,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     private ItemManagementProviderResponseDto toItemManagementProviderResponseDto(ItemManagement itemManagement, User requester, Provider newProvider) {
-        if (!(newProvider instanceof ProviderSupplier providerSupplier)) {
+        Provider actualProvider = (Provider) Hibernate.unproxy(newProvider);
+
+        if (!(actualProvider instanceof ProviderSupplier providerSupplier)) {
             throw new IllegalArgumentException("Not a valid provider");
         }
 
@@ -282,7 +287,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     private ItemManagementUserDetailsResponseDto toItemManagementUserDetailsResponseDto(ItemManagement itemManagement) {
-        if (!(itemManagement.getNewUser() instanceof UserClient userClient)) {
+        User actualUser = (User) Hibernate.unproxy(itemManagement.getNewUser());
+
+        if (!(actualUser instanceof UserClient userClient)) {
             throw new IllegalArgumentException("Not a valid user");
         }
 
@@ -295,9 +302,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .tradeName(userClient.getBranch().getClient().getTradeName())
                         .build())
                 .newUser(ItemManagementUserDetailsResponseDto.NewUser.builder()
-                        .fullName(itemManagement.getNewUser().getFirstName() + " " + itemManagement.getNewUser().getSurname())
-                        .cpf(itemManagement.getNewUser().getCpf())
-                        .email(itemManagement.getNewUser().getEmail())
+                        .fullName(userClient.getFirstName() + " " + userClient.getSurname())
+                        .cpf(userClient.getCpf())
+                        .email(userClient.getEmail())
                         .build())
                 .requester(ItemManagementUserDetailsResponseDto.Requester.builder()
                         .fullName(itemManagement.getRequester().getFirstName() + " " + itemManagement.getRequester().getSurname())
@@ -307,7 +314,9 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     private ItemManagementProviderDetailsResponseDto toItemManagementProviderDetailsResponseDto(ItemManagement itemManagement) {
-        if (!(itemManagement.getNewProvider() instanceof ProviderSupplier providerSupplier)) {
+        Provider actualProvider = (Provider) Hibernate.unproxy(itemManagement.getNewProvider());
+
+        if (!(actualProvider instanceof ProviderSupplier providerSupplier)) {
             throw new IllegalArgumentException("Not a valid provider");
         }
 
