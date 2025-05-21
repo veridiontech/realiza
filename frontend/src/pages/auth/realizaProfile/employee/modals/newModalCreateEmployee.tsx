@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useEffect } from "react";
 
 interface propsCep {
   address: string;
@@ -48,7 +49,7 @@ const createNewEmployeeFormSchema = z.object({
   position: z.string(),
   // situation: z.string(),
   education: z.string(),
-  cbo: z.string().optional(),
+  cboId: z.string().optional(),
   // platformAccess: z.string(),
   // rg: z.string(),
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
@@ -60,8 +61,10 @@ export function NewModalCreateEmployee() {
   const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
+  const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
+  const [searchCbo, setSearchCbo] = useState("");
 
-  console.log("teste", supplier);
+  console.log("Id Supplier: ", supplier);
 
 
   const {
@@ -72,6 +75,12 @@ export function NewModalCreateEmployee() {
   } = useForm<CreateNewEmpoloyeeFormSchema>({
     resolver: zodResolver(createNewEmployeeFormSchema),
   });
+
+  const filteredCbos = cbos.filter(
+    (cbo) =>
+      cbo.title.toLowerCase().includes(searchCbo.toLowerCase()) ||
+      cbo.code.toLowerCase().includes(searchCbo.toLowerCase())
+  );
 
   const formatCPF = (value: string) => {
     return value
@@ -89,18 +98,18 @@ export function NewModalCreateEmployee() {
   //     .replace(/(\d{3})(\d{1})$/, "$1-$2");
   // };
 
- const formatSalary = (value: string) => {
-  const number = Number(value.replace(/\D/g, "")) / 100;
-  return number.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-  }).replace("R$", "").trim();
-};
+  const formatSalary = (value: string) => {
+    const number = Number(value.replace(/\D/g, "")) / 100;
+    return number.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+    }).replace("R$", "").trim();
+  };
 
   const normalizeSalary = (value: string) => {
-  return parseFloat(value.replace(/\./g, '').replace(',', '.'));
-};
+    return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+  };
 
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
@@ -149,6 +158,25 @@ export function NewModalCreateEmployee() {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    const fetchCbos = async () => {
+      try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const response = await axios.get(`${ip}/cbo`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        });
+
+        setCbos(response.data); // Certifique-se que a API retorna uma lista aqui
+      } catch (error) {
+        toast.error("Erro ao buscar CBOs");
+      }
+    };
+
+    fetchCbos();
+  }, []);
+
+
 
   const setValuesCep = (data: propsCep) => {
     setValue("city", data.city),
@@ -336,7 +364,27 @@ export function NewModalCreateEmployee() {
                 </div>
                 <div>
                   <Label className="text-white">CBO</Label>
-                  <Input {...register("cbo")} />
+                  <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                    <Search className="text-neutral-500 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Pesquisar CBO..."
+                      value={searchCbo}
+                      onChange={(e) => setSearchCbo(e.target.value)}
+                      className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                    />
+                  </div>
+                  <select
+                    {...register("cboId")}
+                    className="flex flex-col rounded-md border p-2 w-full"
+                  >
+                    <option value="">Selecione o CBO</option>
+                    {filteredCbos.map((cbo) => (
+                      <option key={cbo.id} value={cbo.id}>
+                        {cbo.title} - {cbo.code}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label className="text-white">Graduação</Label>
