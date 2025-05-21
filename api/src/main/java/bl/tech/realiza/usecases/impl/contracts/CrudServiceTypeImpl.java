@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,16 +56,19 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         switch (owner) {
             case CLIENT -> {
                 return serviceTypeClientRepository.findAllByClient_IdClient(idOwner).stream()
+                        .sorted(Comparator.comparing(ServiceType::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                         .map(client -> (ServiceTypeResponseDto) toResponse(client))
                         .toList();
             }
             case BRANCH -> {
                 return serviceTypeBranchRepository.findAllByBranch_IdBranch(idOwner).stream()
+                        .sorted(Comparator.comparing(ServiceType::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                         .map(branch -> (ServiceTypeResponseDto) toResponse(branch))
                         .toList();
             }
             case REPO -> {
                 return serviceTypeRepoRepository.findAll().stream()
+                        .sorted(Comparator.comparing(ServiceType::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                         .map(repo -> (ServiceTypeResponseDto) toResponse(repo))
                         .toList();
             }
@@ -98,7 +102,10 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     @Override
     public List<ServiceTypeResponseDto> getAllServiceType() {
         return serviceTypeRepository.findAll()
-                .stream().map(this::toResponse).toList();
+                .stream()
+                .sorted(Comparator.comparing(ServiceType::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override

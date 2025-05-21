@@ -58,7 +58,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Override
     public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplier(@RequestParam(defaultValue = "0") int page,
                                                                                      @RequestParam(defaultValue = "5") int size,
-                                                                                     @RequestParam(defaultValue = "idContract") String sort,
+                                                                                     @RequestParam(defaultValue = "contractReference") String sort,
                                                                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -90,7 +90,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Override
     public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplierBySupplier(@RequestParam(defaultValue = "0") int page,
                                                                                                @RequestParam(defaultValue = "5") int size,
-                                                                                               @RequestParam(defaultValue = "idContract") String sort,
+                                                                                               @RequestParam(defaultValue = "contractReference") String sort,
                                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                                @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
@@ -105,7 +105,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Override
     public ResponseEntity<Page<ContractResponseDto>> getAllContractsProviderSupplierByClient(@RequestParam(defaultValue = "0") int page,
                                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                                             @RequestParam(defaultValue = "idContract") String sort,
+                                                                                             @RequestParam(defaultValue = "contractReference") String sort,
                                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                              @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
@@ -120,7 +120,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Override
     public ResponseEntity<Page<ContractResponseDto>> getAllBySupplierAndBranch(@RequestParam(defaultValue = "0") int page,
                                                                                @RequestParam(defaultValue = "5") int size,
-                                                                               @RequestParam(defaultValue = "idContract") String sort,
+                                                                               @RequestParam(defaultValue = "contractReference") String sort,
                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                @RequestParam String idBranch,
                                                                                @RequestParam String idSupplier) {

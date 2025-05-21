@@ -59,7 +59,7 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployee(@RequestParam(defaultValue = "0") int page,
                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                             @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                             @RequestParam(defaultValue = "title") String sort,
                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -115,7 +115,7 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsEmployeeByEmployee(@RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "5") int size,
-                                                                                       @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                                       @RequestParam(defaultValue = "title") String sort,
                                                                                        @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                        @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
@@ -150,7 +150,7 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/document-matrix")
+    @PostMapping("/{idEmployee}/document-matrix")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<String> addRequiredDocument(@PathVariable String idEmployee, @RequestParam String documentMatrixId) {

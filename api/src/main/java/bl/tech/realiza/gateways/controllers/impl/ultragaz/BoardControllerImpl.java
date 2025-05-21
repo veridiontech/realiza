@@ -42,7 +42,7 @@ public class BoardControllerImpl implements BoardController {
     @Override
     public ResponseEntity<Page<BoardResponseDto>> getAllBoards(@RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "5") int size,
-                                                               @RequestParam(defaultValue = "idBoard") String sort,
+                                                               @RequestParam(defaultValue = "name") String sort,
                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
         return ResponseEntity.ok(crudBoard.findAll(pageable));
@@ -53,7 +53,7 @@ public class BoardControllerImpl implements BoardController {
     @Override
     public ResponseEntity<Page<BoardResponseDto>> getAllBoardsByClient(@RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "200") int size,
-                                                                       @RequestParam(defaultValue = "idBoard") String sort,
+                                                                       @RequestParam(defaultValue = "name") String sort,
                                                                        @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                        @RequestParam String idClient) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

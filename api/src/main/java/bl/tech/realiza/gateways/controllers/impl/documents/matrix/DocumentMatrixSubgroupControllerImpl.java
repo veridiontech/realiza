@@ -47,7 +47,7 @@ public class DocumentMatrixSubgroupControllerImpl implements DocumentMatrixSubgr
     @Override
     public ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroup(@RequestParam(defaultValue = "0") int page,
                                                                                          @RequestParam(defaultValue = "5") int size,
-                                                                                         @RequestParam(defaultValue = "idDocumentSubgroup") String sort,
+                                                                                         @RequestParam(defaultValue = "name") String sort,
                                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -76,7 +76,7 @@ public class DocumentMatrixSubgroupControllerImpl implements DocumentMatrixSubgr
     @Override
     public ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixSubgroupByGroup(@RequestParam(defaultValue = "0") int page,
                                                                                                 @RequestParam(defaultValue = "5") int size,
-                                                                                                @RequestParam(defaultValue = "idDocumentSubgroup") String sort,
+                                                                                                @RequestParam(defaultValue = "name") String sort,
                                                                                                 @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                                 @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

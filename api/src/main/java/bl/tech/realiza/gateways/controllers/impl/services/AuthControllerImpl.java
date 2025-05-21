@@ -1,6 +1,5 @@
 package bl.tech.realiza.gateways.controllers.impl.services;
 
-import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.controllers.interfaces.services.AuthController;
 import bl.tech.realiza.gateways.requests.services.ExtractTokenRequestDto;
 import bl.tech.realiza.gateways.requests.services.LoginRequestDto;
@@ -13,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/login")

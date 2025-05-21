@@ -52,7 +52,7 @@ public class ContractControllerImpl implements ContractController {
     @Override
     public ResponseEntity<Page<ContractByEmployeeResponseDto>> getContractsByEmployee(@RequestParam(defaultValue = "0") int page,
                                                                                       @RequestParam(defaultValue = "5") int size,
-                                                                                      @RequestParam(defaultValue = "idContract") String sort,
+                                                                                      @RequestParam(defaultValue = "contractReference") String sort,
                                                                                       @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                       @PathVariable String idEmployee) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

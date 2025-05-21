@@ -53,7 +53,7 @@ public class ClientControllerImpl implements ClientControlller {
     @Override
     public ResponseEntity<Page<ClientResponseDto>> getAllClients(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "5") int size,
-                                                                 @RequestParam(defaultValue = "idClient") String sort,
+                                                                 @RequestParam(defaultValue = "tradeName") String sort,
                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

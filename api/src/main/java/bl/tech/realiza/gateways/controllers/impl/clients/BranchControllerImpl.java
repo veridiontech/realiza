@@ -49,7 +49,7 @@ public class BranchControllerImpl implements BranchControlller {
     @Override
     public ResponseEntity<Page<BranchResponseDto>> getAllBranches(@RequestParam(defaultValue = "0") int page,
                                                                   @RequestParam(defaultValue = "5") int size,
-                                                                  @RequestParam(defaultValue = "idBranch") String sort,
+                                                                  @RequestParam(defaultValue = "name") String sort,
                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -63,7 +63,7 @@ public class BranchControllerImpl implements BranchControlller {
     @Override
     public ResponseEntity<Page<BranchResponseDto>> getAllBranchesByCenter(@RequestParam(defaultValue = "0") int page,
                                                                           @RequestParam(defaultValue = "200") int size,
-                                                                          @RequestParam(defaultValue = "idBranch") String sort,
+                                                                          @RequestParam(defaultValue = "name") String sort,
                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                           @RequestParam String idCenter) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
@@ -93,7 +93,7 @@ public class BranchControllerImpl implements BranchControlller {
     @Override
     public ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClient(@RequestParam(defaultValue = "0") int page,
                                                                           @RequestParam(defaultValue = "5") int size,
-                                                                          @RequestParam(defaultValue = "idBranch") String sort,
+                                                                          @RequestParam(defaultValue = "name") String sort,
                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                           @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

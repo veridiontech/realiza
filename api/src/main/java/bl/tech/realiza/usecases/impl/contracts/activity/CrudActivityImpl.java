@@ -96,7 +96,8 @@ public class CrudActivityImpl implements CrudActivity {
                                 .title(activity.getTitle())
                                 .risk(activity.getRisk())
                                 .build())
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparing(ActivityResponseDto::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                .toList();
     }
 
     @Override
@@ -126,7 +127,8 @@ public class CrudActivityImpl implements CrudActivity {
                             .selected(isSelected)
                             .build();
                 })
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparing(ActivityDocumentResponseDto::getDocumentTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                .toList();
     }
 
     @Override
