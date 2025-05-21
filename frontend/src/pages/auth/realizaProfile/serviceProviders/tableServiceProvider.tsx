@@ -52,6 +52,7 @@ export function TableServiceProvider() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+  const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -77,11 +78,32 @@ export function TableServiceProvider() {
     }
   };
 
+  const updateSupplier = async (idContract: string, updatedData: any) => {
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    await axios.put(
+      `${ip}/contract/supplier/${idContract}`,
+      updatedData,
+      {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      }
+    );
+    await getSupplier();
+  } catch (error) {
+    console.error("Erro ao atualizar fornecedor", error);
+  }
+};
+
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
     }
   }, [selectedBranch]);
+
+  const handleViewClick = (supplier: any) => {
+    setSelectedSupplier(supplier);
+    setIsViewModalOpen(true);
+  };
 
   return (
     <div className="p-5 md:p-10">
@@ -115,7 +137,7 @@ export function TableServiceProvider() {
               </p> */}
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
-                <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
+                <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
                   <Eye className="w-5 h-5" />
                 </button>
                 <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
@@ -180,7 +202,7 @@ export function TableServiceProvider() {
                   </td>
 
                   <td className="border border-gray-300 p-2 space-x-2">
-                    <button title="Visualizar contrato" onClick={() => setIsViewModalOpen(true)}>
+                    <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
                       <Eye className="w-5 h-5" />
                     </button>
                     <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
@@ -213,119 +235,83 @@ export function TableServiceProvider() {
         </table>
       </div>
 
-      {isViewModalOpen && (
+      {isViewModalOpen && selectedSupplier && (
         <Modal title="Visualizar Contrato" onClose={() => setIsViewModalOpen(false)}>
-          <p className="text-white">Conteúdo para visualizar o contrato.</p>
+          <div className="text-white space-y-2 max-h-[400px] overflow-auto">
+            <p><strong>Referência do Contrato:</strong> {selectedSupplier.contractReference}</p>
+            <p><strong>Nome do Fornecedor:</strong> {selectedSupplier.providerSupplierName}</p>
+            <p><strong>CNPJ:</strong> {selectedSupplier.providerSupplierCnpj}</p>
+            <p><strong>Nome do Serviço:</strong> {selectedSupplier.serviceName}</p>
+            <p><strong>Data de Início:</strong> {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}</p>
+            <p><strong>Descrição:</strong> {selectedSupplier.description}</p>
+            <p><strong>Tipo de Despesa:</strong> {selectedSupplier.expenseType}</p>
+            <p><strong>Filial:</strong> {selectedSupplier.branchName}</p>
+          </div>
         </Modal>
       )}
 
-      {isEditModalOpen && (
+      {isEditModalOpen && selectedSupplier && (
         <Modal title="Editar Fornecedor" onClose={() => setIsEditModalOpen(false)}>
-          <p className="text-white">Formulário de edição aqui.</p>
-        </Modal>
-      )}
-
-      {/* {isAllocateModalOpen && (
-        <Modal
-          title="Alocar Funcionário"
-          onClose={() => {
-            
-            setIsAllocateModalOpen(false);
-            setSearchTerm("");
-            setAllocateStep(1);
-          }}
-        >
-          {allocateStep === 1 ? (
-            <div className="text-white space-y-4">
-              <label className="block text-sm font-semibold">Buscar Colaborador:</label>
+          <div className="flex flex-col gap-4 max-h-[400px] overflow-auto">
+            <div>
+              <label className="text-white font-semibold block mb-1">Referência do Contrato</label>
               <input
                 type="text"
-                placeholder="Digite o nome do colaborador..."
-                className="w-full px-3 py-2 rounded text-black"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={selectedSupplier.contractReference}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
               />
-              <div className="max-h-40 overflow-y-auto">
-                {employees
-                  .filter(emp => emp.name && emp.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map(emp => (
-                    <div key={emp.idEmployee} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedEmployees.includes(emp.idEmployee)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedEmployees(prev => [...prev, emp.idEmployee]);
-                          } else {
-                            setSelectedEmployees(prev => prev.filter(id => id !== emp.idEmployee));
-                          }
-                        }}
-                      />
-                      <span>{emp.name}</span>
-                    </div>
-                  ))}
-              </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setAllocateStep(2)}
-                  className="bg-realizaBlue px-4 py-2 rounded"
-                  disabled={selectedEmployees.length === 0}
-                >
-                  Próximo
-                </button>
-              </div>
             </div>
-          ) : (
-            <div className="text-white space-y-4">
-              <p>Você confirma que esses colaboradores selecionados serão alocados ao contrato?</p>
-              <ul className="list-disc list-inside">
-                {employees
-                  .filter(emp => selectedEmployees.includes(emp.idEmployee))
-                  .map(emp => (
-                    <li key={emp.idEmployee}>{emp.name}</li>
-                  ))}
-              </ul>
-              <div className="flex justify-end gap-4">
-                <button
-                  onClick={() => setAllocateStep(1)}
-                  className="bg-gray-500 px-4 py-2 rounded"
-                >
-                  Voltar
-                </button>
-                <button
-                  onClick={async () => {
-                    if (!selectedContractId) return;
-                    try {
-                      console.log("Lista de obj", selectedEmployees);
-                      await axios.post(
-                        `${ip}/contract/add-employee/${selectedContractId}`,
-                        { idEmployees: selectedEmployees },
-                        {
-                          headers: {
-                            Authorization: `Bearer ${localStorage.getItem("tokenClient")}`,
-                          },
-                        }
-                      );
-                      await getSupplier();
-                    } catch (err) {
-                      console.error("Erro ao alocar colaboradores", err);
-                    } finally {
-                      setIsAllocateModalOpen(false);
-                      setSearchTerm("");
-                      setAllocateStep(1);
-                      setSelectedEmployees([]);
-                    }
-                  }}
-                  className="bg-green-600 px-4 py-2 rounded"
-                >
-                  Confirmar
-                </button>
-              </div>
+            <div>
+              <label className="text-white font-semibold block mb-1">Nome do Fornecedor</label>
+              <input
+                type="text"
+                value={selectedSupplier.providerSupplierName}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+              />
             </div>
-          )}
+            <div>
+              <label className="text-white font-semibold block mb-1">CNPJ</label>
+              <input
+                type="text"
+                value={selectedSupplier.providerSupplierCnpj}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="text-white font-semibold block mb-1">Nome do Serviço</label>
+              <input
+                type="text"
+                value={selectedSupplier.serviceName}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="text-white font-semibold block mb-1">Data de Início</label>
+              <input
+                type="text"
+                value={selectedSupplier.dateStart ? new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR") : ""}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="text-white font-semibold block mb-1">Tipo de Despesa</label>
+              <input
+                type="text"
+                value={selectedSupplier.expenseType}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label className="text-white font-semibold block mb-1">Descrição</label>
+              <textarea
+                value={selectedSupplier.description}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed resize-none"
+                rows={3}
+              />
+            </div>
+          </div>
         </Modal>
-      )} */}
+      )}
 
       {isFinalizeModalOpen && (
         <Modal
