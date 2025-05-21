@@ -168,31 +168,14 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         ProviderSupplier finalNewProviderSupplier = newProviderSupplier;
         documentBranch.forEach(
-                document -> {
-                    switch (document.getDocumentMatrix().getSubGroup().getGroup().getGroupName().toLowerCase()) {
-                        case "documento empresa", "documento pessoa", "treinamentos e certificações" -> {
-                            documentProviderSupplier.add(DocumentProviderSupplier.builder()
-                                    .title(document.getTitle())
-                                    .status(Document.Status.PENDENTE)
-                                    .type(document.getType())
-                                    .isActive(true)
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .providerSupplier(finalNewProviderSupplier)
-                                    .build());
-                        }
-                        case "documento empresa-serviço" -> {
-                            documentContract.add(DocumentContract.builder()
-                                    .title(document.getTitle())
-                                    .status(Document.Status.PENDENTE)
-                                    .type(document.getType())
-                                    .isActive(true)
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .contract(savedContractProviderSupplier)
-                                    .build());
-                        }
-                    }
-
-                });
+                document -> documentProviderSupplier.add(DocumentProviderSupplier.builder()
+                                .title(document.getTitle())
+                                .status(Document.Status.PENDENTE)
+                                .type(document.getType())
+                                .isActive(true)
+                                .documentMatrix(document.getDocumentMatrix())
+                                .providerSupplier(finalNewProviderSupplier)
+                                .build()));
 
         documentProviderSupplierRepository.saveAll(documentProviderSupplier);
         documentContractRepository.saveAll(documentContract);

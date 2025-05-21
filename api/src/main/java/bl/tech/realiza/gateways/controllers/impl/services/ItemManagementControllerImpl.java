@@ -63,11 +63,11 @@ public class ItemManagementControllerImpl implements ItemManagementController {
         return ResponseEntity.ok(itemManagementResponse);
     }
 
-    @GetMapping("/new-user/details")
+    @GetMapping("/new-user/details/{idSolicitation}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Busca detalhes da solicitação de adicionar usuário")
     @Override
-    public ResponseEntity<ItemManagementUserDetailsResponseDto> getUserSolicitationDetails(String idSolicitation) {
+    public ResponseEntity<ItemManagementUserDetailsResponseDto> getUserSolicitationDetails(@PathVariable String idSolicitation) {
         return ResponseEntity.ok(crudItemManagement.findUserSolicitationDetails(idSolicitation));
     }
 
@@ -86,11 +86,11 @@ public class ItemManagementControllerImpl implements ItemManagementController {
         return ResponseEntity.ok(itemManagementResponse);
     }
 
-    @GetMapping("/new-provider/details")
+    @GetMapping("/new-provider/details/{idSolicitation}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Busca detalhes da solicitação de adicionar usuário")
     @Override
-    public ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(String idSolicitation) {
+    public ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(@PathVariable String idSolicitation) {
         return ResponseEntity.ok(crudItemManagement.findProviderSolicitationDetails(idSolicitation));
     }
 
