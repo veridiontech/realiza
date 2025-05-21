@@ -132,7 +132,8 @@ export function AddNewBranch() {
       console.log("enviando dados:", payload);
       await axios.post(`${ip}/branch`, payload,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          headers:
+           { Authorization: `Bearer ${tokenFromStorage}` }
         }
       );
       toast.success("Sucesso ao criar filial");
