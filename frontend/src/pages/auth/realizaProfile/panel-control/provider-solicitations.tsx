@@ -26,7 +26,7 @@ export interface Solicitation {
   };
   newUser: {
     idUser: string;
-    firstName?:string | undefined;
+    firstName?: string | undefined;
     surname?: string | undefined;
     nameEnterprise?: string | undefined;
     cpf?: string | undefined;
@@ -43,15 +43,23 @@ interface ApiResponse {
 
 export function ProviderSolicitations() {
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchSolicitations = async () => {
+    setIsLoading(true);
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const response = await axios.get<ApiResponse>(
         `${ip}/item-management/new-provider`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       setSolicitations(response.data.content);
     } catch (err) {
       console.error("Erro ao buscar solicitações:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,13 +69,13 @@ export function ProviderSolicitations() {
 
   const removeSolicitation = (idSolicitation: string) => {
     setSolicitations((prev) =>
-      prev.filter((s) => s.idSolicitation !== idSolicitation),
+      prev.filter((s) => s.idSolicitation !== idSolicitation)
     );
   };
 
   const countStatus = (status: "APPROVED" | "DENIED" | "PENDING") => {
     return solicitations.filter(
-      (solicitation) => solicitation.status === status,
+      (solicitation) => solicitation.status === status
     ).length;
   };
 
@@ -83,20 +91,31 @@ export function ProviderSolicitations() {
               bgColor="bg-[#F9731640]"
               textColor="text-[#F97316]"
               icon={<Rotate3D className="text-[#F97316]" />}
+              isLoading={isLoading}
             />
             <div>
               <div className="bg-gray-100 p-8">
                 <ScrollArea className="h-[40vh]">
-                  {solicitations
-                    .filter((solicitation) => solicitation.status === "PENDING")
-                    .map((solicitation) => (
-                      <CardPanelControlProvider
-                        key={solicitation.idSolicitation}
-                        data={solicitation}
-                        onActionCompleted={removeSolicitation}
-                        status="PENDING"
-                      />
-                    ))}
+                  <div className="flex flex-col gap-5">
+                    {solicitations
+                      .filter(
+                        (solicitation) => solicitation.status === "PENDING"
+                      )
+                      .map((solicitation: any) => (
+                        <CardPanelControlProvider
+                          key={solicitation.idSolicitation}
+                          requesterName={solicitation.requesterName}
+                          creationDate={solicitation.creationDate}
+                          idSolicitation={solicitation.idSolicitation}
+                          requesterEmail={solicitation.requesterEmail}
+                          solicitationType={solicitation.solicitationType}
+                          clientCnpj={solicitation.clientCnpj}
+                          clientName={solicitation.clientName}
+                          onActionCompleted={removeSolicitation}
+                          status="PENDING"
+                        />
+                      ))}
+                  </div>
                 </ScrollArea>
               </div>
             </div>
@@ -108,6 +127,7 @@ export function ProviderSolicitations() {
               bgColor="bg-[#2563EB40]"
               textColor="text-[#2563EB]"
               icon={<CheckCircle className="text-[#2563EB]" />}
+              isLoading={isLoading}
             />
             <div>
               <div className="bg-gray-100 p-8">
@@ -115,13 +135,20 @@ export function ProviderSolicitations() {
                   <div className="flex flex-col gap-2">
                     {solicitations
                       .filter(
-                        (solicitation) => solicitation.status === "APPROVED",
+                        (solicitation) => solicitation.status === "APPROVED"
                       )
-                      .map((solicitation) => (
+                      .map((solicitation: any) => (
                         <CardPanelControlProvider
                           key={solicitation.idSolicitation}
-                          data={solicitation}
-                          onActionCompleted={removeSolicitation}
+                          requesterName={solicitation.requesterName}
+                          creationDate={solicitation.creationDate}
+                          idSolicitation={solicitation.idSolicitation}
+                          requesterEmail={solicitation.requesterEmail}
+                          solicitationType={solicitation.solicitationType}
+                          clientCnpj={solicitation.clientCnpj}
+                          clientName={solicitation.clientName}
+                          // onActionCompleted={removeSolicitation}
+                          // onActionCompleted={removeSolicitation}
                           status="APPROVED"
                         />
                       ))}
@@ -138,17 +165,23 @@ export function ProviderSolicitations() {
               bgColor="bg-[#FF464640]"
               textColor="text-[#FF4646]"
               icon={<Ban className="text-[#FF4646]" />}
+              isLoading={isLoading}
             />
             <div>
               <div className="bg-gray-100 p-8">
                 <ScrollArea className="h-[40vh]">
                   {solicitations
                     .filter((solicitation) => solicitation.status === "DENIED")
-                    .map((solicitation) => (
+                    .map((solicitation: any) => (
                       <CardPanelControlProvider
                         key={solicitation.idSolicitation}
-                        data={solicitation}
-                        onActionCompleted={removeSolicitation}
+                        requesterName={solicitation.requesterName}
+                        creationDate={solicitation.creationDate}
+                        idSolicitation={solicitation.idSolicitation}
+                        requesterEmail={solicitation.requesterEmail}
+                        solicitationType={solicitation.solicitationType}
+                        clientCnpj={solicitation.clientCnpj}
+                        clientName={solicitation.clientName}
                         status="DENIED"
                       />
                     ))}

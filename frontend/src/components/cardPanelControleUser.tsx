@@ -17,34 +17,29 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface CardPanelControlProps {
-  data: {
-    idSolicitation: string;
-    title: string;
-    details: string;
-    creationDate: string;
-    requester: {
-      idUser: string;
-      firstName: string;
-      surname: string;
-      nameEnterprise?: string | undefined;
-      cpf?: string | undefined;
-    };
-    newUser: {
-      idUser: string;
-      firstName?: string | undefined;
-      surname?: string | undefined;
-      nameEnterprise?: string | undefined;
-      cpf?: string | undefined;
-      email?: string | undefined;
-      enterprise?: string | undefined;
-    };
-  };
+  clientCnpj: string;
+  clientTradeName: string;
+  creationDate: string;
+  idSolicitation: string;
+  requesterEmail: string;
+  requesterFullName: string;
+  // solicitationType: string;
+  // status: string;
+  userFullName: string;
   // Callback opcional para atualizar a lista após a ação
   onActionCompleted?: (idSolicitation: string) => void;
 }
 
 export function CardPanelControlUser({
-  data,
+  clientCnpj,
+  clientTradeName,
+  creationDate,
+  idSolicitation,
+  requesterEmail,
+  requesterFullName,
+  // solicitationType,
+  // status,
+  userFullName,
   onActionCompleted,
 }: CardPanelControlProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -54,15 +49,9 @@ export function CardPanelControlUser({
       const tokenFromStorage = localStorage.getItem("tokenClient");
       // Define o loading como true antes de começar a requisição
       setIsLoading(true);
-
-      console.log("teste id da solicitacao", data.idSolicitation);
-
-      await axios.patch(
-        `${ip}/item-management/${data.idSolicitation}/approve`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
+      await axios.patch(`${ip}/item-management/${idSolicitation}/approve`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
 
       toast.success("Solicitação aprovada");
 
@@ -71,7 +60,7 @@ export function CardPanelControlUser({
 
       // Recarregue ou atualize conforme necessário
       if (onActionCompleted) {
-        onActionCompleted(data.idSolicitation);
+        onActionCompleted(idSolicitation);
       }
       window.location.reload();
     } catch (error) {
@@ -85,7 +74,7 @@ export function CardPanelControlUser({
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.patch(
-        `${ip}/item-management/${data.idSolicitation}/deny`,
+        `${ip}/item-management/${idSolicitation}/deny`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
@@ -94,7 +83,7 @@ export function CardPanelControlUser({
       alert(response.data);
       // Remove o item negado da lista se houver callback
       if (onActionCompleted) {
-        onActionCompleted(data.idSolicitation);
+        onActionCompleted(idSolicitation);
       }
     } catch (error) {
       console.error("Erro ao negar solicitação:", error);
@@ -108,39 +97,45 @@ export function CardPanelControlUser({
         <div className="flex items-center gap-1">
           <User color="#2563EB" />
           <span className="font-semibold text-[#2563EB]">
-            Solicitação de: {data.requester.firstName} {data.requester.surname}
+            Solicitação de: {requesterFullName}
           </span>
         </div>
-        {}
         <MoreDetailsUser
-          idSolicitation={data.idSolicitation}
-          requesterFirstName={data.requester.firstName}
-          requesterSurname={data.requester.surname}
-          requesterCpf={data.requester.cpf}
-          nameEnterprise={data.requester.nameEnterprise}
-          newUserFirstName={data.newUser.firstName}
-          newUserSurname={data.newUser.surname}
-          newUserEmail={data.newUser.email}
-          newUserEnterprise={data.newUser.enterprise}
+          idSolicitation={idSolicitation}
+          clientCnpj={clientCnpj}
+          clientTradeName={clientTradeName}
+          creationDate={creationDate}
+          requesterEmail={requesterEmail}
+          requesterFullName={requesterFullName}
+          userFullName={userFullName}
+          key={idSolicitation}
         />
       </div>
-      <div className="flex w-full flex-col gap-2 border-y border-[#7CA1F333] py-4">
-        <h3 className="mb-3 text-sm font-semibold text-[#2563EB]">
-          {data.title}
-        </h3>
-        <p className="text-sm font-semibold text-[#3F3F46]">
-          Detalhes: {data.details}
-        </p>
+      <div className="flex flex-col gap-2">
+        <div className="">
+          <div className="flex items-center gap-1">
+            <h2 className="font-semibold">Cliente: </h2>
+            <p>{clientTradeName}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <h3 className="font-semibold">Cliente cnpj:</h3>
+            <p>{clientCnpj}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <h2 className="font-semibold">Novo usuário solicitado:</h2>
+          <p>{userFullName}</p>
+        </div>
       </div>
       <div className="row flex w-full items-center justify-between">
         <div className="flex flex-row items-center justify-center gap-2">
           <CalendarDays color="#3F3F46" />
           <span className="text-xs text-[#3F3F46]">
-            {new Date(data.creationDate).toLocaleString()}
+            {new Date(creationDate).toLocaleString()}
           </span>
         </div>
         <div className="flex flex-row items-center justify-center gap-2">
-          {status === "APPROVED" || status === "DENIED"? (
+          {status === "APPROVED" || status === "DENIED" ? (
             <div></div>
           ) : (
             <div className="flex flex-row items-center justify-center gap-2">
@@ -155,8 +150,7 @@ export function CardPanelControlUser({
                   <AlertDialogHeader>
                     <AlertDialogTitle>
                       Deseja mesmo dispensar a solicitação de acesso de{" "}
-                      {data.newUser.firstName} {data.newUser.surname} ao
-                      sistema?
+                      {userFullName} ao sistema?
                     </AlertDialogTitle>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -193,8 +187,7 @@ export function CardPanelControlUser({
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>
-                        Deseja mesmo confirmar o acesso de{" "}
-                        {data.newUser.firstName} {data.newUser.surname} ao
+                        Deseja mesmo confirmar o acesso de {userFullName} ao
                         sistema?
                       </AlertDialogTitle>
                     </AlertDialogHeader>

@@ -7,27 +7,27 @@ import {
 } from "@/components/ui/dialog";
 
 interface MoreDetailsProps {
+  clientCnpj: string;
+  clientTradeName: string;
+  creationDate: string;
   idSolicitation: string;
-  requesterFirstName: string;
-  requesterSurname: string;
-  requesterCpf: string | undefined;
-  nameEnterprise: string | undefined;
-  newUserFirstName:  string | undefined;
-  newUserSurname: string | undefined;
-  newUserEmail:  string | undefined;
-  newUserEnterprise:  string | undefined;
+  requesterEmail: string;
+  requesterFullName: string;
+  // solicitationType: string;
+  // status: string;
+  userFullName: string;
 }
 
 export function MoreDetailsUser({
   idSolicitation,
-  requesterFirstName,
-  requesterSurname,
-  requesterCpf,
-  nameEnterprise,
-  newUserFirstName,
-  newUserSurname,
-  newUserEmail,
-  newUserEnterprise
+  clientCnpj,
+  clientTradeName,
+  // creationDate,
+  requesterEmail,
+  requesterFullName,
+  // solicitationType,
+  // status,
+  userFullName,
 }: MoreDetailsProps) {
   return (
     <Dialog>
@@ -43,34 +43,26 @@ export function MoreDetailsUser({
             <h1 className="font-semibold">Solicitante:</h1>
             <div className="flex items-center gap-1">
               <p className="font-medium">Nome do solicitante:</p>
-              <span>
-                {requesterFirstName} {requesterSurname}
-              </span>
+              <span>{requesterFullName}</span>
             </div>
             <div className="flex items-center gap-1">
               <p className="font-medium">Nome da empresa solicitante:</p>
-              <span>{nameEnterprise}</span>
+              <span>{clientTradeName}</span>
             </div>
             <div className="flex items-center gap-1">
-              <p className="font-medium">CPF:</p>
-              <span>{requesterCpf}</span>
+              <p className="font-medium">CNPJ:</p>
+              <span>{clientCnpj}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <p className="font-medium">Email:</p>
+              <span>{requesterEmail}</span>
             </div>
             <div className="h-[1px] w-full bg-neutral-900"></div>
             <div>
               <h1 className="font-semibold">Usuário solicitado:</h1>
               <div className="flex items-center gap-2">
                 <p className="font-medium">Nome do novo usuário:</p>
-                <span>
-                  {newUserFirstName} {newUserSurname}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="font-medium">Email do novo usuário:</p>
-                <span>{newUserEmail}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="font-medium">Empresa:</p>
-                <span>{newUserEnterprise}</span>
+                <span>{userFullName}</span>
               </div>
             </div>
           </div>

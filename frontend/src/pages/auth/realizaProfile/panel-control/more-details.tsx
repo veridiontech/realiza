@@ -8,22 +8,39 @@ import {
 
 interface MoreDetailsProps {
   idSolicitation: string;
-  requesterFirstName: string;
-  requesterSurname: string;
-  nameEnterprise: string | undefined;
-  requesterCpf: string | undefined;
-  corporateName: string | undefined;
-  cnpj: string | undefined;
+  client: {
+    idClient?: string;
+    cnpj?: string;
+    tradeName?: string;
+    corporateName?: string;
+    logo?: string;
+    email?: string;
+    telephone?: string;
+    cep?: string;
+    state?: string;
+    city?: string;
+    address?: string;
+    isUltragaz?: true;
+    number?: string;
+    isActive?: true;
+    deleteRequest?: boolean;
+    creationDate?: string;
+  };
+  newProvider: {
+    cnpj?: string;
+    corporateName?: string;
+  };
+  requester: {
+    fullName?: string;
+    email?: string;
+  };
 }
 
 export function MoreDetails({
   idSolicitation,
- requesterFirstName,
-  nameEnterprise,
-  requesterSurname,
-  requesterCpf,
-  corporateName,
-  cnpj,
+  client,
+  newProvider,
+  requester,
 }: MoreDetailsProps) {
   return (
     <Dialog>
@@ -34,34 +51,48 @@ export function MoreDetails({
         <DialogHeader>
           <DialogTitle>DETALHES DA SOLICITAÇÃO</DialogTitle>
         </DialogHeader>
-        <div className="" key={idSolicitation}>
-          <div className="flex flex-col gap-2">
-            <h1 className="font-semibold">Solicitante:</h1>
-            <div className="flex items-center gap-1">
-              <p className="font-medium">Nome: </p>
-              <span>
-                {requesterFirstName} {requesterSurname}
-              </span>
+        <div key={idSolicitation}>
+          <div className="flex flex-col gap-5">
+            <h1 className="font-semibold">Solicitação de:</h1>
+            <div className="flex gap-1 flex-col">
+              <p className="">
+                <strong>Nome:</strong> {requester.fullName}
+              </p>
+              <p className="">
+                <strong>Email:</strong> {requester.email}
+              </p>
             </div>
-            <div className="flex items-center gap-1">
-              <p className="font-medium">Empresa: </p>
-              <span>{nameEnterprise}</span>
-            </div>
-            <div className="flex items-center gap-1">
-                <p className="font-medium">CPF:</p>
-                <span>{requesterCpf}</span>
+            <div>
+              <div>
+                <h2 className="font-semibold">Nova Empresa Solicitante:</h2>
+              </div>
+              <div>
+                <p>
+                  {newProvider.corporateName} - {newProvider.cnpj}
+                </p>
+              </div>
             </div>
             <div className="bg-neutral-900 h-[1px] w-full"></div>
             <div>
-                <h1 className="font-semibold">Solicitado: </h1>
+              <h1 className="font-semibold">Cliente</h1>
+              <div className="flex gap-1 flex-col">
                 <div className="flex items-center gap-1">
-                    <p className="font-medium">Razão social:</p>
-                    <span>{corporateName}</span>
+                  <p className="font-medium">Razão social: </p>
+                  <span>{client.corporateName}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <p className="font-medium">CNPJ:</p>
-                    <span>{cnpj}</span>
+                  <p className="font-semibold">Nome Fantasia: </p>
+                  <span>{client.tradeName}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <p className="font-semibold">cnpj:</p>
+                  <span>{client.cnpj}</span>
+                </div>
+                                                <div className="flex items-center gap-1">
+                  <p className="font-semibold">Email:</p>
+                  <span>{client.email}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
