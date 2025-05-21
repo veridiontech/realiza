@@ -45,8 +45,10 @@ import { AddNewBranch } from "../branchs/modals/add-new-branch";
 import { UltraSection } from "../ultra/ultra-branchs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChat";
+import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChart";
 import { BranchesTable } from "./branchesTable";
+import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
+import { Employees } from "@/components/BIs/BisPageComponents/employees";
 
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
@@ -565,11 +567,14 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <ConformityGaugeChart />
+               <div className="w-[800px] rounded-lg border bg-white p-6 shadow-sm">
+                <ConformityGaugeChart />
+              </div>
             </div>
           </div>
-          <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
-            <StatusDocumentChart />
+          <div className="mt-9 flex gap-">
+            <ActiveContracts />
+            <Employees />
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>

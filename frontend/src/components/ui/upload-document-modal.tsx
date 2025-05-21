@@ -24,8 +24,33 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const openPreviewModal = (url: string) => {
-    setPreviewUrl(url);
+  const handlePreviewDocument = async (docId: string) => {
+    try {
+      const token = localStorage.getItem('tokenClient');
+      if (!token) {
+        toast.error("Token de autenticação não encontrado.");
+        return;
+      }
+
+      const response = await axios.get(`${ip}/document/supplier/${docId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { fileData, fileContentType } = response.data;
+
+      if (!fileData || !fileContentType) {
+        toast.error("Arquivo não encontrado.");
+        return;
+      }
+
+      const fileUrl = `data:${fileContentType};base64,${fileData}`;
+      setPreviewUrl(fileUrl);
+    } catch (error) {
+      console.error("Erro ao visualizar documento:", error);
+      toast.error("Erro ao visualizar documento.");
+    }
   };
 
   const closePreviewModal = () => {
@@ -145,7 +170,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
                         {doc.status !== 'PENDENTE' && doc.fileName && (
                           <button
                             type="button"
-                            onClick={() => openPreviewModal(doc.fileName!)}
+                            onClick={() => handlePreviewDocument(doc.idDocument)}
                             className="text-black hover:text-gray-600"
                             title="Visualizar documento"
                           >
