@@ -13,4 +13,5 @@ public interface CrudEmployee {
     EmployeeResponseDto findAllSelectedDocuments (String id);
     // tem que dar update nos docs, imagino um put completo com o objeto inteiro
     String updateDocumentRequests(String id, List<String> documentCollection);
+    Page<EmployeeResponseDto> findAllByContract(String idContract, Pageable pageable);
 }
