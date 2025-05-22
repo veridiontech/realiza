@@ -32,6 +32,7 @@ import { CreateUserRealiza } from "./pages/auth/realizaProfile/createUserRealiza
 import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeToContract";
 import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
+import { FornecedoresPage } from '@/pages/auth/realizaProfile/providers/table-providers';
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 // import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
       { path: "realizaHome/:id", element: <RealizaHome /> },
       { path: "selectClient/:id", element: <SelectClient /> },
       { path: "serviceProviders/:id", element: <ServiceProvider /> },
+      { path: "table-providers/:id", element: <FornecedoresPage /> },
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "employees/:id", element: <EmployeesTable /> },
       { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
