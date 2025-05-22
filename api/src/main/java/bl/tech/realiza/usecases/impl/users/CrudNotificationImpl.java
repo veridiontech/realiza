@@ -52,15 +52,13 @@ public class CrudNotificationImpl implements CrudNotification {
 
         Notification savedNotification = notificationRepository.save(newNotification);
 
-        NotificationResponseDto notificationResponse = NotificationResponseDto.builder()
+        return NotificationResponseDto.builder()
                 .idNotification(savedNotification.getIdNotification())
                 .title(savedNotification.getTitle())
                 .description(savedNotification.getDescription())
                 .isRead(savedNotification.getIsRead())
                 .user(savedNotification.getUser().getIdUser())
                 .build();
-
-        return notificationResponse;
     }
 
     @Override
@@ -84,7 +82,7 @@ public class CrudNotificationImpl implements CrudNotification {
     public Page<NotificationResponseDto> findAll(Pageable pageable) {
         Page<Notification> notificationPage = notificationRepository.findAll(pageable);
 
-        Page<NotificationResponseDto> notificationResponseDtoPage = notificationPage.map(
+        return notificationPage.map(
                 notification -> NotificationResponseDto.builder()
                         .idNotification(notification.getIdNotification())
                         .title(notification.getTitle())
@@ -93,8 +91,6 @@ public class CrudNotificationImpl implements CrudNotification {
                         .user(notification.getUser().getIdUser())
                         .build()
         );
-
-        return notificationResponseDtoPage;
     }
 
     @Override
@@ -129,7 +125,7 @@ public class CrudNotificationImpl implements CrudNotification {
     public Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable) {
         Page<Notification> notificationPage = notificationRepository.findAllByUser_IdUser(idSearch, pageable);
 
-        Page<NotificationResponseDto> notificationResponseDtoPage = notificationPage.map(
+        return notificationPage.map(
                 notification -> NotificationResponseDto.builder()
                         .idNotification(notification.getIdNotification())
                         .title(notification.getTitle())
@@ -138,8 +134,6 @@ public class CrudNotificationImpl implements CrudNotification {
                         .user(notification.getUser().getIdUser())
                         .build()
         );
-
-        return notificationResponseDtoPage;
     }
 
     @Override
@@ -216,5 +210,31 @@ public class CrudNotificationImpl implements CrudNotification {
                 }
         );
         notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public void markAllNotificationsAsRead(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        List<Notification> notifications = notificationRepository.findAllByUser_IdUser(user.getIdUser());
+
+        notifications.forEach(
+                notification -> {
+                    notification.setIsRead(true);
+                }
+        );
+
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public void markOneNotificationAsRead(String notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException("Notification not found"));
+
+        notification.setIsRead(true);
+
+        notificationRepository.save(notification);
     }
 }

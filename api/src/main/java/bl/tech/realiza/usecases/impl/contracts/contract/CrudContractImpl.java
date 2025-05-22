@@ -28,6 +28,7 @@ import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -74,8 +75,11 @@ public class CrudContractImpl implements CrudContract {
     @Override
     public String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         List<DocumentEmployee> documentEmployee = new java.util.ArrayList<>(List.of());
-        Contract contract = contractRepository.findById(idContract)
+        Contract contractProxy = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
         List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
@@ -164,8 +168,12 @@ public class CrudContractImpl implements CrudContract {
             throw new NotFoundException("Invalid contract type");
         }
 
-        contract.getEmployees().addAll(employees);
-        contractRepository.save(contract);
+        employees.forEach(
+                employee -> {
+                    employee.getContracts().add(contract);
+                }
+        );
+        employeeRepository.saveAll(employees);
         documentEmployeeRepository.saveAll(documentEmployee);
 
         return "Employee added successfully";
@@ -173,8 +181,11 @@ public class CrudContractImpl implements CrudContract {
 
     @Override
     public String removeEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
-        Contract contract = contractRepository.findById(idContract)
+        Contract contractProxy = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
         List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {

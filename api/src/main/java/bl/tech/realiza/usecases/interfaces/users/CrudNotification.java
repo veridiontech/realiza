@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.users;
 
 import bl.tech.realiza.domains.services.ItemManagement;
-import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
-import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import org.springframework.data.domain.Page;
@@ -22,4 +20,8 @@ public interface CrudNotification {
     void saveUserNotificationForManagerUsers(ItemManagement itemManagement);
     @Async
     void saveProviderNotificationForManagerUsers(ItemManagement itemManagement);
+    @Async
+    void markAllNotificationsAsRead(String userId);
+    @Async
+    void markOneNotificationAsRead(String notificationId);
 }
