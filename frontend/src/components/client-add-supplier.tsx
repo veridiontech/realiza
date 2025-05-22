@@ -336,7 +336,6 @@ export function ModalTesteSendSupplier() {
         },
         headers: { Authorization: `Bearer ${tokenFromStorage}`, }
       },); 
-      console.log("aaa", res.data)
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);

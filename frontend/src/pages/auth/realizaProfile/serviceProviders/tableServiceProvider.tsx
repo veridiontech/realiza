@@ -12,22 +12,26 @@ function StatusBadge({ finished }: { finished?: boolean }) {
   const statusText = isFinalizado ? "Finalizado" : "Ativo";
   const statusStyle = isFinalizado ? "bg-red-600" : "bg-green-600";
 
-  return (
-    <span className={`${baseClass} ${statusStyle}`}>
-      {statusText}
-    </span>
-  );
+  return <span className={`${baseClass} ${statusStyle}`}>{statusText}</span>;
 }
 
-function Modal({ title, onClose, children }: { title: string, onClose: () => void, children: React.ReactNode }) {
+function Modal({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div
         className="bg-white p-6 rounded-lg shadow-lg w-96 relative"
         style={{
           backgroundImage: `url(${bgModalRealiza})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         <button
@@ -51,8 +55,9 @@ export function TableServiceProvider() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
+  const [editFormData, setEditFormData] = useState<any | null>(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -60,15 +65,12 @@ export function TableServiceProvider() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log("Requisição ao finalizar");
-      const res = await axios.get(
-        `${ip}/contract/supplier/filtered-client`,
-        {
-          params: {
-            idSearch: selectedBranch.idBranch
-          },
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
+      const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
+        params: {
+          idSearch: selectedBranch.idBranch,
+        },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       console.log("Exemplo de item:", res.data.content);
       setSuppliers(res.data.content);
     } catch (err) {
@@ -77,22 +79,19 @@ export function TableServiceProvider() {
       setLoading(false);
     }
   };
-
-//   const updateSupplier = async (idContract: string, updatedData: any) => {
-//   try {
-//     const tokenFromStorage = localStorage.getItem("tokenClient");
-//     await axios.put(
-//       `${ip}/contract/supplier/${idContract}`,
-//       updatedData,
-//       {
-//         headers: { Authorization: `Bearer ${tokenFromStorage}` },
-//       }
-//     );
-//     await getSupplier();
-//   } catch (error) {
-//     console.error("Erro ao atualizar fornecedor", error);
-//   }
-// };
+  
+  const updateSupplier = async (idContract: string, updatedData: any) => {
+    try {
+       console.log("Atualizando fornecedor", { idContract, updatedData });
+      // const tokenFromStorage = localStorage.getItem("tokenClient");
+      // await axios.put(`${ip}/contract/supplier/${idContract}`, updatedData, {
+      //   headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      // });
+      await getSupplier();
+    } catch (error) {
+      console.error("Erro ao atualizar fornecedor", error);
+    }
+  };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -103,6 +102,12 @@ export function TableServiceProvider() {
   const handleViewClick = (supplier: any) => {
     setSelectedSupplier(supplier);
     setIsViewModalOpen(true);
+  };
+
+  const handleEditClick = (supplier: any) => {
+    setSelectedSupplier(supplier);
+    setEditFormData({ ...supplier });
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -120,8 +125,7 @@ export function TableServiceProvider() {
               <p className="text-sm font-semibold text-gray-700">Referência do Contrato:</p>
               <p className="mb-2 text-gray-800">{supplier.contractReference}</p>
               <p className="text-sm font-semibold text-gray-700">Nome:</p>
-              <p className="mb-2 text-realizaBlue">{supplier.providerSupplierName
-              }</p>
+              <p className="mb-2 text-realizaBlue">{supplier.providerSupplierName}</p>
               <p className="text-sm font-semibold text-gray-700">CNPJ:</p>
               <p className="mb-2 text-gray-800">{supplier.providerSupplierCnpj}</p>
               <p className="text-sm font-semibold text-gray-700">Nome do Serviço:</p>
@@ -130,17 +134,12 @@ export function TableServiceProvider() {
               <p className="mb-2 text-gray-800">
                 {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
               </p>
-              {/* <p className="text-gray-800">
-                {supplier.branches && supplier.branches.length > 0
-                  ? supplier.branches.map((b: any) => b.branchName).join(", ")
-                  : "Nenhuma filial associada"}
-              </p> */}
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
                 <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
                   <Eye className="w-5 h-5" />
                 </button>
-                <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
+                <button title="Editar" onClick={() => handleEditClick(supplier)}>
                   <Pencil className="w-5 h-5" />
                 </button>
                 <button
@@ -152,11 +151,9 @@ export function TableServiceProvider() {
                 >
                   <Ban className="w-5 h-5" />
                 </button>
-
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
               <StatusBadge finished={supplier.finished} />
-
             </div>
           ))
         ) : (
@@ -180,7 +177,7 @@ export function TableServiceProvider() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="border border-gray-300 p-2 text-center">
+                <td colSpan={7} className="border border-gray-300 p-2 text-center">
                   Carregando...
                 </td>
               </tr>
@@ -188,14 +185,8 @@ export function TableServiceProvider() {
               suppliers.map((supplier: any) => (
                 <tr key={supplier.idProvider}>
                   <td className="border border-gray-300 p-2">{supplier.contractReference}</td>
-                  <td className="border border-gray-300 p-2">{supplier.providerSupplierName
-                  }</td>
+                  <td className="border border-gray-300 p-2">{supplier.providerSupplierName}</td>
                   <td className="border border-gray-300 p-2">{supplier.providerSupplierCnpj}</td>
-                  {/* <td className="border border-gray-300 p-2">
-                    {supplier.branches && supplier.branches.length > 0
-                      ? supplier.branches.map((b: any) => b.branchName).join(", ")
-                      : "Nenhuma filial associada"}
-                  </td> */}
                   <td className="border border-gray-300 p-2">{supplier.serviceName}</td>
                   <td className="border border-gray-300 p-2">
                     {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
@@ -205,7 +196,7 @@ export function TableServiceProvider() {
                     <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
                       <Eye className="w-5 h-5" />
                     </button>
-                    <button title="Editar" onClick={() => setIsEditModalOpen(true)}>
+                    <button title="Editar" onClick={() => handleEditClick(supplier)}>
                       <Pencil className="w-5 h-5" />
                     </button>
                     <button
@@ -217,7 +208,6 @@ export function TableServiceProvider() {
                     >
                       <Ban className="w-5 h-5" />
                     </button>
-
                   </td>
                   <td className="border border-gray-300 p-2">
                     <StatusBadge finished={supplier.finished} />
@@ -226,7 +216,7 @@ export function TableServiceProvider() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="border border-gray-300 p-2 text-center">
+                <td colSpan={7} className="border border-gray-300 p-2 text-center">
                   Nenhum fornecedor encontrado.
                 </td>
               </tr>
@@ -238,76 +228,128 @@ export function TableServiceProvider() {
       {isViewModalOpen && selectedSupplier && (
         <Modal title="Visualizar Contrato" onClose={() => setIsViewModalOpen(false)}>
           <div className="text-white space-y-2 max-h-[400px] overflow-auto">
-            <p><strong>Referência do Contrato:</strong> {selectedSupplier.contractReference}</p>
-            <p><strong>Nome do Fornecedor:</strong> {selectedSupplier.providerSupplierName}</p>
-            <p><strong>CNPJ:</strong> {selectedSupplier.providerSupplierCnpj}</p>
-            <p><strong>Nome do Serviço:</strong> {selectedSupplier.serviceName}</p>
-            <p><strong>Data de Início:</strong> {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}</p>
-            <p><strong>Descrição:</strong> {selectedSupplier.description}</p>
-            <p><strong>Tipo de Despesa:</strong> {selectedSupplier.expenseType}</p>
-            <p><strong>Filial:</strong> {selectedSupplier.branchName}</p>
+            <p>
+              <strong>Referência do Contrato:</strong> {selectedSupplier.contractReference}
+            </p>
+            <p>
+              <strong>Nome do Fornecedor:</strong> {selectedSupplier.providerSupplierName}
+            </p>
+            <p>
+              <strong>CNPJ:</strong> {selectedSupplier.providerSupplierCnpj}
+            </p>
+            <p>
+              <strong>Nome do Serviço:</strong> {selectedSupplier.serviceName}
+            </p>
+            <p>
+              <strong>Data de Início:</strong>{" "}
+              {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}
+            </p>
+            <p>
+              <strong>Descrição:</strong> {selectedSupplier.description}
+            </p>
+            <p>
+              <strong>Tipo de Despesa:</strong> {selectedSupplier.expenseType}
+            </p>
+            <p>
+              <strong>Filial:</strong> {selectedSupplier.branchName}
+            </p>
           </div>
         </Modal>
       )}
 
-      {isEditModalOpen && selectedSupplier && (
+      {isEditModalOpen && editFormData && (
         <Modal title="Editar Fornecedor" onClose={() => setIsEditModalOpen(false)}>
           <div className="flex flex-col gap-4 max-h-[400px] overflow-auto">
             <div>
               <label className="text-white font-semibold block mb-1">Referência do Contrato</label>
               <input
                 type="text"
-                value={selectedSupplier.contractReference}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+                value={editFormData.contractReference || ""}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, contractReference: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
               <label className="text-white font-semibold block mb-1">Nome do Fornecedor</label>
               <input
                 type="text"
-                value={selectedSupplier.providerSupplierName}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">CNPJ</label>
-              <input
-                type="text"
-                value={selectedSupplier.providerSupplierCnpj}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+                value={editFormData.providerSupplierName || ""}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, providerSupplierName: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
               <label className="text-white font-semibold block mb-1">Nome do Serviço</label>
               <input
                 type="text"
-                value={selectedSupplier.serviceName}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+                value={editFormData.serviceName || ""}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, serviceName: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
               <label className="text-white font-semibold block mb-1">Data de Início</label>
               <input
-                type="text"
-                value={selectedSupplier.dateStart ? new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR") : ""}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+                type="date"
+                value={
+                  editFormData.dateStart
+                    ? new Date(editFormData.dateStart).toISOString().slice(0, 10)
+                    : ""
+                }
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, dateStart: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
               <label className="text-white font-semibold block mb-1">Tipo de Despesa</label>
               <input
                 type="text"
-                value={selectedSupplier.expenseType}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed"
+                value={editFormData.expenseType || ""}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, expenseType: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
               <label className="text-white font-semibold block mb-1">Descrição</label>
               <textarea
-                value={selectedSupplier.description}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black cursor-not-allowed resize-none"
+                value={editFormData.description || ""}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, description: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black resize-none"
                 rows={3}
               />
+            </div>
+
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="bg-red-600 px-4 py-2 rounded text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  if (!editFormData.idContract) return;
+                  await updateSupplier(editFormData.idContract, editFormData);
+                  setIsEditModalOpen(false);
+                  setSelectedSupplier(null);
+                  setEditFormData(null);
+                }}
+                className="bg-green-600 px-4 py-2 rounded text-white"
+              >
+                Salvar
+              </button>
             </div>
           </div>
         </Modal>
