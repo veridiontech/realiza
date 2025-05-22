@@ -30,10 +30,8 @@ public interface CrudServiceType {
     // Client
     ServiceTypeClientResponseDto saveServiceTypeClient(ServiceTypeClientRequestDto serviceTypeClientRequestDto);
 
-    @Async
     void transferFromRepoToClient(String idClient);
 
-    @Async
     void transferFromClientToBranch(String idClient, String idBranch);
 
     public enum Owner {

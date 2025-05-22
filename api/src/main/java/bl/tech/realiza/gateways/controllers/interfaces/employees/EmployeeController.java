@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface EmployeeController {
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByEnterprise(int page, int size, String sort, Sort.Direction direction, Provider.Company company, String idSearch);
+    ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByContract(int page, int size, String sort, Sort.Direction direction, String idContract);
 
     // brazilian
     ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);

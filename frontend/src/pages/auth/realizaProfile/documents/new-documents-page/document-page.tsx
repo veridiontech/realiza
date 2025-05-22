@@ -2,6 +2,7 @@ import { NewDocumentBox } from "./document-box-new";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ActiviteSectionBox } from "./activities-section";
+import { ServicesSection } from "./services-section";
 
 export function DocumentPageNew() {
   const [selectTab, setSelectedTab] = useState("document");
@@ -44,11 +45,11 @@ export function DocumentPageNew() {
           </Button>
           <Button
             className={`${
-              selectTab === "profiles"
+              selectTab === "services"
                 ? "bg-realizaBlue"
                 : "bg-transparent border text-black border-black hover:bg-neutral-300"
             }`}
-            onClick={() => setSelectedTab("profiles")}
+            onClick={() => setSelectedTab("services")}
           >
             Serviços 
           </Button>
@@ -57,6 +58,7 @@ export function DocumentPageNew() {
       <div>
         {selectTab === "document" && <NewDocumentBox />}
         {selectTab === "activities" && <ActiviteSectionBox />}
+        {selectTab === "services" && <ServicesSection /> }
       </div>
     </div>
   );

@@ -59,7 +59,7 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractor(@RequestParam(defaultValue = "0") int page,
                                                                                           @RequestParam(defaultValue = "5") int size,
-                                                                                          @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                                          @RequestParam(defaultValue = "title") String sort,
                                                                                           @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -115,7 +115,7 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @Override
     public ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(@RequestParam(defaultValue = "0") int page,
                                                                                                          @RequestParam(defaultValue = "5") int size,
-                                                                                                         @RequestParam(defaultValue = "idDocumentation") String sort,
+                                                                                                         @RequestParam(defaultValue = "title") String sort,
                                                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                                          @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

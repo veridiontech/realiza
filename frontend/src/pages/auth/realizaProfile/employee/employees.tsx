@@ -38,9 +38,8 @@ export const EmployeesTable = (): JSX.Element => {
     useState<propsSupplier | null>(null);
   const [getSubcontractorList, setGetSubcontractorList] = useState([]);
   const { user } = useUser();
-  const { supplier } = useSupplier();
+  const { supplier, setSupplier } = useSupplier();
   // const [employees, setEmployees] = useState([])
-
   // const handlePageChange = (page: number) => {
   //   if (page >= 0 && page <= totalPages) {
   //     setCurrentPage(page);
@@ -61,6 +60,8 @@ export const EmployeesTable = (): JSX.Element => {
       console.error("Erro ao encontrar fornecedor:", error);
     }
   };
+
+  console.log("Id supplier: ", supplier);
 
   const uniqueSupplier = async () => {
     try {
@@ -247,16 +248,19 @@ export const EmployeesTable = (): JSX.Element => {
                 </span>
                 <select
                   value={selectedSupplier || ""}
-                  onChange={(e) => setSelectedSupplier(e.target.value)}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    setSelectedSupplier(selectedId);
+                    const supplierData = suppliersList.find(sup => sup.idProvider === selectedId);
+                    if (supplierData) {
+                      setSupplier(supplierData);
+                    }
+                  }}
                   className="rounded-lg border p-2 text-[12px]"
                 >
                   <option value="">Selecione um fornecedor</option>
-                  {suppliersList.map((supplier: propsSupplier) => (
-                    <option
-                      key={supplier.idProvider}
-                      value={supplier.idProvider}
-                      onClick={() => selectedSupplier}
-                    >
+                  {suppliersList.map((supplier) => (
+                    <option key={supplier.idProvider} value={supplier.idProvider}>
                       {supplier.corporateName}
                     </option>
                   ))}

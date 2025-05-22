@@ -19,9 +19,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-@EnableGlobalMethodSecurity(prePostEnabled = true) // Adicionar esta anotação
+@EnableMethodSecurity(prePostEnabled = true)
 @Configuration
-@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -30,13 +29,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Ativar CORS no Spring Security
                 .csrf(csrf -> csrf.disable()) // Desativa CSRF para APIs Stateless
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(HttpMethod.POST, "/login", "/user/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/branch/*").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
-//                        .requestMatchers("/h2-console/**").permitAll()
-                        .anyRequest().permitAll()
-//                        .anyRequest().authenticated()
+//                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))

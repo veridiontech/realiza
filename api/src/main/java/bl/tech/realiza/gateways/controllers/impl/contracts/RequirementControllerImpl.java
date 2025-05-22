@@ -49,7 +49,7 @@ public class RequirementControllerImpl implements RequirementControlller {
     @Override
     public ResponseEntity<Page<RequirementResponseDto>> getAllRequirements(@RequestParam(defaultValue = "0") int page,
                                                                            @RequestParam(defaultValue = "5") int size,
-                                                                           @RequestParam(defaultValue = "idRequirement") String sort,
+                                                                           @RequestParam(defaultValue = "title") String sort,
                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 

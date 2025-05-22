@@ -55,9 +55,9 @@ public class UserManagerControllerImpl implements UserManagerController {
     @Override
     public ResponseEntity<Page<UserResponseDto>> getAllUsersManager(@RequestParam(defaultValue = "0") int page,
                                                                     @RequestParam(defaultValue = "5") int size,
-                                                                    @RequestParam(defaultValue = "idUser") String sort,
+                                                                    @RequestParam(defaultValue = "firstName") String sort,
                                                                     @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort, "surname"));
 
         Page<UserResponseDto> pageUserManager = crudUserManager.findAll(pageable);
 

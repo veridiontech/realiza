@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useEffect } from "react";
 
 interface propsCep {
   address: string;
@@ -34,7 +35,7 @@ const createNewEmployeeFormSchema = z.object({
   surname: z.string(),
   // email: z.string(),
   cpf: z.string(),
-  salary: z.string(),
+  salary: z.string().regex(/^\d{1,3}(\.\d{3})*,\d{2}$/),
   gender: z.string(),
   maritalStatus: z.string(),
   cep: z.string(),
@@ -48,7 +49,7 @@ const createNewEmployeeFormSchema = z.object({
   position: z.string(),
   // situation: z.string(),
   education: z.string(),
-  cbo: z.string().optional(),
+  cboId: z.string().optional(),
   // platformAccess: z.string(),
   // rg: z.string(),
   admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
@@ -60,8 +61,10 @@ export function NewModalCreateEmployee() {
   const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
+  const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
+  const [searchCbo, setSearchCbo] = useState("");
 
-  console.log("teste", supplier);
+  console.log("Id Supplier: ", supplier);
 
 
   const {
@@ -72,6 +75,12 @@ export function NewModalCreateEmployee() {
   } = useForm<CreateNewEmpoloyeeFormSchema>({
     resolver: zodResolver(createNewEmployeeFormSchema),
   });
+
+  const filteredCbos = cbos.filter(
+    (cbo) =>
+      cbo.title.toLowerCase().includes(searchCbo.toLowerCase()) ||
+      cbo.code.toLowerCase().includes(searchCbo.toLowerCase())
+  );
 
   const formatCPF = (value: string) => {
     return value
@@ -89,17 +98,25 @@ export function NewModalCreateEmployee() {
   //     .replace(/(\d{3})(\d{1})$/, "$1-$2");
   // };
 
-  // const formatSalary = (value: string) => {
-  //   return value
-  //     .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")
-  //     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  // };
+  const formatSalary = (value: string) => {
+    const number = Number(value.replace(/\D/g, "")) / 100;
+    return number.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+    }).replace("R$", "").trim();
+  };
+
+  const normalizeSalary = (value: string) => {
+    return parseFloat(value.replace(/\./g, '').replace(',', '.'));
+  };
 
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
     const payload = {
       ...data,
-      supplier: supplier?.idProvider
+      supplier: supplier?.idProvider,
+      salary: normalizeSalary(data.salary)
     };
     console.log("Enviando dados:", payload);
     try {
@@ -141,6 +158,25 @@ export function NewModalCreateEmployee() {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    const fetchCbos = async () => {
+      try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const response = await axios.get(`${ip}/cbo`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        });
+
+        setCbos(response.data); // Certifique-se que a API retorna uma lista aqui
+      } catch (error) {
+        toast.error("Erro ao buscar CBOs");
+      }
+    };
+
+    fetchCbos();
+  }, []);
+
+
 
   const setValuesCep = (data: propsCep) => {
     setValue("city", data.city),
@@ -190,12 +226,12 @@ export function NewModalCreateEmployee() {
                     className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione</option>
-                    <option value="Masculino">Casado</option>
-                    <option value="Feminino">Solteiro</option>
-                    <option value="Divorciado">Divorciado</option>
-                    <option value="Viúvo">Viúvo </option>
-                    <option value="Separado Judicialmente">Separado judicialmente </option>
-                    <option value="União Estável">União estável</option>
+                    <option value="CASADO">Casado</option>
+                    <option value="SOLTEIRO">Solteiro</option>
+                    <option value="DIVORCIADO">Divorciado</option>
+                    <option value="VIUVO">Viúvo </option>
+                    <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente </option>
+                    <option value="UNIAO_ESTAVEL">União estável</option>
                   </select>
                 </div>
                 <div>
@@ -205,29 +241,29 @@ export function NewModalCreateEmployee() {
                     className="flex flex-col rounded-md border p-2 w-full"
                   >
                     <option value="">Selecione um tipo de contrato</option>
-                    <option value="Autônomo">Autônomo</option>
-                    <option value="Avulso (Sindicato)">
+                    <option value="AUTONOMO">Autônomo</option>
+                    <option value="AVULSO_SINDICATO">
                       Avulso (Sindicato)
                     </option>
-                    <option value="CLT - Horista">CLT - Horista</option>
-                    <option value="CLT - Tempo Determinado">
+                    <option value="CLT_HORISTA">CLT - Horista</option>
+                    <option value="CLT_TEMPO_DETERMINADO">
                       CLT - Tempo Determinado
                     </option>
-                    <option value="CLT - Tempo Indeterminado">
+                    <option value="CLT_TEMPO_INDETERMINADO">
                       CLT - Tempo Indeterminado
                     </option>
-                    <option value="Cooperado">Cooperado</option>
-                    <option value="Estágio / Bolsa">Estágio / Bolsa</option>
-                    <option value="Estrangeiro - Imigrante">
+                    <option value="COOPERADO">Cooperado</option>
+                    <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
+                    <option value="ESTRANGEIRO_IMIGRANTE">
                       Estrangeiro - Imigrante
                     </option>
-                    <option value="Estrangeiro - Temporário">
+                    <option value="ESTRANGEIRO_TEMPORARIO">
                       Estrangeiro - Temporário
                     </option>
-                    <option value="Intermitente">Intermitente</option>
-                    <option value="Jovem Aprendiz">Jovem Aprendiz</option>
-                    <option value="Sócio">Sócio</option>
-                    <option value="Temporário">Temporário</option>
+                    <option value="INTERMITENTE">Intermitente</option>
+                    <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
+                    <option value="SOCIO">Sócio</option>
+                    <option value="TEMPORARIO">Temporário</option>
                   </select>
                 </div>
 
@@ -254,10 +290,10 @@ export function NewModalCreateEmployee() {
                   <Input
                     type="text"
                     {...register("salary")}
-                    // onChange={(e) => {
-                    //   const formattedSalary = formatSalary(e.target.value);
-                    //   setValue("salary", formattedSalary);
-                    // }}
+                    onChange={(e) => {
+                      const formattedSalary = formatSalary(e.target.value);
+                      setValue("salary", formattedSalary);
+                    }}
                     placeholder="000.000,00"
                   />
                   {errors.salary && <span>{errors.salary.message}</span>}
@@ -328,7 +364,27 @@ export function NewModalCreateEmployee() {
                 </div>
                 <div>
                   <Label className="text-white">CBO</Label>
-                  <Input {...register("cbo")} />
+                  <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                    <Search className="text-neutral-500 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Pesquisar CBO..."
+                      value={searchCbo}
+                      onChange={(e) => setSearchCbo(e.target.value)}
+                      className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                    />
+                  </div>
+                  <select
+                    {...register("cboId")}
+                    className="flex flex-col rounded-md border p-2 w-full"
+                  >
+                    <option value="">Selecione o CBO</option>
+                    {filteredCbos.map((cbo) => (
+                      <option key={cbo.id} value={cbo.id}>
+                        {cbo.title} - {cbo.code}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label className="text-white">Graduação</Label>

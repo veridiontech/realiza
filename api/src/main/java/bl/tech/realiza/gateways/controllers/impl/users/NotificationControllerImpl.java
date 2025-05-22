@@ -3,7 +3,6 @@ package bl.tech.realiza.gateways.controllers.impl.users;
 import bl.tech.realiza.gateways.controllers.interfaces.users.NotificationController;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
-import bl.tech.realiza.usecases.impl.users.CrudNotificationImpl;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -49,7 +48,7 @@ public class NotificationControllerImpl implements NotificationController {
     @Override
     public ResponseEntity<Page<NotificationResponseDto>> getAllNotifications(@RequestParam(defaultValue = "0") int page,
                                                                              @RequestParam(defaultValue = "5") int size,
-                                                                             @RequestParam(defaultValue = "idNotification") String sort,
+                                                                             @RequestParam(defaultValue = "title") String sort,
                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -81,7 +80,7 @@ public class NotificationControllerImpl implements NotificationController {
     @Override
     public ResponseEntity<Page<NotificationResponseDto>> getAllNotificationsByUser(@RequestParam(defaultValue = "0") int page,
                                                                                    @RequestParam(defaultValue = "5") int size,
-                                                                                   @RequestParam(defaultValue = "idNotification") String sort,
+                                                                                   @RequestParam(defaultValue = "title") String sort,
                                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                    @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
@@ -89,5 +88,23 @@ public class NotificationControllerImpl implements NotificationController {
         Page<NotificationResponseDto> pageNotification = crudNotification.findAllByUser(idSearch, pageable);
 
         return ResponseEntity.ok(pageNotification);
+    }
+
+    @PostMapping("{notificationId}/mark-as-read")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Override
+    public ResponseEntity<Void> markOneNotificationAsRead(@PathVariable String notificationId) {
+
+        crudNotification.markOneNotificationAsRead(notificationId);
+
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("{userId}/mark-all-as-read")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Override
+    public ResponseEntity<Void> markAllNotificationsFromUserAsRead(@PathVariable String userId) {
+        crudNotification.markAllNotificationsAsRead(userId);
+        return ResponseEntity.accepted().build();
     }
 }

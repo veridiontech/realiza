@@ -315,7 +315,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                       </div>
                       <div className="flex items-center gap-1 text-[14px]">
                         <p>CBO:</p>
-                        <p>{employee.cbo}</p>
+                        <p>{employee.cboId}</p>
                       </div>
                     </div>
                   </div>
@@ -424,7 +424,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                       </div>
                       <div className="flex items-center gap-1 text-[14px]">
                         <p>CBO:</p>
-                        <p>{employee.cbo}</p>
+                        <p>{employee.cboId}</p>
                       </div>
                     </div>
                   </div>
@@ -547,7 +547,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                     </div>
                     <div className="flex items-center gap-1 text-[14px]">
                       <p>CBO:</p>
-                      <p>{employee.cbo}</p>
+                      <p>{employee.cboId}</p>
                     </div>
                   </div>
                 </div>

@@ -42,7 +42,7 @@ public class CenterControllerImpl implements CenterController {
     @Override
     public ResponseEntity<Page<CenterResponseDto>> getAllCenters(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "5") int size,
-                                                                 @RequestParam(defaultValue = "idCenter") String sort,
+                                                                 @RequestParam(defaultValue = "name") String sort,
                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
         return ResponseEntity.ok(crudCenter.findAll(pageable));
@@ -53,7 +53,7 @@ public class CenterControllerImpl implements CenterController {
     @Override
     public ResponseEntity<Page<CenterResponseDto>> getAllCentersByMarket(@RequestParam(defaultValue = "0") int page,
                                                                          @RequestParam(defaultValue = "200") int size,
-                                                                         @RequestParam(defaultValue = "idCenter") String sort,
+                                                                         @RequestParam(defaultValue = "name") String sort,
                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                          @RequestParam String idMarket) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

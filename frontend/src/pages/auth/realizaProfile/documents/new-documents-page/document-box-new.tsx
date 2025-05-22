@@ -31,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
@@ -97,35 +97,35 @@ export function NewDocumentBox() {
     <div className="relative bottom-[8vw]">
       <div className="absolute left-0 right-0 top-0 z-10 hidden gap-2 rounded-lg bg-white p-5 shadow-md md:flex items-center justify-between">
         <div>
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "thirdCompany"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("thirdCompany");
-            handleClickToggle();
-          }}
-        >
-          Cadastro e certidões
-        </Button>
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "thirdCollaborators"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("thirdCollaborators");
-            handleClickToggle();
-          }}
-        >
-          Saúde
-        </Button>
-        {/* <Button
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "thirdCompany"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("thirdCompany");
+              handleClickToggle();
+            }}
+          >
+            Cadastro e certidões
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "thirdCollaborators"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("thirdCollaborators");
+              handleClickToggle();
+            }}
+          >
+            Saúde
+          </Button>
+          {/* <Button
             variant={"ghost"}
             className={`px-4 py-2 transition-all duration-300 ${
               selectedTab === "training"
@@ -136,72 +136,73 @@ export function NewDocumentBox() {
           >
             Treinamentos
           </Button> */}
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "otherRequirements"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("otherRequirements"), handleClickToggle();
-          }}
-        >
-          Segurança do Trabalho
-        </Button>{" "}
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "ambient"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("ambient"), handleClickToggle();
-          }}
-        >
-          Meio Ambiente
-        </Button>
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "trabalhista"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("trabalhista"), handleClickToggle();
-          }}
-        >
-          Trabalhista
-        </Button>
-        <Button
-          variant={"ghost"}
-          className={`px-4 py-2 transition-all duration-300 ${
-            selectedTab === "geral"
-              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-              : "text-realizaBlue bg-white"
-          }`}
-          onClick={() => {
-            setSelectedTab("geral"), handleClickToggle();
-          }}
-        >
-          Geral
-        </Button>
-        
-</div>
-<Dialog>
-  <DialogTrigger className=""><Button className="bg-realizaBlue">+</Button></DialogTrigger>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Are you absolutely sure?</DialogTitle>
-      <DialogDescription>
-        This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.
-      </DialogDescription>
-    </DialogHeader>
-  </DialogContent>
-</Dialog>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "otherRequirements"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("otherRequirements"), handleClickToggle();
+            }}
+          >
+            Segurança do Trabalho
+          </Button>{" "}
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "ambient"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("ambient"), handleClickToggle();
+            }}
+          >
+            Meio Ambiente
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "trabalhista"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("trabalhista"), handleClickToggle();
+            }}
+          >
+            Trabalhista
+          </Button>
+          <Button
+            variant={"ghost"}
+            className={`px-4 py-2 transition-all duration-300 ${
+              selectedTab === "geral"
+                ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                : "text-realizaBlue bg-white"
+            }`}
+            onClick={() => {
+              setSelectedTab("geral"), handleClickToggle();
+            }}
+          >
+            Geral
+          </Button>
+        </div>
+        <Dialog>
+          <DialogTrigger className="">
+            <Button className="bg-realizaBlue">+</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
         <Button

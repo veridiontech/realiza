@@ -42,7 +42,7 @@ public class MarketControllerImpl implements MarketController {
     @Override
     public ResponseEntity<Page<MarketResponseDto>> getAllMarkets(@RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "5") int size,
-                                                                 @RequestParam(defaultValue = "idMarket") String sort,
+                                                                 @RequestParam(defaultValue = "name") String sort,
                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
         return ResponseEntity.ok(crudMarket.findAll(pageable));
@@ -53,7 +53,7 @@ public class MarketControllerImpl implements MarketController {
     @Override
     public ResponseEntity<Page<MarketResponseDto>> getAllMarketsByBoard(@RequestParam(defaultValue = "0") int page,
                                                                         @RequestParam(defaultValue = "200") int size,
-                                                                        @RequestParam(defaultValue = "idMarket") String sort,
+                                                                        @RequestParam(defaultValue = "name") String sort,
                                                                         @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                         @RequestParam String idBoard) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

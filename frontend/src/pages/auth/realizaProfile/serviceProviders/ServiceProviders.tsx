@@ -35,7 +35,7 @@ export function ServiceProvider() {
     <div className="m-10 flex min-h-full justify-center ">
       <div className="dark:bg-primary flex h-full w-[90rem] flex-col rounded-lg ">
         <div className="flex items-center md:justify-between justify-around">
-          <h1 className="hidden md:block m-8 text-2xl">Prestadores de Serviço</h1>
+          <h1 className="hidden md:block m-8 text-2xl">Contratos</h1>
           <h1 className="md:hidden m-8 text-2xl">Prestadores</h1>
           <ModalTesteSendSupplier />
         </div>

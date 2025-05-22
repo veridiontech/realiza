@@ -1,8 +1,10 @@
 package bl.tech.realiza.usecases.impl.clients;
 
+import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -11,13 +13,13 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
-import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
+import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
-import bl.tech.realiza.services.setup.ClientSetupAsynService;
-import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
-import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
+import bl.tech.realiza.services.setup.ClientSetupAsyncService;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
@@ -46,7 +48,9 @@ public class CrudClientImpl implements CrudClient {
     private final CrudActivity crudActivity;
     private final CrudBranch crudBranchImpl;
     private final CrudServiceType crudServiceTypeImpl;
-    private final ClientSetupAsynService clientSetupAsynService;
+    private final ClientSetupAsyncService clientSetupAsyncService;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogServiceImpl;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -74,7 +78,19 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        clientSetupAsynService.setupClient(savedClient);
+        clientSetupAsyncService.setupClient(savedClient);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogClient(
+                        savedClient,
+                        userResponsible.getEmail() + " created client " + savedClient.getCorporateName(),
+                        AuditLogClient.AuditLogClientActions.CREATE,
+                        userResponsible);
+            }
+        }
 
         return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())
@@ -98,6 +114,8 @@ public class CrudClientImpl implements CrudClient {
 
         Optional<Client> clientOptional = clientRepository.findById(id);
         Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+
+        crudServiceTypeImpl.transferFromClientToBranch(client.getIdClient(), client.getBranches().get(0).getIdBranch());
 
         if (client.getLogo() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
@@ -174,6 +192,18 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(client);
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogClient(
+                        savedClient,
+                        userResponsible.getEmail() + " updated client " + savedClient.getCorporateName(),
+                        AuditLogClient.AuditLogClientActions.UPDATE,
+                        userResponsible);
+            }
+        }
+
         ClientResponseDto clientResponse = ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
@@ -194,6 +224,20 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public void delete(String id) {
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogClient(
+                        client,
+                        userResponsible.getEmail() + " deleted client " + client.getCorporateName(),
+                        AuditLogClient.AuditLogClientActions.UPDATE,
+                        userResponsible);
+            }
+        }
         clientRepository.deleteById(id);
     }
 

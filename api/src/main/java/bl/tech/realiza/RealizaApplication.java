@@ -19,6 +19,8 @@ public class RealizaApplication {
 			}
 		});
 
+		System.setProperty("user.timezone", "America/Sao_Paulo");
+
 		SpringApplication.run(RealizaApplication.class, args);
 	}
 }

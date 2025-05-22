@@ -50,7 +50,7 @@ public class ContactControllerImpl implements ContactControlller {
     @Override
     public ResponseEntity<Page<ContactResponseDto>> getAllContacts(@RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "5") int size,
-                                                                   @RequestParam(defaultValue = "idContact") String sort,
+                                                                   @RequestParam(defaultValue = "email") String sort,
                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -82,7 +82,7 @@ public class ContactControllerImpl implements ContactControlller {
     @Override
     public ResponseEntity<Page<ContactResponseDto>> getAllContactByEnterprise(@RequestParam(defaultValue = "0") int page,
                                                                               @RequestParam(defaultValue = "5") int size,
-                                                                              @RequestParam(defaultValue = "idContact") String sort,
+                                                                              @RequestParam(defaultValue = "email") String sort,
                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                               @RequestParam Provider.Company company,
                                                                               @RequestParam String idSearch) {

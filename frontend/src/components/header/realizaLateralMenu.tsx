@@ -41,9 +41,9 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
 
       <h3 className="pl-4 pt-6 text-xs text-white">Prestadores de serviço</h3>
       <Link to={`/sistema/serviceProviders/${getIdUser}`} onClick={onClose}>
-        <Button variant="ghost" className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
-          <Users2 className="text-white" />
-          <span className="ml-2 text-sm font-medium text-white">Ver prestadores</span>
+        <Button variant="ghost"  className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500">
+          <Users2  className="text-white" />
+          <span className="ml-2 text-sm font-medium text-white">Ver contratos</span>
         </Button>
       </Link>
 

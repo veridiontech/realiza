@@ -51,7 +51,7 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
     @Override
     public ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractor(@RequestParam(defaultValue = "0") int page,
                                                                                   @RequestParam(defaultValue = "5") int size,
-                                                                                  @RequestParam(defaultValue = "idProvider") String sort,
+                                                                                  @RequestParam(defaultValue = "tradeName") String sort,
                                                                                   @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
@@ -98,7 +98,7 @@ public class ProviderSubcontractorControllerImpl implements ProviderSubcontracto
     @Override
     public ResponseEntity<Page<ProviderResponseDto>> getAllProvidersSubcontractorBySupplier(@RequestParam(defaultValue = "0") int page,
                                                                                             @RequestParam(defaultValue = "5") int size,
-                                                                                            @RequestParam(defaultValue = "idProvider") String sort,
+                                                                                            @RequestParam(defaultValue = "tradeName") String sort,
                                                                                             @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                             @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));

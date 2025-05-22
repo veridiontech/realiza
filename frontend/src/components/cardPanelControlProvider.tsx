@@ -17,82 +17,79 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface CardPanelControlProps {
-  data: {
-    idSolicitation: string;
-    title: string;
-    details: string;
-    creationDate: string;
-    requester: {
-      idUser: string;
-      firstName: string;
-      surname: string;
-      nameEnterprise?: string | undefined;
-      cpf?: string | undefined;
-    };
-    newProvider: {
-      cnpj?: string | undefined;
-      corporateName?: string | undefined;
-      telephone: string | undefined;
-    };
-  };
-  // Callback opcional para atualizar a lista após a ação
+  idSolicitation: string;
+  creationDate: string;
+  requesterEmail: string;
+  requesterName: string;
+  solicitationType: string;
+  enterpriseName?: string | undefined;
+  clientName: string;
+  clientCnpj: string;
   onActionCompleted?: (idSolicitation: string) => void;
-  status: string,
+  status: string;
 }
 
 export function CardPanelControlProvider({
-  data,
+  idSolicitation,
+  creationDate,
+  enterpriseName,
+  requesterEmail,
+  requesterName,
+  clientName,
+  clientCnpj,
+  // solicitationType,
   onActionCompleted,
-  status
+  status,
 }: CardPanelControlProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  const client = {
+    cnpj: clientCnpj,
+    tradeName: clientName,
+    corporateName: enterpriseName || "",
+  };
+
+  const requester = {
+    fullName: requesterName,
+    email: requesterEmail,
+  };
+
+  const newProvider = {
+    corporateName: enterpriseName || "",
+    cnpj: "",
+  };
 
   const handleApprove = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      // Define o loading como true antes de começar a requisição
       setIsLoading(true);
 
-      console.log("teste id da solicitacao", data.idSolicitation);
-
-      await axios.patch(
-        `${ip}/item-management/${data.idSolicitation}/approve`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
+      await axios.patch(`${ip}/item-management/${idSolicitation}/approve`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
 
       toast.success("Solicitação aprovada");
-
-      // Atualize o estado do loading para false quando a requisição for concluída
       setIsLoading(false);
 
-      // Recarregue ou atualize conforme necessário
       if (onActionCompleted) {
-        onActionCompleted(data.idSolicitation);
+        onActionCompleted(idSolicitation);
       }
       window.location.reload();
     } catch (error) {
       console.error("Erro ao aprovar solicitação:", error);
       toast.error("Erro ao aceitar solicitação");
-      setIsLoading(false); // Também precisa garantir que o loading seja alterado em caso de erro
+      setIsLoading(false);
     }
   };
 
   const handleDeny = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const response = await axios.patch(
-        `${ip}/item-management/${data.idSolicitation}/deny`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-
-      alert(response.data);
-      // Remove o item negado da lista se houver callback
+      await axios.patch(`${ip}/item-management/${idSolicitation}/deny`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       if (onActionCompleted) {
-        onActionCompleted(data.idSolicitation);
+        onActionCompleted(idSolicitation);
       }
     } catch (error) {
       console.error("Erro ao negar solicitação:", error);
@@ -101,103 +98,128 @@ export function CardPanelControlProvider({
   };
 
   return (
-    <div className="flex flex-col justify-center gap-2 rounded-md border border-neutral-300 bg-white p-4 shadow-md">
+    <div className="flex flex-col justify-center gap-5 rounded-md border border-neutral-300 bg-white p-4 shadow-md">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <User color="#2563EB" />
-          <span className="font-semibold text-[#2563EB]">
-            Solicitação de: {data.requester.firstName} {data.requester.surname}
-          </span>
+        <div>
+          {status === "PENDING" ? (
+            <div className="flex items-center gap-1">
+              <User color="#2563EB" />
+              <span className="font-semibold text-[#2563EB]">
+                Solicitação de: {requesterName}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <User color="#2563EB" />
+              <span className="font-semibold text-[#2563EB]">
+                Solicitação aceita
+              </span>
+            </div>
+          )}
+          <span className="text-[14px] text-neutral-600">{requesterEmail}</span>
         </div>
-        {}
         <MoreDetails
-          idSolicitation={data.idSolicitation}
-          requesterFirstName={data.requester.firstName}
-          requesterSurname={data.requester.surname}
-          requesterCpf={data.requester.cpf}
-          nameEnterprise={data.requester.nameEnterprise}
-          corporateName={data.newProvider.corporateName}
-          cnpj={data.newProvider.cnpj}
+          idSolicitation={idSolicitation}
+          client={client}
+          requester={requester}
+          newProvider={newProvider}
         />
       </div>
-      <div className="flex w-full flex-col gap-2 border-y border-[#7CA1F333] py-4">
-        <h3 className="mb-3 text-sm font-semibold text-[#2563EB]">
-          {data.title}
-        </h3>
-        <p className="text-sm font-semibold text-[#3F3F46]">
-          Detalhes: {data.details}
-        </p>
+      <div className="flex flex-col">
+        <div className="flex items-center gap-1">
+          <strong className="text-[14px]">Empresa solicitada: </strong>
+          <span>{enterpriseName}</span>
+        </div>
+        <div className="flex flex-col gap-1 text-[14px]">
+          <div className="flex items-center gap-1">
+            <strong>Cliente: </strong>
+            <span>
+              {clientName}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <strong>Cliente Cnpj: </strong>
+            <span>{clientCnpj}</span>
+          </div>
+        </div>
       </div>
       <div className="row flex w-full items-center justify-between">
         <div className="flex flex-row items-center justify-center gap-2">
           <CalendarDays color="#3F3F46" />
           <span className="text-xs text-[#3F3F46]">
-            {new Date(data.creationDate).toLocaleString()}
+            {new Date(creationDate).toLocaleString()}
           </span>
         </div>
-          {status === "APPROVED" || status === "DENIED"? (<div></div>): (<div className="flex flex-row items-center justify-center gap-2">
-          <AlertDialog>
-            <AlertDialogTrigger>
-              {" "}
-              <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300">
-                Dispensar <ThumbsUp size={15} />
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Deseja mesmo dispensar a solicitação de acesso de{" "}
-                  {data.newProvider.corporateName} ao sistema?
-                </AlertDialogTitle>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeny}>
-                  Dispensar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          {isLoading ? (
-            <button
-              onClick={handleApprove}
-              className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
-            >
-              <Oval
-                visible={true}
-                height="20"
-                width="20"
-                color="#4fa94d"
-                ariaLabel="oval-loading"
-                wrapperStyle={{}}
-                wrapperClass=""
-              />
-            </button>
-          ) : (
+        {status === "APPROVED" || status === "DENIED" ? (
+          <div></div>
+        ) : (
+          <div className="flex flex-row items-center justify-center gap-2">
             <AlertDialog>
               <AlertDialogTrigger>
-                {" "}
-                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300">
-                  Aceitar <ThumbsUp size={15} />
+                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300">
+                  Dispensar <ThumbsUp size={15} />
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-                    Deseja mesmo confirmar o acesso de{" "}
-                    {data.newProvider.corporateName} ao sistema?
+                    Deseja mesmo dispensar a solicitação de acesso de{" "}
+                    {enterpriseName} ao sistema?
                   </AlertDialogTitle>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-red-300 hover:bg-red-400">Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleApprove} className="bg-green-800 text-white">
-                      Aceitar
-                    </AlertDialogAction>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeny}>
+                    Dispensar
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          )}
-        </div>)}
+            {isLoading ? (
+              <button
+                onClick={handleApprove}
+                className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300"
+              >
+                <Oval
+                  visible={true}
+                  height="20"
+                  width="20"
+                  color="#4fa94d"
+                  ariaLabel="oval-loading"
+                  wrapperStyle={{}}
+                  wrapperClass=""
+                />
+              </button>
+            ) : (
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300">
+                    Aceitar <ThumbsUp size={15} />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Deseja mesmo confirmar o acesso de {enterpriseName} ao
+                      sistema?
+                    </AlertDialogTitle>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-red-300 hover:bg-red-400">
+                      Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleApprove}
+                      className="bg-green-800 text-white"
+                    >
+                      Aceitar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

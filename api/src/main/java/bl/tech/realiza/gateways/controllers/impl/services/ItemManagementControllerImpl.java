@@ -54,8 +54,8 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Override
     public ResponseEntity<Page<ItemManagementUserResponseDto>> getUserSolicitations(@RequestParam(defaultValue = "0") int page,
                                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                                @RequestParam(defaultValue = "idSolicitation") String sort,
-                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+                                                                                @RequestParam(defaultValue = "creationDate") String sort,
+                                                                                @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
         Page<ItemManagementUserResponseDto> itemManagementResponse = crudItemManagement.findAllUserSolicitation(pageable);
@@ -63,11 +63,11 @@ public class ItemManagementControllerImpl implements ItemManagementController {
         return ResponseEntity.ok(itemManagementResponse);
     }
 
-    @GetMapping("/new-user/details")
+    @GetMapping("/new-user/details/{idSolicitation}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Busca detalhes da solicitação de adicionar usuário")
     @Override
-    public ResponseEntity<ItemManagementUserDetailsResponseDto> getUserSolicitationDetails(String idSolicitation) {
+    public ResponseEntity<ItemManagementUserDetailsResponseDto> getUserSolicitationDetails(@PathVariable String idSolicitation) {
         return ResponseEntity.ok(crudItemManagement.findUserSolicitationDetails(idSolicitation));
     }
 
@@ -77,8 +77,8 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Override
     public ResponseEntity<Page<ItemManagementProviderResponseDto>> getProviderSolicitations(@RequestParam(defaultValue = "0") int page,
                                                                                     @RequestParam(defaultValue = "10") int size,
-                                                                                    @RequestParam(defaultValue = "idSolicitation") String sort,
-                                                                                    @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+                                                                                    @RequestParam(defaultValue = "creationDate") String sort,
+                                                                                    @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
         Page<ItemManagementProviderResponseDto> itemManagementResponse = crudItemManagement.findAllProviderSolicitation(pageable);
@@ -86,11 +86,11 @@ public class ItemManagementControllerImpl implements ItemManagementController {
         return ResponseEntity.ok(itemManagementResponse);
     }
 
-    @GetMapping("/new-provider/details")
+    @GetMapping("/new-provider/details/{idSolicitation}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Busca detalhes da solicitação de adicionar usuário")
     @Override
-    public ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(String idSolicitation) {
+    public ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(@PathVariable String idSolicitation) {
         return ResponseEntity.ok(crudItemManagement.findProviderSolicitationDetails(idSolicitation));
     }
 

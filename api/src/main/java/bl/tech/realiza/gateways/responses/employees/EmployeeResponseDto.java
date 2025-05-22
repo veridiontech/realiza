@@ -42,6 +42,8 @@ public class EmployeeResponseDto {
     private String email;
     private Employee.LevelOfEducation levelOfEducation;
     private String cboId;
+    private String cboTitle;
+    private String cboCode;
     private Employee.Situation situation;
     private List<ContractDto> contracts;
     private List<DocumentMatrix> documents;
