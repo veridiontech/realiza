@@ -115,8 +115,6 @@ public class CrudClientImpl implements CrudClient {
         Optional<Client> clientOptional = clientRepository.findById(id);
         Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
 
-        crudServiceTypeImpl.transferFromClientToBranch(client.getIdClient(), client.getBranches().get(0).getIdBranch());
-
         if (client.getLogo() != null) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
             fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
