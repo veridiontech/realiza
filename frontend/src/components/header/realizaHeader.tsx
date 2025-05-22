@@ -26,7 +26,7 @@ import { useBoard } from "@/context/context-ultra/Board-provider";
 import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
-import bannerHeader from "@/assets/banner/Rectangle 42203.png"
+import bannerHeader from "@/assets/banner/Rectangle 42203.png";
 import { Solicitation } from "@/pages/auth/realizaProfile/panel-control/provider-solicitations";
 
 interface ApiResponse {
@@ -41,10 +41,11 @@ export function Header() {
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
-  const { boards, setSelectedBoard, selectedBoard } = useBoard()
-  const { markets, setSelectedMarket, selectedMarket } = useMarket()
-  const { center, selectedCenter, setSelectedCenter } = useCenter()
-  const { branchUltra, setSelectedBranchUltra, selectedBranchUltra } = useBranchUltra()
+  const { boards, setSelectedBoard, selectedBoard } = useBoard();
+  const { markets, setSelectedMarket, selectedMarket } = useMarket();
+  const { center, selectedCenter, setSelectedCenter } = useCenter();
+  const { branchUltra, setSelectedBranchUltra, selectedBranchUltra } =
+    useBranchUltra();
   const getIdUser = user?.idUser;
 
   // Busca clientes
@@ -54,11 +55,14 @@ export function Header() {
         const tokenFromStorage = localStorage.getItem("tokenClient");
         const firstRes = await axios.get(`${ip}/client`, {
           params: { page: 0, size: 1000 },
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         });
         const totalPages = firstRes.data.totalPages;
         const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
-          axios.get(`${ip}/client`, { params: { page: i + 1, size: 1000 }, headers: { Authorization: `Bearer ${tokenFromStorage}` } }),
+          axios.get(`${ip}/client`, {
+            params: { page: i + 1, size: 1000 },
+            headers: { Authorization: `Bearer ${tokenFromStorage}` },
+          })
         );
 
         const responses = await Promise.all(requests);
@@ -80,11 +84,9 @@ export function Header() {
   const handleSelectClient = async (id: string) => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/client/${id}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
+      const res = await axios.get(`${ip}/client/${id}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       setClient(res.data);
     } catch (err) {
       console.error("Erro ao selecionar cliente", err);
@@ -96,9 +98,10 @@ export function Header() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get<ApiResponse>(
-        `${ip}/item-management/new-provider`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
+        `${ip}/item-management/new-provider`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       console.log("solicitacao:", response.data.content);
       setSolicitations(response.data.content);
@@ -112,13 +115,11 @@ export function Header() {
   console.log("diretorias: ", boards);
   console.log("diretoria selecionada:", selectedBoard);
 
-
-
   const handleMouseEnter = () => setMenuOpen(true);
   const handleMouseLeave = () => setMenuOpen(false);
 
   const pendingSolicitationsCount = solicitations.filter(
-    (solicitation) => solicitation.status === "PENDING",
+    (solicitation) => solicitation.status === "PENDING"
   ).length;
 
   if (client?.isUltragaz === true) {
@@ -184,18 +185,22 @@ export function Header() {
 
             <div className="flex items-center gap-5">
               <div>
-                <span className="text-realizaBlue text-[14px]">Diretoria: </span>
+                <span className="text-realizaBlue text-[14px]">
+                  Diretoria:{" "}
+                </span>
                 <select
                   value={selectedBoard?.idBoard || ""}
                   onChange={(e) => {
                     const selected = boards.find(
-                      (b) => b.idBoard === e.target.value,
+                      (b) => b.idBoard === e.target.value
                     );
                     setSelectedBoard(selected || null);
                   }}
                   className="text-[12px]"
                 >
-                  <option value="" disabled>Selecione um cliente</option>
+                  <option value="" disabled>
+                    Selecione um cliente
+                  </option>
                   {Array.isArray(branch) &&
                     boards.map((b) => (
                       <option value={b.idBoard} key={b.idBoard}>
@@ -210,7 +215,7 @@ export function Header() {
                   value={selectedMarket?.idMarket || ""}
                   onChange={(e) => {
                     const selected = markets.find(
-                      (b) => b.idMarket === e.target.value,
+                      (b) => b.idMarket === e.target.value
                     );
                     setSelectedMarket(selected || null);
                   }}
@@ -231,7 +236,7 @@ export function Header() {
                   value={selectedCenter?.idCenter || ""}
                   onChange={(e) => {
                     const selected = center.find(
-                      (b) => b.idCenter === e.target.value,
+                      (b) => b.idCenter === e.target.value
                     );
                     setSelectedCenter(selected || null);
                   }}
@@ -252,7 +257,7 @@ export function Header() {
                   value={selectedBranchUltra?.idBranch || ""}
                   onChange={(e) => {
                     const selected = branchUltra.find(
-                      (b) => b.idBranch === e.target.value,
+                      (b) => b.idBranch === e.target.value
                     );
                     setSelectedBranchUltra(selected || null);
                   }}
@@ -284,11 +289,11 @@ export function Header() {
                   // Filtra solicitações com status "PENDING"
                   <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
                     {solicitations.filter(
-                      (solicitation) => solicitation.status === "PENDING",
+                      (solicitation) => solicitation.status === "PENDING"
                     ).length > 0 ? (
                       solicitations
                         .filter(
-                          (solicitation) => solicitation.status === "PENDING",
+                          (solicitation) => solicitation.status === "PENDING"
                         )
                         .map((solicitation) => (
                           <div
@@ -302,7 +307,9 @@ export function Header() {
                               </div>
                               <div className="flex flex-col gap-1">
                                 <strong>Detalhes da solicitação:</strong>{" "}
-                                <span className="text-[14px]">{solicitation.details}</span>
+                                <span className="text-[14px]">
+                                  {solicitation.details}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -325,7 +332,10 @@ export function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center">
+                    {" "}
+                    <ProfilePhoto />
+                  </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
@@ -367,7 +377,10 @@ export function Header() {
   }
 
   return (
-    <header className="bg-transparent relative p-5 h-[27vh] rounded-b-xl" style={{ backgroundImage: `url(${bannerHeader})` }}>
+    <header
+      className="bg-transparent relative p-5 h-[27vh] rounded-b-xl"
+      style={{ backgroundImage: `url(${bannerHeader})` }}
+    >
       <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">
@@ -417,7 +430,11 @@ export function Header() {
                   Selecione um cliente
                 </option>
                 {clients.map((client) => (
-                  <option key={client.idClient} value={client.idClient} className="text-black">
+                  <option
+                    key={client.idClient}
+                    value={client.idClient}
+                    className="text-black"
+                  >
                     {client.tradeName}
                   </option>
                 ))}
@@ -430,16 +447,22 @@ export function Header() {
                   value={selectedBranch?.idBranch || ""}
                   onChange={(e) => {
                     const selected = branch.find(
-                      (b) => b.idBranch === e.target.value,
+                      (b) => b.idBranch === e.target.value
                     );
                     setSelectedBranch(selected || null);
                   }}
                   className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
                 >
-                  <option value="" className="text-black">Selecione uma filial</option>
+                  <option value="" className="text-black">
+                    Selecione uma filial
+                  </option>
                   {Array.isArray(branch) &&
                     branch.map((b) => (
-                      <option value={b.idBranch} key={b.idBranch} className="text-black">
+                      <option
+                        value={b.idBranch}
+                        key={b.idBranch}
+                        className="text-black"
+                      >
                         {b.name}
                       </option>
                     ))}
@@ -466,11 +489,11 @@ export function Header() {
                 {solicitations && solicitations.length > 0 ? (
                   <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
                     {solicitations.filter(
-                      (solicitation) => solicitation.status === "PENDING",
+                      (solicitation) => solicitation.status === "PENDING"
                     ).length > 0 ? (
                       solicitations
                         .filter(
-                          (solicitation) => solicitation.status === "PENDING",
+                          (solicitation) => solicitation.status === "PENDING"
                         )
                         .map((solicitation) => (
                           <div
@@ -509,7 +532,10 @@ export function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white overflow-hidden flex items-center justify-center"> <ProfilePhoto /></div>
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white overflow-hidden flex items-center justify-center">
+                    {" "}
+                    <ProfilePhoto />
+                  </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="dark:bg-primary mr-5">
                   <DropdownMenuLabel>
