@@ -12,12 +12,61 @@ import { TailSpin } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 
+// Regex para telefone (formato válido)
+const phoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}[-]?\d{4}$/;
+
+// Função para validar CPF
+function validarCPF(cpf: string): boolean {
+  cpf = cpf.replace(/[^\d]+/g, "");
+
+  if (cpf.length !== 11) return false;
+
+  // Elimina CPFs com todos os dígitos iguais
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+  let soma = 0;
+  let resto;
+
+  for (let i = 1; i <= 9; i++) {
+    soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  }
+
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf.substring(9, 10))) return false;
+
+  soma = 0;
+  for (let i = 1; i <= 10; i++) {
+    soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  }
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf.substring(10, 11))) return false;
+
+  return true;
+}
+
+// Função para validar se telefone tem dígitos todos iguais (ex: 11111111111)
+function validarTelefoneRepetido(telefone: string): boolean {
+  const digits = telefone.replace(/\D/g, "");
+  return !/^(\d)\1+$/.test(digits);
+}
+
 const createUserClientSchema = z.object({
   firstName: z.string().nonempty("Insira um nome"),
   surname: z.string().nonempty("Insira um sobrenome"),
   email: z.string().email("Insira um email válido"),
-  cpf: z.string().nonempty("Insira um CPF"),
-  telephone: z.string().nonempty("Insira um telefone"),
+  cpf: z
+    .string()
+    .nonempty("Insira um CPF")
+    .refine((cpf) => validarCPF(cpf), { message: "CPF inválido" }),
+  telephone: z
+    .string()
+    .nonempty("Telefone é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
+    .refine((tel) => validarTelefoneRepetido(tel), {
+      message: "Telefone inválido: não pode ter números repetidos",
+    }),
   position: z.string().nonempty("Insira um cargo"),
   role: z.string().default("ROLE_CLIENT_RESPONSIBLE"),
   enterprise: z.string().default("CLIENT"),
@@ -25,6 +74,7 @@ const createUserClientSchema = z.object({
 });
 
 type CreateUserClientSchema = z.infer<typeof createUserClientSchema>;
+
 export function FormCreateUserClient() {
   const [userPreview, setUserPreview] = useState({
     firstName: "",
@@ -33,11 +83,14 @@ export function FormCreateUserClient() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [clients, setClients] = useState([]);
+  const [phoneValue, setPhoneValue] = useState("");
+  const [cpfValue, setCpfValue] = useState("");
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateUserClientSchema>({
     resolver: zodResolver(createUserClientSchema),
@@ -57,7 +110,7 @@ export function FormCreateUserClient() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/user/manager/new-user`, data, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       toast.success("Sucesso ao criar novo usuário Realiza");
     } catch (err: any) {
@@ -69,6 +122,10 @@ export function FormCreateUserClient() {
       toast.error("Erro ao criar um novo usuário, tente novamente");
     } finally {
       setIsLoading(false);
+      setPhoneValue("");
+      setCpfValue("");
+      setValue("telephone", "");
+      setValue("cpf", "");
     }
   };
 
@@ -92,6 +149,18 @@ export function FormCreateUserClient() {
   useEffect(() => {
     getAllClients();
   }, []);
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10)
+      return `(${digits.slice(0, 2)}) ${digits.slice(
+        2,
+        digits.length - 4
+      )}-${digits.slice(digits.length - 4)}`;
+    return value;
+  };
 
   return (
     <form onSubmit={handleSubmit(createUser)} className="flex flex-col gap-6">
@@ -154,7 +223,13 @@ export function FormCreateUserClient() {
 
           <div>
             <Label>CPF</Label>
-            <Input type="text" {...register("cpf")} className="dark:bg-white" />
+            <Input
+              type="text"
+              {...register("cpf")}
+              className="dark:bg-white"
+              value={cpfValue}
+              onChange={(e) => setCpfValue(e.target.value)}
+            />
             {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
           </div>
 
@@ -182,15 +257,22 @@ export function FormCreateUserClient() {
                 <p className="text-red-500">{errors.email.message}</p>
               )}
             </div>
-            <div>
-              <Label>Celular</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-white">Telefone</Label>
               <Input
                 type="text"
+                value={phoneValue}
                 {...register("telephone")}
-                className="dark:bg-white"
+                onChange={(e) => {
+                  const formattedPhone = formatPhone(e.target.value);
+                  setPhoneValue(formattedPhone);
+                  setValue("telephone", formattedPhone, { shouldValidate: true });
+                }}
+                placeholder="(00) 00000-0000"
+                maxLength={15}
               />
               {errors.telephone && (
-                <p className="text-red-500">{errors.telephone.message}</p>
+                <span className="text-sm text-red-600">{errors.telephone.message}</span>
               )}
             </div>
           </div>

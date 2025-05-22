@@ -59,7 +59,6 @@ export function SignUpPageEmail() {
   const getBranch = async () => {
     try {
       const res = await axios.get(`${ip}/branch/${findBranchId}`)
-      console.log("aaa" , res.data);
       setBranch(res.data)
     } catch (err:any){
       console.log("Erro ao selecionar branch:" , err);

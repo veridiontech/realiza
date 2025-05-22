@@ -21,7 +21,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const { user } = useUser();
   const { client } = useClient();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingDocs, setLoadingDocs] = useState<Record<string, boolean>>({});
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handlePreviewDocument = async (docId: string) => {
@@ -72,8 +72,14 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
         return;
       }
 
+      const token = localStorage.getItem('tokenClient');
+      console.log("aaa", idSearch)
+
       const response = await axios.get(`${ip}/document/supplier/filtered-supplier`, {
         params: { size: 100000, idSearch },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const docs = Array.isArray(response.data.content) ? response.data.content : [];
@@ -92,7 +98,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
     const formData = new FormData();
     formData.append('file', file);
 
-    setIsLoading(true);  // Começa a mostrar o loader
+    setLoadingDocs(prev => ({ ...prev, [docId]: true }));
 
     try {
       const response = await axios.post(`${ip}/document/supplier/${docId}/upload`, formData, {
@@ -110,7 +116,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
       console.error('Erro ao fazer upload:', error);
       alert('Erro ao enviar o arquivo.');
     } finally {
-      setIsLoading(false);  // Para de mostrar o loader
+      setLoadingDocs(prev => ({ ...prev, [docId]: false }));
       fetchDocuments();
     }
   };
@@ -190,9 +196,9 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
                           type="button"
                           onClick={() => triggerFileInput(doc.idDocument)}
                           className="bg-realizaBlue text-white flex items-center justify-center p-2 hover:bg-blue-700 w-[40px] h-[40px]"
-                          disabled={isLoading}
+                          disabled={loadingDocs[doc.idDocument] === true}
                         >
-                          {isLoading ? (
+                          {loadingDocs[doc.idDocument] ? (
                             <Oval
                               visible={true}
                               height={24}
