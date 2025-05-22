@@ -51,6 +51,44 @@ import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContra
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
 
 
+function validarCPF(cpf: string): boolean {
+  cpf = cpf.replace(/[^\d]+/g, "");
+
+  if (cpf.length !== 11) return false;
+
+  // Elimina CPFs com todos os dígitos iguais (ex: 111.111.111-11)
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+  let soma = 0;
+  let resto;
+
+  for (let i = 1; i <= 9; i++) {
+    soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  }
+
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf.substring(9, 10))) return false;
+
+  soma = 0;
+  for (let i = 1; i <= 10; i++) {
+    soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  }
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf.substring(10, 11))) return false;
+
+  return true;
+}
+
+function validarTelefoneRepetido(telefone: string) {
+  // Remove tudo que não for número
+  const digits = telefone.replace(/\D/g, "");
+  // Verifica se todos os dígitos são iguais
+  return !/^(\d)\1+$/.test(digits);
+}
+
+
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
 const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
@@ -59,10 +97,14 @@ const createUserClient = z.object({
   surname: z.string().nonempty("Sobrenome é obrigatório"),
   cellPhone: z.string()
     .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
+    .refine(validarTelefoneRepetido, { message: "Telefone inválido: não pode ter números repetidos" }),
   cpf: z.string()
     .nonempty("Cpf é obrigatório")
-    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00"),
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00")
+    .refine((cpf) => validarCPF(cpf), {
+      message: "CPF inválido",
+    }),
   email: z
     .string()
     .email("Formato de email inválido")
@@ -135,6 +177,8 @@ export function Dashboard() {
       toast.success("Sucesso ao criar usuário");
       await getUsersFromBranch();
       reset();
+      setCpfValue("");
+      setPhoneValue("");
     } catch (err: any) {
       if (err.response && err.response.data) {
         const mensagemBackend =
@@ -397,15 +441,20 @@ export function Dashboard() {
                                   <Input
                                     type="text"
                                     value={phoneValue}
+                                    {...register("cellPhone")}
                                     onChange={(e) => {
                                       const formattedPhone = formatPhone(e.target.value);
                                       setPhoneValue(formattedPhone);
-                                      setValue("cellPhone", formattedPhone);
+                                      setValue("cellPhone", formattedPhone, { shouldValidate: true });
                                     }}
                                     placeholder="(00) 00000-0000"
                                     maxLength={15}
                                   />
+                                  {errors.cellPhone && (
+                                    <span className="text-sm text-red-600">{errors.cellPhone.message}</span>
+                                  )}
                                 </div>
+
 
                                 <div>
                                   <Label className="text-white">Cargo</Label>
@@ -567,7 +616,7 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-               <div className="w-[800px] rounded-lg border bg-white p-6 shadow-sm">
+              <div className="w-[800px] rounded-lg border bg-white p-6 shadow-sm">
                 <ConformityGaugeChart />
               </div>
             </div>
