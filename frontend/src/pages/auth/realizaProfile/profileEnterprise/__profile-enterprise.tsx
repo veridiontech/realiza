@@ -5,16 +5,31 @@ import { useClient } from "@/context/Client-Provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplier } from "@/context/Supplier-context";
 import { UploadDocumentButton } from "@/components/ui/upload-document-button";
-
 import { useUser } from "@/context/user-provider";
 
-export function ProfileEnterpriseReprise() {
+interface Supplier {
+  tradeName?: string;
+  cnpj?: string;
+  email?: string;
+  telephone?: string;
+  cep?: string;
+  // adicione outras propriedades que usar no profile...
+}
+
+interface ProfileEnterpriseRepriseProps {
+  supplier?: Supplier; // prop opcional
+}
+
+export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnterpriseRepriseProps) {
   const { client } = useClient();
-  const { supplier } = useSupplier();
+  const { supplier: contextSupplier } = useSupplier();
   const { user } = useUser();
 
-  const firstLetter = client?.tradeName?.charAt(0) || "";
-  const lastLetter = client?.tradeName?.slice(-1) || "";
+  // Usar a prop se existir, senão o supplier do contexto
+  const supplier = propSupplier || contextSupplier;
+
+  const firstLetter = supplier?.tradeName?.charAt(0) || "";
+  const lastLetter = supplier?.tradeName?.slice(-1) || "";
 
   if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE") {
     return (
@@ -37,9 +52,7 @@ export function ProfileEnterpriseReprise() {
                       {supplier?.tradeName ? (
                         <h2>{supplier.tradeName}</h2>
                       ) : (
-                        <span className="font-normal">
-                          Nenhum fornecedor selecionado
-                        </span>
+                        <span className="font-normal">Nenhum fornecedor selecionado</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -60,8 +73,8 @@ export function ProfileEnterpriseReprise() {
                   </div>
                 </div>
                 <div className="flex space-x-4">
-                  <UploadDocumentButton /> {/* Coloquei o botão de upload à esquerda */}
-                  <EditModalEnterprise /> {/* O botão de edição à direita */}
+                  <UploadDocumentButton />
+                  <EditModalEnterprise />
                 </div>
               </div>
             </div>
@@ -90,6 +103,7 @@ export function ProfileEnterpriseReprise() {
     );
   }
 
+  // Se não for ROLE_SUPPLIER_RESPONSIBLE, exibe cliente normalmente (igual ao seu código)
   return (
     <>
       <Helmet title="profile" />
@@ -101,8 +115,8 @@ export function ProfileEnterpriseReprise() {
               <div className="relative bottom-10 left-1 flex items-center gap-4">
                 <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
                   <div className="text-[40px] text-white">
-                    {firstLetter}
-                    {lastLetter}
+                    {client?.tradeName?.charAt(0) || ""}
+                    {client?.tradeName?.slice(-1) || ""}
                   </div>
                 </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
@@ -110,9 +124,7 @@ export function ProfileEnterpriseReprise() {
                     {client ? (
                       <h2>{client.tradeName}</h2>
                     ) : (
-                      <span className="font-normal">
-                        Nenhum cliente selecionado
-                      </span>
+                      <span className="font-normal">Nenhum cliente selecionado</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
@@ -133,9 +145,9 @@ export function ProfileEnterpriseReprise() {
                 </div>
               </div>
               <div className="flex space-x-4">
-                  <UploadDocumentButton /> {/* Coloquei o botão de upload à esquerda */}
-                  <EditModalEnterprise /> {/* O botão de edição à direita */}
-                </div>
+                <UploadDocumentButton />
+                <EditModalEnterprise />
+              </div>
             </div>
           </div>
         </div>
