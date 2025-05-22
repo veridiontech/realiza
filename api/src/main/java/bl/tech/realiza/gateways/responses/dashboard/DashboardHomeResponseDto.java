@@ -8,4 +8,7 @@ import lombok.Data;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DashboardHomeResponseDto {
+    private Double adherence;
+    private Integer activeContractQuantity;
+    private Integer activeEmployeeQuantity;
 }
