@@ -4,16 +4,17 @@ import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Data
-@SuperBuilder
+@Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public abstract class ServiceTypeBaseResponseDto implements ServiceTypeResponseDto {
+public class ServiceTypeFullResponseDto {
     private String idServiceType;
     private String title;
     private ServiceType.Risk risk;
-    private LocalDateTime creationDate;
+    private String branchId;
+    private String clientId;
+    private LocalDateTime createdAt;
 }

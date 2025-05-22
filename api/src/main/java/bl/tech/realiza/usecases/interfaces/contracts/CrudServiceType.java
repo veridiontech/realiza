@@ -1,34 +1,31 @@
 package bl.tech.realiza.usecases.interfaces.contracts;
 
-import bl.tech.realiza.domains.contract.serviceType.ServiceTypeRepo;
-import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeBranchRequestDto;
-import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeClientRequestDto;
-import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRepoDtoRequestDto;
-import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeBaseRequestDto;
+import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeBranchResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeClientResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeFullResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeRepoResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.serviceType.ServiceTypeResponseDto;
-import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 
 public interface CrudServiceType {
     // any
     void deleteServiceType(String idServiceType);
-    ServiceTypeResponseDto updateServiceType(String idServiceType, ServiceTypeBaseRequestDto serviceTypeBaseRequestDto);
-    ServiceTypeResponseDto getServiceType(String idServiceType);
-    List<ServiceTypeResponseDto> getAllServiceType();
+    ServiceTypeFullResponseDto getServiceType(String idServiceType);
+    List<ServiceTypeFullResponseDto> getAllServiceType();
+    List<ServiceTypeFullResponseDto> getAllServiceType(String idOwner, Owner owner);
 
     // Repositório
-    ServiceTypeRepoResponseDto saveServiceTypeRepo(ServiceTypeRepoDtoRequestDto serviceTypeRepoDtoRequestDto);
-    List<ServiceTypeResponseDto> getAllServiceType(String idOwner, Owner owner);
+    ServiceTypeRepoResponseDto saveServiceTypeRepo(ServiceTypeRequestDto serviceTypeRequestDto);
+    ServiceTypeRepoResponseDto updateServiceTypeRepo(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
 
     // Branch
-    ServiceTypeBranchResponseDto saveServiceTypeBranch(ServiceTypeBranchRequestDto serviceTypeBranchRequestDto);
+    ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto);
+    ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
 
     // Client
-    ServiceTypeClientResponseDto saveServiceTypeClient(ServiceTypeClientRequestDto serviceTypeClientRequestDto);
+    ServiceTypeClientResponseDto saveServiceTypeClient(String clientId, ServiceTypeRequestDto serviceTypeRequestDto);
+    ServiceTypeClientResponseDto updateServiceTypeClient(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
 
     void transferFromRepoToClient(String idClient);
 
