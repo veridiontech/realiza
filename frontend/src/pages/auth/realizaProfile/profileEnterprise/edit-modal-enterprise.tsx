@@ -45,6 +45,7 @@ export function EditModalEnterprise() {
   const [cep, setCep] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { client } = useClient();
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     register,
@@ -110,6 +111,7 @@ export function EditModalEnterprise() {
         }
       );
       toast.success("Sucesso ao atualizar cliente");
+      setIsOpen(false);
       window.location.reload();
     } catch (err) {
       console.log("erro ao atualizar cliente:", err);
@@ -124,7 +126,7 @@ export function EditModalEnterprise() {
   }, [client]);
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="hidden md:block bg-realizaBlue"><Pencil /></Button>
       </DialogTrigger>

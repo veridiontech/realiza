@@ -63,6 +63,7 @@ export function NewModalCreateEmployee() {
   const { supplier } = useSupplier();
   const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
   const [searchCbo, setSearchCbo] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   console.log("Id Supplier: ", supplier);
 
@@ -128,6 +129,7 @@ export function NewModalCreateEmployee() {
       );
       console.log("Sucesso na requisição!", response.data);
       toast.success("Sucesso ao cadastrar novo usuário");
+      setIsOpen(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
         console.error("Erro Axios:", err.response?.status, err.response?.data);
@@ -137,6 +139,7 @@ export function NewModalCreateEmployee() {
       } else {
         console.error("Erro desconhecido:", err);
         toast.error("Erro inesperado, tente novamente");
+        setIsOpen(false);
       }
     } finally {
       setIsLoading(false);
@@ -185,7 +188,7 @@ export function NewModalCreateEmployee() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="hidden md:block bg-realizaBlue border border-white rounded-md">Cadastrar novo colaborador +</Button>
       </DialogTrigger>
