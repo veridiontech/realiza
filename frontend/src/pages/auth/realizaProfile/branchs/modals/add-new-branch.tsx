@@ -21,6 +21,10 @@ import { toast } from "sonner";
 import { z } from "zod";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
+const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
+const cepRegex = /^\d{5}-?\d{3}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
 async function validarCEPExiste(cep: string): Promise<boolean> {
   try {
     const cepLimpo = cep.replace(/\D/g, "");
@@ -38,10 +42,6 @@ function validarNumerosRepetidos(valor: string) {
   const digits = valor.replace(/\D/g, "");
   return !/^(\d)\1+$/.test(digits);
 }
-
-const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
-const cepRegex = /^\d{5}-?\d{3}$/;
-const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
 const newBranchFormSchema = z.object({
   cnpj: z.string()
