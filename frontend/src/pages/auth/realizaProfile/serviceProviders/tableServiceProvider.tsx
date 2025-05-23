@@ -83,10 +83,23 @@ export function TableServiceProvider() {
   const updateSupplier = async (idContract: string, updatedData: any) => {
     try {
        console.log("Atualizando fornecedor", { idContract, updatedData });
-      // const tokenFromStorage = localStorage.getItem("tokenClient");
-      // await axios.put(`${ip}/contract/supplier/${idContract}`, updatedData, {
-      //   headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      // });
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const payload = {
+      branch: updatedData.branch,
+      branchName: updatedData.branchName,
+      contractReference: updatedData.contractReference,
+      dateStart: updatedData.dateStart,
+      description: updatedData.description,
+      expenseType: updatedData.expenseType,
+      finished: updatedData.finished,
+      providerSupplier: updatedData.providerSupplier,
+      providerSupplierCnpj: updatedData.providerSupplierCnpj,
+      providerSupplierName: updatedData.providerSupplierName,
+      serviceName: updatedData.serviceName,
+    };
+      await axios.put(`${ip}/contract/supplier/${idContract}`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       await getSupplier();
     } catch (error) {
       console.error("Erro ao atualizar fornecedor", error);

@@ -63,6 +63,7 @@ export function StepOneEmployee({
   } = useForm<EmployeeFormSchema>({
     resolver: zodResolver(employeeFormSchema),
   });
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const getAllClients = async () => {
@@ -145,15 +146,16 @@ export function StepOneEmployee({
       );
       onSubmit(response.data);
       toast.success("Sucesso ao criar colaborador");
+      setIsOpen(false);
     } catch (error: any) {
       console.error(error.response?.data || error.message);
       toast.error("Erro ao criar colaborador, tente novamente");
-      // setIsOpen(false);
+      setIsOpen(false);
     }
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-realizaBlue">Cadastrar colaborador</Button>
       </DialogTrigger>

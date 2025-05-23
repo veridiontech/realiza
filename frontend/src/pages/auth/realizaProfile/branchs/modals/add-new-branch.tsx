@@ -76,6 +76,7 @@ export function AddNewBranch() {
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [razaoSocial, setRazaoSocial] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     register,
@@ -147,11 +148,13 @@ export function AddNewBranch() {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       toast.success("Sucesso ao criar filial");
+      setIsOpen(false);
       reset();
       setCnpjValue("");
       setCepValue("");
       setPhoneValue("");
       setRazaoSocial(null);
+
     } catch (err: any) {
       if (err.response && err.response.data) {
         const mensagemBackend =
@@ -196,7 +199,7 @@ export function AddNewBranch() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-realizaBlue hidden md:block">+</Button>
       </DialogTrigger>
