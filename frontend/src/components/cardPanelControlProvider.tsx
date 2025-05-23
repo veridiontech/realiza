@@ -126,15 +126,21 @@ export function CardPanelControlProvider({
         />
       </div>
       <div className="flex flex-col">
-        <div>
-          <p className="text-[14px]">Empresa solicitante: </p>
+        <div className="flex items-center gap-1">
+          <strong className="text-[14px]">Empresa solicitada: </strong>
           <span>{enterpriseName}</span>
         </div>
-        <div className="flex items-center gap-1 text-[14px]">
-          <p>Cliente: </p>
-          <span>
-            {clientName} - {clientCnpj}
-          </span>
+        <div className="flex flex-col gap-1 text-[14px]">
+          <div className="flex items-center gap-1">
+            <strong>Cliente: </strong>
+            <span>
+              {clientName}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <strong>Cliente Cnpj: </strong>
+            <span>{clientCnpj}</span>
+          </div>
         </div>
       </div>
       <div className="row flex w-full items-center justify-between">

@@ -15,4 +15,6 @@ public interface NotificationController {
     ResponseEntity<Optional<NotificationResponseDto>> updateNotification(String id, NotificationRequestDto notificationRequestDto);
     ResponseEntity<Void> deleteNotification(String id);
     ResponseEntity<Page<NotificationResponseDto>> getAllNotificationsByUser(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<Void> markOneNotificationAsRead(String notificationId);
+    ResponseEntity<Void> markAllNotificationsFromUserAsRead(String userId);
 }

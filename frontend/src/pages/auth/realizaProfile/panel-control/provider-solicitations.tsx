@@ -106,6 +106,7 @@ export function ProviderSolicitations() {
                           key={solicitation.idSolicitation}
                           requesterName={solicitation.requesterName}
                           creationDate={solicitation.creationDate}
+                          enterpriseName={solicitation.enterpriseName}
                           idSolicitation={solicitation.idSolicitation}
                           requesterEmail={solicitation.requesterEmail}
                           solicitationType={solicitation.solicitationType}

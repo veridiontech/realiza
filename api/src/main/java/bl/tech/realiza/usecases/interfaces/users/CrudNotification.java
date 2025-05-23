@@ -1,9 +1,11 @@
 package bl.tech.realiza.usecases.interfaces.users;
 
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.Optional;
 
@@ -14,4 +16,12 @@ public interface CrudNotification {
     Optional<NotificationResponseDto> update(String id, NotificationRequestDto notificationRequestDto);
     void delete(String id);
     Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable);
+    @Async
+    void saveUserNotificationForManagerUsers(ItemManagement itemManagement);
+    @Async
+    void saveProviderNotificationForManagerUsers(ItemManagement itemManagement);
+    @Async
+    void markAllNotificationsAsRead(String userId);
+    @Async
+    void markOneNotificationAsRead(String notificationId);
 }

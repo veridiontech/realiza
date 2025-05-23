@@ -27,6 +27,7 @@ import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManag
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
+import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final ContractRepository contractRepository;
     private final TokenManagerService tokenManagerService;
+    private final CrudNotification crudNotification;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -65,6 +67,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .requester(requester)
                 .newUser(newUser)
                 .build());
+
+        crudNotification.saveUserNotificationForManagerUsers(solicitation);
 
         return toItemManagementUserResponseDto(solicitation, requester, newUser);
     }
@@ -107,6 +111,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .requester(requester)
                 .newProvider(newProviderSupplier)
                 .build());
+
+        crudNotification.saveProviderNotificationForManagerUsers(solicitation);
 
         return toItemManagementProviderResponseDto(solicitation, requester, newProviderSupplier);
     }
@@ -277,8 +283,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .idSolicitation(itemManagement.getIdSolicitation())
                 .enterpriseName(providerSupplier.getCorporateName())
                 .solicitationType(itemManagement.getSolicitationType())
-                .clientName(providerSupplier.getBranches().get(0).getClient().getCorporateName())
-                .clientCnpj(providerSupplier.getBranches().get(0).getClient().getCnpj())
+                .clientName(!providerSupplier.getBranches().isEmpty()
+                        ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
+                        : null)
+                .clientCnpj(!providerSupplier.getBranches().isEmpty()
+                        ? providerSupplier.getBranches().get(0).getClient().getCnpj()
+                        : null)
                 .requesterName(requester.getFirstName() + " " + requester.getSurname())
                 .requesterEmail(requester.getEmail())
                 .status(itemManagement.getStatus())
@@ -325,8 +335,12 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .solicitationType(itemManagement.getSolicitationType())
                 .creationDate(itemManagement.getCreationDate())
                 .client(ItemManagementProviderDetailsResponseDto.Client.builder()
-                        .cnpj(providerSupplier.getBranches().get(0).getClient().getCnpj())
-                        .tradeName(providerSupplier.getBranches().get(0).getClient().getCorporateName())
+                        .cnpj(!providerSupplier.getBranches().isEmpty()
+                                ? providerSupplier.getBranches().get(0).getClient().getCnpj()
+                                : null)
+                        .tradeName(!providerSupplier.getBranches().isEmpty()
+                                ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
+                                : null)
                         .build())
                 .newProvider(ItemManagementProviderDetailsResponseDto.NewProvider.builder()
                         .cnpj(providerSupplier.getCnpj())

@@ -20,7 +20,8 @@ public class Notification {
     private String idNotification;
     private String title;
     private String description;
-    private Boolean isRead;
+    @Builder.Default
+    private Boolean isRead = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
