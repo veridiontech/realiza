@@ -32,12 +32,23 @@ const createClienteFormSchema = z.object({
 });
 
 type CreateClientFormSchema = z.infer<typeof createClienteFormSchema>;
+
 export function ModalCreateCliente() {
   const [cnpj, setCnpj] = useState("");
+  const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [cnpjData, setCnpjData] = useState<propsCompanyData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const sanitizedCnpj = typeof cnpj === "string" ? cnpj.replace(/\D/g, "") : "";
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+  } = useForm<CreateClientFormSchema>({
+    resolver: zodResolver(createClienteFormSchema),
+  });
 
   const getCnpj = async () => {
     try {
@@ -45,24 +56,16 @@ export function ModalCreateCliente() {
         `https://open.cnpja.com/office/${sanitizedCnpj}`,
       );
       setCnpjData(res.data);
-      console.log(res.data);
       setShowSecondModal(true);
     } catch (err: any) {
       console.log("Erro ao requisitar cnpj", err);
-      toast.error("Erro ao buscar cnpj", err);
+      toast.error("Erro ao buscar cnpj");
     }
   };
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCnpj(event.target.value);
   };
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-  } = useForm<CreateClientFormSchema>({
-    resolver: zodResolver(createClienteFormSchema),
-  });
 
   useEffect(() => {
     if (cnpjData) {
@@ -91,9 +94,16 @@ export function ModalCreateCliente() {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
-      toast.success("Sucesso ao criar cliente ");
+      toast.success("Sucesso ao criar cliente");
+
+      // Resetar e fechar ambos os modais
+      reset();
+      setCnpj("");
+      setCnpjData(null);
+      setShowSecondModal(false);
+      setShowFirstModal(false);
     } catch (err: any) {
-      if (err.response.status === 422) {
+      if (err.response?.status === 422) {
         toast.warning("CNPJ já cadastrado");
       } else {
         console.log(err);
@@ -106,7 +116,7 @@ export function ModalCreateCliente() {
 
   return (
     <div>
-      <Dialog>
+      <Dialog open={showFirstModal} onOpenChange={setShowFirstModal}>
         <DialogTrigger>
           <Button className="bg-realizaBlue w-[2.1vw] rounded-full">
             <Plus size={24} className="dark:text-white" />
@@ -139,6 +149,7 @@ export function ModalCreateCliente() {
           </div>
         </DialogContent>
       </Dialog>
+
       <Dialog open={showSecondModal} onOpenChange={setShowSecondModal}>
         <DialogContent>
           <DialogHeader>
@@ -193,8 +204,6 @@ export function ModalCreateCliente() {
                     width="80"
                     color="#4fa94d"
                     ariaLabel="oval-loading"
-                    wrapperStyle={{}}
-                    wrapperClass=""
                   />
                 </Button>
               ) : (
