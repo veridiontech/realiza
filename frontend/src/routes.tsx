@@ -91,7 +91,8 @@ export const router = createBrowserRouter([
       { path: "risk-matriz/:id", element: <RiskMatriz /> },
       { path: "controlPanel/:id", element: <ControlPanel /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
-      {path: "dashboard-details/:id", element: <MonittoringBis />}
+      { path: "dashboard-details/:id", element: <MonittoringBis /> },
+      { path: "fornecedor/:id", element: <ProfileEnterpriseReprise /> },
     ],
   },
 
@@ -140,13 +141,13 @@ export const router = createBrowserRouter([
       </UserProvider>
     ),
     children: [
-      { path: "home/:id", element: <SupplierContractNewPage/> },
+      { path: "home/:id", element: <SupplierContractNewPage /> },
       { path: "quartered/:id", element: <Quartered /> },
       { path: "contracts/:id", element: <SupplierContracts /> },
-      { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
+      { path: "profile/:id", element: <ProfileEnterpriseReprise /> }, // Página do perfil do fornecedor
       { path: "branch/:id", element: <Branch /> },
       { path: "employees/:id", element: <EmployeesTable /> },
-      {path: "create-manager/:id", element: <CreateNewManagerSupplier />},
+      { path: "create-manager/:id", element: <CreateNewManagerSupplier /> },
       { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
     ],
   },

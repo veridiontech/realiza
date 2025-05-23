@@ -47,6 +47,7 @@
     "react-dropzone": "^14.3.5",
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.53.2",
+    "react-input-mask": "^2.0.4",
     "react-loader-spinner": "^6.1.6",
     "react-router-dom": "^6.26.1",
     "recharts": "^2.15.2",
