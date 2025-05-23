@@ -124,6 +124,7 @@ export function Dashboard() {
   const { user } = useUser();
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     register,
@@ -175,6 +176,7 @@ export function Dashboard() {
         }
       );
       toast.success("Sucesso ao criar usuário");
+      setIsOpen(false);
       await getUsersFromBranch();
       reset();
       setCpfValue("");
@@ -188,6 +190,7 @@ export function Dashboard() {
         console.log(mensagemBackend);
       }
       toast.error("Erro ao criar novo usuário");
+      setIsOpen(false);
       console.log(err);
     }
   };
@@ -338,7 +341,7 @@ export function Dashboard() {
                       </div>
                       {selectedTab === "filiais" && <AddNewBranch />}
                       {selectedTab === "usuarios" && (
-                        <Dialog>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
                           <DialogTrigger asChild>
                             <Button className="bg-realizaBlue hidden md:block">
                               Criar Usuário
