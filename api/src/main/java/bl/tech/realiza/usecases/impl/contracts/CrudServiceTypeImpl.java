@@ -191,6 +191,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
 
     private ServiceTypeFullResponseDto toResponse(ServiceType serviceType) {
         return ServiceTypeFullResponseDto.builder()
+                .idServiceType( serviceType.getIdServiceType())
                 .title(serviceType.getTitle())
                 .risk(serviceType.getRisk())
                 .branchId(serviceType instanceof ServiceTypeBranch serviceTypeBranch ?

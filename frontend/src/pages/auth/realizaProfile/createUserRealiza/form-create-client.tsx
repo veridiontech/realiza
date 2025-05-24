@@ -12,16 +12,12 @@ import { TailSpin } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 
-// Regex para telefone (formato válido)
-const phoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}[-]?\d{4}$/;
-
-// Função para validar CPF
 function validarCPF(cpf: string): boolean {
   cpf = cpf.replace(/[^\d]+/g, "");
 
   if (cpf.length !== 11) return false;
 
-  // Elimina CPFs com todos os dígitos iguais
+  // Elimina CPFs com todos os dígitos iguais (ex: 111.111.111-11)
   if (/^(\d)\1{10}$/.test(cpf)) return false;
 
   let soma = 0;
@@ -46,20 +42,24 @@ function validarCPF(cpf: string): boolean {
   return true;
 }
 
-// Função para validar se telefone tem dígitos todos iguais (ex: 11111111111)
-function validarTelefoneRepetido(telefone: string): boolean {
+function validarTelefoneRepetido(telefone: string) {
   const digits = telefone.replace(/\D/g, "");
   return !/^(\d)\1+$/.test(digits);
 }
+
+const cpfRegex = /^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/;
+const phoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}[-]?\d{4}$/;
 
 const createUserClientSchema = z.object({
   firstName: z.string().nonempty("Insira um nome"),
   surname: z.string().nonempty("Insira um sobrenome"),
   email: z.string().email("Insira um email válido"),
-  cpf: z
-    .string()
-    .nonempty("Insira um CPF")
-    .refine((cpf) => validarCPF(cpf), { message: "CPF inválido" }),
+  cpf: z.string()
+    .nonempty("CPF é obrigatório")
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00")
+    .refine((cpf) => validarCPF(cpf), {
+      message: "CPF inválido",
+    }),
   telephone: z
     .string()
     .nonempty("Telefone é obrigatório")
@@ -95,6 +95,15 @@ export function FormCreateUserClient() {
   } = useForm<CreateUserClientSchema>({
     resolver: zodResolver(createUserClientSchema),
   });
+
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
 
   const firstName = watch("firstName");
   const surname = watch("surname");
@@ -201,6 +210,7 @@ export function FormCreateUserClient() {
               <Label>Nome</Label>
               <Input
                 type="text"
+                placeholder="Digite seu nome"
                 {...register("firstName")}
                 className="dark:bg-white"
               />
@@ -212,6 +222,7 @@ export function FormCreateUserClient() {
               <Label>Sobrenome</Label>
               <Input
                 type="text"
+                placeholder="Digite seu sobrenome"
                 {...register("surname")}
                 className="dark:bg-white"
               />
@@ -222,21 +233,28 @@ export function FormCreateUserClient() {
           </div>
 
           <div>
-            <Label>CPF</Label>
+            <Label className="text-white">CPF</Label>
             <Input
               type="text"
-              {...register("cpf")}
-              className="dark:bg-white"
               value={cpfValue}
-              onChange={(e) => setCpfValue(e.target.value)}
+              onChange={(e) => {
+                const formattedCpf = formatCPF(e.target.value);
+                setCpfValue(formattedCpf);
+                setValue("cpf", formattedCpf, { shouldValidate: true });
+              }}
+              placeholder="000.000.000-00"
+              maxLength={14}
             />
-            {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
+            {errors.cpf && (
+              <span className="text-sm text-red-600">{errors.cpf.message}</span>
+            )}
           </div>
 
           <div>
             <Label>Cargo</Label>
             <Input
               type="text"
+              placeholder="Digite seu cargo"
               {...register("position")}
               className="dark:bg-white"
             />
@@ -250,6 +268,7 @@ export function FormCreateUserClient() {
               <Label>Email</Label>
               <Input
                 type="email"
+                placeholder="exemplo@exemplo.com"
                 {...register("email")}
                 className="dark:bg-white"
               />

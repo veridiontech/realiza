@@ -11,25 +11,32 @@ import { TailSpin } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const cpfRegex = /^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/;
-const phoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}[-]?\d{4}$/;
+function validarCPF(cpf: string): boolean {
+  cpf = cpf.replace(/[^\d]+/g, "");
 
-function validarCPF(cpf: string) {
-  cpf = cpf.replace(/\D/g, "");
   if (cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false; // Números repetidos bloqueados
+
+  // Elimina CPFs com todos os dígitos iguais (ex: 111.111.111-11)
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
 
   let soma = 0;
-  for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
-  let resto = 11 - (soma % 11);
+  let resto;
+
+  for (let i = 1; i <= 9; i++) {
+    soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  }
+
+  resto = (soma * 10) % 11;
   if (resto === 10 || resto === 11) resto = 0;
-  if (resto !== parseInt(cpf.charAt(9))) return false;
+  if (resto !== parseInt(cpf.substring(9, 10))) return false;
 
   soma = 0;
-  for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
-  resto = 11 - (soma % 11);
+  for (let i = 1; i <= 10; i++) {
+    soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  }
+  resto = (soma * 10) % 11;
   if (resto === 10 || resto === 11) resto = 0;
-  if (resto !== parseInt(cpf.charAt(10))) return false;
+  if (resto !== parseInt(cpf.substring(10, 11))) return false;
 
   return true;
 }
@@ -39,20 +46,21 @@ function validarTelefoneRepetido(telefone: string) {
   return !/^(\d)\1+$/.test(digits);
 }
 
+const cpfRegex = /^(\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/;
+const phoneRegex = /^\(?\d{2}\)?[\s-]?\d{4,5}[-]?\d{4}$/;
+
 const createUserRealizaSchema = z.object({
   firstName: z.string().nonempty("Insira um nome"),
   surname: z.string().nonempty("Insira um sobrenome"),
   email: z.string().email("Insira um email válido"),
   cpf: z.string()
-    .nonempty("Insira um CPF")
-    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00 ou 11 dígitos")
-    .refine((cpf) => {
-      const cleanCpf = cpf.replace(/\D/g, "");
-      if (/^(\d)\1{10}$/.test(cleanCpf)) return false; // bloqueia números repetidos
-      return validarCPF(cpf);
-    }, { message: "CPF inválido" }),
-  telephone: z.string()
-    .nonempty("Insira um telefone")
+    .nonempty("CPF é obrigatório")
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00")
+    .refine((cpf) => validarCPF(cpf), {
+      message: "CPF inválido",
+    }),
+  cellPhone: z.string()
+    .nonempty("Celular é obrigatório")
     .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
     .refine(validarTelefoneRepetido, { message: "Telefone inválido: não pode ter números repetidos" }),
   position: z.string().nonempty("Insira um cargo"),
@@ -70,6 +78,7 @@ export function FormCreateUserRealiza() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
+  const [cpfValue, setCpfValue] = useState("");
 
   const {
     register,
@@ -81,6 +90,15 @@ export function FormCreateUserRealiza() {
   } = useForm<CreateUserRealizaSchema>({
     resolver: zodResolver(createUserRealizaSchema),
   });
+
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
 
   const firstName = watch("firstName");
   const surname = watch("surname");
@@ -99,6 +117,7 @@ export function FormCreateUserRealiza() {
       });
       toast.success("Sucesso ao criar novo usuário Realiza");
       reset();
+      setCpfValue("");
       setPhoneValue("");
     } catch (err: any) {
       if (err.response?.status === 500) {
@@ -167,14 +186,21 @@ export function FormCreateUserRealiza() {
           </div>
 
           <div>
-            <Label>CPF</Label>
+            <Label className="text-white">CPF</Label>
             <Input
               type="text"
+              value={cpfValue}
+              onChange={(e) => {
+                const formattedCpf = formatCPF(e.target.value);
+                setCpfValue(formattedCpf);
+                setValue("cpf", formattedCpf, { shouldValidate: true });
+              }}
               placeholder="000.000.000-00"
-              {...register("cpf")}
-              className="dark:bg-white"
+              maxLength={14}
             />
-            {errors.cpf && <p className="text-red-500">{errors.cpf.message}</p>}
+            {errors.cpf && (
+              <span className="text-sm text-red-600">{errors.cpf.message}</span>
+            )}
           </div>
 
           <div>
@@ -211,14 +237,14 @@ export function FormCreateUserRealiza() {
                 onChange={(e) => {
                   const formattedPhone = formatPhone(e.target.value);
                   setPhoneValue(formattedPhone);
-                  setValue("telephone", formattedPhone, { shouldValidate: true });
+                  setValue("cellPhone", formattedPhone, { shouldValidate: true });
                 }}
                 placeholder="(00) 00000-0000"
                 maxLength={15}
                 className="dark:bg-white"
               />
-              {errors.telephone && (
-                <span className="text-sm text-red-600">{errors.telephone.message}</span>
+              {errors.cellPhone && (
+                <span className="text-sm text-red-600">{errors.cellPhone.message}</span>
               )}
             </div>
           </div>
