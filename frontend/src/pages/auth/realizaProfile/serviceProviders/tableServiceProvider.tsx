@@ -97,6 +97,8 @@ export function TableServiceProvider() {
       providerSupplierName: updatedData.providerSupplierName,
       serviceName: updatedData.serviceName,
     };
+    console.log("teste: " , payload);
+    
       await axios.put(`${ip}/contract/supplier/${idContract}`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
@@ -117,11 +119,12 @@ export function TableServiceProvider() {
     setIsViewModalOpen(true);
   };
 
-  const handleEditClick = (supplier: any) => {
-    setSelectedSupplier(supplier);
-    setEditFormData({ ...supplier });
-    setIsEditModalOpen(true);
-  };
+const handleEditClick = (supplier: any) => {
+  console.log("Supplier editando:", supplier);
+  setSelectedSupplier(supplier);
+  setEditFormData({ ...supplier });
+  setIsEditModalOpen(true);
+};
 
   return (
     <div className="p-5 md:p-10">
@@ -271,7 +274,7 @@ export function TableServiceProvider() {
       )}
 
       {isEditModalOpen && editFormData && (
-        <Modal title="Editar Fornecedor" onClose={() => setIsEditModalOpen(false)}>
+        <Modal title="Editar Contrato" onClose={() => setIsEditModalOpen(false)}>
           <div className="flex flex-col gap-4 max-h-[400px] overflow-auto">
             <div>
               <label className="text-white font-semibold block mb-1">Referência do Contrato</label>
@@ -352,17 +355,21 @@ export function TableServiceProvider() {
                 Cancelar
               </button>
               <button
-                onClick={async () => {
-                  if (!editFormData.idContract) return;
-                  await updateSupplier(editFormData.idContract, editFormData);
-                  setIsEditModalOpen(false);
-                  setSelectedSupplier(null);
-                  setEditFormData(null);
-                }}
-                className="bg-green-600 px-4 py-2 rounded text-white"
-              >
-                Salvar
-              </button>
+  onClick={async () => {
+    if (!editFormData?.idContract) {
+      console.error("ID do contrato não encontrado no formulário de edição");
+      return;
+    }
+    console.log("Salvando contrato", editFormData.idContract, editFormData);
+    await updateSupplier(editFormData.idContract, editFormData);
+    setIsEditModalOpen(false);
+    setSelectedSupplier(null);
+    setEditFormData(null);
+  }}
+  className="bg-green-600 px-4 py-2 rounded text-white"
+>
+  Salvar
+</button>
             </div>
           </div>
         </Modal>

@@ -169,8 +169,7 @@ export function NewModalCreateEmployee() {
         const response = await axios.get(`${ip}/cbo`, {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         });
-
-        setCbos(response.data); // Certifique-se que a API retorna uma lista aqui
+        setCbos(response.data);
       } catch (error) {
         toast.error("Erro ao buscar CBOs");
       }
