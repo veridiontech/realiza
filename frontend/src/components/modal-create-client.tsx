@@ -134,6 +134,7 @@ export function ModalCreateCliente() {
       return;
     }
     try {
+      console.log("CNPJ enviado para a API:", cnpjValue);
       const res = await axios.get(`https://open.cnpja.com/office/${sanitizedCnpj}`);
       setCnpjData(res.data);
       toast.success("CNPJ carregado com sucesso!");
@@ -148,7 +149,7 @@ export function ModalCreateCliente() {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     const payload = {
       ...data,
-      cnpj: sanitizedCnpj,
+      cnpj: cnpjValue,
     };
     setIsLoading(true);
     try {
