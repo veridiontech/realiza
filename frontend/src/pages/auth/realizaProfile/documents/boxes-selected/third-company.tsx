@@ -69,12 +69,12 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
   
 
 // Envio de documentos nao selecionados
-  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+  const sendDocuments = async(isSelected: boolean, idDocument: string[]) => {
     // const 
     const tokenFromStorage = localStorage.getItem("tokenClient")
     try {
-      console.log("selecionando documentos não selecionados:", idDocumentation);
-      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
+      console.log("selecionando documentos não selecionados:", idDocument);
+      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocument, {
         headers: {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
@@ -128,8 +128,8 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
               <div>
                 <ul>
                   {nonSelected.length > 0 ? (
-                    nonSelected.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                    nonSelected.map((doc: any) => (
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -158,8 +158,8 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
               <div>
                 <ul>
                   {documents.length > 0 ? (
-                    documents.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                    documents.map((doc: any) => (
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>

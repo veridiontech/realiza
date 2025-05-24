@@ -72,38 +72,7 @@ const createClienteFormSchema = z.object({
 type CreateClientFormSchema = z.infer<typeof createClienteFormSchema>;
 
 export function ModalCreateCliente() {
-  const [cnpj, setCnpj] = useState("");
   const [showFirstModal, setShowFirstModal] = useState(false);
-  const [showSecondModal, setShowSecondModal] = useState(false);
-  const [cnpjData, setCnpjData] = useState<propsCompanyData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const sanitizedCnpj = typeof cnpj === "string" ? cnpj.replace(/\D/g, "") : "";
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-  } = useForm<CreateClientFormSchema>({
-    resolver: zodResolver(createClienteFormSchema),
-  });
-
-  const getCnpj = async () => {
-    try {
-      const res = await axios.get(
-        `https://open.cnpja.com/office/${sanitizedCnpj}`,
-      );
-      setCnpjData(res.data);
-      setShowSecondModal(true);
-    } catch (err: any) {
-      console.log("Erro ao requisitar cnpj", err);
-      toast.error("Erro ao buscar cnpj");
-    }
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCnpj(event.target.value);
-  };
   const [showSecondModal, setShowSecondModal] = useState(false);
   const [cnpjData, setCnpjData] = useState<propsCompanyData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -192,7 +161,6 @@ export function ModalCreateCliente() {
 
       // Resetar e fechar ambos os modais
       reset();
-      setCnpj("");
       setCnpjData(null);
       setShowSecondModal(false);
       setShowFirstModal(false);
@@ -239,10 +207,7 @@ export function ModalCreateCliente() {
 
   return (
     <div>
-      <Dialog open={showFirstModal} onOpenChange={setShowFirstModal}>
-        <DialogTrigger>
-      {/* Modal 1 - CNPJ input */}
-      <Dialog>
+      <Dialog  open={showFirstModal} onOpenChange={setShowFirstModal}>
         <DialogTrigger asChild>
           <Button className="bg-realizaBlue w-[2.1vw] rounded-full">
             <Plus size={24} className="dark:text-white" />
@@ -360,8 +325,6 @@ export function ModalCreateCliente() {
                     color="#4fa94d"
                     ariaLabel="oval-loading"
                   />
-                <Button className="bg-realizaBlue w-full" disabled>
-                  <Oval visible={true} height={40} width={40} color="#4fa94d" ariaLabel="oval-loading" />
                 </Button>
               ) : (
                 <Button className="bg-realizaBlue w-full" type="submit">

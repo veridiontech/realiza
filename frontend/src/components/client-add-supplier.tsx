@@ -336,6 +336,7 @@ export function ModalTesteSendSupplier() {
         },
         headers: { Authorization: `Bearer ${tokenFromStorage}`, }
       },); 
+            console.log("servicos:", res.data);
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);
@@ -790,7 +791,6 @@ export function ModalTesteSendSupplier() {
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
                       <select
-                        defaultValue=""
                         {...registerContract("idServiceType")}
                         className="rounded-md border p-2"
                       >

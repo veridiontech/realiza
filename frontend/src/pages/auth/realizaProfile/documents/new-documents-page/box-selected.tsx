@@ -36,15 +36,15 @@ export function BoxSelected({documents}: boxSelectedProps) {
         <ScrollArea className="h-[30vh]">
           <div>
             {Array.isArray(documents) && documents.length > 0 ? (
-              documents.map((document) => (
+              documents.map((document: any) => (
                 <div
-                  key={document.idDocumentation}
+                  key={document.idDocument}
                   className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
-                  onClick={() => toggleCheckbox(document.idDocumentation, document)} 
+                  onClick={() => toggleCheckbox(document.idDocument, document)} 
                 >
                   <input
                     type="checkbox"
-                    checked={checkedDocs.includes(document.idDocumentation)}
+                    checked={checkedDocs.includes(document.idDocument)}
                     onChange={() => {}} 
                   />
                   <span>{document.title || "Documento"}</span>
