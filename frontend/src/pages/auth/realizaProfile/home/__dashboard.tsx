@@ -571,9 +571,6 @@ export function Dashboard() {
                               <th className="border border-gray-300 px-4 py-2 text-start">
                                 CPF
                               </th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                Ações
-                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -585,15 +582,6 @@ export function Dashboard() {
                                   </td>
                                   <td className="border border-gray-300 px-4 py-2">
                                     {users.cpf}
-                                  </td>
-                                  <td className="border border-gray-300 px-4 py-2">
-                                    <Link
-                                      to={`/sistema/detailsEmployees/${users.idEmployee}`}
-                                    >
-                                      <button className="text-realizaBlue flex items-center justify-center hover:underline">
-                                        <Settings2 size={18} />
-                                      </button>
-                                    </Link>
                                   </td>
                                 </tr>
                               ))
@@ -610,11 +598,6 @@ export function Dashboard() {
                           </tbody>
                         </table>
                       </div>
-                      {/* <Pagination
-                                  currentPage={currentPage}
-                                  totalPages={totalPages}
-                                  onPageChange={handlePageChange}
-                                /> */}
                     </div>
                   )}
                 </div>
