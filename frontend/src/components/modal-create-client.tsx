@@ -71,7 +71,6 @@ const createClienteFormSchema = z.object({
 
 type CreateClientFormSchema = z.infer<typeof createClienteFormSchema>;
 
-
 export function ModalCreateCliente() {
   const [showFirstModal, setShowFirstModal] = useState(false);
   const [showSecondModal, setShowSecondModal] = useState(false);
@@ -110,7 +109,6 @@ export function ModalCreateCliente() {
     setValue("cnpj", formatted, { shouldValidate: true });
   }, [getValues, setValue]);
 
-  // Atualiza formulário quando dados da API chegam
   useEffect(() => {
     if (cnpjData) {
       setValue("corporateName", cnpjData.company.name || "");
@@ -136,6 +134,7 @@ export function ModalCreateCliente() {
       return;
     }
     try {
+      console.log("CNPJ enviado para a API:", cnpjValue);
       const res = await axios.get(`https://open.cnpja.com/office/${sanitizedCnpj}`);
       setCnpjData(res.data);
       toast.success("CNPJ carregado com sucesso!");
@@ -150,7 +149,7 @@ export function ModalCreateCliente() {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     const payload = {
       ...data,
-      cnpj: sanitizedCnpj,
+      cnpj: cnpjValue,
     };
     setIsLoading(true);
     try {
@@ -159,6 +158,13 @@ export function ModalCreateCliente() {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
+      toast.success("Sucesso ao criar cliente");
+
+      // Resetar e fechar ambos os modais
+      reset();
+      setCnpjData(null);
+      setShowSecondModal(false);
+      setShowFirstModal(false);
       toast.success("Cliente criado com sucesso!");
       reset();
       setCepValue("");
@@ -202,8 +208,8 @@ export function ModalCreateCliente() {
 
   return (
     <div>
-      <Dialog open={showFirstModal} onOpenChange={setShowFirstModal}>
-        <DialogTrigger>
+      <Dialog  open={showFirstModal} onOpenChange={setShowFirstModal}>
+        <DialogTrigger asChild>
           <Button className="bg-realizaBlue w-[2.1vw] rounded-full">
             <Plus size={24} className="dark:text-white" />
           </Button>
@@ -239,7 +245,6 @@ export function ModalCreateCliente() {
           </form>
         </DialogContent>
       </Dialog>
-
       <Dialog open={showSecondModal} onOpenChange={setShowSecondModal}>
         <DialogContent>
           <DialogHeader>
