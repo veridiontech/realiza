@@ -3,15 +3,18 @@ import { useDocument } from "@/context/Document-provider";
 import { propsActivities } from "@/types/interfaces";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { Blocks } from "react-loader-spinner";
 
 interface BoxActivitiesProps {
   activities: propsActivities[];
   onSelectActivitie: (activitie: any) => void;
+  isLoading: boolean
 }
 
 export function BoxActivities({
   activities,
   onSelectActivitie,
+  isLoading
 }: BoxActivitiesProps) {
   const [activitiesCheck, setCheckedActivities] = useState<string | null>(null); // Armazena o ID da atividade selecionada
   const { setActivitiesSelected } = useDocument();
@@ -31,6 +34,28 @@ export function BoxActivities({
       }
     });
   };
+
+    if (isLoading) {
+      return (
+        <div className="border p-5 shadow-md w-[35vw]">
+          <div className="flex items-center gap-2 rounded-md border p-2">
+            <Search />
+            <input className="outline-none" />
+          </div>
+          <div className="h-[30vh] flex items-center justify-center">
+            <Blocks
+              height="80"
+              width="80"
+              color="#4fa94d"
+              ariaLabel="blocks-loading"
+              wrapperStyle={{}}
+              wrapperClass="blocks-wrapper"
+              visible={true}
+            />
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="w-[35vw] border p-5 shadow-md">
