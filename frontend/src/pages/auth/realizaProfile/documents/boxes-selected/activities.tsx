@@ -11,7 +11,7 @@ import { Blocks } from "react-loader-spinner";
 export function ActivitiesBox() {
   // const [checkedDocs, setCheckedDocs] = useState<string[]>([]); // Array para armazenar os documentos selecionados
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
-  const [activities, setActivities] = useState<any>([]);
+  const [activities, setActivities] = useState<any[]>([]);
   const [documentsByActivitie, setDocumentsByActivitie] = useState([]);
   const { selectedBranch } = useBranch();
   const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(

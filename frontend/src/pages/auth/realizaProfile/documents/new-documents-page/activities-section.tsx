@@ -162,7 +162,7 @@ export function ActiviteSectionBox() {
         </Dialog>
       </div>
       <div className="bg-white pt-24 shadow-md">
-        {selectedTab === "activities" && <ActivitiesBox />}
+        {selectedTab === "activities" && <ActivitiesBox/>}
       </div>
     </div>
   );
