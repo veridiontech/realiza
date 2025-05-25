@@ -24,9 +24,11 @@ export function TrabalhistaBox() {
   const [notSelectedDocument, setNotSelectedDocument] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState<any>([]);
   const { selectedBranch } = useBranch();
+  const [isLoading, setIsLoading] = useState(false)
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
+    setIsLoading(true)
     try {
       const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
@@ -59,6 +61,8 @@ export function TrabalhistaBox() {
       setSelectedDocument(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
+    } finally {
+      setIsLoading(true)
     }
   };
 
@@ -113,7 +117,7 @@ export function TrabalhistaBox() {
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={notSelectedDocument} />
+        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading}/>
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -178,7 +182,7 @@ export function TrabalhistaBox() {
         </div>
       </div>
       <div>
-        <BoxSelected documents={selectedDocument} />
+        <BoxSelected documents={selectedDocument} isLoading={isLoading}/>
       </div>
     </div>
   );
