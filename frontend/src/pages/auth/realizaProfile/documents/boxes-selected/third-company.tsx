@@ -16,7 +16,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
-import { propsDocument } from "@/types/interfaces";
+// import { propsDocument } from "@/types/interfaces";
 // import { boolean } from "zod";
 
 export function ThirdCompany() {
@@ -57,12 +57,12 @@ export function ThirdCompany() {
     }
   };
   const filterIdDocuments = nonSelected
-  .map((document: propsDocument) => document.idDocumentation)
-  // .map((document) => document.idDocumentation);
+  .map((document: any) => document.idDocument)
+  // .map((document) => document.idDocument);
 
   const filterIdDocumentsSelected = documents
-  .map((document: propsDocument) => document.idDocumentation)
-  // .map((document) => document.idDocumentation);
+  .map((document: any) => document.idDocument)
+  // .map((document) => document.idDocument);
 
 console.log("ids dos documentos", filterIdDocuments);
 console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
