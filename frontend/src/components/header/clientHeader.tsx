@@ -1,6 +1,6 @@
 import { ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import realizaLogo from "../../assets/logoRealiza/Background - Realiza.png";
+import realizaLogo from "@/assets/logoRealiza/Logo Realiza Completo 1.png";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { ClientLateralMenu } from "./clientLateralMenu";
@@ -22,6 +22,7 @@ import axios from "axios";
 import { useBranch } from "@/context/Branch-provider";
 import { useClient } from "@/context/Client-Provider";
 import { propsBranch } from "@/types/interfaces";
+import bannerHeader from "@/assets/banner/Rectangle 42203.png";
 
 export function HeaderClient() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,11 +36,10 @@ export function HeaderClient() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/branch/${user?.branch}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
-      );
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       setUniqueBranch(res.data);
-      setSelectedBranch(res.data)
+      setSelectedBranch(res.data);
     } catch (err) {
       console.log("erro ao buscar filial:", err);
     }
@@ -49,10 +49,10 @@ export function HeaderClient() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/client/find-by-branch/${user?.branch}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
-
+        `${ip}/client/find-by-branch/${user?.branch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       setClients(res.data);
       setClient(res.data);
@@ -65,9 +65,11 @@ export function HeaderClient() {
   const fetchBranchesByClient = async (idClient: string) => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/branch/filtered-client?idSearch=${idClient}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
+      const res = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       setSelectedBranch(res.data);
     } catch (err) {
@@ -98,7 +100,10 @@ export function HeaderClient() {
 
   if (user?.role === "ROLE_CLIENT_MANAGER") {
     return (
-      <header className="dark:bg-primary relative p-5">
+      <header
+        className="dark:bg-primary relative p-5 h-[27vh]"
+        style={{ backgroundImage: `url(${bannerHeader})` }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div
@@ -133,8 +138,8 @@ export function HeaderClient() {
               <div>
                 {uniqueBranch ? (
                   <div className="flex items-center gap-1 text-[20px]">
-                    <span>Filial:</span>
-                    <h1 className="font-semibold">{uniqueBranch.name}</h1>
+                    <span className="text-white">Filial:</span>
+                    <h1 className="font-semibold text-white">{uniqueBranch.name}</h1>
                   </div>
                 ) : (
                   <div className="flex items-center">
@@ -204,7 +209,7 @@ export function HeaderClient() {
                 </Link> */}
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
+                  <DropdownMenuTrigger className="border border-white rounded-full">
                     <ProfilePhoto />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="dark:bg-primary mr-5">
@@ -287,7 +292,7 @@ export function HeaderClient() {
                 value={selectedBranch?.idBranch || ""}
                 onChange={(e) => {
                   const selected = branch.find(
-                    (b) => b.idBranch === e.target.value,
+                    (b) => b.idBranch === e.target.value
                   );
                   setSelectedBranch(selected || null);
                 }}

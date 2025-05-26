@@ -10,7 +10,6 @@ import { useUser } from "@/context/user-provider";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
-import { propsClient } from "@/types/interfaces";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,8 +34,7 @@ interface ApiResponse {
 }
 
 export function Header() {
-  const [clients, setClients] = useState<propsClient[]>([]);
-  const { client, setClient } = useClient();
+  const { clients, setClients, client, setClient } = useClient();
   const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -168,15 +166,13 @@ export function Header() {
                 Cliente:
               </div>
               <select
+                value={client?.idClient || ""}
                 onChange={(e) => handleSelectClient(e.target.value)}
-                defaultValue=""
-                className="rounded-md border p-1 text-black"
+                className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
               >
-                <option value="" disabled>
-                  Selecione um cliente
-                </option>
+                <option value="" disabled>Selecione um cliente</option>
                 {clients.map((client) => (
-                  <option key={client.idClient} value={client.idClient}>
+                  <option key={client.idClient} value={client.idClient} className="text-black">
                     {client.tradeName}
                   </option>
                 ))}

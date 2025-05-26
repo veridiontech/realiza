@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ip } from "@/utils/ip";
 import { Oval } from "react-loader-spinner";
+import { useClient } from "@/context/Client-Provider";
 
 async function validarCEPExiste(cep: string): Promise<boolean> {
   try {
@@ -79,6 +80,7 @@ export function ModalCreateCliente() {
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [cnpjValue, setCnpjValue] = useState("");
+  const { addClient } = useClient();
 
   const {
     register,
@@ -147,30 +149,27 @@ export function ModalCreateCliente() {
   // Envio do formulário para criar cliente
   const createCliente = async (data: CreateClientFormSchema) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
+
     const payload = {
       ...data,
       cnpj: cnpjValue,
     };
     setIsLoading(true);
     try {
-      await axios.post(`${ip}/client`, payload, {
+      const response = await axios.post(`${ip}/client`, payload, {
         headers: {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
-      toast.success("Sucesso ao criar cliente");
-
-      // Resetar e fechar ambos os modais
-      reset();
-      setCnpjData(null);
-      setShowSecondModal(false);
-      setShowFirstModal(false);
+      addClient(response.data);
       toast.success("Cliente criado com sucesso!");
       reset();
+      setCnpjData(null);
       setCepValue("");
       setPhoneValue("");
       setCnpjValue("");
       setShowSecondModal(false);
+      setShowFirstModal(false);
     } catch (err: any) {
       if (err.response?.status === 422) {
         toast.warning("CNPJ já cadastrado");

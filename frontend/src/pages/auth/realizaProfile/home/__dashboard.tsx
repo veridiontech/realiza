@@ -50,11 +50,12 @@ import { BranchesTable } from "./branchesTable";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
 import { Suppliers } from "@/components/BIs/BisPageComponents/suppliersCard";
+import { Oval } from "react-loader-spinner";
+import { Suppliers } from "@/components/BIs/BisPageComponents/SuppliersCard";
 import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
 const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
-
 
 function validarCPF(cpf: string): boolean {
   cpf = cpf.replace(/[^\d]+/g, "");
@@ -93,15 +94,18 @@ function validarTelefoneRepetido(telefone: string) {
   return !/^(\d)\1+$/.test(digits);
 }
 
-
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
-  cellPhone: z.string()
+  cellPhone: z
+    .string()
     .nonempty("Celular é obrigatório")
     .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarTelefoneRepetido, { message: "Telefone inválido: não pode ter números repetidos" }),
-  cpf: z.string()
+    .refine(validarTelefoneRepetido, {
+      message: "Telefone inválido: não pode ter números repetidos",
+    }),
+  cpf: z
+    .string()
     .nonempty("Cpf é obrigatório")
     .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00")
     .refine((cpf) => validarCPF(cpf), {
@@ -127,17 +131,17 @@ export function Dashboard() {
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
-    setValue,        // <== Adicione aqui
+    setValue, // <== Adicione aqui
     formState: { errors },
     reset,
   } = useForm<CreateUserClient>({
     resolver: zodResolver(createUserClient),
   });
-
 
   const formatCPF = (value: string) => {
     return value
@@ -170,13 +174,12 @@ export function Dashboard() {
       idUser: user?.idUser,
     };
     console.log("Enviando dados do novo usuário:", payload);
+    setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      await axios.post(`${ip}/user/manager/new-user`, payload,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
+      await axios.post(`${ip}/user/manager/new-user`, payload, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       toast.success("Sucesso ao criar usuário");
       setIsOpen(false);
       await getUsersFromBranch();
@@ -195,6 +198,9 @@ export function Dashboard() {
       setIsOpen(false);
       console.log(err);
     }
+    finally {
+      setIsLoading(false);
+    }
   };
 
   const getUsersFromBranch = async () => {
@@ -205,7 +211,7 @@ export function Dashboard() {
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       const { content } = res.data;
@@ -330,20 +336,22 @@ export function Dashboard() {
                       <div className="flex items-center gap-5">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
-                            : "text-realizaBlue border-realizaBlue border bg-white"
-                            }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                            selectedTab === "filiais"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
+                              : "text-realizaBlue border-realizaBlue border bg-white"
+                          }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           <Building2 /> Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue border-realizaBlue border bg-white"
-                            }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                            selectedTab === "usuarios"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue border-realizaBlue border bg-white"
+                          }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           <Users /> Usuários
@@ -437,15 +445,21 @@ export function Dashboard() {
                                     type="text"
                                     value={cpfValue}
                                     onChange={(e) => {
-                                      const formattedCpf = formatCPF(e.target.value);
+                                      const formattedCpf = formatCPF(
+                                        e.target.value
+                                      );
                                       setCpfValue(formattedCpf);
-                                      setValue("cpf", formattedCpf, { shouldValidate: true });
+                                      setValue("cpf", formattedCpf, {
+                                        shouldValidate: true,
+                                      });
                                     }}
                                     placeholder="000.000.000-00"
                                     maxLength={14}
                                   />
                                   {errors.cpf && (
-                                    <span className="text-sm text-red-600">{errors.cpf.message}</span>
+                                    <span className="text-sm text-red-600">
+                                      {errors.cpf.message}
+                                    </span>
                                   )}
                                 </div>
 
@@ -456,18 +470,23 @@ export function Dashboard() {
                                     value={phoneValue}
                                     {...register("cellPhone")}
                                     onChange={(e) => {
-                                      const formattedPhone = formatPhone(e.target.value);
+                                      const formattedPhone = formatPhone(
+                                        e.target.value
+                                      );
                                       setPhoneValue(formattedPhone);
-                                      setValue("cellPhone", formattedPhone, { shouldValidate: true });
+                                      setValue("cellPhone", formattedPhone, {
+                                        shouldValidate: true,
+                                      });
                                     }}
                                     placeholder="(00) 00000-0000"
                                     maxLength={15}
                                   />
                                   {errors.cellPhone && (
-                                    <span className="text-sm text-red-600">{errors.cellPhone.message}</span>
+                                    <span className="text-sm text-red-600">
+                                      {errors.cellPhone.message}
+                                    </span>
                                   )}
                                 </div>
-
 
                                 <div>
                                   <Label className="text-white">Cargo</Label>
@@ -498,12 +517,23 @@ export function Dashboard() {
                                 </div> */}
 
                                 <div className="flex justify-end">
-                                  <Button
-                                    type="submit"
-                                    className="bg-realizaBlue"
-                                  >
-                                    Criar
-                                  </Button>
+                                  <div>
+                                    {isLoading ? (
+                                      <Button className="bg-realizaBlue w-full">
+                                        <Oval
+                                          visible={true}
+                                          height="80"
+                                          width="80"
+                                          color="#4fa94d"
+                                          ariaLabel="oval-loading"
+                                        />
+                                      </Button>
+                                    ) : (
+                                      <Button className="bg-realizaBlue w-full" type="submit">
+                                        Criar
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               </form>
                             </ScrollArea>

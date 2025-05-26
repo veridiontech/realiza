@@ -8,6 +8,9 @@ interface ClientContextProps {
   setClient: React.Dispatch<React.SetStateAction<propsClient | null>>;
   branches: propsBranch | null;
   setBranches: React.Dispatch<React.SetStateAction<propsBranch | null>>;
+  clients: propsClient[];
+  setClients: React.Dispatch<React.SetStateAction<propsClient[]>>;
+  addClient: (newClient: propsClient) => void;
 }
 
 const ClientContext = createContext<ClientContextProps | undefined>(undefined);
@@ -15,7 +18,7 @@ const ClientContext = createContext<ClientContextProps | undefined>(undefined);
 export function useClient() {
   const context = useContext(ClientContext);
   if (!context) {
-    throw new Error("O UserProvider não está configurado corretamente.");
+    throw new Error("O ClientProvider não está configurado corretamente.");
   }
   return context;
 }
@@ -23,6 +26,7 @@ export function useClient() {
 export function ClientProvider({ children }: { children: React.ReactNode }) {
   const [client, setClient] = useState<propsClient | null>(null);
   const [branches, setBranches] = useState<propsBranch | null>(null);
+  const [clients, setClients] = useState<propsClient[]>([]);
 
   useEffect(() => {
     const idClient = localStorage.getItem("idClient");
@@ -38,9 +42,8 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/client/${idClient}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
-      );
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       if (res.data) {
         setClient(res.data);
       } else {
@@ -59,13 +62,17 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
       const res = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${idClient}`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       setBranches(res.data.content);
     } catch (err) {
       console.log("erro ao puxar filiais:", err);
     }
+  };
+
+  const addClient = (newClient: propsClient) => {
+    setClients((prev) => [...prev, newClient]);
   };
 
   return (
@@ -75,6 +82,9 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
         setClient,
         branches,
         setBranches,
+        clients,
+        setClients,
+        addClient,
       }}
     >
       {children}

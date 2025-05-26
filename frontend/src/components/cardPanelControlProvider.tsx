@@ -37,7 +37,7 @@ export function CardPanelControlProvider({
   requesterName,
   clientName,
   clientCnpj,
-  // solicitationType,
+  solicitationType,
   onActionCompleted,
   status,
 }: CardPanelControlProps) {
@@ -66,12 +66,16 @@ export function CardPanelControlProvider({
 
       setIsLoading(true);
 
-      await axios.patch(`${ip}/item-management/${idSolicitation}/approve`, {
-        headers: {
-          Authorization: `Bearer ${tokenFromStorage}`,
-          "Content-Type": "application/json",
-        },
-      });
+      await axios.patch(
+        `${ip}/item-management/${idSolicitation}/approve`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       toast.success("Solicitação aprovada");
       setIsLoading(false);
@@ -90,9 +94,13 @@ export function CardPanelControlProvider({
   const handleDeny = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      await axios.patch(`${ip}/item-management/${idSolicitation}/deny`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
+      await axios.patch(
+        `${ip}/item-management/${idSolicitation}/deny`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
       if (onActionCompleted) {
         onActionCompleted(idSolicitation);
       }
@@ -132,10 +140,15 @@ export function CardPanelControlProvider({
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1">
-          <span className="text-[18px] font-semibold">
-            Motivo: {" "}
-          </span>
-          <p className="text-[15px]">Remoção da empresa {enterpriseName}</p>
+          <span className="text-[18px] font-semibold">Motivo: </span>
+          {solicitationType === "CREATION" && (
+            <p className="text-[15px]">CRIAÇÃO da empresa {enterpriseName}</p>
+          )}
+          {solicitationType === "EXCLUSION" && (
+            <div>
+              <span>Exclusão da empresa {enterpriseName}</span>
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-1 text-[14px]">
           <div className="flex items-center gap-1">

@@ -5,6 +5,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ip } from "@/utils/ip";
+import axios from "axios";
+import { useEffect } from "react";
 
 interface MoreDetailsProps {
   idSolicitation: string;
@@ -42,6 +45,30 @@ export function MoreDetails({
   newProvider,
   requester,
 }: MoreDetailsProps) {
+  // const [moreDetailsProvider, setMoreDetailsProvider] = useState(null)
+
+  const token = localStorage.getItem("tokenClient")
+
+  const getMoreDetails = async() => {
+    try{
+      const res = await axios.get(`${ip}/item-management/new-provider/details/${idSolicitation}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(res.data);
+      // setMoreDetailsProvider(res.data)
+    }catch(err: any) {
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    if(idSolicitation) {
+      getMoreDetails()
+    }
+  }, [idSolicitation])
+
   return (
     <Dialog>
       <DialogTrigger className="bg-realizaBlue rounded-md p-2 text-white">
@@ -52,8 +79,8 @@ export function MoreDetails({
           <DialogTitle>DETALHES DA SOLICITAÇÃO</DialogTitle>
         </DialogHeader>
         <div key={idSolicitation}>
-          <div className="flex flex-col gap-5">
-            <h1 className="font-semibold">Solicitação de:</h1>
+          <div className="flex flex-col gap-3">
+            <h1 className="font-semibold">Solicitação de</h1>
             <div className="flex gap-1 flex-col">
               <p className="">
                 <strong>Nome:</strong> {requester.fullName}
@@ -87,10 +114,6 @@ export function MoreDetails({
                 <div className="flex items-center gap-1">
                   <p className="font-semibold">cnpj:</p>
                   <span>{client.cnpj}</span>
-                </div>
-                                                <div className="flex items-center gap-1">
-                  <p className="font-semibold">Email:</p>
-                  <span>{client.email}</span>
                 </div>
               </div>
             </div>
