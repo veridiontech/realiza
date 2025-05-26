@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplier } from "@/context/Supplier-context";
 import { UploadDocumentButton } from "@/components/ui/upload-document-button";
 import { useUser } from "@/context/user-provider";
-import { useLocation } from "react-router-dom"; // 👈 IMPORTANTE
+import { useLocation } from "react-router-dom"; 
 
 interface Supplier {
   tradeName?: string;

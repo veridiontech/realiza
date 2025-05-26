@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-export function ActiveContracts() {
-  const count = 1126;
+export function Suppliers() {
+  const count = 3;
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -30,7 +30,7 @@ export function ActiveContracts() {
           marginBottom: 10,
         }}
       >
-        {count.toLocaleString("pt-BR")}
+        {count}
       </div>
 
       <div
@@ -44,7 +44,7 @@ export function ActiveContracts() {
           gap: 6,
         }}
       >
-        Contratos Ativos
+        Fornecedores
         <span
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
@@ -82,7 +82,7 @@ export function ActiveContracts() {
                 userSelect: "none",
               }}
             >
-              Número total de contratos em vigência
+              Número total de fornecedores cadastrados
             </div>
           )}
         </span>

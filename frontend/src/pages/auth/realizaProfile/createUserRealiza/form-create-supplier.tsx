@@ -226,7 +226,7 @@ export function FormCreateUserSupplier() {
           </div>
 
           <div>
-            <Label className="text-white">CPF</Label>
+            <Label>CPF</Label>
             <Input
               type="text"
               value={cpfValue}
@@ -272,7 +272,7 @@ export function FormCreateUserSupplier() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-white">Telefone</Label>
+              <Label>Telefone</Label>
               <Input
                 type="text"
                 value={phoneValue}
