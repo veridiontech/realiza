@@ -5,6 +5,8 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -15,4 +17,31 @@ public interface DocumentProviderSubcontractorRepository extends JpaRepository<D
     Long countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(String enterpriseId, String groupName, Boolean isActive);
     Long countByProviderSubcontractor_IdProviderAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, String groupName);
     Long countByProviderSubcontractor_IdProviderAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(String enterpriseId, Document.Status status, String groupName);
+
+    @Query("""
+    SELECT
+        COUNT(dps) AS total,
+        SUM(CASE WHEN dps.status = :status THEN 1 ELSE 0 END) AS pendentes
+    FROM DocumentProviderSubcontractor dps
+    JOIN dps.providerSubcontractor psb
+    JOIN psb.providerSupplier psp
+    JOIN psp.branches b
+    WHERE b.idBranch = :branchId
+""")
+    Object[] countTotalAndPendentesByBranch(
+            @Param("branchId") String branchId,
+            @Param("status") Document.Status status
+    );
+
+    @Query("""
+    SELECT
+        dps.type, dps.status, COUNT(dps)
+    FROM DocumentProviderSubcontractor dps
+    JOIN dps.providerSubcontractor psb
+    JOIN psb.providerSupplier psp
+    JOIN psp.branches b
+    WHERE b.idBranch = :branchId
+    GROUP BY dps.type, dps.status
+""")
+    List<Object[]> countTotalTypesByBranch(@Param("branchId") String branchId);
 }

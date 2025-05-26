@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
+import bl.tech.realiza.gateways.responses.services.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 public interface EmployeeController {
-    ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByEnterprise(int page, int size, String sort, Sort.Direction direction, Provider.Company company, String idSearch);
+    ResponseEntity<PageResponse<EmployeeResponseDto>> getAllEmployeesByEnterprise(int page, int size, String sort, Sort.Direction direction, Provider.Company company, String idSearch);
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByContract(int page, int size, String sort, Sort.Direction direction, String idContract);
 
     // brazilian

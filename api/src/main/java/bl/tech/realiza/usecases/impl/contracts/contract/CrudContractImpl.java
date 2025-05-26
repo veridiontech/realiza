@@ -1,7 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
-import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
@@ -24,7 +23,6 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import lombok.RequiredArgsConstructor;

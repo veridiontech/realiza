@@ -40,20 +40,22 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public ActivityResponseDto save(ActivityRequestDto activityRequestDto) {
+
         Activity activity = Activity.builder()
                 .title(activityRequestDto.getTitle())
                 .risk(activityRequestDto.getRisk())
+                .branch(branchRepository.findById(activityRequestDto.getIdBranch())
+                        .orElseThrow(() -> new NotFoundException("Branch not found")))
                 .build();
 
         Activity savedActivity = activityRepository.save(activity);
 
-        ActivityResponseDto activityResponse = ActivityResponseDto.builder()
+        return ActivityResponseDto.builder()
                 .idActivity(savedActivity.getIdActivity())
                 .title(savedActivity.getTitle())
                 .risk(savedActivity.getRisk())
+                .idBranch(savedActivity.getBranch().getIdBranch())
                 .build();
-
-        return activityResponse;
     }
 
     @Override
@@ -75,15 +77,13 @@ public class CrudActivityImpl implements CrudActivity {
     public Page<ActivityResponseDto> findAll(Pageable pageable) {
         Page<Activity> activityPage = activityRepository.findAll(pageable);
 
-        Page<ActivityResponseDto> activities = activityPage.map(
+        return activityPage.map(
                 activity -> ActivityResponseDto.builder()
                         .idActivity(activity.getIdActivity())
                         .title(activity.getTitle())
                         .risk(activity.getRisk())
                         .build()
         );
-
-        return activities;
     }
 
     @Override
@@ -111,6 +111,14 @@ public class CrudActivityImpl implements CrudActivity {
                 .toList();
 
         return documentBranches.stream()
+                .filter(documentBranch -> {
+                    String type = documentBranch.getType();
+                    return type != null && (
+                            type.equalsIgnoreCase("saude") ||
+                                    type.equalsIgnoreCase("segurança do trabalho") ||
+                                    type.equalsIgnoreCase("meio ambiente")
+                    );
+                })
                 .map(documentBranch -> {
                     boolean isSelected = documentBranchIds.contains(documentBranch.getIdDocumentation());
 

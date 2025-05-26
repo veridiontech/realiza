@@ -10,4 +10,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     Long countAllByBranch_IdBranch(String branchId);
     Long countAllBySupplier_IdProvider(String supplierId);
     Long countAllBySubcontract_IdProvider(String subcontractId);
+    Long countAllBySubcontract_ProviderSupplier_Branches_IdBranch(String branchId);
+    Long countAllBySupplier_Branches_IdBranch(String branchId);
 }

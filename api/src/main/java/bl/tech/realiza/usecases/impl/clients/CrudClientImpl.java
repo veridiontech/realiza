@@ -9,21 +9,14 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
-import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
-import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.auth.PasswordEncryptionService;
-import bl.tech.realiza.services.setup.ClientSetupAsyncService;
+import bl.tech.realiza.services.setup.SetupAsyncService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
-import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
-import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -39,16 +32,9 @@ import java.util.Optional;
 public class CrudClientImpl implements CrudClient {
 
     private final ClientRepository clientRepository;
-    private final UserClientRepository userClientRepository;
-    private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
-    private final DocumentMatrixRepository documentMatrixRepository;
-    private final DocumentBranchRepository documentBranchRepository;
-    private final CrudActivity crudActivity;
-    private final CrudBranch crudBranchImpl;
-    private final CrudServiceType crudServiceTypeImpl;
-    private final ClientSetupAsyncService clientSetupAsyncService;
+    private final SetupAsyncService setupAsyncService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
 
@@ -78,7 +64,7 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        clientSetupAsyncService.setupClient(savedClient);
+        setupAsyncService.setupNewClient(savedClient);
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())

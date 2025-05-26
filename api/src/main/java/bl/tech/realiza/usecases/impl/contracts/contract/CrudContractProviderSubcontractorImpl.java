@@ -5,8 +5,6 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
@@ -35,7 +33,7 @@ import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequ
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSubcontractorResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.services.setup.SetupAsyncService;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
@@ -61,12 +59,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final DocumentContractRepository documentContractRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
-    private final CrudItemManagement crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagement;
     private final ActivityDocumentRepository activityDocumentRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
+    private final SetupAsyncService setupAsyncService;
 
     @Override
     public ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractProviderSubcontractorRequestDto) {
@@ -88,22 +87,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         ProviderSupplier providerSupplier = providerSupplierRepository.findById(contractProviderSupplier.getProviderSupplier().getIdProvider())
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
-// depois de terminar subcontratado, verificar erro de get contract supplier pelo id do supplier
-        if (contractProviderSubcontractorRequestDto.getHse() && !contractProviderSubcontractorRequestDto.getIdActivities().isEmpty()) {
-            activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getIdActivities());
-            if (activities.isEmpty()) {
-                throw new NotFoundException("Activities not found");
-            }
-        }
-
-        activities.forEach(
-                activity -> {
-                    List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(activity.getIdActivity());
-                    activityDocumentsList.forEach(
-                            activityDocument -> idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation())
-                    );
-                }
-        );
 
         if (newProviderSubcontractor == null) {
             newProviderSubcontractor = providerSubcontractorRepository.save(ProviderSubcontractor.builder()
@@ -131,6 +114,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
+        setupAsyncService.setupContractSubcontractor(savedContractSubcontractor,contractProviderSubcontractorRequestDto.getIdActivities());
+
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
@@ -143,40 +128,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             }
         }
 
-        documentSupplier = documentProviderSupplierRepository.findAllById(idDocuments);
-
-        ProviderSubcontractor finalNewProviderSubcontractor = newProviderSubcontractor;
-        documentSupplier.forEach(
-                document -> {
-                    switch (document.getDocumentMatrix().getSubGroup().getGroup().getGroupName().toLowerCase()) {
-                        case "documento empresa", "documento pessoa", "treinamentos e certificações" -> {
-                            documentProviderSubcontractor.add(DocumentProviderSubcontractor.builder()
-                                    .title(document.getTitle())
-                                    .status(Document.Status.PENDENTE)
-                                    .type(document.getType())
-                                    .isActive(true)
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .providerSubcontractor(finalNewProviderSubcontractor)
-                                    .build());
-                        }
-                        case "documento empresa-serviço" -> {
-                            documentContract.add(DocumentContract.builder()
-                                    .title(document.getTitle())
-                                    .status(Document.Status.PENDENTE)
-                                    .type(document.getType())
-                                    .isActive(true)
-                                    .documentMatrix(document.getDocumentMatrix())
-                                    .contract(savedContractSubcontractor)
-                                    .build());
-                        }
-                    }
-                });
-
-        documentProviderSubcontractorRepository.saveAll(documentProviderSubcontractor);
-        documentContractRepository.saveAll(documentContract);
-
         // criar solicitação
-        crudItemManagementImpl.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
+        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
                 .solicitationType(ItemManagement.SolicitationType.CREATION)
                 .idRequester(contractProviderSubcontractorRequestDto.getIdRequester())
                 .idNewProvider(newProviderSubcontractor.getIdProvider())
@@ -288,7 +241,11 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                     .serviceName(contractProviderSubcontractor.getServiceName())
                     .contractReference(contractProviderSubcontractor.getContractReference())
                     .description(contractProviderSubcontractor.getDescription())
-                    .idResponsible(contractProviderSubcontractor.getResponsible().getIdUser())
+                    .responsible(contractProviderSubcontractor.getResponsible() != null
+                            ? contractProviderSubcontractor.getResponsible().getFirstName()
+                            + " "
+                            + contractProviderSubcontractor.getResponsible().getSurname()
+                            : null)
                     .expenseType(contractProviderSubcontractor.getExpenseType())
                     .dateStart(contractProviderSubcontractor.getDateStart())
                     .finished(contractProviderSubcontractor.getFinished())
