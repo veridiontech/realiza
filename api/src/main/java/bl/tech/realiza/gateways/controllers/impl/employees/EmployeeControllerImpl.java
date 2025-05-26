@@ -5,6 +5,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.employees.EmployeeControl
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
+import bl.tech.realiza.gateways.responses.services.PageResponse;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeBrazilianImpl;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeForeignerImpl;
 import bl.tech.realiza.usecases.impl.employees.CrudEmployeeImpl;
@@ -39,17 +40,17 @@ public class EmployeeControllerImpl implements EmployeeController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByEnterprise(@RequestParam(defaultValue = "0") int page,
-                                                                                 @RequestParam(defaultValue = "5") int size,
-                                                                                 @RequestParam(defaultValue = "name") String sort,
-                                                                                 @RequestParam(defaultValue = "ASC") Sort.Direction direction,
-                                                                                 @RequestParam Provider.Company enterprise,
-                                                                                 @RequestParam String idSearch) {
+    public ResponseEntity<PageResponse<EmployeeResponseDto>> getAllEmployeesByEnterprise(@RequestParam(defaultValue = "0") int page,
+                                                                                         @RequestParam(defaultValue = "5") int size,
+                                                                                         @RequestParam(defaultValue = "name") String sort,
+                                                                                         @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                         @RequestParam Provider.Company enterprise,
+                                                                                         @RequestParam String idSearch) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort, "surname"));
 
-        Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee. findAllByEnterprise(idSearch, enterprise, pageable);
+        Page<EmployeeResponseDto> employeeResponseDtos = crudEmployee.findAllByEnterprise(idSearch, enterprise, pageable);
 
-        return ResponseEntity.ok(pageEmployeeForeigner);
+        return ResponseEntity.ok(new PageResponse<>(employeeResponseDtos));
     }
 
     @GetMapping("/filtered-by-contract")

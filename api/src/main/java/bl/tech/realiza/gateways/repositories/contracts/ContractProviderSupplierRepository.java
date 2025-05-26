@@ -17,4 +17,5 @@ public interface ContractProviderSupplierRepository extends JpaRepository<Contra
     Page<ContractProviderSupplier> findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(String idBranch, String idSupplier, Pageable pageable);
     ContractProviderSupplier findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(String idCompany);
     List<ContractProviderSupplier> findAllByBranch_IdBranchAndSubcontractPermissionIsTrue(String idBranch);
+    Long countByBranch_IdBranchAndFinishedIsFalse(String idBranch);
 }
