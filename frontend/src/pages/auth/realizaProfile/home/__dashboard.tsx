@@ -93,6 +93,7 @@ function validarTelefoneRepetido(telefone: string) {
   return !/^(\d)\1+$/.test(digits);
 }
 
+
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
