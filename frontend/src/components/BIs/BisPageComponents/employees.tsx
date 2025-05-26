@@ -8,29 +8,43 @@ export function Employees() {
     <div
       style={{
         background: "#fff",
-        borderRadius: 8,
-        padding: 20,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        width: 180,
+        borderRadius: 16,
+        padding: 32,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        width: 280,
+        height: 160,
         textAlign: "center",
         margin: "0 10px",
         fontFamily: "Arial, sans-serif",
         position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
       }}
     >
       <div
         style={{
-          fontWeight: "600",
-          fontSize: 14,
-          color: "#333",
-          marginBottom: 8,
+          fontWeight: "700",
+          fontSize: 52,
+          color: "#374151",
+          marginBottom: 10,
+        }}
+      >
+        {count.toLocaleString("pt-BR")}
+      </div>
+
+      <div
+        style={{
+          fontWeight: "500",
+          fontSize: 16,
+          color: "#374151",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           gap: 6,
         }}
       >
-        Total de Colaboradores
+        Colaboradores
         <span
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
@@ -68,13 +82,10 @@ export function Employees() {
                 userSelect: "none",
               }}
             >
-              Informação adicional
+              Número total de colaboradores ativos
             </div>
           )}
         </span>
-      </div>
-      <div style={{ fontSize: 48, color: "#3b82f6", fontWeight: "bold" }}>
-        {count.toLocaleString("pt-BR")}
       </div>
     </div>
   );

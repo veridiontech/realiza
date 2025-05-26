@@ -51,6 +51,12 @@ import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContra
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
 import { Oval } from "react-loader-spinner";
 
+import { Suppliers } from "@/components/BIs/BisPageComponents/SuppliersCard";
+import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
+
+const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
 function validarCPF(cpf: string): boolean {
   cpf = cpf.replace(/[^\d]+/g, "");
 
@@ -87,9 +93,6 @@ function validarTelefoneRepetido(telefone: string) {
   // Verifica se todos os dígitos são iguais
   return !/^(\d)\1+$/.test(digits);
 }
-
-const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;
-const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
@@ -237,10 +240,18 @@ export function Dashboard() {
               <EnterpriseResume />
               {client?.isUltragaz && <UltraSection />}
             </div>
-            <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-[5fr_3fr]">
+            <div className="mt-8 grid grid-cols-1 gap-8">
               <StatusDocumentChart />
-              <ConformityGaugeChart />
+
+              <div className="w-full flex justify-center">
+                <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
+                  <ConformityGaugeChart />
+                </div>
+
+              </div>
+
             </div>
+
             <div className="mt-5 w-full text-right">
               <NavLink to={`sistema/dashboard-details/${user?.idUser}`}>
                 <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
@@ -639,6 +650,8 @@ export function Dashboard() {
           <div className="mt-9 flex gap-">
             <ActiveContracts />
             <Employees />
+            < Suppliers/>
+            <AllocatedEmployees/>
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>
