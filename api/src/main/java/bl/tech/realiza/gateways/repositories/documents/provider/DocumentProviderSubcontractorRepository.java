@@ -32,4 +32,16 @@ public interface DocumentProviderSubcontractorRepository extends JpaRepository<D
             @Param("branchId") String branchId,
             @Param("status") Document.Status status
     );
+
+    @Query("""
+    SELECT
+        dps.type, dps.status, COUNT(dps)
+    FROM DocumentProviderSubcontractor dps
+    JOIN dps.providerSubcontractor psb
+    JOIN psb.providerSupplier psp
+    JOIN psp.branches b
+    WHERE b.idBranch = :branchId
+    GROUP BY dps.type, dps.status
+""")
+    List<Object[]> countTotalTypesByBranch(@Param("branchId") String branchId);
 }

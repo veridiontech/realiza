@@ -193,7 +193,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .serviceName(contractProviderSupplier.getServiceName())
                         .contractReference(contractProviderSupplier.getContractReference())
                         .description(contractProviderSupplier.getDescription())
-                        .responsible(contractProviderSupplier.getResponsible() != null ? contractProviderSupplier.getResponsible().getIdUser() : null)
+                        .responsible(contractProviderSupplier.getResponsible() != null
+                                ? contractProviderSupplier.getResponsible().getFirstName()
+                                + " "
+                                + contractProviderSupplier.getResponsible().getSurname()
+                                : null)
                         .expenseType(contractProviderSupplier.getExpenseType())
                         .dateStart(contractProviderSupplier.getDateStart())
                         .endDate(contractProviderSupplier.getEndDate())
@@ -264,7 +268,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
-                .responsible(savedContractProviderSupplier.getResponsible() != null ? savedContractProviderSupplier.getResponsible().getIdUser() : null)
+                .responsible(savedContractProviderSupplier.getResponsible() != null
+                        ? savedContractProviderSupplier.getResponsible().getFirstName()
+                        + " "
+                        + savedContractProviderSupplier.getResponsible().getSurname()
+                        : null)
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .dateStart(savedContractProviderSupplier.getDateStart())
                 .endDate(savedContractProviderSupplier.getEndDate())
@@ -452,7 +460,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
                 .allocatedLimit(savedContractProviderSupplier.getAllocatedLimit())
-                .responsible(savedContractProviderSupplier.getResponsible().getIdUser())
+                .responsible(savedContractProviderSupplier.getResponsible() != null
+                        ? savedContractProviderSupplier.getResponsible().getFirstName()
+                        + " "
+                        + savedContractProviderSupplier.getResponsible().getSurname()
+                        : null)
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .startDate(savedContractProviderSupplier.getDateStart())
                 .endDate(savedContractProviderSupplier.getEndDate())

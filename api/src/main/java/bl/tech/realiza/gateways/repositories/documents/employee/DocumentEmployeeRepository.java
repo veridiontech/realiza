@@ -37,6 +37,20 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
 
     @Query("""
     SELECT
+        de.type, de.status, COUNT(de)
+    FROM DocumentEmployee de
+    JOIN de.employee e
+    JOIN e.contracts c
+    JOIN ContractProviderSupplier cps ON cps.idContract = c.idContract
+    WHERE cps.finished = false
+        AND e.situation = 0
+        AND cps.branch.idBranch = :branchId
+    GROUP BY de.type, de.status
+""")
+    List<Object[]> countTotalTypesByBranch(@Param("branchId") String branchId);
+
+    @Query("""
+    SELECT
             COUNT(de) AS total,
             SUM(CASE WHEN de.status = :status THEN 1 ELSE 0 END) AS pendentes
     FROM DocumentEmployee de

@@ -15,9 +15,7 @@ import bl.tech.realiza.gateways.responses.dashboard.DashboardHomeResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +31,8 @@ public class DashboardService {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
         double adherence;
-        Integer activeContractQuantity;
-        Integer activeEmployeeQuantity;
+        int activeContractQuantity;
+        int activeEmployeeQuantity;
 
         Object[] resultSupplier = documentProviderSupplierRepository
                 .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
@@ -79,29 +77,46 @@ public class DashboardService {
         List<DashboardDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
         List<DashboardDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
 
-        List<DashboardDetailsResponseDto.Status> status = new ArrayList<>();
+        List<Object[]> resultSupplier = documentProviderSupplierRepository
+                .countTotalTypesByBranch(branch.getIdBranch());
+        List<Object[]> resultEmployeeSupplier = documentEmployeeRepository
+                .countTotalTypesByBranch(branch.getIdBranch());
+        List<Object[]> resultSubcontractor = documentProviderSupplierRepository
+                .countTotalTypesByBranch(branch.getIdBranch());
+        List<Object[]> resultEmployeeSubcontractor = documentEmployeeRepository
+                .countTotalTypesByBranch(branch.getIdBranch());
 
-        List<String> types = branch.getDocumentBranches().stream()
-                .map(DocumentBranch::getType)
-                .filter(Objects::nonNull)
-                .distinct()
+        List<Object[]> allResults = new ArrayList<>();
+        allResults.addAll(resultSupplier);
+        allResults.addAll(resultEmployeeSupplier);
+        allResults.addAll(resultSubcontractor);
+        allResults.addAll(resultEmployeeSubcontractor);
+
+        Map<String, Map<String, Integer>> grouped = new HashMap<>();
+
+        for (Object[] row : allResults) {
+            String docType = (String) row[0];
+            Document.Status status = (Document.Status) row[1];
+            Integer quantity = ((Number) row[2]).intValue();
+
+            grouped
+                    .computeIfAbsent(docType, k -> new HashMap<>())
+                    .merge(status.name(), quantity, Integer::sum);
+        }
+
+        documentStatus = grouped.entrySet().stream()
+                .map(entry -> DashboardDetailsResponseDto.TypeStatus.builder()
+                        .name(entry.getKey())
+                        .status(
+                                entry.getValue().entrySet().stream()
+                                        .map(statusEntry -> DashboardDetailsResponseDto.Status.builder()
+                                                .type(statusEntry.getKey())
+                                                .quantity(statusEntry.getValue())
+                                                .build())
+                                        .toList()
+                        )
+                        .build())
                 .toList();
-
-        /*types.forEach(type -> {
-            DashboardDetailsResponseDto.TypeStatus.builder()
-                    .name(type)
-                    .status(status)
-                    .build();
-                    .quantity(
-                            branch.getDocumentBranches().stream()
-                                    .map(DocumentBranch::getType)
-                                    .filter(type::equals)
-                                    .toList()
-                                    .size()
-                    )
-
-        })*/
-
 
         return DashboardDetailsResponseDto.builder()
                 .documentStatus(documentStatus)
