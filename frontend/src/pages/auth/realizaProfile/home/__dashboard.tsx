@@ -49,8 +49,8 @@ import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDo
 import { BranchesTable } from "./branchesTable";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
+import { Suppliers } from "@/components/BIs/BisPageComponents/suppliersCard";
 import { Oval } from "react-loader-spinner";
-
 import { Suppliers } from "@/components/BIs/BisPageComponents/SuppliersCard";
 import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
 
