@@ -9,10 +9,9 @@ import axios from "axios";
 import { useBranch } from "@/context/Branch-provider";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-provider";
-// import { EnterpriseResume } from "@/components/home/enterpriseResume";
 import { BranchResume } from "./branch-resume";
 import { TableResume } from "./table-resume";
-// import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
+import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
 
 export function HomeClient() {
   const [employees, setEmployees] = useState([]);
@@ -23,6 +22,8 @@ export function HomeClient() {
   const [branches, setBranches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBranches, setFilteredBranches] = useState([]);
+
+    console.log(selectedBranch);
 
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
@@ -99,8 +100,9 @@ export function HomeClient() {
           email={selectedBranch?.email}
           name={selectedBranch?.name}
         />
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center px-[20vw] gap-5">
           <TableResume idBranch={selectedBranch?.idBranch}/>
+          <ConformityGaugeChart />
         </div>
       </div>
     );
