@@ -147,6 +147,8 @@ export function ModalCreateCliente() {
   // Envio do formulário para criar cliente
   const createCliente = async (data: CreateClientFormSchema) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
+
+    
     const payload = {
       ...data,
       cnpj: cnpjValue,

@@ -62,10 +62,15 @@ export function CardPanelControlProvider({
   const handleApprove = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
+      console.log(tokenFromStorage);
+
       setIsLoading(true);
 
       await axios.patch(`${ip}/item-management/${idSolicitation}/approve`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`,
+          "Content-Type": "application/json",
+        },
       });
 
       toast.success("Solicitação aprovada");
@@ -125,17 +130,17 @@ export function CardPanelControlProvider({
           newProvider={newProvider}
         />
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1">
-          <strong className="text-[14px]">Empresa solicitada: </strong>
-          <span>{enterpriseName}</span>
+          <span className="text-[18px] font-semibold">
+            Motivo: {" "}
+          </span>
+          <p className="text-[15px]">Remoção da empresa {enterpriseName}</p>
         </div>
         <div className="flex flex-col gap-1 text-[14px]">
           <div className="flex items-center gap-1">
             <strong>Cliente: </strong>
-            <span>
-              {clientName}
-            </span>
+            <span>{clientName}</span>
           </div>
           <div className="flex items-center ">
             <strong>Cliente Cnpj: </strong>

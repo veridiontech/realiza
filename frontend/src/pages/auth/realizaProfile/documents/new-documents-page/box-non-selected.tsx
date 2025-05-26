@@ -3,20 +3,25 @@ import { useDocument } from "@/context/Document-provider";
 import { propsDocument } from "@/types/interfaces";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { Blocks } from "react-loader-spinner";
 
 interface BoxNonSelectedDocuments {
   documents: propsDocument[];
+  isLoading: boolean;
 }
 
-export function BoxNonSelected({ documents }: BoxNonSelectedDocuments) {
-  const [checkedDocs, setCheckedDocs] = useState<string[]>([]); 
+export function BoxNonSelected({
+  documents,
+  isLoading,
+}: BoxNonSelectedDocuments) {
+  const [checkedDocs, setCheckedDocs] = useState<string[]>([]);
   const { setNonSelected } = useDocument();
 
   const toggleCheckbox = (id: string, document: propsDocument) => {
     setCheckedDocs((prev) =>
       prev.includes(id) ? prev.filter((docId) => docId !== id) : [...prev, id]
     );
-    
+
     setNonSelected((prevDocuments) => {
       if (prevDocuments.some((doc) => doc.idDocumentation === id)) {
         return prevDocuments.filter((doc) => doc.idDocumentation !== id);
@@ -25,6 +30,28 @@ export function BoxNonSelected({ documents }: BoxNonSelectedDocuments) {
       }
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="border p-5 shadow-md w-[35vw]">
+        <div className="flex items-center gap-2 rounded-md border p-2">
+          <Search />
+          <input className="outline-none" />
+        </div>
+        <div className="h-[30vh] flex items-center justify-center">
+          <Blocks
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="blocks-loading"
+            wrapperStyle={{}}
+            wrapperClass="blocks-wrapper"
+            visible={true}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border p-5 shadow-md w-[35vw]">
@@ -35,16 +62,16 @@ export function BoxNonSelected({ documents }: BoxNonSelectedDocuments) {
       <ScrollArea className="h-[30vh]">
         <div>
           {Array.isArray(documents) && documents.length > 0 ? (
-            documents.map((document) => (
+            documents.map((document: any) => (
               <div
-                key={document.idDocumentation}
+                key={document.idDocument}
                 className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
-                onClick={() => toggleCheckbox(document.idDocumentation, document)} 
+                onClick={() => toggleCheckbox(document.idDocument, document)}
               >
                 <input
                   type="checkbox"
-                  checked={checkedDocs.includes(document.idDocumentation)}
-                  onChange={() => {}} 
+                  checked={checkedDocs.includes(document.idDocument)}
+                  onChange={() => {}}
                 />
                 <span>{document.title || "Documento"}</span>
               </div>

@@ -19,22 +19,25 @@ import { ip } from "@/utils/ip";
 import { propsDocument } from "@/types/interfaces";
 
 export function ThirdCollaborators() {
-    const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
-    const [notSelectedDocument, setNotSelectedDocument] = useState([])
-    const [selectedDocument, setSelectedDocument] = useState<any>([])
-    const { selectedBranch } = useBranch();
+  const { setDocuments, documents, setNonSelected, nonSelected } =
+    useDocument();
+  const [notSelectedDocument, setNotSelectedDocument] = useState([]);
+  const [selectedDocument, setSelectedDocument] = useState<any>([]);
+  const { selectedBranch } = useBranch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
+    setIsLoading(true);
     try {
-        const resSelected = await axios.get(
+      const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
           headers: {
             Authorization: `Bearer ${tokenFromStorage}`,
           },
           params: { documentTypeName: "SAUDE", isSelected: true },
-        },
+        }
       );
       const resNonSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
@@ -43,73 +46,85 @@ export function ThirdCollaborators() {
             Authorization: `Bearer ${tokenFromStorage}`,
           },
           params: { documentTypeName: "SAUDE", isSelected: false },
-        },
+        }
       );
       console.log("teste", resSelected.data);
       console.log("teste", resNonSelected.data);
 
-      setNotSelectedDocument(resNonSelected.data)
-      setSelectedDocument(resSelected.data)
+      setNotSelectedDocument(resNonSelected.data);
+      setSelectedDocument(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-    const filterIdDocuments = nonSelected
-    .map((document: propsDocument) => document.idDocumentation)
-    // .map((document) => document.idDocumentation);
-  
-    const filterIdDocumentsSelected = documents
-    .map((document: propsDocument) => document.idDocumentation)
+  const filterIdDocuments = nonSelected.map(
+    (document: propsDocument) => document.idDocumentation
+  );
+  // .map((document) => document.idDocumentation);
 
-  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
-    // const 
-    const tokenFromStorage = localStorage.getItem("tokenClient")
+  const filterIdDocumentsSelected = documents.map(
+    (document: propsDocument) => document.idDocumentation
+  );
+
+  const sendDocuments = async (
+    isSelected: boolean,
+    idDocumentation: string[]
+  ) => {
+    // const
+    const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       console.log("selecionando documentos não selecionados:", idDocumentation);
-      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
-        headers: {
-          Authorization: `Bearer ${tokenFromStorage}`,
-        },
-        params: {
-          isSelected,
+      await axios.post(
+        `${ip}/document/branch/document-matrix/update`,
+        idDocumentation,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
+          },
+          params: {
+            isSelected,
+          },
         }
-      })
-      clearArray()
-      pullDatas()
-    }catch(err) {
-      console.log("erro ao enviar documento", err );
-      
+      );
+      clearArray();
+      pullDatas();
+    } catch (err) {
+      console.log("erro ao enviar documento", err);
     }
-  }
+  };
 
   useEffect(() => {
-    if(selectedBranch?.idBranch) {
-      getDocument()
+    if (selectedBranch?.idBranch) {
+      getDocument();
     }
-   
-  }, [selectedBranch?.idBranch])
+  }, [selectedBranch?.idBranch]);
 
   const clearArray = () => {
-    setDocuments([])
-    setNonSelected([])
-    setNotSelectedDocument([])
-    setSelectedDocument([])
-  }
+    setDocuments([]);
+    setNonSelected([]);
+    setNotSelectedDocument([]);
+    setSelectedDocument([]);
+  };
 
   const pullDatas = () => {
-    getDocument()
-  }
+    getDocument();
+  };
 
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={notSelectedDocument} />
+        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
           <AlertDialog>
-            <AlertDialogTrigger className="bg-realizaBlue w-[10vw] rounded-md p-4 text-white">
+            <AlertDialogTrigger
+              className="bg-realizaBlue w-[10vw] rounded-md p-4 text-white"
+              disabled={documents.length === 0}
+            >
               Confirmar Seleção
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -129,14 +144,21 @@ export function ThirdCollaborators() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>Confirmar</AlertDialogAction>
+                <AlertDialogAction
+                  onClick={() => sendDocuments(true, filterIdDocuments)}
+                >
+                  Confirmar
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>
         <div>
           <AlertDialog>
-            <AlertDialogTrigger className="w-[10vw] rounded-md bg-red-600 p-3 text-white">
+            <AlertDialogTrigger
+              className="w-[10vw] rounded-md bg-red-600 p-3 text-white"
+              disabled={documents.length === 0}
+            >
               Confirmar Remoção
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -156,14 +178,20 @@ export function ThirdCollaborators() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>Confirmar</AlertDialogAction>
+                <AlertDialogAction
+                  onClick={() =>
+                    sendDocuments(false, filterIdDocumentsSelected)
+                  }
+                >
+                  Confirmar
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>
       </div>
       <div>
-        <BoxSelected documents={selectedDocument} />
+        <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
   );
