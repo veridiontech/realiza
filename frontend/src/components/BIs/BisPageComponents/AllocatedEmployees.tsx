@@ -1,14 +1,14 @@
 import { useState } from "react";
 
-export function ActiveContracts() {
-  const count = 1126;
+export function AllocatedEmployees() {
+  const count = 1330;
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <div
       style={{
         background: "#fff",
-        borderRadius: 16,
+        borderRadius: 12,
         padding: 32,
         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
         width: 280,
@@ -26,7 +26,7 @@ export function ActiveContracts() {
         style={{
           fontWeight: "700",
           fontSize: 52,
-          color: "#374151",
+          color: "#374151", // azul acinzentado
           marginBottom: 10,
         }}
       >
@@ -44,7 +44,7 @@ export function ActiveContracts() {
           gap: 6,
         }}
       >
-        Contratos Ativos
+        Funcionários Alocados
         <span
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
@@ -82,7 +82,7 @@ export function ActiveContracts() {
                 userSelect: "none",
               }}
             >
-              Número total de contratos em vigência
+              Funcionários atualmente alocados em contratos
             </div>
           )}
         </span>

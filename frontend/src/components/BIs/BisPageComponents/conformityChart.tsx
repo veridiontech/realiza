@@ -77,7 +77,7 @@ export function ConformityGaugeChart() {
   }
 
   return (
-    <Card className="w-full h-[300px]">
+    <Card className="w-full h-[370px]">
       <CardHeader className="pb-0">
         <CardTitle className="text-muted-foreground text-base">Conformidade</CardTitle>
         <CardDescription className="text-xl font-bold">
