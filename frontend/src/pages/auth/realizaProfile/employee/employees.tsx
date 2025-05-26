@@ -307,7 +307,7 @@ export const EmployeesTable = (): JSX.Element => {
           onPageChange={handlePageChange}
         /> */}
         </div>
-        <div className="flex gap-2 justify-end  relative bottom-[15vh]">
+        <div className="flex gap-2 justify-end  relative  2xl:bottom-[14vh] xl:bottom-[12vh] lg:bottom-[8vh] md:bottom-[7vh] bottom-[15vh]">
           <NewModalCreateEmployee />
           <ManageEmployeesModal idProvider={selectedSupplier} />
         </div>
