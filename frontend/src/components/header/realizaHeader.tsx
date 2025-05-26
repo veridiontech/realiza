@@ -382,7 +382,6 @@ export function Header() {
       style={{ backgroundImage: `url(${bannerHeader})` }}
     >
       <div className="flex items-center md:justify-between justify-center">
-        {/* Botão que abre o menu lateral via hover */}
         <div className="flex items-center">
           <div
             className="relative"

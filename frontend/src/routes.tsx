@@ -48,7 +48,7 @@ import SubContracts from "./pages/auth/subProfile/subContracts/subContracts";
 import { SubContractorAppLayout } from "./_layouts/subContractorApp";
 import { CreateNewManagerClient } from "./pages/auth/clientProfile/create-new-manager/create-new-manager";
 import { CreateNewManagerSupplier } from "./pages/auth/supplier/create-new-manager/create-new-manager";
-import { HomeClient } from "./pages/auth/clientProfile/home/homeClient";
+import { HomeClient } from "./pages/auth/clientProfile/home/__homeClient";
 import { ProfileBranch } from "./pages/auth/realizaProfile/profileEnterprise/profileBranch";
 import { SupplierContractNewPage } from "./pages/auth/supplier/contracts/supplier-contract-new-page";
 import { DocumentPageNew } from "./pages/auth/realizaProfile/documents/new-documents-page/document-page";
