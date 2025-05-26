@@ -8,12 +8,7 @@ import { Eye, Edit, User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
 import { Blocks } from "react-loader-spinner";
-
-// interface Employee {
-//   id: string;
-//   name: string;
-//   status: string;
-// }
+import { toast } from "sonner";
 
 interface Document {
   idDocumentation: string;
@@ -30,63 +25,75 @@ export function DetailsEmployee() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
-    null,
-  );
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
 
   const fetchEmployee = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const response = await axios.get(`${ip}/employee/brazilian/${id}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
-      console.log("teste", response.data);
-
+      const response = await axios.get(`${ip}/employee/brazilian/${id}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       setEmployee(response.data);
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Erro ao carregar o Colaborador.",
-      );
+      setError(err.response?.data?.message || "Erro ao carregar o Colaborador.");
     }
   };
 
   const fetchDocuments = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const response = await axios.get(
-        `${ip}/document/employee/filtered-employee`,
-        {
-          params: {
-            idSearch: id,
-            page: 0,
-            size: 10,
-            sort: "creationDate",
-            direction: "DESC",
-          },
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      const response = await axios.get(`${ip}/document/employee/filtered-employee`, {
+        params: {
+          idSearch: id,
+          page: 0,
+          size: 10,
+          sort: "creationDate",
+          direction: "DESC",
         },
-      );
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
       setDocuments(response.data.content || []);
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Erro ao carregar os documentos.",
-      );
+      setError(err.response?.data?.message || "Erro ao carregar os documentos.");
+    }
+  };
+
+  const updateSituation = async (newSituation: string) => {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+
+    const payload = {
+      situation: newSituation,
+    };
+
+    const formData = new FormData();
+    formData.append(
+      "employeeBrazilianRequestDto",
+      new Blob([JSON.stringify(payload)], { type: "application/json" })
+    );
+
+    try {
+      await axios.put(`${ip}/employee/brazilian/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Situação atualizada com sucesso!");
+      fetchEmployee();
+    } catch (error: any) {
+      console.error("Erro ao atualizar situação:", error.response?.data || error.message);
+      toast.error("Erro ao atualizar situação.");
     }
   };
 
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() =>
-      setIsLoading(false),
-    );
+    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() => setIsLoading(false));
   }, [id]);
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        {" "}
         <Blocks
           height="80"
           width="80"
@@ -117,14 +124,11 @@ export function DetailsEmployee() {
       key: "creationDate" as keyof Document,
       label: "Data de Envio",
       render: (creationDate: string) => {
-        const formattedDate = new Date(creationDate).toLocaleDateString(
-          "pt-BR",
-          {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          },
-        );
+        const formattedDate = new Date(creationDate).toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        });
         return formattedDate;
       },
     },
@@ -137,10 +141,7 @@ export function DetailsEmployee() {
       key: "status" as keyof Document,
       label: "Status",
       render: (status: string) => (
-        <span
-          className={`text-sm font-medium ${status === "ativo" ? "text-green-600" : "text-red-600"
-            }`}
-        >
+        <span className={`text-sm font-medium ${status === "ativo" ? "text-green-600" : "text-red-600"}`}>
           {status}
         </span>
       ),
@@ -186,18 +187,34 @@ export function DetailsEmployee() {
                 <h3 className="text-lg font-medium">
                   {employee.name} {employee.surname}
                 </h3>
-                <p className="text-[14px] text-gray-500">
-                  Status: {employee.situation}
-                </p>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="situation" className="text-[14px] text-gray-500">
+                    Situação:
+                  </label>
+                  <select
+                    id="situation"
+                    value={employee.situation}
+                    onChange={(e) => updateSituation(e.target.value)}
+                    className="rounded border p-1 text-sm"
+                  >
+                    <option value="ALOCADO">Alocado</option>
+                    <option value="DESALOCADO">Desalocado</option>
+                    <option value="DEMITIDO">Demitido</option>
+                    <option value="AFASTADO">Afastado</option>
+                    <option value="LICENCA_MATERNIDADE">Licença Maternidade</option>
+                    <option value="LICENCA_MEDICA">Licença Médica</option>
+                    <option value="LICENCA_MILITAR">Licença Militar</option>
+                    <option value="FERIAS">Férias</option>
+                    <option value="ALISTAMENTO_MILITAR">Alistamento Militar</option>
+                    <option value="APOSENTADORIA_POR_INVALIDEZ">Aposentadoria por Invalidez</option>
+                  </select>
+
+                </div>
               </div>
             </div>
           </div>
         </div>
-        {/* <div className="ml-10 flex justify-start">
-          <ButtonBlue onClick={() => setIsModalOpen(true)}>
-            Adicionar Documento
-          </ButtonBlue>
-        </div> */}
+
         <div className="flex flex-row items-start space-x-4">
           <div className="flex-[2]">
             <Table<Document> data={documents} columns={columns} />
@@ -208,41 +225,27 @@ export function DetailsEmployee() {
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Atividade
-                    </th>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Tipo de Atividade
-                    </th>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Feito por
-                    </th>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Data
-                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">Atividade</th>
+                    <th className="p-2 text-left text-sm text-stone-600">Tipo de Atividade</th>
+                    <th className="p-2 text-left text-sm text-stone-600">Feito por</th>
+                    <th className="p-2 text-left text-sm text-stone-600">Data</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="p-2 text-stone-600">
-                      NR33 - Atividade teste
-                    </td>
+                    <td className="p-2 text-stone-600">NR33 - Atividade teste</td>
                     <td className="p-2 text-stone-600">Upload</td>
                     <td className="p-2 text-stone-600">Monica</td>
                     <td className="p-2 text-stone-600">10/04/2025</td>
                   </tr>
                   <tr>
-                    <td className="p-2 text-stone-600">
-                      NR34 - Atividade teste
-                    </td>
+                    <td className="p-2 text-stone-600">NR34 - Atividade teste</td>
                     <td className="p-2 text-stone-600">Upload</td>
                     <td className="p-2 text-stone-600">Monica</td>
                     <td className="p-2 text-stone-600">05/04/2025</td>
                   </tr>
                   <tr>
-                    <td className="p-2 text-stone-600">
-                      MDF³ - Atividade teste
-                    </td>
+                    <td className="p-2 text-stone-600">MDF³ - Atividade teste</td>
                     <td className="p-2 text-stone-600">Modificação</td>
                     <td className="p-2 text-stone-600">Monica</td>
                     <td className="p-2 text-stone-600">05/04/2025</td>
@@ -253,6 +256,7 @@ export function DetailsEmployee() {
           </div>
         </div>
       </div>
+
       {isModalOpen && (
         <AddDocument
           isOpen={isModalOpen}

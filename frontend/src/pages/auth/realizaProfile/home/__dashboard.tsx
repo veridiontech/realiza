@@ -49,6 +49,7 @@ import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDo
 import { BranchesTable } from "./branchesTable";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
+import { Oval } from "react-loader-spinner";
 
 function validarCPF(cpf: string): boolean {
   cpf = cpf.replace(/[^\d]+/g, "");
@@ -127,6 +128,7 @@ export function Dashboard() {
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -169,6 +171,7 @@ export function Dashboard() {
       idUser: user?.idUser,
     };
     console.log("Enviando dados do novo usuário:", payload);
+    setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.post(`${ip}/user/manager/new-user`, payload, {
@@ -191,6 +194,9 @@ export function Dashboard() {
       toast.error("Erro ao criar novo usuário");
       setIsOpen(false);
       console.log(err);
+    }
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -500,12 +506,23 @@ export function Dashboard() {
                                 </div> */}
 
                                 <div className="flex justify-end">
-                                  <Button
-                                    type="submit"
-                                    className="bg-realizaBlue"
-                                  >
-                                    Criar
-                                  </Button>
+                                  <div>
+                                    {isLoading ? (
+                                      <Button className="bg-realizaBlue w-full">
+                                        <Oval
+                                          visible={true}
+                                          height="80"
+                                          width="80"
+                                          color="#4fa94d"
+                                          ariaLabel="oval-loading"
+                                        />
+                                      </Button>
+                                    ) : (
+                                      <Button className="bg-realizaBlue w-full" type="submit">
+                                        Criar
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               </form>
                             </ScrollArea>
