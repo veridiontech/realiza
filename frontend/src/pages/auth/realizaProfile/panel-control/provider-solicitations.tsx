@@ -55,6 +55,8 @@ export function ProviderSolicitations() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
+      console.log(response.data.content);
+      
       setSolicitations(response.data.content);
     } catch (err) {
       console.error("Erro ao buscar solicitações:", err);
