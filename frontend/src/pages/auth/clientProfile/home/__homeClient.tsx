@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-provider";
 // import { EnterpriseResume } from "@/components/home/enterpriseResume";
 import { BranchResume } from "./branch-resume";
+import { TableResume } from "./table-resume";
+// import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
 
 export function HomeClient() {
   const [employees, setEmployees] = useState([]);
@@ -88,14 +90,19 @@ export function HomeClient() {
 
   if (user?.role === "ROLE_CLIENT_MANAGER") {
     return (
-      <BranchResume
-        firstLetter={firstLetterBranch}
-        lastLetter={lastLetterBranch}
-        isLoading={!!selectedBranch}
-        cnpj={selectedBranch?.cnpj}
-        email={selectedBranch?.email}
-        name={selectedBranch?.name}
-      />
+      <div>
+        <BranchResume
+          firstLetter={firstLetterBranch}
+          lastLetter={lastLetterBranch}
+          isLoading={!!selectedBranch}
+          cnpj={selectedBranch?.cnpj}
+          email={selectedBranch?.email}
+          name={selectedBranch?.name}
+        />
+        <div className="flex items-center justify-center">
+          <TableResume idBranch={selectedBranch?.idBranch}/>
+        </div>
+      </div>
     );
   }
 
