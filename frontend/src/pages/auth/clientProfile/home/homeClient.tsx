@@ -9,6 +9,8 @@ import axios from "axios";
 import { useBranch } from "@/context/Branch-provider";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-provider";
+// import { EnterpriseResume } from "@/components/home/enterpriseResume";
+import { BranchResume } from "./branch-resume";
 
 export function HomeClient() {
   const [employees, setEmployees] = useState([]);
@@ -30,9 +32,10 @@ export function HomeClient() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
+        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       const { content } = response.data;
       setBranches(content);
@@ -45,8 +48,10 @@ export function HomeClient() {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase();
     setSearchTerm(term);
-    const filtered = branches.filter((branch: any) =>
-      branch.name.toLowerCase().includes(searchTerm) || branch.cnpj.includes(term)
+    const filtered = branches.filter(
+      (branch: any) =>
+        branch.name.toLowerCase().includes(searchTerm) ||
+        branch.cnpj.includes(term)
     );
     setFilteredBranches(filtered);
   };
@@ -56,9 +61,10 @@ export function HomeClient() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
+        `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       console.log(res.data.content);
 
@@ -72,66 +78,24 @@ export function HomeClient() {
     if (selectedBranch?.idBranch) {
       getEmployee();
     }
-  }, [selectedBranch?.idBranch])
+  }, [selectedBranch?.idBranch]);
 
   useEffect(() => {
     if (client?.idClient) {
       fetchBranches();
     }
-
   }, [selectedBranch?.idBranch, client?.idClient]);
 
   if (user?.role === "ROLE_CLIENT_MANAGER") {
     return (
-      <div className="flex flex-col items-center justify-center gap-5 p-10">
-        <div className="flex gap-4">
-          <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
-            <div className="flex gap-3">
-              <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
-                <div className="text-[40px] text-white">
-                  {firstLetterBranch}
-                  {lastLetterBranch}
-                </div>
-              </div>
-              <div className="flex flex-col gap-10">
-                <div className="flex flex-col items-start gap-3">
-                  <div className="text-realizaBlue text-[30px] font-medium">
-                    {selectedBranch ? (
-                      <h2>{selectedBranch?.name}</h2>
-                    ) : (
-                      <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
-                    )}
-                  </div>
-                  <div className="ml-1 text-sky-900">
-                    {selectedBranch ? (
-                      <h3>{selectedBranch?.email}</h3>
-                    ) : (
-                      <Skeleton className="h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1 text-[13px] text-sky-900">
-                  <div>
-                    {selectedBranch ? (
-                      <p>{selectedBranch?.cnpj}</p>
-                    ) : (
-                      <Skeleton className="h-[0.8vh] w-[7vw] rounded-full bg-gray-600" />
-                    )}
-                  </div>
-                  <div>
-                    {selectedBranch ? (
-                      <p>{selectedBranch?.cep}</p>
-                    ) : (
-                      <Skeleton className="h-[0.6vh] w-[5vw] rounded-full bg-gray-600" />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <EditModalEnterprise />
-        </div>
-      </div>
+      <BranchResume
+        firstLetter={firstLetterBranch}
+        lastLetter={lastLetterBranch}
+        isLoading={!!selectedBranch}
+        cnpj={selectedBranch?.cnpj}
+        email={selectedBranch?.email}
+        name={selectedBranch?.name}
+      />
     );
   }
 
@@ -190,20 +154,22 @@ export function HomeClient() {
             <nav className="flex items-center">
               <Button
                 variant={"ghost"}
-                className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectTab === "filiais"
+                className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                  selectTab === "filiais"
                     ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                     : "text-realizaBlue bg-white"
-                  }`}
+                }`}
                 onClick={() => setSelectedTab("filiais")}
               >
                 Filiais
               </Button>
               <Button
                 variant={"ghost"}
-                className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectTab === "usuarios"
+                className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                  selectTab === "usuarios"
                     ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                     : "text-realizaBlue bg-white"
-                  }`}
+                }`}
                 onClick={() => setSelectedTab("usuarios")}
               >
                 Usuários
