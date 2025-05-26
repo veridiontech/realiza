@@ -22,6 +22,8 @@ public class ContractSupplierResponseDto {
     private String contractReference;
     private Boolean subcontractPermission;
     private Date dateStart;
+    private Boolean hse;
+    private Boolean labor;
     private Contract.IsActive isActive;
     private List<String> activities;
     private String idBranch;

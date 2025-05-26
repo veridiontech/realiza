@@ -12,4 +12,5 @@ public class ActivityResponseDto {
     private String idActivity;
     private String title;
     private Activity.Risk risk;
+    private String idBranch;
 }

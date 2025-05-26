@@ -6,7 +6,6 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.Requirement;
-import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
@@ -20,12 +19,9 @@ import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
-import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
-import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.contract.DocumentContractRepository;
@@ -43,11 +39,10 @@ import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPer
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.services.setup.SetupAsyncService;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
-import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -74,10 +69,10 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final CrudItemManagement crudItemManagementImpl;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
-    private final ActivityDocumentRepository activityDocumentRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
+    private final SetupAsyncService setupAsyncService;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
@@ -101,22 +96,6 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
                 .orElseThrow(() ->  new NotFoundException("Service Type not found"));
-
-        if (contractProviderSupplierRequestDto.getHse() && !contractProviderSupplierRequestDto.getIdActivities().isEmpty()) {
-            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
-            if (activities.isEmpty()) {
-                throw new NotFoundException("Activities not found");
-            }
-        }
-
-        activities.forEach(
-                activity -> {
-                    List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(activity.getIdActivity());
-                    activityDocumentsList.forEach(
-                            activityDocument -> idDocuments.add(activityDocument.getDocumentBranch().getIdDocumentation())
-                    );
-                }
-        );
 
         if (newProviderSupplier == null) {
             newProviderSupplier = providerSupplierRepository.save(ProviderSupplier.builder()
@@ -151,6 +130,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .branch(branch)
                 .build());
 
+        setupAsyncService.setupContractSupplier(savedContractProviderSupplier,contractProviderSupplierRequestDto.getIdActivities());
+
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
@@ -162,23 +143,6 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         userResponsible);
             }
         }
-
-        // salvar por tipagem de contrato / supplier
-        documentBranch = documentBranchRepository.findAllById(idDocuments);
-
-        ProviderSupplier finalNewProviderSupplier = newProviderSupplier;
-        documentBranch.forEach(
-                document -> documentProviderSupplier.add(DocumentProviderSupplier.builder()
-                                .title(document.getTitle())
-                                .status(Document.Status.PENDENTE)
-                                .type(document.getType())
-                                .isActive(true)
-                                .documentMatrix(document.getDocumentMatrix())
-                                .providerSupplier(finalNewProviderSupplier)
-                                .build()));
-
-        documentProviderSupplierRepository.saveAll(documentProviderSupplier);
-        documentContractRepository.saveAll(documentContract);
 
         // criar solicitação
         crudItemManagementImpl.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
@@ -247,14 +211,21 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Optional<ContractResponseDto> update(String id, ContractRequestDto contractProviderSupplierRequestDto) {
+        ServiceTypeBranch serviceTypeBranch = null;
+        UserClient userClient = null;
+
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-        ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
-                .orElseThrow(() -> new NotFoundException("Service type not found"));
+        if (contractProviderSupplierRequestDto.getIdServiceType() != null && !contractProviderSupplierRequestDto.getIdServiceType().isEmpty()) {
+            serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
+                    .orElseThrow(() -> new NotFoundException("Service type not found"));
+        }
 
-        UserClient userClient = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        if (contractProviderSupplierRequestDto.getResponsible() != null && !contractProviderSupplierRequestDto.getResponsible().isEmpty()) {
+            userClient = userClientRepository.findById(contractProviderSupplierRequestDto.getResponsible())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+        }
 
         List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivityList());
 

@@ -3,26 +3,20 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
-import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.services.setup.SetupAsyncService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
-import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -30,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +31,10 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
-    private final CrudActivity crudActivity;
     private final CenterRepository centerRepository;
-    private final DocumentMatrixRepository documentMatrixRepository;
-    private final DocumentBranchRepository documentBranchRepository;
-    private final CrudServiceType crudServiceTypeImpl;
-    private final AuditLogService auditLogService;
+    private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
+    private final SetupAsyncService setupAsyncService;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -60,7 +50,7 @@ public class CrudBranchImpl implements CrudBranch {
             center = centerRepository.findAllById(branchCreateRequestDto.getCenter());
         }
 
-        Branch newBranch = Branch.builder()
+        Branch savedBranch = branchRepository.save(Branch.builder()
                 .name(branchCreateRequestDto.getName())
                 .cnpj(branchCreateRequestDto.getCnpj())
                 .cep(branchCreateRequestDto.getCep())
@@ -72,32 +62,15 @@ public class CrudBranchImpl implements CrudBranch {
                 .number(branchCreateRequestDto.getNumber())
                 .client(client)
                 .center(center)
-                .build();
+                .build());
 
-        Branch savedBranch = branchRepository.save(newBranch);
-
-        List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAll();
-
-        List<DocumentBranch> documentBranchList = documentMatrixList.stream()
-                .map(documentMatrix -> DocumentBranch.builder()
-                        .title(documentMatrix.getName())
-                        .type(documentMatrix.getType())
-                        .status(Document.Status.PENDENTE)
-                        .isActive(true)
-                        .branch(savedBranch)
-                        .documentMatrix(documentMatrix)
-                        .build())
-                .collect(Collectors.toList());
-
-        documentBranchRepository.saveAll(documentBranchList);
-        crudServiceTypeImpl.transferFromClientToBranch(savedBranch.getClient().getIdClient(),savedBranch.getIdBranch());
-        crudActivity.transferFromRepo(savedBranch.getIdBranch());
+        setupAsyncService.setupBranch(savedBranch);
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogService.createAuditLogBranch(
+                auditLogServiceImpl.createAuditLogBranch(
                         savedBranch,
                         userResponsible.getEmail() + " created branch " + savedBranch.getName(),
                         AuditLogBranch.AuditLogBranchActions.CREATE,
@@ -204,7 +177,7 @@ public class CrudBranchImpl implements CrudBranch {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogService.createAuditLogBranch(
+                auditLogServiceImpl.createAuditLogBranch(
                         branch,
                         userResponsible.getEmail() + " updated branch " + branch.getName(),
                         AuditLogBranch.AuditLogBranchActions.UPDATE,
@@ -251,7 +224,7 @@ public class CrudBranchImpl implements CrudBranch {
             Branch branch = branchRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Branch not found"));
             if (userResponsible != null) {
-                auditLogService.createAuditLogBranch(
+                auditLogServiceImpl.createAuditLogBranch(
                         branch,
                         userResponsible.getEmail() + " deleted branch " + branch.getName(),
                         AuditLogBranch.AuditLogBranchActions.DELETE,

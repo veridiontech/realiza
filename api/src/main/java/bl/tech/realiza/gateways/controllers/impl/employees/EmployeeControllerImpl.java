@@ -72,15 +72,7 @@ public class EmployeeControllerImpl implements EmployeeController {
     @Override
     public ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(@RequestBody @Valid EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
 
-        EmployeeResponseDto employeeBrazilian = null;
-
-        try {
-            employeeBrazilian= crudEmployeeBrazilian.save(employeeBrazilianRequestDto);
-        } catch (Exception e) {
-            throw new RuntimeException("Error saving employee",e);
-        }
-
-        return ResponseEntity.of(Optional.of(employeeBrazilian));
+        return ResponseEntity.of(Optional.of(crudEmployeeBrazilian.save(employeeBrazilianRequestDto)));
     }
 
     @GetMapping("/brazilian/{id}")
