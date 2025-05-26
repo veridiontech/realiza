@@ -79,8 +79,8 @@ export function MoreDetails({
           <DialogTitle>DETALHES DA SOLICITAÇÃO</DialogTitle>
         </DialogHeader>
         <div key={idSolicitation}>
-          <div className="flex flex-col gap-5">
-            <h1 className="font-semibold">Solicitação de:</h1>
+          <div className="flex flex-col gap-3">
+            <h1 className="font-semibold">Solicitação de</h1>
             <div className="flex gap-1 flex-col">
               <p className="">
                 <strong>Nome:</strong> {requester.fullName}

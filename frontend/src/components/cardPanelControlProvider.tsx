@@ -66,12 +66,16 @@ export function CardPanelControlProvider({
 
       setIsLoading(true);
 
-      await axios.patch(`${ip}/item-management/${idSolicitation}/approve`, {
-        headers: {
-          Authorization: `Bearer ${tokenFromStorage}`,
-          "Content-Type": "application/json",
-        },
-      });
+      await axios.patch(
+        `${ip}/item-management/${idSolicitation}/approve`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       toast.success("Solicitação aprovada");
       setIsLoading(false);
@@ -90,9 +94,13 @@ export function CardPanelControlProvider({
   const handleDeny = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      await axios.patch(`${ip}/item-management/${idSolicitation}/deny`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
+      await axios.patch(
+        `${ip}/item-management/${idSolicitation}/deny`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
       if (onActionCompleted) {
         onActionCompleted(idSolicitation);
       }
@@ -137,7 +145,9 @@ export function CardPanelControlProvider({
             <p className="text-[15px]">CRIAÇÃO da empresa {enterpriseName}</p>
           )}
           {solicitationType === "EXCLUSION" && (
-            <div><span>Exclusão da empresa {enterpriseName}</span></div>
+            <div>
+              <span>Exclusão da empresa {enterpriseName}</span>
+            </div>
           )}
         </div>
         <div className="flex flex-col gap-1 text-[14px]">

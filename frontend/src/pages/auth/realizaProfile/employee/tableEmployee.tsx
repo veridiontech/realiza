@@ -24,28 +24,14 @@ interface TableEmployeeProps {
 export function TableEmployee({ idProvider }: TableEmployeeProps) {
   const [employees, setEmployee] = useState([]);
   const { user } = useUser();
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para o termo de busca
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [isLoading, setIsLoading] = useState(false);
-  // const [branches, setBranches] = useState([]);
-  // const [selectedBranch, setSelectedBranch] = useState("");
-  // const { client } = useClient();
-  // const { selectedBranch } = useBranch();
+  const [detailsContract, setDetailsContract] = useState(null)
 
-  const page = 0; // Número da página
-  const limit = 10; // Quantidade de itens por página
 
-  // const getBranchClient = async () => {
-  //   if (!client?.idClient) return;
-  //   try {
-  //     const res = await axios.get(
-  //       `${ip}/branch/filtered-client?idSearch=${client.idClient}`
-  //     );
-  //     setBranches(res.data.content);
-  //     console.log("Filiais:", res.data.content);
-  //   } catch (err) {
-  //     console.log("Erro ao buscar filial do cliente", err);
-  //   }
-  // };
+  const page = 0; 
+  const limit = 10;
+
 
   const getEmployee = async () => {
     setIsLoading(true);
@@ -58,8 +44,8 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
             page: page,
             limit: limit,
           },
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       console.log("employees:", res.data.content);
 
@@ -74,7 +60,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   const filteredEmployees = employees.filter((employee: any) =>
     `${employee.name} ${employee.surname}`
       .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
+      .includes(searchTerm.toLowerCase())
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,11 +76,22 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
     setEmployee([]);
   }, [idProvider]);
 
-  // const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const branchId = e.target.value;
-  //   // setSelectedBranch(branchId);
-  //   getEmployee(branchId);
-  // };
+  const getMoreDetailsDocument = async(id: string) => {
+          const tokenFromStorage = localStorage.getItem("tokenClient");
+    try{
+      const res = await axios.get(`${ip}/contract/supplier/${id}`, {
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`
+        }
+      })
+      console.log("detalhes:", res.data);
+      
+      setDetailsContract(res.data)
+    }catch(err: any) {
+      console.log(err);
+      
+    }
+  }
 
   if (user?.role === "ROLE_SUPPLIER_RESPONSIBLE" && "ROLE_SUPPLIER_MANAGER") {
     return (
@@ -282,7 +279,10 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                 </div>
                 <div key={employee.idEmployee} className="w-[15vw] p-4">
                   <div className="flex flex-col gap-5">
-                    <Link to={`/fornecedor/detailsEmployees/${employee.idEmployee}`} className="flex gap-2 hover:bg-neutral-300 p-2 rounded-md">
+                    <Link
+                      to={`/fornecedor/detailsEmployees/${employee.idEmployee}`}
+                      className="flex gap-2 hover:bg-neutral-300 p-2 rounded-md"
+                    >
                       <div className="rounded-full bg-neutral-200 p-2">
                         <User />
                       </div>
@@ -438,22 +438,9 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5">
-      <div className="flex items-center gap-2">
-        <span>Filtrar colaborador</span>
-        <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500 bg-white p-2">
-          <Search />
-          <input
-            type="text"
-            placeholder="Pesquisar por nome"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="bg-transparent outline-none"
-          />
-        </div>
-      </div>
+    <div className="flex flex-col items-center justify-center gap-5  relative top-[6vw] ">
       {isLoading ? (
-        <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
+        <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
           <Blocks
             height="80"
             width="80"
@@ -465,10 +452,23 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
           />
         </div>
       ) : (
-        <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
+        <div className="flex  w-[95vw] flex-wrap justify-center gap-5 rounded-md p-10 shadow-lg  bg-white">
+          <div className="flex items-center gap-2">
+            <span>Filtrar colaborador</span>
+            <div className="flex w-[50vw] items-center gap-1 rounded-md border border-neutral-500  p-2">
+              <Search />
+              <input
+                type="text"
+                placeholder="Pesquisar por nome"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="bg-transparent outline-none"
+              />
+            </div>
+          </div>
           {filteredEmployees.map((employee: any) => (
-            <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl">
-              <div className="flex w-[20vw] flex-col gap-9 p-10">
+            <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl ">
+              <div className="flex w-[25vw] h-[50vh] flex-col gap-9 p-10">
                 <div className="flex items-center justify-between">
                   <h1 className="text-[20px]">Contratos</h1>
                   <Button className="bg-realizaBlue">
@@ -476,20 +476,11 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                   </Button>
                 </div>
                 <div className="flex flex-col gap-5">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-realizaBlue font-medium">
-                      Industria Ultra gás - altura
-                    </h2>
-                    <div>
-                      <Eye />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-realizaBlue font-medium">
-                      Industria Ultra gás - altura
-                    </h2>
-                    <Dialog>
-                      <DialogTrigger>
+                  {employee.contracts.map((contract: any) => (
+                    <div key={contract.idContract} className="flex items-center justify-between">
+                      <h2 className="text-realizaBlue font-medium">{contract.serviceName}</h2>
+                      <Dialog>
+                      <DialogTrigger className="" onClick={() => getMoreDetailsDocument(contract.idContract)}>
                         {" "}
                         <div>
                           <Eye />
@@ -497,7 +488,7 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Are you absolutely sure?</DialogTitle>
+                          <DialogTitle>Detalhes do contrato</DialogTitle>
                           <DialogDescription>
                             This action cannot be undone. This will permanently
                             delete your account and remove your data from our
@@ -506,13 +497,18 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
                         </DialogHeader>
                       </DialogContent>
                     </Dialog>
-                  </div>
+                    </div>
+                  ))}
                 </div>
                 <Button className="bg-realizaBlue">
                   Ver todos os contratos
                 </Button>
               </div>
-              <Link to={`/sistema/detailsEmployees/${employee.idEmployee}`} key={employee.idEmployee} className="w-[15vw] p-4">
+              <Link
+                to={`/sistema/detailsEmployees/${employee.idEmployee}`}
+                key={employee.idEmployee}
+                className="w-[15vw] p-4"
+              >
                 <div className="flex flex-col gap-5">
                   <div className="flex gap-2">
                     <div className="rounded-full bg-neutral-200 p-2">
