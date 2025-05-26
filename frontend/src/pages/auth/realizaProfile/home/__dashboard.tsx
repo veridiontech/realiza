@@ -49,7 +49,7 @@ import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDo
 import { BranchesTable } from "./branchesTable";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
-import { Suppliers } from "@/components/BIs/BisPageComponents/SuppliersCard";
+import { Suppliers } from "@/components/BIs/BisPageComponents/suppliersCard";
 import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
 
 const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/;

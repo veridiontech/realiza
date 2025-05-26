@@ -3,16 +3,51 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PersonStanding } from "lucide-react";
 import { useUser } from "@/context/user-provider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
+function validarCPF(cpf: string): boolean {
+  cpf = cpf.replace(/[^\d]+/g, "");
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  let soma = 0;
+  for (let i = 1; i <= 9; i++) soma += parseInt(cpf[i - 1]) * (11 - i);
+  let resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(cpf[9])) return false;
+
+  soma = 0;
+  for (let i = 1; i <= 10; i++) soma += parseInt(cpf[i - 1]) * (12 - i);
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  return resto === parseInt(cpf[10]);
+}
+
+function validarTelefoneRepetido(telefone: string) {
+  const digits = telefone.replace(/\D/g, "");
+  return !/^(\d)\1+$/.test(digits);
+}
 
 const profileSchema = z.object({
   firstName: z.string(),
   surname: z.string(),
   email: z.string(),
-  telephone: z.string(),
-  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
+  telephone: z.string()
+    .nonempty("Celular é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
+    .refine(validarTelefoneRepetido, {
+      message: "Telefone inválido: não pode ter números repetidos"
+    }),
+  cpf: z.string()
+    .nonempty("CPF é obrigatório")
+    .regex(cpfRegex, "CPF inválido, use o formato 000.000.000-00")
+    .refine(validarCPF, { message: "CPF inválido" }),
   description: z.string(),
 });
 
@@ -20,6 +55,9 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 export function MiddleSection() {
   const { user } = useUser();
+
+  const [cpfValue, setCpfValue] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
 
   const {
     register,
@@ -30,136 +68,119 @@ export function MiddleSection() {
     resolver: zodResolver(profileSchema),
   });
 
-  const onSubmit = async (data: ProfileFormData) => {
-    const payload = {
-      ...data,
-      password: "40028922",
-    };
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      console.log(payload);
-      await axios.put(`${ip}/user/manager/${user?.idUser}`, payload,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
-      window.location.reload();
-    } catch (err) {
-      console.log("erro ao atualizar usuário", err);
-    }
-  };
-
   useEffect(() => {
     if (user) {
-      setValue("firstName", user?.firstName || "");
-      setValue("surname", user?.surname || "");
-      setValue("cpf", user?.cpf || "");
-      setValue("email", user?.email || "");
-      setValue("telephone", user?.telephone || "");
-      setValue("description", user?.description || "");
+      setValue("firstName", user.firstName || "");
+      setValue("surname", user.surname || "");
+      setValue("cpf", user.cpf || "");
+      setValue("email", user.email || "");
+      setValue("telephone", user.telephone || "");
+      setValue("description", user.description || "");
+
+      setCpfValue(user.cpf || "");
+      setPhoneValue(user.telephone || "");
     }
   }, [user, setValue]);
+
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+  };
+
+  const onSubmit = async (data: ProfileFormData) => {
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const payload = { ...data, password: "40028922" };
+      await axios.put(`${ip}/user/manager/${user?.idUser}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao atualizar usuário", err);
+    }
+  };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow"
     >
-      <div className="flex flex-row gap-2">
+      <div className="flex items-center gap-2">
         <PersonStanding className="text-realizaBlue h-7 w-7" />
         <h2 className="text-realizaBlue mb-4 text-lg">Informações Pessoais</h2>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Nome</label>
-        <input
+        <Label>Nome</Label>
+        <Input {...register("firstName")} placeholder="Digite seu nome" />
+        {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
+      </div>
+
+      <div>
+        <Label>Sobrenome</Label>
+        <Input {...register("surname")} placeholder="Digite seu sobrenome" />
+        {errors.surname && <p className="text-sm text-red-500">{errors.surname.message}</p>}
+      </div>
+
+      <div>
+        <Label>E-mail</Label>
+        <Input {...register("email")} placeholder="Digite seu e-mail" />
+        {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+      </div>
+
+      <div>
+        <Label>Telefone</Label>
+        <Input
           type="text"
-          {...register("firstName")}
-          className={`w-full rounded border p-3 ${errors.firstName ? "border-red-500" : "border-gray-300"
-            }`}
-          placeholder="Digite seu nome completo"
+          value={phoneValue}
+          onChange={(e) => {
+            const formatted = formatPhone(e.target.value);
+            setPhoneValue(formatted);
+            setValue("telephone", formatted, { shouldValidate: true });
+          }}
+          placeholder="(00) 00000-0000"
+          maxLength={15}
         />
-        {errors.firstName && (
-          <p className="text-sm text-red-500">{errors.firstName.message}</p>
-        )}
+        {errors.telephone && <p className="text-sm text-red-500">{errors.telephone.message}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Sobrenome
-        </label>
-        <input
+        <Label>CPF</Label>
+        <Input
           type="text"
-          {...register("surname")}
-          className={`w-full rounded border p-3 ${errors.surname ? "border-red-500" : "border-gray-300"
-            }`}
-          placeholder="Digite seu nome completo"
+          value={cpfValue}
+          onChange={(e) => {
+            const formatted = formatCPF(e.target.value);
+            setCpfValue(formatted);
+            setValue("cpf", formatted, { shouldValidate: true });
+          }}
+          placeholder="000.000.000-00"
+          maxLength={14}
         />
-        {errors.surname && (
-          <p className="text-sm text-red-500">{errors.surname.message}</p>
-        )}
+        {errors.cpf && <p className="text-sm text-red-500">{errors.cpf.message}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
-          E-mail
-        </label>
-        <input
-          type="email"
-          {...register("email")}
-          className={`w-full rounded border p-3 ${errors.email ? "border-red-500" : "border-gray-300"
-            }`}
-          placeholder="Digite seu e-mail"
-        />
-        {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Telefone
-        </label>
-        <input
-          type="text"
-          {...register("telephone")}
-          className={`w-full rounded border p-3 ${errors.telephone ? "border-red-500" : "border-gray-300"
-            }`}
-          placeholder="+55 11 91234-5678"
-        />
-        {errors.telephone && (
-          <p className="text-sm text-red-500">{errors.telephone.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">CPF</label>
-        <input
-          type="text"
-          {...register("cpf")}
-          className={`w-full rounded border p-3 ${errors.cpf ? "border-red-500" : "border-gray-300"
-            }`}
-          placeholder="123.456.789-00"
-        />
-        {errors.cpf && (
-          <p className="text-sm text-red-500">{errors.cpf.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Descrição
-        </label>
+        <Label>Descrição</Label>
         <textarea
           {...register("description")}
-          className={`w-full rounded border p-3 ${errors.description ? "border-red-500" : "border-gray-300"
-            }`}
+          className={`w-full rounded border p-3 ${errors.description ? "border-red-500" : "border-gray-300"}`}
           placeholder="Digite uma descrição sobre você"
           rows={4}
-        ></textarea>
-        {errors.description && (
-          <p className="text-sm text-red-500">{errors.description.message}</p>
-        )}
+        />
+        {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
       </div>
 
       <div className="flex justify-end">
