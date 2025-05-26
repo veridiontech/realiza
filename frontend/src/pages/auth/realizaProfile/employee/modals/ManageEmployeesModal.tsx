@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
+import { Puff } from "react-loader-spinner";
 
 interface Employee {
   idEmployee: string;
@@ -43,6 +44,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
   // const [allocatedEmployees, setAllocatedEmployees] = useState<Employee[]>([]);
   // const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<string[]>([]);
+  const [isAllocating, setIsAllocating] = useState(false);
 
   useEffect(() => {
     if (mainModalOpen) {
@@ -88,21 +90,21 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
     }
   }, [mainModalOpen, activeTab, idProvider]);
 
-//   const fetchAllocatedEmployees = async (contractId: string) => {
-//   setLoading(true);
-//   try {
-//     const tokenFromStorage = localStorage.getItem("tokenClient");
-//     const res = await axios.get(`${ip}/employee/filtered-by-contract/${contractId}`, {
-//       headers: { Authorization: `Bearer ${tokenFromStorage}` }
-//     });
-//     setAllocatedEmployees(res.data.content || []);
-//     setSelectedAllocatedEmployees([]);
-//   } catch (error) {
-//     console.error("Erro ao buscar colaboradores alocados:", error);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+  //   const fetchAllocatedEmployees = async (contractId: string) => {
+  //   setLoading(true);
+  //   try {
+  //     const tokenFromStorage = localStorage.getItem("tokenClient");
+  //     const res = await axios.get(`${ip}/employee/filtered-by-contract/${contractId}`, {
+  //       headers: { Authorization: `Bearer ${tokenFromStorage}` }
+  //     });
+  //     setAllocatedEmployees(res.data.content || []);
+  //     setSelectedAllocatedEmployees([]);
+  //   } catch (error) {
+  //     console.error("Erro ao buscar colaboradores alocados:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const toggleSelectAll = () => {
     if (activeTab === "alocar") {
@@ -172,11 +174,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
   const handleAllocate = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
-    console.log("Lista de colaboradores", selectedEmployees);
+    setIsAllocating(true);
     try {
       await Promise.all(
         selectedContracts.map(async (contractId) => {
-          console.log("ID do Contrato", contractId);
           await axios.post(
             `${ip}/contract/add-employee/${contractId}`,
             { employees: selectedEmployees },
@@ -189,12 +190,15 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
           );
         })
       );
-      toast.success("Sucesso ao alocar colaborador ");
+      toast.success("Sucesso ao alocar colaborador");
       setFinalConfirmOpen(false);
       setSelectedContracts([]);
       setSelectedEmployees([]);
     } catch (error) {
       console.error("Erro ao alocar colaboradores:", error);
+      toast.error("Erro ao alocar colaboradores.");
+    } finally {
+      setIsAllocating(false);
     }
   };
 
@@ -267,8 +271,8 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                 ? "Limpar Seleção"
                 : "Selecionar Todos"
               : selectedContracts.length === contracts.length
-              ? "Limpar Seleção"
-              : "Selecionar Todos"}
+                ? "Limpar Seleção"
+                : "Selecionar Todos"}
           </Button>
 
           <ScrollArea className="h-[60vh] mt-2 space-y-2">
@@ -284,11 +288,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                     <button
                       key={emp.idEmployee}
                       onClick={() => toggleSelect(emp.idEmployee)}
-                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
-                        isSelected
+                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
                           ? "bg-green-600 border-green-400"
                           : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                      }`}
+                        }`}
                     >
                       {emp.name} {emp.surname}
                     </button>
@@ -304,11 +307,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                   <button
                     key={contract.idContract}
                     onClick={() => toggleSelectContract(contract.idContract)}
-                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
-                      isSelected
+                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
                         ? "bg-green-600 border-red-400"
                         : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col">
                       <span className="font-semibold">{contract.serviceName}</span>
@@ -330,77 +332,75 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
           {((activeTab === "alocar" && selectedEmployees.length > 0) ||
             (activeTab === "desalocar" && selectedContracts.length > 0)) && (
-            <div className="mt-4 flex justify-end">
-              <Button
-                onClick={handleConfirm}
-                className={`${
-                  activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
-                } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
-              >
-                Proxima etapa
-              </Button>
-            </div>
-          )}
+              <div className="mt-4 flex justify-end">
+                <Button
+                  onClick={handleConfirm}
+                  className={`${activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
+                    } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
+                >
+                  Proxima etapa
+                </Button>
+              </div>
+            )}
         </DialogContent>
       </Dialog>
 
       <Dialog open={selectContractsModalOpen} onOpenChange={setSelectContractsModalOpen}>
-  <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-md">
-    <DialogHeader>
-      <DialogTitle className="text-white text-center text-lg">
-        Selecione os contratos
-        <ScrollArea className="h-[50vh] mt-4 space-y-2">
-          {contracts.length > 0 ? (
-            contracts.map((contract) => {
-              const isSelected = selectedContracts.includes(contract.idContract);
-              return (
-                <button
-                  key={contract.idContract}
-                  onClick={() => toggleSelectContract(contract.idContract)}
-                  className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
-                    isSelected
-                      ? "bg-green-600 border-green-400"
-                      : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                  }`}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{contract.serviceName}</span>
-                    <span className="text-sm text-gray-300">{contract.contractReference}</span>
-                    <span className="text-sm text-gray-300">{new Date(contract.dateStart).toLocaleDateString()}</span>
-                    <span className="text-sm text-gray-400">{contract.description}</span>
-                  </div>
-                </button>
-              );
-            })
-          ) : (
-            <p>Nenhum contrato disponível.</p>
-          )}
-        </ScrollArea>
-      </DialogTitle>
-    </DialogHeader>
-    <div className="mt-6 flex justify-end gap-3">
-      <Button
-        onClick={() => {
-          setSelectContractsModalOpen(false);
-          setMainModalOpen(true);
-        }}
-        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-2 rounded-md"
-      >
-        Voltar
-      </Button>
+        <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white text-center text-lg">
+              Selecione os contratos
+              <ScrollArea className="h-[50vh] mt-4 space-y-2">
+                {contracts.length > 0 ? (
+                  contracts.map((contract) => {
+                    const isSelected = selectedContracts.includes(contract.idContract);
+                    return (
+                      <button
+                        key={contract.idContract}
+                        onClick={() => toggleSelectContract(contract.idContract)}
+                        className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
+                            ? "bg-green-600 border-green-400"
+                            : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                          }`}
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{contract.serviceName}</span>
+                          <span className="text-sm text-gray-300">{contract.contractReference}</span>
+                          <span className="text-sm text-gray-300">{new Date(contract.dateStart).toLocaleDateString()}</span>
+                          <span className="text-sm text-gray-400">{contract.description}</span>
+                        </div>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p>Nenhum contrato disponível.</p>
+                )}
+              </ScrollArea>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              onClick={() => {
+                setSelectContractsModalOpen(false);
+                setMainModalOpen(true);
+              }}
+              className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-2 rounded-md"
+            >
+              Voltar
+            </Button>
 
-      <Button
-        onClick={() => {
-          setFinalConfirmOpen(true);
-          setSelectContractsModalOpen(false);
-        }}
-        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md"
-      >
-        Proxima etapa
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+            <Button
+              onClick={() => {
+                setFinalConfirmOpen(true);
+                setSelectContractsModalOpen(false);
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md"
+            >
+              Proxima etapa
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
         <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-lg">
@@ -450,9 +450,20 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
             </Button>
             <Button
               onClick={handleAllocate}
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md"
+              disabled={isAllocating}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md flex items-center justify-center gap-2"
             >
-              Confirmar
+              {isAllocating ? (
+                <Puff
+                  visible={true}
+                  height="20"
+                  width="20"
+                  color="white"
+                  ariaLabel="puff-loading"
+                />
+              ) : (
+                "Confirmar"
+              )}
             </Button>
           </div>
         </DialogContent>

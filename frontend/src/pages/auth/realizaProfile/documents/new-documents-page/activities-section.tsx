@@ -14,81 +14,79 @@ import { useState } from "react";
 //   AlertDialogTrigger,
 // } from "@/components/ui/alert-dialog";
 // import { useDocument } from "@/context/Document-provider";
-import { ThirdCompany } from "../boxes-selected/third-company";
-import { ThirdCollaborators } from "../boxes-selected/third-collaborators";
-import { TrainingBox } from "../boxes-selected/services";
-import { OrtherRequirements } from "../boxes-selected/orther-requirements";
 import { useDocument } from "@/context/Document-provider";
 import { ActivitiesBox } from "../boxes-selected/activities";
-import { AmbientBox } from "../boxes-selected/ambient-box";
-import { TrabalhistaBox } from "../boxes-selected/trabalhista-box";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { GeralBox } from "../boxes-selected/geral";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { useBranch } from "@/context/Branch-provider";
+import { Oval } from "react-loader-spinner";
+import { toast } from "sonner";
 
+const contractFormSchema = z.object({
+  title: z.string(),
+  risk: z.string(),
+});
+
+type ContractFormSchema = z.infer<typeof contractFormSchema>;
 export function ActiviteSectionBox() {
   const [selectedTab, setSelectedTab] = useState("activities");
   const { setDocuments, setNonSelected } = useDocument();
+  const { selectedBranch } = useBranch();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // const { documents, nonSelected } = useDocument();
-
-  // const mockDocumentsNonSelected: propsDocument[] = [
-  //   { idDocument: "1", name: "Documento 1" },
-  //   { idDocument: "2", name: "Documento 2" },
-  //   { idDocument: "3", name: "Documento 3" },
-  //   { idDocument: "4", name: "Documento 4" },
-  // ];
-
-  // const mockDocumentsSelected: propsDocument[] = [
-  //   { idDocument: "1", name: "Documento 11231231" },
-  //   { idDocument: "2", name: "Documento 21231231" },
-  //   { idDocument: "3", name: "Documento 31231231" },
-  //   { idDocument: "4", name: "Documento 4231321" },
-  // ];
+  const { register, handleSubmit } = useForm<ContractFormSchema>({
+    resolver: zodResolver(contractFormSchema),
+  });
 
   const handleClickToggle = () => {
     setDocuments([]);
     setNonSelected([]);
   };
 
-  const tabsOrder = [
-    "thirdCompany",
-    "thirdCollaborators",
-    "otherRequirements",
-    "activities",
-  ];
-
-  const handlePrev = () => {
-    const currentIndex = tabsOrder.indexOf(selectedTab);
-    if (currentIndex > 0) {
-      setSelectedTab(tabsOrder[currentIndex - 1]);
-      handleClickToggle();
-    }
-  };
-
-  const handleNext = () => {
-    const currentIndex = tabsOrder.indexOf(selectedTab);
-    if (currentIndex < tabsOrder.length - 1) {
-      setSelectedTab(tabsOrder[currentIndex + 1]);
-      handleClickToggle();
-    }
-  };
-
-  const renderTabName = () => {
-    if (selectedTab === "thirdCompany") return "Empresa terceiros";
-    if (selectedTab === "thirdCollaborators") return "Colaboradores terceiros";
-    if (selectedTab === "otherRequirements") return "Outras exigências";
-    if (selectedTab === "activities") return "Atividades";
-    return "";
-  };
-
   // useEffect(() => {
 
   // }, [])
 
+  const createActivitie = async (data: ContractFormSchema) => {
+    const token = localStorage.getItem("tokenClient");
+    const payload = {
+      ...data,
+      idBranch: selectedBranch?.idBranch,
+    };
+    console.log(payload);
+    
+    setIsLoading(true);
+    try {
+      await axios.post(`${ip}/contract/activity`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Atividade criada com sucesso")
+    } catch (err) {
+      toast.error("Erro ao criar atividade")
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative bottom-[8vw]">
-      <div className="absolute left-0 right-0 top-0 z-10 hidden gap-2 rounded-lg bg-white p-5 shadow-md md:flex ">
-    
+      <div className="absolute left-0 right-0 top-0 z-10 gap-2 rounded-lg bg-white p-5 shadow-md md:flex justify-between">
         <Button
           variant={"ghost"}
           className={`px-4 py-2 transition-all duration-300 ${
@@ -102,42 +100,69 @@ export function ActiviteSectionBox() {
         >
           Atividades
         </Button>
-      </div>
-      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
-        <Button
-          variant={"ghost"}
-          onClick={handlePrev}
-          disabled={selectedTab === "thirdCompany"}
-          className={`text-realizaBlue ${selectedTab === "thirdCompany" ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
-        <div className="flex flex-1 justify-center">
-          <Button
-            variant={"ghost"}
-            className="bg-realizaBlue pointer-events-none px-6 py-3 font-bold text-white shadow-lg"
-          >
-            {renderTabName()}
-          </Button>
-        </div>
-        <Button
-          variant={"ghost"}
-          onClick={handleNext}
-          disabled={selectedTab === "activities"}
-          className={`text-realizaBlue ${selectedTab === "activities" ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
+        <Dialog>
+          <DialogTrigger>
+            <Button className="bg-realizaBlue">
+              <Plus />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Criar atividade para filial{" "}
+                {selectedBranch?.name ? selectedBranch.name : "não selecionada"}
+              </DialogTitle>
+            </DialogHeader>
+            <div>
+              <form
+                onSubmit={handleSubmit(createActivitie)}
+                className="flex flex-col gap-2"
+              >
+                <div>
+                  <Label>Título da atividade</Label>
+                  <Input
+                    {...register("title")}
+                    className="border border-neutral-400"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Label>Risco</Label>
+                  <select
+                    className="border border-neutral-400 rounded-md p-2"
+                    defaultValue={""}
+                    {...register("risk")}
+                  >
+                    <option value="" disabled>
+                      Selecione um risco
+                    </option>
+                    <option value="LOW">BAIXO</option>
+                    <option value="MEDIUM">MÉDIO</option>
+                    <option value="HIGH">ALTO</option>
+                    <option value="VERY_HIGH">MUITO ALTO</option>
+                  </select>
+                </div>
+                {isLoading ? (
+                  <Button className="bg-realizaBlue">
+                    <Oval
+                      visible={true}
+                      height="80"
+                      width="80"
+                      color="#4fa94d"
+                      ariaLabel="oval-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </Button>
+                ) : (
+                  <Button className="bg-realizaBlue"  disabled={!selectedBranch?.idBranch}>Criar atividade</Button>
+                )}
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="bg-white pt-24 shadow-md">
-        {selectedTab === "thirdCompany" && <ThirdCompany />}
-        {selectedTab === "thirdCollaborators" && <ThirdCollaborators />}
-        {selectedTab === "training" && <TrainingBox />}
-        {selectedTab === "otherRequirements" && <OrtherRequirements />}
-        {selectedTab === "geral" && <GeralBox />}
-        {selectedTab === "activities" && <ActivitiesBox />}
-        {selectedTab === "ambient" && <AmbientBox />}
-        {selectedTab === "trabalhista" && <TrabalhistaBox />}
+        {selectedTab === "activities" && <ActivitiesBox/>}
       </div>
     </div>
   );

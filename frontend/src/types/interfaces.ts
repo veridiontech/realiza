@@ -57,6 +57,7 @@ export interface propsBranch {
   state: string;
   row: string;
   actions: string
+  client: string
 }
 
 export interface propsSupplier {

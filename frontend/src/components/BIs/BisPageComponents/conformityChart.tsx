@@ -17,22 +17,30 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { ip } from '@/utils/ip'
 import { useBranch } from '@/context/Branch-provider'
-import { useClient } from '@/context/Client-Provider'
+// import { useClient } from '@/context/Client-Provider'
 
 export function ConformityGaugeChart() {
   const { selectedBranch } = useBranch()
-  const { client } = useClient() // ⬅️ Corrigido aqui!
+  // const { client } = useClient() // ⬅️ Corrigido aqui!
 
   const [percentage, setPercentage] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const token = localStorage.getItem("tokenClient")
 
   useEffect(() => {
     const fetchConformity = async () => {
       try {
         const res = await axios.get(
-          `${ip}/conformity?branchId=${selectedBranch?.idBranch}&clientId=${client?.idClient}`
+          `${ip}/conformity?branchId=${selectedBranch?.idBranch}&clientId=${selectedBranch?.client}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         )
         const conformityValue = res.data?.percentage ?? 0
+        console.log(conformityValue);
+        
         setPercentage(conformityValue)
       } catch (err) {
         console.error('Erro ao buscar conformidade:', err)
@@ -42,10 +50,10 @@ export function ConformityGaugeChart() {
       }
     }
 
-    if (selectedBranch?.idBranch && client?.idClient) {
+    if (selectedBranch?.idBranch && selectedBranch.client) {
       fetchConformity()
     }
-  }, [selectedBranch?.idBranch, client?.idClient])
+  }, [selectedBranch?.idBranch, selectedBranch?.client])
 
   const chartData = [
     {

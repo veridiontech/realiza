@@ -27,7 +27,6 @@ import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
 const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
-
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z
@@ -95,11 +94,9 @@ export function ModalTesteSendSupplier() {
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
-  const [isMainModalOpen, setIsMainModalOpen] = useState(false);  // controla o primeiro modal
+  const [isMainModalOpen, setIsMainModalOpen] = useState(false); // controla o primeiro modal
   const [cnpjValue, setCnpjValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
-
-
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -159,23 +156,18 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-
   useEffect(() => {
     setCnpjValue(getValues("cnpj") || "");
     setPhoneValue(getValues("phone") || "");
   }, [getValues]);
 
-
   const handleCNPJSearch = async () => {
     const cnpjValue = getValues("cnpj");
-    console.log("CNPJ no form de contratado:", cnpjValue);
     setIsLoading(true);
     try {
       const companyData = await fetchCompanyByCNPJ(cnpjValue);
       setValue("corporateName", companyData.razaoSocial || "");
     } catch (error) {
-      console.log("erro ao buscar cnpj", error);
-
       toast.error("Erro ao buscar dados do CNPJ");
     } finally {
       setIsLoading(false);
@@ -187,12 +179,13 @@ export function ModalTesteSendSupplier() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/contract/supplier/subcontract-permission`, {
-        params: {
-          idBranch: selectedBranch.idBranch
-        },
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
+        `${ip}/contract/supplier/subcontract-permission`,
+        {
+          params: {
+            idBranch: selectedBranch.idBranch,
+          },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       console.log(res.data);
 
@@ -212,13 +205,16 @@ export function ModalTesteSendSupplier() {
   const getActivities = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const activitieData = await axios.get(`${ip}/contract/activity`, {
-        params: {
-          size: 1000
-        },
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      });
-      setActivities(activitieData.data.content);
+      const activitieData = await axios.get(
+        `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
+        {
+          params: {
+            size: 1000,
+          },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      setActivities(activitieData.data);
     } catch (err) {
       console.log(err);
     }
@@ -234,7 +230,7 @@ export function ModalTesteSendSupplier() {
         };
         console.log(
           "Dados enviados de contratado para modal de contrato:",
-          payload,
+          payload
         );
       } else {
         payload = {
@@ -242,7 +238,7 @@ export function ModalTesteSendSupplier() {
         };
         console.log(
           "Enviando dados de subcontratado para o modal de contrato:",
-          payload,
+          payload
         );
       }
       setProviderDatas(payload);
@@ -261,15 +257,16 @@ export function ModalTesteSendSupplier() {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
-        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
+        `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
       );
       setManagers(res.data.content);
     } catch (err) {
       console.log(
         `erro ao buscar gestores da filia: ${selectedBranch?.name}`,
-        err,
+        err
       );
     }
   };
@@ -309,7 +306,6 @@ export function ModalTesteSendSupplier() {
       toast.success("Contrato criado com sucesso!");
       setNextModal(false);
       setIsMainModalOpen(false);
-
     } catch (err: any) {
       if (err.response) {
         console.error("Erro no servidor:", err.response.data);
@@ -332,17 +328,16 @@ export function ModalTesteSendSupplier() {
       const res = await axios.get(`${ip}/contract/service-type`, {
         params: {
           owner: "BRANCH",
-          idOwner: selectedBranch?.idBranch
+          idOwner: selectedBranch?.idBranch,
         },
-        headers: { Authorization: `Bearer ${tokenFromStorage}`, }
-      },); 
-            console.log("servicos:", res.data);
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+      console.log("servicos:", res.data);
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);
     }
   };
-  
 
   useEffect(() => {
     getActivities();
@@ -351,7 +346,7 @@ export function ModalTesteSendSupplier() {
 
   return (
     <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
-      <DialogTrigger asChild >
+      <DialogTrigger asChild>
         <Button className="hidden bg-sky-700 md:block">
           Cadastrar novo prestador
         </Button>
@@ -421,7 +416,7 @@ export function ModalTesteSendSupplier() {
                       setValue("cnpj", formatted, { shouldValidate: true });
                     }}
                     className="w-full"
-                  // {...register("cnpj")}
+                    // {...register("cnpj")}
                   />
                   {isLoading ? (
                     <div
@@ -448,7 +443,9 @@ export function ModalTesteSendSupplier() {
                   )}
                 </div>
                 {errorsSubContract.cnpj && (
-                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
+                  <span className="text-red-600">
+                    {errorsSubContract.cnpj.message}
+                  </span>
                 )}
               </div>
 
@@ -537,7 +534,9 @@ export function ModalTesteSendSupplier() {
                   )}
                 </div>
                 {errorsSubContract.cnpj && (
-                  <span className="text-red-600">{errorsSubContract.cnpj.message}</span>
+                  <span className="text-red-600">
+                    {errorsSubContract.cnpj.message}
+                  </span>
                 )}
               </div>
 
@@ -597,14 +596,16 @@ export function ModalTesteSendSupplier() {
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  {Array.isArray(suppliers) && suppliers.map((supplier: any) => (
-                    <option
-                      value={supplier.idContract}
-                      key={supplier.idContract}
-                    >
-                      {supplier.providerSupplierName} - {supplier.contractReference}
-                    </option>
-                  ))}
+                  {Array.isArray(suppliers) &&
+                    suppliers.map((supplier: any) => (
+                      <option
+                        value={supplier.idContract}
+                        key={supplier.idContract}
+                      >
+                        {supplier.providerSupplierName} -{" "}
+                        {supplier.contractReference}
+                      </option>
+                    ))}
                 </select>
                 {errorsSubContract.providerSubcontractor && (
                   <span className="text-red-600">
@@ -818,7 +819,7 @@ export function ModalTesteSendSupplier() {
                         <Label className="text-white">Tipo de atividade</Label>
                         <ScrollArea className="h-[20vh] p-2 rounded-lg">
                           <div className="flex flex-col gap-1 bg-white p-2 rounded-lg">
-                            {activities.map((activity: any) => (
+                            {Array.isArray(activities) && activities.map((activity: any) => (
                               <div
                                 key={activity.idActivity}
                                 className="flex items-center gap-2"
@@ -828,11 +829,11 @@ export function ModalTesteSendSupplier() {
                                   onChange={(e) =>
                                     handleCheckboxChange(
                                       activity.idActivity,
-                                      e.target.checked,
+                                      e.target.checked
                                     )
                                   }
                                   checked={selectedActivities.includes(
-                                    activity.idActivity,
+                                    activity.idActivity
                                   )}
                                 />
                                 <p className="text-black">{activity.title}</p>

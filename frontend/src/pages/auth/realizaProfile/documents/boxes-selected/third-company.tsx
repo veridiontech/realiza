@@ -16,7 +16,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
-import { propsDocument } from "@/types/interfaces";
+// import { propsDocument } from "@/types/interfaces";
 // import { boolean } from "zod";
 
 export function ThirdCompany() {
@@ -24,10 +24,12 @@ export function ThirdCompany() {
   const [notSelectedDocument, setNotSelectedDocument] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState<any>([]);
   const { selectedBranch } = useBranch();
+  const [isLoading, setIsLoading] = useState(false)
 
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
+    setIsLoading(true)
     try {
       const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
@@ -54,15 +56,17 @@ export function ThirdCompany() {
       setSelectedDocument(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
+    } finally {
+      setIsLoading(false)
     }
   };
   const filterIdDocuments = nonSelected
-  .map((document: propsDocument) => document.idDocumentation)
-  // .map((document) => document.idDocumentation);
+  .map((document: any) => document.idDocument)
+  // .map((document) => document.idDocument);
 
   const filterIdDocumentsSelected = documents
-  .map((document: propsDocument) => document.idDocumentation)
-  // .map((document) => document.idDocumentation);
+  .map((document: any) => document.idDocument)
+  // .map((document) => document.idDocument);
 
 console.log("ids dos documentos", filterIdDocuments);
 console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
@@ -110,7 +114,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={notSelectedDocument} />
+        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading}/>
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -175,7 +179,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
         </div>
       </div>
       <div>
-        <BoxSelected documents={selectedDocument} />
+        <BoxSelected documents={selectedDocument} isLoading={isLoading}/>
       </div>
     </div>
   );
