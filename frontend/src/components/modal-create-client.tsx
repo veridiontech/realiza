@@ -251,15 +251,17 @@ export function ModalCreateCliente() {
           </DialogHeader>
           <form onSubmit={handleSubmit(createCliente)} className="flex flex-col gap-2">
             <div>
-              <Label>Nome fantasia</Label>
-              <Input {...register("tradeName")} placeholder="Insira o nome fantasia" />
-              {errors.tradeName && <span className="text-sm text-red-600">{errors.tradeName.message}</span>}
-            </div>
-            <div>
               <Label>Razão social</Label>
               <Input {...register("corporateName")} placeholder="Insira a razão social" />
               {errors.corporateName && <span className="text-sm text-red-600">{errors.corporateName.message}</span>}
             </div>
+
+            <div>
+              <Label>Nome fantasia</Label>
+              <Input {...register("tradeName")} placeholder="Insira o nome fantasia" />
+              {errors.tradeName && <span className="text-sm text-red-600">{errors.tradeName.message}</span>}
+            </div>
+            
             <div>
               <Label>Email</Label>
               <Input {...register("email")} placeholder="Insira o email" />
