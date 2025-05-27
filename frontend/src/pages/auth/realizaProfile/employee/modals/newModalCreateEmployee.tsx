@@ -519,7 +519,9 @@ export function NewModalCreateEmployee() {
 
                 <div>
                   <Label className="text-white">Cargo</Label>
-                  <Input {...register("position")} />
+                  <Input
+                    placeholder="Digite o cargo"
+                    {...register("position")} />
                 </div>
                 <div>
                   <Label className="text-white">CBO</Label>
