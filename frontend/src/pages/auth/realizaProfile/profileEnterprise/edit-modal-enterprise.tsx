@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Puff } from "react-loader-spinner";
+// import { Puff } from "react-loader-spinner";
 import {
   Dialog,
   DialogContent,
@@ -23,12 +23,13 @@ import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 // 🛠 Regex mais seguro (exige hífen)
 const cepRegex = /^\d{5}-\d{3}$/;
+const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
-interface adressProps {
-  city: string;
-  state: string;
-  adress: string;
-}
+// interface adressProps {
+//   city: string;
+//   state: string;
+//   adress: string;
+// }
 
 async function validarCEPExiste(cep: string): Promise<boolean> {
   try {
@@ -40,6 +41,13 @@ async function validarCEPExiste(cep: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function validarTelefoneRepetido(telefone: string) {
+  // Remove tudo que não for número
+  const digits = telefone.replace(/\D/g, "");
+  // Verifica se todos os dígitos são iguais
+  return !/^(\d)\1+$/.test(digits);
 }
 
 const editModalEnterpriseSchema = z.object({
@@ -54,7 +62,13 @@ const editModalEnterpriseSchema = z.object({
   corporateName: z.string(),
   tradeName: z.string(),
   email: z.string(),
-  phone: z.string(),
+  phone: z
+    .string()
+    .nonempty("Celular é obrigatório")
+    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
+    .refine(validarTelefoneRepetido, {
+      message: "Telefone inválido: não pode ter números repetidos",
+    }),
   state: z.string(),
   city: z.string(),
   adress: z.string(),
@@ -65,9 +79,10 @@ type EditModalEnterpriseSchema = z.infer<typeof editModalEnterpriseSchema>;
 
 export function EditModalEnterprise() {
   const [cepValue, setCepValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const { client } = useClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [phoneValue, setPhoneValue] = useState("");
 
   const {
     register,
@@ -106,30 +121,31 @@ export function EditModalEnterprise() {
     }
   };
 
-  const findCep = async () => {
-    try {
-      setIsLoading(true);
-      const cepLimpo = cepValue.replace(/\D/g, "");
-      const res = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-      if (res.data) {
-        setValuesAdress({
-          city: res.data.localidade,
-          state: res.data.uf,
-          adress: res.data.logradouro,
-        });
-      }
-    } catch (err) {
-      console.log("Não foi possível buscar o CEP", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const findCep = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const cepLimpo = cepValue.replace(/\D/g, "");
+  //     const res = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+  //     if (res.data) {
+  //       setValuesAdress({
+  //         city: res.data.localidade,
+  //         state: res.data.uf,
+  //         adress: res.data.logradouro,
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.log("Não foi possível buscar o CEP", err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const setValuesAdress = (data: adressProps) => {
-    setValue("city", data.city);
-    setValue("state", data.state);
-    setValue("adress", data.adress);
-  };
+
+  // const setValuesAdress = (data: adressProps) => {
+  //   setValue("city", data.city);
+  //   setValue("state", data.state);
+  //   setValue("adress", data.adress);
+  // };
 
   const onSubmit = async (data: EditModalEnterpriseSchema) => {
     try {
@@ -148,6 +164,20 @@ export function EditModalEnterprise() {
 
   const formatCEP = (value: string) => {
     return value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
+  };
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+
+    if (digits.length <= 2) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
   };
 
   useEffect(() => {
@@ -181,22 +211,48 @@ export function EditModalEnterprise() {
 
             <div>
               <Label className="text-white">Nome da empresa</Label>
-              <Input {...register("corporateName")} />
+              <Input
+                placeholder="Digite o nome da empresa"
+                {...register("corporateName")} />
             </div>
 
             <div>
               <Label className="text-white">Nome fantasia</Label>
-              <Input {...register("tradeName")} />
+              <Input
+                placeholder="Digite o nome fantasia"
+                {...register("tradeName")} />
             </div>
 
             <div>
               <Label className="text-white">Email corporativo</Label>
-              <Input {...register("email")} />
+              <Input
+                placeholder="Digite o email corporativo"
+                {...register("email")} />
             </div>
 
-            <div>
+            <div className="flex flex-col gap-2">
               <Label className="text-white">Telefone</Label>
-              <Input {...register("phone")} />
+              <Input
+                type="text"
+                value={phoneValue}
+                {...register("phone")}
+                onChange={(e) => {
+                  const formattedPhone = formatPhone(
+                    e.target.value
+                  );
+                  setPhoneValue(formattedPhone);
+                  setValue("phone", formattedPhone, {
+                    shouldValidate: true,
+                  });
+                }}
+                placeholder="(00) 00000-0000"
+                maxLength={15}
+              />
+              {errors.phone && (
+                <span className="text-sm text-red-600">
+                  {errors.phone.message}
+                </span>
+              )}
             </div>
 
             <div>
@@ -220,18 +276,18 @@ export function EditModalEnterprise() {
 
             <div>
               <Label className="text-white">Estado</Label>
-              <Input {...register("state")} readOnly placeholder="Preencha o CEP" />
+              <Input {...register("state")} readOnly placeholder="Digite o estado" />
             </div>
 
             <div>
               <Label className="text-white">Cidade</Label>
-              <Input {...register("city")} readOnly placeholder="Preencha o CEP" />
+              <Input {...register("city")} readOnly placeholder="Digite a cidade" />
             </div>
 
             <div className="flex flex-col md:flex-row gap-3">
               <div className="w-full md:w-[80%]">
                 <Label className="text-white">Endereço</Label>
-                <Input {...register("adress")} readOnly placeholder="Preencha o CEP" />
+                <Input {...register("adress")} readOnly placeholder="Digite o endereço" />
               </div>
               <div className="w-full md:w-[20%]">
                 <Label className="text-white">Número</Label>
@@ -241,8 +297,9 @@ export function EditModalEnterprise() {
 
             <div>
               <Label className="text-white">Responsável pela unidade</Label>
-              <Input />
+              <Input placeholder="Digite o nome do responsável" />
             </div>
+
 
             <Button className="bg-realizaBlue w-full md:w-auto">
               Confirmar edição
