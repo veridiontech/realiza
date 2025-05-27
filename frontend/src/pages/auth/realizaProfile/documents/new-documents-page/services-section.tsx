@@ -9,7 +9,8 @@ import axios from "axios";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Blocks } from "react-loader-spinner";
+import { Blocks, Oval } from "react-loader-spinner";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type Service = {
@@ -19,9 +20,8 @@ type Service = {
 };
 
 const createNewService = z.object({
-  title: z.string(),
-  risk: z.string(),
-  idBranch: z.string(),
+  title: z.string().nonempty("É obrigatório o preenchimento do título"),
+  risk: z.string().nonempty("É obrigatório a seleção de risco"),
 });
 
 type CreateNewService = z.infer<typeof createNewService>;
@@ -33,6 +33,7 @@ export function ServicesSection() {
   const [tempTitle, setTempTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false)
 
   const tokenFromStorage = localStorage.getItem("tokenClient");
 
@@ -58,7 +59,9 @@ export function ServicesSection() {
   const updateTitle = async (idServiceType: string, title: string) => {
     if (!title.trim()) return alert("Título não pode ser vazio");
 
-    const serviceAtual = services.find((s) => s.idServiceType === idServiceType);
+    const serviceAtual = services.find(
+      (s) => s.idServiceType === idServiceType
+    );
     if (!serviceAtual) return;
 
     const payload = {
@@ -86,7 +89,9 @@ export function ServicesSection() {
 
   // Atualiza só o risco, mas envia título + risco juntos
   const updateRisk = async (idServiceType: string, risk: Service["risk"]) => {
-    const serviceAtual = services.find((s) => s.idServiceType === idServiceType);
+    const serviceAtual = services.find(
+      (s) => s.idServiceType === idServiceType
+    );
     if (!serviceAtual) return;
 
     const payload = {
@@ -115,23 +120,36 @@ export function ServicesSection() {
     }
   }, [selectedBranch?.idBranch]);
 
-  const { register, handleSubmit } = useForm<CreateNewService>({
+  const { register, handleSubmit, formState: {errors} } = useForm<CreateNewService>({
     resolver: zodResolver(createNewService),
   });
 
   const createService = async (data: CreateNewService) => {
+    setIsLoadingCreate(true)
+
+    const payload = {
+      ...data,
+      branchId: selectedBranch?.idBranch
+    }
+    console.log("enviando dados:", payload);
+    
     try {
       await axios.post(
-        `${ip}/contract/service-type/${selectedBranch?.idBranch}`,
-        data,
+        `${ip}/contract/service-type/branch/${selectedBranch?.idBranch}`,
+        payload,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
+      toast.success("Sucesso ao criar novo serviço")
       // Atualizar lista após criar novo serviço
       getServices();
+
+      
     } catch (err: any) {
       console.log(err);
+    } finally {
+      setIsLoadingCreate(false)
     }
   };
 
@@ -229,7 +247,9 @@ export function ServicesSection() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-gray-500">Nenhum serviço encontrado.</p>
+                  <p className="text-center text-gray-500">
+                    Nenhum serviço encontrado.
+                  </p>
                 )}
               </div>
             </ScrollArea>
@@ -248,6 +268,9 @@ export function ServicesSection() {
                   {...register("title")}
                   className="border border-neutral-400"
                 />
+                {errors.title && (
+                  <span>{errors.title.message}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <Label>Risco</Label>
@@ -264,8 +287,25 @@ export function ServicesSection() {
                   <option value="HIGH">ALTO</option>
                   <option value="VERY_HIGH">MUITO ALTO</option>
                 </select>
+                {errors.risk && (
+                  <span>{errors.risk.message}</span>
+                )}
               </div>
-              <Button className="bg-realizaBlue">Criar novo serviço</Button>
+              {isLoadingCreate ? (
+                <Button className="bg-realizaBlue">
+                  <Oval
+                    visible={true}
+                    height="80"
+                    width="80"
+                    color="#4fa94d"
+                    ariaLabel="oval-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                  />
+                </Button>
+              ) : (
+                <Button className="bg-realizaBlue" type="submit">Criar novo serviço</Button>
+              )}
             </form>
           </div>
         </div>

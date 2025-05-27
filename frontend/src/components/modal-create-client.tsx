@@ -111,20 +111,20 @@ export function ModalCreateCliente() {
     setValue("cnpj", formatted, { shouldValidate: true });
   }, [getValues, setValue]);
 
-  useEffect(() => {
-    if (cnpjData) {
-      setValue("corporateName", cnpjData.company.name || "");
-      setValue("tradeName", cnpjData.alias || "");
-      setValue("email", cnpjData.emails?.[0]?.address || "");
-      setValue("telephone", cnpjData.phones?.[0]?.number || "");
-      setValue("cep", cnpjData.address.zip || "");
-      setValue("state", cnpjData.address.state || "");
-      setValue("city", cnpjData.address.city || "");
-      setValue("address", cnpjData.address.street || "");
-      setValue("number", cnpjData.address.number || "");
-      setShowSecondModal(true);
-    }
-  }, [cnpjData, setValue]);
+  // useEffect(() => {
+  //   if (cnpjData) {
+  //     setValue("corporateName", cnpjData.company.name || "");
+  //     setValue("tradeName", cnpjData.alias || "");
+  //     // setValue("email", cnpjData.emails?.[0]?.address || "");
+  //     setValue("telephone", cnpjData.phones?.[0]?.number || "");
+  //     setValue("cep", cnpjData.address.zip || "");
+  //     setValue("state", cnpjData.address.state || "");
+  //     setValue("city", cnpjData.address.city || "");
+  //     setValue("address", cnpjData.address.street || "");
+  //     setValue("number", cnpjData.address.number || "");
+  //     setShowSecondModal(true);
+  //   }
+  // }, [cnpjData, setValue]);
 
   // Sanitiza o CNPJ removendo caracteres não numéricos
   const sanitizedCnpj = cnpjValue.replace(/\D/g, "");
@@ -138,6 +138,8 @@ export function ModalCreateCliente() {
     try {
       console.log("CNPJ enviado para a API:", cnpjValue);
       const res = await axios.get(`https://open.cnpja.com/office/${sanitizedCnpj}`);
+      console.log("obbjeto do cnpj retornado:", res.data);
+      
       setCnpjData(res.data);
       toast.success("CNPJ carregado com sucesso!");
     } catch (err) {
@@ -204,6 +206,36 @@ export function ModalCreateCliente() {
       formatted = formatted.replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d{0,2})/, "$1.$2.$3/$4-$5");
     return formatted;
   };
+
+  const formatPhoneFromApi = (area: string, number: string) => {
+  const fullNumber = area + number;
+  if (fullNumber.length === 10) {
+    return `(${fullNumber.slice(0, 2)}) ${fullNumber.slice(2, 6)}-${fullNumber.slice(6)}`;
+  } else if (fullNumber.length === 11) {
+    return `(${fullNumber.slice(0, 2)}) ${fullNumber.slice(2, 7)}-${fullNumber.slice(7)}`;
+  } else {
+    return number;
+  }
+};
+
+useEffect(() => {
+  if (cnpjData) {
+    const phone = cnpjData.phones?.[0];
+    const formattedPhone = phone ? formatPhoneFromApi(phone.area, phone.number) : "";
+
+    setValue("corporateName", cnpjData.company.name || "");
+    setValue("tradeName", cnpjData.alias || "");
+    // setValue("email", cnpjData.emails?.[0]?.address || "");
+    setValue("telephone", formattedPhone);
+    setPhoneValue(formattedPhone);
+    setValue("cep", cnpjData.address.zip || "");
+    setValue("state", cnpjData.address.state || "");
+    setValue("city", cnpjData.address.city || "");
+    setValue("address", cnpjData.address.street || "");
+    setValue("number", cnpjData.address.number || "");
+    setShowSecondModal(true);
+  }
+}, [cnpjData, setValue]);
 
   return (
     <div>
@@ -285,6 +317,7 @@ export function ModalCreateCliente() {
               <Input
                 type="text"
                 value={cepValue}
+                {...register("cep")}
                 onChange={(e) => {
                   const formattedCEP = formatCEP(e.target.value);
                   setCepValue(formattedCEP);
