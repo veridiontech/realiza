@@ -578,7 +578,7 @@ export function Dashboard() {
                                 Nome:
                               </p>
                               <p className="text-realizaBlue mb-2">
-                                {users.firstName}
+                                {users.firstName} {users.surname}
                               </p>
 
                               <p className="text-sm font-semibold text-gray-700">
@@ -618,7 +618,7 @@ export function Dashboard() {
                               usersFromBranch.map((users: any) => (
                                 <tr key={users.idUser}>
                                   <td className="border border-gray-300 px-4 py-2">
-                                    {users.firstName}
+                                    {users.firstName} {users.surname}
                                   </td>
                                   <td className="border border-gray-300 px-4 py-2">
                                     {users.cpf}
