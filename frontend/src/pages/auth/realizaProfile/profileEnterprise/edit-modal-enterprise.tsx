@@ -62,7 +62,7 @@ const editModalEnterpriseSchema = z.object({
   corporateName: z.string(),
   tradeName: z.string(),
   email: z.string(),
-  phone: z
+  telephone: z
     .string()
     .nonempty("Celular é obrigatório")
     .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
@@ -71,7 +71,7 @@ const editModalEnterpriseSchema = z.object({
     }),
   state: z.string(),
   city: z.string(),
-  adress: z.string(),
+  address: z.string(),
   number: z.string(),
 });
 
@@ -83,6 +83,9 @@ export function EditModalEnterprise() {
   const { client } = useClient();
   const [isOpen, setIsOpen] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
+
+  console.log(client);
+  
 
   const {
     register,
@@ -110,12 +113,14 @@ export function EditModalEnterprise() {
       setValue("cnpj", data.cnpj || "");
       setValue("corporateName", data.corporateName || "");
       setValue("tradeName", data.tradeName || "");
+      setValue("cep" , data.cep || "")
       setValue("email", data.email || "");
-      setValue("phone", data.phone || "");
+      setValue("telephone", data.telephone|| "");
       setValue("state", data.state || "");
       setValue("city", data.city || "");
-      setValue("adress", data.adress || "");
+      setValue("address", data.adress || "");
       setValue("number", data.number || "");
+      setValue("address", data.address || "")
     } catch (err) {
       console.error("Não foi possível recuperar os dados da empresa", err);
     }
@@ -235,22 +240,22 @@ export function EditModalEnterprise() {
               <Input
                 type="text"
                 value={phoneValue}
-                {...register("phone")}
+                {...register("telephone")}
                 onChange={(e) => {
                   const formattedPhone = formatPhone(
                     e.target.value
                   );
                   setPhoneValue(formattedPhone);
-                  setValue("phone", formattedPhone, {
+                  setValue("telephone", formattedPhone, {
                     shouldValidate: true,
                   });
                 }}
                 placeholder="(00) 00000-0000"
                 maxLength={15}
               />
-              {errors.phone && (
+              {errors.telephone && (
                 <span className="text-sm text-red-600">
-                  {errors.phone.message}
+                  {errors.telephone.message}
                 </span>
               )}
             </div>
@@ -259,6 +264,7 @@ export function EditModalEnterprise() {
               <Label className="text-white">CEP</Label>
               <Input
                 value={cepValue}
+                {...register("cep")}
                 onChange={(e) => {
                   const formatted = formatCEP(e.target.value);
                   setCepValue(formatted);
@@ -287,21 +293,14 @@ export function EditModalEnterprise() {
             <div className="flex flex-col md:flex-row gap-3">
               <div className="w-full md:w-[80%]">
                 <Label className="text-white">Endereço</Label>
-                <Input {...register("adress")} readOnly placeholder="Digite o endereço" />
+                <Input {...register("address")} readOnly placeholder="Digite o endereço" />
               </div>
               <div className="w-full md:w-[20%]">
                 <Label className="text-white">Número</Label>
                 <Input {...register("number")} />
               </div>
             </div>
-
-            <div>
-              <Label className="text-white">Responsável pela unidade</Label>
-              <Input placeholder="Digite o nome do responsável" />
-            </div>
-
-
-            <Button className="bg-realizaBlue w-full md:w-auto">
+            <Button className="bg-realizaBlue w-full md:w-auto"type="submit">
               Confirmar edição
             </Button>
           </form>
