@@ -5,9 +5,6 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.documents.contract.DocumentContract;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -16,14 +13,9 @@ import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
-import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
-import bl.tech.realiza.gateways.repositories.contracts.RequirementRepository;
-import bl.tech.realiza.gateways.repositories.documents.contract.DocumentContractRepository;
-import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
@@ -32,8 +24,9 @@ import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSubcontractorResponseDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.setup.SetupAsyncService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
@@ -42,7 +35,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,19 +45,14 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ActivityRepository activityRepository;
-    private final RequirementRepository requirementRepository;
     private final UserProviderSupplierRepository userProviderSupplierRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
-    private final DocumentContractRepository documentContractRepository;
-    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final CrudItemManagement crudItemManagement;
-    private final ActivityDocumentRepository activityDocumentRepository;
-    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
-    private final SetupAsyncService setupAsyncService;
+    private final SetupAsyncQueueProducer setupQueueProducer;
 
     @Override
     public ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractProviderSubcontractorRequestDto) {
@@ -115,7 +102,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
-        setupAsyncService.setupContractSubcontractor(savedContractSubcontractor,contractProviderSubcontractorRequestDto.getIdActivities());
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUBCONTRACT", null, null, null, savedContractSubcontractor, contractProviderSubcontractorRequestDto.getIdActivities()));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

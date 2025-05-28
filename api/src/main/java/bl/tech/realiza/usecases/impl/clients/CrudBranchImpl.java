@@ -12,9 +12,10 @@ import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.setup.SetupAsyncService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class CrudBranchImpl implements CrudBranch {
     private final CenterRepository centerRepository;
     private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
-    private final SetupAsyncService setupAsyncService;
+    private final SetupAsyncQueueProducer setupQueueProducer;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -64,18 +65,15 @@ public class CrudBranchImpl implements CrudBranch {
                 .center(center)
                 .build());
 
-        setupAsyncService.setupBranch(savedBranch);
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch, null, null, null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogBranch(
+            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                    userResponsible -> auditLogServiceImpl.createAuditLogBranch(
                         savedBranch,
                         userResponsible.getEmail() + " created branch " + savedBranch.getName(),
                         AuditLogBranch.AuditLogBranchActions.CREATE,
-                        userResponsible);
-            }
+                        userResponsible));
         }
 
         return BranchResponseDto.builder()

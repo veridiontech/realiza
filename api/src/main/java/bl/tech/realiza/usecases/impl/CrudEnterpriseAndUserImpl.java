@@ -1,6 +1,5 @@
 package bl.tech.realiza.usecases.impl;
 
-import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -10,7 +9,6 @@ import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -18,11 +16,11 @@ import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
-import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
-import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +36,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final PasswordEncryptionService passwordEncryptionService;
-    private final BranchRepository branchRepository;
-    private final CrudActivity crudActivity;
+    private final SetupAsyncQueueProducer setupQueueProducer;
 
     @Override
     public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
@@ -67,16 +64,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
 
         Client savedClient = clientRepository.save(client);
 
-        Branch newBranch = Branch.builder()
-                .name(enterpriseAndUserRequestDto.getCorporateName() + " Matriz")
-                .cnpj(enterpriseAndUserRequestDto.getCnpj())
-                .email(enterpriseAndUserRequestDto.getEmail())
-                .client(savedClient)
-                .build();
-
-        Branch savedBranch = branchRepository.save(newBranch);
-
-        crudActivity.transferFromRepo(savedBranch.getIdBranch());
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient, null, null, null, null));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 
