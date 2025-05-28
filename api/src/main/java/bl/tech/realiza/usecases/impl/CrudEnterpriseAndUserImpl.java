@@ -78,7 +78,6 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 .email(enterpriseAndUserRequestDto.getEmail())
                 .telephone(enterpriseAndUserRequestDto.getPhone())
                 .isActive(true)
-                .branch(savedBranch)
                 .build();
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SetupMessage {
-    private String type; // "NEW_CLIENT", "BRANCH", "CONTRACT_SUPPLIER", "CONTRACT_SUBCONTRACTOR"
+    private String type;
     private Client client;
     private Branch branch;
     private ContractProviderSupplier contractSupplier;
