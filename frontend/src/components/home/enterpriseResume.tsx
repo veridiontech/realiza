@@ -8,6 +8,9 @@ import { ModalCreateCliente } from "../modal-create-client";
 
 export function EnterpriseResume() {
   const { client } = useClient();
+  const { branches } = useClient();
+  console.log("CLIENTE:", client);
+  console.log("FILIAL:", branches);
 
   return (
     <div className="dark:bg-primary flex w-full items-start justify-between rounded bg-white p-4 shadow md:flex-row">
@@ -23,6 +26,14 @@ export function EnterpriseResume() {
             <strong className="md:font-md font-medium">Empresa:</strong>
             {client ? (
               <h3>{client.corporateName}</h3>
+            ) : (
+              <Skeleton className="h-[8px] w-[100px] rounded-full bg-gray-200" />
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <strong className="md:font-md font-medium">Filial:</strong>
+            {branches ? (
+              <h3>{branches.name}</h3>
             ) : (
               <Skeleton className="h-[8px] w-[100px] rounded-full bg-gray-200" />
             )}
