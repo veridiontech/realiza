@@ -417,24 +417,24 @@ export function Header() {
               <div className="block md:hidden text-realizaBlue mr-4 text-xl">
                 Cliente:
               </div>
-              <select
-                onChange={(e) => handleSelectClient(e.target.value)}
-                defaultValue=""
-                className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
-              >
-                <option value="" disabled>
-                  Selecione um cliente
-                </option>
-                {clients.map((client) => (
-                  <option
-                    key={client.idClient}
-                    value={client.idClient}
-                    className="text-black"
-                  >
-                    {client.tradeName}
-                  </option>
-                ))}
-              </select>
+<select
+  value={client?.idClient?.toString() || ""}
+  onChange={(e) => handleSelectClient(e.target.value)}
+  className="rounded-md border p-1 bg-transparent text-white w-[15vw]"
+>
+  <option value="" disabled>
+    Selecione um cliente
+  </option>
+  {clients.map((client) => (
+    <option
+      key={client.idClient}
+      value={client.idClient.toString()}
+      className="text-black"
+    >
+      {client.tradeName}
+    </option>
+  ))}
+</select>
             </div>
 
             <div className="flex items-center gap-5">

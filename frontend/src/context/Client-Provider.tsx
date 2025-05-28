@@ -6,6 +6,8 @@ import { ip } from "@/utils/ip";
 interface ClientContextProps {
   client: propsClient | null;
   setClient: React.Dispatch<React.SetStateAction<propsClient | null>>;
+  refreshClient: (id: string) => Promise<void>;
+  refreshClients: () => Promise<void>;
   branches: propsBranch | null;
   setBranches: React.Dispatch<React.SetStateAction<propsBranch | null>>;
   clients: propsClient[];
@@ -31,28 +33,54 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const idClient = localStorage.getItem("idClient");
     if (idClient) {
-      getUser(idClient);
-      if (client) {
-        getBranches(idClient);
-      }
+      refreshClient(idClient);
     }
   }, []);
 
-  const getUser = async (idClient: string) => {
+  useEffect(() => {
+    const idClient = localStorage.getItem("idClient");
+    if (client && idClient) {
+      getBranches(idClient);
+    }
+  }, [client]);
+
+  const refreshClient = async (idClient: string) => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/client/${idClient}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-      if (res.data) {
-        setClient(res.data);
-      } else {
-        console.error("Cliente não encontrado.");
-        setClient(null);
-      }
+      setClient(res.data);
     } catch (error) {
-      console.error("Erro ao buscar usuário:", error);
+      console.error("Erro ao buscar cliente:", error);
       setClient(null);
+    }
+  };
+
+  const refreshClients = async () => {
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const firstRes = await axios.get(`${ip}/client`, {
+        params: { page: 0, size: 1000 },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+      const totalPages = firstRes.data.totalPages;
+      const requests = Array.from({ length: totalPages - 1 }, (_, i) =>
+        axios.get(`${ip}/client`, {
+          params: { page: i + 1, size: 1000 },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        })
+      );
+
+      const responses = await Promise.all(requests);
+      const allClients = [
+        firstRes.data.content,
+        ...responses.map((res) => res.data.content),
+      ].flat();
+
+      setClients(allClients);
+    } catch (err) {
+      console.error("Erro ao atualizar lista de clientes:", err);
     }
   };
 
@@ -67,7 +95,7 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
       );
       setBranches(res.data.content);
     } catch (err) {
-      console.log("erro ao puxar filiais:", err);
+      console.log("Erro ao puxar filiais:", err);
     }
   };
 
@@ -80,6 +108,8 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
       value={{
         client,
         setClient,
+        refreshClient,
+        refreshClients,
         branches,
         setBranches,
         clients,

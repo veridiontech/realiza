@@ -80,12 +80,12 @@ type EditModalEnterpriseSchema = z.infer<typeof editModalEnterpriseSchema>;
 export function EditModalEnterprise() {
   const [cepValue, setCepValue] = useState("");
   // const [isLoading, setIsLoading] = useState(false);
-  const { client } = useClient();
+  const { client, setClient, refreshClient, refreshClients } = useClient();
   const [isOpen, setIsOpen] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false)
 
   console.log(client);
-  
 
   const {
     register,
@@ -113,14 +113,14 @@ export function EditModalEnterprise() {
       setValue("cnpj", data.cnpj || "");
       setValue("corporateName", data.corporateName || "");
       setValue("tradeName", data.tradeName || "");
-      setValue("cep" , data.cep || "")
+      setValue("cep", data.cep || "");
       setValue("email", data.email || "");
-      setValue("telephone", data.telephone|| "");
+      setValue("telephone", data.telephone || "");
       setValue("state", data.state || "");
       setValue("city", data.city || "");
       setValue("address", data.adress || "");
       setValue("number", data.number || "");
-      setValue("address", data.address || "")
+      setValue("address", data.address || "");
     } catch (err) {
       console.error("Não foi possível recuperar os dados da empresa", err);
     }
@@ -145,7 +145,6 @@ export function EditModalEnterprise() {
   //   }
   // };
 
-
   // const setValuesAdress = (data: adressProps) => {
   //   setValue("city", data.city);
   //   setValue("state", data.state);
@@ -153,22 +152,36 @@ export function EditModalEnterprise() {
   // };
 
   const onSubmit = async (data: EditModalEnterpriseSchema) => {
+    setIsLoading(true)
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.put(`${ip}/client/${client?.idClient}`, data, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      const res = await axios.get(`${ip}/client/${client?.idClient}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+     
+      if(client) {
+        await refreshClient(client.idClient)
+        await refreshClients();
+      }
+      setClient(res.data);
       toast.success("Sucesso ao atualizar cliente");
       setIsOpen(false);
-      window.location.reload();
     } catch (err) {
       console.error("Erro ao atualizar cliente:", err);
       toast.error("Erro ao atualizar cliente, tente novamente");
+    } finally {
+      setIsLoading(false)
     }
   };
 
   const formatCEP = (value: string) => {
-    return value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 9);
   };
 
   const formatPhone = (value: string) => {
@@ -199,7 +212,9 @@ export function EditModalEnterprise() {
         </Button>
       </DialogTrigger>
       <DialogTrigger asChild>
-        <Button className="md:hidden bg-realizaBlue">Editar perfil empresarial</Button>
+        <Button className="md:hidden bg-realizaBlue">
+          Editar perfil empresarial
+        </Button>
       </DialogTrigger>
 
       <DialogContent style={{ backgroundImage: `url(${bgModalRealiza})` }}>
@@ -208,7 +223,10 @@ export function EditModalEnterprise() {
         </DialogHeader>
 
         <ScrollArea className="h-[60vh] pr-5">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
             <div className="text-white">
               <Label>CNPJ</Label>
               <div>{client?.cnpj}</div>
@@ -218,21 +236,24 @@ export function EditModalEnterprise() {
               <Label className="text-white">Nome da empresa</Label>
               <Input
                 placeholder="Digite o nome da empresa"
-                {...register("corporateName")} />
+                {...register("corporateName")}
+              />
             </div>
 
             <div>
               <Label className="text-white">Nome fantasia</Label>
               <Input
                 placeholder="Digite o nome fantasia"
-                {...register("tradeName")} />
+                {...register("tradeName")}
+              />
             </div>
 
             <div>
               <Label className="text-white">Email corporativo</Label>
               <Input
                 placeholder="Digite o email corporativo"
-                {...register("email")} />
+                {...register("email")}
+              />
             </div>
 
             <div className="flex flex-col gap-2">
@@ -242,9 +263,7 @@ export function EditModalEnterprise() {
                 value={phoneValue}
                 {...register("telephone")}
                 onChange={(e) => {
-                  const formattedPhone = formatPhone(
-                    e.target.value
-                  );
+                  const formattedPhone = formatPhone(e.target.value);
                   setPhoneValue(formattedPhone);
                   setValue("telephone", formattedPhone, {
                     shouldValidate: true,
@@ -282,26 +301,39 @@ export function EditModalEnterprise() {
 
             <div>
               <Label className="text-white">Estado</Label>
-              <Input {...register("state")} readOnly placeholder="Digite o estado" />
+              <Input
+                {...register("state")}
+                readOnly
+                placeholder="Digite o estado"
+              />
             </div>
 
             <div>
               <Label className="text-white">Cidade</Label>
-              <Input {...register("city")} readOnly placeholder="Digite a cidade" />
+              <Input
+                {...register("city")}
+                readOnly
+                placeholder="Digite a cidade"
+              />
             </div>
 
             <div className="flex flex-col md:flex-row gap-3">
               <div className="w-full md:w-[80%]">
                 <Label className="text-white">Endereço</Label>
-                <Input {...register("address")} readOnly placeholder="Digite o endereço" />
+                <Input
+                  {...register("address")}
+                  readOnly
+                  placeholder="Digite o endereço"
+                />
               </div>
               <div className="w-full md:w-[20%]">
                 <Label className="text-white">Número</Label>
                 <Input {...register("number")} />
               </div>
             </div>
-            <Button className="bg-realizaBlue w-full md:w-auto"type="submit">
-              Confirmar edição
+            <Button className="bg-realizaBlue w-full md:w-auto" type="submit">
+              {isLoading ? "Carregando..." : "Confirmar edição"}
+              
             </Button>
           </form>
         </ScrollArea>
