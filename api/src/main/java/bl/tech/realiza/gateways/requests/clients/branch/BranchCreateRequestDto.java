@@ -13,7 +13,6 @@ public class BranchCreateRequestDto {
     private String name;
     @NotEmpty
     private String cnpj;
-    @NotEmpty
     private String email;
     @NotEmpty
     private String telephone;

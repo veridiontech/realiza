@@ -22,9 +22,19 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         .header {
-            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
-            padding: 40px 30px;
+            background-image: url('https://realiza.onrender.com/email-images/realiza_assessoria_empresarial_cover.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 60px 30px;
             text-align: center;
+            position: relative;
+            color: white;
+        }
+        .header-content {
+            background-color: rgba(44, 62, 80, 0.85);
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
         }
         .header h1 {
             color: #fff;
@@ -79,17 +89,29 @@
             font-size: 14px;
             color: #616161;
         }
+        .contact-info p {
+            margin: 4px 0;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="email-card">
         <div class="header">
-            <div class="badge">Convite para Cadastro</div>
-            <h1>Conclua seu Cadastro na Plataforma da Realiza Assessoria</h1>
+            <div class="header-content">
+                <img
+                        src="https://realiza.onrender.com/email-images/realiza_assessoria_logo.jpg"
+                        alt="Logo Realiza"
+                        width="160"
+                        style="margin: 0 auto 20px auto; display: block;"
+                />
+                <div class="badge">Convite para Cadastro</div>
+                <h1>Conclua seu Cadastro na Plataforma da Realiza Assessoria</h1>
+            </div>
         </div>
 
         <div class="content">
+
             <p>Prezado(a) responsável pela #NOME_ENTERPRISE#,</p>
 
             <p>Você foi indicado para fazer parte do processo de gestão e monitoramento de terceiros da <span class="highlight">Realiza Assessoria</span>, a serviço de nosso cliente <span class="highlight">#NAME_REQUESTER#</span>.</p>
@@ -115,8 +137,12 @@
 
         <div class="footer">
             <p>Este é um e-mail automático. Para dúvidas ou suporte adicional, entre em contato com nossa equipe.</p>
-            <p>Central de Atendimento – Realiza (WhatsApp: (11) 93491-5018) | <a href="mailto:cadastro@realizaassessoria.com.br" style="color: #34495E; text-decoration: none; font-weight: 500;">cadastro@realizaassessoria.com.br</a></p>
-            <p style="margin-top: 15px; font-size: 13px;">© 2024 Realiza Assessoria. Todos os direitos reservados.</p>
+            <div class="contact-info">
+                <p>Central de Atendimento – Realiza</p>
+                <p>WhatsApp: (11) 93491-5018</p>
+                <p><a href="mailto:cadastro@realizaassessoria.com.br" style="color: #34495E; text-decoration: none; font-weight: 500;">cadastro@realizaassessoria.com.br</a></p>
+                <p style="margin-top: 15px; font-size: 13px;">© 2025 Realiza Assessoria. Todos os direitos reservados.</p>
+            </div>
         </div>
     </div>
 </div>

@@ -70,10 +70,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     @Override
     public ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractProviderSubcontractorRequestDto) {
         List<Activity> activities = List.of();
-        List<DocumentProviderSupplier> documentSupplier = List.of();
-        List<String> idDocuments = new ArrayList<>(List.of());
-        List<DocumentContract> documentContract = new ArrayList<>(List.of());
-        List<DocumentProviderSubcontractor> documentProviderSubcontractor = new ArrayList<>(List.of());
 
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getIdContractSupplier())
                 .orElseThrow(() -> new NotFoundException("Supplier contract not found"));
@@ -87,6 +83,11 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         ProviderSupplier providerSupplier = providerSupplierRepository.findById(contractProviderSupplier.getProviderSupplier().getIdProvider())
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
+
+        if (contractProviderSubcontractorRequestDto.getIdActivities() != null
+                && !contractProviderSubcontractorRequestDto.getIdActivities().isEmpty()) {
+            activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getIdActivities());
+        }
 
         if (newProviderSubcontractor == null) {
             newProviderSubcontractor = providerSubcontractorRepository.save(ProviderSubcontractor.builder()
@@ -117,15 +118,12 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         setupAsyncService.setupContractSubcontractor(savedContractSubcontractor,contractProviderSubcontractorRequestDto.getIdActivities());
 
         if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogContract(
+            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                    userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractSubcontractor,
                         userResponsible.getEmail() + " created contract " + savedContractSubcontractor.getContractReference(),
                         AuditLogContract.AuditLogContractActions.CREATE,
-                        userResponsible);
-            }
+                        userResponsible));
         }
 
         // criar solicitação
