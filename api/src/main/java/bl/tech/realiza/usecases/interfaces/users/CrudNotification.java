@@ -1,5 +1,8 @@
 package bl.tech.realiza.usecases.interfaces.users;
 
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
@@ -17,9 +20,15 @@ public interface CrudNotification {
     void delete(String id);
     Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable);
     @Async
-    void saveUserNotificationForManagerUsers(ItemManagement itemManagement);
+    void saveUserNotificationForRealizaUsers(ItemManagement itemManagement);
     @Async
-    void saveProviderNotificationForManagerUsers(ItemManagement itemManagement);
+    void saveProviderNotificationForRealizaUsers(ItemManagement itemManagement);
+    @Async
+    void saveExpiredSupplierDocumentNotificationForSupplierUsers(DocumentProviderSupplier documentProviderSupplier);
+    @Async
+    void saveExpiredSubcontractDocumentNotificationForSubcontractorUsers(DocumentProviderSubcontractor documentProviderSubcontractor);
+    @Async
+    void saveExpiredEmployeeDocumentNotificationForManagerUsers(DocumentEmployee documentEmployee);
     @Async
     void markAllNotificationsAsRead(String userId);
     @Async
