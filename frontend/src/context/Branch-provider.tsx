@@ -9,6 +9,7 @@ interface BranchContextProps {
   setBranch: React.Dispatch<React.SetStateAction<propsBranch[]>>;
   selectedBranch: propsBranch | null;
   setSelectedBranch: React.Dispatch<React.SetStateAction<propsBranch | null>>;
+  addBranch: (newBranch: propsBranch) => void;
 }
 
 const BranchContext = createContext<BranchContextProps | undefined>(undefined);
@@ -23,9 +24,7 @@ export function useBranch() {
 
 export function BranchProvider({ children }: { children: React.ReactNode }) {
   const [branch, setBranch] = useState<propsBranch[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<propsBranch | null>(
-    null,
-  );
+  const [selectedBranch, setSelectedBranch] = useState<propsBranch | null>(null);
   const { client } = useClient();
 
   useEffect(() => {
@@ -38,15 +37,11 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
   const getBranch = async (idClient: string, size: number = 1000) => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      if (client?.isUltragaz === true) { }
       const res = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${idClient}`, {
-        params: {
-          size,
-        },
+        params: { size },
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
-      );
+      });
       setBranch(res.data.content || []);
     } catch (err) {
       console.error("Erro ao buscar filiais no context", err);
@@ -54,9 +49,13 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const addBranch = (newBranch: propsBranch) => {
+    setBranch((prev) => [...prev, newBranch]);
+  };
+
   return (
     <BranchContext.Provider
-      value={{ branch, setBranch, selectedBranch, setSelectedBranch }}
+      value={{ branch, setBranch, selectedBranch, setSelectedBranch, addBranch }}
     >
       {children}
     </BranchContext.Provider>

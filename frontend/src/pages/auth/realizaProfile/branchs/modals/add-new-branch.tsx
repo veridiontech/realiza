@@ -20,6 +20,7 @@ import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
+import { useBranch } from "@/context/Branch-provider";
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
 const cepRegex = /^\d{5}-?\d{3}$/;
@@ -77,6 +78,7 @@ export function AddNewBranch() {
   const [phoneValue, setPhoneValue] = useState("");
   const [razaoSocial, setRazaoSocial] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const { addBranch } = useBranch();
 
   const {
     register,
@@ -119,6 +121,9 @@ export function AddNewBranch() {
       const country = res.data.address.country.name;
       const state = res.data.address.state;
       const number = res.data.address.number;
+      
+      console.log("CEP", cep);
+      
 
       setValue("number", number);
       setValue("state", state);
@@ -144,9 +149,10 @@ export function AddNewBranch() {
     setLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      await axios.post(`${ip}/branch`, payload, {
+      const res = await axios.post(`${ip}/branch`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      addBranch(res.data); 
       toast.success("Sucesso ao criar filial");
       setIsOpen(false);
       reset();
@@ -272,6 +278,7 @@ export function AddNewBranch() {
               <Input
                 type="text"
                 value={cepValue}
+                {...register("cep")}
                 onChange={(e) => {
                   const formattedCEP = formatCEP(e.target.value);
                   setCepValue(formattedCEP);

@@ -5,12 +5,14 @@ import { Button } from "../ui/button";
 import { useClient } from "@/context/Client-Provider";
 import { ClientProfilePhoto } from "../profile-photos/client-profile-photo";
 import { ModalCreateCliente } from "../modal-create-client";
+import { useBranch } from "@/context/Branch-provider";
 
 export function EnterpriseResume() {
   const { client } = useClient();
-  const { branches } = useClient();
+  const { selectedBranch } = useBranch();
   console.log("CLIENTE:", client);
-  console.log("FILIAL:", branches);
+  console.log("FILIAL:", selectedBranch);
+  
 
   return (
     <div className="dark:bg-primary flex w-full items-start justify-between rounded bg-white p-4 shadow md:flex-row">
@@ -32,8 +34,8 @@ export function EnterpriseResume() {
           </div>
           <div className="flex items-center gap-2">
             <strong className="md:font-md font-medium">Filial:</strong>
-            {branches ? (
-              <h3>{branches.name}</h3>
+            {selectedBranch ? (
+              <h3>{selectedBranch.name}</h3>
             ) : (
               <Skeleton className="h-[8px] w-[100px] rounded-full bg-gray-200" />
             )}
