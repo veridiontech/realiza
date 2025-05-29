@@ -119,7 +119,7 @@ const getMoreDetailsDocument = async (id: string) => {
           </div>
         ) : (
           <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
-            {filteredEmployees.map((employee: any) => (
+            {Array.isArray (filteredEmployees) && filteredEmployees.map((employee: any) => (
               <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl">
                 <div className="flex w-[20vw] flex-col gap-9 p-10">
                   <div className="flex items-center justify-between">
@@ -349,7 +349,7 @@ const getMoreDetailsDocument = async (id: string) => {
           </div>
         ) : (
           <div className="flex w-[80vw] flex-wrap justify-center gap-5 rounded-md bg-white p-10 shadow-lg">
-            {filteredEmployees.map((employee: any) => (
+            {Array.isArray (filteredEmployees) && filteredEmployees.map((employee: any) => (
               <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl">
                 <div className="flex w-[20vw] flex-col gap-9 p-10">
                   <div className="flex items-center justify-between">
@@ -470,7 +470,7 @@ const getMoreDetailsDocument = async (id: string) => {
                     </Button>
                   </div>
                   <div className="flex flex-col gap-5">
-                    {employee.contracts.map((contract: any) => (
+                    {Array.isArray(employee.contracts) && employee.contracts.map((contract: any) => (
                       <div
                         key={contract.idContract}
                         className="flex items-center justify-between"
