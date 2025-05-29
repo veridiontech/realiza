@@ -1,7 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -17,19 +16,18 @@ import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpda
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
-import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,19 +179,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             documentBranch.setDocumentation(fileDocumentId);
         }
 
-        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
-
-        if (documentIAValidation.isAutoValidate()) {
-            if (documentIAValidation.isValid()) {
-                documentBranch.setStatus(Document.Status.APROVADO_IA);
-            } else {
-                documentBranch.setStatus(Document.Status.REPROVADO_IA);
-            }
-        } else {
-            documentBranch.setStatus(Document.Status.EM_ANALISE);
-        }
-
-        documentBranch.setVersionDate(LocalDateTime.now());
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentBranch) Hibernate.unproxy(documentBranch));
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
@@ -204,7 +191,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .documentation(savedDocumentBranch.getDocumentation())
                 .creationDate(savedDocumentBranch.getCreationDate())
                 .branch(savedDocumentBranch.getBranch().getIdBranch())
-                .documentIAValidationResponse(documentIAValidation)
                 .build();
 
         return Optional.of(documentBranchResponse);

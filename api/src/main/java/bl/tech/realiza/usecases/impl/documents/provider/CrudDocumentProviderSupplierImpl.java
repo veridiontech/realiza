@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -20,6 +21,7 @@ import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProvid
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -235,19 +237,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             documentSupplier.setDocumentation(fileDocumentId);
         }
 
-        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
-
-        if (documentIAValidation.isAutoValidate()) {
-            if (documentIAValidation.isValid()) {
-                documentSupplier.setStatus(Document.Status.APROVADO_IA);
-            } else {
-                documentSupplier.setStatus(Document.Status.REPROVADO_IA);
-            }
-        } else {
-            documentSupplier.setStatus(Document.Status.EM_ANALISE);
-        }
-
-        documentSupplier.setVersionDate(LocalDateTime.now());
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentProviderSupplier) Hibernate.unproxy(documentSupplier));
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
@@ -258,7 +249,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
                 .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
-                .documentIAValidationResponse(documentIAValidation)
                 .build();
 
         return Optional.of(documentSupplierResponse);

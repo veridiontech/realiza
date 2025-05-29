@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
@@ -20,6 +21,7 @@ import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProvid
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -236,19 +238,8 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             documentProviderSubcontractor.setDocumentation(fileDocumentId);
         }
 
-        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
-
-        if (documentIAValidation.isAutoValidate()) {
-            if (documentIAValidation.isValid()) {
-                documentProviderSubcontractor.setStatus(Document.Status.APROVADO_IA);
-            } else {
-                documentProviderSubcontractor.setStatus(Document.Status.REPROVADO_IA);
-            }
-        } else {
-            documentProviderSubcontractor.setStatus(Document.Status.EM_ANALISE);
-        }
-
-        documentProviderSubcontractor.setVersionDate(LocalDateTime.now());
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentProviderSubcontractor) Hibernate.unproxy(documentProviderSubcontractor));
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentProviderSubcontractor);
 
@@ -259,7 +250,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
                 .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
-                .documentIAValidationResponse(documentIAValidation)
                 .build();
 
         return Optional.of(documentSubcontractorResponse);

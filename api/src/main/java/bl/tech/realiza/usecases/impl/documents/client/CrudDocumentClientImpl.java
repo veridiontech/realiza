@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -16,6 +17,7 @@ import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentClient;
 import bl.tech.realiza.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -228,19 +230,8 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             documentClient.setDocumentation(fileDocumentId);
         }
 
-        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
-
-        if (documentIAValidation.isAutoValidate()) {
-            if (documentIAValidation.isValid()) {
-                documentClient.setStatus(Document.Status.APROVADO);
-            } else {
-                documentClient.setStatus(Document.Status.REPROVADO);
-            }
-        } else {
-            documentClient.setStatus(Document.Status.EM_ANALISE);
-        }
-
-        documentClient.setVersionDate(LocalDateTime.now());
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentClient) Hibernate.unproxy(documentClient));
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 
@@ -251,7 +242,6 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 .documentation(savedDocumentClient.getDocumentation())
                 .creationDate(savedDocumentClient.getCreationDate())
                 .client(savedDocumentClient.getClient().getIdClient())
-                .documentIAValidationResponse(documentIAValidation)
                 .build();
 
         return Optional.of(documentClientResponse);

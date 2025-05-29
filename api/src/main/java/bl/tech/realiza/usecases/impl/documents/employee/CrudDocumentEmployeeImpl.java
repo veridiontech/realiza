@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.documents.employee;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
@@ -21,6 +22,7 @@ import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmploy
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -235,19 +237,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
             documentEmployee.setDocumentation(fileDocumentId);
         }
 
-        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
-
-        if (documentIAValidation.isAutoValidate()) {
-            if (documentIAValidation.isValid()) {
-                documentEmployee.setStatus(Document.Status.APROVADO_IA);
-            } else {
-                documentEmployee.setStatus(Document.Status.REPROVADO_IA);
-            }
-        } else {
-            documentEmployee.setStatus(Document.Status.EM_ANALISE);
-        }
-
-        documentEmployee.setVersionDate(LocalDateTime.now());
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentEmployee) Hibernate.unproxy(documentEmployee));
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
@@ -258,7 +249,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
                 .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
-                .documentIAValidationResponse(documentIAValidation)
                 .build();
 
         return Optional.of(documentEmployeeResponse);
