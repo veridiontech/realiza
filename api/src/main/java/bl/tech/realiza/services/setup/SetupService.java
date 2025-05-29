@@ -8,8 +8,10 @@ import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -17,9 +19,11 @@ import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +47,8 @@ public class SetupService {
     private final ActivityDocumentRepository activityDocumentRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final EmployeeRepository employeeRepository;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
 
     public void setupNewClient(Client savedClient) {
         Branch baseBranch = branchRepository.save(
@@ -179,5 +186,68 @@ public class SetupService {
                         .build()));
 
         documentProviderSubcontractorRepository.saveAll(documentProviderSubcontractor);
+    }
+
+    public void setupEmployeeToContractSupplier(ContractProviderSupplier contractProviderSupplier, List<Employee> employees) {
+        ProviderSupplier providerSupplier = contractProviderSupplier.getProviderSupplier();
+
+        List<DocumentEmployee> documentEmployees = new ArrayList<>();
+
+        List<DocumentProviderSupplier> documentSupplier = new ArrayList<>();
+
+        documentSupplier.addAll(documentProviderSupplierRepository
+                .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                        providerSupplier.getIdProvider(), "Documento pessoa", true));
+
+        documentSupplier.addAll(documentProviderSupplierRepository
+                .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                        providerSupplier.getIdProvider(), "Treinamentos e certificações", true));
+
+        for (Employee employee : employees) {
+            for (DocumentProviderSupplier document : documentSupplier) {
+                documentEmployees.add(DocumentEmployee.builder()
+                        .title(document.getTitle())
+                        .status(Document.Status.PENDENTE)
+                        .type(document.getType())
+                        .isActive(true)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .employee(employee)
+                        .build());
+            }
+        }
+
+        documentEmployeeRepository.saveAll(documentEmployees);
+    }
+
+
+    public void setupEmployeeToContractSubcontract(ContractProviderSubcontractor contractProviderSubcontractor, List<Employee> employees) {
+        ProviderSubcontractor providerSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
+
+        List<DocumentEmployee> documentEmployees = new ArrayList<>();
+
+        List<DocumentProviderSubcontractor> documentSubcontractor = new ArrayList<>();
+
+        documentSubcontractor.addAll(documentProviderSubcontractorRepository
+                .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                        providerSubcontractor.getIdProvider(),"Documento pessoa",true));
+
+        documentSubcontractor.addAll(documentProviderSubcontractorRepository
+                .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                        providerSubcontractor.getIdProvider(),"Treinamentos e certificações",true));
+
+        for (Employee employee : employees) {
+            for (DocumentProviderSubcontractor document : documentSubcontractor) {
+                documentEmployees.add(DocumentEmployee.builder()
+                        .title(document.getTitle())
+                        .status(Document.Status.PENDENTE)
+                        .type(document.getType())
+                        .isActive(true)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .employee(employee)
+                        .build());
+            }
+        }
+
+        documentEmployeeRepository.saveAll(documentEmployees);
     }
 }

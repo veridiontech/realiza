@@ -67,7 +67,7 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient, null, null, null, null));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient, null, null, null, null, null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())

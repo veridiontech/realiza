@@ -52,14 +52,14 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
         return ResponseEntity.ok(crudServiceTypeImpl.getServiceType(idServiceType));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypes() {
         return ResponseEntity.ok(crudServiceTypeImpl.getAllServiceType());
     }
 
-    @GetMapping(params = {"idOwner", "owner"})
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypesByOwner(@RequestParam String idOwner, @RequestParam CrudServiceType.Owner owner) {

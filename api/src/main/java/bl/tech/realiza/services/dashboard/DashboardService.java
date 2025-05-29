@@ -173,9 +173,9 @@ public class DashboardService {
             int nonConforming = (int) (totalValidos - aprovados);
 
             DashboardDetailsResponseDto.Conformity level;
-            if (conformity < 70) {
+            if (conformity < 60) {
                 level = DashboardDetailsResponseDto.Conformity.RISKY;
-            } else if (conformity < 80) {
+            } else if (conformity < 75) {
                 level = DashboardDetailsResponseDto.Conformity.ATTENTION;
             } else if (conformity < 90) {
                 level = DashboardDetailsResponseDto.Conformity.NORMAL;

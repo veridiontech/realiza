@@ -102,7 +102,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUBCONTRACT", null, null, null, savedContractSubcontractor, contractProviderSubcontractorRequestDto.getIdActivities()));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUBCONTRACT", null, null, null, savedContractSubcontractor, contractProviderSubcontractorRequestDto.getIdActivities(), null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
