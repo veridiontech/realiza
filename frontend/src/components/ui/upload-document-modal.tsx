@@ -28,7 +28,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
 
   const handlePreviewDocument = async (docId: string) => {
     try {
-      
+
       if (!token) {
         toast.error("Token de autenticação não encontrado.");
         return;
@@ -113,7 +113,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
       if (response.status === 200) {
         toast.success("Arquivo enviado com Sucesso!");
       } else {
-      toast.error("Erro ao enviar documento")
+        toast.error("Erro ao enviar documento")
       }
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
@@ -126,10 +126,25 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
 
   const handleFileChange = (docId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      handleFileUpload(docId, file);
+
+    if (!file) return;
+
+    const maxSizeInMB = 5;
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+
+    if (file.type !== 'application/pdf') {
+      toast.error("Apenas arquivos PDF são permitidos.");
+      return;
     }
+
+    if (file.size > maxSizeInBytes) {
+      toast.error(`Arquivo excede o limite de ${maxSizeInMB}MB.`);
+      return;
+    }
+
+    handleFileUpload(docId, file);
   };
+
 
   const triggerFileInput = (docId: string) => {
     fileInputRefs.current[docId]?.click();
