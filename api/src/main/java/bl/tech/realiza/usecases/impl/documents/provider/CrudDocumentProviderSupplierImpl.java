@@ -235,6 +235,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 throw new EntityNotFoundException(e);
             }
             documentSupplier.setDocumentation(fileDocumentId);
+            documentSupplier.setStatus(Document.Status.EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,

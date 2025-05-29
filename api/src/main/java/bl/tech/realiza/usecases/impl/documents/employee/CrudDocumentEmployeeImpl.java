@@ -235,6 +235,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 throw new EntityNotFoundException(e);
             }
             documentEmployee.setDocumentation(fileDocumentId);
+            documentEmployee.setStatus(Document.Status.EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
