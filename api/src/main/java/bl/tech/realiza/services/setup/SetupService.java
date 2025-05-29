@@ -53,7 +53,7 @@ public class SetupService {
     public void setupNewClient(Client savedClient) {
         Branch baseBranch = branchRepository.save(
                 Branch.builder()
-                        .name(savedClient.getCorporateName() + " Base")
+                        .name(savedClient.getTradeName() + " Base")
                         .cnpj(savedClient.getCnpj())
                         .cep(savedClient.getCep())
                         .state(savedClient.getState())

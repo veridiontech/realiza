@@ -228,6 +228,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 throw new NotFoundException("Document couldn't be saved");
             }
             documentClient.setDocumentation(fileDocumentId);
+            documentClient.setStatus(Document.Status.EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,

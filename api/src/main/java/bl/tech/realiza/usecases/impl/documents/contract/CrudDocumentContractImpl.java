@@ -235,6 +235,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 throw new EntityNotFoundException(e);
             }
             documentContract.setDocumentation(fileDocumentId);
+            documentContract.setStatus(Document.Status.EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
