@@ -126,7 +126,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .branch(branch)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER", null, null, savedContractProviderSupplier, null, contractProviderSupplierRequestDto.getIdActivities()));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER", null, null, savedContractProviderSupplier, null, contractProviderSupplierRequestDto.getIdActivities(), null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

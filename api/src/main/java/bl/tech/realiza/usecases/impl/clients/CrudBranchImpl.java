@@ -65,7 +65,7 @@ public class CrudBranchImpl implements CrudBranch {
                 .center(center)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch, null, null, null));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch, null, null, null, null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

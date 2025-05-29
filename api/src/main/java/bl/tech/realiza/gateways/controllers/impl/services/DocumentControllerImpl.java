@@ -24,7 +24,8 @@ public class DocumentControllerImpl implements DocumentController {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<DocumentIAValidationResponse> validateDocument(@RequestParam("file") MultipartFile file) throws IOException {
-        DocumentIAValidationResponse response = documentProcessingService.processDocument(file);
-        return ResponseEntity.ok(response);
+//        DocumentIAValidationResponse response = documentProcessingService.processDocumentAsync(file);
+//        return ResponseEntity.ok(response);
+        return null;
     }
 }

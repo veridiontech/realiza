@@ -34,6 +34,14 @@ public class SetupQueueConsumer {
                     setupService.setupContractSubcontractor(message.getContractSubcontractor(), message.getActivitiesId());
                     logService.logSuccess("NEW_CONTRACT_SUBCONTRACTOR", message.getContractSubcontractor().getIdContract());
                 }
+                case "EMPLOYEE_CONTRACT_SUPPLIER" -> {
+                    setupService.setupEmployeeToContractSupplier(message.getContractSupplier(), message.getEmployees());
+                    logService.logSuccess("EMPLOYEE_CONTRACT_SUPPLIER", message.getContractSupplier().getIdContract());
+                }
+                case "EMPLOYEE_CONTRACT_SUBCONTRACT" -> {
+                    setupService.setupEmployeeToContractSubcontract(message.getContractSubcontractor(), message.getEmployees());
+                    logService.logSuccess("EMPLOYEE_CONTRACT_SUBCONTRACT", message.getContractSubcontractor().getIdContract());
+                }
                 default -> throw new IllegalArgumentException("Tipo inválido: " + message.getType());
             }
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.documents.contract;
 
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.contract.Contract;
@@ -21,6 +22,7 @@ import bl.tech.realiza.usecases.interfaces.documents.contract.CrudDocumentContra
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -235,19 +237,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
             documentContract.setDocumentation(fileDocumentId);
         }
 
-        DocumentIAValidationResponse documentIAValidation = documentProcessingService.processDocument(file);
-
-        if (documentIAValidation.isAutoValidate()) {
-            if (documentIAValidation.isValid()) {
-                documentContract.setStatus(Document.Status.APROVADO_IA);
-            } else {
-                documentContract.setStatus(Document.Status.REPROVADO_IA);
-            }
-        } else {
-            documentContract.setStatus(Document.Status.EM_ANALISE);
-        }
-
-        documentContract.setVersionDate(LocalDateTime.now());
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentContract) Hibernate.unproxy(documentContract));
 
         DocumentContract savedDocumentContract = documentContractRepository.save(documentContract);
 
@@ -258,7 +249,6 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 .documentation(savedDocumentContract.getDocumentation())
                 .creationDate(savedDocumentContract.getCreationDate())
                 .contract(savedDocumentContract.getContract().getIdContract())
-                .documentIAValidationResponse(documentIAValidation)
                 .build();
 
         return Optional.of(documentContractResponse);

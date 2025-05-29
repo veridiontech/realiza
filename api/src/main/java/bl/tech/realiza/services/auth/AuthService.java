@@ -24,6 +24,11 @@ public class AuthService {
         if (user == null || !passwordService.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
+
+        if (user.getIsActive() == null || !user.getIsActive()) {
+            throw new RuntimeException("Innactive user. Solicite a ativação do seu cadastro.");
+        }
+
         switch (user.getClass().getSimpleName()) {
             case "UserManager":
                 return jwtService.generateTokenManager(userManagerRepository.findById(user.getIdUser()).orElseThrow(() ->  new NotFoundException("User not found")));
