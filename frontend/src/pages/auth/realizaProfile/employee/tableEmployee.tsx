@@ -460,7 +460,7 @@ const getMoreDetailsDocument = async (id: string) => {
             </div>
           </div>
           <div className="flex justify-center gap-5 items-center">
-            {filteredEmployees.map((employee: any) => (
+            {Array.isArray(filteredEmployees) && filteredEmployees.map((employee: any) => (
               <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl ">
                 <div className="flex w-[25vw] h-[50vh] flex-col gap-9 p-10">
                   <div className="flex items-center justify-between">
