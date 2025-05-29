@@ -1,3 +1,4 @@
+import { useBranch } from "@/context/Branch-provider";
 import { useClient } from "@/context/Client-Provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
@@ -9,6 +10,7 @@ export function BranchesTable() {
   const [currentPage, setCurrentPage] = useState(1); // Página atual
   const [totalPages, setTotalPages] = useState(0); // Total de páginas
   const { client } = useClient();
+  const { branch } = useBranch();
   const [filteredBranches, setFilteredBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,12 +52,13 @@ export function BranchesTable() {
 
     setFilteredBranches(filtered); // Atualizar o estado de filiais filtradas
   };
+  
 
-  useEffect(() => {
-    if (client?.idClient) {
-      fetchBranches(currentPage);
-    }
-  }, [client?.idClient, currentPage]);
+useEffect(() => {
+  if (client?.idClient) {
+    fetchBranches(currentPage);
+  }
+}, [client?.idClient, currentPage, branch]);
 
   return (
     <div>
