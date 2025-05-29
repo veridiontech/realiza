@@ -97,6 +97,9 @@ export function ModalTesteSendSupplier() {
   const [isMainModalOpen, setIsMainModalOpen] = useState(false); // controla o primeiro modal
   const [cnpjValue, setCnpjValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
+  const [searchService, setSearchService] = useState("");
+  const [searchActivity, setSearchActivity] = useState("");
+
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -115,6 +118,24 @@ export function ModalTesteSendSupplier() {
   } = useForm<ModalSendEmailFormSchema>({
     resolver: zodResolver(modalSendEmailFormSchema),
   });
+
+  type RiscoNivel = "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
+
+  const formatarRisco = (risco: RiscoNivel): string => {
+    switch (risco) {
+      case "LOW":
+        return "Risco: Baixo";
+      case "MEDIUM":
+        return "Risco: Médio";
+      case "HIGH":
+        return "Risco: Alto";
+      case "VERY_HIGH":
+        return "Risco: Muito Alto";
+      default:
+        return risco;
+    }
+  };
+
 
   const {
     register: registerContract,
@@ -213,7 +234,7 @@ export function ModalTesteSendSupplier() {
           },
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
-      );
+      ); console.log("aaa", activitieData)
       setActivities(activitieData.data);
     } catch (err) {
       console.log(err);
@@ -416,7 +437,7 @@ export function ModalTesteSendSupplier() {
                       setValue("cnpj", formatted, { shouldValidate: true });
                     }}
                     className="w-full"
-                    // {...register("cnpj")}
+                  // {...register("cnpj")}
                   />
                   {isLoading ? (
                     <div
@@ -791,22 +812,42 @@ export function ModalTesteSendSupplier() {
                     </div>
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
+
+                      {/* Campo de busca */}
+                      <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                        <Search className="text-neutral-500 w-5 h-5" />
+                        <input
+                          type="text"
+                          placeholder="Pesquisar serviço..."
+                          value={searchService}
+                          onChange={(e) => setSearchService(e.target.value)}
+                          className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                        />
+                      </div>
+
+                      {/* Select com filtro aplicado */}
                       <select
                         {...registerContract("idServiceType")}
-                        className="rounded-md border p-2"
+                        className="rounded-md border p-2 w-full mt-1"
+                        defaultValue=""
                       >
                         <option value="" disabled>
                           Selecione uma opção
                         </option>
-                        {servicesType.map((idServiceType: any) => (
-                          <option
-                            value={idServiceType.idServiceType}
-                            key={idServiceType.idServiceType}
-                          >
-                            {idServiceType.title}
-                          </option>
-                        ))}
+                        {servicesType
+                          .filter((s: any) =>
+                            s.title.toLowerCase().includes(searchService.toLowerCase())
+                          )
+                          .map((idServiceType: any) => (
+                            <option
+                              key={idServiceType.idServiceType}
+                              value={idServiceType.idServiceType}
+                            >
+                              {idServiceType.title} - {formatarRisco(idServiceType.risk as RiscoNivel)}
+                            </option>
+                          ))}
                       </select>
+
                       {errorsContract.idServiceType && (
                         <span className="text-red-500">
                           {errorsContract.idServiceType.message}
@@ -814,35 +855,77 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
 
+
                     {isSsma === true && (
                       <div className="flex flex-col gap-2">
                         <Label className="text-white">Tipo de atividade</Label>
-                        <ScrollArea className="h-[20vh] p-2 rounded-lg">
-                          <div className="flex flex-col gap-1 bg-white p-2 rounded-lg">
-                            {Array.isArray(activities) && activities.map((activity: any) => (
-                              <div
-                                key={activity.idActivity}
-                                className="flex items-center gap-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  onChange={(e) =>
-                                    handleCheckboxChange(
-                                      activity.idActivity,
-                                      e.target.checked
-                                    )
-                                  }
-                                  checked={selectedActivities.includes(
-                                    activity.idActivity
-                                  )}
-                                />
-                                <p className="text-black">{activity.title}</p>
-                              </div>
-                            ))}
+
+                        {/* Campo de busca */}
+                        <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                          <Search className="text-neutral-500 w-5 h-5" />
+                          <input
+                            type="text"
+                            placeholder="Pesquisar atividade..."
+                            value={searchActivity}
+                            onChange={(e) => setSearchActivity(e.target.value)}
+                            className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                          />
+                        </div>
+
+                        {/* Lista filtrada com checkboxes */}
+                        <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
+                          <div className="flex flex-col gap-2">
+                            {Array.isArray(activities) &&
+                              activities
+                                .filter((activity: any) =>
+                                  activity.title
+                                    .toLowerCase()
+                                    .includes(searchActivity.toLowerCase())
+                                )
+                                .map((activity: any) => (
+                                  <label
+                                    key={activity.idActivity}
+                                    className="flex items-center gap-2 text-black"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedActivities.includes(activity.idActivity)}
+                                      onChange={(e) =>
+                                        handleCheckboxChange(
+                                          activity.idActivity,
+                                          e.target.checked
+                                        )
+                                      }
+                                    />
+                                    {activity.title}
+                                  </label>
+                                ))}
                           </div>
                         </ScrollArea>
                       </div>
                     )}
+
+                    {isSsma === true && selectedActivities.length > 0 && (
+                      <div className="flex flex-col gap-1 mt-2">
+                        <Label className="text-white">Atividades selecionadas</Label>
+                        <div className="bg-white rounded-md border p-2 h-auto min-h-[3rem] max-h-[10rem] overflow-y-auto">
+                          <ul className="list-disc ml-4 text-sm text-black">
+                            {selectedActivities.map((idAtividade) => {
+                              const atividade = activities.find(
+                                (a: any) => a.idActivity === idAtividade
+                              );
+                              return (
+                                <li key={idAtividade}>
+                                  {atividade ? atividade.title : "Atividade não encontrada"}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
+
 
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">

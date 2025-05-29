@@ -80,7 +80,7 @@ export function ModalCreateCliente() {
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [cnpjValue, setCnpjValue] = useState("");
-  const { addClient } = useClient();
+  const { addClient, setClient } = useClient();
 
   const {
     register,
@@ -163,7 +163,10 @@ export function ModalCreateCliente() {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
-      addClient(response.data);
+
+      addClient(response.data);     
+      setClient(response.data);    
+
       toast.success("Cliente criado com sucesso!");
       reset();
       setCnpjData(null);
@@ -182,6 +185,7 @@ export function ModalCreateCliente() {
       setIsLoading(false);
     }
   };
+
 
   // Funções de formatação
   const formatCEP = (value: string) =>
@@ -239,7 +243,7 @@ useEffect(() => {
 
   return (
     <div>
-      <Dialog  open={showFirstModal} onOpenChange={setShowFirstModal}>
+      <Dialog open={showFirstModal} onOpenChange={setShowFirstModal}>
         <DialogTrigger asChild>
           <Button className="bg-realizaBlue w-[2.1vw] rounded-full">
             <Plus size={24} className="dark:text-white" />
@@ -293,7 +297,7 @@ useEffect(() => {
               <Input {...register("tradeName")} placeholder="Insira o nome fantasia" />
               {errors.tradeName && <span className="text-sm text-red-600">{errors.tradeName.message}</span>}
             </div>
-            
+
             <div>
               <Label>Email</Label>
               <Input {...register("email")} placeholder="Insira o email" />
