@@ -13,8 +13,10 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.setup.SetupAsyncService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.setup.SetupService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,8 @@ public class CrudClientImpl implements CrudClient {
     private final ClientRepository clientRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
-    private final SetupAsyncService setupAsyncService;
+    private final SetupService setupService;
+    private final SetupAsyncQueueProducer setupQueueProducer;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
 
@@ -64,7 +67,7 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        setupAsyncService.setupNewClient(savedClient);
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient, null, null, null, null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())

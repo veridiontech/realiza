@@ -19,7 +19,7 @@ public class EmailEnterpriseInviteRequestDto {
     private String requesterName;
     @NotEmpty
     private String serviceName;
-    @NotEmpty
+    @NotNull
     private Date startDate;
     @NotEmpty
     private String requesterBranchName;

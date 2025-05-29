@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.responses.dashboard.DashboardDetailsResponseDto;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static bl.tech.realiza.domains.documents.Document.Status.APROVADO;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class DashboardService {
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final EmployeeRepository employeeRepository;
+    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         Branch branch = branchRepository.findById(branchId)
@@ -34,28 +38,35 @@ public class DashboardService {
         int activeContractQuantity;
         int activeEmployeeQuantity;
 
-        Object[] resultSupplier = documentProviderSupplierRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
-
-        Object[] resultEmployeeSupplier = documentEmployeeRepository
+        Object[] resultEmployeeSupplierRaw = documentEmployeeRepository
                 .countTotalAndPendentesByContractSupplierBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+        Object[] resultEmployeeSupplier = (Object[]) resultEmployeeSupplierRaw[0];
 
-        Object[] resultSubcontractor = documentProviderSupplierRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
-
-        Object[] resultEmployeeSubcontractor = documentEmployeeRepository
+        Object[] resultEmployeeSubcontractorRaw = documentEmployeeRepository
                 .countTotalAndPendentesByContractSubcontractorBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+        Object[] resultEmployeeSubcontractor = (Object[]) resultEmployeeSubcontractorRaw[0];
 
-        long total = ((Number) resultEmployeeSupplier[0]).longValue()
-                + ((Number) resultEmployeeSubcontractor[0]).longValue()
-                + ((Number) resultSubcontractor[0]).longValue()
-                + ((Number) resultSupplier[0]).longValue();
-        long pendentes = ((Number) resultEmployeeSupplier[1]).longValue()
-                + ((Number) resultEmployeeSubcontractor[1]).longValue()
-                + ((Number) resultSubcontractor[1]).longValue()
-                + ((Number) resultSupplier[1]).longValue();
+        Object[] resultSubcontractorRaw = documentProviderSubcontractorRepository
+                .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+        Object[] resultSubcontractor = (Object[]) resultSubcontractorRaw[0];
 
-        adherence = total > 0 ? (pendentes * 100.0 / total) : 0;
+        Object[] resultSupplierRaw = documentProviderSupplierRepository
+                .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+        Object[] resultSupplier = (Object[]) resultSupplierRaw[0];
+
+
+        long total = getSafeLong(resultEmployeeSupplier, 0)
+                + getSafeLong(resultEmployeeSubcontractor, 0)
+                + getSafeLong(resultSubcontractor, 0)
+                + getSafeLong(resultSupplier, 0);
+
+        long pendentes = getSafeLong(resultEmployeeSupplier, 1)
+                + getSafeLong(resultEmployeeSubcontractor, 1)
+                + getSafeLong(resultSubcontractor, 1)
+                + getSafeLong(resultSupplier, 1);
+
+
+        adherence = total > 0 ? ((total - pendentes) * 100.0 / total) : 0;
 
         activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndFinishedIsFalse(branch.getIdBranch()).intValue();
 
@@ -73,7 +84,7 @@ public class DashboardService {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        List<DashboardDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
+        List<DashboardDetailsResponseDto.TypeStatus> documentStatus;
         List<DashboardDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
         List<DashboardDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
 
@@ -118,10 +129,81 @@ public class DashboardService {
                         .build())
                 .toList();
 
+        documentExemption = documentStatus.stream()
+                .map(typeStatus -> DashboardDetailsResponseDto.Exemption.builder()
+                        .name(typeStatus.getName())
+                        .quantity(0)
+                        .build())
+                .toList();
+
+        List<Branch> allBranches = branch.getClient().getBranches();
+
+        for (Branch b : allBranches) {
+            Object[] supplier = documentProviderSupplierRepository
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] employeeSupplier = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] subcontractor = documentProviderSupplierRepository
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] employeeSubcontractor = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSubcontractorBranch(b.getIdBranch(), Document.Status.PENDENTE);
+
+            long total = getSafeLong(supplier, 0)
+                    + getSafeLong(employeeSupplier, 0)
+                    + getSafeLong(subcontractor, 0)
+                    + getSafeLong(employeeSubcontractor, 0);
+
+            long pendentes = getSafeLong(supplier, 1)
+                    + getSafeLong(employeeSupplier, 1)
+                    + getSafeLong(subcontractor, 1)
+                    + getSafeLong(employeeSubcontractor, 1);
+
+            double adherence = total > 0 ? (pendentes * 100.0 / total) : 0;
+
+            // Agora calcular conformidade
+            long aprovados = documentEmployeeRepository.countByBranchIdAndStatus(branchId, APROVADO)
+                    + documentProviderSupplierRepository.countByBranchIdAndStatus(branchId, APROVADO)
+                    + documentProviderSubcontractorRepository.countByBranchIdAndStatus(branchId, APROVADO);
+
+            long totalValidos = documentEmployeeRepository.countByBranchId(branchId)
+                    + documentProviderSupplierRepository.countByBranchId(branchId)
+                    + documentProviderSubcontractorRepository.countByBranchId(branchId);
+
+            double conformity = totalValidos > 0 ? (aprovados * 100.0 / totalValidos) : 0;
+            int nonConforming = (int) (totalValidos - aprovados);
+
+            DashboardDetailsResponseDto.Conformity level;
+            if (conformity < 70) {
+                level = DashboardDetailsResponseDto.Conformity.RISKY;
+            } else if (conformity < 80) {
+                level = DashboardDetailsResponseDto.Conformity.ATTENTION;
+            } else if (conformity < 90) {
+                level = DashboardDetailsResponseDto.Conformity.NORMAL;
+            } else {
+                level = DashboardDetailsResponseDto.Conformity.OK;
+            }
+
+            pendingRanking.add(DashboardDetailsResponseDto.Pending.builder()
+                    .corporateName(b.getName())
+                    .cnpj(b.getCnpj())
+                    .adherence(adherence)
+                    .conformity(conformity)
+                    .nonConformingDocumentQuantity(nonConforming)
+                    .conformityLevel(level)
+                    .build());
+        }
+
         return DashboardDetailsResponseDto.builder()
                 .documentStatus(documentStatus)
                 .documentExemption(documentExemption)
                 .pendingRanking(pendingRanking)
                 .build();
+    }
+
+    private long getSafeLong(Object[] array, int index) {
+        if (array != null && array.length > index && array[index] instanceof Number number) {
+            return number.longValue();
+        }
+        return 0L;
     }
 }

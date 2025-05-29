@@ -68,7 +68,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .newUser(newUser)
                 .build());
 
-        crudNotification.saveUserNotificationForManagerUsers(solicitation);
+        crudNotification.saveUserNotificationForRealizaUsers(solicitation);
 
         return toItemManagementUserResponseDto(solicitation, requester, newUser);
     }
@@ -112,7 +112,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .newProvider(newProviderSupplier)
                 .build());
 
-        crudNotification.saveProviderNotificationForManagerUsers(solicitation);
+        crudNotification.saveProviderNotificationForRealizaUsers(solicitation);
 
         return toItemManagementProviderResponseDto(solicitation, requester, newProviderSupplier);
     }

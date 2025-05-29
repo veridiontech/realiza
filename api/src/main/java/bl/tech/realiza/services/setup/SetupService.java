@@ -23,7 +23,6 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SetupAsyncService {
+public class SetupService {
 
     private final CrudServiceType crudServiceType;
     private final BranchRepository branchRepository;
@@ -44,7 +43,6 @@ public class SetupAsyncService {
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
-    @Async
     public void setupNewClient(Client savedClient) {
         Branch baseBranch = branchRepository.save(
                 Branch.builder()
@@ -80,7 +78,6 @@ public class SetupAsyncService {
         crudActivity.transferFromRepo(baseBranch.getIdBranch());
     }
 
-    @Async
     public void setupBranch(Branch baseBranch) {
         crudServiceType.transferFromClientToBranch(baseBranch.getClient().getIdClient(), baseBranch.getIdBranch());
 
@@ -100,7 +97,6 @@ public class SetupAsyncService {
         crudActivity.transferFromRepo(baseBranch.getIdBranch());
     }
 
-    @Async
     public void setupContractSupplier(ContractProviderSupplier contractProviderSupplier, List<String> activitiesId) {
         List<Activity> activities = new ArrayList<>(List.of());
         List<String> idDocuments = new ArrayList<>(List.of());
@@ -143,7 +139,6 @@ public class SetupAsyncService {
         documentProviderSupplierRepository.saveAll(documentProviderSupplier);
     }
 
-    @Async
     public void setupContractSubcontractor(ContractProviderSubcontractor contractProviderSubcontractor, List<String> activitiesId) {
         List<Activity> activities = new ArrayList<>(List.of());;
         List<DocumentProviderSupplier> documentSupplier;

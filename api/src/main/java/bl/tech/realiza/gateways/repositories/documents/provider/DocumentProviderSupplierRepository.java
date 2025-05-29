@@ -43,4 +43,23 @@ public interface DocumentProviderSupplierRepository extends JpaRepository<Docume
     GROUP BY dps.type, dps.status
 """)
     List<Object[]> countTotalTypesByBranch(@Param("branchId") String branchId);
+
+    @Query("""
+    SELECT COUNT(d)
+    FROM DocumentProviderSupplier d
+    JOIN d.providerSupplier ps
+    JOIN ps.branches b
+    WHERE b.idBranch = :branchId AND d.status = :status
+""")
+    Long countByBranchIdAndStatus(@Param("branchId") String branchId, @Param("status") Document.Status status);
+
+    @Query("""
+    SELECT COUNT(d)
+    FROM DocumentProviderSupplier d
+    JOIN d.providerSupplier ps
+    JOIN ps.branches b
+    WHERE b.idBranch = :branchId
+""")
+    Long countByBranchId(@Param("branchId") String branchId);
+
 }

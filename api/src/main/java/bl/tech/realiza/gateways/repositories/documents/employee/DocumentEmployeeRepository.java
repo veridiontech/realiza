@@ -66,4 +66,25 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
             @Param("branchId") String branchId,
             @Param("status") Document.Status status
     );
+
+    @Query("""
+    SELECT COUNT(d)
+    FROM DocumentEmployee d
+    JOIN d.employee e
+    JOIN e.contracts c
+    JOIN ContractProviderSupplier cps ON cps.idContract = c.idContract
+    WHERE cps.branch.idBranch = :branchId AND d.status = :status
+""")
+    Long countByBranchIdAndStatus(@Param("branchId") String branchId, @Param("status") Document.Status status);
+
+    @Query("""
+    SELECT COUNT(d)
+    FROM DocumentEmployee d
+    JOIN d.employee e
+    JOIN e.contracts c
+    JOIN ContractProviderSupplier cps ON cps.idContract = c.idContract
+    WHERE cps.branch.idBranch = :branchId
+""")
+    Long countByBranchId(@Param("branchId") String branchId);
+
 }

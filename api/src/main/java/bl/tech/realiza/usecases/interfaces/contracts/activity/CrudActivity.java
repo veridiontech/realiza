@@ -20,7 +20,5 @@ public interface CrudActivity {
     String removeDocumentFromActivity(String idActivity, String idDocumentBranch);
     Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto);
     void delete(String id);
-
-    @Async
     void transferFromRepo(String idBranch);
 }

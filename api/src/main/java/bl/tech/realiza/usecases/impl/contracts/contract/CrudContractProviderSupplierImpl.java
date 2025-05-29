@@ -5,7 +5,6 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.Requirement;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
@@ -38,8 +37,9 @@ import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.setup.SetupAsyncService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
@@ -72,15 +72,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
-    private final SetupAsyncService setupAsyncService;
+    private final SetupAsyncQueueProducer setupQueueProducer;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
         List<Activity> activities = List.of();
-        List<String> idDocuments = new ArrayList<>(List.of());
-        List<DocumentBranch> documentBranch = List.of();
-        List<DocumentContract> documentContract = new ArrayList<>(List.of());
-        List<DocumentProviderSupplier> documentProviderSupplier = new ArrayList<>(List.of());
 
         ProviderSupplier newProviderSupplier = providerSupplierRepository.findByCnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
                 .orElse(null);
@@ -130,18 +126,15 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .branch(branch)
                 .build());
 
-        setupAsyncService.setupContractSupplier(savedContractProviderSupplier,contractProviderSupplierRequestDto.getIdActivities());
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER", null, null, savedContractProviderSupplier, null, contractProviderSupplierRequestDto.getIdActivities()));
 
         if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogContract(
+            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                    userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
                         userResponsible.getEmail() + " created contract " + savedContractProviderSupplier.getContractReference(),
                         AuditLogContract.AuditLogContractActions.CREATE,
-                        userResponsible);
-            }
+                        userResponsible));
         }
 
         // criar solicitação
@@ -246,15 +239,12 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(contractProviderSupplier);
 
         if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogContract(
+            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                    userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
                         userResponsible.getEmail() + " updated contract " + savedContractProviderSupplier.getContractReference(),
                         AuditLogContract.AuditLogContractActions.UPDATE,
-                        userResponsible);
-            }
+                        userResponsible));
         }
 
         return getContractResponseDto(contractProviderSupplier, savedContractProviderSupplier);
@@ -270,8 +260,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .description(savedContractProviderSupplier.getDescription())
                 .responsible(savedContractProviderSupplier.getResponsible() != null
                         ? savedContractProviderSupplier.getResponsible().getFirstName()
-                        + " "
-                        + savedContractProviderSupplier.getResponsible().getSurname()
+                        + " " + savedContractProviderSupplier.getResponsible().getSurname()
                         : null)
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .dateStart(savedContractProviderSupplier.getDateStart())
@@ -280,10 +269,21 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
                 .activities(contractProviderSupplier.getActivities()
                         .stream().map(Activity::getIdActivity).toList())
-                .providerSupplier(contractProviderSupplier.getProviderSupplier() != null ? contractProviderSupplier.getProviderSupplier().getIdProvider() : null)
-                .providerSupplierName(contractProviderSupplier.getProviderSupplier() != null ? contractProviderSupplier.getProviderSupplier().getCorporateName() : null)
-                .branch(contractProviderSupplier.getBranch() != null ? contractProviderSupplier.getBranch().getIdBranch() : null)
-                .branchName(contractProviderSupplier.getBranch() != null ? contractProviderSupplier.getBranch().getName() : null)
+                .providerSupplier(contractProviderSupplier.getProviderSupplier() != null
+                        ? contractProviderSupplier.getProviderSupplier().getIdProvider()
+                        : null)
+                .providerSupplierName(contractProviderSupplier.getProviderSupplier() != null
+                        ? contractProviderSupplier.getProviderSupplier().getCorporateName()
+                        : null)
+                .branch(contractProviderSupplier.getBranch() != null
+                        ? contractProviderSupplier.getBranch().getIdBranch()
+                        : null)
+                .branchName(contractProviderSupplier.getBranch() != null
+                        ? contractProviderSupplier.getBranch().getName()
+                        : null)
+                .activities(contractProviderSupplier.getActivities() != null
+                        ? contractProviderSupplier.getActivities().stream().map(Activity::getIdActivity).toList()
+                        : null)
                 .build();
 
         return Optional.of(contractResponseDto);
@@ -294,15 +294,12 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         Contract contract = contractRepository.findById(id)
                         .orElseThrow(() -> new NotFoundException("Contract not found"));
         if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogContract(
+            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                    userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         contract,
                         userResponsible.getEmail() + " deleted contract " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.DELETE,
-                        userResponsible);
-            }
+                        userResponsible));
         }
         contractProviderSupplierRepository.deleteById(id);
     }
@@ -356,8 +353,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public ContractAndSupplierCreateResponseDto saveContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto) {
-        List<Activity> activities = List.of();
-        List<Requirement> requirements = List.of();
+        List<Activity> activities;
 
         if (contractAndSupplierCreateRequestDto.getIdBranch() == null || contractAndSupplierCreateRequestDto.getIdBranch().isEmpty()) {
             throw new BadRequestException("Invalid branches");
@@ -422,6 +418,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .subcontractPermission(contractAndSupplierCreateRequestDto.getSubcontractPermission())
                 .providerSupplier(savedProviderSupplier)
                 .branch(branch)
+                .activities(activities)
                 .build();
 
         ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(newContractSupplier);
@@ -469,6 +466,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .startDate(savedContractProviderSupplier.getDateStart())
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
+                .activity(savedContractProviderSupplier.getActivities() != null
+                        ? savedContractProviderSupplier.getActivities().stream().map(Activity::getIdActivity).toList()
+                        : null)
                 .providerSupplierName(savedContractProviderSupplier.getProviderSupplier().getCorporateName())
                 .idBranch(savedContractProviderSupplier.getBranch().getIdBranch())
                 .branchName(savedContractProviderSupplier.getBranch().getName())

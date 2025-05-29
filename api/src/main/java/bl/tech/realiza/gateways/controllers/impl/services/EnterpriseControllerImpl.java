@@ -28,9 +28,12 @@ public class EnterpriseControllerImpl implements EnterpriseController {
     public ResponseEntity<EnterpriseAndUserResponseDto> createEnterpriseAndUser(@RequestBody @Valid EnterpriseAndUserRequestDto clientAndUserClientRequestDto) {
         EnterpriseAndUserResponseDto enterpriseAndUser = null;
         switch (clientAndUserClientRequestDto.getCompany()) {
-            case CLIENT -> enterpriseAndUser = crudEnterpriseAndUser.saveBothClient(clientAndUserClientRequestDto);
+//            case CLIENT -> enterpriseAndUser = crudEnterpriseAndUser.saveBothClient(clientAndUserClientRequestDto);
             case SUPPLIER -> enterpriseAndUser = crudEnterpriseAndUser.saveBothSupplier(clientAndUserClientRequestDto);
             case SUBCONTRACTOR -> enterpriseAndUser = crudEnterpriseAndUser.saveBothSubcontractor(clientAndUserClientRequestDto);
+            default -> {
+                return ResponseEntity.badRequest().build();
+            }
         }
         assert enterpriseAndUser != null;
         return ResponseEntity.of(Optional.of(enterpriseAndUser));

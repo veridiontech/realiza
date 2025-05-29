@@ -29,8 +29,8 @@ public class ContractAndSupplierCreateResponseDto {
     private Date endDate;
     private Boolean subcontractPermission;
     private String contractSupplierId;
-    private Activity activity;
-    private List<Requirement> requirements;
+    private List<String> activity;
+    private List<String> requirements;
 
     // client
     private String branchName;
