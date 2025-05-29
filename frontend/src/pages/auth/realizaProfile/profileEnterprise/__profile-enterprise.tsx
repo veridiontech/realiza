@@ -1,84 +1,24 @@
-import { Locate, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
 // import { useClient } from "@/context/Client-Provider";
 // import { Skeleton } from "@/components/ui/skeleton";
-import { useSupplier } from "@/context/Supplier-context";
 import { UploadDocumentButton } from "@/components/ui/upload-document-button";
 // import { useUser } from "@/context/user-provider"
-import { useLocation, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { ip } from "@/utils/ip";
-import { propsSupplier } from "@/types/interfaces";
+import { useState } from "react";
+import { useClient } from "@/context/Client-Provider";
 
-interface Supplier {
-  tradeName?: string;
-  cnpj?: string;
-  email?: string;
-  telephone?: string;
-  cep?: string;
-}
-
-interface ProfileEnterpriseRepriseProps {
-  supplier?: Supplier; // opcional via prop
-}
-
-export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnterpriseRepriseProps) {
-  const { supplier: contextSupplier } = useSupplier();
-  const { id } = useParams();
+export function ProfileEnterpriseReprise() {
   // const { user } = useUser();
-  const location = useLocation();
-  const [loading, setLoading] = useState(false);
-  const [suppliers, setSuppliers] = useState<propsSupplier | null>(null);
+  const [loading,] = useState(false);
+  const { client } = useClient();
 
   // 🧠 Prioridade: prop > state da rota > contexto
-  const supplier = propSupplier || location.state?.supplier || contextSupplier;
+  const firstLetter = client?.corporateName?.charAt(0) || "";
+  const lastLetter = client?.corporateName?.slice(-1) || "";
 
+  // const isclientResponsible = user?.role === "ROLE_client_RESPONSIBLE";
 
-  const firstLetter = supplier?.tradeName?.charAt(0) || "";
-  const lastLetter = supplier?.tradeName?.slice(-1) || "";
-
-  // const isSupplierResponsible = user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
-
-  console.log("teste id", id);
-
-
-  const fetchSuppliers = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("tokenClient");
-      if (!token) {
-        console.error("Token não encontrado.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get(`${ip}/supplier/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data);
-
-      setSuppliers(response.data);
-
-    } catch (error) {
-      console.error("Erro ao buscar fornecedores:", error);
-      setSuppliers(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  console.log(suppliers);
-
-
-  useEffect(() => {
-    fetchSuppliers()
-  }, []);
 
   return (
     <>
@@ -96,8 +36,8 @@ export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnte
                   </div>
                 </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
-                  { loading ? "Carregando..." : <span>{suppliers?.corporateName}</span> }
-                  {suppliers ? <div>{suppliers.tradeName}</div> : <div></div>}
+                  { loading ? "Carregando..." : <span>{client?.corporateName}</span> }
+                  {client ? <div>{client.tradeName}</div> : <div></div>}
                 </div>
               </div>
               <div className="flex space-x-4">
@@ -114,22 +54,22 @@ export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnte
             <div className="flex flex-col gap-4">
               <div className="flex flex-row items-center gap-2">
                 <Mail />
-                <span>E-mail: {suppliers?.email || "Não disponível"}</span>
+                <span>E-mail: {client?.email || "Não disponível"}</span>
               </div>
               <div className="flex flex-row items-center gap-2">
                 <Phone />
                 <span className="flex items-center gap-2">
                   <span>CNPJ: </span>
-                  <span>{suppliers?.cnpj || "Não disponível"}</span>
+                  <span>{client?.cnpj || "Não disponível"}</span>
                 </span>
               </div>
-              <div className="flex flex-row items-center gap-2">
+              {/* <div className="flex flex-row items-center gap-2">
                 <Locate />
                 <span className="flex items-center gap-2">
                   <span>Cep: </span>
-                  <span>{suppliers?.cep || "Não disponível"}</span>
+                  <span>{client?.cep || "Não disponível"}</span>
                 </span>
-              </div>
+              </div> */}
             </div>
             <span>Outras formas de contato</span>
           </div>

@@ -20,7 +20,7 @@ export function EnterpriseResume() {
         <ClientProfilePhoto />
         <div className="flex flex-col gap-1">
           {client ? (
-            <h3 className="text-lg font-medium">{client.tradeName}</h3>
+            <h3 className="text-lg font-medium">{client.corporateName}</h3>
           ) : (
             <h3 className="text-lg font-medium">Cliente não selecionado</h3>
           )}

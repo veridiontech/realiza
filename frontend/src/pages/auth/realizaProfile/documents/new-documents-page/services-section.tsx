@@ -72,7 +72,7 @@ export function ServicesSection() {
     console.log("Enviando updateTitle:", payload);
 
     try {
-      await axios.put(`${ip}/contract/service-type/${idServiceType}`, payload, {
+      await axios.put(`${ip}/contract/service-type/branch/${idServiceType}`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
 
@@ -102,7 +102,7 @@ export function ServicesSection() {
     console.log("Enviando updateRisk:", payload);
 
     try {
-      await axios.put(`${ip}/contract/service-type/${idServiceType}`, payload, {
+      await axios.put(`${ip}/contract/service-type/branch/${idServiceType}`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
 
