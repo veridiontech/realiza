@@ -21,7 +21,7 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
     return (
       <SheetContent
         className="h-full overflow-auto"
-        onMouseLeave={onClose}
+        // onMouseLeave={onClose}
         onInteractOutside={onClose}
         onEscapeKeyDown={onClose}
         side={"left"}
@@ -106,7 +106,7 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
     <SheetContent
       className="h-full overflow-auto dark:bg-white bg-right bg-cover"
       side={"left"}
-      onMouseLeave={onClose}
+      // onMouseLeave={onClose}
       onInteractOutside={onClose}
       onEscapeKeyDown={onClose}
       style={{ backgroundImage: `url(${bgModalRealiza})` }}>

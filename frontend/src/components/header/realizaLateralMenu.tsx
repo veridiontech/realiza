@@ -27,7 +27,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
     <SheetContent
       className="h-full overflow-auto dark:bg-white bg-right bg-cover"
       side="left"
-      onMouseLeave={onClose}
+      // onMouseLeave={onClose}
       onInteractOutside={onClose} // Fecha se clicar fora
       onEscapeKeyDown={onClose} // Fecha se pressionar "Esc"
       style={{ backgroundImage: `url(${bgModalRealiza})` }}
@@ -121,7 +121,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
       </Link>
 
       <h3 className="pl-4 pt-6 text-xs text-white">Funcionalidades</h3>
-      <Link to={`/sistema/controlPanel/${user?.idUser}`}>
+      <Link to={`/sistema/controlPanel/${user?.idUser}`} onClick={onClose}>
         <Button
           variant="ghost"
           className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
@@ -132,7 +132,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
           </span>
         </Button>
       </Link>
-      <Link to={`/sistema/controlPanel/${user?.idUser}`}>
+      <Link to={`/sistema/controlPanel/${user?.idUser}`} onClick={onClose}>
         <Button
           variant="ghost"
           className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
@@ -144,7 +144,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         </Button>
       </Link>
 
-      <Link to={`/sistema/documents/${user?.idUser}`}>
+      <Link to={`/sistema/documents/${user?.idUser}`} onClick={onClose}>
         <Button
           variant="ghost"
           className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
