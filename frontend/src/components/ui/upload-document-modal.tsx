@@ -24,9 +24,11 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
   const [loadingDocs, setLoadingDocs] = useState<Record<string, boolean>>({});
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const token = localStorage.getItem('tokenClient');
+
   const handlePreviewDocument = async (docId: string) => {
     try {
-      const token = localStorage.getItem('tokenClient');
+      
       if (!token) {
         toast.error("Token de autenticação não encontrado.");
         return;
@@ -103,6 +105,7 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
     try {
       const response = await axios.post(`${ip}/document/supplier/${docId}/upload`, formData, {
         headers: {
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -110,11 +113,11 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
       if (response.status === 200) {
         toast.success("Arquivo enviado com Sucesso!");
       } else {
-        alert('Erro ao enviar o arquivo. Tente novamente.');
+      toast.error("Erro ao enviar documento")
       }
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      alert('Erro ao enviar o arquivo.');
+      toast.error("Erro ao enviar documento")
     } finally {
       setLoadingDocs(prev => ({ ...prev, [docId]: false }));
       fetchDocuments();

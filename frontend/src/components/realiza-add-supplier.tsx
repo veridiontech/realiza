@@ -464,7 +464,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Tipoe do serviço</Label>
+                      <Label className="text-white">Tipo do serviço</Label>
                       <select
                         {...registerContract("serviceTypeExpense")}
                         className="rounded-md p-1"

@@ -1,12 +1,16 @@
 import { Locate, Mail, Phone } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
-import { useClient } from "@/context/Client-Provider";
-import { Skeleton } from "@/components/ui/skeleton";
+// import { useClient } from "@/context/Client-Provider";
+// import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplier } from "@/context/Supplier-context";
 import { UploadDocumentButton } from "@/components/ui/upload-document-button";
-import { useUser } from "@/context/user-provider";
-import { useLocation } from "react-router-dom"; 
+// import { useUser } from "@/context/user-provider"
+import { useLocation, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { propsSupplier } from "@/types/interfaces";
 
 interface Supplier {
   tradeName?: string;
@@ -21,19 +25,60 @@ interface ProfileEnterpriseRepriseProps {
 }
 
 export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnterpriseRepriseProps) {
-  const { client } = useClient();
   const { supplier: contextSupplier } = useSupplier();
-  const { user } = useUser();
-  const location = useLocation(); // 👈 ACESSO AO STATE DE NAVEGAÇÃO
+  const { id } = useParams();
+  // const { user } = useUser();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+  const [suppliers, setSuppliers] = useState<propsSupplier | null>(null);
 
   // 🧠 Prioridade: prop > state da rota > contexto
   const supplier = propSupplier || location.state?.supplier || contextSupplier;
 
+
   const firstLetter = supplier?.tradeName?.charAt(0) || "";
   const lastLetter = supplier?.tradeName?.slice(-1) || "";
 
-  const isSupplierResponsible = user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
-  const displayData = isSupplierResponsible ? supplier : client;
+  // const isSupplierResponsible = user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
+
+  console.log("teste id", id);
+
+
+  const fetchSuppliers = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("tokenClient");
+      if (!token) {
+        console.error("Token não encontrado.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`${ip}/supplier/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+
+      setSuppliers(response.data);
+
+    } catch (error) {
+      console.error("Erro ao buscar fornecedores:", error);
+      setSuppliers(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log(suppliers);
+
+
+  useEffect(() => {
+    fetchSuppliers()
+  }, []);
 
   return (
     <>
@@ -51,26 +96,8 @@ export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnte
                   </div>
                 </div>
                 <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
-                  <div className="text-lg font-medium text-sky-800">
-                    {displayData?.tradeName ? (
-                      <h2>{displayData.tradeName}</h2>
-                    ) : (
-                      <span className="font-normal">Nenhum fornecedor selecionado</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {displayData?.tradeName ? (
-                      <span className="text-xs font-medium text-sky-700">
-                        {displayData.tradeName} / {displayData?.cnpj}
-                      </span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-[1vh] w-[4vw]" />
-                        <span className="text-sky-700"> / </span>
-                        <Skeleton className="h-[1vh] w-[4vw]" />
-                      </div>
-                    )}
-                  </div>
+                  { loading ? "Carregando..." : <span>{suppliers?.corporateName}</span> }
+                  {suppliers ? <div>{suppliers.tradeName}</div> : <div></div>}
                 </div>
               </div>
               <div className="flex space-x-4">
@@ -87,20 +114,20 @@ export function ProfileEnterpriseReprise({ supplier: propSupplier }: ProfileEnte
             <div className="flex flex-col gap-4">
               <div className="flex flex-row items-center gap-2">
                 <Mail />
-                <span>E-mail: {displayData?.email || "Não disponível"}</span>
+                <span>E-mail: {suppliers?.email || "Não disponível"}</span>
               </div>
               <div className="flex flex-row items-center gap-2">
                 <Phone />
                 <span className="flex items-center gap-2">
-                  <span>Telefone: </span>
-                  <span>{displayData?.telephone || "Não disponível"}</span>
+                  <span>CNPJ: </span>
+                  <span>{suppliers?.cnpj || "Não disponível"}</span>
                 </span>
               </div>
               <div className="flex flex-row items-center gap-2">
                 <Locate />
                 <span className="flex items-center gap-2">
                   <span>Cep: </span>
-                  <span>{displayData?.cep || "Não disponível"}</span>
+                  <span>{suppliers?.cep || "Não disponível"}</span>
                 </span>
               </div>
             </div>
