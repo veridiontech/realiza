@@ -49,7 +49,7 @@ const newBranchFormSchema = z.object({
     .regex(cnpjRegex, "CNPJ inválido, use o formato XX.XXX.XXX/XXXX-XX")
     .refine(validarNumerosRepetidos, { message: "CNPJ inválido: não pode ter números repetidos" }),
   name: z.string().min(1, "O nome da filial é obrigatório"),
-  email: z.string().email("Insira um email válido"),
+  // email: z.string().email("Insira um email válido"),
   cep: z.string()
     .nonempty("CEP é obrigatório")
     .regex(cepRegex, "CEP inválido, use o formato 12345-678")
@@ -243,13 +243,13 @@ export function AddNewBranch() {
               )}
             </div>
 
-            <div>
+            {/* <div>
               <Label className="text-white">Email</Label>
               <Input type="email" placeholder="Digite seu e-mail" {...register("email")} />
               {errors.email && (
                 <span className="text-sm text-red-600">{errors.email.message}</span>
               )}
-            </div>
+            </div> */}
 
             <div>
               <Label className="text-white">Nome da filial</Label>

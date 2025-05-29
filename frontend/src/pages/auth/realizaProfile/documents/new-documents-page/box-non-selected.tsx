@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDocument } from "@/context/Document-provider";
 import { propsDocument } from "@/types/interfaces";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Blocks } from "react-loader-spinner";
 
 interface BoxNonSelectedDocuments {
@@ -14,19 +14,23 @@ export function BoxNonSelected({
   documents,
   isLoading,
 }: BoxNonSelectedDocuments) {
+  const { nonSelected, setNonSelected } = useDocument();
   const [checkedDocs, setCheckedDocs] = useState<string[]>([]);
-  const { setNonSelected } = useDocument();
 
-  const toggleCheckbox = (id: string, document: propsDocument) => {
+  useEffect(() => {
+    setCheckedDocs(nonSelected.map((doc: any) => doc.idDocument));
+  }, [nonSelected]);
+
+  const toggleCheckbox = (id: string, document: propsDocument, isChecked: boolean) => {
     setCheckedDocs((prev) =>
-      prev.includes(id) ? prev.filter((docId) => docId !== id) : [...prev, id]
+      isChecked ? [...prev, id] : prev.filter((docId) => docId !== id)
     );
 
     setNonSelected((prevDocuments) => {
-      if (prevDocuments.some((doc) => doc.idDocumentation === id)) {
-        return prevDocuments.filter((doc) => doc.idDocumentation !== id);
-      } else {
+      if (isChecked) {
         return [...prevDocuments, document];
+      } else {
+        return prevDocuments.filter((doc: any) => doc.idDocument !== id);
       }
     });
   };
@@ -39,15 +43,7 @@ export function BoxNonSelected({
           <input className="outline-none" />
         </div>
         <div className="h-[30vh] flex items-center justify-center">
-          <Blocks
-            height="80"
-            width="80"
-            color="#4fa94d"
-            ariaLabel="blocks-loading"
-            wrapperStyle={{}}
-            wrapperClass="blocks-wrapper"
-            visible={true}
-          />
+          <Blocks height="80" width="80" color="#4fa94d" ariaLabel="blocks-loading" visible={true} />
         </div>
       </div>
     );
@@ -65,21 +61,20 @@ export function BoxNonSelected({
             documents.map((document: any) => (
               <div
                 key={document.idDocument}
-                className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
-                onClick={() => toggleCheckbox(document.idDocument, document)}
+                className="rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
               >
                 <input
                   type="checkbox"
                   checked={checkedDocs.includes(document.idDocument)}
-                  onChange={() => {}}
+                  onChange={(e) =>
+                    toggleCheckbox(document.idDocument, document, e.target.checked)
+                  }
                 />
                 <span>{document.title || "Documento"}</span>
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500">
-              Nenhum documento encontrado.
-            </p>
+            <p className="text-sm text-gray-500">Nenhum documento encontrado.</p>
           )}
         </div>
       </ScrollArea>

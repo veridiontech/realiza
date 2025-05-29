@@ -1,11 +1,16 @@
 import { NewDocumentBox } from "./document-box-new";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActiviteSectionBox } from "./activities-section";
 import { ServicesSection } from "./services-section";
+import { toast } from "sonner";
 
 export function DocumentPageNew() {
   const [selectTab, setSelectedTab] = useState("document");
+
+  useEffect(() => {
+    toast.info("Selecione um cliente e uma filial para dar início")
+  }, [])
 
   return (
     <div className="p-6 md:p-10 flex flex-col gap-6 md:gap-10">
