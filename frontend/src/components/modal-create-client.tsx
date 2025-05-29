@@ -47,9 +47,9 @@ const createClienteFormSchema = z.object({
     .nonempty("CNPJ é obrigatório")
     .regex(cnpjRegex, "CNPJ inválido, use o formato XX.XXX.XXX/XXXX-XX ou 14 dígitos")
     .refine(validarNumerosRepetidos, { message: "CNPJ inválido: não pode ter números repetidos" }),
-  tradeName: z.string().nonempty("Nome fantasia é obrigatório"),
+  tradeName: z.string(),
   corporateName: z.string().nonempty("Razão social é obrigatória"),
-  email: z.string().email("Email inválido"),
+  email: z.string(),
   telephone: z
     .string()
     .nonempty("Celular é obrigatório")

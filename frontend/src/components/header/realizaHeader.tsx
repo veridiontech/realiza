@@ -432,7 +432,7 @@ export function Header() {
                     value={client.idClient.toString()}
                     className="text-black"
                   >
-                    {client.tradeName}
+                    {client.corporateName}
                   </option>
                 ))}
               </select>

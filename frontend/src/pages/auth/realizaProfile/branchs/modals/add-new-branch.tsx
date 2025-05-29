@@ -123,7 +123,6 @@ export function AddNewBranch() {
       const number = res.data.address.number;
       
       console.log("CEP", cep);
-      
 
       setValue("number", number);
       setValue("state", state);
