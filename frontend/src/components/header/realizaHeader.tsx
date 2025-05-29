@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Bell, ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
+import { Bell, LogOut, Menu, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "@/assets/logoRealiza/Logo Realiza Completo 1.png";
-import { Button } from "../ui/button";
+// import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { LateralMenu } from "./realizaLateralMenu";
 // import { ToggleTheme } from "../toggle-theme";
@@ -142,12 +142,7 @@ export function Header() {
             >
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
-                  >
-                    <ChartNoAxesGantt className="text-white" />
-                  </Button>
+                  <Menu size={40} className="text-white border p-2 rounded-full"/>
                 </SheetTrigger>
                 <SheetContent
                   className="h-full overflow-auto dark:bg-white"
@@ -387,7 +382,7 @@ export function Header() {
     >
       <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-5">
           <div
             className="relative"
             onMouseEnter={handleMouseEnter}
@@ -395,12 +390,7 @@ export function Header() {
           >
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
-                <Button
-                  variant={"ghost"}
-                  className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
-                >
-                  <ChartNoAxesGantt className="text-white" />
-                </Button>
+                   <Menu size={40} className="text-white border p-2 rounded-full"/>
               </SheetTrigger>
               <SheetContent
                 className="h-full overflow-auto dark:bg-white"

@@ -33,29 +33,24 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
 
       // const tokenFromStorage = localStorage.getItem("tokenClient");
 
-  const getEmployee = async () => {
-    setIsLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(
-        `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
-        {
-          params: {
-            page: page,
-            limit: limit,
-          },
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      console.log("employees:", res.data.content);
-
-      setEmployee(res.data.content);
-    } catch (error) {
-      console.log("Erro ao buscar colaboradores:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const getEmployee = async () => {
+  setIsLoading(true);
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    const res = await axios.get(
+      `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
+      {
+        params: { page, limit },
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      }
+    );
+    setEmployee(res.data?.content ?? []);
+  } catch (error) {
+    console.error("Erro ao buscar colaboradores:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const filteredEmployees = employees.filter((employee: any) =>
     `${employee.name} ${employee.surname}`
@@ -69,12 +64,13 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
 
   console.log("colaboradores da branch:", employees);
 
-  useEffect(() => {
-    if (idProvider) {
-      getEmployee();
-    }
+useEffect(() => {
+  if (idProvider) {
+    getEmployee();
+  } else {
     setEmployee([]);
-  }, [idProvider]);
+  }
+}, [idProvider]);
 
 const getMoreDetailsDocument = async (id: string) => {
   const tokenFromStorage = localStorage.getItem("tokenClient");
