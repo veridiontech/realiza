@@ -336,22 +336,20 @@ export function Dashboard() {
                       <div className="flex items-center gap-5">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                            selectedTab === "filiais"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
                               : "text-realizaBlue border-realizaBlue border bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           <Building2 /> Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                            selectedTab === "usuarios"
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
                               ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
                               : "text-realizaBlue border-realizaBlue border bg-white"
-                          }`}
+                            }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           <Users /> Usuários
@@ -642,16 +640,18 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <div className="w-[800px] rounded-lg border bg-white p-6 shadow-sm">
-                <ConformityGaugeChart />
+              <div className="w-full flex justify-center">
+                <div className="h-[60vh] w-[30vw] rounded-lg border bg-white p-5 shadow-sm">
+                  <ConformityGaugeChart />
+                </div>
               </div>
             </div>
           </div>
           <div className="mt-9 flex gap-">
             <ActiveContracts />
             <Employees />
-            < Suppliers/>
-            <AllocatedEmployees/>
+            < Suppliers />
+            <AllocatedEmployees />
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>

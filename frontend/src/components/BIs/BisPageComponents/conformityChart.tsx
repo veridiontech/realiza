@@ -17,12 +17,9 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { ip } from '@/utils/ip'
 import { useBranch } from '@/context/Branch-provider'
-// import { useClient } from '@/context/Client-Provider'
 
 export function ConformityGaugeChart() {
   const { selectedBranch } = useBranch()
-  // const { client } = useClient() // ⬅️ Corrigido aqui!
-
   const [percentage, setPercentage] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -33,14 +30,13 @@ export function ConformityGaugeChart() {
       try {
         const res = await axios.get(
           `${ip}/conformity?branchId=${selectedBranch?.idBranch}&clientId=${selectedBranch?.client}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
+          headers: {
+            Authorization: `Bearer ${token}`
           }
+        }
         )
         const conformityValue = res.data?.percentage ?? 0
-        console.log(conformityValue);
-        
+        console.log(conformityValue)
         setPercentage(conformityValue)
       } catch (err) {
         console.error('Erro ao buscar conformidade:', err)
@@ -63,21 +59,21 @@ export function ConformityGaugeChart() {
         percentage! >= 75
           ? '#22c55e'
           : percentage! >= 50
-          ? '#eab308'
-          : '#ef4444',
+            ? '#eab308'
+            : '#ef4444',
     },
   ]
 
   if (loading) {
     return (
-      <Card className="w-full h-[300px] flex justify-center items-center">
+      <Card className="w-full h-80 flex justify-center items-center">
         <Blocks height="60" width="60" color="#3B82F6" visible />
       </Card>
     )
   }
 
   return (
-    <Card className="w-full h-[370px]">
+    <Card className="w-full h-96"> 
       <CardHeader className="pb-0">
         <CardTitle className="text-muted-foreground text-base">Conformidade</CardTitle>
         <CardDescription className="text-xl font-bold">
@@ -119,5 +115,6 @@ export function ConformityGaugeChart() {
         </div>
       </CardContent>
     </Card>
+
   )
 }
