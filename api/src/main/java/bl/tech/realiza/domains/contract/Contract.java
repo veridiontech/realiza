@@ -57,6 +57,7 @@ public abstract class Contract {
 
     @ManyToOne
     @JoinColumn(name = "idUser")
+    @JsonIgnore
     private User responsible;
 
     @ManyToOne
