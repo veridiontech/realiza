@@ -480,6 +480,15 @@ export function SelectClient() {
       return;
     }
 
+    const emailJaExiste = usersFromBranch.some(
+      (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+    );
+
+    if (emailJaExiste) {
+      toast.error("E-mail já cadastrado para esta filial");
+      return;
+    }
+
     const payload = {
       ...data,
       branch: selectedBranch?.idBranch,

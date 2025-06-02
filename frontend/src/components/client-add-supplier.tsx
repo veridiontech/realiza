@@ -99,6 +99,7 @@ export function ModalTesteSendSupplier() {
   const [phoneValue, setPhoneValue] = useState("");
   const [searchService, setSearchService] = useState("");
   const [searchActivity, setSearchActivity] = useState("");
+  const [usedEmails, setUsedEmails] = useState<string[]>([]);
 
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
@@ -241,38 +242,36 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  const createClient = async (data: ModalSendEmailFormSchema) => {
-    setIsLoading(true);
-    try {
-      let payload;
-      if (isSubcontractor === "contratado") {
-        payload = {
-          ...data,
-        };
-        console.log(
-          "Dados enviados de contratado para modal de contrato:",
-          payload
-        );
-      } else {
-        payload = {
-          ...data,
-        };
-        console.log(
-          "Enviando dados de subcontratado para o modal de contrato:",
-          payload
-        );
-      }
-      setProviderDatas(payload);
-      setPushCnpj(data.cnpj);
-      toast.success("Prestador preenchido com sucesso");
-      setNextModal(true);
-    } catch (err) {
-      console.log("Erro ao criar prestador", err);
-      toast.error("Erro ao criar prestador. Tente novamente");
-    } finally {
-      setIsLoading(false);
+const createClient = async (data: ModalSendEmailFormSchema) => {
+  setIsLoading(true);
+
+  const emailAtual = data.email.toLowerCase();
+  if (usedEmails.includes(emailAtual)) {
+    toast.error("E-mail já utilizado nesta sessão");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    let payload;
+    if (isSubcontractor === "contratado") {
+      payload = { ...data };
+    } else {
+      payload = { ...data };
     }
-  };
+
+    setProviderDatas(payload);
+    setPushCnpj(data.cnpj);
+    setUsedEmails((prev) => [...prev, emailAtual]); 
+    toast.success("Prestador preenchido com sucesso");
+    setNextModal(true);
+  } catch (err) {
+    console.log("Erro ao criar prestador", err);
+    toast.error("Erro ao criar prestador. Tente novamente");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const getManager = async () => {
     try {
