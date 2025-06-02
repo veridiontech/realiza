@@ -76,7 +76,6 @@ public class CrudContractImpl implements CrudContract {
 
     @Override
     public String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
-        List<DocumentEmployee> documentEmployee = new ArrayList<>(List.of());
         Contract contractProxy = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
