@@ -177,6 +177,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 throw new EntityNotFoundException(e);
             }
             documentBranch.setDocumentation(fileDocumentId);
+            documentBranch.setStatus(Document.Status.EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,

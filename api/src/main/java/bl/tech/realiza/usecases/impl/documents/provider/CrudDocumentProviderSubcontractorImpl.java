@@ -236,6 +236,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 throw new EntityNotFoundException(e);
             }
             documentProviderSubcontractor.setDocumentation(fileDocumentId);
+            documentProviderSubcontractor.setStatus(Document.Status.EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,

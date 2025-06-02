@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +52,7 @@ public class SetupService {
     public void setupNewClient(Client savedClient) {
         Branch baseBranch = branchRepository.save(
                 Branch.builder()
-                        .name(savedClient.getCorporateName() + " Base")
+                        .name(savedClient.getTradeName() + " Base")
                         .cnpj(savedClient.getCnpj())
                         .cep(savedClient.getCep())
                         .state(savedClient.getState())

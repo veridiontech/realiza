@@ -3,8 +3,8 @@ import { useClient } from "@/context/Client-Provider";
 export function ClientProfilePhoto() {
   const { client } = useClient();
 
-  const firstLetter = client?.tradeName[0];
-  const lastLetter = client?.tradeName?.slice(-1);
+  const firstLetter = client?.corporateName[0];
+  const lastLetter = client?.corporateName?.slice(-1);
 
   return (
     <div >

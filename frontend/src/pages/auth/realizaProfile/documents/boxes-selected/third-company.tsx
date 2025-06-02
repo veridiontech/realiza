@@ -123,7 +123,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
               className={`w-[10vw] rounded-md p-4 transition-all duration-300 ${nonSelected.length === 0 ? "cursor-not-allowed bg-gray-300 text-gray-500" : "bg-realizaBlue text-white"}`}
               disabled={nonSelected.length === 0}
             >
-              Desalocar documentos
+              Alocar novos documentos
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -153,7 +153,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
               className={`w-[10vw] rounded-md p-3 transition-all duration-300 ${documents.length === 0 ? "cursor-not-allowed bg-red-300 text-red-500" : "bg-red-600 text-white"}`}
               disabled={documents.length === 0}
             >
-              Alocar novos documentos
+              Desalocar documentos
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
