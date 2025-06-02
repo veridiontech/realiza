@@ -124,7 +124,7 @@ export function NewModalCreateEmployee() {
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [mobileValue, setMobileValue] = useState("");
-  const [cpfValue, setCpfValue] = useState("");
+  const [cpfValue, setCpfValue] = useState("")
 
   console.log("Id Supplier: ", supplier);
 
@@ -207,6 +207,8 @@ export function NewModalCreateEmployee() {
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
 
+
+
     const payload = {
       ...data,
       supplier: supplier?.idProvider,
@@ -217,7 +219,7 @@ export function NewModalCreateEmployee() {
       const tokenFromStorage = localStorage.getItem("tokenClient");
 
       await axios.post(`${ip}/employee/brazilian`, payload, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
 
       toast.success("Sucesso ao cadastrar novo colaborador!");
@@ -232,7 +234,17 @@ export function NewModalCreateEmployee() {
       setIsOpen(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        toast.error(`Erro ${err.response?.status}: ${err.response?.data?.message || "Erro ao cadastrar colaborador"}`);
+        const errorMsg = err.response?.data?.message || "";
+
+        if (
+          errorMsg.toLowerCase().includes("duplicate entry") &&
+          errorMsg.toLowerCase().includes("cpf")
+        ) {
+          toast.error("Já existe um colaborador com esse CPF cadastrado.");
+        } else {
+          toast.error(`Erro ${err.response?.status}: ${errorMsg || "Erro ao cadastrar colaborador"}`);
+        }
+
         console.error("Erro Axios:", err.response?.data);
       } else {
         toast.error("Erro inesperado. Tente novamente.");

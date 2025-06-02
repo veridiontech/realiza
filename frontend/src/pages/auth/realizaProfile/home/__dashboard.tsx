@@ -167,6 +167,14 @@ export function Dashboard() {
   };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
+    const cpfSemPontuacao = data.cpf.replace(/\D/g, "");
+    const cpfJaExiste = usersFromBranch.some((user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao);
+
+    if (cpfJaExiste) {
+      toast.error("CPF já cadastrado para esta filial");
+      return;
+    }
+
     const payload = {
       ...data,
       idEnterprise: selectedBranch?.idBranch,
@@ -337,8 +345,8 @@ export function Dashboard() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
-                              : "text-realizaBlue border-realizaBlue border bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
+                            : "text-realizaBlue border-realizaBlue border bg-white"
                             }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
@@ -347,8 +355,8 @@ export function Dashboard() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue border-realizaBlue border bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue border-realizaBlue border bg-white"
                             }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >

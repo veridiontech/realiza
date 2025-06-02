@@ -472,6 +472,14 @@ export function SelectClient() {
   };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
+    const cpfSemPontuacao = data.cpf.replace(/\D/g, "");
+    const cpfJaExiste = usersFromBranch.some((user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao);
+
+    if (cpfJaExiste) {
+      toast.error("CPF já cadastrado para esta filial");
+      return;
+    }
+
     const payload = {
       ...data,
       branch: selectedBranch?.idBranch,
