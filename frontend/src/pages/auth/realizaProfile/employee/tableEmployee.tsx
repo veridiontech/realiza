@@ -465,9 +465,6 @@ const getMoreDetailsDocument = async (id: string) => {
                 <div className="flex w-[25vw] h-[50vh] flex-col gap-9 p-10">
                   <div className="flex items-center justify-between">
                     <h1 className="text-[20px]">Contratos</h1>
-                    <Button className="bg-realizaBlue">
-                      Adicionar contratos +
-                    </Button>
                   </div>
                   <div className="flex flex-col gap-5">
                     {Array.isArray(employee.contracts) && employee.contracts.map((contract: any) => (
