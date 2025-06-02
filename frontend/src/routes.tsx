@@ -39,7 +39,7 @@ import ChatPage from "./pages/auth/realizaProfile/chat";
 import RiskMatriz from "./pages/auth/realizaProfile/documents/risk-matriz";
 import { ClientEmployee } from "./pages/auth/clientProfile/employee/clientEmployee";
 import { ControlPanel } from "./pages/auth/realizaProfile/panel-control/_panelControl";
-
+import { DetailsUsers } from "@/pages/auth/realizaProfile/employee/detailsUsers";
 import { Quartered } from "./pages/auth/supplier/quartered/quartered";
 import { ProviderAppLayout } from "./_layouts/providerApp";
 // import { SupplierEmployee } from "./pages/auth/supplier/supplierEmployee/supplierEmployee";
@@ -79,6 +79,7 @@ export const router = createBrowserRouter([
       { path: "contracts/:id", element: <ContractsTable /> },
       { path: "employees/:id", element: <EmployeesTable /> },
       { path: "detailsEmployees/:id", element: <DetailsEmployee /> },
+      { path: "detailsUsers/:id", element: <DetailsUsers /> },
       {
         path: "employee-to-contract/:contractId",
         element: <EmployeeToContract />,

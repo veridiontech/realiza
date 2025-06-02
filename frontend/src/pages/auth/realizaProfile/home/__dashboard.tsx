@@ -176,13 +176,13 @@ export function Dashboard() {
     }
 
     const emailJaExiste = usersFromBranch.some(
-  (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
-);
+      (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+    );
 
-if (emailJaExiste) {
-  toast.error("E-mail já cadastrado para esta filial");
-  return;
-}
+    if (emailJaExiste) {
+      toast.error("E-mail já cadastrado para esta filial");
+      return;
+    }
 
     const payload = {
       ...data,
@@ -602,7 +602,7 @@ if (emailJaExiste) {
                               <p className="mb-2 text-gray-800">{users.cpf}</p>
 
                               <Link
-                                to={`/sistema/detailsEmployees/${users.idEmployee}`}
+                                to={`/sistema/detailsUsers/${users.idUser}`}
                               >
                                 <button className="text-realizaBlue mt-2 flex items-center gap-1 hover:underline">
                                   <Settings2 size={18} /> Acessar
@@ -620,12 +620,9 @@ if (emailJaExiste) {
                         <table className="w-full border-collapse border border-gray-300">
                           <thead>
                             <tr>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                Nome
-                              </th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                CPF
-                              </th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">Nome</th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">CPF</th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">Ações</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -635,8 +632,14 @@ if (emailJaExiste) {
                                   <td className="border border-gray-300 px-4 py-2">
                                     {users.firstName} {users.surname}
                                   </td>
+                                  <td className="border border-gray-300 px-4 py-2">{users.cpf}</td>
                                   <td className="border border-gray-300 px-4 py-2">
-                                    {users.cpf}
+                                    <Link
+                                      to={`/sistema/detailsUsers/${users.idUser}`}
+                                      className="text-realizaBlue hover:underline flex items-center gap-1"
+                                    >
+                                      <Settings2 size={16} />
+                                    </Link>
                                   </td>
                                 </tr>
                               ))
