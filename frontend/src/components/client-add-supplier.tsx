@@ -870,7 +870,7 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                             className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
                           />
                         </div>
-
+                      
                         {/* Lista filtrada com checkboxes */}
                         <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
                           <div className="flex flex-col gap-2">

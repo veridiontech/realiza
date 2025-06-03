@@ -382,32 +382,36 @@ export function Header() {
     >
       <div className="flex items-center md:justify-between justify-center">
         {/* Botão que abre o menu lateral via hover */}
-        <div className="flex items-center gap-5">
-          <div
-            className="relative"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                   <Menu size={40} className="text-white border p-2 rounded-full"/>
-              </SheetTrigger>
-              <SheetContent
-                className="h-full overflow-auto dark:bg-white"
-                side="left"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <LateralMenu onClose={() => setMenuOpen(false)} />
-              </SheetContent>
-            </Sheet>
-          </div>
-          <div className="hidden md:block">
-            <Link to={`/sistema/dashboard/${getIdUser}`}>
-              <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
-            </Link>
-          </div>
-        </div>
+<div className="flex items-center gap-5">
+  <div
+    className="relative"
+    onMouseEnter={handleMouseEnter}
+    onMouseLeave={handleMouseLeave}
+  >
+    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+      <SheetTrigger asChild>
+        <Menu size={40} className="text-white border p-2 rounded-full"/>
+      </SheetTrigger>
+      <SheetContent
+        className="h-full overflow-auto dark:bg-white"
+        side="left"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <LateralMenu onClose={() => setMenuOpen(false)} />
+      </SheetContent>
+    </Sheet>
+  </div>
+  <div className="hidden md:flex items-center gap-4">
+    <Link to={`/sistema/dashboard/${getIdUser}`}>
+      <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
+    </Link>
+    <div className="flex flex-col text-white">
+      <span className="font-semibold text-sm">Cliente: {client?.corporateName || 'Não selecionado'}</span>
+      <span className="font-semibold text-sm">Filial: {selectedBranch?.name || 'Não selecionada'}</span>
+    </div>
+  </div>
+</div>
         {/* Perfil do usuário e demais itens */}
         <div className="hidden items-center gap-14 md:flex">
           <div className="flex gap-10 items-start">

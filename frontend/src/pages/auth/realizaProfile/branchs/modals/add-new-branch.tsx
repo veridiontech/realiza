@@ -106,39 +106,43 @@ export function AddNewBranch() {
     setPhoneValue(formatPhone(rawPhone));
   }, [getValues]);
 
-  const handleCnpj = async () => {
-    const cnpj = getValues("cnpj").replace(/\D/g, "");
-    if (cnpj.length !== 14) {
-      toast.error("CNPJ inválido");
-      return;
-    }
-    try {
-      const res = await axios.get(`https://open.cnpja.com/office/${cnpj}`);
-      const razao = res.data.company.name || "Razão social não encontrada";
-      const cep = res.data.address.zip;
-      const city = res.data.address.city;
-      const address = res.data.address.street;
-      const country = res.data.address.country.name;
-      const state = res.data.address.state;
-      const number = res.data.address.number;
-      
-      console.log("CEP", cep);
+const handleCnpj = async () => {
+  const cnpj = getValues("cnpj").replace(/\D/g, "");
+  if (cnpj.length !== 14) {
+    toast.error("CNPJ inválido");
+    return;
+  }
 
-      setValue("number", number);
-      setValue("state", state);
-      setValue("country", country);
-      setValue("address", address);
-      setValue("cep", cep);
-      setValue("city", city);
-      setValue("name", razao);
-      setRazaoSocial(razao);
-      toast.success("Sucesso ao buscar CNPJ");
-    } catch (err) {
-      setRazaoSocial(null);
-      toast.error("Erro ao buscar CNPJ");
-      console.error("Erro ao buscar CNPJ:", err);
-    }
-  };
+  try {
+    const res = await axios.get(`https://open.cnpja.com/office/${cnpj}`);
+    const razao = res.data.company.name || "Razão social não encontrada";
+
+    const rawCep = res.data.address.zip || "";
+    const formattedCep = formatCEP(rawCep);
+    const city = res.data.address.city;
+    const address = res.data.address.street;
+    const country = res.data.address.country.name;
+    const state = res.data.address.state;
+    const number = res.data.address.number;
+
+    console.log("CEP formatado", formattedCep);
+    setValue("number", number);
+    setValue("state", state);
+    setValue("country", country);
+    setValue("address", address);
+    setValue("cep", formattedCep); 
+    setCepValue(formattedCep); 
+    setValue("city", city);
+    setValue("name", razao);
+    setRazaoSocial(razao);
+    toast.success("Sucesso ao buscar CNPJ");
+  } catch (err) {
+    setRazaoSocial(null);
+    toast.error("Erro ao buscar CNPJ");
+    console.error("Erro ao buscar CNPJ:", err);
+  }
+};
+
 
   const onSubmit = async (data: NewBranchFormSchema) => {
     const payload = {

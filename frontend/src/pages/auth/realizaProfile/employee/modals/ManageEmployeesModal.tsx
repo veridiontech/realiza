@@ -231,7 +231,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                 setConfirmModalOpen(false);
                 setMainModalOpen(true);
               }}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md shadow"
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-md transition-colors"
             >
               Alocar Colaborador
             </Button>
@@ -241,7 +241,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                 setConfirmModalOpen(false);
                 setMainModalOpen(true);
               }}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-md shadow"
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded-md transition-colors"
             >
               Desalocar Colaborador
             </Button>

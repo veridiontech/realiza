@@ -26,7 +26,7 @@ export function DocumentPageNew() {
             }`}
             onClick={() => setSelectedTab("document")}
           >
-            Documentos
+            Alocar documentos
           </Button>
           <Button
             className={`${
