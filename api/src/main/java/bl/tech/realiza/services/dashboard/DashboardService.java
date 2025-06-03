@@ -3,6 +3,7 @@ package bl.tech.realiza.services.dashboard;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
@@ -70,8 +71,10 @@ public class DashboardService {
 
         activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndFinishedIsFalse(branch.getIdBranch()).intValue();
 
-        activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranch(branch.getIdBranch()).intValue()
-        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranch(branch.getIdBranch()).intValue();
+        activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.ALOCADO).intValue()
+        + employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.DESALOCADO).intValue()
+        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.ALOCADO).intValue()
+        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.DESALOCADO).intValue();
 
         return DashboardHomeResponseDto.builder()
                 .adherence(adherence)
@@ -139,15 +142,24 @@ public class DashboardService {
         List<Branch> allBranches = branch.getClient().getBranches();
 
         for (Branch b : allBranches) {
-            Object[] supplier = documentProviderSupplierRepository
+            Object[] supplierRaw = documentProviderSupplierRepository
                     .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
-            Object[] employeeSupplier = documentEmployeeRepository
-                    .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), Document.Status.PENDENTE);
-            Object[] subcontractor = documentProviderSupplierRepository
-                    .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
-            Object[] employeeSubcontractor = documentEmployeeRepository
-                    .countTotalAndPendentesByContractSubcontractorBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] supplier = (Object[]) supplierRaw[0];
 
+            Object[] employeeSupplierRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] employeeSupplier = (Object[]) employeeSupplierRaw[0];
+
+            Object[] subcontractorRaw = documentProviderSupplierRepository
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] subcontractor = (Object[]) subcontractorRaw[0];
+
+            Object[] employeeSubcontractorRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSubcontractorBranch(b.getIdBranch(), Document.Status.PENDENTE);
+            Object[] employeeSubcontractor = (Object[]) employeeSubcontractorRaw[0];
+
+
+            long supp = getSafeLong(supplier, 0);
             long total = getSafeLong(supplier, 0)
                     + getSafeLong(employeeSupplier, 0)
                     + getSafeLong(subcontractor, 0)
@@ -158,7 +170,8 @@ public class DashboardService {
                     + getSafeLong(subcontractor, 1)
                     + getSafeLong(employeeSubcontractor, 1);
 
-            double adherence = total > 0 ? (pendentes * 100.0 / total) : 0;
+            double adherence = total > 0 ? (pendentes * 100.0 / total) : 100;
+            adherence = Math.round(adherence * 100.0) / 100.0;
 
             // Agora calcular conformidade
             long aprovados = documentEmployeeRepository.countByBranchIdAndStatus(branchId, APROVADO)
