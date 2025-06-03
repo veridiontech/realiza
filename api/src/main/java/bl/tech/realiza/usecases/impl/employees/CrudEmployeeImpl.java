@@ -10,6 +10,7 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
+import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
@@ -18,6 +19,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
     private final EmployeeForeignerRepository employeeForeignerRepository;
     private final FileRepository fileRepository;
     private final ContractRepository contractRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     public Page<EmployeeResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable) {
@@ -222,6 +225,21 @@ public class CrudEmployeeImpl implements CrudEmployee {
         }
 
         return new PageImpl<>(pageContent, pageable, allDtos.size());
+    }
+
+    @Override
+    public EmployeeResponseDto changeSituation(String employeeId, Employee.Situation situation) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
+        employee.setSituation(situation);
+        Employee savedEmployee = employeeRepository.save(employee);
+        if (savedEmployee instanceof EmployeeBrazilian employeeBrazilian) {
+            return convertBrazilianToDto(employeeBrazilian);
+        } else if (savedEmployee instanceof EmployeeForeigner employeeForeigner) {
+            return convertForeignerToDto(employeeForeigner);
+        } else {
+            throw new NotFoundException("Employee not found");
+        }
     }
 
     private EmployeeResponseDto convertBrazilianToDto(EmployeeBrazilian employeeBrazilian) {

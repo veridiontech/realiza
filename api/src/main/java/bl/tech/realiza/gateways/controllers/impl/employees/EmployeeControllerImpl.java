@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.controllers.impl.employees;
 
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.gateways.controllers.interfaces.employees.EmployeeController;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
@@ -66,6 +67,13 @@ public class EmployeeControllerImpl implements EmployeeController {
         Page<EmployeeResponseDto> pageEmployeeForeigner = crudEmployee. findAllByContract(idContract, pageable);
 
         return ResponseEntity.ok(pageEmployeeForeigner);
+    }
+
+    @PostMapping("/{employeeId}/change-situation")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<EmployeeResponseDto> changeEmployeeSituation(@PathVariable String employeeId, @RequestParam Employee.Situation situation) {
+        return ResponseEntity.ok(crudEmployee.changeSituation(employeeId, situation));
     }
 
     @PostMapping("/brazilian")
