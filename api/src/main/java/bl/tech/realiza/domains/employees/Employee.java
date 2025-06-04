@@ -88,6 +88,7 @@ public abstract class Employee {
             joinColumns = @JoinColumn(name = "idEmployee"),
             inverseJoinColumns = @JoinColumn(name = "idContract", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
     )
+    @JsonIgnore
     private List<Contract> contracts;
 
     // -------------------------------
