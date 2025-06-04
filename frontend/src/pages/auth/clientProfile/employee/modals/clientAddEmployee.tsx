@@ -155,7 +155,6 @@ export function StepOneEmployee({ onClose, onSubmit }: StepOneEmployeeProps) {
           label: "Celular",
           type: "telephone",
           placeholder: "(XX) XXXXX-XXXX",
-          required: true,
         },
         {
           name: "admissionDate",

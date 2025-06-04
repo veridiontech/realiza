@@ -99,13 +99,22 @@ const createNewEmployeeFormSchema = z.object({
   number: z.string(),
   complement: z.string(),
   phone: z.string()
-    .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarNumerosRepetidos, { message: "Telefone inválido: não pode ter números repetidos" }),
+    .optional()
+    .refine((val) => !val || phoneRegex.test(val), {
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+    })
+    .refine((val) => !val || validarNumerosRepetidos(val), {
+      message: "Telefone inválido: não pode ter números repetidos"
+    }),
+
   mobile: z.string()
-    .nonempty("Celular obrigatório")
-    .refine(validarNumerosRepetidos, { message: "Celular com dígitos repetidos" })
-    .refine((val) => phoneRegex.test(val), { message: "Celular inválido" }),
+    .optional()
+    .refine((val) => !val || validarNumerosRepetidos(val), {
+      message: "Celular com dígitos repetidos"
+    })
+    .refine((val) => !val || phoneRegex.test(val), {
+      message: "Celular inválido"
+    }),
   position: z.string(),
   education: z.string(),
   cboId: z.string().optional(),
