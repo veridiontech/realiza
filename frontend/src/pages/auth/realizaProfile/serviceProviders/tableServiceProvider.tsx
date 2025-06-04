@@ -2,7 +2,7 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Eye, Pencil, Ban, X } from "lucide-react";
+import { Eye, Pencil, BadgeCheck, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 function StatusBadge({ finished }: { finished?: boolean }) {
@@ -165,7 +165,7 @@ const handleEditClick = (supplier: any) => {
                     setIsFinalizeModalOpen(true);
                   }}
                 >
-                  <Ban className="w-5 h-5" />
+                  <BadgeCheck className="w-5 h-5" />
                 </button>
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
@@ -222,7 +222,7 @@ const handleEditClick = (supplier: any) => {
                         setIsFinalizeModalOpen(true);
                       }}
                     >
-                      <Ban className="w-5 h-5" />
+                      <BadgeCheck className="w-5 h-5" />
                     </button>
                   </td>
                   <td className="border border-gray-300 p-2">

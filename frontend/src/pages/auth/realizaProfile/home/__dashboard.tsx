@@ -167,6 +167,23 @@ export function Dashboard() {
   };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
+    const cpfSemPontuacao = data.cpf.replace(/\D/g, "");
+    const cpfJaExiste = usersFromBranch.some((user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao);
+
+    if (cpfJaExiste) {
+      toast.error("CPF já cadastrado para esta filial");
+      return;
+    }
+
+    const emailJaExiste = usersFromBranch.some(
+      (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+    );
+
+    if (emailJaExiste) {
+      toast.error("E-mail já cadastrado para esta filial");
+      return;
+    }
+
     const payload = {
       ...data,
       idEnterprise: selectedBranch?.idBranch,
@@ -337,8 +354,8 @@ export function Dashboard() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
-                              : "text-realizaBlue border-realizaBlue border bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
+                            : "text-realizaBlue border-realizaBlue border bg-white"
                             }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
@@ -347,8 +364,8 @@ export function Dashboard() {
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                              : "text-realizaBlue border-realizaBlue border bg-white"
+                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                            : "text-realizaBlue border-realizaBlue border bg-white"
                             }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
@@ -585,7 +602,7 @@ export function Dashboard() {
                               <p className="mb-2 text-gray-800">{users.cpf}</p>
 
                               <Link
-                                to={`/sistema/detailsEmployees/${users.idEmployee}`}
+                                to={`/sistema/detailsUsers/${users.idUser}`}
                               >
                                 <button className="text-realizaBlue mt-2 flex items-center gap-1 hover:underline">
                                   <Settings2 size={18} /> Acessar
@@ -603,12 +620,9 @@ export function Dashboard() {
                         <table className="w-full border-collapse border border-gray-300">
                           <thead>
                             <tr>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                Nome
-                              </th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">
-                                CPF
-                              </th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">Nome</th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">CPF</th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">Ações</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -618,8 +632,14 @@ export function Dashboard() {
                                   <td className="border border-gray-300 px-4 py-2">
                                     {users.firstName} {users.surname}
                                   </td>
+                                  <td className="border border-gray-300 px-4 py-2">{users.cpf}</td>
                                   <td className="border border-gray-300 px-4 py-2">
-                                    {users.cpf}
+                                    <Link
+                                      to={`/sistema/detailsUsers/${users.idUser}`}
+                                      className="text-realizaBlue hover:underline flex items-center gap-1"
+                                    >
+                                      <Settings2 size={16} />
+                                    </Link>
                                   </td>
                                 </tr>
                               ))

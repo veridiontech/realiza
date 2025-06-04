@@ -73,6 +73,8 @@ export function ModalTesteSendSupplier() {
   const [nextModal, setNextModal] = useState(false);
   const { client } = useClient();
   const { selectedBranch } = useBranch();
+  const [allSuppliers, setAllSuppliers] = useState<ModalSendEmailFormSchema[]>([]);
+
 
   const {
     register,
@@ -125,33 +127,46 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  const createClient = async (data: ModalSendEmailFormSchema) => {
-    setIsLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      await axios.post(`${ip}/invite`, {
-        email: data.email,
-        company: data.company,
-        cnpj: data.cnpj,
-      }, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
-      );
-      const supplierData = {
-        ...data,
-        branch: selectedBranch,
-        manager: manager,
-      };
-      setSupplierInfo(supplierData);
-      toast.success("Email de cadastro enviado para novo prestador");
-      setNextModal(true);
-    } catch (err) {
-      console.log("Erro ao enviar email para usuário:", err);
-      toast.error("Erro ao enviar email. Tente novamente");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const createClient = async (data: ModalSendEmailFormSchema) => {
+  setIsLoading(true);
+
+  const emailJaExiste = allSuppliers.some(
+    (supplier) => supplier.email.toLowerCase() === data.email.toLowerCase()
+  );
+
+  if (emailJaExiste) {
+    toast.error("E-mail já cadastrado na sessão atual");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    await axios.post(`${ip}/invite`, {
+      email: data.email,
+      company: data.company,
+      cnpj: data.cnpj,
+    }, {
+      headers: { Authorization: `Bearer ${tokenFromStorage}` }
+    });
+
+    const supplierData = {
+      ...data,
+      branch: selectedBranch,
+      manager: manager,
+    };
+
+    setSupplierInfo(supplierData);
+    setAllSuppliers((prev) => [...prev, data]);
+    toast.success("Email de cadastro enviado para novo prestador");
+    setNextModal(true);
+  } catch (err) {
+    console.log("Erro ao enviar email para usuário:", err);
+    toast.error("Erro ao enviar email. Tente novamente");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const createContract = async (data: ContractFormSchema) => {
     if (!supplierInfo) {

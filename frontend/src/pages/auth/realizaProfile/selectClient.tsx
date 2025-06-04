@@ -472,6 +472,23 @@ export function SelectClient() {
   };
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
+    const cpfSemPontuacao = data.cpf.replace(/\D/g, "");
+    const cpfJaExiste = usersFromBranch.some((user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao);
+
+    if (cpfJaExiste) {
+      toast.error("CPF já cadastrado para esta filial");
+      return;
+    }
+
+    const emailJaExiste = usersFromBranch.some(
+      (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+    );
+
+    if (emailJaExiste) {
+      toast.error("E-mail já cadastrado para esta filial");
+      return;
+    }
+
     const payload = {
       ...data,
       branch: selectedBranch?.idBranch,
