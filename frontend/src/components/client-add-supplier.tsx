@@ -768,7 +768,7 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                         </option>
                         <option value="CAPEX">CAPEX</option>
                         <option value="OPEX">OPEX</option>
-                        <option value="Nenhuma">Nenhuma</option>
+                        <option value="NENHUM">Nenhuma</option>
                       </select>
                       {errorsContract.expenseType && (
                         <span className="text-red-500">
