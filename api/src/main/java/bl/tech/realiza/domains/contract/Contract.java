@@ -70,9 +70,11 @@ public abstract class Contract {
             joinColumns = @JoinColumn(name = "idContract"),
             inverseJoinColumns = @JoinColumn(name = "idActivity", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
     )
+    @JsonIgnore
     private List<Activity> activities;
 
     @ManyToMany(mappedBy = "contracts")
+    @JsonIgnore
     private List<Employee> employees;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
