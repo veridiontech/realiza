@@ -77,6 +77,8 @@ public class SetupService {
         );
 
         crudServiceType.transferFromRepoToClient(client.getIdClient());
+        crudServiceType.transferFromClientToBranch(client.getIdClient(), baseBranch.getIdBranch());
+        crudActivity.transferFromRepo(baseBranch.getIdBranch());
 
         documentBranchRepository.saveAll(
                 documentMatrixRepository.findAll()
@@ -90,9 +92,6 @@ public class SetupService {
                                 .documentMatrix(documentMatrix)
                                 .build())
                         .collect(Collectors.toList()));
-
-        crudServiceType.transferFromClientToBranch(client.getIdClient(), baseBranch.getIdBranch());
-        crudActivity.transferFromRepo(baseBranch.getIdBranch());
     }
 
     public void setupBranch(String branchId) {
@@ -100,6 +99,7 @@ public class SetupService {
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
+        crudActivity.transferFromRepo(branch.getIdBranch());
 
         documentBranchRepository.saveAll(
                 documentMatrixRepository.findAll()
@@ -113,8 +113,6 @@ public class SetupService {
                                 .documentMatrix(documentMatrix)
                                 .build())
                         .collect(Collectors.toList()));
-
-        crudActivity.transferFromRepo(branch.getIdBranch());
     }
 
     public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {
