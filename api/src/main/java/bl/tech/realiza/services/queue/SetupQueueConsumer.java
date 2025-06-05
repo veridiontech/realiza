@@ -1,6 +1,10 @@
 package bl.tech.realiza.services.queue;
 
 import bl.tech.realiza.configs.RabbitConfig;
+import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.setup.SetupService;
 import lombok.RequiredArgsConstructor;
@@ -13,34 +17,37 @@ public class SetupQueueConsumer {
 
     private final SetupService setupService;
     private final QueueLogService logService;
+    private final ClientRepository clientRepository;
+    private final BranchRepository branchRepository;
+    private final ContractProviderSupplierRepository contractProviderSupplierRepository;
 
     @RabbitListener(queues = RabbitConfig.SETUP_QUEUE)
     public void consume(SetupMessage message) {
         try {
             switch (message.getType()) {
                 case "NEW_CLIENT" -> {
-                    setupService.setupNewClient(message.getClient());
-                    logService.logSuccess("NEW_CLIENT", message.getClient().getIdClient());
+                    setupService.setupNewClient(message.getClientId());
+                    logService.logSuccess("NEW_CLIENT", message.getClientId());
                 }
                 case "NEW_BRANCH" -> {
-                    setupService.setupBranch(message.getBranch());
-                    logService.logSuccess("NEW_BRANCH", message.getBranch().getIdBranch());
+                    setupService.setupBranch(message.getBranchId());
+                    logService.logSuccess("NEW_BRANCH", message.getBranchId());
                 }
                 case "NEW_CONTRACT_SUPPLIER" -> {
-                    setupService.setupContractSupplier(message.getContractSupplier(), message.getActivitiesId());
-                    logService.logSuccess("NEW_CONTRACT_SUPPLIER", message.getContractSupplier().getIdContract());
+                    setupService.setupContractSupplier(message.getContractSupplierId(), message.getActivityIds());
+                    logService.logSuccess("NEW_CONTRACT_SUPPLIER", message.getContractSupplierId());
                 }
                 case "NEW_CONTRACT_SUBCONTRACTOR" -> {
-                    setupService.setupContractSubcontractor(message.getContractSubcontractor(), message.getActivitiesId());
-                    logService.logSuccess("NEW_CONTRACT_SUBCONTRACTOR", message.getContractSubcontractor().getIdContract());
+                    setupService.setupContractSubcontractor(message.getContractSubcontractorId(), message.getActivityIds());
+                    logService.logSuccess("NEW_CONTRACT_SUBCONTRACTOR", message.getContractSubcontractorId());
                 }
                 case "EMPLOYEE_CONTRACT_SUPPLIER" -> {
-                    setupService.setupEmployeeToContractSupplier(message.getContractSupplier(), message.getEmployees());
-                    logService.logSuccess("EMPLOYEE_CONTRACT_SUPPLIER", message.getContractSupplier().getIdContract());
+                    setupService.setupEmployeeToContractSupplier(message.getContractSupplierId(), message.getEmployeeIds());
+                    logService.logSuccess("EMPLOYEE_CONTRACT_SUPPLIER", message.getContractSupplierId());
                 }
                 case "EMPLOYEE_CONTRACT_SUBCONTRACT" -> {
-                    setupService.setupEmployeeToContractSubcontract(message.getContractSubcontractor(), message.getEmployees());
-                    logService.logSuccess("EMPLOYEE_CONTRACT_SUBCONTRACT", message.getContractSubcontractor().getIdContract());
+                    setupService.setupEmployeeToContractSubcontract(message.getContractSubcontractorId(), message.getEmployeeIds());
+                    logService.logSuccess("EMPLOYEE_CONTRACT_SUBCONTRACT", message.getContractSubcontractorId());
                 }
                 default -> throw new IllegalArgumentException("Tipo inválido: " + message.getType());
             }
@@ -58,10 +65,10 @@ public class SetupQueueConsumer {
 
     private String getId(SetupMessage msg) {
         return switch (msg.getType()) {
-            case "NEW_CLIENT" -> msg.getClient().getIdClient();
-            case "NEW_BRANCH" -> msg.getBranch().getIdBranch();
-            case "NEW_CONTRACT_SUPPLIER" -> msg.getContractSupplier().getIdContract();
-            case "NEW_CONTRACT_SUBCONTRACTOR" -> msg.getContractSubcontractor().getIdContract();
+            case "NEW_CLIENT" -> msg.getClientId();
+            case "NEW_BRANCH" -> msg.getBranchId();
+            case "NEW_CONTRACT_SUPPLIER" -> msg.getContractSupplierId();
+            case "NEW_CONTRACT_SUBCONTRACTOR" -> msg.getContractSubcontractorId();
             default -> "SEM_ID";
         };
     }

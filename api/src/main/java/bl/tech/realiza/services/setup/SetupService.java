@@ -16,6 +16,9 @@ import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
@@ -48,24 +51,32 @@ public class SetupService {
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final EmployeeRepository employeeRepository;
     private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final ClientRepository clientRepository;
+    private final ContractProviderSupplierRepository contractProviderSupplierRepository;
+    private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
 
-    public void setupNewClient(Client savedClient) {
+    public void setupNewClient(String clientId) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
         Branch baseBranch = branchRepository.save(
                 Branch.builder()
-                        .name(savedClient.getTradeName() + " Base")
-                        .cnpj(savedClient.getCnpj())
-                        .cep(savedClient.getCep())
-                        .state(savedClient.getState())
-                        .city(savedClient.getCity())
-                        .email(savedClient.getEmail())
-                        .telephone(savedClient.getTelephone())
-                        .address(savedClient.getAddress())
-                        .number(savedClient.getNumber())
-                        .client(savedClient)
+                        .name(client.getTradeName() != null
+                                ? client.getTradeName() + " Base"
+                                : "Base")
+                        .cnpj(client.getCnpj())
+                        .cep(client.getCep())
+                        .state(client.getState())
+                        .city(client.getCity())
+                        .email(client.getEmail())
+                        .telephone(client.getTelephone())
+                        .address(client.getAddress())
+                        .number(client.getNumber())
+                        .client(client)
                         .build()
         );
 
-        crudServiceType.transferFromRepoToClient(savedClient.getIdClient());
+        crudServiceType.transferFromRepoToClient(client.getIdClient());
 
         documentBranchRepository.saveAll(
                 documentMatrixRepository.findAll()
@@ -80,12 +91,15 @@ public class SetupService {
                                 .build())
                         .collect(Collectors.toList()));
 
-        crudServiceType.transferFromClientToBranch(savedClient.getIdClient(), baseBranch.getIdBranch());
+        crudServiceType.transferFromClientToBranch(client.getIdClient(), baseBranch.getIdBranch());
         crudActivity.transferFromRepo(baseBranch.getIdBranch());
     }
 
-    public void setupBranch(Branch baseBranch) {
-        crudServiceType.transferFromClientToBranch(baseBranch.getClient().getIdClient(), baseBranch.getIdBranch());
+    public void setupBranch(String branchId) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
         documentBranchRepository.saveAll(
                 documentMatrixRepository.findAll()
@@ -95,22 +109,25 @@ public class SetupService {
                                 .type(documentMatrix.getType())
                                 .status(Document.Status.PENDENTE)
                                 .isActive(true)
-                                .branch(baseBranch)
+                                .branch(branch)
                                 .documentMatrix(documentMatrix)
                                 .build())
                         .collect(Collectors.toList()));
 
-        crudActivity.transferFromRepo(baseBranch.getIdBranch());
+        crudActivity.transferFromRepo(branch.getIdBranch());
     }
 
-    public void setupContractSupplier(ContractProviderSupplier contractProviderSupplier, List<String> activitiesId) {
+    public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {
         List<Activity> activities = new ArrayList<>(List.of());
         List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentBranch> documentBranch;
         List<DocumentProviderSupplier> documentProviderSupplier = new ArrayList<>(List.of());
 
-        if (contractProviderSupplier.getHse() && !activitiesId.isEmpty()) {
-            activities = activityRepository.findAllById(activitiesId);
+        ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSupplierId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        if (contractProviderSupplier.getHse() && !activityIds.isEmpty()) {
+            activities = activityRepository.findAllById(activityIds);
             if (activities.isEmpty()) {
                 throw new NotFoundException("Activities not found");
             }
@@ -145,14 +162,17 @@ public class SetupService {
         documentProviderSupplierRepository.saveAll(documentProviderSupplier);
     }
 
-    public void setupContractSubcontractor(ContractProviderSubcontractor contractProviderSubcontractor, List<String> activitiesId) {
+    public void setupContractSubcontractor(String contractProviderSubcontractorId, List<String> activityIds) {
         List<Activity> activities = new ArrayList<>(List.of());;
         List<DocumentProviderSupplier> documentSupplier;
         List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentProviderSubcontractor> documentProviderSubcontractor = new ArrayList<>(List.of());
 
-        if (contractProviderSubcontractor.getHse() && !activitiesId.isEmpty()) {
-            activities = activityRepository.findAllById(activitiesId);
+        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        if (contractProviderSubcontractor.getHse() && !activityIds.isEmpty()) {
+            activities = activityRepository.findAllById(activityIds);
             if (activities.isEmpty()) {
                 throw new NotFoundException("Activities not found");
             }
@@ -187,7 +207,12 @@ public class SetupService {
         documentProviderSubcontractorRepository.saveAll(documentProviderSubcontractor);
     }
 
-    public void setupEmployeeToContractSupplier(ContractProviderSupplier contractProviderSupplier, List<Employee> employees) {
+    public void setupEmployeeToContractSupplier(String contractProviderSupplierId, List<String> employeeIds) {
+        ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSupplierId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        List<Employee> employees = employeeRepository.findAllById(employeeIds);
+
         ProviderSupplier providerSupplier = contractProviderSupplier.getProviderSupplier();
 
         List<DocumentEmployee> documentEmployees = new ArrayList<>();
@@ -219,7 +244,11 @@ public class SetupService {
     }
 
 
-    public void setupEmployeeToContractSubcontract(ContractProviderSubcontractor contractProviderSubcontractor, List<Employee> employees) {
+    public void setupEmployeeToContractSubcontract(String contractProviderSubcontractorId, List<String> employeeIds) {
+        ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        List<Employee> employees = employeeRepository.findAllById(employeeIds);
         ProviderSubcontractor providerSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
 
         List<DocumentEmployee> documentEmployees = new ArrayList<>();
