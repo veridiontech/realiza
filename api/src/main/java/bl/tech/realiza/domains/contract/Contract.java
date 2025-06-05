@@ -57,7 +57,6 @@ public abstract class Contract {
 
     @ManyToOne
     @JoinColumn(name = "idUser")
-    @JsonIgnore
     private User responsible;
 
     @ManyToOne
@@ -74,7 +73,6 @@ public abstract class Contract {
     private List<Activity> activities;
 
     @ManyToMany(mappedBy = "contracts")
-    @JsonIgnore
     private List<Employee> employees;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
