@@ -30,7 +30,6 @@ export function TableEmployee({ idProvider }: TableEmployeeProps) {
   const page = 0;
   const limit = 10;
 
-      // const tokenFromStorage = localStorage.getItem("tokenClient");
 
 const getEmployee = async () => {
   setIsLoading(true);
@@ -120,10 +119,10 @@ const getMoreDetailsDocument = async (id: string) => {
               </div>
             </div>
           </div>
-          <div className="flex justify-center gap-5 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {Array.isArray(filteredEmployees) && filteredEmployees.map((employee: any) => (
-              <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl ">
-                <div className="flex w-[25vw] h-[50vh] flex-col gap-9 p-10">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+                <div className="p-6 w-full md:w-1/2 border-r border-gray-100">
                   <div className="flex items-center justify-between">
                     <h1 className="text-[20px]">Contratos</h1>
                     <Button className="bg-realizaBlue">
@@ -192,7 +191,7 @@ const getMoreDetailsDocument = async (id: string) => {
                 <Link
                   to={`/sistema/detailsEmployees/${employee.idEmployee}`}
                   key={employee.idEmployee}
-                  className="w-[15vw] p-4"
+                  className="w-[12vw] p-3"
                 >
                   <div className="flex flex-col gap-5">
                     <div className="flex gap-2">
@@ -274,10 +273,10 @@ const getMoreDetailsDocument = async (id: string) => {
               </div>
             </div>
           </div>
-          <div className="flex justify-center gap-5 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {Array.isArray(filteredEmployees) && filteredEmployees.map((employee: any) => (
-              <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl ">
-                <div className="flex w-[25vw] h-[50vh] flex-col gap-9 p-10">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+                <div className="p-6 w-full md:w-1/2 border-r border-gray-100">
                   <div className="flex items-center justify-between">
                     <h1 className="text-[20px]">Contratos</h1>
                     <Button className="bg-realizaBlue">
@@ -346,7 +345,7 @@ const getMoreDetailsDocument = async (id: string) => {
                 <Link
                   to={`/sistema/detailsEmployees/${employee.idEmployee}`}
                   key={employee.idEmployee}
-                  className="w-[15vw] p-4"
+                  className="w-[12vw] p-3"
                 >
                   <div className="flex flex-col gap-5">
                     <div className="flex gap-2">
@@ -427,10 +426,10 @@ const getMoreDetailsDocument = async (id: string) => {
               </div>
             </div>
           </div>
-          <div className="flex justify-center gap-5 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {Array.isArray(filteredEmployees) && filteredEmployees.map((employee: any) => (
-              <div className="flex items-start rounded-md border border-neutral-200 bg-white shadow-xl ">
-                <div className="flex w-[25vw] h-[50vh] flex-col gap-9 p-10">
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+                <div className="p-6 w-full md:w-1/2 border-r border-gray-100">
                   <div className="flex items-center justify-between">
                     <h1 className="text-[20px]">Contratos</h1>
                   </div>
@@ -496,7 +495,7 @@ const getMoreDetailsDocument = async (id: string) => {
                 <Link
                   to={`/sistema/detailsEmployees/${employee.idEmployee}`}
                   key={employee.idEmployee}
-                  className="w-[15vw] p-4"
+                  className="w-[12vw] p-3"
                 >
                   <div className="flex flex-col gap-5">
                     <div className="flex gap-2">
