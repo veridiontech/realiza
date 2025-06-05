@@ -150,6 +150,8 @@ const handleEditClick = (supplier: any) => {
               <p className="mb-2 text-gray-800">
                 {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
               </p>
+              <p className="text-sm font-semibold text-gray-700">Gestor:</p>
+              <p className="mb-2 text-gray-800">{supplier.responsibleName}</p>
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
                 <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
@@ -186,6 +188,7 @@ const handleEditClick = (supplier: any) => {
               <th className="border border-gray-300 p-2 text-left">CNPJ</th>
               <th className="border border-gray-300 p-2 text-left">Nome do Serviço</th>
               <th className="border border-gray-300 p-2 text-left">Data de Início</th>
+              <th className="border border-gray-300 p-2 text-left">Gestor</th>
               <th className="border border-gray-300 p-2 text-left">Ações</th>
               <th className="border border-gray-300 p-2 text-left">Status</th>
             </tr>
@@ -207,7 +210,7 @@ const handleEditClick = (supplier: any) => {
                   <td className="border border-gray-300 p-2">
                     {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
                   </td>
-
+                  <td className="border border-gray-300 p-2">{supplier.responsibleName}</td>
                   <td className="border border-gray-300 p-2 space-x-2">
                     <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
                       <Eye className="w-5 h-5" />
@@ -255,6 +258,9 @@ const handleEditClick = (supplier: any) => {
             </p>
             <p>
               <strong>Nome do Serviço:</strong> {selectedSupplier.serviceName}
+            </p>
+            <p>
+              <strong>Gestor do contrato:</strong> {selectedSupplier.responsibleName}
             </p>
             <p>
               <strong>Data de Início:</strong>{" "}
@@ -305,6 +311,17 @@ const handleEditClick = (supplier: any) => {
                 value={editFormData.serviceName || ""}
                 onChange={(e) =>
                   setEditFormData({ ...editFormData, serviceName: e.target.value })
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
+              />
+            </div>
+            <div>
+              <label className="text-white font-semibold block mb-1">Gestor do contrato</label>
+              <input
+                type="text"
+                value={editFormData.responsibleName || ""}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, responsibleName: e.target.value })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />

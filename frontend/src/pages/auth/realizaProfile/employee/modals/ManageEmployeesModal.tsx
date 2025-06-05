@@ -42,9 +42,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
-  // const [allocatedEmployees, setAllocatedEmployees] = useState<Employee[]>([]);
-  // const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<string[]>([]);
+  const [allocatedEmployees, setAllocatedEmployees] = useState<Employee[]>([]);
+  const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<string[]>([]);
   const [isAllocating, setIsAllocating] = useState(false);
+
 
   useEffect(() => {
     if (mainModalOpen) {
@@ -90,21 +91,58 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
     }
   }, [mainModalOpen, activeTab, idProvider]);
 
-  //   const fetchAllocatedEmployees = async (contractId: string) => {
-  //   setLoading(true);
-  //   try {
-  //     const tokenFromStorage = localStorage.getItem("tokenClient");
-  //     const res = await axios.get(`${ip}/employee/filtered-by-contract/${contractId}`, {
-  //       headers: { Authorization: `Bearer ${tokenFromStorage}` }
-  //     });
-  //     setAllocatedEmployees(res.data.content || []);
-  //     setSelectedAllocatedEmployees([]);
-  //   } catch (error) {
-  //     console.error("Erro ao buscar colaboradores alocados:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const fetchAllocatedEmployees = async (contractId: string) => {
+    setLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/employee/filtered-by-contract`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        params: {
+          idContract: contractId,
+        }
+      });
+      setAllocatedEmployees(res.data.content || []);
+      setSelectedAllocatedEmployees([]);
+    } catch (error) {
+      console.error("Erro ao buscar colaboradores alocados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeallocate = async () => {
+    if (selectedContracts.length !== 1 || selectedAllocatedEmployees.length === 0) {
+      toast.error("Selecione 1 contrato e pelo menos 1 colaborador.");
+      return;
+    }
+
+    const contractId = selectedContracts[0];
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    setIsAllocating(true);
+
+    try {
+      await axios.post(
+        `${ip}/contract/remove-employee/${contractId}`,
+        { employees: selectedAllocatedEmployees },
+        {
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success("Colaboradores desalocados com sucesso!");
+      setFinalConfirmOpen(false);
+      setSelectedContracts([]);
+      setSelectedAllocatedEmployees([]);
+      setAllocatedEmployees([]);
+    } catch (error) {
+      console.error("Erro ao desalocar colaboradores:", error);
+      toast.error("Erro ao desalocar colaboradores.");
+    } finally {
+      setIsAllocating(false);
+    }
+  };
 
   const toggleSelectAll = () => {
     if (activeTab === "alocar") {
@@ -139,12 +177,13 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       if (selectedEmployees.length === 0) return;
       setMainModalOpen(false);
       setSelectContractsModalOpen(true);
-    } else {
-      // Aqui você pode implementar a lógica para confirmar a desalocação com os contratos selecionados
-      // Por enquanto só fecho modal e limpo seleção
+    } else if (activeTab === "desalocar") {
+      if (selectedAllocatedEmployees.length === 0 || selectedContracts.length !== 1) {
+        toast.error("Selecione 1 contrato e pelo menos 1 colaborador.");
+        return;
+      }
       setMainModalOpen(false);
-      setSelectedContracts([]);
-      // Coloque aqui o código que deseja para desalocar colaboradores do contrato selecionado
+      setFinalConfirmOpen(true);
     }
   };
 
@@ -166,10 +205,18 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
     }
   }, [selectContractsModalOpen, idProvider]);
 
-  const toggleSelectContract = (id: string) => {
-    setSelectedContracts((prev) =>
-      prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
-    );
+  const toggleSelectContract = async (id: string) => {
+    if (activeTab === "desalocar") {
+      setSelectedContracts((prev) => {
+        const updated = prev.includes(id) ? prev.filter((cid) => cid !== id) : [id];
+        return updated;
+      });
+      await fetchAllocatedEmployees(id);
+    } else {
+      setSelectedContracts((prev) =>
+        prev.includes(id) ? prev.filter((cid) => cid !== id) : [...prev, id]
+      );
+    }
   };
 
   const handleAllocate = async () => {
@@ -278,7 +325,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
           <ScrollArea className="h-[60vh] mt-2 space-y-2">
             {loading ? (
               <p>
-                Carregando {activeTab === "alocar" ? "colaboradores" : "contratos"}...
+                Carregando...
               </p>
             ) : activeTab === "alocar" ? (
               employees.length > 0 ? (
@@ -289,8 +336,8 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                       key={emp.idEmployee}
                       onClick={() => toggleSelect(emp.idEmployee)}
                       className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
-                          ? "bg-green-600 border-green-400"
-                          : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                        ? "bg-green-600 border-green-400"
+                        : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
                         }`}
                     >
                       {emp.name} {emp.surname}
@@ -300,33 +347,59 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
               ) : (
                 <p>Nenhum colaborador encontrado.</p>
               )
-            ) : contracts.length > 0 ? (
-              contracts.map((contract) => {
-                const isSelected = selectedContracts.includes(contract.idContract);
-                return (
-                  <button
-                    key={contract.idContract}
-                    onClick={() => toggleSelectContract(contract.idContract)}
-                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
+            ) : activeTab === "desalocar" ? (
+              selectedContracts.length === 1 ? (
+                allocatedEmployees.length > 0 ? (
+                  allocatedEmployees.map((emp) => {
+                    const isSelected = selectedAllocatedEmployees.includes(emp.idEmployee);
+                    return (
+                      <button
+                        key={emp.idEmployee}
+                        onClick={() => {
+                          setSelectedAllocatedEmployees((prev) =>
+                            prev.includes(emp.idEmployee)
+                              ? prev.filter((e) => e !== emp.idEmployee)
+                              : [...prev, emp.idEmployee]
+                          );
+                        }}
+                        className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
+                          ? "bg-red-600 border-red-400"
+                          : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                          }`}
+                      >
+                        {emp.name} {emp.surname}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p>Nenhum colaborador alocado neste contrato.</p>
+                )
+              ) : (
+                contracts.map((contract) => {
+                  const isSelected = selectedContracts.includes(contract.idContract);
+                  return (
+                    <button
+                      key={contract.idContract}
+                      onClick={() => toggleSelectContract(contract.idContract)}
+                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
                         ? "bg-green-600 border-red-400"
                         : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                      }`}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-semibold">{contract.serviceName}</span>
-                      <span className="text-sm text-gray-300">
-                        {contract.contractReference}
-                      </span>
-                      <span className="text-sm text-gray-300">
-                        {new Date(contract.dateStart).toLocaleDateString()}
-                      </span>
-                      <span className="text-sm text-gray-400">{contract.description}</span>
-                    </div>
-                  </button>
-                );
-              })
+                        }`}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{contract.serviceName}</span>
+                        <span className="text-sm text-gray-300">{contract.contractReference}</span>
+                        <span className="text-sm text-gray-300">
+                          {new Date(contract.dateStart).toLocaleDateString()}
+                        </span>
+                        <span className="text-sm text-gray-400">{contract.description}</span>
+                      </div>
+                    </button>
+                  );
+                })
+              )
             ) : (
-              <p>Nenhum contrato disponível.</p>
+              <p>Algo deu errado ao tentar carregar os dados.</p>
             )}
           </ScrollArea>
 
@@ -359,8 +432,8 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                         key={contract.idContract}
                         onClick={() => toggleSelectContract(contract.idContract)}
                         className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
-                            ? "bg-green-600 border-green-400"
-                            : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                          ? "bg-green-600 border-green-400"
+                          : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
                           }`}
                       >
                         <div className="flex flex-col">
@@ -406,7 +479,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
         <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white text-center text-lg">
-              Confirme a alocação
+              {activeTab === "alocar" ? "Confirme a alocação" : "Confirme a desalocação"}
             </DialogTitle>
           </DialogHeader>
 
@@ -414,13 +487,14 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
             <div>
               <h3 className="font-semibold mb-2">Colaboradores Selecionados:</h3>
               <ul className="list-disc list-inside text-sm text-gray-300">
-                {employees
-                  .filter((emp) => selectedEmployees.includes(emp.idEmployee))
-                  .map((emp) => (
-                    <li key={emp.idEmployee}>
-                      {emp.name} {emp.surname}
-                    </li>
-                  ))}
+                {(activeTab === "alocar"
+                  ? employees.filter((emp) => selectedEmployees.includes(emp.idEmployee))
+                  : allocatedEmployees.filter((emp) => selectedAllocatedEmployees.includes(emp.idEmployee))
+                ).map((emp) => (
+                  <li key={emp.idEmployee}>
+                    {emp.name} {emp.surname}
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -449,7 +523,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
               Voltar
             </Button>
             <Button
-              onClick={handleAllocate}
+              onClick={activeTab === "alocar" ? handleAllocate : handleDeallocate}
               disabled={isAllocating}
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md flex items-center justify-center gap-2"
             >

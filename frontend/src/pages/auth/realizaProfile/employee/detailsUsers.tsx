@@ -93,12 +93,12 @@ export function DetailsUsers() {
         `Usuário ${userData.status === "ACTIVE" ? "inativado" : "reativado"} com sucesso!`
       );
 
-      // Atualiza localmente após sucesso
       setUserData({ ...userData, status: payload.status });
       setOpenDialog(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao alterar status:", err);
-      toast.error("Erro ao atualizar status do usuário.");
+      const errorMessage = err.response?.data?.message || "Erro ao atualizar status do usuário.";
+      toast.error(errorMessage);
     } finally {
       setProcessing(false);
     }
@@ -150,8 +150,8 @@ export function DetailsUsers() {
                     ? "Inativando..."
                     : "Reativando..."
                   : isActive
-                  ? "Inativar"
-                  : "Reativar"}
+                    ? "Inativar"
+                    : "Reativar"}
               </Button>
             </DialogFooter>
           </DialogContent>

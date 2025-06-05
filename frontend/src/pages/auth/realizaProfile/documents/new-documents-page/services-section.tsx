@@ -256,7 +256,7 @@ export function ServicesSection() {
           )}
         </div>
         <div className="border border-neutral-300 p-5 rounded-md">
-          <h2>Criar novo serviço</h2>
+          <h2>Cadastrar novo serviço</h2>
           <div>
             <form
               onSubmit={handleSubmit(createService)}
@@ -304,7 +304,7 @@ export function ServicesSection() {
                   />
                 </Button>
               ) : (
-                <Button className="bg-realizaBlue" type="submit">Criar novo serviço</Button>
+                <Button className="bg-realizaBlue" type="submit">Cadastrar novo serviço</Button>
               )}
             </form>
           </div>

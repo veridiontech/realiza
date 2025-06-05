@@ -24,6 +24,7 @@ interface CardPanelControlProps {
   solicitationType: string;
   enterpriseName?: string | undefined;
   clientName: string;
+  branchName: string;
   clientCnpj: string;
   onActionCompleted?: (idSolicitation: string) => void;
   status: string;
@@ -37,6 +38,7 @@ export function CardPanelControlProvider({
   requesterName,
   clientName,
   clientCnpj,
+  branchName,
   solicitationType,
   onActionCompleted,
   status,
@@ -142,13 +144,19 @@ export function CardPanelControlProvider({
         <div className="flex items-center gap-1">
           <span className="text-[18px] font-semibold">Motivo: </span>
           {solicitationType === "CREATION" && (
-            <p className="text-[15px]">CRIAÇÃO da empresa {enterpriseName}</p>
+            <p className="text-[15px]">CADASTRO da empresa</p>
           )}
           {solicitationType === "EXCLUSION" && (
             <div>
-              <span>Exclusão da empresa {enterpriseName}</span>
+              <span>Inativação da empresa</span>
             </div>
           )}
+        </div>
+        <div className="flex flex-col gap-1 text-[14px]">
+          <div className="flex items-center gap-1">
+            <strong>Nome da empresa: </strong>
+            <span>{enterpriseName}</span>
+          </div>
         </div>
         <div className="flex flex-col gap-1 text-[14px]">
           <div className="flex items-center gap-1">
@@ -156,8 +164,8 @@ export function CardPanelControlProvider({
             <span>{clientName}</span>
           </div>
           <div className="flex items-center ">
-            <strong>Cliente Cnpj: </strong>
-            <span>{clientCnpj}</span>
+            <strong>Filial: </strong>
+            <span>{branchName}</span>
           </div>
         </div>
       </div>

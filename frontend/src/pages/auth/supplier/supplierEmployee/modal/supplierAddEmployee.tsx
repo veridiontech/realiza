@@ -161,7 +161,6 @@ export function SupplierAddEmployee({
           label: "Celular",
           type: "telephone",
           placeholder: "(XX) XXXXX-XXXX",
-          required: true,
         },
         {
           name: "admissionDate",

@@ -78,7 +78,7 @@ export function AddNewBranch() {
   const [phoneValue, setPhoneValue] = useState("");
   const [razaoSocial, setRazaoSocial] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { addBranch } = useBranch();
+  const { addBranch, setSelectedBranch  } = useBranch();
 
   const {
     register,
@@ -155,7 +155,8 @@ const handleCnpj = async () => {
       const res = await axios.post(`${ip}/branch`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-      addBranch(res.data); 
+      addBranch(res.data);
+      setSelectedBranch(res.data);
       toast.success("Sucesso ao criar filial");
       setIsOpen(false);
       reset();

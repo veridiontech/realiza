@@ -407,7 +407,7 @@ export default function SupplierAddQuartered() {
                   </option>
                   <option value="CAPEX">CAPEX</option>
                   <option value="OPEX">OPEX</option>
-                  <option value="Nenhuma">Nenhuma</option>
+                  <option value="NENHUM">Nenhuma</option>
                 </select>
                 {errorsContract.expenseType && (
                   <span className="text-red-600">
