@@ -11,7 +11,7 @@ import { Blocks } from "react-loader-spinner";
 import { toast } from "sonner";
 
 interface Document {
-  idDocumentation: string;
+  idDocument: string;
   title: string;
   creationDate: string;
   status: string;
@@ -154,7 +154,7 @@ export function DetailsEmployee() {
           <button
             className="text-realizaBlue hover:underline"
             onClick={() => {
-              setSelectedDocumentId(row.idDocumentation);
+              setSelectedDocumentId(row.idDocument);
               setIsViewerOpen(true);
             }}
           >
@@ -162,7 +162,9 @@ export function DetailsEmployee() {
           </button>
           <button
             className="text-yellow-500 hover:underline"
-            onClick={() => console.log(`Editar: ${row.idDocumentation}`)}
+            onClick={() =>
+              setIsModalOpen(true)
+            }
           >
             <Edit size={16} />
           </button>
@@ -261,7 +263,7 @@ export function DetailsEmployee() {
         <AddDocument
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          employeeId={employee.id}
+          employeeId={employee.idEmployee}
         />
       )}
       {isViewerOpen && selectedDocumentId && (

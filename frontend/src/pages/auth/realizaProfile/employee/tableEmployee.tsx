@@ -59,6 +59,7 @@ const getEmployee = async () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
+  
 
   console.log("colaboradores da branch:", employees);
 
