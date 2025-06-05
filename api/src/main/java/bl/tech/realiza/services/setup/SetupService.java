@@ -61,8 +61,8 @@ public class SetupService {
 
         Branch baseBranch = branchRepository.save(
                 Branch.builder()
-                        .name(client.getCorporateName() != null
-                                ? client.getCorporateName() + " Base"
+                        .name(client.getTradeName() != null
+                                ? client.getTradeName() + " Base"
                                 : "Base")
                         .cnpj(client.getCnpj())
                         .cep(client.getCep())
