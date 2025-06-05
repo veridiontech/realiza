@@ -93,6 +93,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
                 .orElseThrow(() ->  new NotFoundException("Service Type not found"));
 
+        if (contractProviderSupplierRequestDto.getIdActivities() != null
+                && !contractProviderSupplierRequestDto.getIdActivities().isEmpty()) {
+            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
+        }
+
         if (newProviderSupplier == null) {
             newProviderSupplier = providerSupplierRepository.save(ProviderSupplier.builder()
                     .cnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
@@ -126,7 +131,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .branch(branch)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER", null, null, savedContractProviderSupplier, null, contractProviderSupplierRequestDto.getIdActivities(), null));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER", null, null, savedContractProviderSupplier.getIdContract(), null, activities.stream().map(Activity::getIdActivity).toList(), null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

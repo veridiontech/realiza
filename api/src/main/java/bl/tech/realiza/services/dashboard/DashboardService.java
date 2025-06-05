@@ -173,11 +173,13 @@ public class DashboardService {
             double adherence = total > 0 ? (pendentes * 100.0 / total) : 100;
             adherence = Math.round(adherence * 100.0) / 100.0;
 
+            long docEmployeeApproved = documentEmployeeRepository.countByBranchIdAndStatus(branchId, APROVADO);
             // Agora calcular conformidade
             long aprovados = documentEmployeeRepository.countByBranchIdAndStatus(branchId, APROVADO)
                     + documentProviderSupplierRepository.countByBranchIdAndStatus(branchId, APROVADO)
                     + documentProviderSubcontractorRepository.countByBranchIdAndStatus(branchId, APROVADO);
 
+            long docEmployeeValid = documentEmployeeRepository.countByBranchId(branchId);
             long totalValidos = documentEmployeeRepository.countByBranchId(branchId)
                     + documentProviderSupplierRepository.countByBranchId(branchId)
                     + documentProviderSubcontractorRepository.countByBranchId(branchId);
