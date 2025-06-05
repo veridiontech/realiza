@@ -53,6 +53,7 @@ import { ProfileBranch } from "./pages/auth/realizaProfile/profileEnterprise/pro
 import { SupplierContractNewPage } from "./pages/auth/supplier/contracts/supplier-contract-new-page";
 import { DocumentPageNew } from "./pages/auth/realizaProfile/documents/new-documents-page/document-page";
 import { MonittoringBis } from "./pages/auth/realizaProfile/bis";
+import { ContarctsByProvider } from "./pages/auth/realizaProfile/contract-by-provider/contracts-by-provider";
 
 
 export const router = createBrowserRouter([
@@ -93,7 +94,7 @@ export const router = createBrowserRouter([
       { path: "controlPanel/:id", element: <ControlPanel /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
       { path: "dashboard-details/:id", element: <MonittoringBis /> },
-      { path: "fornecedor/:id", element: <ProfileEnterpriseReprise /> },
+      { path: "fornecedor/:id", element: <ContarctsByProvider /> },
     ],
   },
 
