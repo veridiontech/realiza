@@ -24,7 +24,7 @@ interface CardPanelControlProps {
   solicitationType: string;
   enterpriseName?: string | undefined;
   clientName: string;
-  branchName: string;
+  branchName: boolean;
   clientCnpj: string;
   onActionCompleted?: (idSolicitation: string) => void;
   status: string;
