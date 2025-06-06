@@ -7,6 +7,7 @@ interface AddDocumentProps {
   isOpen: boolean;
   onClose: () => void;
   employeeId: string;
+  preSelectedTitle?: string | null; // novo campo
 }
 
 export const AddDocument: React.FC<AddDocumentProps> = ({

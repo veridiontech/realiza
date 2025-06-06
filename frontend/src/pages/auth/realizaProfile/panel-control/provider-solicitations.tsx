@@ -105,6 +105,7 @@ export function ProviderSolicitations() {
                       )
                       .map((solicitation: any) => (
                         <CardPanelControlProvider
+                          branchName
                           key={solicitation.idSolicitation}
                           requesterName={solicitation.requesterName}
                           creationDate={solicitation.creationDate}
@@ -142,6 +143,7 @@ export function ProviderSolicitations() {
                       )
                       .map((solicitation: any) => (
                         <CardPanelControlProvider
+                        branchName
                           key={solicitation.idSolicitation}
                           requesterName={solicitation.requesterName}
                           creationDate={solicitation.creationDate}
@@ -177,6 +179,7 @@ export function ProviderSolicitations() {
                     .filter((solicitation) => solicitation.status === "DENIED")
                     .map((solicitation: any) => (
                       <CardPanelControlProvider
+                      branchName
                         key={solicitation.idSolicitation}
                         requesterName={solicitation.requesterName}
                         creationDate={solicitation.creationDate}

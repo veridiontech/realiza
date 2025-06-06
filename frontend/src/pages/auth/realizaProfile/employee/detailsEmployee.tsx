@@ -26,6 +26,7 @@ export function DetailsEmployee() {
   const [error, setError] = useState<string | null>(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
 
   const fetchEmployee = async () => {
     try {
@@ -162,9 +163,10 @@ export function DetailsEmployee() {
           </button>
           <button
             className="text-yellow-500 hover:underline"
-            onClick={() =>
-              setIsModalOpen(true)
-            }
+            onClick={() => {
+              setSelectedDocumentTitle(row.title);
+              setIsModalOpen(true);
+            }}
           >
             <Edit size={16} />
           </button>
@@ -259,13 +261,17 @@ export function DetailsEmployee() {
         </div>
       </div>
 
-      {isModalOpen && (
-        <AddDocument
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          employeeId={employee.idEmployee}
-        />
-      )}
+{isModalOpen && (
+  <AddDocument
+    isOpen={isModalOpen}
+    onClose={() => {
+      setIsModalOpen(false);
+      setSelectedDocumentTitle(null);
+    }}
+    employeeId={employee.idEmployee}
+    preSelectedTitle={selectedDocumentTitle}
+  />
+)}
       {isViewerOpen && selectedDocumentId && (
         <DocumentViewer
           documentId={selectedDocumentId}
