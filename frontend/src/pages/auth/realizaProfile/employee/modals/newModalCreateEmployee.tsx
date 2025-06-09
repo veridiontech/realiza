@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,12 +17,11 @@ import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useEffect } from "react";
 
 function validarCPF(cpf: string): boolean {
   const cleaned = cpf.replace(/\D/g, "");
@@ -124,19 +124,22 @@ const createNewEmployeeFormSchema = z.object({
 
 
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
+
 export function NewModalCreateEmployee() {
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
   const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
   const [searchCbo, setSearchCbo] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isSelectTypeModalOpen, setIsSelectTypeModalOpen] = useState(false);
+  const [isBrazilianEmployeeModalOpen, setIsBrazilianEmployeeModalOpen] = useState(false);
+  const [isWorkingOnItModalOpen, setIsForeignerEmployeeModalOpen] = useState(false); // Novo estado para o modal "Trabalhando nisso"
+  const [selectedEmployeeType, setSelectedEmployeeType] = useState<'brasileiro' | 'estrangeiro' | null>(null);
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [mobileValue, setMobileValue] = useState("");
-  const [cpfValue, setCpfValue] = useState("")
+  const [cpfValue, setCpfValue] = useState("");
 
   console.log("Id Supplier: ", supplier);
-
 
   const {
     register,
@@ -161,10 +164,25 @@ export function NewModalCreateEmployee() {
   useEffect(() => {
     const isValidCep = /^\d{5}-\d{3}$/.test(cepValue);
     if (isValidCep) {
-      handleCep(); // busca automática
+      handleCep();
     }
   }, [cepValue]);
 
+  useEffect(() => {
+    const fetchCbos = async () => {
+      try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const response = await axios.get(`${ip}/cbo`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        });
+        setCbos(response.data);
+      } catch (error) {
+        toast.error("Erro ao buscar CBOs");
+      }
+    };
+
+    fetchCbos();
+  }, []);
 
   const filteredCbos = cbos.filter(
     (cbo) =>
@@ -199,7 +217,6 @@ export function NewModalCreateEmployee() {
     return value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
   };
 
-
   const formatSalary = (value: string) => {
     const number = Number(value.replace(/\D/g, "")) / 100;
     return number.toLocaleString("pt-BR", {
@@ -216,8 +233,6 @@ export function NewModalCreateEmployee() {
   const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
     setIsLoading(true);
 
-
-
     const payload = {
       ...data,
       supplier: supplier?.idProvider,
@@ -233,14 +248,15 @@ export function NewModalCreateEmployee() {
 
       toast.success("Sucesso ao cadastrar novo colaborador!");
 
-      // Reset do form e valores controlados
       reset();
       setCpfValue("");
       setCepValue("");
       setPhoneValue("");
       setMobileValue("");
 
-      setIsOpen(false);
+      setIsBrazilianEmployeeModalOpen(false);
+      setIsSelectTypeModalOpen(false);
+      setSelectedEmployeeType(null); // Reseta o tipo de colaborador selecionado
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const errorMsg = err.response?.data?.message || "";
@@ -264,7 +280,6 @@ export function NewModalCreateEmployee() {
     }
   };
 
-
   const handleCep = async () => {
     try {
       const cleanedCep = cepValue.replace(/\D/g, "");
@@ -285,363 +300,453 @@ export function NewModalCreateEmployee() {
     }
   };
 
-
-
-  useEffect(() => {
-    const fetchCbos = async () => {
-      try {
-        const tokenFromStorage = localStorage.getItem("tokenClient");
-        const response = await axios.get(`${ip}/cbo`, {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        });
-        setCbos(response.data);
-      } catch (error) {
-        toast.error("Erro ao buscar CBOs");
-      }
-    };
-
-    fetchCbos();
-  }, []);
-
-
-
   const setValuesCep = (data: propsCep) => {
-    setValue("city", data.city),
-      setValue("state", data.state),
-      setValue("address", data.address);
+    setValue("city", data.city);
+    setValue("state", data.state);
+    setValue("address", data.address);
+  };
+
+  const handleOpenSelectTypeModal = () => {
+    setIsSelectTypeModalOpen(true);
+  };
+
+  const handleProceedWithEmployeeType = () => {
+    if (selectedEmployeeType === 'brasileiro') {
+      setIsSelectTypeModalOpen(false); 
+      setIsBrazilianEmployeeModalOpen(true);
+    } else if (selectedEmployeeType === 'estrangeiro') {
+      setIsSelectTypeModalOpen(false);
+      setIsForeignerEmployeeModalOpen(true); 
+    } else {
+      toast.error("Por favor, selecione um tipo de colaborador (Brasileiro ou Estrangeiro).");
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="hidden md:block bg-realizaBlue border border-white rounded-md">Cadastrar novo colaborador +</Button>
-      </DialogTrigger>
-      <DialogTrigger asChild>
-        <Button className="md:hidden bg-realizaBlue">+</Button>
-      </DialogTrigger>
-      <DialogContent
-        style={{ backgroundImage: `url(${bgModalRealiza})` }}
-        className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
-      >
-        <DialogHeader>
-          <DialogTitle className="text-white">Cadastrar colaborador</DialogTitle>
-          <ScrollArea className="h-[75vh]">
+    <>
+      <Dialog open={isSelectTypeModalOpen} onOpenChange={setIsSelectTypeModalOpen}>
+        <DialogTrigger asChild>
+          <Button
+            className="hidden md:block bg-realizaBlue border border-white rounded-md"
+            onClick={handleOpenSelectTypeModal}
+          >
+            Cadastrar novo colaborador +
+          </Button>
+        </DialogTrigger>
+        <DialogTrigger asChild>
+          <Button
+            className="md:hidden bg-realizaBlue"
+            onClick={handleOpenSelectTypeModal}
+          >
+            +
+          </Button>
+        </DialogTrigger>
+        <DialogContent
+          style={{ backgroundImage: `url(${bgModalRealiza})` }}
+          className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white">Cadastrar novo prestador</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-5 py-4 text-white">
             <div>
-              <form
-                action=""
-                className="flex flex-col gap-5"
-                onSubmit={handleSubmit(onSubmit, (errors) => {
-                  console.log("Erros detectados:", errors);
-                })}
-              >
-                <div>
-                  <Label className="text-white">Nome</Label>
-                  <Input type="text"
-                    placeholder="Digite seu nome"
-                    {...register("name")} />
-                </div>
-                <div>
-                  <Label className="text-white">Sobrenome</Label>
-                  <Input type="text"
-                    placeholder="Digite seu sobrenome"
-                    {...register("surname")} />
-                </div>
-                <div>
-                  <Label className="text-white">Data de nascimento</Label>
-                  <Input type="date"
-                    placeholder="Digite a data de nascimento"
-                    {...register("birthDate")} />
-                </div>
-                <div>
-                  <Label className="text-white">Estado civil</Label>
-                  <select
-                    {...register("maritalStatus")}
-                    className="flex flex-col rounded-md border p-2 w-full"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="CASADO">Casado</option>
-                    <option value="SOLTEIRO">Solteiro</option>
-                    <option value="DIVORCIADO">Divorciado</option>
-                    <option value="VIUVO">Viúvo </option>
-                    <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente </option>
-                    <option value="UNIAO_ESTAVEL">União estável</option>
-                  </select>
-                </div>
-                <div>
-                  <Label className="text-white">Tipo de contrato</Label>
-                  <select
-                    {...register("contractType")}
-                    className="flex flex-col rounded-md border p-2 w-full"
-                  >
-                    <option value="">Selecione um tipo de contrato</option>
-                    <option value="AUTONOMO">Autônomo</option>
-                    <option value="AVULSO_SINDICATO">
-                      Avulso (Sindicato)
-                    </option>
-                    <option value="CLT_HORISTA">CLT - Horista</option>
-                    <option value="CLT_TEMPO_DETERMINADO">
-                      CLT - Tempo Determinado
-                    </option>
-                    <option value="CLT_TEMPO_INDETERMINADO">
-                      CLT - Tempo Indeterminado
-                    </option>
-                    <option value="COOPERADO">Cooperado</option>
-                    <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
-                    <option value="ESTRANGEIRO_IMIGRANTE">
-                      Estrangeiro - Imigrante
-                    </option>
-                    <option value="ESTRANGEIRO_TEMPORARIO">
-                      Estrangeiro - Temporário
-                    </option>
-                    <option value="INTERMITENTE">Intermitente</option>
-                    <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
-                    <option value="SOCIO">Sócio</option>
-                    <option value="TEMPORARIO">Temporário</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label className="text-white">CPF</Label>
-                  <Input
-                    type="text"
-                    value={cpfValue}
-                    onChange={(e) => {
-                      const formattedCpf = formatCPF(e.target.value);
-                      setCpfValue(formattedCpf);
-                      setValue("cpf", formattedCpf, { shouldValidate: true });
-                    }}
-                    placeholder="000.000.000-00"
-                    maxLength={14}
+              <Label className="text-white">Selecione qual tipo de colaborador deseja criar:</Label>
+              <div className="flex items-center space-x-4 mt-2">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="brasileiro"
+                    name="employeeType"
+                    value="brasileiro"
+                    checked={selectedEmployeeType === 'brasileiro'}
+                    onChange={() => setSelectedEmployeeType('brasileiro')}
+                    className="form-radio h-4 w-4 text-realizaBlue"
                   />
-                  {errors.cpf && (
-                    <span className="text-sm text-red-600">{errors.cpf.message}</span>
-                  )}
+                  <Label htmlFor="brasileiro" className="ml-2 text-white cursor-pointer">Brasileiro</Label>
                 </div>
-                <div>
-                  <Label className="text-white">Data de admissão</Label>
-                  <Input type="date" {...register("admissionDate")} />
-                </div>
-                <div>
-                  <Label className="text-white">Salário:</Label>
-                  <Input
-                    type="text"
-                    {...register("salary")}
-                    onChange={(e) => {
-                      const formattedSalary = formatSalary(e.target.value);
-                      setValue("salary", formattedSalary);
-                    }}
-                    placeholder="000.000,00"
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="estrangeiro"
+                    name="employeeType"
+                    value="estrangeiro"
+                    checked={selectedEmployeeType === 'estrangeiro'}
+                    onChange={() => setSelectedEmployeeType('estrangeiro')}
+                    className="form-radio h-4 w-4 text-realizaBlue"
                   />
-                  {errors.salary && <span>{errors.salary.message}</span>}
+                  <Label htmlFor="estrangeiro" className="ml-2 text-white cursor-pointer">Estrangeiro</Label>
                 </div>
-                <div>
-                  <Label className="text-white">Sexo</Label>
-                  <select
-                    {...register("gender")}
-                    className="flex flex-col rounded-md border p-2 w-full"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Feminino">Feminino</option>
-                  </select>
-                  {errors.gender && (
-                    <span className="text-red-600">{errors.gender.message}</span>
-                  )}
-                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleProceedWithEmployeeType}
+              className="bg-realizaBlue hover:bg-blue-700"
+              disabled={!selectedEmployeeType}
+            >
+              Prosseguir
+            </Button>
+            <Button
+              onClick={() => {
+                setIsSelectTypeModalOpen(false);
+                setSelectedEmployeeType(null);
+              }}
+              className="bg-gray-500 hover:bg-gray-600"
+            >
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-                <div>
-                  <Label className="text-white">CEP</Label>
-                  <div className="flex w-full gap-2">
+      <Dialog open={isBrazilianEmployeeModalOpen} onOpenChange={setIsBrazilianEmployeeModalOpen}>
+        <DialogContent
+          style={{ backgroundImage: `url(${bgModalRealiza})` }}
+          className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white">Cadastrar colaborador</DialogTitle>
+            <ScrollArea className="h-[75vh]">
+              <div>
+                <form
+                  action=""
+                  className="flex flex-col gap-5"
+                  onSubmit={handleSubmit(onSubmit, (errors) => {
+                    console.log("Erros detectados:", errors);
+                  })}
+                >
+                  <div>
+                    <Label className="text-white">Nome</Label>
+                    <Input type="text"
+                      placeholder="Digite seu nome"
+                      {...register("name")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Sobrenome</Label>
+                    <Input type="text"
+                      placeholder="Digite seu sobrenome"
+                      {...register("surname")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Data de nascimento</Label>
+                    <Input type="date"
+                      placeholder="Digite a data de nascimento"
+                      {...register("birthDate")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Estado civil</Label>
+                    <select
+                      {...register("maritalStatus")}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="CASADO">Casado</option>
+                      <option value="SOLTEIRO">Solteiro</option>
+                      <option value="DIVORCIADO">Divorciado</option>
+                      <option value="VIUVO">Viúvo </option>
+                      <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente </option>
+                      <option value="UNIAO_ESTAVEL">União estável</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-white">Tipo de contrato</Label>
+                    <select
+                      {...register("contractType")}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione um tipo de contrato</option>
+                      <option value="AUTONOMO">Autônomo</option>
+                      <option value="AVULSO_SINDICATO">
+                        Avulso (Sindicato)
+                      </option>
+                      <option value="CLT_HORISTA">CLT - Horista</option>
+                      <option value="CLT_TEMPO_DETERMINADO">
+                        CLT - Tempo Determinado
+                      </option>
+                      <option value="CLT_TEMPO_INDETERMINADO">
+                        CLT - Tempo Indeterminado
+                      </option>
+                      <option value="COOPERADO">Cooperado</option>
+                      <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
+                      <option value="ESTRANGEIRO_IMIGRANTE">
+                        Estrangeiro - Imigrante
+                      </option>
+                      <option value="ESTRANGEIRO_TEMPORARIO">
+                        Estrangeiro - Temporário
+                      </option>
+                      <option value="INTERMITENTE">Intermitente</option>
+                      <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
+                      <option value="SOCIO">Sócio</option>
+                      <option value="TEMPORARIO">Temporário</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label className="text-white">CPF</Label>
                     <Input
                       type="text"
-                      value={cepValue}
+                      value={cpfValue}
                       onChange={(e) => {
-                        const formattedCEP = formatCEP(e.target.value);
-                        setCepValue(formattedCEP);
-                        setValue("cep", formattedCEP, { shouldValidate: true });
+                        const formattedCpf = formatCPF(e.target.value);
+                        setCpfValue(formattedCpf);
+                        setValue("cpf", formattedCpf, { shouldValidate: true });
                       }}
-                      placeholder="00000-000"
-                      maxLength={9}
+                      placeholder="000.000.000-00"
+                      maxLength={14}
                     />
-                    <div
-                      onClick={handleCep}
-                      className="bg-realizaBlue cursor-pointer rounded-md p-2 text-white hover:bg-gray-600 flex items-center justify-center"
-                    >
-
-                    </div>
+                    {errors.cpf && (
+                      <span className="text-sm text-red-600">{errors.cpf.message}</span>
+                    )}
                   </div>
-                  {errors.cep && (
-                    <span className="text-sm text-red-600">{errors.cep.message}</span>
-                  )}
-                </div>
-                <div>
-                  <Label className="text-white">Estado</Label>
-                  <Input
-                    placeholder="Digite seu estado" {...register("state")} />
-                </div>
-                <div>
-                  <Label className="text-white">Cidade</Label>
-                  <Input
-                    placeholder="Digite sua cidade"
-                    {...register("city")} />
-                </div>
-                <div>
-                  <Label className="text-white">Endereco</Label>
-                  <Input
-                    placeholder="Digite seu endereço"
-                    {...register("address")} />
-                </div>
-                <div>
-                  <Label className="text-white">Número</Label>
-                  <Input
-                    placeholder="Digite o número"
-                    {...register("number")} />
-                </div>
-                <div>
-                  <Label className="text-white">Complemento</Label>
-                  <Input
-                    placeholder="Digite o complemento"
-                    {...register("complement")} />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-white">Telefone</Label>
-                  <Input
-                    type="text"
-                    value={phoneValue}
-                    onChange={(e) => {
-                      const formattedPhone = formatPhone(e.target.value);
-                      setPhoneValue(formattedPhone);
-                      setValue("phone", formattedPhone, { shouldValidate: true });
-                    }}
-                    placeholder="(00) 00000-0000"
-                    maxLength={15}
-                  />
-                  {errors.phone && (
-                    <span className="text-sm text-red-600">{errors.phone.message}</span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-white">Celular</Label>
-                  <Input
-                    type="text"
-                    value={mobileValue}
-                    onChange={(e) => {
-                      const formattedPhone = formatPhone(e.target.value);
-                      setMobileValue(formattedPhone);
-                      setValue("mobile", formattedPhone, { shouldValidate: true });
-                    }}
-                    placeholder="(00) 00000-0000"
-                    maxLength={15}
-                  />
-                  {errors.mobile && (
-                    <span className="text-sm text-red-600">{errors.mobile.message}</span>
-                  )}
-                </div>
-
-                <div>
-                  <Label className="text-white">Cargo</Label>
-                  <Input
-                    placeholder="Digite o cargo"
-                    {...register("position")} />
-                </div>
-                <div>
-                  <Label className="text-white">CBO</Label>
-                  <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
-                    <Search className="text-neutral-500 w-5 h-5" />
-                    <input
+                  <div>
+                    <Label className="text-white">Data de admissão</Label>
+                    <Input type="date" {...register("admissionDate")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Salário:</Label>
+                    <Input
                       type="text"
-                      placeholder="Pesquisar CBO..."
-                      value={searchCbo}
-                      onChange={(e) => setSearchCbo(e.target.value)}
-                      className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                      {...register("salary")}
+                      onChange={(e) => {
+                        const formattedSalary = formatSalary(e.target.value);
+                        setValue("salary", formattedSalary);
+                      }}
+                      placeholder="000.000,00"
                     />
+                    {errors.salary && <span>{errors.salary.message}</span>}
                   </div>
-                  <select
-                    {...register("cboId")}
-                    className="flex flex-col rounded-md border p-2 w-full"
-                  >
-                    <option value="">Selecione o CBO</option>
-                    {filteredCbos.map((cbo) => (
-                      <option key={cbo.id} value={cbo.id}>
-                        {cbo.title} - {cbo.code}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-white">Graduação</Label>
-                  <select
-                    {...register("education")}
-                    className="flex flex-col rounded-md border p-2"
-                  >
-                    <option value="">Selecione</option>
-                    <option value="Ensino Fundamental Incompleto">
-                      Ensino Fundamental Incompleto
-                    </option>
-                    <option value="Ensino Fundamental Completo">
-                      Ensino Fundamental Completo
-                    </option>
-                    <option value="Fundamental I incompleto">
-                      Ensino Fundamental I incompleto
-                    </option>
-                    <option value="Fundamental I completo">
-                      Ensino Fundamental I completo
-                    </option>
-                    <option value="Fundamental II incompleto">
-                      Ensino Fundamental II incompleto
-                    </option>
-                    <option value="Fundamental II completo">
-                      Ensino Fundamental II completo
-                    </option>
-                    <option value="Ensino Médio Incompleto">
-                      Ensino Médio Incompleto
-                    </option>
-                    <option value="Ensino Médio Completo">
-                      Ensino Médio Completo
-                    </option>
-                    <option value="Ensino Superior Incompleto">
-                      Ensino Superior Incompleto
-                    </option>
-                    <option value="Ensino Superior Completo">
-                      Ensino Superior Completo
-                    </option>
-                    <option value="Pós-graduação">
-                      Pós-graduação
-                    </option>
-                    <option value="Mestrado">
-                      Mestrado
-                    </option>
-                    <option value="Doutorado">
-                      Doutorado
-                    </option>
-                    <option value="Ph.D">
-                      Ph.D
-                    </option>
-                  </select>
-                </div>
+                  <div>
+                    <Label className="text-white">Sexo</Label>
+                    <select
+                      {...register("gender")}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                    </select>
+                    {errors.gender && (
+                      <span className="text-red-600">{errors.gender.message}</span>
+                    )}
+                  </div>
 
-                <Button
-                  type="submit"
-                  className="bg-realizaBlue"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Oval
-                      visible={true}
-                      height={20}
-                      width={20}
-                      color="#fff"
-                      ariaLabel="oval-loading"
+                  <div>
+                    <Label className="text-white">CEP</Label>
+                    <div className="flex w-full gap-2">
+                      <Input
+                        type="text"
+                        value={cepValue}
+                        onChange={(e) => {
+                          const formattedCEP = formatCEP(e.target.value);
+                          setCepValue(formattedCEP);
+                          setValue("cep", formattedCEP, { shouldValidate: true });
+                        }}
+                        placeholder="00000-000"
+                        maxLength={9}
+                      />
+                      <div
+                        onClick={handleCep}
+                        className="bg-realizaBlue cursor-pointer rounded-md p-2 text-white hover:bg-gray-600 flex items-center justify-center"
+                      >
+                        <Search className="w-5 h-5" />
+                      </div>
+                    </div>
+                    {errors.cep && (
+                      <span className="text-sm text-red-600">{errors.cep.message}</span>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-white">Estado</Label>
+                    <Input
+                      placeholder="Digite seu estado" {...register("state")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Cidade</Label>
+                    <Input
+                      placeholder="Digite sua cidade"
+                      {...register("city")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Endereco</Label>
+                    <Input
+                      placeholder="Digite seu endereço"
+                      {...register("address")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Número</Label>
+                    <Input
+                      placeholder="Digite o número"
+                      {...register("number")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">Complemento</Label>
+                    <Input
+                      placeholder="Digite o complemento"
+                      {...register("complement")} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-white">Telefone</Label>
+                    <Input
+                      type="text"
+                      value={phoneValue}
+                      onChange={(e) => {
+                        const formattedPhone = formatPhone(e.target.value);
+                        setPhoneValue(formattedPhone);
+                        setValue("phone", formattedPhone, { shouldValidate: true });
+                      }}
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
                     />
-                  ) : (
-                    "Cadastrar"
-                  )}
-                </Button>
-              </form>
-            </div>
-          </ScrollArea>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+                    {errors.phone && (
+                      <span className="text-sm text-red-600">{errors.phone.message}</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-white">Celular</Label>
+                    <Input
+                      type="text"
+                      value={mobileValue}
+                      onChange={(e) => {
+                        const formattedPhone = formatPhone(e.target.value);
+                        setMobileValue(formattedPhone);
+                        setValue("mobile", formattedPhone, { shouldValidate: true });
+                      }}
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
+                    />
+                    {errors.mobile && (
+                      <span className="text-sm text-red-600">{errors.mobile.message}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Cargo</Label>
+                    <Input
+                      placeholder="Digite o cargo"
+                      {...register("position")} />
+                  </div>
+                  <div>
+                    <Label className="text-white">CBO</Label>
+                    <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                      <Search className="text-neutral-500 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar CBO..."
+                        value={searchCbo}
+                        onChange={(e) => setSearchCbo(e.target.value)}
+                        className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                      />
+                    </div>
+                    <select
+                      {...register("cboId")}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione o CBO</option>
+                      {filteredCbos.map((cbo) => (
+                        <option key={cbo.id} value={cbo.id}>
+                          {cbo.title} - {cbo.code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-white">Graduação</Label>
+                    <select
+                      {...register("education")}
+                      className="flex flex-col rounded-md border p-2"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="Ensino Fundamental Incompleto">
+                        Ensino Fundamental Incompleto
+                      </option>
+                      <option value="Ensino Fundamental Completo">
+                        Ensino Fundamental Completo
+                      </option>
+                      <option value="Fundamental I incompleto">
+                        Ensino Fundamental I incompleto
+                      </option>
+                      <option value="Fundamental I completo">
+                        Ensino Fundamental I completo
+                      </option>
+                      <option value="Fundamental II incompleto">
+                        Ensino Fundamental II incompleto
+                      </option>
+                      <option value="Fundamental II completo">
+                        Ensino Fundamental II completo
+                      </option>
+                      <option value="Ensino Médio Incompleto">
+                        Ensino Médio Incompleto
+                      </option>
+                      <option value="Ensino Médio Completo">
+                        Ensino Médio Completo
+                      </option>
+                      <option value="Ensino Superior Incompleto">
+                        Ensino Superior Incompleto
+                      </option>
+                      <option value="Ensino Superior Completo">
+                        Ensino Superior Completo
+                      </option>
+                      <option value="Pós-graduação">
+                        Pós-graduação
+                      </option>
+                      <option value="Mestrado">
+                        Mestrado
+                      </option>
+                      <option value="Doutorado">
+                        Doutorado
+                      </option>
+                      <option value="Ph.D">
+                        Ph.D
+                      </option>
+                    </select>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="bg-realizaBlue"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Oval
+                        visible={true}
+                        height={20}
+                        width={20}
+                        color="#fff"
+                        ariaLabel="oval-loading"
+                      />
+                    ) : (
+                      "Cadastrar"
+                    )}
+                  </Button>
+                </form>
+              </div>
+            </ScrollArea>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isWorkingOnItModalOpen} onOpenChange={setIsForeignerEmployeeModalOpen}>
+        <DialogContent
+          style={{ backgroundImage: `url(${bgModalRealiza})` }}
+          className="max-w-[90vw] sm:max-w-[30vw] md:max-w-[30vw]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white">Cadastrar colaborador</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4 text-white text-center">
+            <p>Teste</p>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setIsForeignerEmployeeModalOpen(false)}
+              className="bg-gray-500 hover:bg-gray-600"
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
-}  
+}
