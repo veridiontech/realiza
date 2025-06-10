@@ -69,6 +69,10 @@ export const contractFormSchema = z.object({
   contractReference: z
     .string()
     .nonempty("Referência do contrato é obrigatório"),
+  subcontractPermission: z
+    .enum(["true", "false"], {
+      required_error: "Selecione se permite subcontratação",
+    })
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -221,6 +225,7 @@ export function ModalTesteSendSupplier() {
     if (selectedBranch?.idBranch) {
       getSupplier();
       setSuppliers([]);
+      console.log("FORNECEDORES DISPONÍVEIS:", suppliers);
     }
   }, [selectedBranch]);
 
@@ -242,36 +247,36 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-const createClient = async (data: ModalSendEmailFormSchema) => {
-  setIsLoading(true);
+  const createClient = async (data: ModalSendEmailFormSchema) => {
+    setIsLoading(true);
 
-  const emailAtual = data.email.toLowerCase();
-  if (usedEmails.includes(emailAtual)) {
-    toast.error("E-mail já utilizado nesta sessão");
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-    let payload;
-    if (isSubcontractor === "contratado") {
-      payload = { ...data };
-    } else {
-      payload = { ...data };
+    const emailAtual = data.email.toLowerCase();
+    if (usedEmails.includes(emailAtual)) {
+      toast.error("E-mail já utilizado nesta sessão");
+      setIsLoading(false);
+      return;
     }
 
-    setProviderDatas(payload);
-    setPushCnpj(data.cnpj);
-    setUsedEmails((prev) => [...prev, emailAtual]); 
-    toast.success("Prestador preenchido com sucesso");
-    setNextModal(true);
-  } catch (err) {
-    console.log("Erro ao criar prestador", err);
-    toast.error("Erro ao criar prestador. Tente novamente");
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      let payload;
+      if (isSubcontractor === "contratado") {
+        payload = { ...data };
+      } else {
+        payload = { ...data };
+      }
+
+      setProviderDatas(payload);
+      setPushCnpj(data.cnpj);
+      setUsedEmails((prev) => [...prev, emailAtual]);
+      toast.success("Prestador preenchido com sucesso");
+      setNextModal(true);
+    } catch (err) {
+      console.log("Erro ao criar prestador", err);
+      toast.error("Erro ao criar prestador. Tente novamente");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getManager = async () => {
     try {
@@ -311,6 +316,7 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const payload = {
         ...data,
+        subcontractPermission: data.subcontractPermission === "true",
         idRequester: user?.idUser,
         providerDatas,
         idBranch: selectedBranch?.idBranch,
@@ -622,7 +628,6 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                         value={supplier.idContract}
                         key={supplier.idContract}
                       >
-                        {supplier.providerSupplierName} -{" "}
                         {supplier.contractReference}
                       </option>
                     ))}
@@ -870,7 +875,7 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                             className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
                           />
                         </div>
-                      
+
                         {/* Lista filtrada com checkboxes */}
                         <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
                           <div className="flex flex-col gap-2">
@@ -924,8 +929,6 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                       </div>
                     )}
 
-
-
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">
                         Descrição detalhada do serviço
@@ -940,6 +943,39 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                         </span>
                       )}
                     </div>
+
+                    {isSubcontractor === "contratado" && (
+                      <div className="flex flex-col gap-2 mt-3">
+                        <Label className="text-white">Permitir subcontratação?</Label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 text-white">
+                            <input
+                              type="radio"
+                              value="true"
+                              {...registerContract("subcontractPermission", {
+                                required: "Selecione se permite subcontratação",
+                              })}
+                            />
+                            Sim
+                          </label>
+                          <label className="flex items-center gap-2 text-white">
+                            <input
+                              type="radio"
+                              value="false"
+                              {...registerContract("subcontractPermission", {
+                                required: "Selecione se permite subcontratação",
+                              })}
+                            />
+                            Não
+                          </label>
+                        </div>
+                        {errorsContract.subcontractPermission && (
+                          <span className="text-red-600">
+                            {errorsContract.subcontractPermission.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {isLoading ? (
                       <Button className="bg-realizaBlue" type="submit">
                         <Oval
