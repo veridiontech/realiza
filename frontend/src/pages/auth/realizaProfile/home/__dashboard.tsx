@@ -97,13 +97,14 @@ function validarTelefoneRepetido(telefone: string) {
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
-  cellPhone: z
-    .string()
-    .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarTelefoneRepetido, {
-      message: "Telefone inválido: não pode ter números repetidos",
-    }),
+  cellPhone: z.string()
+      .optional()
+      .refine((val) => !val || phoneRegex.test(val), {
+        message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+      })
+      .refine((val) => !val || validarTelefoneRepetido(val), {
+        message: "Telefone inválido: não pode ter números repetidos"
+      }),
   cpf: z
     .string()
     .nonempty("Cpf é obrigatório")

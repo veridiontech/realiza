@@ -265,17 +265,17 @@ const handleCnpj = async () => {
               )}
             </div> */}
 
-            <div>
+            {/* <div>
               <Label className="text-white">Nome da filial</Label>
               <Input type="text" placeholder="Digite o nome da filial" {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">{errors.name.message}</span>
               )}
-            </div>
+            </div> */}
 
             <div>
-              <Label className="text-white">Razão social</Label>
-              <Input type="text" placeholder="Digite a razão social" {...register("name")} />
+              <Label className="text-white">Nome da filial</Label>
+              <Input type="text" placeholder="Digite a nome da filial" {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">{errors.name.message}</span>
               )}
