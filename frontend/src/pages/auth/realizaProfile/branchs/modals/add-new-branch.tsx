@@ -63,9 +63,13 @@ const newBranchFormSchema = z.object({
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
   telephone: z.string()
-    .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarNumerosRepetidos, { message: "Telefone inválido: não pode ter números repetidos" }),
+      .optional()
+      .refine((val) => !val || phoneRegex.test(val), {
+        message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+      })
+      .refine((val) => !val || validarNumerosRepetidos(val), {
+        message: "Telefone inválido: não pode ter números repetidos"
+      }),
 });
 
 type NewBranchFormSchema = z.infer<typeof newBranchFormSchema>;
