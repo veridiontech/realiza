@@ -127,7 +127,7 @@ export function ThirdCollaborators() {
             >
               Confirmar Seleção
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
               </AlertDialogHeader>
@@ -152,8 +152,7 @@ export function ThirdCollaborators() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-        <div>
+
           <AlertDialog>
             <AlertDialogTrigger
               className="w-[10vw] rounded-md bg-red-600 p-3 text-white"
@@ -161,7 +160,7 @@ export function ThirdCollaborators() {
             >
               Confirmar Remoção
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
               </AlertDialogHeader>

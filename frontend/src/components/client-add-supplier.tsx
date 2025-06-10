@@ -29,10 +29,11 @@ const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z
-    .string()
-    .nonempty("Telefone é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  phone: z.string()
+        .optional()
+        .refine((val) => !val || phoneRegex.test(val), {
+          message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+        }),
   cnpj: z
     .string()
     .nonempty("Insira o CNPJ")
@@ -42,10 +43,11 @@ export const modalSendEmailFormSchema = z.object({
 
 export const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z
-    .string()
-    .nonempty("Telefone é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX"),
+  phone:  z.string()
+        .optional()
+        .refine((val) => !val || phoneRegex.test(val), {
+          message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+        }),
   cnpj: z
     .string()
     .nonempty("Insira o CNPJ")
