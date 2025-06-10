@@ -63,9 +63,13 @@ const newBranchFormSchema = z.object({
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
   telephone: z.string()
-    .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarNumerosRepetidos, { message: "Telefone inválido: não pode ter números repetidos" }),
+      .optional()
+      .refine((val) => !val || phoneRegex.test(val), {
+        message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+      })
+      .refine((val) => !val || validarNumerosRepetidos(val), {
+        message: "Telefone inválido: não pode ter números repetidos"
+      }),
 });
 
 type NewBranchFormSchema = z.infer<typeof newBranchFormSchema>;
@@ -261,17 +265,17 @@ const handleCnpj = async () => {
               )}
             </div> */}
 
-            <div>
+            {/* <div>
               <Label className="text-white">Nome da filial</Label>
               <Input type="text" placeholder="Digite o nome da filial" {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">{errors.name.message}</span>
               )}
-            </div>
+            </div> */}
 
             <div>
-              <Label className="text-white">Razão social</Label>
-              <Input type="text" placeholder="Digite a razão social" {...register("name")} />
+              <Label className="text-white">Nome da filial</Label>
+              <Input type="text" placeholder="Digite a nome da filial" {...register("name")} />
               {errors.name && (
                 <span className="text-sm text-red-600">{errors.name.message}</span>
               )}

@@ -4,6 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Plus, Search } from "lucide-react";
@@ -19,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ip } from "@/utils/ip";
 import { Oval } from "react-loader-spinner";
 import { useClient } from "@/context/Client-Provider";
+import bgModalRealiza from "@/assets/modalBG.jpeg";
 
 async function validarCEPExiste(cep: string): Promise<boolean> {
   try {
@@ -110,21 +112,6 @@ export function ModalCreateCliente() {
     setCnpjValue(formatted);
     setValue("cnpj", formatted, { shouldValidate: true });
   }, [getValues, setValue]);
-
-  // useEffect(() => {
-  //   if (cnpjData) {
-  //     setValue("corporateName", cnpjData.company.name || "");
-  //     setValue("tradeName", cnpjData.alias || "");
-  //     // setValue("email", cnpjData.emails?.[0]?.address || "");
-  //     setValue("telephone", cnpjData.phones?.[0]?.number || "");
-  //     setValue("cep", cnpjData.address.zip || "");
-  //     setValue("state", cnpjData.address.state || "");
-  //     setValue("city", cnpjData.address.city || "");
-  //     setValue("address", cnpjData.address.street || "");
-  //     setValue("number", cnpjData.address.number || "");
-  //     setShowSecondModal(true);
-  //   }
-  // }, [cnpjData, setValue]);
 
   // Sanitiza o CNPJ removendo caracteres não numéricos
   const sanitizedCnpj = cnpjValue.replace(/\D/g, "");
@@ -250,9 +237,9 @@ export function ModalCreateCliente() {
             <Plus size={24} className="dark:text-white" />
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent style={{ backgroundImage: `url(${bgModalRealiza})` }}>
           <DialogHeader>
-            <DialogTitle>Cadastrar novo cliente</DialogTitle>
+            <DialogTitle className="text-white">Cadastrar novo cliente</DialogTitle>
           </DialogHeader>
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="flex flex-col gap-2">
@@ -282,30 +269,32 @@ export function ModalCreateCliente() {
         </DialogContent>
       </Dialog>
       <Dialog open={showSecondModal} onOpenChange={setShowSecondModal}>
-        <DialogContent>
+        <DialogContent style={{ backgroundImage: `url(${bgModalRealiza})` }} className="max-h-[70vh] overflow-y-auto max-w-md">
           <DialogHeader>
-            <DialogTitle>{cnpjData?.company.name || "Detalhes do cliente"}</DialogTitle>
+            <DialogTitle className="text-white">{cnpjData?.company.name || "Detalhes do cliente"}</DialogTitle>
           </DialogHeader>
+          {/* Adicione o DialogClose aqui para garantir o "X" */}
+          <DialogClose />
           <form onSubmit={handleSubmit(createCliente)} className="flex flex-col gap-2">
             <div>
-              <Label>Razão social</Label>
+              <Label className="text-white">Razão social</Label>
               <Input {...register("corporateName")} placeholder="Insira a razão social" />
               {errors.corporateName && <span className="text-sm text-red-600">{errors.corporateName.message}</span>}
             </div>
 
             <div>
-              <Label>Nome fantasia</Label>
+              <Label className="text-white">Nome fantasia</Label>
               <Input {...register("tradeName")} placeholder="Insira o nome fantasia" />
               {errors.tradeName && <span className="text-sm text-red-600">{errors.tradeName.message}</span>}
             </div>
 
             <div>
-              <Label>Email</Label>
+              <Label className="text-white">Email</Label>
               <Input {...register("email")} placeholder="Insira o email" />
               {errors.email && <span className="text-sm text-red-600">{errors.email.message}</span>}
             </div>
             <div>
-              <Label>Telefone</Label>
+              <Label className="text-white">Telefone</Label>
               <Input
                 type="text"
                 value={phoneValue}
@@ -320,7 +309,7 @@ export function ModalCreateCliente() {
               {errors.telephone && <span className="text-sm text-red-600">{errors.telephone.message}</span>}
             </div>
             <div>
-              <Label>CEP</Label>
+              <Label className="text-white">CEP</Label>
               <Input
                 type="text"
                 value={cepValue}
@@ -336,22 +325,22 @@ export function ModalCreateCliente() {
               {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
             </div>
             <div>
-              <Label>Estado</Label>
+              <Label className="text-white">Estado</Label>
               <Input {...register("state")} placeholder="Insira o estado" />
               {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
             </div>
             <div>
-              <Label>Cidade</Label>
+              <Label className="text-white">Cidade</Label>
               <Input {...register("city")} placeholder="Insira a cidade" />
               {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
             </div>
             <div>
-              <Label>Endereço</Label>
+              <Label className="text-white">Endereço</Label>
               <Input {...register("address")} placeholder="Insira o endereço" />
               {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
             </div>
             <div>
-              <Label>Número</Label>
+              <Label className="text-white">Número</Label>
               <Input {...register("number")} placeholder="Insira o número" />
               {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
             </div>

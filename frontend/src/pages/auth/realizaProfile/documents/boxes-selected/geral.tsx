@@ -59,19 +59,19 @@ export function GeralBox() {
     }
   };
   const filterIdDocuments = nonSelected
-  .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocumentation)
   // .map((document) => document.idDocumentation);
 
   const filterIdDocumentsSelected = documents
-  .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocumentation)
   // .map((document) => document.idDocumentation);
 
-console.log("ids dos documentos", filterIdDocuments);
-console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
-  
+  console.log("ids dos documentos", filterIdDocuments);
+  console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
 
-// Envio de documentos nao selecionados
-  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+
+  // Envio de documentos nao selecionados
+  const sendDocuments = async (isSelected: boolean, idDocumentation: string[]) => {
     // const 
     const tokenFromStorage = localStorage.getItem("tokenClient")
     try {
@@ -86,9 +86,9 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
       })
       clearArray()
       pullDatas()
-    }catch(err) {
-      console.log("erro ao enviar documento", err );
-      
+    } catch (err) {
+      console.log("erro ao enviar documento", err);
+
     } finally {
       setIsLoading(false)
     }
@@ -114,7 +114,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading}/>
+        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -125,7 +125,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
             >
               Confirmar Seleção
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
               </AlertDialogHeader>
@@ -146,8 +146,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-        <div>
+
           <AlertDialog>
             <AlertDialogTrigger
               className={`w-[10vw] rounded-md p-3 transition-all duration-300 ${documents.length === 0 ? "cursor-not-allowed bg-red-300 text-red-500" : "bg-red-600 text-white"}`}
@@ -155,7 +154,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
             >
               Confirmar Remoção
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
               </AlertDialogHeader>
@@ -179,7 +178,7 @@ console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
         </div>
       </div>
       <div>
-        <BoxSelected documents={selectedDocument} isLoading={isLoading}/>
+        <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
   );

@@ -346,7 +346,7 @@ export function NewModalCreateEmployee() {
           className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
         >
           <DialogHeader>
-            <DialogTitle className="text-white">Cadastrar novo prestador</DialogTitle>
+            <DialogTitle className="text-white">Cadastrar novo colaborador</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-5 py-4 text-white">
             <div>

@@ -50,7 +50,7 @@ const sanitizeNumber = (value: string) => value.replace(/\D/g, "");
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
-  cellPhone: z.string().nonempty("Celular é obrigatório"),
+  cellPhone: z.string(),
   cpf: z.string().nonempty("Cpf é obrigatório"),
   email: z
     .string()
@@ -79,7 +79,7 @@ const createBranchUltra = z.object({
   city: z.string().min(1, "A cidade é obrigatória."),
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
-  telephone: z.string().nonempty("Insira um telefone"),
+  telephone: z.string(),
 });
 
 type CreateBranchUltra = z.infer<typeof createBranchUltra>;

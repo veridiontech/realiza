@@ -66,7 +66,7 @@ export function TrabalhistaBox() {
     }
   };
 
-  const sendDocuments = async(isSelected: boolean, idDocumentation: string[]) => {
+  const sendDocuments = async (isSelected: boolean, idDocumentation: string[]) => {
     // const 
     const tokenFromStorage = localStorage.getItem("tokenClient")
     try {
@@ -81,18 +81,18 @@ export function TrabalhistaBox() {
       })
       clearArray()
       pullDatas()
-    }catch(err) {
-      console.log("erro ao enviar documento", err );
-      
+    } catch (err) {
+      console.log("erro ao enviar documento", err);
+
     }
   }
 
   const filterIdDocuments = nonSelected
-  .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocumentation)
   // .map((document) => document.idDocumentation);
 
   const filterIdDocumentsSelected = documents
-  .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocumentation)
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -100,7 +100,7 @@ export function TrabalhistaBox() {
     }
   }, [selectedBranch?.idBranch]);
 
-  
+
   const clearArray = () => {
     setDocuments([])
     setNonSelected([])
@@ -117,7 +117,7 @@ export function TrabalhistaBox() {
   return (
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
-        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading}/>
+        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
       </div>
       <div className="flex flex-col gap-5">
         <div>
@@ -128,7 +128,7 @@ export function TrabalhistaBox() {
             >
               Confirmar Seleção
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
               </AlertDialogHeader>
@@ -158,7 +158,7 @@ export function TrabalhistaBox() {
             >
               Confirmar Remoção
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle>Documentos Selecionados</AlertDialogTitle>
               </AlertDialogHeader>
@@ -182,7 +182,7 @@ export function TrabalhistaBox() {
         </div>
       </div>
       <div>
-        <BoxSelected documents={selectedDocument} isLoading={isLoading}/>
+        <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
   );
