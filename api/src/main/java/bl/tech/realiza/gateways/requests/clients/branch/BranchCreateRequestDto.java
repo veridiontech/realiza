@@ -14,7 +14,6 @@ public class BranchCreateRequestDto {
     @NotEmpty
     private String cnpj;
     private String email;
-    @NotEmpty
     private String telephone;
     @NotEmpty
     private String cep;
