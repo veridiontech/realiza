@@ -10,8 +10,6 @@ import { useBranch } from "@/context/Branch-provider";
 export function EnterpriseResume() {
   const { client } = useClient();
   const { selectedBranch } = useBranch();
-  console.log("CLIENTE:", client);
-  console.log("FILIAL:", selectedBranch);
   
 
   return (
