@@ -110,6 +110,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     .branches(List.of(branch))
                     .build());
         } else {
+            if (!newProviderSupplier.getIsActive()) {
+                throw new IllegalArgumentException("Provider supplier not active");
+            }
             List<Branch> newBranches = newProviderSupplier.getBranches();
             if (!newBranches.contains(branch)) {
                 newBranches.add(branch);

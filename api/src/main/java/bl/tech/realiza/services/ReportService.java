@@ -27,18 +27,18 @@ public class ReportService {
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
     public Long countSuppliersByBranch(String branchId) {
-        return providerRepository.countByBranches_IdBranch(branchId);
+        return providerRepository.countByBranches_IdBranchAndIsActiveIsTrue(branchId);
     }
 
     public Long countSubcontractorsByBranch(String branchId) {
         List<String> suppliersIds = providerRepository.findAllByBranches_IdBranchAndIsActiveIsTrue(branchId)
                 .stream().map(ProviderSupplier::getIdProvider).toList();
 
-        return suppliersIds.isEmpty() ? 0L : providerSubcontractorRepository.countByProviderSupplier_IdProviderIn(suppliersIds);
+        return suppliersIds.isEmpty() ? 0L : providerSubcontractorRepository.countByProviderSupplier_IdProviderInAndIsActiveIsTrue(suppliersIds);
     }
 
     public Long countSubcontractorsBySupplier(String supplierId) {
-        return providerSubcontractorRepository.countByProviderSupplier_IdProvider(supplierId);
+        return providerSubcontractorRepository.countByProviderSupplier_IdProviderAndIsActiveIsTrue(supplierId);
     }
 
     public Long countEmployeesByEnterprise(String enterpriseId, Provider.Company companyDegree) {

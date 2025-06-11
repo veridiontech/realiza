@@ -12,6 +12,6 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
     Page<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
     List<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch);
     Optional<ProviderSupplier> findByCnpj(String cnpj);
-    Long countByBranches_IdBranch(String idSearch);
+    Long countByBranches_IdBranchAndIsActiveIsTrue(String idSearch);
     Page<ProviderSupplier> findAllByIsActiveIsTrue(Pageable pageable);
 }

@@ -191,7 +191,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public Page<UserResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAllByProviderSupplier_IdProviderAndRole(idSearch, User.Role.ROLE_SUPPLIER_MANAGER, pageable);
+        Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrueAndRole(idSearch, User.Role.ROLE_SUPPLIER_MANAGER, pageable);
 
         Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
                 userProvider -> {
