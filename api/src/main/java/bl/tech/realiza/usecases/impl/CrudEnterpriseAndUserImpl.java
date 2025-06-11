@@ -48,7 +48,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
         Optional<Client> clientOptional = clientRepository.findByCnpj(enterpriseAndUserRequestDto.getCnpj());
         Client client = clientOptional.orElse(null);
 
-        if (clientOptional.isPresent()) {
+        if (client != null) {
             client.setTradeName(enterpriseAndUserRequestDto.getTradeName() != null ? enterpriseAndUserRequestDto.getTradeName() : client.getTradeName());
             client.setCorporateName(enterpriseAndUserRequestDto.getCorporateName() != null ? enterpriseAndUserRequestDto.getCorporateName() : client.getCorporateName());
             client.setEmail(enterpriseAndUserRequestDto.getEmail() != null ? enterpriseAndUserRequestDto.getEmail() : client.getEmail());
@@ -168,7 +168,10 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(enterpriseAndUserRequestDto.getIdCompany());
         ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider supplier not found"));
 
-        if (providerSubcontractorOptional.isPresent()) {
+        if (providerSubcontractor != null) {
+            if (!providerSubcontractor.getIsActive()) {
+                throw new IllegalArgumentException("Subcontractor is not active");
+            }
             providerSubcontractor.setTradeName(enterpriseAndUserRequestDto.getTradeName() != null ? enterpriseAndUserRequestDto.getTradeName() : providerSubcontractor.getTradeName());
             providerSubcontractor.setCorporateName(enterpriseAndUserRequestDto.getCorporateName() != null ? enterpriseAndUserRequestDto.getCorporateName() : providerSubcontractor.getCorporateName());
             providerSubcontractor.setEmail(enterpriseAndUserRequestDto.getEmail() != null ? enterpriseAndUserRequestDto.getEmail() : providerSubcontractor.getEmail());

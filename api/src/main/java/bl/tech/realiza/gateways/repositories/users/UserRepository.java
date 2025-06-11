@@ -7,6 +7,7 @@ import java.util.Collection;
 
 public interface UserRepository extends JpaRepository<User, String> {
     User findByEmail(String email);
-    Collection<User> findAllByIsActive(boolean b);
-    Collection<User> findAllByDeleteRequest(boolean b);
+    Collection<User> findAllByIsActive(Boolean b);
+    Collection<User> findAllByDeleteRequest(Boolean b);
+    User findByEmailAndIsActive(String email, Boolean isActive);
 }

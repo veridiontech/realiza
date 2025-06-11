@@ -34,6 +34,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import static bl.tech.realiza.domains.contract.Contract.*;
+import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudItemManagementImpl implements CrudItemManagement {
@@ -164,8 +167,11 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
 
             Contract contract = contractRepository.findById(
-                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
+                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderAndIsActiveOrderByCreationDateDesc(provider.getIdProvider(), PENDENTE).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+            contract.setIsActive(ATIVADO);
+            contractRepository.save(contract);
 
             String token = tokenManagerService.generateToken();
             solicitation.setInvitationToken(token);
@@ -217,8 +223,11 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             providerRepository.save(provider);
 
             Contract contract = contractRepository.findById(
-                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderOrderByCreationDateDesc(provider.getIdProvider()).getIdContract())
+                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderAndIsActiveOrderByCreationDateDesc(provider.getIdProvider(), PENDENTE).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+            contract.setIsActive(NEGADO);
+            contractRepository.save(contract);
 
             String token = tokenManagerService.generateToken();
             solicitation.setInvitationToken(token);
