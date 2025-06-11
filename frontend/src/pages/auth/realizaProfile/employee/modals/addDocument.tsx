@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Modal } from "@/components/modal";
 import { ip } from "@/utils/ip";
@@ -6,70 +6,76 @@ import { ip } from "@/utils/ip";
 interface AddDocumentProps {
   isOpen: boolean;
   onClose: () => void;
-  employeeId: string;
-  preSelectedTitle?: string | null; // novo campo
+  documentId: string | null;
+  preSelectedTitle?: string | null;
 }
 
 export const AddDocument: React.FC<AddDocumentProps> = ({
   isOpen,
   onClose,
-  employeeId,
+  documentId,
+  preSelectedTitle,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("");
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
+
+  useEffect(() => {
+    console.log("documentID:", documentId);
+  }, [documentId]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
+    const file = event.target.files?.[0];
 
-      // Valida se o arquivo é do tipo PDF
-      if (file.type !== "application/pdf") {
-        alert("Por favor, selecione um arquivo no formato PDF.");
-        setSelectedFile(null); // Reseta o arquivo selecionado
-        return;
-      }
+    if (!file) return;
 
-      setSelectedFile(file); // Define o arquivo no estado
-    }
-  };
-
-  const handleSubmit = async (formData: Record<string, any>) => {
-    // Validação para garantir que o arquivo foi selecionado
-    if (!selectedFile) {
-      alert("Por favor, selecione um arquivo antes de enviar.");
+    if (file.type !== "application/pdf") {
+      setStatusMessage("Por favor, selecione um arquivo PDF.");
+      setStatusType("error");
       return;
     }
 
-    const data = new FormData();
+    setSelectedFile(file);
+    setStatusMessage(null);
+    setStatusType(null);
+  };
 
-    const jsonBlob = new Blob(
-      [
-        JSON.stringify({
-          title: formData.title,
-          status: "PENDENTE",
-          employee: employeeId,
-        }),
-      ],
-      { type: "application/json" },
-    );
+  const handleSubmit = async () => {
+    console.log("📦 Submetendo upload para documentId:", documentId);
 
-    data.append("documentEmployeeRequestDto", jsonBlob);
-    data.append("file", selectedFile); // Adiciona o arquivo selecionado
+    if (!selectedFile) {
+      setStatusMessage("Por favor, selecione um arquivo antes de enviar.");
+      setStatusType("error");
+      return;
+    }
 
-    console.log("teste", data);
+    if (!documentId) {
+      setStatusMessage("ID do documento não encontrado.");
+      setStatusType("error");
+      console.warn("⚠️ documentId está indefinido no submit.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      await axios.post(`${ip}/document/employee`, data,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-      );
-      setStatus("Arquivo enviado com sucesso!");
+
+      await axios.post(`${ip}/document/employee/${documentId}/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setStatusMessage("Arquivo enviado com sucesso!");
+      setStatusType("success");
       setSelectedFile(null);
-    } catch (error) {
-      console.error(error);
-      setStatus("Erro ao enviar o arquivo. Tente novamente.");
+    } catch (error: any) {
+      console.error("❌ Erro ao enviar:", error.response?.data || error.message);
+      setStatusMessage("Erro ao enviar o arquivo. Tente novamente.");
+      setStatusType("error");
     }
   };
 
@@ -81,15 +87,16 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
       fields={[
         {
           name: "title",
-          label: "Tipo de Documento",
-          type: "select",
-          options: [
-            "Contrato de Trabalho",
-            "Declaração",
-            "Comprovante de Residência",
-            "Certificado",
-          ],
-          required: true,
+          label: "Nome do Documento",
+          type: "custom",
+          render: () => (
+            <input
+              type="text"
+              readOnly
+              value={preSelectedTitle || ""}
+              className="mb-4 w-full rounded border-none bg-transparent p-2 text-sm text-white focus:outline-none"
+            />
+          ),
         },
         {
           name: "file",
@@ -97,10 +104,7 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
           type: "custom",
           render: () => (
             <div className="flex flex-col">
-              <label
-                htmlFor="file-upload"
-                className="mb-2 text-sm font-medium text-yellow-400"
-              >
+              <label htmlFor="file-upload" className="mb-2 text-sm font-medium text-yellow-400">
                 Selecione o Arquivo
               </label>
               <input
@@ -112,7 +116,7 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
               />
               <label
                 htmlFor="file-upload"
-                className="bg-realizaBlue hover:bg-realizaBlue cursor-pointer rounded px-4 py-2 text-white"
+                className="cursor-pointer rounded bg-realizaBlue px-4 py-2 text-center text-sm text-white hover:bg-blue-700"
               >
                 {selectedFile ? selectedFile.name : "Escolher Arquivo"}
               </label>
@@ -121,7 +125,11 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
         },
       ]}
     >
-      {status && <p className="text-yellow-400">{status}</p>}
+      {statusMessage && (
+        <p className={`mt-4 text-sm ${statusType === "success" ? "text-green-500" : "text-red-500"}`}>
+          {statusMessage}
+        </p>
+      )}
     </Modal>
   ) : null;
 };
