@@ -29,14 +29,16 @@ export function ConformityGaugeChart() {
     const fetchConformity = async () => {
       try {
         const res = await axios.get(
-          `${ip}/conformity?branchId=${selectedBranch?.idBranch}&clientId=${selectedBranch?.client}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
+          `${ip}/dashboard/home/${selectedBranch?.idBranch}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        }
         )
-        const conformityValue = res.data?.percentage ?? 0
-        console.log(conformityValue)
+
+        const conformityValue = res.data?.adherence ?? 0
+        console.log(res.data)
         setPercentage(conformityValue)
       } catch (err) {
         console.error('Erro ao buscar conformidade:', err)
@@ -59,8 +61,8 @@ export function ConformityGaugeChart() {
         percentage! >= 75
           ? '#22c55e'
           : percentage! >= 50
-            ? '#eab308'
-            : '#ef4444',
+          ? '#eab308'
+          : '#ef4444',
     },
   ]
 
@@ -73,9 +75,11 @@ export function ConformityGaugeChart() {
   }
 
   return (
-    <Card className="w-full h-96"> 
+    <Card className="w-full h-96">
       <CardHeader className="pb-0">
-        <CardTitle className="text-muted-foreground text-base">Conformidade</CardTitle>
+        <CardTitle className="text-muted-foreground text-base">
+          Conformidade
+        </CardTitle>
         <CardDescription className="text-xl font-bold">
           {percentage?.toFixed(2)}%
         </CardDescription>
@@ -115,6 +119,5 @@ export function ConformityGaugeChart() {
         </div>
       </CardContent>
     </Card>
-
   )
 }
