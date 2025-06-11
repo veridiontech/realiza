@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProviderSupplierRepository extends JpaRepository<ProviderSupplier, String> {
-    Page<ProviderSupplier> findAllByBranches_IdBranch(String idSearch, Pageable pageable);
-    List<ProviderSupplier> findAllByBranches_IdBranch(String idSearch);
+    Page<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
+    List<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch);
     Optional<ProviderSupplier> findByCnpj(String cnpj);
     Long countByBranches_IdBranch(String idSearch);
     Page<ProviderSupplier> findAllByIsActiveIsTrue(Pageable pageable);
-    Page<ProviderSupplier> findAllByBranches_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
 }

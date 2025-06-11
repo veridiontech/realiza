@@ -31,7 +31,7 @@ public class ReportService {
     }
 
     public Long countSubcontractorsByBranch(String branchId) {
-        List<String> suppliersIds = providerRepository.findAllByBranches_IdBranch(branchId)
+        List<String> suppliersIds = providerRepository.findAllByBranches_IdBranchAndIsActiveIsTrue(branchId)
                 .stream().map(ProviderSupplier::getIdProvider).toList();
 
         return suppliersIds.isEmpty() ? 0L : providerSubcontractorRepository.countByProviderSupplier_IdProviderIn(suppliersIds);

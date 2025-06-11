@@ -1,9 +1,6 @@
 package bl.tech.realiza.services.dashboard;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
@@ -19,7 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static bl.tech.realiza.domains.documents.Document.Status.APROVADO;
+import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
+import static bl.tech.realiza.domains.documents.Document.*;
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+import static bl.tech.realiza.domains.documents.Document.Status.PENDENTE;
+import static bl.tech.realiza.domains.employees.Employee.Situation.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,19 +41,19 @@ public class DashboardService {
         int activeEmployeeQuantity;
 
         Object[] resultEmployeeSupplierRaw = documentEmployeeRepository
-                .countTotalAndPendentesByContractSupplierBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+                .countTotalAndPendentesByContractSupplierBranch(branch.getIdBranch(), PENDENTE);
         Object[] resultEmployeeSupplier = (Object[]) resultEmployeeSupplierRaw[0];
 
         Object[] resultEmployeeSubcontractorRaw = documentEmployeeRepository
-                .countTotalAndPendentesByContractSubcontractorBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+                .countTotalAndPendentesByContractSubcontractorBranch(branch.getIdBranch(), PENDENTE);
         Object[] resultEmployeeSubcontractor = (Object[]) resultEmployeeSubcontractorRaw[0];
 
         Object[] resultSubcontractorRaw = documentProviderSubcontractorRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+                .countTotalAndPendentesByBranch(branch.getIdBranch(), PENDENTE);
         Object[] resultSubcontractor = (Object[]) resultSubcontractorRaw[0];
 
         Object[] resultSupplierRaw = documentProviderSupplierRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), Document.Status.PENDENTE);
+                .countTotalAndPendentesByBranch(branch.getIdBranch(), PENDENTE);
         Object[] resultSupplier = (Object[]) resultSupplierRaw[0];
 
 
@@ -69,12 +70,12 @@ public class DashboardService {
 
         adherence = total > 0 ? ((total - pendentes) * 100.0 / total) : 0;
 
-        activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndFinishedIsFalse(branch.getIdBranch()).intValue();
+        activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(branch.getIdBranch(), ATIVADO).intValue();
 
-        activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.ALOCADO).intValue()
-        + employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.DESALOCADO).intValue()
-        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.ALOCADO).intValue()
-        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), Employee.Situation.DESALOCADO).intValue();
+        activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()
+        + employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), DESALOCADO).intValue()
+        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()
+        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), DESALOCADO).intValue();
 
         return DashboardHomeResponseDto.builder()
                 .adherence(adherence)
@@ -110,7 +111,7 @@ public class DashboardService {
 
         for (Object[] row : allResults) {
             String docType = (String) row[0];
-            Document.Status status = (Document.Status) row[1];
+            Status status = (Status) row[1];
             Integer quantity = ((Number) row[2]).intValue();
 
             grouped
@@ -143,19 +144,19 @@ public class DashboardService {
 
         for (Branch b : allBranches) {
             Object[] supplierRaw = documentProviderSupplierRepository
-                    .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), PENDENTE);
             Object[] supplier = (Object[]) supplierRaw[0];
 
             Object[] employeeSupplierRaw = documentEmployeeRepository
-                    .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), Document.Status.PENDENTE);
+                    .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), PENDENTE);
             Object[] employeeSupplier = (Object[]) employeeSupplierRaw[0];
 
             Object[] subcontractorRaw = documentProviderSupplierRepository
-                    .countTotalAndPendentesByBranch(b.getIdBranch(), Document.Status.PENDENTE);
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), PENDENTE);
             Object[] subcontractor = (Object[]) subcontractorRaw[0];
 
             Object[] employeeSubcontractorRaw = documentEmployeeRepository
-                    .countTotalAndPendentesByContractSubcontractorBranch(b.getIdBranch(), Document.Status.PENDENTE);
+                    .countTotalAndPendentesByContractSubcontractorBranch(b.getIdBranch(), PENDENTE);
             Object[] employeeSubcontractor = (Object[]) employeeSubcontractorRaw[0];
 
 
