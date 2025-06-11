@@ -1,7 +1,10 @@
 import { useState } from "react";
 
-export function Suppliers() {
-  const count = 3;
+interface SupplierCounterProps {
+  count?: number
+}
+
+export function Suppliers({count}: SupplierCounterProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (

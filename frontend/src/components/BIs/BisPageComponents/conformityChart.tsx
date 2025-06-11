@@ -13,54 +13,24 @@ import {
   CardContent,
 } from '@/components/ui/card'
 import { Blocks } from 'react-loader-spinner'
-import axios from 'axios'
-import { useEffect, useState } from 'react'
-import { ip } from '@/utils/ip'
-import { useBranch } from '@/context/Branch-provider'
 
-export function ConformityGaugeChart() {
-  const { selectedBranch } = useBranch()
-  const [percentage, setPercentage] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
+interface ConformityGaugeChartProps {
+  percentage?: number 
+  loading?: boolean
+}
 
-  const token = localStorage.getItem("tokenClient")
-
-  useEffect(() => {
-    const fetchConformity = async () => {
-      try {
-        const res = await axios.get(
-          `${ip}/dashboard/home/${selectedBranch?.idBranch}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-
-        const conformityValue = res.data?.adherence ?? 0
-        console.log(res.data)
-        setPercentage(conformityValue)
-      } catch (err) {
-        console.error('Erro ao buscar conformidade:', err)
-        setPercentage(0)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (selectedBranch?.idBranch && selectedBranch.client) {
-      fetchConformity()
-    }
-  }, [selectedBranch?.idBranch, selectedBranch?.client])
-
+export function ConformityGaugeChart({
+  percentage,
+  loading = false,
+}: ConformityGaugeChartProps) {
   const chartData = [
     {
       name: 'Conformidade',
       value: percentage ?? 0,
       fill:
-        percentage! >= 75
+        (percentage ?? 0) >= 75
           ? '#22c55e'
-          : percentage! >= 50
+          : (percentage ?? 0) >= 50
           ? '#eab308'
           : '#ef4444',
     },
