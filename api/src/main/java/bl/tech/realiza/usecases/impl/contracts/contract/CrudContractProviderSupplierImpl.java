@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.contracts.contract;
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.Contract.IsActive;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
@@ -54,6 +55,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 
 @Service
 @RequiredArgsConstructor
@@ -107,6 +110,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     .branches(List.of(branch))
                     .build());
         } else {
+            if (!newProviderSupplier.getIsActive()) {
+                throw new IllegalArgumentException("Provider supplier not active");
+            }
             List<Branch> newBranches = newProviderSupplier.getBranches();
             if (!newBranches.contains(branch)) {
                 newBranches.add(branch);
@@ -182,7 +188,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAll(Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActiveIsTrue(pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActive(ATIVADO, pageable);
 
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -311,21 +317,21 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(idSearch, ATIVADO, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
 
     @Override
     public Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(idSearch, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveAndProviderSupplier_IsActive(idSearch, ATIVADO, true, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
 
     @Override
     public Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(idBranch,idSupplier, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(idBranch,idSupplier, ATIVADO, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
@@ -482,7 +488,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public List<ContractSupplierPermissionResponseDto> findAllByBranchAndSubcontractPermission(String idBranch) {
-        List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllByBranch_IdBranchAndSubcontractPermissionIsTrue(idBranch);
+        List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveAndSubcontractPermissionIsTrue(idBranch, ATIVADO);
         return contractProviderSuppliers.stream().map(
                 contractProviderSupplier -> ContractSupplierPermissionResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())

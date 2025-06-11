@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProviderSubcontractorRepository extends JpaRepository<ProviderSubcontractor, String> {
-    Page<ProviderSubcontractor> findAllByProviderSupplier_IdProvider(String idSearch, Pageable pageable);
     Optional<ProviderSubcontractor> findByCnpj(String cnpj);
-    List<ProviderSubcontractor> findAllByProviderSupplier_IdProvider(String idSearch);
-    Long countByProviderSupplier_IdProviderIn(List<String> idSearch);
-    Long countByProviderSupplier_IdProvider(String idSearch);
+    List<ProviderSubcontractor> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch);
+    Long countByProviderSupplier_IdProviderInAndIsActiveIsTrue(List<String> idSearch);
+    Long countByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch);
     Page<ProviderSubcontractor> findAllByIsActiveIsTrue(Pageable pageable);
     Page<ProviderSubcontractor> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch, Pageable pageable);
 }

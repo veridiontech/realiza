@@ -230,7 +230,7 @@ public class CrudNotificationImpl implements CrudNotification {
         Page<UserProviderSupplier> managers;
         List<Notification> notifications = new ArrayList<>(List.of());
         do {
-            managers = userProviderSupplierRepository.findAllByProviderSupplier_IdProvider(documentProviderSupplier.getProviderSupplier().getIdProvider(), PageRequest.of(page, size));
+            managers = userProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(documentProviderSupplier.getProviderSupplier().getIdProvider(), PageRequest.of(page, size));
             managers.forEach(
                     manager -> {
                         notifications.add(
@@ -265,7 +265,7 @@ public class CrudNotificationImpl implements CrudNotification {
         Page<UserProviderSubcontractor> managers;
         List<Notification> notifications = new ArrayList<>(List.of());
         do {
-            managers = userProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(documentProviderSubcontractor.getProviderSubcontractor().getIdProvider(), PageRequest.of(page, size));
+            managers = userProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(documentProviderSubcontractor.getProviderSubcontractor().getIdProvider(), PageRequest.of(page, size));
             managers.forEach(
                     manager -> {
                         notifications.add(
@@ -313,8 +313,8 @@ public class CrudNotificationImpl implements CrudNotification {
 
         do {
             Page<? extends User> managers = isSupplier
-                    ? userProviderSupplierRepository.findAllByProviderSupplier_IdProvider(providerId, PageRequest.of(page, size))
-                    : userProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(providerId, PageRequest.of(page, size));
+                    ? userProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(providerId, PageRequest.of(page, size))
+                    : userProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(providerId, PageRequest.of(page, size));
 
             managers.forEach(manager -> {
                 notifications.add(
