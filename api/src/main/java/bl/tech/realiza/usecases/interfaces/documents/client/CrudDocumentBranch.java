@@ -1,11 +1,10 @@
 package bl.tech.realiza.usecases.interfaces.documents.client;
 
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +20,7 @@ public interface CrudDocumentBranch {
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);
-    List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected);
+    List<DocumentSummarizedResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected);
     List<DocumentExpirationResponseDto> findAllFilteredDocumentsExpiration(String idBranch, String documentTypeName, Boolean isSelected);
     String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection);
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
