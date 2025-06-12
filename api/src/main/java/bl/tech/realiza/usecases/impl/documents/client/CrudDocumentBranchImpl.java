@@ -16,6 +16,7 @@ import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpda
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
@@ -382,20 +383,13 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public List<DocumentResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected) {
+    public List<DocumentSummarizedResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected) {
         branchRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        List<DocumentBranch> documentBranch = documentBranchRepository
-                .findAllByBranch_IdBranchAndDocumentMatrix_TypeAndIsActive(id, documentTypeName.toLowerCase(), isSelected);
-
-        return documentBranch.stream()
-                .sorted(Comparator.comparing(Document::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
-                .map(document -> DocumentResponseDto.builder()
-                        .idDocument(document.getIdDocumentation())
-                        .title(document.getTitle())
-                        .build()).toList();
+        return documentBranchRepository.findFilteredDocumentsSimplified(id, documentTypeName, isSelected);
     }
+
 
     @Override
     public List<DocumentExpirationResponseDto> findAllFilteredDocumentsExpiration(String idBranch, String documentTypeName, Boolean isSelected) {

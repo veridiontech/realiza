@@ -2,9 +2,13 @@ package bl.tech.realiza.gateways.repositories.documents.client;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -19,4 +23,23 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     Long countByBranch_IdBranchAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, Document.Status status, String groupName);
 
     List<DocumentBranch> findAllByBranch_IdBranch(String id);
+
+    @Query("""
+    SELECT new bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto(
+        d.idDocumentation,
+        d.title
+    )
+    FROM DocumentBranch d
+    JOIN d.documentMatrix m
+    WHERE d.branch.idBranch = :idBranch
+      AND LOWER(m.type) = LOWER(:documentTypeName)
+      AND d.isActive = :isSelected
+    ORDER BY LOWER(d.title)
+""")
+    List<DocumentSummarizedResponseDto> findFilteredDocumentsSimplified(
+            @Param("idBranch") String idBranch,
+            @Param("documentTypeName") String documentTypeName,
+            @Param("isSelected") Boolean isSelected
+    );
+
 }
