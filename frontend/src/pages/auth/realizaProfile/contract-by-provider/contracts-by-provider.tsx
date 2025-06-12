@@ -21,7 +21,7 @@ export function ContarctsByProvider() {
         params: { idSearch: id.id },
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      console.log("contrato", id);
       setContracts(res.data.content);
     } catch (err) {
       console.log(err);
@@ -43,7 +43,7 @@ export function ContarctsByProvider() {
       setDocuments(res.data.documentDtos || []);
       setCollaborators(res.data.employeeDtos || []);
       setSelectedContractName(serviceName);
-      setSearchTerm(""); // limpa busca ao trocar contrato
+      setSearchTerm(""); 
     } catch (err) {
       console.log(err);
     }
