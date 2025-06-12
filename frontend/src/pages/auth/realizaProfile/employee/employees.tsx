@@ -8,7 +8,6 @@
 // import { useClient } from "@/context/Client-Provider";
 import { useState, useEffect } from "react";
 // import { TableEmployee } from "./tableEmployee";
-// import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 import { Button } from "@/components/ui/button";
 // import { Pagination } from "@/components/ui/pagination";
 import axios from "axios";
@@ -92,22 +91,6 @@ export const EmployeesTable = (): JSX.Element => {
       setLoading(false);
     }
   };
-
-  // const getEmployees = async() => {
-  //   try{
-  //     const res = await axios.get(`${ip}/employee?idSearch=${supplier?.idProvider}&enterprise=SUPPLIER`)
-  //     setEmployees(res.data.content)
-  //   }catch(err) {
-  //     console.log(err);
-
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if(supplier?.idProvider) {
-  //     getEmployees()
-  //   }
-  // }, [supplier?.idProvider])
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
