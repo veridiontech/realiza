@@ -118,7 +118,7 @@ const createNewEmployeeFormSchema = z.object({
   position: z.string().nonempty("Cargo é obrigatório"),
   education: z.string().nonempty("Escolaridade é obrigatória"),
   cboId: z.string().optional(),
-  admissionDate: z.string().nonempty("Data de admissão é obrigatória").optional(),
+  admissionDate: z.string().optional(),
   birthDate: z.string().nonempty("Data de nascimento é obrigatória"),
   rneRnmFederalPoliceProtocol: z.string().optional(),
   brazilEntryDate: z.string().optional(),
@@ -129,8 +129,11 @@ const schemaBrazilian = createNewEmployeeFormSchema;
 const schemaForeigner = createNewEmployeeFormSchema.omit({ cpf: true });
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 
+interface NewModalCreateEmployeeProps {
+  onEmployeeCreated: () => void;
+}
 
-export function NewModalCreateEmployee() {
+export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmployeeProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
   const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
@@ -268,7 +271,8 @@ export function NewModalCreateEmployee() {
       });
 
       toast.success("Sucesso ao cadastrar novo colaborador!");
-
+       
+      onEmployeeCreated();
       reset();
       setCpfValue("");
       setCepValue("");
