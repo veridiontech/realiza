@@ -1,7 +1,11 @@
 import { useState } from "react";
 
-export function Employees() {
-  const count = 1134;
+interface EmployeeCountProps {
+  count?: number | undefined;
+}
+
+export function Employees({count}: EmployeeCountProps) {
+
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -30,7 +34,7 @@ export function Employees() {
           marginBottom: 10,
         }}
       >
-        {count.toLocaleString("pt-BR")}
+        {count}
       </div>
 
       <div

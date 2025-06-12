@@ -93,18 +93,18 @@ function validarTelefoneRepetido(telefone: string) {
   return !/^(\d)\1+$/.test(digits);
 }
 
-
 const createUserClient = z.object({
   firstName: z.string().nonempty("Nome é obrigatório"),
   surname: z.string().nonempty("Sobrenome é obrigatório"),
-  cellPhone: z.string()
-      .optional()
-      .refine((val) => !val || phoneRegex.test(val), {
-        message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
-      })
-      .refine((val) => !val || validarTelefoneRepetido(val), {
-        message: "Telefone inválido: não pode ter números repetidos"
-      }),
+  cellPhone: z
+    .string()
+    .optional()
+    .refine((val) => !val || phoneRegex.test(val), {
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX",
+    })
+    .refine((val) => !val || validarTelefoneRepetido(val), {
+      message: "Telefone inválido: não pode ter números repetidos",
+    }),
   cpf: z
     .string()
     .nonempty("Cpf é obrigatório")
@@ -133,6 +133,12 @@ export function Dashboard() {
   const [cpfValue, setCpfValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<{
+    adherence: number;
+    activeContractQuantity: number;
+    activeEmployeeQuantity: number;
+    activeSupplierQuantity: number;
+  } | null>(null);
 
   const {
     register,
@@ -169,7 +175,9 @@ export function Dashboard() {
 
   const onSubmitUserClient = async (data: CreateUserClient) => {
     const cpfSemPontuacao = data.cpf.replace(/\D/g, "");
-    const cpfJaExiste = usersFromBranch.some((user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao);
+    const cpfJaExiste = usersFromBranch.some(
+      (user: any) => user.cpf.replace(/\D/g, "") === cpfSemPontuacao
+    );
 
     if (cpfJaExiste) {
       toast.error("CPF já cadastrado para esta filial");
@@ -215,8 +223,7 @@ export function Dashboard() {
       toast.error("E-mail já cadastrado");
       setIsOpen(false);
       console.log(err);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -242,6 +249,8 @@ export function Dashboard() {
     }
   };
 
+  // const tokenFromStorage = localStorage.getItem("tokenClient");
+
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getUsersFromBranch();
@@ -255,6 +264,37 @@ export function Dashboard() {
     setPhoneValue(""); 
   }
 }, [isOpen, reset]);
+
+  useEffect(() => {
+    const fetchConformity = async () => {
+      try {
+        const token = localStorage.getItem("tokenClient");
+        const res = await axios.get(
+          `${ip}/dashboard/home/${selectedBranch?.idBranch}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setData(res.data);
+      } catch (err) {
+        console.error("Erro ao buscar conformidade:", err);
+        setData({
+          adherence: 0,
+          activeContractQuantity: 0,
+          activeEmployeeQuantity: 0,
+          activeSupplierQuantity: 0,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (selectedBranch?.idBranch && selectedBranch.client) {
+      fetchConformity();
+    }
+  }, [selectedBranch?.idBranch, selectedBranch?.client]);
 
   if (client?.isUltragaz) {
     return (
@@ -271,11 +311,9 @@ export function Dashboard() {
 
               <div className="w-full flex justify-center">
                 <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
-                  <ConformityGaugeChart />
+                  <ConformityGaugeChart percentage={data?.adherence} />
                 </div>
-
               </div>
-
             </div>
 
             <div className="mt-5 w-full text-right">
@@ -362,20 +400,22 @@ export function Dashboard() {
                       <div className="flex items-center gap-5">
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${selectedTab === "filiais"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
-                            : "text-realizaBlue border-realizaBlue border bg-white"
-                            }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
+                            selectedTab === "filiais"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-sm"
+                              : "text-realizaBlue border-realizaBlue border bg-white"
+                          }`}
                           onClick={() => setSelectedTab("filiais")}
                         >
                           <Building2 /> Filiais
                         </Button>
                         <Button
                           variant={"ghost"}
-                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${selectedTab === "usuarios"
-                            ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                            : "text-realizaBlue border-realizaBlue border bg-white"
-                            }`}
+                          className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
+                            selectedTab === "usuarios"
+                              ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
+                              : "text-realizaBlue border-realizaBlue border bg-white"
+                          }`}
                           onClick={() => setSelectedTab("usuarios")}
                         >
                           <Users /> Usuários
@@ -553,7 +593,10 @@ export function Dashboard() {
                                         />
                                       </Button>
                                     ) : (
-                                      <Button className="bg-realizaBlue w-full" type="submit">
+                                      <Button
+                                        className="bg-realizaBlue w-full"
+                                        type="submit"
+                                      >
                                         Criar
                                       </Button>
                                     )}
@@ -629,9 +672,15 @@ export function Dashboard() {
                         <table className="w-full border-collapse border border-gray-300">
                           <thead>
                             <tr>
-                              <th className="border border-gray-300 px-4 py-2 text-start">Nome</th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">CPF</th>
-                              <th className="border border-gray-300 px-4 py-2 text-start">Ações</th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">
+                                Nome
+                              </th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">
+                                CPF
+                              </th>
+                              <th className="border border-gray-300 px-4 py-2 text-start">
+                                Ações
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -641,7 +690,9 @@ export function Dashboard() {
                                   <td className="border border-gray-300 px-4 py-2">
                                     {users.firstName} {users.surname}
                                   </td>
-                                  <td className="border border-gray-300 px-4 py-2">{users.cpf}</td>
+                                  <td className="border border-gray-300 px-4 py-2">
+                                    {users.cpf}
+                                  </td>
                                   <td className="border border-gray-300 px-4 py-2">
                                     <Link
                                       to={`/sistema/detailsUsers/${users.idUser}`}
@@ -671,15 +722,18 @@ export function Dashboard() {
               </div>
               <div className="w-full flex justify-center">
                 <div className="h-[60vh] w-[30vw] rounded-lg border bg-white p-5 shadow-sm">
-                  <ConformityGaugeChart />
+                  <ConformityGaugeChart
+                    percentage={data?.adherence}
+                    loading={isLoading}
+                  />
                 </div>
               </div>
             </div>
           </div>
           <div className="mt-9 flex gap-">
-            <ActiveContracts />
-            <Employees />
-            < Suppliers />
+<ActiveContracts count={data?.activeContractQuantity ?? 0} />
+<Employees count={data?.activeEmployeeQuantity ?? 0} />
+<Suppliers count={data?.activeSupplierQuantity ?? 0} />
             <AllocatedEmployees />
           </div>
           <div className="mt-5 w-full text-right">

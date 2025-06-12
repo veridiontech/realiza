@@ -1,7 +1,10 @@
 import { useState } from "react";
 
-export function ActiveContracts() {
-  const count = 1126;
+interface ActiveContractProps {
+  count?: number
+}
+
+export function ActiveContracts({count}: ActiveContractProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -30,7 +33,7 @@ export function ActiveContracts() {
           marginBottom: 10,
         }}
       >
-        {count.toLocaleString("pt-BR")}
+        {count}
       </div>
 
       <div

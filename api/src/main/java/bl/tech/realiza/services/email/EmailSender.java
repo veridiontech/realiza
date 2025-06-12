@@ -192,7 +192,7 @@ public class EmailSender {
     }
 
     public void sendPasswordRecoveryEmail(String email) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailAndIsActive(email, true);
 
         try {
             
