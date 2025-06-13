@@ -45,7 +45,7 @@ import { AddNewBranch } from "../branchs/modals/add-new-branch";
 import { UltraSection } from "../ultra/ultra-branchs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChart";
+// import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChart";
 import { BranchesTable } from "./branchesTable";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
@@ -307,7 +307,7 @@ export function Dashboard() {
               {client?.isUltragaz && <UltraSection />}
             </div>
             <div className="mt-8 grid grid-cols-1 gap-8">
-              <StatusDocumentChart />
+              {/* <StatusDocumentChart data={data?.activeSupplierQuantity}/>' */}
 
               <div className="w-full flex justify-center">
                 <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
