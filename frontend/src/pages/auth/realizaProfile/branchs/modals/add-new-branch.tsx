@@ -358,7 +358,7 @@ const handleCnpj = async () => {
 
             <div className="flex justify-end">
               {loading ? (
-                <Button type="submit" className="bg-realizaBlue">
+                <Button disabled type="submit" className="bg-realizaBlue">
                   <Oval
                     visible={true}
                     height="30"

@@ -69,17 +69,17 @@ interface propsCep {
 }
 
 const createNewEmployeeFormSchema = z.object({
-  contractType: z.string(),
-  name: z.string(),
-  surname: z.string(),
+  contractType: z.string().nonempty("Tipo de contrato é obrigatório"),
+  name: z.string().nonempty("Nome é obrigatório"),
+  surname: z.string().nonempty("Sobrenome é obrigatório"),
   cpf: z.string()
     .nonempty("CPF é obrigatório")
     .regex(cpfRegex, "Formato inválido. Use 000.000.000-00")
     .refine(validarNumerosRepetidos, { message: "CPF com todos os dígitos repetidos" })
     .refine(validarCPF, { message: "CPF inválido" }),
   salary: z.string().regex(/^\d{1,3}(\.\d{3})*,\d{2}$/, "Salário inválido"),
-  gender: z.string(),
-  maritalStatus: z.string(),
+  gender: z.string().nonempty("Gênero é obrigatório"),
+  maritalStatus: z.string().nonempty("Estado civil é obrigatório"),
   cep: z.string()
     .nonempty("CEP é obrigatório")
     .regex(cepARegex, "Formato inválido. Use o formato 12345-678 ")
@@ -93,11 +93,11 @@ const createNewEmployeeFormSchema = z.object({
         });
       }
     }),
-  state: z.string(),
-  city: z.string(),
-  address: z.string(),
-  number: z.string(),
-  complement: z.string(),
+  state: z.string().nonempty("Estado é obrigatório"),
+  city: z.string().nonempty("Cidade é obrigatória"),
+  address: z.string().nonempty("Endereço é obrigatório"),
+  number: z.string().nonempty("Número é obrigatório"),
+  complement: z.string().optional(),
   phone: z.string()
     .optional()
     .refine((val) => !val || phoneRegex.test(val), {
@@ -115,24 +115,32 @@ const createNewEmployeeFormSchema = z.object({
     .refine((val) => !val || phoneRegex.test(val), {
       message: "Celular inválido"
     }),
-  position: z.string(),
-  education: z.string(),
+  position: z.string().nonempty("Cargo é obrigatório"),
+  education: z.string().nonempty("Escolaridade é obrigatória"),
   cboId: z.string().optional(),
-  admissionDate: z.string().nonempty("Data de admissão é obrigatória"),
-  birthDate: z.string(),
+  admissionDate: z.string().optional(),
+  birthDate: z.string().nonempty("Data de nascimento é obrigatória"),
+  rneRnmFederalPoliceProtocol: z.string().optional(),
+  brazilEntryDate: z.string().optional(),
+  passport: z.string().optional(),
 });
 
-
+const schemaBrazilian = createNewEmployeeFormSchema;
+const schemaForeigner = createNewEmployeeFormSchema.omit({ cpf: true });
 type CreateNewEmpoloyeeFormSchema = z.infer<typeof createNewEmployeeFormSchema>;
 
-export function NewModalCreateEmployee() {
+interface NewModalCreateEmployeeProps {
+  onEmployeeCreated: () => void;
+}
+
+export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmployeeProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { supplier } = useSupplier();
   const [cbos, setCbos] = useState<{ id: string; title: string; code: string }[]>([]);
   const [searchCbo, setSearchCbo] = useState("");
   const [isSelectTypeModalOpen, setIsSelectTypeModalOpen] = useState(false);
   const [isBrazilianEmployeeModalOpen, setIsBrazilianEmployeeModalOpen] = useState(false);
-  const [isWorkingOnItModalOpen, setIsForeignerEmployeeModalOpen] = useState(false); // Novo estado para o modal "Trabalhando nisso"
+  const [isForeignerEmployeeModalOpen, setIsForeignerEmployeeModalOpen] = useState(false);
   const [selectedEmployeeType, setSelectedEmployeeType] = useState<'brasileiro' | 'estrangeiro' | null>(null);
   const [cepValue, setCepValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
@@ -149,8 +157,7 @@ export function NewModalCreateEmployee() {
     reset,
     formState: { errors },
   } = useForm<CreateNewEmpoloyeeFormSchema>({
-    resolver: zodResolver(createNewEmployeeFormSchema),
-    mode: "onSubmit",
+    resolver: zodResolver(selectedEmployeeType === 'estrangeiro' ? schemaForeigner : schemaBrazilian),
   });
 
   useEffect(() => {
@@ -230,24 +237,42 @@ export function NewModalCreateEmployee() {
     return parseFloat(value.replace(/\./g, '').replace(',', '.'));
   };
 
-  const onSubmit = async (data: CreateNewEmpoloyeeFormSchema) => {
+  const sendEmployeeData = async (
+    data: CreateNewEmpoloyeeFormSchema,
+    endpoint: string,
+    isForeigner: boolean
+  ) => {
     setIsLoading(true);
 
-    const payload = {
+    const payload: any = {
       ...data,
       supplier: supplier?.idProvider,
-      salary: normalizeSalary(data.salary)
+      salary: normalizeSalary(data.salary),
     };
+
+    if (isForeigner) {
+      payload.rneRnmFederalPoliceProtocol = data.rneRnmFederalPoliceProtocol;
+      payload.brazilEntryDate = data.brazilEntryDate;
+      payload.passport = data.passport;
+      delete payload.cpf;
+    } else {
+      if (!payload.cpf) {
+        toast.error("CPF é obrigatório para colaboradores brasileiros.");
+        setIsLoading(false);
+        return;
+      }
+    }
 
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
 
-      await axios.post(`${ip}/employee/brazilian`, payload, {
+      await axios.post(endpoint, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
 
       toast.success("Sucesso ao cadastrar novo colaborador!");
-
+       
+      onEmployeeCreated();
       reset();
       setCpfValue("");
       setCepValue("");
@@ -255,8 +280,9 @@ export function NewModalCreateEmployee() {
       setMobileValue("");
 
       setIsBrazilianEmployeeModalOpen(false);
+      setIsForeignerEmployeeModalOpen(false);
       setIsSelectTypeModalOpen(false);
-      setSelectedEmployeeType(null); // Reseta o tipo de colaborador selecionado
+      setSelectedEmployeeType(null);
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const errorMsg = err.response?.data?.message || "";
@@ -278,6 +304,14 @@ export function NewModalCreateEmployee() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmitBrazilianEmployee = async (data: CreateNewEmpoloyeeFormSchema) => {
+    await sendEmployeeData(data, `${ip}/employee/brazilian`, false);
+  };
+
+  const handleSubmitForeignerEmployee = async (data: CreateNewEmpoloyeeFormSchema) => {
+    await sendEmployeeData(data, `${ip}/employee/foreigner`, true);
   };
 
   const handleCep = async () => {
@@ -312,11 +346,11 @@ export function NewModalCreateEmployee() {
 
   const handleProceedWithEmployeeType = () => {
     if (selectedEmployeeType === 'brasileiro') {
-      setIsSelectTypeModalOpen(false); 
+      setIsSelectTypeModalOpen(false);
       setIsBrazilianEmployeeModalOpen(true);
     } else if (selectedEmployeeType === 'estrangeiro') {
       setIsSelectTypeModalOpen(false);
-      setIsForeignerEmployeeModalOpen(true); 
+      setIsForeignerEmployeeModalOpen(true);
     } else {
       toast.error("Por favor, selecione um tipo de colaborador (Brasileiro ou Estrangeiro).");
     }
@@ -406,13 +440,13 @@ export function NewModalCreateEmployee() {
           className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
         >
           <DialogHeader>
-            <DialogTitle className="text-white">Cadastrar colaborador</DialogTitle>
+            <DialogTitle className="text-white">Cadastrar colaborador Brasileiro</DialogTitle>
             <ScrollArea className="h-[75vh]">
               <div>
                 <form
                   action=""
                   className="flex flex-col gap-5"
-                  onSubmit={handleSubmit(onSubmit, (errors) => {
+                  onSubmit={handleSubmit(handleSubmitBrazilianEmployee, (errors) => {
                     console.log("Erros detectados:", errors);
                   })}
                 >
@@ -726,25 +760,350 @@ export function NewModalCreateEmployee() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isWorkingOnItModalOpen} onOpenChange={setIsForeignerEmployeeModalOpen}>
+      <Dialog open={isForeignerEmployeeModalOpen} onOpenChange={setIsForeignerEmployeeModalOpen}>
         <DialogContent
           style={{ backgroundImage: `url(${bgModalRealiza})` }}
-          className="max-w-[90vw] sm:max-w-[30vw] md:max-w-[30vw]"
+          className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw]"
         >
           <DialogHeader>
-            <DialogTitle className="text-white">Cadastrar colaborador</DialogTitle>
+            <DialogTitle className="text-white">Cadastrar colaborador Estrangeiro</DialogTitle>
+            <ScrollArea className="h-[75vh]">
+              <div>
+                <form
+                  action=""
+                  className="flex flex-col gap-5"
+                  onSubmit={handleSubmit(handleSubmitForeignerEmployee, (errors) => {
+                    console.log("Erros detectados:", errors);
+                  })}
+                >
+                  <div>
+                    <Label className="text-white">Nome</Label>
+                    <Input type="text"
+                      placeholder="Digite seu nome"
+                      {...register("name", { required: "Nome é obrigatório" })} />
+                    {errors.name && <span className="text-sm text-red-600">{errors.name.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Sobrenome</Label>
+                    <Input type="text"
+                      placeholder="Digite seu sobrenome"
+                      {...register("surname", { required: "Sobrenome é obrigatório" })} />
+                    {errors.surname && <span className="text-sm text-red-600">{errors.surname.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Data de nascimento</Label>
+                    <Input type="date"
+                      placeholder="Digite a data de nascimento"
+                      {...register("birthDate", { required: "Data de nascimento é obrigatória" })} />
+                    {errors.birthDate && <span className="text-sm text-red-600">{errors.birthDate.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Estado civil</Label>
+                    <select
+                      {...register("maritalStatus", { required: "Estado civil é obrigatório" })}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="CASADO">Casado</option>
+                      <option value="SOLTEIRO">Solteiro</option>
+                      <option value="DIVORCIADO">Divorciado</option>
+                      <option value="VIUVO">Viúvo </option>
+                      <option value="SEPARADO_JUDICIALMENTE">Separado judicialmente </option>
+                      <option value="UNIAO_ESTAVEL">União estável</option>
+                    </select>
+                    {errors.maritalStatus && <span className="text-sm text-red-600">{errors.maritalStatus.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Tipo de contrato</Label>
+                    <select
+                      {...register("contractType", { required: "Tipo de contrato é obrigatório" })}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione um tipo de contrato</option>
+                      <option value="AUTONOMO">Autônomo</option>
+                      <option value="AVULSO_SINDICATO">
+                        Avulso (Sindicato)
+                      </option>
+                      <option value="CLT_HORISTA">CLT - Horista</option>
+                      <option value="CLT_TEMPO_DETERMINADO">
+                        CLT - Tempo Determinado
+                      </option>
+                      <option value="CLT_TEMPO_INDETERMINADO">
+                        CLT - Tempo Indeterminado
+                      </option>
+                      <option value="COOPERADO">Cooperado</option>
+                      <option value="ESTAGIO_BOLSA">Estágio / Bolsa</option>
+                      <option value="ESTRANGEIRO_IMIGRANTE">
+                        Estrangeiro - Imigrante
+                      </option>
+                      <option value="ESTRANGEIRO_TEMPORARIO">
+                        Estrangeiro - Temporário
+                      </option>
+                      <option value="INTERMITENTE">Intermitente</option>
+                      <option value="JOVEM_APRENDIZ">Jovem Aprendiz</option>
+                      <option value="SOCIO">Sócio</option>
+                      <option value="TEMPORARIO">Temporário</option>
+                    </select>
+                    {errors.contractType && <span className="text-sm text-red-600">{errors.contractType.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Protocolo RNE/RNM Polícia Federal</Label>
+                    <Input
+                      type="text"
+                      placeholder="Digite o protocolo RNE/RNM"
+                      {...register("rneRnmFederalPoliceProtocol")}
+                    />
+                    {errors.rneRnmFederalPoliceProtocol && (
+                      <span className="text-sm text-red-600">{errors.rneRnmFederalPoliceProtocol.message}</span>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-white">Data de Entrada no Brasil</Label>
+                    <Input
+                      type="date"
+                      {...register("brazilEntryDate")}
+                    />
+                    {errors.brazilEntryDate && (
+                      <span className="text-sm text-red-600">{errors.brazilEntryDate.message}</span>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-white">Passaporte</Label>
+                    <Input
+                      type="text"
+                      placeholder="Digite o número do passaporte"
+                      {...register("passport")}
+                    />
+                    {errors.passport && (
+                      <span className="text-sm text-red-600">{errors.passport.message}</span>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-white">Salário:</Label>
+                    <Input
+                      type="text"
+                      {...register("salary", { required: "Salário é obrigatório" })}
+                      onChange={(e) => {
+                        const formattedSalary = formatSalary(e.target.value);
+                        setValue("salary", formattedSalary);
+                      }}
+                      placeholder="000.000,00"
+                    />
+                    {errors.salary && <span>{errors.salary.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Sexo</Label>
+                    <select
+                      {...register("gender", { required: "Gênero é obrigatório" })}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                    </select>
+                    {errors.gender && (
+                      <span className="text-red-600">{errors.gender.message}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-white">CEP</Label>
+                    <div className="flex w-full gap-2">
+                      <Input
+                        type="text"
+                        value={cepValue}
+                        onChange={(e) => {
+                          const formattedCEP = formatCEP(e.target.value);
+                          setCepValue(formattedCEP);
+                          setValue("cep", formattedCEP, { shouldValidate: true });
+                        }}
+                        placeholder="00000-000"
+                        maxLength={9}
+                      />
+                      <div
+                        onClick={handleCep}
+                        className="bg-realizaBlue cursor-pointer rounded-md p-2 text-white hover:bg-gray-600 flex items-center justify-center"
+                      >
+                        <Search className="w-5 h-5" />
+                      </div>
+                    </div>
+                    {errors.cep && (
+                      <span className="text-sm text-red-600">{errors.cep.message}</span>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-white">Estado</Label>
+                    <Input
+                      placeholder="Digite seu estado" {...register("state", { required: "Estado é obrigatório" })} />
+                    {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Cidade</Label>
+                    <Input
+                      placeholder="Digite sua cidade"
+                      {...register("city", { required: "Cidade é obrigatória" })} />
+                    {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Endereco</Label>
+                    <Input
+                      placeholder="Digite seu endereço"
+                      {...register("address", { required: "Endereço é obrigatório" })} />
+                    {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Número</Label>
+                    <Input
+                      placeholder="Digite o número"
+                      {...register("number", { required: "Número é obrigatório" })} />
+                    {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">Complemento</Label>
+                    <Input
+                      placeholder="Digite o complemento"
+                      {...register("complement")} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-white">Telefone</Label>
+                    <Input
+                      type="text"
+                      value={phoneValue}
+                      onChange={(e) => {
+                        const formattedPhone = formatPhone(e.target.value);
+                        setPhoneValue(formattedPhone);
+                        setValue("phone", formattedPhone, { shouldValidate: true });
+                      }}
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
+                    />
+                    {errors.phone && (
+                      <span className="text-sm text-red-600">{errors.phone.message}</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-white">Celular</Label>
+                    <Input
+                      type="text"
+                      value={mobileValue}
+                      onChange={(e) => {
+                        const formattedPhone = formatPhone(e.target.value);
+                        setMobileValue(formattedPhone);
+                        setValue("mobile", formattedPhone, { shouldValidate: true });
+                      }}
+                      placeholder="(00) 00000-0000"
+                      maxLength={15}
+                    />
+                    {errors.mobile && (
+                      <span className="text-sm text-red-600">{errors.mobile.message}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Cargo</Label>
+                    <Input
+                      placeholder="Digite o cargo"
+                      {...register("position", { required: "Cargo é obrigatório" })} />
+                    {errors.position && <span className="text-sm text-red-600">{errors.position.message}</span>}
+                  </div>
+                  <div>
+                    <Label className="text-white">CBO</Label>
+                    <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                      <Search className="text-neutral-500 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar CBO..."
+                        value={searchCbo}
+                        onChange={(e) => setSearchCbo(e.target.value)}
+                        className="border-none w-full outline-none text-sm placeholder:text-neutral-400"
+                      />
+                    </div>
+                    <select
+                      {...register("cboId")}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione o CBO</option>
+                      {filteredCbos.map((cbo) => (
+                        <option key={cbo.id} value={cbo.id}>
+                          {cbo.title} - {cbo.code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-white">Graduação</Label>
+                    <select
+                      {...register("education", { required: "Escolaridade é obrigatória" })}
+                      className="flex flex-col rounded-md border p-2"
+                    >
+                      <option value="">Selecione</option>
+                      <option value="Ensino Fundamental Incompleto">
+                        Ensino Fundamental Incompleto
+                      </option>
+                      <option value="Ensino Fundamental Completo">
+                        Ensino Fundamental Completo
+                      </option>
+                      <option value="Fundamental I incompleto">
+                        Ensino Fundamental I incompleto
+                      </option>
+                      <option value="Fundamental I completo">
+                        Ensino Fundamental I completo
+                      </option>
+                      <option value="Fundamental II incompleto">
+                        Ensino Fundamental II incompleto
+                      </option>
+                      <option value="Fundamental II completo">
+                        Ensino Fundamental II completo
+                      </option>
+                      <option value="Ensino Médio Incompleto">
+                        Ensino Médio Incompleto
+                      </option>
+                      <option value="Ensino Médio Completo">
+                        Ensino Médio Completo
+                      </option>
+                      <option value="Ensino Superior Incompleto">
+                        Ensino Superior Incompleto
+                      </option>
+                      <option value="Ensino Superior Completo">
+                        Ensino Superior Completo
+                      </option>
+                      <option value="Pós-graduação">
+                        Pós-graduação
+                      </option>
+                      <option value="Mestrado">
+                        Mestrado
+                      </option>
+                      <option value="Doutorado">
+                        Doutorado
+                      </option>
+                      <option value="Ph.D">
+                        Ph.D
+                      </option>
+                    </select>
+                    {errors.education && <span className="text-sm text-red-600">{errors.education.message}</span>}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="bg-realizaBlue"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Oval
+                        visible={true}
+                        height={20}
+                        width={20}
+                        color="#fff"
+                        ariaLabel="oval-loading"
+                      />
+                    ) : (
+                      "Cadastrar"
+                    )}
+                  </Button>
+                </form>
+              </div>
+            </ScrollArea>
           </DialogHeader>
-          <div className="flex flex-col gap-4 py-4 text-white text-center">
-            <p>Teste</p>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => setIsForeignerEmployeeModalOpen(false)}
-              className="bg-gray-500 hover:bg-gray-600"
-            >
-              Fechar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

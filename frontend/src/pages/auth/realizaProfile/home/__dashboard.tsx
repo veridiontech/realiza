@@ -220,7 +220,7 @@ export function Dashboard() {
           "Erro inesperado no servidor";
         console.log(mensagemBackend);
       }
-      toast.error("Erro ao criar novo usuário");
+      toast.error("E-mail já cadastrado");
       setIsOpen(false);
       console.log(err);
     } finally {
@@ -256,6 +256,14 @@ export function Dashboard() {
       getUsersFromBranch();
     }
   }, [selectedBranch?.idBranch]);
+
+  useEffect(() => {
+  if (!isOpen) {
+    reset();
+    setCpfValue("");
+    setPhoneValue(""); 
+  }
+}, [isOpen, reset]);
 
   useEffect(() => {
     const fetchConformity = async () => {

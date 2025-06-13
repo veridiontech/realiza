@@ -51,7 +51,7 @@ export function UserSolicitations() {
         }
       );
 
-      console.log("teste de solicitacoes de usuários:", response.data.content);
+      console.log("teste de solicitacoes de usuário:", response.data.content);
 
       setSolicitations(response.data.content);
     } catch (err) {

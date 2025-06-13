@@ -52,13 +52,11 @@ const createClienteFormSchema = z.object({
   tradeName: z.string(),
   corporateName: z.string().nonempty("Razão social é obrigatória"),
   email: z.string(),
-  telephone: z
-    .string()
-    .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarNumerosRepetidos, {
-      message: "Telefone inválido: não pode ter números repetidos",
-    }),
+  telephone: z.string()
+          .optional()
+          .refine((val) => !val || phoneRegex.test(val), {
+            message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+          }),
   cep: z
     .string()
     .nonempty("CEP é obrigatório")

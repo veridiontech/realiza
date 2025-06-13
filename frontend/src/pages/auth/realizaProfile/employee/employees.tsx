@@ -1,19 +1,7 @@
-// import { Table } from "@/components/ui/tableVanila";
-// import { Pagination } from "@/components/ui/pagination";
-// import { useEmployees } from "@/hooks/gets/realiza/useEmployees";
-// import { StepOneEmployee } from "./modals/stepOne";
-// import { Settings2 } from "lucide-react";
-// import { Link } from "react-router-dom";
-// import { Employee } from "@/types/employee";
-// import { useClient } from "@/context/Client-Provider";
 import { useState, useEffect } from "react";
-// import { TableEmployee } from "./tableEmployee";
-// import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
 import { Button } from "@/components/ui/button";
-// import { Pagination } from "@/components/ui/pagination";
 import axios from "axios";
 import { ip } from "@/utils/ip";
-// import { useClient } from "@/context/Client-Provider";
 import { propsSupplier } from "@/types/interfaces";
 import { TableEmployee } from "./tableEmployee";
 import { useBranch } from "@/context/Branch-provider";
@@ -25,12 +13,8 @@ import { BriefcaseBusiness, Cog, Users2Icon } from "lucide-react";
 
 export const EmployeesTable = (): JSX.Element => {
   const [selectedTab, setSelectedTab] = useState("fornecedor");
-  // const [employee, setEmployees] = useState([]);
-  // const [totalPages, setTotalPages] = useState(1);
-  // const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error] = useState<string | null>(null);
-  // const { client } = useClient();
   const { selectedBranch } = useBranch();
   const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
   const [suppliersList, setSuppliersList] = useState<propsSupplier[]>([]);
@@ -39,12 +23,6 @@ export const EmployeesTable = (): JSX.Element => {
   const [getSubcontractorList, setGetSubcontractorList] = useState([]);
   const { user } = useUser();
   const { supplier, setSupplier } = useSupplier();
-  // const [employees, setEmployees] = useState([])
-  // const handlePageChange = (page: number) => {
-  //   if (page >= 0 && page <= totalPages) {
-  //     setCurrentPage(page);
-  //   }
-  // };
 
   const suppliers = async () => {
     try {
@@ -93,22 +71,6 @@ export const EmployeesTable = (): JSX.Element => {
     }
   };
 
-  // const getEmployees = async() => {
-  //   try{
-  //     const res = await axios.get(`${ip}/employee?idSearch=${supplier?.idProvider}&enterprise=SUPPLIER`)
-  //     setEmployees(res.data.content)
-  //   }catch(err) {
-  //     console.log(err);
-
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if(supplier?.idProvider) {
-  //     getEmployees()
-  //   }
-  // }, [supplier?.idProvider])
-
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       suppliers();
@@ -131,7 +93,7 @@ export const EmployeesTable = (): JSX.Element => {
               <Users2Icon size={30} className="text-[#FFCE50]" /> Colaboradores
             </h1>
             <div className="flex gap-2">
-              <NewModalCreateEmployee />
+              <NewModalCreateEmployee onEmployeeCreated={getSubcontractor} />
               <ManageEmployeesModal idProvider={supplier?.idProvider ?? null} />
             </div>
           </div>
@@ -301,14 +263,9 @@ export const EmployeesTable = (): JSX.Element => {
               </div>
             )}
           </div>
-          {/* <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        /> */}
         </div>
         <div className="flex gap-2 justify-end  relative  2xl:bottom-[14vh] xl:bottom-[12vh] lg:bottom-[8vh] md:bottom-[7vh] bottom-[15vh]">
-          <NewModalCreateEmployee />
+          <NewModalCreateEmployee onEmployeeCreated={getSubcontractor} />
           <ManageEmployeesModal idProvider={selectedSupplier} />
         </div>
       </div>
