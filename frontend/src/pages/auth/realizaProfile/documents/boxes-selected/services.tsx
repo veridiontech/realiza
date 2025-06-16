@@ -59,11 +59,11 @@ export function TrainingBox() {
   };
 
   const filterIdDocuments = nonSelected
-    .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocument)
   // .map((document) => document.idDocumentation);
 
   const filterIdDocumentsSelected = documents
-    .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocument)
 
   const sendDocuments = async (isSelected: boolean, idDocumentation: string[]) => {
     // const 
@@ -126,7 +126,7 @@ export function TrainingBox() {
                 <ul>
                   {filterIdDocuments.length > 0 ? (
                     nonSelected.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -155,7 +155,7 @@ export function TrainingBox() {
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>

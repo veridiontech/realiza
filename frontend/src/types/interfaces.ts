@@ -38,7 +38,7 @@ export interface propsClient {
 
 export interface propsDocument {
   documentId?: string;
-  idDocumentation: string;
+  idDocument: string;
   title: string;
   doesBlock?: boolean;
   idDocumentSubgroup?: string;
