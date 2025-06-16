@@ -36,40 +36,44 @@ public class DashboardService {
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
-        double adherence;
+        double conformity;
         int activeContractQuantity;
         int activeEmployeeQuantity;
+        int supplierQuantity = 0;
+        int allocatedEmployeeQuantity = 0;
 
+        // conformidade
         Object[] resultEmployeeSupplierRaw = documentEmployeeRepository
-                .countTotalAndPendentesByContractSupplierBranch(branch.getIdBranch(), PENDENTE);
+                .countTotalAndPendentesByContractSupplierBranch(branch.getIdBranch(), APROVADO);
         Object[] resultEmployeeSupplier = (Object[]) resultEmployeeSupplierRaw[0];
 
         Object[] resultEmployeeSubcontractorRaw = documentEmployeeRepository
-                .countTotalAndPendentesByContractSubcontractorBranch(branch.getIdBranch(), PENDENTE);
+                .countTotalAndPendentesByContractSubcontractorBranch(branch.getIdBranch(), APROVADO);
         Object[] resultEmployeeSubcontractor = (Object[]) resultEmployeeSubcontractorRaw[0];
 
         Object[] resultSubcontractorRaw = documentProviderSubcontractorRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), PENDENTE);
+                .countTotalAndPendentesByBranch(branch.getIdBranch(), APROVADO);
         Object[] resultSubcontractor = (Object[]) resultSubcontractorRaw[0];
 
         Object[] resultSupplierRaw = documentProviderSupplierRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), PENDENTE);
+                .countTotalAndPendentesByBranch(branch.getIdBranch(), APROVADO);
         Object[] resultSupplier = (Object[]) resultSupplierRaw[0];
-
 
         long total = getSafeLong(resultEmployeeSupplier, 0)
                 + getSafeLong(resultEmployeeSubcontractor, 0)
                 + getSafeLong(resultSubcontractor, 0)
                 + getSafeLong(resultSupplier, 0);
 
-        long pendentes = getSafeLong(resultEmployeeSupplier, 1)
+        long aprovados = getSafeLong(resultEmployeeSupplier, 1)
                 + getSafeLong(resultEmployeeSubcontractor, 1)
                 + getSafeLong(resultSubcontractor, 1)
                 + getSafeLong(resultSupplier, 1);
 
 
-        adherence = total > 0 ? ((total - pendentes) * 100.0 / total) : 0;
+        conformity = total > 0 ? (aprovados * 100.0 / total) : 0;
 
+        // contratos ativos
+        // TODO corrigir quantidade de contratos ativos
         activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(branch.getIdBranch(), ATIVADO).intValue();
 
         activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()
@@ -77,10 +81,18 @@ public class DashboardService {
         + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()
         + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), DESALOCADO).intValue();
 
+        // quantidade de fornecedores
+        // TODO adicionar quantidade de fornecerores
+
+        // quantidade de funcionarios alocados
+        // TODO adicionar quantidade de funcionarios alocados
+
         return DashboardHomeResponseDto.builder()
-                .adherence(adherence)
+                .conformity(conformity)
                 .activeContractQuantity(activeContractQuantity)
                 .activeEmployeeQuantity(activeEmployeeQuantity)
+                .supplierQuantity(supplierQuantity)
+                .allocatedEmployeeQuantity(allocatedEmployeeQuantity)
                 .build();
     }
 

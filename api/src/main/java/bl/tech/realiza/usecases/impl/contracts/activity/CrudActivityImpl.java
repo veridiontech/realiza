@@ -19,16 +19,18 @@ import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentRes
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CrudActivityImpl implements CrudActivity {
 
     private final ActivityRepository activityRepository;
@@ -195,6 +197,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
+    @Transactional
     public void transferFromRepo(String idBranch) {
         Branch branch = branchRepository.findById(idBranch)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
@@ -211,8 +214,16 @@ public class CrudActivityImpl implements CrudActivity {
                     .build();
             newActivities.add(newActivity);
             repoToNewActivityMap.put(repo.getIdActivity(), newActivity);
+
+            if (newActivities.size() == 50) {
+                activityRepository.saveAll(newActivities);
+                newActivities.clear();
+            }
         }
-        activityRepository.saveAll(newActivities);
+
+        if (!newActivities.isEmpty()) {
+            activityRepository.saveAll(newActivities);
+        }
 
         List<DocumentBranch> allBranchDocs = documentBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch());
         Map<String, DocumentBranch> matrixIdToBranchDocMap = allBranchDocs.stream()
@@ -220,10 +231,16 @@ public class CrudActivityImpl implements CrudActivity {
                 .collect(Collectors.toMap(doc -> doc.getDocumentMatrix().getIdDocument(), doc -> doc));
 
         List<ActivityDocumentsRepo> docsRepo = activityDocumentRepoRepository.findAll();
+        log.info("{} atividades encontradas", docsRepo.size());
         List<ActivityDocuments> newActivityDocs = new ArrayList<>();
 
         for (ActivityDocumentsRepo docRepo : docsRepo) {
             Activity newActivity = repoToNewActivityMap.get(docRepo.getActivity().getIdActivity());
+            if (newActivity == null) {
+                log.info("Atividade null");
+            } else {
+                log.info("Atividade id - {}", newActivity.getIdActivity());
+            }
             DocumentMatrix matrix = docRepo.getDocumentMatrix();
             if (newActivity == null || matrix == null) continue;
 
@@ -235,8 +252,15 @@ public class CrudActivityImpl implements CrudActivity {
                     .documentBranch(branchDoc)
                     .isSelected(true)
                     .build());
+
+            if (newActivityDocs.size() == 50) {
+                activityDocumentRepository.saveAll(newActivityDocs);
+                newActivityDocs.clear();
+            }
         }
 
-        activityDocumentRepository.saveAll(newActivityDocs);
+        if (!newActivityDocs.isEmpty()) {
+            activityDocumentRepository.saveAll(newActivityDocs);
+        }
     }
 }

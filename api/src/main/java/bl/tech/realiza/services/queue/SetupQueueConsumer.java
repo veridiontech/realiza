@@ -20,36 +20,37 @@ public class SetupQueueConsumer {
 
     @RabbitListener(queues = RabbitConfig.SETUP_QUEUE)
     public void consume(SetupMessage message) {
+        long start = System.currentTimeMillis();
         try {
             switch (message.getType()) {
                 case "NEW_CLIENT" -> {
                     setupService.setupNewClient(message.getClientId());
-                    logService.logSuccess("NEW_CLIENT", message.getClientId());
+                    logService.logSuccess("NEW_CLIENT", message.getClientId(), start);
                 }
                 case "NEW_BRANCH" -> {
                     setupService.setupBranch(message.getBranchId());
-                    logService.logSuccess("NEW_BRANCH", message.getBranchId());
+                    logService.logSuccess("NEW_BRANCH", message.getBranchId(), start);
                 }
                 case "NEW_CONTRACT_SUPPLIER" -> {
                     setupService.setupContractSupplier(message.getContractSupplierId(), message.getActivityIds());
-                    logService.logSuccess("NEW_CONTRACT_SUPPLIER", message.getContractSupplierId());
+                    logService.logSuccess("NEW_CONTRACT_SUPPLIER", message.getContractSupplierId(), start);
                 }
                 case "NEW_CONTRACT_SUBCONTRACTOR" -> {
                     setupService.setupContractSubcontractor(message.getContractSubcontractorId(), message.getActivityIds());
-                    logService.logSuccess("NEW_CONTRACT_SUBCONTRACTOR", message.getContractSubcontractorId());
+                    logService.logSuccess("NEW_CONTRACT_SUBCONTRACTOR", message.getContractSubcontractorId(), start);
                 }
                 case "EMPLOYEE_CONTRACT_SUPPLIER" -> {
                     setupService.setupEmployeeToContractSupplier(message.getContractSupplierId(), message.getEmployeeIds());
-                    logService.logSuccess("EMPLOYEE_CONTRACT_SUPPLIER", message.getContractSupplierId());
+                    logService.logSuccess("EMPLOYEE_CONTRACT_SUPPLIER", message.getContractSupplierId(), start);
                 }
                 case "EMPLOYEE_CONTRACT_SUBCONTRACT" -> {
                     setupService.setupEmployeeToContractSubcontract(message.getContractSubcontractorId(), message.getEmployeeIds());
-                    logService.logSuccess("EMPLOYEE_CONTRACT_SUBCONTRACT", message.getContractSubcontractorId());
+                    logService.logSuccess("EMPLOYEE_CONTRACT_SUBCONTRACT", message.getContractSubcontractorId(), start);
                 }
                 default -> throw new IllegalArgumentException("Tipo inválido: " + message.getType());
             }
         } catch (Exception e) {
-            logService.logFailure(message.getType(), getId(message), e);
+            logService.logFailure(message.getType(), getId(message), e, start);
             throw e;
         }
     }

@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -149,6 +150,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
+    @Transactional
     public void transferFromRepoToClient(String idClient) {
         Client client = clientRepository.findById(idClient)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
@@ -163,12 +165,14 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                                 .build())
                 .collect(Collectors.toList());
 
-        List<List<ServiceTypeClient>> partitioned = Lists.partition(serviceTypeClientList, 50);
-        partitioned.forEach(serviceTypeClientRepository::saveAll);
-
+        List<List<ServiceTypeClient>> batches = Lists.partition(serviceTypeClientList, 50);
+        for (List<ServiceTypeClient> batch : batches) {
+            serviceTypeClientRepository.saveAll(batch);
+        }
     }
 
     @Override
+    @Transactional
     public void transferFromClientToBranch(String idClient, String idBranch) {
         clientRepository.findById(idClient)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
@@ -179,15 +183,20 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         List<ServiceTypeClient> serviceTypeClientList = serviceTypeClientRepository.findAllByClient_IdClient(idClient);
 
         List<ServiceTypeBranch> serviceTypeBranchList = serviceTypeClientList.stream().map(
-                        serviceTypeClient -> ServiceTypeBranch.builder()
-                                .title(serviceTypeClient.getTitle())
-                                .risk(serviceTypeClient.getRisk())
-                                .branch(branch)
-                                .build())
-                .collect(Collectors.toList());
+                clientService -> ServiceTypeBranch.builder()
+                        .title(clientService.getTitle())
+                        .risk(clientService.getRisk())
+                        .branch(branch)
+                        .build()
+        ).collect(Collectors.toList());
 
-        serviceTypeBranchRepository.saveAll(serviceTypeBranchList);
+        // Salvar em lotes de 50
+        List<List<ServiceTypeBranch>> batches = Lists.partition(serviceTypeBranchList, 50);
+        for (List<ServiceTypeBranch> batch : batches) {
+            serviceTypeBranchRepository.saveAll(batch);
+        }
     }
+
 
     private ServiceTypeFullResponseDto toResponse(ServiceType serviceType) {
         return ServiceTypeFullResponseDto.builder()
