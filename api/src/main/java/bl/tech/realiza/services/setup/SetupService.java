@@ -108,11 +108,8 @@ public class SetupService {
     public void setupBranch(String branchId) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
-        log.info("🚀 antes do transfer de service");
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
-        log.info("🚀 depois do service antes do activity");
         crudActivity.transferFromRepo(branch.getIdBranch());
-        log.info("🚀 depois do activity");
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (var documentMatrix : documentMatrixRepository.findAll()) {
