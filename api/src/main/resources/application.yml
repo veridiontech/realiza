@@ -40,8 +40,5 @@ spring:
           max-interval: 10000
     template:
       reply-timeout: 180000
-logging:
-  level:
-    root: info
 server:
   port: 8080
