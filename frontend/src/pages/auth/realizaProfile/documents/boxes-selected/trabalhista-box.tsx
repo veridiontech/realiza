@@ -126,7 +126,7 @@ export function TrabalhistaBox() {
               className={`w-[10vw] rounded-md p-4 transition-all duration-300 ${nonSelected.length === 0 ? "cursor-not-allowed bg-gray-300 text-gray-500" : "bg-realizaBlue text-white"}`}
               disabled={nonSelected.length === 0}
             >
-              Confirmar Seleção
+              Alocar novos documentos
             </AlertDialogTrigger>
             <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
@@ -156,7 +156,7 @@ export function TrabalhistaBox() {
               className={`w-[10vw] rounded-md p-3 transition-all duration-300 ${documents.length === 0 ? "cursor-not-allowed bg-red-300 text-red-500" : "bg-red-600 text-white"}`}
               disabled={documents.length === 0}
             >
-              Confirmar Remoção
+              Desalocar documentos
             </AlertDialogTrigger>
             <AlertDialogContent className="max-h-[400px] overflow-y-auto">
               <AlertDialogHeader>
