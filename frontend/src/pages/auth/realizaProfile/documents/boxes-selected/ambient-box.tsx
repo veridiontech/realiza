@@ -88,11 +88,11 @@ export function AmbientBox() {
   }
 
   const filterIdDocuments = nonSelected
-    .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocument)
   // .map((document) => document.idDocumentation);
 
   const filterIdDocumentsSelected = documents
-    .map((document: propsDocument) => document.idDocumentation)
+    .map((document: propsDocument) => document.idDocument)
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -136,7 +136,7 @@ export function AmbientBox() {
                 <ul>
                   {nonSelected.length > 0 ? (
                     nonSelected.map((doc: propsDocument) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -165,7 +165,7 @@ export function AmbientBox() {
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>

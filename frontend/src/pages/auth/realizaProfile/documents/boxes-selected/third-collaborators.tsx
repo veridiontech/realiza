@@ -61,12 +61,12 @@ export function ThirdCollaborators() {
   };
 
   const filterIdDocuments = nonSelected.map(
-    (document: propsDocument) => document.idDocumentation
+    (document: propsDocument) => document.idDocument
   );
   // .map((document) => document.idDocumentation);
 
   const filterIdDocumentsSelected = documents.map(
-    (document: propsDocument) => document.idDocumentation
+    (document: propsDocument) => document.idDocument
   );
 
   const sendDocuments = async (
@@ -76,6 +76,7 @@ export function ThirdCollaborators() {
     // const
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log("Desalocando documentos:", filterIdDocumentsSelected);
       console.log("selecionando documentos não selecionados:", idDocumentation);
       await axios.post(
         `${ip}/document/branch/document-matrix/update`,
@@ -123,7 +124,7 @@ export function ThirdCollaborators() {
           <AlertDialog>
             <AlertDialogTrigger
               className="bg-realizaBlue w-[10vw] rounded-md p-4 text-white"
-              disabled={documents.length === 0}
+               disabled={nonSelected.length === 0}
             >
               Confirmar Seleção
             </AlertDialogTrigger>
@@ -135,7 +136,7 @@ export function ThirdCollaborators() {
                 <ul>
                   {nonSelected.length > 0 ? (
                     nonSelected.map((doc: propsDocument) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>
@@ -168,7 +169,7 @@ export function ThirdCollaborators() {
                 <ul>
                   {documents.length > 0 ? (
                     documents.map((doc) => (
-                      <li key={doc.idDocumentation}>{doc.title}</li>
+                      <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
                     <p>Nenhum documento selecionado.</p>

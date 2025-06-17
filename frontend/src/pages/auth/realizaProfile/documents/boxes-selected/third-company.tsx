@@ -62,14 +62,13 @@ export function ThirdCompany() {
   };
   const filterIdDocuments = nonSelected
     .map((document: any) => document.idDocument)
-  // .map((document) => document.idDocument);
 
   const filterIdDocumentsSelected = documents
     .map((document: any) => document.idDocument)
-  // .map((document) => document.idDocument);
 
   console.log("ids dos documentos", filterIdDocuments);
   console.log("ids dos documentos selecionados", filterIdDocumentsSelected);
+  console.log("nonSelected:", nonSelected);
 
 
   // Envio de documentos nao selecionados
@@ -90,7 +89,6 @@ export function ThirdCompany() {
       pullDatas()
     } catch (err) {
       console.log("erro ao enviar documento", err);
-
     }
   }
 
@@ -161,8 +159,8 @@ export function ThirdCompany() {
               </AlertDialogHeader>
               <div>
                 <ul>
-                  {nonSelected.length > 0 ? (
-                    nonSelected.map((doc: any) => (
+                  {documents.length > 0 ? (
+                    documents.map((doc: any) => (
                       <li key={doc.idDocument}>{doc.title}</li>
                     ))
                   ) : (
@@ -172,7 +170,7 @@ export function ThirdCompany() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>Confirmar</AlertDialogAction>
+                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>Confirmar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
