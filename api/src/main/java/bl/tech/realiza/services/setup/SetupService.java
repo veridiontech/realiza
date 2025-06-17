@@ -109,7 +109,6 @@ public class SetupService {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
-        crudActivity.transferFromRepo(branch.getIdBranch());
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (var documentMatrix : documentMatrixRepository.findAll()) {
@@ -130,7 +129,7 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
-
+        crudActivity.transferFromRepo(branch.getIdBranch());
     }
 
     public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {

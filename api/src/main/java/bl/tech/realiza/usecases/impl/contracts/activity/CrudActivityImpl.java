@@ -239,29 +239,24 @@ public class CrudActivityImpl implements CrudActivity {
 
             DocumentMatrix matrix = docRepo.getDocumentMatrix();
             if (newActivity == null || matrix == null) continue;
-            log.info("📃 after doc matrix");
+
             DocumentBranch branchDoc = matrixIdToBranchDocMap.get(matrix.getIdDocument());
             if (branchDoc == null) continue;
-            log.info("📃 after doc branch");
+
             newActivityDocs.add(ActivityDocuments.builder()
                     .activity(newActivity)
                     .documentBranch(branchDoc)
                     .isSelected(true)
                     .build());
-            log.info("📃 after builder");
+
             if (newActivityDocs.size() == 50) {
-                log.info("📃 before save batch");
                 activityDocumentRepository.saveAll(newActivityDocs);
-                log.info("📃 after save batch");
                 newActivityDocs.clear();
-                log.info("📃 after clear");
             }
         }
 
         if (!newActivityDocs.isEmpty()) {
-            log.info("📃 before save last batch");
             activityDocumentRepository.saveAll(newActivityDocs);
-            log.info("📃 after save last batch");
         }
     }
 }
