@@ -202,6 +202,10 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+            throw new BadRequestException("Arquivo muito grande.");
+        }
+
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
@@ -231,8 +235,8 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             documentClient.setStatus(Document.Status.EM_ANALISE);
         }
 
-//        documentProcessingService.processDocumentAsync(file,
-//                (DocumentClient) Hibernate.unproxy(documentClient));
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentClient) Hibernate.unproxy(documentClient));
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 
