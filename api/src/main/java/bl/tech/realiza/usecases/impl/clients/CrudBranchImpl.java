@@ -3,11 +3,15 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
@@ -16,6 +20,8 @@ import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
+import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +42,10 @@ public class CrudBranchImpl implements CrudBranch {
     private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
     private final SetupAsyncQueueProducer setupQueueProducer;
+    private final CrudServiceTypeImpl crudServiceTypeImpl;
+    private final CrudActivityImpl crudActivityImpl;
+    private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentBranchRepository documentBranchRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -66,6 +76,26 @@ public class CrudBranchImpl implements CrudBranch {
                 .build());
 
         setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch.getIdBranch(), null, null, null, null));
+
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (var documentMatrix : documentMatrixRepository.findAll()) {
+            batch.add(DocumentBranch.builder()
+                    .title(documentMatrix.getName())
+                    .type(documentMatrix.getType())
+                    .status(Document.Status.PENDENTE)
+                    .isActive(true)
+                    .branch(savedBranch)
+                    .documentMatrix(documentMatrix)
+                    .build());
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

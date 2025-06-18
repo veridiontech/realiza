@@ -30,7 +30,9 @@ import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class SetupService {
 
     private final CrudServiceType crudServiceType;
@@ -80,46 +84,58 @@ public class SetupService {
         crudServiceType.transferFromClientToBranch(client.getIdClient(), baseBranch.getIdBranch());
         crudActivity.transferFromRepo(baseBranch.getIdBranch());
 
-        documentBranchRepository.saveAll(
-                documentMatrixRepository.findAll()
-                        .stream()
-                        .map(documentMatrix -> DocumentBranch.builder()
-                                .title(documentMatrix.getName())
-                                .type(documentMatrix.getType())
-                                .status(Document.Status.PENDENTE)
-                                .isActive(true)
-                                .branch(baseBranch)
-                                .documentMatrix(documentMatrix)
-                                .build())
-                        .collect(Collectors.toList()));
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (var documentMatrix : documentMatrixRepository.findAll()) {
+            batch.add(DocumentBranch.builder()
+                    .title(documentMatrix.getName())
+                    .type(documentMatrix.getType())
+                    .status(Document.Status.PENDENTE)
+                    .isActive(true)
+                    .branch(baseBranch)
+                    .documentMatrix(documentMatrix)
+                    .build());
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
     }
 
     public void setupBranch(String branchId) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
-
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
-        crudActivity.transferFromRepo(branch.getIdBranch());
 
-        documentBranchRepository.saveAll(
-                documentMatrixRepository.findAll()
-                        .stream()
-                        .map(documentMatrix -> DocumentBranch.builder()
-                                .title(documentMatrix.getName())
-                                .type(documentMatrix.getType())
-                                .status(Document.Status.PENDENTE)
-                                .isActive(true)
-                                .branch(branch)
-                                .documentMatrix(documentMatrix)
-                                .build())
-                        .collect(Collectors.toList()));
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (var documentMatrix : documentMatrixRepository.findAll()) {
+            batch.add(DocumentBranch.builder()
+                    .title(documentMatrix.getName())
+                    .type(documentMatrix.getType())
+                    .status(Document.Status.PENDENTE)
+                    .isActive(true)
+                    .branch(branch)
+                    .documentMatrix(documentMatrix)
+                    .build());
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
+        crudActivity.transferFromRepo(branch.getIdBranch());
     }
 
     public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {
         List<Activity> activities = new ArrayList<>(List.of());
         List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentBranch> documentBranch;
-        List<DocumentProviderSupplier> documentProviderSupplier = new ArrayList<>(List.of());
 
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSupplierId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
@@ -144,27 +160,38 @@ public class SetupService {
                 ? activities
                 : contractProviderSupplier.getActivities());
 
+        contractProviderSupplierRepository.save(contractProviderSupplier);
+
         documentBranch = documentBranchRepository.findAllById(idDocuments);
 
         ProviderSupplier finalNewProviderSupplier = contractProviderSupplier.getProviderSupplier();
-        documentBranch.forEach(
-                document -> documentProviderSupplier.add(DocumentProviderSupplier.builder()
-                        .title(document.getTitle())
-                        .status(Document.Status.PENDENTE)
-                        .type(document.getType())
-                        .isActive(true)
-                        .documentMatrix(document.getDocumentMatrix())
-                        .providerSupplier(finalNewProviderSupplier)
-                        .build()));
 
-        documentProviderSupplierRepository.saveAll(documentProviderSupplier);
+        List<DocumentProviderSupplier> batch = new ArrayList<>(50);
+        for (DocumentBranch document : documentBranch) {
+            batch.add(DocumentProviderSupplier.builder()
+                    .title(document.getTitle())
+                    .status(Document.Status.PENDENTE)
+                    .type(document.getType())
+                    .isActive(true)
+                    .documentMatrix(document.getDocumentMatrix())
+                    .providerSupplier(finalNewProviderSupplier)
+                    .build());
+
+            if (batch.size() == 50) {
+                documentProviderSupplierRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+
+        if (!batch.isEmpty()) {
+            documentProviderSupplierRepository.saveAll(batch);
+        }
     }
 
     public void setupContractSubcontractor(String contractProviderSubcontractorId, List<String> activityIds) {
         List<Activity> activities = new ArrayList<>(List.of());;
         List<DocumentProviderSupplier> documentSupplier;
         List<String> idDocuments = new ArrayList<>(List.of());
-        List<DocumentProviderSubcontractor> documentProviderSubcontractor = new ArrayList<>(List.of());
 
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
@@ -189,20 +216,33 @@ public class SetupService {
                 ? activities
                 : contractProviderSubcontractor.getActivities());
 
+        contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
+
         documentSupplier = documentProviderSupplierRepository.findAllById(idDocuments);
 
         ProviderSubcontractor finalNewProviderSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
-        documentSupplier.forEach(
-                document -> documentProviderSubcontractor.add(DocumentProviderSubcontractor.builder()
-                        .title(document.getTitle())
-                        .status(Document.Status.PENDENTE)
-                        .type(document.getType())
-                        .isActive(true)
-                        .documentMatrix(document.getDocumentMatrix())
-                        .providerSubcontractor(finalNewProviderSubcontractor)
-                        .build()));
+        List<DocumentProviderSubcontractor> batch = new ArrayList<>(50);
 
-        documentProviderSubcontractorRepository.saveAll(documentProviderSubcontractor);
+        for (DocumentProviderSupplier document : documentSupplier) {
+            batch.add(DocumentProviderSubcontractor.builder()
+                    .title(document.getTitle())
+                    .status(Document.Status.PENDENTE)
+                    .type(document.getType())
+                    .isActive(true)
+                    .documentMatrix(document.getDocumentMatrix())
+                    .providerSubcontractor(finalNewProviderSubcontractor)
+                    .build());
+
+            if (batch.size() == 50) {
+                documentProviderSubcontractorRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+
+        if (!batch.isEmpty()) {
+            documentProviderSubcontractorRepository.saveAll(batch);
+        }
+
     }
 
     public void setupEmployeeToContractSupplier(String contractProviderSupplierId, List<String> employeeIds) {
@@ -210,24 +250,21 @@ public class SetupService {
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         List<Employee> employees = employeeRepository.findAllById(employeeIds);
-
         ProviderSupplier providerSupplier = contractProviderSupplier.getProviderSupplier();
 
-        List<DocumentEmployee> documentEmployees = new ArrayList<>();
-
         List<DocumentProviderSupplier> documentSupplier = new ArrayList<>();
-
         documentSupplier.addAll(documentProviderSupplierRepository
                 .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
                         providerSupplier.getIdProvider(), "Documento pessoa", true));
-
         documentSupplier.addAll(documentProviderSupplierRepository
                 .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
                         providerSupplier.getIdProvider(), "Treinamentos e certificações", true));
 
+        List<DocumentEmployee> batch = new ArrayList<>(50);
+
         for (Employee employee : employees) {
             for (DocumentProviderSupplier document : documentSupplier) {
-                documentEmployees.add(DocumentEmployee.builder()
+                batch.add(DocumentEmployee.builder()
                         .title(document.getTitle())
                         .status(Document.Status.PENDENTE)
                         .type(document.getType())
@@ -235,11 +272,19 @@ public class SetupService {
                         .documentMatrix(document.getDocumentMatrix())
                         .employee(employee)
                         .build());
+
+                if (batch.size() == 50) {
+                    documentEmployeeRepository.saveAll(batch);
+                    batch.clear();
+                }
             }
         }
 
-        documentEmployeeRepository.saveAll(documentEmployees);
+        if (!batch.isEmpty()) {
+            documentEmployeeRepository.saveAll(batch);
+        }
     }
+
 
 
     public void setupEmployeeToContractSubcontract(String contractProviderSubcontractorId, List<String> employeeIds) {
@@ -249,21 +294,19 @@ public class SetupService {
         List<Employee> employees = employeeRepository.findAllById(employeeIds);
         ProviderSubcontractor providerSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
 
-        List<DocumentEmployee> documentEmployees = new ArrayList<>();
-
         List<DocumentProviderSubcontractor> documentSubcontractor = new ArrayList<>();
-
         documentSubcontractor.addAll(documentProviderSubcontractorRepository
                 .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
-                        providerSubcontractor.getIdProvider(),"Documento pessoa",true));
-
+                        providerSubcontractor.getIdProvider(), "Documento pessoa", true));
         documentSubcontractor.addAll(documentProviderSubcontractorRepository
                 .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
-                        providerSubcontractor.getIdProvider(),"Treinamentos e certificações",true));
+                        providerSubcontractor.getIdProvider(), "Treinamentos e certificações", true));
+
+        List<DocumentEmployee> batch = new ArrayList<>(50);
 
         for (Employee employee : employees) {
             for (DocumentProviderSubcontractor document : documentSubcontractor) {
-                documentEmployees.add(DocumentEmployee.builder()
+                batch.add(DocumentEmployee.builder()
                         .title(document.getTitle())
                         .status(Document.Status.PENDENTE)
                         .type(document.getType())
@@ -271,9 +314,17 @@ public class SetupService {
                         .documentMatrix(document.getDocumentMatrix())
                         .employee(employee)
                         .build());
+
+                if (batch.size() == 50) {
+                    documentEmployeeRepository.saveAll(batch);
+                    batch.clear();
+                }
             }
         }
 
-        documentEmployeeRepository.saveAll(documentEmployees);
+        if (!batch.isEmpty()) {
+            documentEmployeeRepository.saveAll(batch);
+        }
     }
+
 }

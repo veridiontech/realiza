@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SetupMessage {
+public class SetupMessage implements Serializable {
     private String type;
     private String clientId;
     private String branchId;
@@ -18,4 +19,3 @@ public class SetupMessage {
     private List<String> activityIds;
     private List<String> employeeIds;
 }
-

@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class QueueLogService {
 
-    public void logSuccess(String type, String id) {
-        log.info("✅ Processado com sucesso: {} - {}", type, id);
+    public void logSuccess(String type, String id, long start) {
+        log.info("✅ Processado com sucesso: {} - {} em {} ms", type, id, System.currentTimeMillis() - start);
     }
 
-    public void logFailure(String type, String id, Exception e) {
-        log.info("❌ Erro ao processar {} - {}: {}", type, id, e.getMessage());
+    public void logFailure(String type, String id, Exception e, long start) {
+        log.info("❌ Erro ao processar {} - {}: {} em {} ms", type, id, e.getMessage(), System.currentTimeMillis() - start);
     }
 
 }
