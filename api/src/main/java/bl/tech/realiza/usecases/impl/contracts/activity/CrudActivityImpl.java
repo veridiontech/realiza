@@ -251,6 +251,7 @@ public class CrudActivityImpl implements CrudActivity {
 
             if (newActivityDocs.size() == 50) {
                 log.info("💾 Saving activities batch");
+                log.info("Id Activity: {}, Document Branch Id: {}", newActivity.getIdActivity(), branchDoc.getBranch().getIdBranch());
                 activityDocumentRepository.saveAll(newActivityDocs);
                 log.info("💾 Saved activities batch");
                 newActivityDocs.clear();
