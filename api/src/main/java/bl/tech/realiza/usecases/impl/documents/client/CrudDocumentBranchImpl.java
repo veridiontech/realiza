@@ -147,6 +147,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+            throw new BadRequestException("Arquivo muito grande.");
+        }
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
@@ -181,8 +184,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             documentBranch.setStatus(Document.Status.EM_ANALISE);
         }
 
-//        documentProcessingService.processDocumentAsync(file,
-//                (DocumentBranch) Hibernate.unproxy(documentBranch));
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentBranch) Hibernate.unproxy(documentBranch));
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 

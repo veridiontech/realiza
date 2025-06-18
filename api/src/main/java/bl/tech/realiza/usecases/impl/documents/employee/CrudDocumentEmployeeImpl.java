@@ -207,6 +207,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+            throw new BadRequestException("Arquivo muito grande.");
+        }
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument = null;
@@ -238,8 +241,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
             documentEmployee.setStatus(Document.Status.EM_ANALISE);
         }
 
-//        documentProcessingService.processDocumentAsync(file,
-//                (DocumentEmployee) Hibernate.unproxy(documentEmployee));
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentEmployee) Hibernate.unproxy(documentEmployee));
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 

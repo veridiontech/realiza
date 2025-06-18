@@ -208,6 +208,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
+        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+            throw new BadRequestException("Arquivo muito grande.");
+        }
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
@@ -239,8 +242,8 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             documentProviderSubcontractor.setStatus(Document.Status.EM_ANALISE);
         }
 
-//        documentProcessingService.processDocumentAsync(file,
-//                (DocumentProviderSubcontractor) Hibernate.unproxy(documentProviderSubcontractor));
+        documentProcessingService.processDocumentAsync(file,
+                (DocumentProviderSubcontractor) Hibernate.unproxy(documentProviderSubcontractor));
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentProviderSubcontractor);
 
