@@ -108,7 +108,7 @@ public class CrudUserClientImpl implements CrudUserClient {
         Optional<UserClient> userClientOptional = userClientRepository.findById(id);
         UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (userClient.getProfilePicture() != null) {
+        if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
             fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }

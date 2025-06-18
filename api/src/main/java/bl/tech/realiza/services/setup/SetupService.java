@@ -63,46 +63,7 @@ public class SetupService {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
 
-        Branch baseBranch = branchRepository.save(
-                Branch.builder()
-                        .name(client.getTradeName() != null
-                                ? client.getTradeName() + " Base"
-                                : "Base")
-                        .cnpj(client.getCnpj())
-                        .cep(client.getCep())
-                        .state(client.getState())
-                        .city(client.getCity())
-                        .email(client.getEmail())
-                        .telephone(client.getTelephone())
-                        .address(client.getAddress())
-                        .number(client.getNumber())
-                        .client(client)
-                        .build()
-        );
-
         crudServiceType.transferFromRepoToClient(client.getIdClient());
-        crudServiceType.transferFromClientToBranch(client.getIdClient(), baseBranch.getIdBranch());
-        crudActivity.transferFromRepo(baseBranch.getIdBranch());
-
-        List<DocumentBranch> batch = new ArrayList<>(50);
-        for (var documentMatrix : documentMatrixRepository.findAll()) {
-            batch.add(DocumentBranch.builder()
-                    .title(documentMatrix.getName())
-                    .type(documentMatrix.getType())
-                    .status(Document.Status.PENDENTE)
-                    .isActive(true)
-                    .branch(baseBranch)
-                    .documentMatrix(documentMatrix)
-                    .build());
-
-            if (batch.size() == 50) {
-                documentBranchRepository.saveAll(batch);
-                batch.clear();
-            }
-        }
-        if (!batch.isEmpty()) {
-            documentBranchRepository.saveAll(batch);
-        }
     }
 
     public void setupBranch(String branchId) {

@@ -57,12 +57,15 @@ public class DocumentProcessingService {
         this.documentRepository = documentRepository;
     }
 
-
-    @Async
+    @Async("taskExecutor")
     public void processDocumentAsync(MultipartFile file, Document document) {
+        String threadName = Thread.currentThread().getName();
+        log.info("[{}] Iniciando processamento assíncrono para o documento ID={}...", threadName, document.getIdDocumentation());
+
         try {
             String imageBase64 = convertPdfToImageBase64(file);
             if (imageBase64 == null) {
+                log.warn("[{}] Erro na conversão para imagem base64: retorno nulo", threadName);
                 throw new IOException("Erro ao converter o PDF para imagem.");
             }
 
@@ -70,40 +73,49 @@ public class DocumentProcessingService {
 
             if (result.isAutoValidate()) {
                 document.setStatus(result.isValid() ? Document.Status.APROVADO_IA : Document.Status.REPROVADO_IA);
+                log.info("[{}] Resultado IA: status automático definido como {}", threadName, document.getStatus());
             } else {
                 document.setStatus(Document.Status.EM_ANALISE);
+                log.info("[{}] Resultado IA: sem validação automática. Status definido como EM_ANALISE", threadName);
             }
 
             document.setVersionDate(LocalDateTime.now());
             documentRepository.save(document);
+            log.info("[{}] Documento ID={} salvo com novo status {}", threadName, document.getIdDocumentation(), document.getStatus());
 
         } catch (Exception e) {
-            log.error("Erro ao processar documento de forma assíncrona", e);
+            log.error("[{}] Falha no processamento assíncrono do documento ID={}", threadName, document.getIdDocumentation(), e);
             document.setStatus(Document.Status.EM_ANALISE);
             documentRepository.save(document);
         }
     }
 
-
-    /**
-     * Converte um PDF para uma imagem Base64.
-     */
     private String convertPdfToImageBase64(MultipartFile file) throws IOException {
-        try (PDDocument document = PDDocument.load(file.getInputStream())) {
-            PDFRenderer pdfRenderer = new PDFRenderer(document);
-            BufferedImage image = pdfRenderer.renderImageWithDPI(0, 300, ImageType.RGB);
+        log.info("Iniciando conversão de PDF para imagem base64...");
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PDDocument document = PDDocument.load(file.getInputStream());
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
+            PDFRenderer pdfRenderer = new PDFRenderer(document);
+            BufferedImage image = pdfRenderer.renderImageWithDPI(0, 100, ImageType.RGB);
+
             ImageIO.write(image, "png", baos);
+            image.flush(); // libera memória gráfica
+            log.info("Conversão concluída com sucesso.");
+
             return Base64.getEncoder().encodeToString(baos.toByteArray());
+
+        } catch (IOException e) {
+            log.error("Erro ao converter PDF em imagem base64", e);
+            throw e;
         }
     }
 
-    /**
-     * Envia a imagem Base64 para a OpenAI e retorna a resposta processada.
-     */
+
     private DocumentIAValidationResponse identifyDocumentType(String imageBase64) {
-        RestTemplate restTemplate = RestTemplateTimeoutFactory.create(120000); // 2 minutos
+        log.info("Enviando imagem para IA da OpenAI para identificação...");
+
+        RestTemplate restTemplate = RestTemplateTimeoutFactory.create(120_000); // 2 minutos
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + OPENAI_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -121,20 +133,22 @@ public class DocumentProcessingService {
                 "max_tokens", 500
         );
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
         try {
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
             ResponseEntity<Map> response = restTemplate.exchange(OPENAI_API_URL, HttpMethod.POST, request, Map.class);
+            log.info("Resposta da OpenAI recebida com sucesso.");
             return parseResponse(response.getBody());
+
         } catch (ResourceAccessException e) {
             if (e.getCause() instanceof java.net.SocketTimeoutException) {
-                log.warn("⚠ Timeout ao aguardar resposta da OpenAI.");
+                log.warn("Timeout ao acessar OpenAI (provavelmente a imagem está grande ou conexão lenta)");
             } else {
-                log.error("⚠ Erro de acesso à OpenAI: {}", e.getMessage());
+                log.error("Erro de rede ao acessar a OpenAI: {}", e.getMessage());
             }
             return new DocumentIAValidationResponse("Erro", "Timeout ou erro de rede ao acessar a IA", false, false);
+
         } catch (Exception e) {
-            log.error("⚠ Erro inesperado ao processar resposta da OpenAI", e);
+            log.error("Erro inesperado durante a requisição à OpenAI", e);
             return new DocumentIAValidationResponse("Erro", "Erro interno ao processar a requisição", false, false);
         }
     }
@@ -145,28 +159,34 @@ public class DocumentProcessingService {
      */
     @SuppressWarnings("unchecked")
     private DocumentIAValidationResponse parseResponse(Map<String, Object> responseBody) {
+        log.info("Iniciando parsing da resposta da IA...");
+
         if (responseBody == null || !responseBody.containsKey("choices")) {
+            log.warn("Resposta sem 'choices'. Documento não identificado.");
             return new DocumentIAValidationResponse("Desconhecido", "Documento não identificado", false, false);
         }
 
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
-        if (choices.isEmpty() || !choices.get(0).containsKey("message")) {
-            return new DocumentIAValidationResponse("Desconhecido", "Resposta da IA incompleta", false, false);
-        }
-
-        Map<String, Object> firstChoice = choices.get(0);
-        Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
-        String responseContent = (String) message.get("content");
-
-        responseContent = responseContent.replaceAll("```json", "").replaceAll("```", "").trim();
-
         try {
-            return objectMapper.readValue(responseContent, DocumentIAValidationResponse.class);
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
+            if (choices.isEmpty() || !choices.get(0).containsKey("message")) {
+                log.warn("Resposta incompleta ou sem 'message'.");
+                return new DocumentIAValidationResponse("Desconhecido", "Resposta da IA incompleta", false, false);
+            }
+
+            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+            String responseContent = ((String) message.get("content")).replaceAll("```json", "").replaceAll("```", "").trim();
+
+            DocumentIAValidationResponse parsed = objectMapper.readValue(responseContent, DocumentIAValidationResponse.class);
+            log.info("Parsing da IA concluído com sucesso. Tipo do documento: {}", parsed.getDocumentType());
+
+            return parsed;
+
         } catch (Exception e) {
             log.error("Erro ao converter JSON da IA para objeto DocumentIAValidationResponse", e);
             return new DocumentIAValidationResponse("Erro", "Erro interno ao interpretar resposta da IA", false, false);
         }
     }
+
 
 
     private String buildPrompt() {

@@ -238,8 +238,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
             documentEmployee.setStatus(Document.Status.EM_ANALISE);
         }
 
-        documentProcessingService.processDocumentAsync(file,
-                (DocumentEmployee) Hibernate.unproxy(documentEmployee));
+//        documentProcessingService.processDocumentAsync(file,
+//                (DocumentEmployee) Hibernate.unproxy(documentEmployee));
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 

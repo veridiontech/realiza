@@ -97,7 +97,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
         Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
         UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (userSubcontractor.getProfilePicture() != null) {
+        if (userSubcontractor.getProfilePicture() != null && !userSubcontractor.getProfilePicture().isEmpty()) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
             fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }

@@ -95,7 +95,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
         UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (userProvider.getProfilePicture() != null) {
+        if (userProvider.getProfilePicture() != null && !userProvider.getProfilePicture().isEmpty()) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
             fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }

@@ -231,8 +231,8 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             documentClient.setStatus(Document.Status.EM_ANALISE);
         }
 
-        documentProcessingService.processDocumentAsync(file,
-                (DocumentClient) Hibernate.unproxy(documentClient));
+//        documentProcessingService.processDocumentAsync(file,
+//                (DocumentClient) Hibernate.unproxy(documentClient));
 
         DocumentClient savedDocumentClient = documentClientRepository.save(documentClient);
 
