@@ -181,8 +181,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             documentBranch.setStatus(Document.Status.EM_ANALISE);
         }
 
-        documentProcessingService.processDocumentAsync(file,
-                (DocumentBranch) Hibernate.unproxy(documentBranch));
+//        documentProcessingService.processDocumentAsync(file,
+//                (DocumentBranch) Hibernate.unproxy(documentBranch));
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 

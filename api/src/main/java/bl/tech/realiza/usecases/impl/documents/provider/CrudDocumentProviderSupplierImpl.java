@@ -238,8 +238,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             documentSupplier.setStatus(Document.Status.EM_ANALISE);
         }
 
-        documentProcessingService.processDocumentAsync(file,
-                (DocumentProviderSupplier) Hibernate.unproxy(documentSupplier));
+//        documentProcessingService.processDocumentAsync(file,
+//                (DocumentProviderSupplier) Hibernate.unproxy(documentSupplier));
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 

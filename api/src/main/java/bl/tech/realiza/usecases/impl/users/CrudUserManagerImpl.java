@@ -137,7 +137,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
         Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
         UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (userManager.getProfilePicture() != null) {
+        if (userManager.getProfilePicture() != null && !userManager.getProfilePicture().isEmpty()) {
             Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
             fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
         }

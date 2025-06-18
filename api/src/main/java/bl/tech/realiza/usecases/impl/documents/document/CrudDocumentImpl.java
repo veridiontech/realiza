@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+
+import static bl.tech.realiza.domains.documents.Document.*;
+import static bl.tech.realiza.domains.documents.Document.Status.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +34,13 @@ public class CrudDocumentImpl implements CrudDocument {
         Page<Document> documentPage;
         do {
             documentPage = documentRepository.findAllByStatus(
-                    Document.Status.APROVADO, PageRequest.of(page, size)
+                    APROVADO, PageRequest.of(page, size)
             );
 
             documentPage.forEach(document -> {
                 if (document.getExpirationDate() != null &&
                         document.getExpirationDate().isBefore(LocalDate.now().atStartOfDay())) {
-                    document.setStatus(Document.Status.VENCIDO);
+                    document.setStatus(VENCIDO);
                     documentRepository.save(document);
                 }
             });
@@ -56,7 +60,7 @@ public class CrudDocumentImpl implements CrudDocument {
         Page<Document> documentPage;
         do {
             documentPage = documentRepository.findAllByStatus(
-                    Document.Status.VENCIDO, PageRequest.of(page, size)
+                    VENCIDO, PageRequest.of(page, size)
             );
 
             documentPage.forEach(document -> {
@@ -72,5 +76,14 @@ public class CrudDocumentImpl implements CrudDocument {
             hasNext = documentPage.hasNext();
             page++;
         } while (hasNext);
+    }
+
+    @Override
+    public String changeStatus(String documentId, Status status) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+        document.setStatus(status);
+        documentRepository.save(document);
+        return "Document status changed to " + status.name();
     }
 }

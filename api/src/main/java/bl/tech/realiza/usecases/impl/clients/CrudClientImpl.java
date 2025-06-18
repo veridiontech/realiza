@@ -11,6 +11,7 @@ import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
+import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
@@ -40,6 +41,7 @@ public class CrudClientImpl implements CrudClient {
     private final SetupAsyncQueueProducer setupQueueProducer;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final CrudBranchImpl crudBranchImpl;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto) {
@@ -68,6 +70,21 @@ public class CrudClientImpl implements CrudClient {
         Client savedClient = clientRepository.save(newClient);
 
         setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient.getIdClient(), null, null, null, null, null));
+
+        crudBranchImpl.save(BranchCreateRequestDto.builder()
+                .name(savedClient.getTradeName() != null
+                        ? savedClient.getTradeName() + " Base"
+                        : "Base")
+                .cnpj(savedClient.getCnpj())
+                .cep(savedClient.getCep())
+                .state(savedClient.getState())
+                .city(savedClient.getCity())
+                .email(savedClient.getEmail())
+                .telephone(savedClient.getTelephone())
+                .address(savedClient.getAddress())
+                .number(savedClient.getNumber())
+                .client(savedClient.getIdClient())
+                .build());
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
