@@ -45,7 +45,13 @@ export function DetailsUsers() {
           },
         });
 
-        setUserData(response.data);
+        // Aqui definimos o status como "ACTIVE" se não existir
+        const user = response.data;
+        if (!user.status) {
+          user.status = "ACTIVE"; // Define o status como "ACTIVE" se não estiver presente
+        }
+
+        setUserData(user);
       } catch (err) {
         console.error("Erro ao buscar usuário:", err);
         setError("Erro ao buscar dados do usuário.");
