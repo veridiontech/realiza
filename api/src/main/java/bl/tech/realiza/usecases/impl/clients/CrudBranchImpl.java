@@ -75,10 +75,7 @@ public class CrudBranchImpl implements CrudBranch {
                 .center(center)
                 .build());
 
-//        setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch.getIdBranch(), null, null, null, null));
-
-        crudServiceTypeImpl.transferFromClientToBranch(savedBranch.getClient().getIdClient(), savedBranch.getIdBranch());
-        crudActivityImpl.transferFromRepo(savedBranch.getIdBranch());
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch.getIdBranch(), null, null, null, null));
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (var documentMatrix : documentMatrixRepository.findAll()) {
