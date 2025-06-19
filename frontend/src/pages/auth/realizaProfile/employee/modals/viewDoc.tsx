@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { toast } from "sonner";
 
 interface DocumentViewerProps {
   documentId: string;
   onClose: () => void;
+  onStatusChange?: (id: string, newStatus: string) => void;
 }
 
-export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
+export function DocumentViewer({ documentId, onClose, onStatusChange }: DocumentViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,31 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
       historico: "aprovou o documento",
     },
   ]);
+
+  const handleChangeStatus = async (status: string) => {
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const response = await axios.post(
+        `${ip}/document/${documentId}/change-status`,
+        null,
+        {
+          params: { status },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("status:", response.data);
+      toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
+      if (onStatusChange) {
+        onStatusChange(documentId, status);
+      }
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast("Erro ao atualizar o status do documento.");
+    }
+  };
 
   useEffect(() => {
     const fetchFileData = async () => {
@@ -80,7 +107,6 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
     fetchFileData();
   }, [documentId]);
 
-  // Definição das colunas para o DataGrid
   const columns: GridColDef[] = [
     { field: "usuario", headerName: "Usuário", flex: 1 },
     { field: "acao", headerName: "Ação", flex: 1 },
@@ -136,7 +162,7 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
               sx={{
                 "& .MuiDataGrid-root": {
                   minWidth: "100%",
-                  maxHeight: "100%", // Define um tamanho máximo
+                  maxHeight: "100%",
                 },
               }}
             />
@@ -145,15 +171,18 @@ export function DocumentViewer({ documentId, onClose }: DocumentViewerProps) {
 
         <div className="mt-6 flex justify-center">
           <div className="flex flex-row gap-6">
-            <button className="h-12 w-[10rem] rounded-full bg-green-400 font-bold text-white hover:bg-green-300">
+            <button
+              onClick={() => handleChangeStatus("APROVADO")}
+              className="h-12 w-[10rem] rounded-full bg-green-400 font-bold text-white hover:bg-green-300"
+            >
               Aprovar
             </button>
-            <button className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300">
+            <button
+              onClick={() => handleChangeStatus("REPROVADO")}
+              className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
+            >
               Reprovar
             </button>
-            {/* <button className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-red-300">
-              Bloquear
-            </button> */}
           </div>
         </div>
       </div>
