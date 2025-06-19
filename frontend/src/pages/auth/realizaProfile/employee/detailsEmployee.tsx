@@ -28,6 +28,14 @@ export function DetailsEmployee() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
 
+  const handleStatusChange = (id: string, newStatus: string) => {
+    setDocuments(prevDocuments =>
+      prevDocuments.map(doc =>
+        doc.idDocument === id ? { ...doc, status: newStatus } : doc
+      )
+    );
+  };
+
   // 🔄 Carrega dados do colaborador
   const fetchEmployee = async () => {
     try {
@@ -91,62 +99,62 @@ export function DetailsEmployee() {
     Promise.all([fetchEmployee(), fetchDocuments()]).finally(() => setIsLoading(false));
   }, [id]);
 
-const columns: {
-  key: keyof Document;
-  label: string;
-  render?: (value: string, row: Document) => React.ReactNode;
-}[] = [
-  {
-    key: "title",
-    label: "Documento",
-  },
-  {
-    key: "creationDate",
-    label: "Data de Envio",
-    render: (value: string) =>
-      new Date(value).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      }),
-  },
-  {
-    key: "status",
-    label: "Status",
-    render: (value: string) => (
-      <span className={`text-sm font-medium ${value === "ativo" ? "text-green-600" : "text-red-600"}`}>
-        {value}
-      </span>
-    ),
-  },
-  {
-    key: "idDocument",
-    label: "Ações",
-    render: (_: string, row: Document) => (
-      <div className="flex space-x-2">
-        <button
-          className="text-realizaBlue hover:underline"
-          onClick={() => {
-            setSelectedDocumentId(row.idDocument);
-            setIsViewerOpen(true);
-          }}
-        >
-          <Eye size={16} />
-        </button>
-        <button
-          className="text-yellow-500 hover:underline"
-          onClick={() => {
-            setSelectedDocumentId(row.idDocument);
-            setSelectedDocumentTitle(row.title);
-            setTimeout(() => setIsModalOpen(true), 0);
-          }}
-        >
-          <Edit size={16} />
-        </button>
-      </div>
-    ),
-  },
-];
+  const columns: {
+    key: keyof Document;
+    label: string;
+    render?: (value: string, row: Document) => React.ReactNode;
+  }[] = [
+      {
+        key: "title",
+        label: "Documento",
+      },
+      {
+        key: "creationDate",
+        label: "Data de Envio",
+        render: (value: string) =>
+          new Date(value).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          }),
+      },
+      {
+        key: "status",
+        label: "Status",
+        render: (value: string) => (
+          <span className={`text-sm font-medium ${value === "ativo" ? "text-green-600" : "text-red-600"}`}>
+            {value}
+          </span>
+        ),
+      },
+      {
+        key: "idDocument",
+        label: "Ações",
+        render: (_: string, row: Document) => (
+          <div className="flex space-x-2">
+            <button
+              className="text-realizaBlue hover:underline"
+              onClick={() => {
+                setSelectedDocumentId(row.idDocument);
+                setIsViewerOpen(true);
+              }}
+            >
+              <Eye size={16} />
+            </button>
+            <button
+              className="text-yellow-500 hover:underline"
+              onClick={() => {
+                setSelectedDocumentId(row.idDocument);
+                setSelectedDocumentTitle(row.title);
+                setTimeout(() => setIsModalOpen(true), 0);
+              }}
+            >
+              <Edit size={16} />
+            </button>
+          </div>
+        ),
+      },
+    ];
 
   if (isLoading) {
     return (
@@ -244,6 +252,7 @@ const columns: {
         <DocumentViewer
           documentId={selectedDocumentId}
           onClose={() => setIsViewerOpen(false)}
+          onStatusChange={handleStatusChange}
         />
       )}
     </div>

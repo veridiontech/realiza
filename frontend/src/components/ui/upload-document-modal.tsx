@@ -145,7 +145,6 @@ export const UploadDocumentModal = ({ isOpen, onClose }: { isOpen: boolean, onCl
     handleFileUpload(docId, file);
   };
 
-
   const triggerFileInput = (docId: string) => {
     fileInputRefs.current[docId]?.click();
   };
