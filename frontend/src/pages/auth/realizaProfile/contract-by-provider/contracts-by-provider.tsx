@@ -12,6 +12,7 @@ export function ContarctsByProvider() {
   const [collaborators, setCollaborators] = useState([]);
   const [selectedContractName, setSelectedContractName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [provider, setProvider] = useState<any>(null);
 
   const token = localStorage.getItem("tokenClient");
 
@@ -28,8 +29,15 @@ export function ContarctsByProvider() {
     }
   };
 
+  const getProvider = async () => {
+    const res = await axios.get(`${ip}/supplier/${id.id}`);
+    console.log(res.data);
+    setProvider(res.data);
+  };
+
   useEffect(() => {
     if (id) {
+      getProvider();
       getContractsByProvider();
     }
   }, [id]);
@@ -43,15 +51,16 @@ export function ContarctsByProvider() {
       setDocuments(res.data.documentDtos || []);
       setCollaborators(res.data.employeeDtos || []);
       setSelectedContractName(serviceName);
-      setSearchTerm(""); 
+      setSearchTerm("");
     } catch (err) {
       console.log(err);
     }
   };
 
-  const filteredDocuments = documents.filter((doc: any) =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDocuments = documents.filter(
+    (doc: any) =>
+      doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -60,9 +69,7 @@ export function ContarctsByProvider() {
       <div className="bg-realizaBlue border rounded-md flex flex-col w-[25vw]">
         <div className="p-5 flex items-center gap-1">
           <Notebook className="text-[#C0B15B]" />
-          <h1 className="text-white font-medium">
-            Fornecedor: Levi Yuki Utima
-          </h1>
+          <h1 className="text-white font-medium">Fornecedor: {provider.corporateName}</h1>
         </div>
         <div className="bg-neutral-600 h-[1px]" />
         <div className="w-full flex flex-col gap-5">
@@ -136,13 +143,17 @@ export function ContarctsByProvider() {
                   >
                     <div>
                       <h3 className="text-[16px] font-medium">{doc.title}</h3>
-                      <span className="text-[12px] text-neutral-600">{doc.ownerName}</span>
+                      <span className="text-[12px] text-neutral-600">
+                        {doc.ownerName}
+                      </span>
                     </div>
                     <Eye />
                   </div>
                 ))
               ) : (
-                <span className="text-neutral-400">Nenhum documento encontrado</span>
+                <span className="text-neutral-400">
+                  Nenhum documento encontrado
+                </span>
               )}
             </div>
           </div>
@@ -172,7 +183,9 @@ export function ContarctsByProvider() {
                   </div>
                 ))
               ) : (
-                <span className="text-neutral-400">Nenhum colaborador encontrado</span>
+                <span className="text-neutral-400">
+                  Nenhum colaborador encontrado
+                </span>
               )}
             </div>
           </div>
