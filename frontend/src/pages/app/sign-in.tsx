@@ -7,6 +7,7 @@ import axios from "axios";
 import { useUser } from "@/context/user-provider";
 import { ip } from "@/utils/ip";
 import SplashPage from "@/pages/app/splashPage";
+import logo from "@/assets/logoRealiza/Logo Realiza Completo 1.png"
 
 const loginFormSchema = z.object({
   email: z
@@ -136,23 +137,26 @@ export function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4 sm:px-6 lg:px-8">
-      <div className="w-full 2xl:w-[20-vw] xl:w-[30vw] lg:w-[40vw] md:w-[40vw] bg-white rounded-xl p-6 sm:p-8">
-        <h1 className="text-center text-3xl font-bold text-gray-900">Bem Vindo</h1>
-        <span className="text-center block text-sm text-gray-600">
+    <div className="min-h-screen p-32 bg-transparent">
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col items-start gap-4">
+          <img src={logo}/>
+        <h1 className="text-center text-3xl font-bold text-white">Bem Vindo a <span className="text-[#C0B15B]">Realiza Assessoria</span></h1>
+        <span className="text-center block text-sm text-white">
           Insira seu e-mail e senha para continuar
         </span>
+        </div>
   
         <Form
           className="mt-10 flex flex-col gap-4"
           onSubmit={handleSubmit(getUser)}
         >
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-white">
               E-mail
             </label>
             <input
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
+              className="mt-1 block w-full rounded-md border bg-transparent border-neutral-400 px-3 py-2 text-white shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
               placeholder="email@gmail.com"
               type="email"
               {...register("email")}
@@ -163,12 +167,12 @@ export function SignIn() {
           </div>
   
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password"  className="block text-sm font-medium text-white">
               Senha
             </label>
             <div className="relative">
               <input
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
+              className="mt-1 block w-full rounded-md border bg-transparent border-neutral-400 px-3 py-2 text-white shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
               />
@@ -193,7 +197,7 @@ export function SignIn() {
           </div>
   
           <button
-            className="mt-4 w-full rounded bg-realizaBlue px-4 py-2 font-bold text-white hover:bg-blue-700"
+            className="mt-4 w-full rounded bg-[#C0B15B] text-realizaBlue px-4 py-2 font-bold hover:bg-neutral-400"
             type="submit"
             disabled={loading}
           >

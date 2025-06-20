@@ -1,11 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
-import imageLogin from "@/assets/imageLogin.png";
+import imageLogin from "@/assets/sign-in-image.jpg";
 import imageForgotPassword from "@/assets/imageForgotPassword.png";
 import bgAuth from "@/assets/bg-auth.svg";
-// import { useUser } from '@/context/user-provider'
 
 export function AuthLayout() {
-  // const { authUser } = useUser()
   const location = useLocation();
 
   const imageMap: Record<string, string> = {
@@ -17,17 +15,10 @@ export function AuthLayout() {
 
   const dynamicImage = imageMap[location.pathname];
 
-  // if(!authUser) {
-  //   <div>
-  //     pagina nao autenticada
-  //   </div>
-  // }
-
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Coluna para o Outlet */}
+    <div className="flex h-screen w-full overflow-hidden">
       <div
-        className="w-full md:w-6/12 bg-white bg-left-bottom bg-no-repeat"
+        className="relative z-10 w-full md:w-6/12 bg-[#34495E] bg-left-bottom bg-no-repeat"
         style={{
           backgroundImage: `url(${bgAuth})`,
           backgroundSize: "300px 300px",
@@ -35,9 +26,14 @@ export function AuthLayout() {
       >
         <Outlet />
       </div>
-      {/* Coluna para a imagem que só aparece em telas médias ou maiores */}
-      <div className="hidden md:flex h-screen w-6/12">
-        <img src={dynamicImage} alt="imagem" className="w-full object-cover" />
+
+      <div className="hidden md:block relative w-6/12 h-full overflow-hidden">
+        <img
+          src={dynamicImage}
+          alt="imagem"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#34495e]/95 to-transparent" />
       </div>
     </div>
   );
