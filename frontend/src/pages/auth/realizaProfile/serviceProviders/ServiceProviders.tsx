@@ -4,6 +4,7 @@ import { useFetchServiceProviders } from "@/hooks/gets/realiza/useServiceProvide
 // import { ModalTesteSendSupplier } from "@/components/realiza-add-supplier";
 import { useClient } from "@/context/Client-Provider";
 import { TableServiceProvider } from "./tableServiceProvider";
+import { ScrollText } from "lucide-react";
 // import { ModalAddContract } from "@/components/realizaAddContract";
 
 export function ServiceProvider() {
@@ -31,13 +32,13 @@ export function ServiceProvider() {
   };
 
   return (
-    <div className="flex min-h-full justify-center relative bottom-[7vw]">
+    <div className="flex min-h-full justify-center relative bottom-[10vw] p-10">
       <div className="dark:bg-primary w-full flex flex-col rounded-lg px-4">
         <div className="flex items-center md:justify-between justify-around">
-          <h1 className="hidden md:block m-8 text-2xl">Contratos</h1>
+          <h1 className=" text-2xl text-white font-semibold flex items-center gap-2"><ScrollText className="text-[#C0B15B]"/>Todos os Contratos</h1>
           <h1 className="md:hidden m-8 text-2xl">Prestadores</h1>
         </div>
-          <TableServiceProvider />
+        <TableServiceProvider />
 
         <Pagination
           currentPage={currentPage}
