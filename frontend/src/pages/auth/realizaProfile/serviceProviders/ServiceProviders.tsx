@@ -5,7 +5,6 @@ import { useFetchServiceProviders } from "@/hooks/gets/realiza/useServiceProvide
 import { useClient } from "@/context/Client-Provider";
 import { TableServiceProvider } from "./tableServiceProvider";
 // import { ModalAddContract } from "@/components/realizaAddContract";
-import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 export function ServiceProvider() {
   const { client } = useClient();
@@ -32,19 +31,13 @@ export function ServiceProvider() {
   };
 
   return (
-    <div className="m-10 flex min-h-full justify-center ">
+    <div className="flex min-h-full justify-center relative bottom-[7vw]">
       <div className="dark:bg-primary w-full flex flex-col rounded-lg px-4">
         <div className="flex items-center md:justify-between justify-around">
           <h1 className="hidden md:block m-8 text-2xl">Contratos</h1>
           <h1 className="md:hidden m-8 text-2xl">Prestadores</h1>
-          <ModalTesteSendSupplier />
         </div>
-
-        {/* <div className="flex w-[90rem] flex-row justify-between px-10">
-          <ModalTesteSendSupplier />
-        </div> */}
-
-        <TableServiceProvider />
+          <TableServiceProvider />
 
         <Pagination
           currentPage={currentPage}

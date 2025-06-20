@@ -4,6 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, BadgeCheck, X } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
+import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 function StatusBadge({ finished }: { finished?: boolean }) {
   const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
@@ -57,7 +58,10 @@ export function TableServiceProvider() {
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
   const [editFormData, setEditFormData] = useState<any | null>(null);
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
+    null
+  );
+  const [searchTerm, setSearchTerm] = useState("");
 
   const getSupplier = async () => {
     if (!selectedBranch?.idBranch) return;
@@ -79,26 +83,26 @@ export function TableServiceProvider() {
       setLoading(false);
     }
   };
-  
+
   const updateSupplier = async (idContract: string, updatedData: any) => {
     try {
-       console.log("Atualizando fornecedor", { idContract, updatedData });
+      console.log("Atualizando fornecedor", { idContract, updatedData });
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const payload = {
-      branch: updatedData.branch,
-      branchName: updatedData.branchName,
-      contractReference: updatedData.contractReference,
-      dateStart: updatedData.dateStart,
-      description: updatedData.description,
-      expenseType: updatedData.expenseType,
-      finished: updatedData.finished,
-      providerSupplier: updatedData.providerSupplier,
-      providerSupplierCnpj: updatedData.providerSupplierCnpj,
-      providerSupplierName: updatedData.providerSupplierName,
-      serviceName: updatedData.serviceName,
-    };
-    console.log("teste: " , payload);
-    
+        branch: updatedData.branch,
+        branchName: updatedData.branchName,
+        contractReference: updatedData.contractReference,
+        dateStart: updatedData.dateStart,
+        description: updatedData.description,
+        expenseType: updatedData.expenseType,
+        finished: updatedData.finished,
+        providerSupplier: updatedData.providerSupplier,
+        providerSupplierCnpj: updatedData.providerSupplierCnpj,
+        providerSupplierName: updatedData.providerSupplierName,
+        serviceName: updatedData.serviceName,
+      };
+      console.log("teste: ", payload);
+
       await axios.put(`${ip}/contract/supplier/${idContract}`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
@@ -119,12 +123,24 @@ export function TableServiceProvider() {
     setIsViewModalOpen(true);
   };
 
-const handleEditClick = (supplier: any) => {
-  console.log("Supplier editando:", supplier);
-  setSelectedSupplier(supplier);
-  setEditFormData({ ...supplier });
-  setIsEditModalOpen(true);
-};
+  const handleEditClick = (supplier: any) => {
+    console.log("Supplier editando:", supplier);
+    setSelectedSupplier(supplier);
+    setEditFormData({ ...supplier });
+    setIsEditModalOpen(true);
+  };
+
+  const filteredSuppliers = suppliers.filter((supplier) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      supplier.contractReference?.toLowerCase().includes(term) ||
+      supplier.providerSupplierName?.toLowerCase().includes(term) ||
+      supplier.providerSupplierCnpj?.includes(term) ||
+      supplier.serviceName?.toLowerCase().includes(term) ||
+      (term === "ativo" && !supplier.finished) ||
+      (term === "finalizado" && supplier.finished)
+    );
+  });
 
   return (
     <div className="p-5 md:p-10">
@@ -138,15 +154,25 @@ const handleEditClick = (supplier: any) => {
               key={supplier.idProvider}
               className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
             >
-              <p className="text-sm font-semibold text-gray-700">Referência do Contrato:</p>
+              <p className="text-sm font-semibold text-gray-700">
+                Referência do Contrato:
+              </p>
               <p className="mb-2 text-gray-800">{supplier.contractReference}</p>
               <p className="text-sm font-semibold text-gray-700">Nome:</p>
-              <p className="mb-2 text-realizaBlue">{supplier.providerSupplierName}</p>
+              <p className="mb-2 text-realizaBlue">
+                {supplier.providerSupplierName}
+              </p>
               <p className="text-sm font-semibold text-gray-700">CNPJ:</p>
-              <p className="mb-2 text-gray-800">{supplier.providerSupplierCnpj}</p>
-              <p className="text-sm font-semibold text-gray-700">Nome do Serviço:</p>
+              <p className="mb-2 text-gray-800">
+                {supplier.providerSupplierCnpj}
+              </p>
+              <p className="text-sm font-semibold text-gray-700">
+                Nome do Serviço:
+              </p>
               <p className="mb-2 text-gray-800">{supplier.serviceName}</p>
-              <p className="text-sm font-semibold text-gray-700">Data de Início:</p>
+              <p className="text-sm font-semibold text-gray-700">
+                Data de Início:
+              </p>
               <p className="mb-2 text-gray-800">
                 {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
               </p>
@@ -154,10 +180,16 @@ const handleEditClick = (supplier: any) => {
               <p className="mb-2 text-gray-800">{supplier.responsibleName}</p>
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
-                <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
+                <button
+                  title="Visualizar contrato"
+                  onClick={() => handleViewClick(supplier)}
+                >
                   <Eye className="w-5 h-5" />
                 </button>
-                <button title="Editar" onClick={() => handleEditClick(supplier)}>
+                <button
+                  title="Editar"
+                  onClick={() => handleEditClick(supplier)}
+                >
                   <Pencil className="w-5 h-5" />
                 </button>
                 <button
@@ -175,19 +207,39 @@ const handleEditClick = (supplier: any) => {
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-600">Nenhum fornecedor encontrado.</p>
+          <p className="text-center text-gray-600">
+            Nenhum fornecedor encontrado.
+          </p>
         )}
       </div>
 
-      <div className="hidden md:block overflow-x-auto rounded-lg border bg-white p-4 shadow-lg">
+      <div className="rounded-lg border bg-white p-4 shadow-lg flex flex-col gap-5">
+        <div className="flex items-center  justify-between">
+        <input
+          type="text"
+          placeholder="Buscar por contrato, fornecedor, CNPJ, serviço ou status..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm bg-neutral-100"
+        />
+        <ModalTesteSendSupplier />
+        </div>
         <table className="w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-200">
+          <thead className="bg-[#345D5C33]">
             <tr>
-              <th className="border border-gray-300 p-2 text-left">Referência do Contrato</th>
-              <th className="border border-gray-300 p-2 text-left">Nome do Fornecedor</th>
+              <th className="border border-gray-300 p-2 text-left">
+                Referência do Contrato
+              </th>
+              <th className="border border-gray-300 p-2 text-left">
+                Nome do Fornecedor
+              </th>
               <th className="border border-gray-300 p-2 text-left">CNPJ</th>
-              <th className="border border-gray-300 p-2 text-left">Nome do Serviço</th>
-              <th className="border border-gray-300 p-2 text-left">Data de Início</th>
+              <th className="border border-gray-300 p-2 text-left">
+                Nome do Serviço
+              </th>
+              <th className="border border-gray-300 p-2 text-left">
+                Data de Início
+              </th>
               <th className="border border-gray-300 p-2 text-left">Gestor</th>
               <th className="border border-gray-300 p-2 text-left">Ações</th>
               <th className="border border-gray-300 p-2 text-left">Status</th>
@@ -196,26 +248,45 @@ const handleEditClick = (supplier: any) => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="border border-gray-300 p-2 text-center">
+                <td
+                  colSpan={7}
+                  className="border border-gray-300 p-2 text-center"
+                >
                   Carregando...
                 </td>
               </tr>
-            ) : suppliers.length > 0 ? (
-              suppliers.map((supplier: any) => (
+            ) : filteredSuppliers.length > 0 ? (
+              filteredSuppliers.map((supplier: any) => (
                 <tr key={supplier.idProvider}>
-                  <td className="border border-gray-300 p-2">{supplier.contractReference}</td>
-                  <td className="border border-gray-300 p-2">{supplier.providerSupplierName}</td>
-                  <td className="border border-gray-300 p-2">{supplier.providerSupplierCnpj}</td>
-                  <td className="border border-gray-300 p-2">{supplier.serviceName}</td>
+                  <td className="border border-gray-300 p-2">
+                    {supplier.contractReference}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {supplier.providerSupplierName}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {supplier.providerSupplierCnpj}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {supplier.serviceName}
+                  </td>
                   <td className="border border-gray-300 p-2">
                     {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
                   </td>
-                  <td className="border border-gray-300 p-2">{supplier.responsibleName}</td>
+                  <td className="border border-gray-300 p-2">
+                    {supplier.responsibleName}
+                  </td>
                   <td className="border border-gray-300 p-2 space-x-2">
-                    <button title="Visualizar contrato" onClick={() => handleViewClick(supplier)}>
+                    <button
+                      title="Visualizar contrato"
+                      onClick={() => handleViewClick(supplier)}
+                    >
                       <Eye className="w-5 h-5" />
                     </button>
-                    <button title="Editar" onClick={() => handleEditClick(supplier)}>
+                    <button
+                      title="Editar"
+                      onClick={() => handleEditClick(supplier)}
+                    >
                       <Pencil className="w-5 h-5" />
                     </button>
                     <button
@@ -235,7 +306,10 @@ const handleEditClick = (supplier: any) => {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="border border-gray-300 p-2 text-center">
+                <td
+                  colSpan={7}
+                  className="border border-gray-300 p-2 text-center"
+                >
                   Nenhum fornecedor encontrado.
                 </td>
               </tr>
@@ -245,13 +319,18 @@ const handleEditClick = (supplier: any) => {
       </div>
 
       {isViewModalOpen && selectedSupplier && (
-        <Modal title="Visualizar Contrato" onClose={() => setIsViewModalOpen(false)}>
+        <Modal
+          title="Visualizar Contrato"
+          onClose={() => setIsViewModalOpen(false)}
+        >
           <div className="text-white space-y-2 max-h-[400px] overflow-auto">
             <p>
-              <strong>Referência do Contrato:</strong> {selectedSupplier.contractReference}
+              <strong>Referência do Contrato:</strong>{" "}
+              {selectedSupplier.contractReference}
             </p>
             <p>
-              <strong>Nome do Fornecedor:</strong> {selectedSupplier.providerSupplierName}
+              <strong>Nome do Fornecedor:</strong>{" "}
+              {selectedSupplier.providerSupplierName}
             </p>
             <p>
               <strong>CNPJ:</strong> {selectedSupplier.providerSupplierCnpj}
@@ -260,7 +339,8 @@ const handleEditClick = (supplier: any) => {
               <strong>Nome do Serviço:</strong> {selectedSupplier.serviceName}
             </p>
             <p>
-              <strong>Gestor do contrato:</strong> {selectedSupplier.responsibleName}
+              <strong>Gestor do contrato:</strong>{" "}
+              {selectedSupplier.responsibleName}
             </p>
             <p>
               <strong>Data de Início:</strong>{" "}
@@ -280,84 +360,124 @@ const handleEditClick = (supplier: any) => {
       )}
 
       {isEditModalOpen && editFormData && (
-        <Modal title="Editar Contrato" onClose={() => setIsEditModalOpen(false)}>
+        <Modal
+          title="Editar Contrato"
+          onClose={() => setIsEditModalOpen(false)}
+        >
           <div className="flex flex-col gap-4 max-h-[400px] overflow-auto">
             <div>
-              <label className="text-white font-semibold block mb-1">Referência do Contrato</label>
+              <label className="text-white font-semibold block mb-1">
+                Referência do Contrato
+              </label>
               <input
                 type="text"
                 value={editFormData.contractReference || ""}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, contractReference: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    contractReference: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
-              <label className="text-white font-semibold block mb-1">Nome do Fornecedor</label>
+              <label className="text-white font-semibold block mb-1">
+                Nome do Fornecedor
+              </label>
               <input
                 type="text"
                 value={editFormData.providerSupplierName || ""}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, providerSupplierName: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    providerSupplierName: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
-              <label className="text-white font-semibold block mb-1">Nome do Serviço</label>
+              <label className="text-white font-semibold block mb-1">
+                Nome do Serviço
+              </label>
               <input
                 type="text"
                 value={editFormData.serviceName || ""}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, serviceName: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    serviceName: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
-              <label className="text-white font-semibold block mb-1">Gestor do contrato</label>
+              <label className="text-white font-semibold block mb-1">
+                Gestor do contrato
+              </label>
               <input
                 type="text"
                 value={editFormData.responsibleName || ""}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, responsibleName: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    responsibleName: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
-              <label className="text-white font-semibold block mb-1">Data de Início</label>
+              <label className="text-white font-semibold block mb-1">
+                Data de Início
+              </label>
               <input
                 type="date"
                 value={
                   editFormData.dateStart
-                    ? new Date(editFormData.dateStart).toISOString().slice(0, 10)
+                    ? new Date(editFormData.dateStart)
+                        .toISOString()
+                        .slice(0, 10)
                     : ""
                 }
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, dateStart: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    dateStart: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
-              <label className="text-white font-semibold block mb-1">Tipo de Despesa</label>
+              <label className="text-white font-semibold block mb-1">
+                Tipo de Despesa
+              </label>
               <input
                 type="text"
                 value={editFormData.expenseType || ""}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, expenseType: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    expenseType: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
               />
             </div>
             <div>
-              <label className="text-white font-semibold block mb-1">Descrição</label>
+              <label className="text-white font-semibold block mb-1">
+                Descrição
+              </label>
               <textarea
                 value={editFormData.description || ""}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, description: e.target.value })
+                  setEditFormData({
+                    ...editFormData,
+                    description: e.target.value,
+                  })
                 }
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black resize-none"
                 rows={3}
@@ -372,21 +492,27 @@ const handleEditClick = (supplier: any) => {
                 Cancelar
               </button>
               <button
-  onClick={async () => {
-    if (!editFormData?.idContract) {
-      console.error("ID do contrato não encontrado no formulário de edição");
-      return;
-    }
-    console.log("Salvando contrato", editFormData.idContract, editFormData);
-    await updateSupplier(editFormData.idContract, editFormData);
-    setIsEditModalOpen(false);
-    setSelectedSupplier(null);
-    setEditFormData(null);
-  }}
-  className="bg-green-600 px-4 py-2 rounded text-white"
->
-  Salvar
-</button>
+                onClick={async () => {
+                  if (!editFormData?.idContract) {
+                    console.error(
+                      "ID do contrato não encontrado no formulário de edição"
+                    );
+                    return;
+                  }
+                  console.log(
+                    "Salvando contrato",
+                    editFormData.idContract,
+                    editFormData
+                  );
+                  await updateSupplier(editFormData.idContract, editFormData);
+                  setIsEditModalOpen(false);
+                  setSelectedSupplier(null);
+                  setEditFormData(null);
+                }}
+                className="bg-green-600 px-4 py-2 rounded text-white"
+              >
+                Salvar
+              </button>
             </div>
           </div>
         </Modal>
@@ -413,12 +539,15 @@ const handleEditClick = (supplier: any) => {
                 onClick={async () => {
                   if (!selectedSupplierId) return;
                   try {
-                    const tokenFromStorage = localStorage.getItem("tokenClient");
+                    const tokenFromStorage =
+                      localStorage.getItem("tokenClient");
                     await axios.post(
                       `${ip}/contract/finish/${selectedSupplierId}`,
                       { status: "Contrato Cancelado" },
                       {
-                        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+                        headers: {
+                          Authorization: `Bearer ${tokenFromStorage}`,
+                        },
                       }
                     );
                     await getSupplier();
