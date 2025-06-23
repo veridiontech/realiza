@@ -69,7 +69,9 @@ export function ContarctsByProvider() {
       <div className="bg-realizaBlue border rounded-md flex flex-col w-[25vw]">
         <div className="p-5 flex items-center gap-1">
           <Notebook className="text-[#C0B15B]" />
-          <h1 className="text-white font-medium">Fornecedor: {provider.corporateName}</h1>
+          <h1 className="text-white font-medium">
+            Fornecedor: {provider ? provider.corporateName : "Carregando..."}
+          </h1>
         </div>
         <div className="bg-neutral-600 h-[1px]" />
         <div className="w-full flex flex-col gap-5">
@@ -80,9 +82,8 @@ export function ContarctsByProvider() {
             {contracts.map((contract: any, index) => (
               <div
                 key={contract.idContract}
-                className={`w-full p-2 cursor-pointer ${
-                  index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
-                }`}
+                className={`w-full p-2 cursor-pointer ${index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
+                  }`}
                 onClick={() =>
                   getAllDatas(contract.idContract, contract.serviceName)
                 }

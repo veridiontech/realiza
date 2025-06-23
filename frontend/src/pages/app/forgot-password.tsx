@@ -28,15 +28,15 @@ export function ForgotPassword() {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex w-full max-w-md flex-col justify-center px-6">
-        <h1 className="mb-4 text-center text-3xl font-bold">
+        <h1 className="mb-4 text-center text-3xl font-bold text-white">
           Esqueceu sua senha?
         </h1>
-        <span className="text-center text-gray-600">
+        <span className="text-center text-white">
           Insira seu e-mail abaixo para que possamos enviar um código de 4
           dígitos para redefinir sua senha.
         </span>
         <Form className="mt-8 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-          <label className="mb-2" htmlFor="email">
+          <label className="mb-2 text-white" htmlFor="email">
             E-mail
           </label>
           <input
@@ -52,7 +52,7 @@ export function ForgotPassword() {
           )}
 
           <button
-            className="bg-realizaBlue hover:bg-realizaBlue rounded px-4 py-2 font-bold text-white"
+            className="mt-4 w-full rounded bg-[#C0B15B] text-realizaBlue px-4 py-2 font-bold hover:bg-neutral-400"
             type="submit"
           >
             Enviar
