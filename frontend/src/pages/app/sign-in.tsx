@@ -189,10 +189,10 @@ export function SignIn() {
             )}
           </div>
   
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-white">
             Esqueceu a senha?{" "}
-            <Link to="/forgot-password" className="text-realizaBlue hover:underline">
-              Recupere-se aqui!
+            <Link to="/forgot-password" className="text-white hover:underline">
+              Recupere aqui!
             </Link>
           </div>
   
