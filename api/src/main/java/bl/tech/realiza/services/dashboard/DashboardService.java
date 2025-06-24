@@ -14,6 +14,8 @@ import bl.tech.realiza.gateways.responses.dashboard.DashboardHomeResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
@@ -70,10 +72,10 @@ public class DashboardService {
                 + getSafeLong(resultSupplier, 1);
 
 
-        conformity = total > 0 ? (aprovados * 100.0 / total) : 0;
+        conformity = total > 0 ? new BigDecimal(aprovados * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
 
         // contratos ativos
-        // TODO corrigir quantidade de contratos ativos
         activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(branch.getIdBranch(), ATIVADO).intValue();
 
         activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()

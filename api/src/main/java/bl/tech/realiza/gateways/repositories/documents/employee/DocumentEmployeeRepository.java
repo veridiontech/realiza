@@ -20,7 +20,7 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
 
     @Query("""
     SELECT
-            COUNT(de) AS total,
+            SUM(CASE WHEN de.status != :status THEN 1 ELSE 0 END) AS total,
             SUM(CASE WHEN de.status = :status THEN 1 ELSE 0 END) AS pendentes
     FROM DocumentEmployee de
     JOIN de.employee e

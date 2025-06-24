@@ -31,7 +31,7 @@ public class ContractProviderSupplier extends Contract {
     private ServiceTypeBranch serviceTypeBranch;
 
     @ManyToOne
-    @JoinColumn(name = "idProviderSuppllier")
+    @JoinColumn(name = "idProviderSupplier")
     private ProviderSupplier providerSupplier;
 
     @ManyToOne
