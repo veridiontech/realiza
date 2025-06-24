@@ -127,7 +127,7 @@ export function CardPanelControlProvider({
             <div className="flex items-center gap-1">
               <User color="#2563EB" />
               <span className="font-semibold text-[#2563EB]">
-                Solicitação aceita
+                Solicitação está aceita
               </span>
             </div>
           )}
