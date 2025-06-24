@@ -14,36 +14,10 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [logs] = useState([
-    {
-      id: 1,
-      usuario: "monica",
-      acao: "create",
-      data: "27/02/2012 - 13:02:01",
-      historico: "subiu o documento",
-    },
-    {
-      id: 2,
-      usuario: "gabriela",
-      acao: "update",
-      data: "27/02/2012 - 13:02:51",
-      historico: "bloqueou o documento",
-    },
-    {
-      id: 3,
-      usuario: "monica",
-      acao: "update",
-      data: "27/02/2012 - 17:02:57",
-      historico: "corrigiu o documento",
-    },
-    {
-      id: 4,
-      usuario: "larissa",
-      acao: "update",
-      data: "27/02/2012 - 17:02:45",
-      historico: "aprovou o documento",
-    },
-  ]);
+  const [logs] = useState([]);
+  const [showJustification, setShowJustification] = useState(false);
+  const [justification, setJustification] = useState("");
+  const [justificationError, setJustificationError] = useState<string | null>(null);
 
   const handleChangeStatus = async (status: string) => {
     try {
@@ -62,6 +36,36 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
       toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
       if (onStatusChange) {
         onStatusChange(documentId, status);
+      }
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast("Erro ao atualizar o status do documento.");
+    }
+  };
+
+  const handleReprovar = async () => {
+    if (justification.length > 1000) {
+      setJustificationError("A justificativa não pode ter mais de 1000 caracteres.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const response = await axios.post(
+        `${ip}/document/${documentId}/change-status`,
+        { justification },
+        {
+          params: { status: "REPROVADO" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("status:", response.data);
+      toast("Documento reprovado com sucesso!");
+      if (onStatusChange) {
+        onStatusChange(documentId, "REPROVADO");
       }
       onClose();
     } catch (err) {
@@ -178,11 +182,40 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
               Aprovar
             </button>
             <button
-              onClick={() => handleChangeStatus("REPROVADO")}
+              onClick={() => setShowJustification(true)}
               className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
             >
               Reprovar
             </button>
+            {showJustification && (
+              <div className="mt-4">
+                <textarea
+                  value={justification}
+                  onChange={(e) => setJustification(e.target.value)}
+                  maxLength={1000}
+                  rows={4}
+                  className="w-full border border-gray-300 p-2 rounded-md"
+                  placeholder="Informe a justificativa para a reprovação"
+                />
+                {justificationError && (
+                  <p className="text-red-500 text-sm">{justificationError}</p>
+                )}
+                <div className="mt-4 flex gap-4">
+                  <button
+                    onClick={handleReprovar}
+                    className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
+                  >
+                    Confirmar Reprovação
+                  </button>
+                  <button
+                    onClick={() => setShowJustification(false)}
+                    className="h-12 w-[10rem] rounded-full bg-gray-400 font-bold text-white hover:bg-gray-300"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
