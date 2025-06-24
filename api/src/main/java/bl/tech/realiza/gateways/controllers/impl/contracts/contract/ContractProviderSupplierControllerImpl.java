@@ -8,12 +8,10 @@ import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplier
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
-import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,7 +31,6 @@ import java.util.Optional;
 public class ContractProviderSupplierControllerImpl implements ContractProviderSupplierControlller {
 
     private final CrudContractProviderSupplier crudSupplier;
-    private final CrudContractProviderSubcontractor contractProviderSubcontractor;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -351,6 +351,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .endDate(contractProviderSupplier.getEndDate())
                         .finished(contractProviderSupplier.getFinished())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
+                        .responsible(contractProviderSupplier.getResponsible() != null
+                                ? (contractProviderSupplier.getResponsible().getFirstName() + (contractProviderSupplier.getResponsible().getSurname() != null
+                                    ? (" " + contractProviderSupplier.getResponsible().getSurname())
+                                    : ""))
+                                : null)
                         .activities(contractProviderSupplier.getActivities()
                                 .stream().map(Activity::getIdActivity).toList())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier() != null ? contractProviderSupplier.getProviderSupplier().getIdProvider() : null)
