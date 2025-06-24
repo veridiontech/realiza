@@ -46,7 +46,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .idDocumentMatrix(savedDocumentMatrix.getIdDocument())
                 .type(savedDocumentMatrix.getType())
                 .doesBlock(savedDocumentMatrix.getDoesBlock())
-                .idDocumentSubgroup(savedDocumentMatrix.getSubGroup().getIdDocumentSubgroup())
+                .idDocumentSubgroup(savedDocumentMatrix.getSubGroup() != null
+                        ? savedDocumentMatrix.getSubGroup().getIdDocumentSubgroup()
+                        : null)
                 .build();
 
         return documentMatrixResponse;
@@ -63,7 +65,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .name(documentMatrix.getName())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
-                .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                .idDocumentSubgroup(documentMatrix.getSubGroup() != null
+                        ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+                        : null)
                 .build();
 
         return Optional.of(documentMatrixResponse);
@@ -79,7 +83,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         .name(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
-                        .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                        .idDocumentSubgroup(documentMatrix.getSubGroup() != null
+                                ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+                                : null)
                         .build()
         );
 
@@ -106,7 +112,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .name(documentMatrix.getName())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
-                .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                .idDocumentSubgroup(documentMatrix.getSubGroup() != null
+                        ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+                        : null)
                 .build();
 
         return Optional.of(documentMatrixResponse);
@@ -127,7 +135,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         .name(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
-                        .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                        .idDocumentSubgroup(documentMatrix.getSubGroup() != null
+                                ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+                                : null)
                         .build()
         );
 
@@ -144,7 +154,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         .name(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
-                        .idDocumentSubgroup(documentMatrix.getSubGroup().getIdDocumentSubgroup())
+                        .idDocumentSubgroup(documentMatrix.getSubGroup() != null
+                                ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+                                : null)
                         .build()
         );
 

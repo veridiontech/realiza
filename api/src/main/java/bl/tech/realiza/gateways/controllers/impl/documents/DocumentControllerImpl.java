@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.documents;
 
 import bl.tech.realiza.gateways.controllers.interfaces.documents.DocumentController;
+import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class DocumentControllerImpl implements DocumentController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override
-    public ResponseEntity<String> changeDocumentStatus(@PathVariable String documentId, @RequestParam Status status) {
-        return ResponseEntity.ok(crudDocument.changeStatus(documentId,status));
+    public ResponseEntity<String> changeDocumentStatus(@PathVariable String documentId, @RequestBody DocumentStatusChangeRequestDto documentStatusChangeRequest) {
+        return ResponseEntity.ok(crudDocument.changeStatus(documentId, documentStatusChangeRequest));
     }
 }

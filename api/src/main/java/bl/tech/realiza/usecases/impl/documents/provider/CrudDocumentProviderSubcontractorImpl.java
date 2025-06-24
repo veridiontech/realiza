@@ -1,7 +1,5 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
@@ -15,7 +13,6 @@ import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
-import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,9 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static bl.tech.realiza.domains.documents.Document.Status.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +37,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     private final DocumentProviderSubcontractorRepository documentSubcontractorRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final FileRepository fileRepository;
-    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentProcessingService documentProcessingService;
 
@@ -94,7 +91,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor() != null
+                        ? savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider()
+                        : null)
                 .build();
 
         return documentSubcontractorResponse;
@@ -118,7 +117,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
                 .creationDate(documentSubcontractor.getCreationDate())
-                .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .subcontractor(documentSubcontractor.getProviderSubcontractor() != null
+                        ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
+                        : null)
                 .build();
 
         return Optional.of(documentSubcontractorResponse);
@@ -145,7 +146,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentSubcontractor.getCreationDate())
-                            .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .subcontractor(documentSubcontractor.getProviderSubcontractor() != null
+                                    ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
+                                    : null)
                             .build();
                 }
         );
@@ -195,7 +198,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor() != null
+                        ? savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider()
+                        : null)
                 .build();
 
         return Optional.of(documentSubcontractorResponse);
@@ -223,7 +228,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .owner(FileDocument.Owner.SUBCONTRACTOR)
-                        .ownerId(documentProviderSubcontractor.getProviderSubcontractor().getIdProvider())
+                        .ownerId(documentProviderSubcontractor.getProviderSubcontractor() != null
+                                ? documentProviderSubcontractor.getProviderSubcontractor().getIdProvider()
+                                : null)
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -239,7 +246,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 throw new EntityNotFoundException(e);
             }
             documentProviderSubcontractor.setDocumentation(fileDocumentId);
-            documentProviderSubcontractor.setStatus(Document.Status.EM_ANALISE);
+            documentProviderSubcontractor.setStatus(EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
@@ -253,7 +260,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .status(savedDocumentSubcontractor.getStatus())
                 .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
-                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider())
+                .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor() != null
+                        ? savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider()
+                        : null)
                 .build();
 
         return Optional.of(documentSubcontractorResponse);
@@ -280,7 +289,9 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentSubcontractor.getCreationDate())
-                            .subcontractor(documentSubcontractor.getProviderSubcontractor().getIdProvider())
+                            .subcontractor(documentSubcontractor.getProviderSubcontractor() != null
+                                    ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
+                                    : null)
                             .build();
                 }
         );
@@ -298,10 +309,30 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
                         .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                        : null)
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                        : null)
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
@@ -310,10 +341,22 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
         List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
@@ -349,7 +392,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .filter(doc -> !existingDocuments.contains(doc))
                 .map(doc -> DocumentProviderSubcontractor.builder()
                         .title(doc.getName())
-                        .status(Document.Status.PENDENTE)
+                        .status(PENDENTE)
                         .providerSubcontractor(providerSubcontractor)
                         .documentMatrix(doc)
                         .build())
@@ -388,7 +431,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
         DocumentProviderSubcontractor newDocumentBranch = DocumentProviderSubcontractor.builder()
                 .title(documentMatrix.getName())
-                .status(Document.Status.PENDENTE)
+                .status(PENDENTE)
                 .providerSubcontractor(providerSubcontractor)
                 .documentMatrix(documentMatrix)
                 .build();

@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudDocumentClientImpl implements CrudDocumentClient {
@@ -87,7 +89,9 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
                 .creationDate(savedDocumentClient.getCreationDate())
-                .client(savedDocumentClient.getClient().getIdClient())
+                .client(savedDocumentClient.getClient() != null
+                        ? savedDocumentClient.getClient().getIdClient()
+                        : null)
                 .build();
 
         return documentClientResponse;
@@ -139,7 +143,9 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentClient.getCreationDate())
-                            .client(documentClient.getClient().getIdClient())
+                            .client(documentClient.getClient() != null
+                                    ? documentClient.getClient().getIdClient()
+                                    : null)
                             .build();
                 }
         );
@@ -189,7 +195,9 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
                 .creationDate(savedDocumentClient.getCreationDate())
-                .client(savedDocumentClient.getClient().getIdClient())
+                .client(savedDocumentClient.getClient() != null
+                        ? savedDocumentClient.getClient().getIdClient()
+                        : null)
                 .build();
 
         return Optional.of(documentClientResponse);
@@ -210,7 +218,8 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
 
-        DocumentClient documentClient = documentClientRepository.findById(id).orElseThrow(() -> new NotFoundException("Document client not found"));
+        DocumentClient documentClient = documentClientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Document client not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
@@ -232,7 +241,7 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 throw new NotFoundException("Document couldn't be saved");
             }
             documentClient.setDocumentation(fileDocumentId);
-            documentClient.setStatus(Document.Status.EM_ANALISE);
+            documentClient.setStatus(EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
@@ -246,7 +255,9 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                 .status(savedDocumentClient.getStatus())
                 .documentation(savedDocumentClient.getDocumentation())
                 .creationDate(savedDocumentClient.getCreationDate())
-                .client(savedDocumentClient.getClient().getIdClient())
+                .client(savedDocumentClient.getClient() != null
+                        ? savedDocumentClient.getClient().getIdClient()
+                        : null)
                 .build();
 
         return Optional.of(documentClientResponse);
@@ -273,7 +284,9 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentClient.getCreationDate())
-                            .client(documentClient.getClient().getIdClient())
+                            .client(documentClient.getClient() != null
+                                    ? documentClient.getClient().getIdClient()
+                                    : null)
                             .build();
                 }
         );

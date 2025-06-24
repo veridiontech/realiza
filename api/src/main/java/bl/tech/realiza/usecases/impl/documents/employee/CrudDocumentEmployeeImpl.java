@@ -33,6 +33,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
@@ -94,7 +96,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
-                .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
+                .employee(savedDocumentEmployee.getEmployee() != null
+                        ? savedDocumentEmployee.getEmployee().getIdEmployee()
+                        : null)
                 .build();
 
         return documentEmployeeResponseDto;
@@ -117,7 +121,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
                 .creationDate(documentEmployee.getCreationDate())
-                .employee(documentEmployee.getEmployee().getIdEmployee())
+                .employee(documentEmployee.getEmployee() != null
+                        ? documentEmployee.getEmployee().getIdEmployee()
+                        : null)
                 .build();
 
         return Optional.of(documentEmployeeResponseDto);
@@ -144,7 +150,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentEmployee.getCreationDate())
-                            .employee(documentEmployee.getEmployee().getIdEmployee())
+                            .employee(documentEmployee.getEmployee() != null
+                                    ? documentEmployee.getEmployee().getIdEmployee()
+                                    : null)
                             .build();
                 }
         );
@@ -194,7 +202,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
-                .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
+                .employee(savedDocumentEmployee.getEmployee() != null
+                        ? savedDocumentEmployee.getEmployee().getIdEmployee()
+                        : null)
                 .build();
 
         return Optional.of(documentEmployeeResponseDto);
@@ -238,7 +248,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 throw new EntityNotFoundException(e);
             }
             documentEmployee.setDocumentation(fileDocumentId);
-            documentEmployee.setStatus(Document.Status.EM_ANALISE);
+            documentEmployee.setStatus(EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
@@ -252,7 +262,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .status(savedDocumentEmployee.getStatus())
                 .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
-                .employee(savedDocumentEmployee.getEmployee().getIdEmployee())
+                .employee(savedDocumentEmployee.getEmployee() != null
+                        ? savedDocumentEmployee.getEmployee().getIdEmployee()
+                        : null)
                 .build();
 
         return Optional.of(documentEmployeeResponse);
@@ -279,7 +291,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentEmployee.getCreationDate())
-                            .employee(documentEmployee.getEmployee().getIdEmployee())
+                            .employee(documentEmployee.getEmployee() != null
+                                    ? documentEmployee.getEmployee().getIdEmployee()
+                                    : null)
                             .build();
                 }
         );
@@ -297,10 +311,30 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
                         .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                        : null)
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                        : null)
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
@@ -309,10 +343,22 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
         List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
@@ -348,7 +394,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .filter(doc -> !existingDocuments.contains(doc))
                 .map(doc -> DocumentEmployee.builder()
                         .title(doc.getName())
-                        .status(Document.Status.PENDENTE)
+                        .status(PENDENTE)
                         .employee(employee)
                         .documentMatrix(doc)
                         .build())
@@ -409,7 +455,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
         DocumentEmployee newDocumentBranch = DocumentEmployee.builder()
                 .title(documentMatrix.getName())
-                .status(Document.Status.PENDENTE)
+                .status(PENDENTE)
                 .employee(employee)
                 .documentMatrix(documentMatrix)
                 .build();

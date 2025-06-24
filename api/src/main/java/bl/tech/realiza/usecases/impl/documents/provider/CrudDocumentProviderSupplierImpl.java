@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSupplier {
@@ -93,7 +95,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
-                .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
+                .supplier(savedDocumentSupplier.getProviderSupplier() != null
+                        ? savedDocumentSupplier.getProviderSupplier().getIdProvider()
+                        : null)
                 .build();
 
         return documentSupplierResponse;
@@ -117,7 +121,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
                 .creationDate(documentSupplier.getCreationDate())
-                .supplier(documentSupplier.getProviderSupplier().getIdProvider())
+                .supplier(documentSupplier.getProviderSupplier() != null
+                        ? documentSupplier.getProviderSupplier().getIdProvider()
+                        : null)
                 .build();
 
         return Optional.of(documentSupplierResponse);
@@ -140,11 +146,19 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .fileName(fileDocument != null
+                                    ? fileDocument.getName()
+                                    : null)
+                            .fileContentType(fileDocument != null
+                                    ? fileDocument.getContentType()
+                                    : null)
+                            .fileData(fileDocument != null
+                                    ? fileDocument.getData()
+                                    : null)
                             .creationDate(documentSupplier.getCreationDate())
-                            .supplier(documentSupplier.getProviderSupplier().getIdProvider())
+                            .supplier(documentSupplier.getProviderSupplier() != null
+                                    ? documentSupplier.getProviderSupplier().getIdProvider()
+                                    : null)
                             .build();
                 }
         );
@@ -194,7 +208,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
-                .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
+                .supplier(savedDocumentSupplier.getProviderSupplier() != null
+                        ? savedDocumentSupplier.getProviderSupplier().getIdProvider()
+                        : null)
                 .build();
 
         return Optional.of(documentSupplierResponse);
@@ -222,7 +238,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .owner(FileDocument.Owner.SUPPLIER)
-                        .ownerId(documentSupplier.getProviderSupplier().getIdProvider())
+                        .ownerId(documentSupplier.getProviderSupplier() != null
+                                ? documentSupplier.getProviderSupplier().getIdProvider()
+                                : null)
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -238,7 +256,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 throw new EntityNotFoundException(e);
             }
             documentSupplier.setDocumentation(fileDocumentId);
-            documentSupplier.setStatus(Document.Status.EM_ANALISE);
+            documentSupplier.setStatus(EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
@@ -252,7 +270,9 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .status(savedDocumentSupplier.getStatus())
                 .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
-                .supplier(savedDocumentSupplier.getProviderSupplier().getIdProvider())
+                .supplier(savedDocumentSupplier.getProviderSupplier() != null
+                        ? savedDocumentSupplier.getProviderSupplier().getIdProvider()
+                        : null)
                 .build();
 
         return Optional.of(documentSupplierResponse);
@@ -275,11 +295,19 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
                             .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .fileName(fileDocument != null
+                                    ? fileDocument.getName()
+                                    : null)
+                            .fileContentType(fileDocument != null
+                                    ? fileDocument.getContentType()
+                                    : null)
+                            .fileData(fileDocument != null
+                                    ? fileDocument.getData()
+                                    : null)
                             .creationDate(documentSupplier.getCreationDate())
-                            .supplier(documentSupplier.getProviderSupplier().getIdProvider())
+                            .supplier(documentSupplier.getProviderSupplier() != null
+                                    ? documentSupplier.getProviderSupplier().getIdProvider()
+                                    : null)
                             .build();
                 }
         );
@@ -297,10 +325,26 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
                         .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup() != null
+                                ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix().getSubGroup() != null
+                                ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> allDocuments = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
@@ -309,10 +353,22 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
         List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
@@ -331,7 +387,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             throw new NotFoundException("Invalid documents");
         }
 
-        ProviderSupplier providerSupplier = providerSupplierRepository.findById(id).orElseThrow(() -> new NotFoundException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         List<DocumentMatrix> documentMatrixList = documentMatrixRepository.findAllById(documentCollection);
         if (documentMatrixList.isEmpty()) {
@@ -348,7 +405,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .filter(doc -> !existingDocuments.contains(doc))
                 .map(doc -> DocumentProviderSupplier.builder()
                         .title(doc.getName())
-                        .status(Document.Status.PENDENTE)
+                        .status(PENDENTE)
                         .providerSupplier(providerSupplier)
                         .documentMatrix(doc)
                         .build())
@@ -375,9 +432,11 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             throw new BadRequestException("Invalid documents");
         }
 
-        ProviderSupplier providerSupplier = providerSupplierRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(idEnterprise)
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId)
+                .orElseThrow(() -> new NotFoundException("Document not found in matrix"));
 
         List<DocumentProviderSupplier> existingDocumentBranches = documentSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(idEnterprise, true);
 
@@ -387,7 +446,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         DocumentProviderSupplier newDocumentBranch = DocumentProviderSupplier.builder()
                 .title(documentMatrix.getName())
-                .status(Document.Status.PENDENTE)
+                .status(PENDENTE)
                 .providerSupplier(providerSupplier)
                 .documentMatrix(documentMatrix)
                 .build();

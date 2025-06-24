@@ -88,8 +88,7 @@ public class DocumentProcessingService {
                 document.setStatus(result.isValid() ? APROVADO_IA : REPROVADO_IA);
                 log.info("[{}] Resultado IA: status automático definido como {}", threadName, document.getStatus());
             } else {
-                document.setStatus(EM_ANALISE);
-                log.info("[{}] Resultado IA: sem validação automática. Status definido como EM_ANALISE pelo motivo {}", threadName, result.getReason());
+                log.info("[{}] Resultado IA: sem validação automática. Status não alterado pelo motivo {}", threadName, result.getReason());
             }
 
             document.setVersionDate(LocalDateTime.now());
@@ -98,7 +97,6 @@ public class DocumentProcessingService {
 
         } catch (Exception e) {
             log.error("[{}] Falha no processamento assíncrono do documento ID={}", threadName, document.getIdDocumentation(), e);
-            document.setStatus(EM_ANALISE);
             documentRepository.save(document);
         }
     }

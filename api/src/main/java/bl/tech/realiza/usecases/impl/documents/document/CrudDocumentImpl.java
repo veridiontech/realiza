@@ -1,11 +1,18 @@
 package bl.tech.realiza.usecases.impl.documents.document;
 
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument.AuditLogDocumentActions;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
+import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
+import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
-import static bl.tech.realiza.domains.documents.Document.*;
+import static bl.tech.realiza.domains.auditLogs.document.AuditLogDocument.AuditLogDocumentActions.*;
 import static bl.tech.realiza.domains.documents.Document.Status.*;
 
 @Service
@@ -24,6 +32,8 @@ public class CrudDocumentImpl implements CrudDocument {
 
     private final DocumentRepository documentRepository;
     private final CrudNotification crudNotification;
+    private final AuditLogDocumentRepository auditLogDocumentRepository;
+    private final UserRepository userRepository;
 
     @Override
     public void expirationChange() {
@@ -79,11 +89,29 @@ public class CrudDocumentImpl implements CrudDocument {
     }
 
     @Override
-    public String changeStatus(String documentId, Status status) {
+    public String changeStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
-        document.setStatus(status);
+        document.setStatus(documentStatusChangeRequestDto.getStatus());
         documentRepository.save(document);
-        return "Document status changed to " + status.name();
+
+        AuditLogDocumentActions action;
+        switch (documentStatusChangeRequestDto.getStatus()) {
+            case REPROVADO -> action = REJECT;
+            case APROVADO -> action = APPROVE;
+            default -> throw new IllegalStateException("Status change not valid for status " + documentStatusChangeRequestDto.getStatus());
+        }
+        User user = userRepository.findById(Objects.requireNonNull(JwtService.getAuthenticatedUserId()))
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        auditLogDocumentRepository.save(
+                AuditLogDocument.builder()
+                        .idDocumentation(document)
+                        .description(user.getEmail() + " " + action.name() + " document " + document.getTitle())
+                        .notes(documentStatusChangeRequestDto.getNotes())
+                        .action(action)
+                        .idUser(user)
+                        .build());
+
+        return "Document status changed to " + documentStatusChangeRequestDto.getStatus().name();
     }
 }

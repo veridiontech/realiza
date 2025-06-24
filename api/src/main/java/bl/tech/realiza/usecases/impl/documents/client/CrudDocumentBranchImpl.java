@@ -32,6 +32,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+import static bl.tech.realiza.domains.services.FileDocument.Owner.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudDocumentBranchImpl implements CrudDocumentBranch {
@@ -44,9 +47,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
-        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
-
-        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+        DocumentBranch documentBranch = documentBranchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
 
@@ -61,7 +63,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .fileContentType(fileDocument.getContentType())
                 .fileData(fileDocument.getData())
                 .creationDate(documentBranch.getCreationDate())
-                .branch(documentBranch.getBranch().getIdBranch())
+                .branch(documentBranch.getBranch() != null
+                        ? documentBranch.getBranch().getIdBranch()
+                        : null)
                 .build();
 
         return Optional.of(documentBranchResponse);
@@ -88,7 +92,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                             .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
                             .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentBranch.getCreationDate())
-                            .branch(documentBranch.getBranch().getIdBranch())
+                            .branch(documentBranch.getBranch() != null
+                                    ? documentBranch.getBranch().getIdBranch()
+                                    : null)
                             .build();
                 }
 
@@ -103,9 +109,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
 
-        Optional<DocumentBranch> documentBranchOptional = documentBranchRepository.findById(id);
-
-        DocumentBranch documentBranch = documentBranchOptional.orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+        DocumentBranch documentBranch = documentBranchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
@@ -129,7 +134,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             documentBranch.setDocumentation(fileDocumentId);
         }
 
-        documentBranch.setStatus(documentBranchRequestDto.getStatus() != null ? documentBranchRequestDto.getStatus() : documentBranch.getStatus());
+        documentBranch.setStatus(documentBranchRequestDto.getStatus() != null
+                ? documentBranchRequestDto.getStatus()
+                : documentBranch.getStatus());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
@@ -139,7 +146,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
                 .creationDate(savedDocumentBranch.getCreationDate())
-                .branch(savedDocumentBranch.getBranch().getIdBranch())
+                .branch(savedDocumentBranch.getBranch() != null
+                        ? savedDocumentBranch.getBranch().getIdBranch()
+                        : null)
                 .build();
 
         return Optional.of(documentBranchResponse);
@@ -164,8 +173,10 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .title(documentBranch.getTitle())
-                        .owner(FileDocument.Owner.BRANCH)
-                        .ownerId(documentBranch.getBranch().getIdBranch())
+                        .owner(BRANCH)
+                        .ownerId(documentBranch.getBranch() != null
+                                ? documentBranch.getBranch().getIdBranch()
+                                : null)
                         .data(file.getBytes())
                         .build();
             } catch (IOException e) {
@@ -181,7 +192,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 throw new EntityNotFoundException(e);
             }
             documentBranch.setDocumentation(fileDocumentId);
-            documentBranch.setStatus(Document.Status.EM_ANALISE);
+            documentBranch.setStatus(EM_ANALISE);
         }
 
         documentProcessingService.processDocumentAsync(file,
@@ -195,7 +206,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .status(savedDocumentBranch.getStatus())
                 .documentation(savedDocumentBranch.getDocumentation())
                 .creationDate(savedDocumentBranch.getCreationDate())
-                .branch(savedDocumentBranch.getBranch().getIdBranch())
+                .branch(savedDocumentBranch.getBranch() != null
+                        ? savedDocumentBranch.getBranch().getIdBranch()
+                        : null)
                 .build();
 
         return Optional.of(documentBranchResponse);
@@ -218,11 +231,19 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                             .title(documentBranch.getTitle())
                             .status(documentBranch.getStatus())
                             .documentation(documentBranch.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .fileName(fileDocument != null
+                                    ? fileDocument.getName()
+                                    : null)
+                            .fileContentType(fileDocument != null
+                                    ? fileDocument.getContentType()
+                                    : null)
+                            .fileData(fileDocument != null
+                                    ? fileDocument.getData()
+                                    : null)
                             .creationDate(documentBranch.getCreationDate())
-                            .branch(documentBranch.getBranch().getIdBranch())
+                            .branch(documentBranch.getBranch() != null
+                                    ? documentBranch.getBranch().getIdBranch()
+                                    : null)
                             .build();
                 }
 
@@ -244,12 +265,34 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
-                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .idDocumentMatrix(doc.getDocumentMatrix() != null
+                                ? doc.getDocumentMatrix().getIdDocument()
+                                : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                        : null)
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                        : null)
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> selectedDocumentsPersonal = documentBranch.stream()
@@ -257,12 +300,34 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
-                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .idDocumentMatrix(doc.getDocumentMatrix() != null
+                                ? doc.getDocumentMatrix().getIdDocument()
+                                : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                        : null)
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                        : null)
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> selectedDocumentsService = documentBranch.stream()
@@ -270,12 +335,34 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
-                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .idDocumentMatrix(doc.getDocumentMatrix() != null
+                                ? doc.getDocumentMatrix().getIdDocument()
+                                : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                        : null)
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                        : null)
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> selectedDocumentsTraining = documentBranch.stream()
@@ -283,12 +370,34 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
-                        .idDocumentMatrix(doc.getDocumentMatrix().getIdDocument())
+                        .idDocumentMatrix(doc.getDocumentMatrix() != null
+                                ? doc.getDocumentMatrix().getIdDocument()
+                                : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()) // Substitua pelos getters corretos
-                        .subgroupName(doc.getDocumentMatrix().getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+                                    : null)
+                                : null)
+                        .subgroupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+                                    : null)
+                                : null)
+                        .idDocumentGroup(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
+                                        : null)
+                                    : null)
+                                : null)
+                        .groupName(doc.getDocumentMatrix() != null
+                                ? (doc.getDocumentMatrix().getSubGroup() != null
+                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
+                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                        : null)
+                                    : null)
+                                : null)
                         .build())
                 .collect(Collectors.toList());
 
@@ -298,10 +407,22 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
         List<DocumentMatrixResponseDto> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa")
@@ -310,10 +431,22 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
         List<DocumentMatrixResponseDto> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
@@ -322,10 +455,22 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
         List<DocumentMatrixResponseDto> allDocumentsTraining = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
@@ -334,10 +479,22 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup().getIdDocumentSubgroup())
-                        .subgroupName(doc.getSubGroup().getSubgroupName())
-                        .idDocumentGroup(doc.getSubGroup().getGroup().getIdDocumentGroup())
-                        .groupName(doc.getSubGroup().getGroup().getGroupName())
+                        .idDocumentSubgroup(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getIdDocumentSubgroup()
+                                : null)
+                        .subgroupName(doc.getSubGroup() != null
+                                ? doc.getSubGroup().getSubgroupName()
+                                : null)
+                        .idDocumentGroup(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
+                                    : null)
+                                : null)
+                        .groupName(doc.getSubGroup() != null
+                                ? (doc.getSubGroup().getGroup() != null
+                                    ? doc.getSubGroup().getGroup().getGroupName()
+                                    : null)
+                                : null)
                         .build())
                 .toList();
 
@@ -437,13 +594,15 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             throw new BadRequestException("Invalid documents");
         }
 
-        Branch branch = branchRepository.findById(idEnterprise).orElseThrow(() -> new NotFoundException("Branch not found"));
+        Branch branch = branchRepository.findById(idEnterprise)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId).orElseThrow(() -> new NotFoundException("Document not found in matrix"));
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentMatrixId)
+                .orElseThrow(() -> new NotFoundException("Document not found in matrix"));
 
         DocumentBranch newDocumentBranch = DocumentBranch.builder()
                         .title(documentMatrix.getName())
-                        .status(Document.Status.PENDENTE)
+                        .status(PENDENTE)
                         .branch(branch)
                         .documentMatrix(documentMatrix)
                         .build();
@@ -466,8 +625,12 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch documentBranch = documentBranchRepository.findById(idDocumentation)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        documentBranch.setExpirationDateAmount(documentExpirationUpdateRequestDto.getExpirationDateAmount() != null ? documentExpirationUpdateRequestDto.getExpirationDateAmount() : documentBranch.getExpirationDateAmount());
-        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateUnit() != null ? documentExpirationUpdateRequestDto.getExpirationDateUnit() : documentBranch.getExpirationDateUnit());
+        documentBranch.setExpirationDateAmount(documentExpirationUpdateRequestDto.getExpirationDateAmount() != null
+                ? documentExpirationUpdateRequestDto.getExpirationDateAmount()
+                : documentBranch.getExpirationDateAmount());
+        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateUnit() != null
+                ? documentExpirationUpdateRequestDto.getExpirationDateUnit()
+                : documentBranch.getExpirationDateUnit());
 
         documentBranchRepository.save(documentBranch);
 
