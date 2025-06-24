@@ -264,21 +264,29 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private ItemManagementUserResponseDto toItemManagementUserResponseDto(ItemManagement itemManagement, User requester, User newUser) {
         User actualUser = (User) Hibernate.unproxy(newUser);
 
+
         if (!(actualUser instanceof UserClient userClient)) {
             throw new IllegalArgumentException("Not a valid user");
+        } else {
+            return ItemManagementUserResponseDto.builder()
+                    .idSolicitation(itemManagement.getIdSolicitation())
+                    .userFullName(userClient.getFirstName() + " " + userClient.getSurname())
+                    .solicitationType(itemManagement.getSolicitationType())
+                    .clientTradeName(userClient.getBranch() != null
+                            ? (userClient.getBranch().getClient() != null
+                                ? userClient.getBranch().getClient().getCorporateName()
+                                : null)
+                            : null)
+                    .clientCnpj(userClient.getBranch().getClient().getCnpj())
+                    .requesterFullName(requester.getFirstName() + " " + requester.getSurname())
+                    .requesterEmail(requester.getEmail())
+                    .status(itemManagement.getStatus())
+                    .branchName(userClient.getBranch() != null
+                            ? userClient.getBranch().getName()
+                            : null)
+                    .creationDate(itemManagement.getCreationDate())
+                    .build();
         }
-
-        return ItemManagementUserResponseDto.builder()
-                .idSolicitation(itemManagement.getIdSolicitation())
-                .userFullName(userClient.getFirstName() + " " + userClient.getSurname())
-                .solicitationType(itemManagement.getSolicitationType())
-                .clientTradeName(userClient.getBranch().getClient().getCorporateName())
-                .clientCnpj(userClient.getBranch().getClient().getCnpj())
-                .requesterFullName(requester.getFirstName() + " " + requester.getSurname())
-                .requesterEmail(requester.getEmail())
-                .status(itemManagement.getStatus())
-                .creationDate(itemManagement.getCreationDate())
-                .build();
     }
 
     private ItemManagementProviderResponseDto toItemManagementProviderResponseDto(ItemManagement itemManagement, User requester, Provider newProvider) {
@@ -286,23 +294,28 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
         if (!(actualProvider instanceof ProviderSupplier providerSupplier)) {
             throw new IllegalArgumentException("Not a valid provider");
+        } else {
+            return ItemManagementProviderResponseDto.builder()
+                    .idSolicitation(itemManagement.getIdSolicitation())
+                    .enterpriseName(providerSupplier.getCorporateName())
+                    .solicitationType(itemManagement.getSolicitationType())
+                    .clientName(!providerSupplier.getBranches().isEmpty()
+                            ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
+                            : null)
+                    .clientCnpj(!providerSupplier.getBranches().isEmpty()
+                            ? providerSupplier.getBranches().get(0).getClient().getCnpj()
+                            : null)
+                    .requesterName(requester.getFirstName() + " " + requester.getSurname())
+                    .requesterEmail(requester.getEmail())
+                    .status(itemManagement.getStatus())
+                    .branchName((providerSupplier.getBranches() != null && !providerSupplier.getBranches().isEmpty())
+                            ? (providerSupplier.getBranches().get(0) != null
+                                ? providerSupplier.getBranches().get(0).getName()
+                                : null)
+                            : null)
+                    .creationDate(itemManagement.getCreationDate())
+                    .build();
         }
-
-        return ItemManagementProviderResponseDto.builder()
-                .idSolicitation(itemManagement.getIdSolicitation())
-                .enterpriseName(providerSupplier.getCorporateName())
-                .solicitationType(itemManagement.getSolicitationType())
-                .clientName(!providerSupplier.getBranches().isEmpty()
-                        ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
-                        : null)
-                .clientCnpj(!providerSupplier.getBranches().isEmpty()
-                        ? providerSupplier.getBranches().get(0).getClient().getCnpj()
-                        : null)
-                .requesterName(requester.getFirstName() + " " + requester.getSurname())
-                .requesterEmail(requester.getEmail())
-                .status(itemManagement.getStatus())
-                .creationDate(itemManagement.getCreationDate())
-                .build();
     }
 
     private ItemManagementUserDetailsResponseDto toItemManagementUserDetailsResponseDto(ItemManagement itemManagement) {
