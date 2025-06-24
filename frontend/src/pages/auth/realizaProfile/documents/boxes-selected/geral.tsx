@@ -29,7 +29,7 @@ export function GeralBox() {
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
-    setIsLoading(true)
+    setIsLoading(false)
     try {
       const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,

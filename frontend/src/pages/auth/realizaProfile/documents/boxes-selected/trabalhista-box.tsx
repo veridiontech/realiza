@@ -62,7 +62,7 @@ export function TrabalhistaBox() {
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
     } finally {
-      setIsLoading(true)
+      setIsLoading(false)
     }
   };
 
