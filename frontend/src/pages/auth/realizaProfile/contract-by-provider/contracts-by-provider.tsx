@@ -1,9 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ip } from "@/utils/ip";
 import axios from "axios";
-import { Eye, Notebook, NotebookText, Plus, User } from "lucide-react";
+import { Eye, Notebook, NotebookText, Plus, Upload, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { AddDocument } from "../employee/modals/addDocumentForSupplier";
+import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
+
 
 export function ContarctsByProvider() {
   const id = useParams();
@@ -13,6 +16,10 @@ export function ContarctsByProvider() {
   const [selectedContractName, setSelectedContractName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [provider, setProvider] = useState<any>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isViewerModalOpen, setIsViewerModalOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
 
   const token = localStorage.getItem("tokenClient");
 
@@ -63,9 +70,30 @@ export function ContarctsByProvider() {
       doc.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleOpenUploadModal = (documentId: string, documentTitle: string) => {
+    setSelectedDocumentId(documentId);
+    setSelectedDocumentTitle(documentTitle);
+    setIsUploadModalOpen(true);
+  };
+
+  const handleCloseUploadModal = () => {
+    setIsUploadModalOpen(false);
+    setSelectedDocumentId(null);
+    setSelectedDocumentTitle(null);
+  };
+
+  const handleOpenViewerModal = (documentId: string) => {
+    setSelectedDocumentId(documentId);
+    setIsViewerModalOpen(true);
+  };
+
+  const handleCloseViewerModal = () => {
+    setIsViewerModalOpen(false);
+    setSelectedDocumentId(null);
+  };
+
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
-      {/* Lado esquerdo: Contratos */}
       <div className="bg-realizaBlue border rounded-md flex flex-col w-[25vw]">
         <div className="p-5 flex items-center gap-1">
           <Notebook className="text-[#C0B15B]" />
@@ -82,8 +110,9 @@ export function ContarctsByProvider() {
             {contracts.map((contract: any, index) => (
               <div
                 key={contract.idContract}
-                className={`w-full p-2 cursor-pointer ${index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
-                  }`}
+                className={`w-full p-2 cursor-pointer ${
+                  index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
+                }`}
                 onClick={() =>
                   getAllDatas(contract.idContract, contract.serviceName)
                 }
@@ -97,9 +126,7 @@ export function ContarctsByProvider() {
         </div>
       </div>
 
-      {/* Lado direito */}
       <div className="w-full flex flex-col gap-5">
-        {/* Contrato selecionado */}
         <div className="bg-white p-5 rounded-md shadow-md w-full">
           <span className="text-neutral-500 text-[14px]">
             Contrato selecionado:
@@ -111,21 +138,18 @@ export function ContarctsByProvider() {
           </div>
         </div>
 
-        {/* Painel documentos + colaboradores */}
         <div className="bg-white rounded-md p-5 border border-neutral-400 shadow-md flex gap-10 h-[50vh]">
-          {/* Documentos */}
           <div className="border border-neutral-400 rounded-md shadow-md p-5 w-[40vw] flex flex-col gap-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2 text-[#34495E]">
                 <NotebookText />
                 <h2 className="text-[20px]">Documentos vinculados:</h2>
               </div>
-              <div className="bg-realizaBlue p-2 rounded-md text-white">
+              <div className="bg-realizaBlue p-2 rounded-md text-white hover:bg-blue-700 transition duration-300 cursor-pointer">
                 <Plus />
               </div>
             </div>
 
-            {/* Search Bar */}
             <input
               type="text"
               placeholder="Buscar por título ou empresa..."
@@ -134,7 +158,6 @@ export function ContarctsByProvider() {
               className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
             />
 
-            {/* Lista de documentos */}
             <div className="flex flex-col gap-4 overflow-y-auto max-h-[35vh] pr-2">
               {filteredDocuments.length > 0 ? (
                 filteredDocuments.map((doc: any) => (
@@ -148,7 +171,18 @@ export function ContarctsByProvider() {
                         {doc.ownerName}
                       </span>
                     </div>
-                    <Eye />
+                    <div className="flex gap-3">
+                      <Eye
+                        className="cursor-pointer text-[#34495E] hover:text-[#2C3E50] transition duration-200"
+                        onClick={() => handleOpenViewerModal(doc.id)}
+                      />
+                      <Upload
+                        className="cursor-pointer text-[#34495E] hover:text-[#2C3E50] transition duration-200"
+                        onClick={() =>
+                          handleOpenUploadModal(doc.id, doc.title)
+                        }
+                      />
+                    </div>
                   </div>
                 ))
               ) : (
@@ -159,7 +193,6 @@ export function ContarctsByProvider() {
             </div>
           </div>
 
-          {/* Colaboradores */}
           <div className="flex flex-col items-start gap-10">
             <div className="flex items-center gap-2 text-[#34495E]">
               <User />
@@ -192,6 +225,21 @@ export function ContarctsByProvider() {
           </div>
         </div>
       </div>
+
+      <AddDocument
+        isOpen={isUploadModalOpen}
+        onClose={handleCloseUploadModal}
+        documentId={selectedDocumentId}
+        preSelectedTitle={selectedDocumentTitle}
+      />
+
+      {selectedDocumentId && (
+        <DocumentViewer
+          isOpen={isViewerModalOpen}
+          onClose={handleCloseViewerModal}
+          documentId={selectedDocumentId}
+        />
+      )}
     </div>
   );
 }

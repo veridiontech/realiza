@@ -44,6 +44,7 @@ export function CardPanelControlProvider({
   status,
 }: CardPanelControlProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const client = {
     cnpj: clientCnpj,
@@ -62,6 +63,7 @@ export function CardPanelControlProvider({
   };
 
   const handleApprove = async () => {
+    setIsButtonDisabled(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       console.log(tokenFromStorage);
@@ -94,6 +96,7 @@ export function CardPanelControlProvider({
   };
 
   const handleDeny = async () => {
+    setIsButtonDisabled(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.patch(
@@ -182,7 +185,7 @@ export function CardPanelControlProvider({
           <div className="flex flex-row items-center justify-center gap-2">
             <AlertDialog>
               <AlertDialogTrigger>
-                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300">
+                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300" disabled={isButtonDisabled}>
                   Dispensar <ThumbsUp size={15} />
                 </button>
               </AlertDialogTrigger>
@@ -219,7 +222,7 @@ export function CardPanelControlProvider({
             ) : (
               <AlertDialog>
                 <AlertDialogTrigger>
-                  <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300">
+                  <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300" disabled={isButtonDisabled}>
                     Aceitar <ThumbsUp size={15} />
                   </button>
                 </AlertDialogTrigger>
