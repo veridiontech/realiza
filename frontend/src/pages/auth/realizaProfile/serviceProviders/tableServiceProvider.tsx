@@ -7,13 +7,12 @@ import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 function StatusBadge({ finished }: { finished?: boolean }) {
-  const baseClass = "px-3 py-1 rounded font-semibold text-white text-sm";
+  const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
   const isFinalizado = finished === true;
 
-  const statusText = isFinalizado ? "Finalizado" : "Ativo";
   const statusStyle = isFinalizado ? "bg-red-600" : "bg-green-600";
 
-  return <span className={`${baseClass} ${statusStyle}`}>{statusText}</span>;
+  return <span className={`${baseClass} ${statusStyle}`}></span>;
 }
 
 function Modal({
@@ -171,10 +170,20 @@ export function TableServiceProvider() {
               </p>
               <p className="mb-2 text-gray-800">{supplier.serviceName}</p>
               <p className="text-sm font-semibold text-gray-700">
-                Data de Início:
+                Data de Ínicio:
               </p>
+              
               <p className="mb-2 text-gray-800">
                 {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
+              </p>
+
+              <p className="text-sm font-semibold text-gray-700">
+                Data de finalização:
+
+              </p>
+              <p className="mb-2 text-gray-800 ">
+                {supplier.dateFinish ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR") : "-"}
+
               </p>
               <p className="text-sm font-semibold text-gray-700">Gestor:</p>
               <p className="mb-2 text-gray-800">{supplier.responsibleName}</p>
@@ -238,11 +247,15 @@ export function TableServiceProvider() {
                 Nome do Serviço
               </th>
               <th className="border border-gray-300 p-2 text-left">
-                Data de Início
+                Data de Ínicio
+              </th>
+              <th className="border border-gray-300 p-2 text-left">
+                Data de finalização
               </th>
               <th className="border border-gray-300 p-2 text-left">Gestor</th>
-              <th className="border border-gray-300 p-2 text-left">Ações</th>
               <th className="border border-gray-300 p-2 text-left">Status</th>
+              <th className="border border-gray-300 p-2 text-left">Ações</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -274,7 +287,17 @@ export function TableServiceProvider() {
                     {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
                   </td>
                   <td className="border border-gray-300 p-2">
+                    {supplier.dateFinish
+                    ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR") : "-"
+                    }
+
+                  </td>
+                
+                  <td className="border border-gray-300 p-2">
                     {supplier.responsibleName}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    <StatusBadge finished={supplier.finished} />
                   </td>
                   <td className="border border-gray-300 p-2 space-x-2">
                     <button
@@ -299,9 +322,6 @@ export function TableServiceProvider() {
                       <BadgeCheck className="w-5 h-5" />
                     </button>
                   </td>
-                  <td className="border border-gray-300 p-2">
-                    <StatusBadge finished={supplier.finished} />
-                  </td>
                 </tr>
               ))
             ) : (
@@ -316,6 +336,18 @@ export function TableServiceProvider() {
             )}
           </tbody>
         </table>
+        {/*legenda dos status dos contratos*/}
+        <div className="mt-4 text-sm text-gray-600 flex gap-4 items-center justify-end">
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-green-600 inline-block" />
+            <span>Ativo</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-red-600 inline-block" />
+          <span>Finalizado</span>
+          </div>
+        </div>
+
       </div>
 
       {isViewModalOpen && selectedSupplier && (
@@ -345,6 +377,10 @@ export function TableServiceProvider() {
             <p>
               <strong>Data de Início:</strong>{" "}
               {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}
+            </p>
+            <p>
+              <strong>Data de Finalização:</strong> {" "}
+              {selectedSupplier.dateFinish ? new Date(selectedSupplier.dateFinish).toLocaleDateString("pt-BR") : "-"}
             </p>
             <p>
               <strong>Descrição:</strong> {selectedSupplier.description}
@@ -431,7 +467,7 @@ export function TableServiceProvider() {
             </div>
             <div>
               <label className="text-white font-semibold block mb-1">
-                Data de Início
+                Data de Ínicio
               </label>
               <input
                 type="date"
