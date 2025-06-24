@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface CardPanelControlProps {
+interface CardPanelControlProps {  
   clientCnpj: string;
   clientTradeName: string;
   creationDate: string;
