@@ -19,7 +19,7 @@ import { BranchUltraProvider } from "./context/context-ultra/BranchUltra-provide
 
 const queryClient = new QueryClient();
 
-export function App() {
+export function App() {   
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
