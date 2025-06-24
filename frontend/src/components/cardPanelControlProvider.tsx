@@ -129,7 +129,7 @@ export function CardPanelControlProvider({
               <span className="font-semibold text-[#2563EB]">
                 Solicitação está aceita
               </span>
-            </div>
+            </div> 
           )}
           <span className="text-[14px] text-neutral-600">{requesterEmail}</span>
         </div>
