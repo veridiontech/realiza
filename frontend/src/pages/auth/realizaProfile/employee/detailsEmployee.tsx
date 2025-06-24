@@ -3,7 +3,7 @@ import axios from "axios";
 import { Table } from "@/components/ui/tableVanila";
 import { AddDocument } from "./modals/addDocument";
 import { useParams } from "react-router-dom";
-import { Eye, Edit, User } from "lucide-react";
+import { Eye, FileDown , User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
 import { Blocks } from "react-loader-spinner";
@@ -149,7 +149,7 @@ export function DetailsEmployee() {
                 setTimeout(() => setIsModalOpen(true), 0);
               }}
             >
-              <Edit size={16} />
+              <FileDown size={16} />
             </button>
           </div>
         ),
