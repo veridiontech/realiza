@@ -223,10 +223,7 @@ export function DetailsEmployee() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="p-2 text-stone-600">NR33 - Atividade teste</td>
-                    <td className="p-2 text-stone-600">Upload</td>
-                    <td className="p-2 text-stone-600">Monica</td>
-                    <td className="p-2 text-stone-600">10/04/2025</td>
+                    {/* <td className="p-2 text-stone-600">...</td> */}
                   </tr>
                 </tbody>
               </table>
