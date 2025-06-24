@@ -586,9 +586,6 @@ export function NewModalCreateEmployee({ onEmployeeCreated }: NewModalCreateEmpl
                         <Search className="w-5 h-5" />
                       </div>
                     </div>
-                    {errors.cep && (
-                      <span className="text-sm text-red-600">{errors.cep.message}</span>
-                    )}
                   </div>
                   <div>
                     <Label className="text-white">Estado</Label>
