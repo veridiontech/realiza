@@ -9,6 +9,7 @@ import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployee
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.responses.dashboard.DashboardDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.dashboard.DashboardHomeResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,10 @@ public class DashboardService {
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final EmployeeRepository employeeRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final ProviderSupplierRepository providerSupplierRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
-        Branch branch = branchRepository.findById(branchId)
+        branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
         double conformity;
         int activeContractQuantity;
@@ -46,19 +48,19 @@ public class DashboardService {
 
         // conformidade
         Object[] resultEmployeeSupplierRaw = documentEmployeeRepository
-                .countTotalAndPendentesByContractSupplierBranch(branch.getIdBranch(), APROVADO);
+                .countTotalAndPendentesByContractSupplierBranch(branchId, APROVADO);
         Object[] resultEmployeeSupplier = (Object[]) resultEmployeeSupplierRaw[0];
 
         Object[] resultEmployeeSubcontractorRaw = documentEmployeeRepository
-                .countTotalAndPendentesByContractSubcontractorBranch(branch.getIdBranch(), APROVADO);
+                .countTotalAndPendentesByContractSubcontractorBranch(branchId, APROVADO);
         Object[] resultEmployeeSubcontractor = (Object[]) resultEmployeeSubcontractorRaw[0];
 
         Object[] resultSubcontractorRaw = documentProviderSubcontractorRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), APROVADO);
+                .countTotalAndPendentesByBranch(branchId, APROVADO);
         Object[] resultSubcontractor = (Object[]) resultSubcontractorRaw[0];
 
         Object[] resultSupplierRaw = documentProviderSupplierRepository
-                .countTotalAndPendentesByBranch(branch.getIdBranch(), APROVADO);
+                .countTotalAndPendentesByBranch(branchId, APROVADO);
         Object[] resultSupplier = (Object[]) resultSupplierRaw[0];
 
         long total = getSafeLong(resultEmployeeSupplier, 0)
@@ -76,18 +78,19 @@ public class DashboardService {
 
 
         // contratos ativos
-        activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(branch.getIdBranch(), ATIVADO).intValue();
+        activeContractQuantity = contractProviderSupplierRepository.countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(branchId, ATIVADO).intValue();
 
-        activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()
-        + employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), DESALOCADO).intValue()
-        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), ALOCADO).intValue()
-        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branch.getIdBranch(), DESALOCADO).intValue();
+        activeEmployeeQuantity = employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branchId, ALOCADO).intValue()
+        + employeeRepository.countAllBySupplier_Branches_IdBranchAndSituation(branchId, DESALOCADO).intValue()
+        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branchId, ALOCADO).intValue()
+        + employeeRepository.countAllBySubcontract_ProviderSupplier_Branches_IdBranchAndSituation(branchId, DESALOCADO).intValue();
 
         // quantidade de fornecedores
-        // TODO adicionar quantidade de fornecerores
+        supplierQuantity = providerSupplierRepository.countByBranches_IdBranchAndIsActiveIsTrue(branchId);
 
         // quantidade de funcionarios alocados
         // TODO adicionar quantidade de funcionarios alocados
+        allocatedEmployeeQuantity = employeeRepository.countAllByBranch_IdBranchAndSituation(branchId, ALOCADO);
 
         return DashboardHomeResponseDto.builder()
                 .conformity(conformity)
