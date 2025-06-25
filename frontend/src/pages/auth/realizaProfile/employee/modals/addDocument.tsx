@@ -8,6 +8,7 @@ interface AddDocumentProps {
   onClose: () => void;
   documentId: string | null;
   preSelectedTitle?: string | null;
+  onStatusChange: (id: string, newStatus: string) => void;  // Função recebida via props
 }
 
 export const AddDocument: React.FC<AddDocumentProps> = ({
@@ -15,6 +16,7 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
   onClose,
   documentId,
   preSelectedTitle,
+  onStatusChange,  // Função recebida via props
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -71,6 +73,12 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
 
       setStatusMessage("Arquivo enviado com sucesso!");
       setStatusType("success");
+
+      // Atualizando o status do documento para "EM_ANALISE" após o upload
+      if (documentId) {
+        onStatusChange(documentId, "EM_ANALISE");  // Aqui a função é chamada para alterar o status
+      }
+
       setSelectedFile(null);
     } catch (error: any) {
       console.error("❌ Erro ao enviar:", error.response?.data || error.message);
