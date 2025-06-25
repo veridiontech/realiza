@@ -6,7 +6,7 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Blocks, Oval } from "react-loader-spinner";
@@ -33,7 +33,7 @@ export function ServicesSection() {
   const [tempTitle, setTempTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false)
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
 
   const tokenFromStorage = localStorage.getItem("tokenClient");
 
@@ -72,9 +72,13 @@ export function ServicesSection() {
     console.log("Enviando updateTitle:", payload);
 
     try {
-      await axios.put(`${ip}/contract/service-type/branch/${idServiceType}`, payload, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
+      await axios.put(
+        `${ip}/contract/service-type/branch/${idServiceType}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
 
       setServices((old) =>
         old.map((s) =>
@@ -102,9 +106,13 @@ export function ServicesSection() {
     console.log("Enviando updateRisk:", payload);
 
     try {
-      await axios.put(`${ip}/contract/service-type/branch/${idServiceType}`, payload, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
+      await axios.put(
+        `${ip}/contract/service-type/branch/${idServiceType}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
 
       setServices((old) =>
         old.map((s) => (s.idServiceType === idServiceType ? { ...s, risk } : s))
@@ -120,19 +128,23 @@ export function ServicesSection() {
     }
   }, [selectedBranch?.idBranch]);
 
-  const { register, handleSubmit, formState: {errors} } = useForm<CreateNewService>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateNewService>({
     resolver: zodResolver(createNewService),
   });
 
   const createService = async (data: CreateNewService) => {
-    setIsLoadingCreate(true)
+    setIsLoadingCreate(true);
 
     const payload = {
       ...data,
-      branchId: selectedBranch?.idBranch
-    }
+      branchId: selectedBranch?.idBranch,
+    };
     console.log("enviando dados:", payload);
-    
+
     try {
       await axios.post(
         `${ip}/contract/service-type/branch/${selectedBranch?.idBranch}`,
@@ -141,15 +153,39 @@ export function ServicesSection() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      toast.success("Sucesso ao criar novo serviço")
+      toast.success("Sucesso ao criar novo serviço");
       // Atualizar lista após criar novo serviço
       getServices();
-
-      
     } catch (err: any) {
       console.log(err);
     } finally {
-      setIsLoadingCreate(false)
+      setIsLoadingCreate(false);
+    }
+  };
+
+  const deleteService = async () => {
+    if (!serviceToDelete) return;
+
+    try {
+      await axios.delete(
+        `${ip}/contract/service-type/${serviceToDelete}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+
+      setServices((prevServices) =>
+        prevServices.filter(
+          (service) => service.idServiceType !== serviceToDelete
+        )
+      );
+
+      toast.success("Serviço excluído com sucesso!");
+    } catch (err) {
+      console.log(err);
+      toast.error("Erro ao excluir serviço.");
+    } finally {
+      closeDeleteModal(); // Fecha o modal após a operação
     }
   };
 
@@ -158,13 +194,26 @@ export function ServicesSection() {
     service.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
+
+  const openDeleteModal = (idServiceType: string) => {
+    setServiceToDelete(idServiceType);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsModalOpen(false);
+    setServiceToDelete(null);
+  };
+
   return (
     <div className="relative bottom-[8vw] bg-white rounded-md shadow-md p-10 flex flex-col gap-5">
       <div>
         <h1 className="text-[30px]">Serviços</h1>
       </div>
       <div className="flex items-start gap-10">
-        <div className="border border-neutral-300 rounded-md w-[30vw] p-3 shadow-md">
+        <div className="border border-neutral-300 rounded-md w-[50vw] p-3 shadow-md">
           <div className="flex items-center gap-1 rounded-sm border border-neutral-400 p-2">
             <Search />
             <input
@@ -189,12 +238,12 @@ export function ServicesSection() {
             </div>
           ) : (
             <ScrollArea className="h-[50vh]">
-              <div className="p-5 flex flex-col gap-4">
+              <div className="p-5 flex flex-col gap-4 ">
                 {filteredServices.length > 0 ? (
                   filteredServices.map((service) => (
                     <div
                       key={service.idServiceType}
-                      className="flex items-center gap-5"
+                      className="flex items-center gap-5 "
                     >
                       {editingTitleId === service.idServiceType ? (
                         <>
@@ -205,7 +254,7 @@ export function ServicesSection() {
                               updateTitle(service.idServiceType, tempTitle)
                             }
                             autoFocus
-                            className="border border-neutral-400 rounded p-1"
+                            className="border border-neutral-400 rounded p-1 flex-none"
                           />
                           <button
                             onClick={() => setEditingTitleId(null)}
@@ -228,6 +277,12 @@ export function ServicesSection() {
                       )}
 
                       <span>-</span>
+                      <button
+                        type="button"
+                        onClick={() => openDeleteModal(service.idServiceType)}
+                      >
+                        <Trash2 height="15" width="15" color="#9d2626" />
+                      </button>
 
                       <select
                         value={service.risk}
@@ -255,7 +310,7 @@ export function ServicesSection() {
             </ScrollArea>
           )}
         </div>
-        <div className="border border-neutral-300 p-5 rounded-md">
+        <div className="border border-neutral-300 p-5 rounded-md w-[30vw]">
           <h2>Cadastrar novo serviço</h2>
           <div>
             <form
@@ -268,9 +323,7 @@ export function ServicesSection() {
                   {...register("title")}
                   className="border border-neutral-400"
                 />
-                {errors.title && (
-                  <span>{errors.title.message}</span>
-                )}
+                {errors.title && <span>{errors.title.message}</span>}
               </div>
               <div className="flex flex-col gap-1">
                 <Label>Risco</Label>
@@ -287,9 +340,7 @@ export function ServicesSection() {
                   <option value="HIGH">ALTO</option>
                   <option value="VERY_HIGH">MUITO ALTO</option>
                 </select>
-                {errors.risk && (
-                  <span>{errors.risk.message}</span>
-                )}
+                {errors.risk && <span>{errors.risk.message}</span>}
               </div>
               {isLoadingCreate ? (
                 <Button className="bg-realizaBlue">
@@ -304,9 +355,33 @@ export function ServicesSection() {
                   />
                 </Button>
               ) : (
-                <Button className="bg-realizaBlue" type="submit">Cadastrar novo serviço</Button>
+                <Button className="bg-realizaBlue" type="submit">
+                  Cadastrar novo serviço
+                </Button>
               )}
             </form>
+            {isModalOpen && (
+              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-md w-96">
+                  <h2 className="text-lg font-bold">Confirmação</h2>
+                  <p>Tem certeza que deseja excluir este serviço?</p>
+                  <div className="flex justify-between mt-4">
+                    <button
+                      onClick={closeDeleteModal}
+                      className="bg-gray-300 p-2 rounded-md"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={deleteService}
+                      className="bg-red-500 text-white p-2 rounded-md"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
