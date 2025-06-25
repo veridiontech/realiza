@@ -2,9 +2,31 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Eye, Pencil, BadgeCheck, X } from "lucide-react";
+import { Eye, Pencil, BadgeCheck, X, MoreVertical } from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
+
+//
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner"; 
+
+const editContractSchema = z.object({
+  contractReference: z.string().nonempty("Referência do contrato é obrigatória"),
+  providerSupplierName: z.string().nonempty("Nome do fornecedor é obrigatório"),
+  serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
+  idResponsible: z.string().nonempty("Selecione um gestor"),
+  dateStart: z.string().nonempty("Data de início é obrigatória"),
+  expenseType: z.enum(["CAPEX", "OPEX", "NENHUM"]),
+  idServiceType: z.string().nonempty("Tipo de serviço é obrigatório"),
+  subcontractPermission: z.enum(["true", "false"]),
+  hse: z.boolean(),
+  labor: z.boolean(),
+  description: z.string().optional(),
+});
+
+
 
 function StatusBadge({ finished }: { finished?: boolean }) {
   const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
@@ -27,13 +49,16 @@ function Modal({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div
-        className="bg-white p-6 rounded-lg shadow-lg w-96 relative"
-        style={{
-          backgroundImage: `url(${bgModalRealiza})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+        className="p-6 rounded-lg shadow-lg w-[90vw] md:w-[640px] relative text-white"
+          style={{
+            backgroundImage: `url(${bgModalRealiza})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundColor: "#000", 
+          }}
+        >
+
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-white hover:text-gray-300"
@@ -60,6 +85,31 @@ export function TableServiceProvider() {
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
     null
   );
+  const [managers, setManagers] = useState<any[]>([]);
+  const [servicesType, setServicesType] = useState<any[]>([]);
+
+  const {
+  register,
+  handleSubmit,
+  reset,
+  formState: { errors },
+} = useForm<z.infer<typeof editContractSchema>>({
+  resolver: zodResolver(editContractSchema),
+});
+
+
+
+useEffect(() => {
+  if (editFormData) {
+    reset({
+      ...editFormData,
+      subcontractPermission: editFormData.subcontractPermission ? "true" : "false",
+      hse: editFormData.hse ?? false,
+      labor: editFormData.labor ?? false,
+    });
+  }
+}, [editFormData]);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const getSupplier = async () => {
@@ -82,38 +132,65 @@ export function TableServiceProvider() {
       setLoading(false);
     }
   };
+  const onSubmitEdit = async (data: z.infer<typeof editContractSchema>) => {
+  try {
+    const token = localStorage.getItem("tokenClient");
+    const payload = {
+      ...data,
+      subcontractPermission: data.subcontractPermission === "true",
+    };
 
-  const updateSupplier = async (idContract: string, updatedData: any) => {
-    try {
-      console.log("Atualizando fornecedor", { idContract, updatedData });
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const payload = {
-        branch: updatedData.branch,
-        branchName: updatedData.branchName,
-        contractReference: updatedData.contractReference,
-        dateStart: updatedData.dateStart,
-        description: updatedData.description,
-        expenseType: updatedData.expenseType,
-        finished: updatedData.finished,
-        providerSupplier: updatedData.providerSupplier,
-        providerSupplierCnpj: updatedData.providerSupplierCnpj,
-        providerSupplierName: updatedData.providerSupplierName,
-        serviceName: updatedData.serviceName,
-      };
-      console.log("teste: ", payload);
+    await axios.put(`${ip}/contract/supplier/${editFormData.idContract}`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      await axios.put(`${ip}/contract/supplier/${idContract}`, payload, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      await getSupplier();
-    } catch (error) {
-      console.error("Erro ao atualizar fornecedor", error);
-    }
-  };
+    toast.success("Contrato atualizado com sucesso");
+    await getSupplier();
+    setIsEditModalOpen(false);
+  } catch (err) {
+    console.error(err);
+    toast.error("Erro ao atualizar contrato");
+  }
+};
+
+
+  const getManager = async () => {
+  try {
+    const token = localStorage.getItem("tokenClient");
+    const res = await axios.get(
+      `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    setManagers(res.data.content);
+  } catch (err) {
+    console.error("Erro ao buscar gestores", err);
+  }
+};
+
+const getServicesType = async () => {
+  try {
+    const token = localStorage.getItem("tokenClient");
+    const res = await axios.get(`${ip}/contract/service-type`, {
+      params: {
+        owner: "BRANCH",
+        idOwner: selectedBranch?.idBranch,
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setServicesType(res.data);
+  } catch (err) {
+    console.error("Erro ao buscar tipos de serviço", err);
+  }
+};
+
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
+      getManager();
+      getServicesType();
     }
   }, [selectedBranch]);
 
@@ -299,29 +376,58 @@ export function TableServiceProvider() {
                   <td className="border border-gray-300 p-2">
                     <StatusBadge finished={supplier.finished} />
                   </td>
-                  <td className="border border-gray-300 p-2 space-x-2">
+                  <td className="border border-gray-300 p-2 text-center align-middle">
+                    <div className="relative inline-block text-left">
                     <button
-                      title="Visualizar contrato"
-                      onClick={() => handleViewClick(supplier)}
-                    >
-                      <Eye className="w-5 h-5" />
-                    </button>
-                    <button
-                      title="Editar"
-                      onClick={() => handleEditClick(supplier)}
-                    >
-                      <Pencil className="w-5 h-5" />
-                    </button>
-                    <button
-                      title="Finalizar"
-                      onClick={() => {
-                        setSelectedSupplierId(supplier.idContract);
-                        setIsFinalizeModalOpen(true);
-                      }}
-                    >
-                      <BadgeCheck className="w-5 h-5" />
-                    </button>
-                  </td>
+                      onClick={() =>
+                      setSelectedSupplierId(
+                        selectedSupplierId === supplier.idContract ? null : supplier.idContract
+                    )
+                  }
+                  className="p-1 hover:bg-gray-200 rounded"
+                >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+
+              {selectedSupplierId === supplier.idContract && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                <button
+                  onClick={() => {
+                  handleViewClick(supplier);
+                  setSelectedSupplierId(null);
+                }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+              >
+              <Eye className="w-4 h-4" /> Visualizar
+              </button>
+            <button
+              onClick={() => {
+              handleEditClick(supplier);
+              setSelectedSupplierId(null);
+            }}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          >
+            <Pencil className="w-4 h-4" /> Editar
+          </button>
+        <button
+          onClick={() => {
+            setSelectedSupplierId(null);
+            setIsFinalizeModalOpen(true);
+          }}
+          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+        >
+          <BadgeCheck className="w-4 h-4" /> Finalizar
+              </button>
+              <button
+                disabled
+                className="w-full text-left px-4 py-2 text-sm text-gray-400 flex items-center gap-2 cursor-not-allowed"
+              >
+                <X className="w-4 h-4" /> Suspender
+              </button>
+                </div>
+                )}
+                </div>
+              </td>
                 </tr>
               ))
             ) : (
@@ -396,163 +502,158 @@ export function TableServiceProvider() {
       )}
 
       {isEditModalOpen && editFormData && (
-        <Modal
-          title="Editar Contrato"
-          onClose={() => setIsEditModalOpen(false)}
-        >
-          <div className="flex flex-col gap-4 max-h-[400px] overflow-auto">
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Referência do Contrato
-              </label>
-              <input
-                type="text"
-                value={editFormData.contractReference || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    contractReference: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Nome do Fornecedor
-              </label>
-              <input
-                type="text"
-                value={editFormData.providerSupplierName || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    providerSupplierName: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Nome do Serviço
-              </label>
-              <input
-                type="text"
-                value={editFormData.serviceName || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    serviceName: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Gestor do contrato
-              </label>
-              <input
-                type="text"
-                value={editFormData.responsibleName || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    responsibleName: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Data de Ínicio
-              </label>
-              <input
-                type="date"
-                value={
-                  editFormData.dateStart
-                    ? new Date(editFormData.dateStart)
-                        .toISOString()
-                        .slice(0, 10)
-                    : ""
-                }
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    dateStart: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Tipo de Despesa
-              </label>
-              <input
-                type="text"
-                value={editFormData.expenseType || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    expenseType: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black"
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold block mb-1">
-                Descrição
-              </label>
-              <textarea
-                value={editFormData.description || ""}
-                onChange={(e) =>
-                  setEditFormData({
-                    ...editFormData,
-                    description: e.target.value,
-                  })
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white text-black resize-none"
-                rows={3}
-              />
-            </div>
+        <Modal title="Editar Contrato" onClose={() => setIsEditModalOpen(false)}>
+          <div className="text-white space-y-4 max-h-[80vh] overflow-auto w-[90vw] md:w-[600px]">
+            <form
+              onSubmit={handleSubmit(onSubmitEdit)}
+              className="flex flex-col gap-3 text-black"
+            >
+          <label>
+            Referência do Contrato
+          <input
+            className="w-full rounded border px-2 py-1"
+            {...register("contractReference")}
+          />
+          {errors.contractReference && (
+            <span className="text-red-500">{errors.contractReference.message}</span>
+          )}
+        </label>
 
-            <div className="flex justify-end gap-4 mt-4">
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="bg-red-600 px-4 py-2 rounded text-white"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={async () => {
-                  if (!editFormData?.idContract) {
-                    console.error(
-                      "ID do contrato não encontrado no formulário de edição"
-                    );
-                    return;
-                  }
-                  console.log(
-                    "Salvando contrato",
-                    editFormData.idContract,
-                    editFormData
-                  );
-                  await updateSupplier(editFormData.idContract, editFormData);
-                  setIsEditModalOpen(false);
-                  setSelectedSupplier(null);
-                  setEditFormData(null);
-                }}
-                className="bg-green-600 px-4 py-2 rounded text-white"
-              >
-                Salvar
-              </button>
-            </div>
+        <label>
+          Nome do Fornecedor
+          <input
+            className="w-full rounded border px-2 py-1"
+            {...register("providerSupplierName")}
+          />
+          {errors.providerSupplierName && (
+            <span className="text-red-500">{errors.providerSupplierName.message}</span>
+          )}
+        </label>
+
+        <label>
+          Nome do Serviço
+          <input
+            className="w-full rounded border px-2 py-1"
+            {...register("serviceName")}
+          />
+          {errors.serviceName && (
+            <span className="text-red-500">{errors.serviceName.message}</span>
+          )}
+        </label>
+
+        <label>
+          Gestor
+          <select {...register("idResponsible")} className="w-full rounded border px-2 py-1">
+            <option value="">Selecione</option>
+            {managers.map((m: any) => (
+              <option key={m.idUser} value={m.idUser}>
+                {m.firstName} {m.surname}
+              </option>
+            ))}
+          </select>
+          {errors.idResponsible && (
+            <span className="text-red-500">{errors.idResponsible.message}</span>
+          )}
+        </label>
+
+        <label>
+          Data de Início
+          <input
+            type="date"
+            className="w-full rounded border px-2 py-1"
+            {...register("dateStart")}
+          />
+          {errors.dateStart && (
+            <span className="text-red-500">{errors.dateStart.message}</span>
+          )}
+        </label>
+
+        <label>
+          Tipo de Despesa
+          <select {...register("expenseType")} className="w-full rounded border px-2 py-1">
+            <option value="">Selecione</option>
+            <option value="CAPEX">CAPEX</option>
+            <option value="OPEX">OPEX</option>
+            <option value="NENHUM">Nenhuma</option>
+          </select>
+          {errors.expenseType && (
+            <span className="text-red-500">{errors.expenseType.message}</span>
+          )}
+        </label>
+
+        <label>
+          Tipo do Serviço
+          <select {...register("idServiceType")} className="w-full rounded border px-2 py-1">
+            <option value="">Selecione</option>
+            {servicesType.map((service: any) => (
+              <option key={service.idServiceType} value={service.idServiceType}>
+                {service.title}
+              </option>
+            ))}
+          </select>
+          {errors.idServiceType && (
+            <span className="text-red-500">{errors.idServiceType.message}</span>
+          )}
+        </label>
+
+        <div className="flex gap-4 items-center">
+          <label className="flex gap-2 items-center">
+            <input type="checkbox" {...register("hse")} />
+            SSMA
+          </label>
+          <label className="flex gap-2 items-center">
+            <input type="checkbox" {...register("labor")} />
+            Trabalhista
+          </label>
+        </div>
+        
+
+        <label>
+          Permitir Subcontratação?
+          <div className="flex gap-3">
+            <label className="flex items-center gap-1">
+              <input type="radio" value="true" {...register("subcontractPermission")} />
+              Sim
+            </label>
+            <label className="flex items-center gap-1">
+              <input type="radio" value="false" {...register("subcontractPermission")} />
+              Não
+            </label>
           </div>
-        </Modal>
-      )}
+          {errors.subcontractPermission && (
+            <span className="text-red-500">{errors.subcontractPermission.message}</span>
+          )}
+        </label>
+
+        <label>
+          Descrição
+          <textarea
+            className="w-full rounded border px-2 py-1"
+            rows={3}
+            {...register("description")}
+          />
+        </label>
+
+        <div className="flex justify-end gap-4 mt-2">
+          <button
+            type="button"
+            onClick={() => setIsEditModalOpen(false)}
+            className="bg-red-600 px-4 py-2 rounded text-white"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="bg-green-600 px-4 py-2 rounded text-white"
+          >
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </Modal>
+)}
+
 
       {isFinalizeModalOpen && (
         <Modal
