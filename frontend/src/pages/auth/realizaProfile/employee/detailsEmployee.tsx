@@ -3,7 +3,7 @@ import axios from "axios";
 import { Table } from "@/components/ui/tableVanila";
 import { AddDocument } from "./modals/addDocument";
 import { useParams } from "react-router-dom";
-import { Eye, Upload  , User } from "lucide-react";
+import { Eye, Upload, User } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
 import { Blocks } from "react-loader-spinner";
@@ -36,7 +36,6 @@ export function DetailsEmployee() {
     );
   };
 
-  // 🔄 Carrega dados do colaborador
   const fetchEmployee = async () => {
     try {
       const token = localStorage.getItem("tokenClient");
@@ -49,7 +48,6 @@ export function DetailsEmployee() {
     }
   };
 
-  // 🔄 Carrega documentos
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem("tokenClient");
@@ -121,11 +119,30 @@ export function DetailsEmployee() {
       {
         key: "status",
         label: "Status",
-        render: (value: string) => (
-          <span className={`text-sm font-medium ${value === "ativo" ? "text-green-600" : "text-red-600"}`}>
-            {value}
-          </span>
-        ),
+        render: (value: string) => {
+          let statusClass = "";
+          let statusText = value;
+
+          if (value === "PENDENTE") {
+            statusClass = "text-yellow-500";
+          } else if (value === "APROVADO") {
+            statusClass = "text-green-600";
+          } else if (value === "REPROVADO") {
+            statusClass = "text-red-600";
+          } else if (value === "EM_ANALISE") {
+            statusClass = "text-yellow-500";
+          } else if (value === "REPROVADO_IA") {
+            statusClass = "text-red-600";
+          } else if (value === "APROVADO_IA") {
+            statusClass = "text-green-600";
+          }
+
+          return (
+            <span className={`text-sm font-medium ${statusClass}`}>
+              {statusText}
+            </span>
+          );
+        },
       },
       {
         key: "idDocument",
@@ -142,14 +159,14 @@ export function DetailsEmployee() {
               <Eye size={16} />
             </button>
             <button
-              className="text-yellow-500 hover:underline"
+              className="text-realizaBlue hover:underline"
               onClick={() => {
                 setSelectedDocumentId(row.idDocument);
                 setSelectedDocumentTitle(row.title);
                 setTimeout(() => setIsModalOpen(true), 0);
               }}
             >
-              <Upload  size={16} />
+              <Upload size={16} />
             </button>
           </div>
         ),
