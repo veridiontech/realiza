@@ -47,6 +47,10 @@ export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
   }
 
   return (
+    <div className="relative w-fit">
+          <span className="absolute -top-5 left-2 text-sm text-gray-500">
+            Documentos alocados
+          </span>
     <div className="border p-5 shadow-md w-[35vw]">
       <div className="flex items-center gap-2 rounded-md border p-2">
         <Search />
@@ -75,6 +79,7 @@ export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
           )}
         </div>
       </ScrollArea>
+    </div>
     </div>
   );
 }

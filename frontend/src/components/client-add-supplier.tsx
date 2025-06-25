@@ -30,10 +30,10 @@ const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
   phone: z.string()
-        .optional()
-        .refine((val) => !val || phoneRegex.test(val), {
-          message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
-        }),
+    .optional()
+    .refine((val) => !val || phoneRegex.test(val), {
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+    }),
   cnpj: z
     .string()
     .nonempty("Insira o CNPJ")
@@ -43,11 +43,11 @@ export const modalSendEmailFormSchema = z.object({
 
 export const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
-  phone:  z.string()
-        .optional()
-        .refine((val) => !val || phoneRegex.test(val), {
-          message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
-        }),
+  phone: z.string()
+    .optional()
+    .refine((val) => !val || phoneRegex.test(val), {
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+    }),
   cnpj: z
     .string()
     .nonempty("Insira o CNPJ")
@@ -106,7 +106,7 @@ export function ModalTesteSendSupplier() {
   const [searchService, setSearchService] = useState("");
   const [searchActivity, setSearchActivity] = useState("");
   const [usedEmails, setUsedEmails] = useState<string[]>([]);
-
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
@@ -314,6 +314,7 @@ export function ModalTesteSendSupplier() {
       return;
     }
     setIsLoading(true);
+    setIsButtonDisabled(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const payload = {
@@ -347,6 +348,7 @@ export function ModalTesteSendSupplier() {
       }
     } finally {
       setIsLoading(false);
+      setIsButtonDisabled(false);
     }
   };
 
@@ -979,7 +981,7 @@ export function ModalTesteSendSupplier() {
                       </div>
                     )}
                     {isLoading ? (
-                      <Button className="bg-realizaBlue" type="submit">
+                      <Button className="bg-realizaBlue" type="submit" disabled={isButtonDisabled}>
                         <Oval
                           visible={true}
                           height="80"
@@ -991,7 +993,7 @@ export function ModalTesteSendSupplier() {
                         />
                       </Button>
                     ) : (
-                      <Button className="bg-realizaBlue" type="submit">
+                      <Button className="bg-realizaBlue" type="submit" disabled={isButtonDisabled}>
                         Enviar contrato
                       </Button>
                     )}
