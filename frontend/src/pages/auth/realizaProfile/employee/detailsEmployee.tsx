@@ -259,6 +259,7 @@ export function DetailsEmployee() {
           }}
           documentId={selectedDocumentId}
           preSelectedTitle={selectedDocumentTitle}
+          onStatusChange={handleStatusChange}
         />
       )}
 
