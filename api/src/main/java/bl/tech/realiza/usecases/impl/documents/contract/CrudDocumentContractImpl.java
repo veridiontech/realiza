@@ -43,6 +43,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                                 .id(documentEmployee.getIdDocumentation())
                                 .title(documentEmployee.getTitle())
+                                .status(documentEmployee.getStatus())
                                 .ownerName(documentEmployee.getEmployee().getName()
                                         + (documentEmployee.getEmployee().getSurname() != null
                                         ? " " + documentEmployee.getEmployee().getSurname() : ""))
@@ -59,6 +60,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                             .id(documentProviderSupplier.getIdDocumentation())
                             .title(documentProviderSupplier.getTitle())
+                            .status(documentProviderSupplier.getStatus())
                             .ownerName(documentProviderSupplier.getProviderSupplier().getCorporateName())
                             .enterprise(true)
                         .build());
@@ -79,6 +81,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                                 .id(documentProviderSubcontractor.getIdDocumentation())
                                 .title(documentProviderSubcontractor.getTitle())
+                                .status(documentProviderSubcontractor.getStatus())
                                 .ownerName(documentProviderSubcontractor.getProviderSubcontractor().getCorporateName())
                                 .enterprise(true)
                         .build());
