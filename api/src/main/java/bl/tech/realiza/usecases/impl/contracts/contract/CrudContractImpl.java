@@ -111,6 +111,12 @@ public class CrudContractImpl implements CrudContract {
 
         Contract contract = (Contract) Hibernate.unproxy(contractProxy);
 
+        switch (contract.getIsActive()) {
+            case PENDENTE -> throw new IllegalArgumentException("Contract is in pendent state");
+            case SUSPENSO -> throw new IllegalArgumentException("Contract is in suspended state");
+            case NEGADO -> throw new IllegalArgumentException("Contract was denied");
+        }
+
         List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
         if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
@@ -154,6 +160,11 @@ public class CrudContractImpl implements CrudContract {
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
+        switch (contract.getIsActive()) {
+            case PENDENTE -> throw new IllegalArgumentException("Contract is in pendent state");
+            case NEGADO -> throw new IllegalArgumentException("Contract was denied");
+        }
 
         List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
