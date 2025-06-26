@@ -3,8 +3,6 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -76,26 +74,6 @@ public class CrudBranchImpl implements CrudBranch {
                 .build());
 
         setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH", null, savedBranch.getIdBranch(), null, null, null, null));
-
-        List<DocumentBranch> batch = new ArrayList<>(50);
-        for (var documentMatrix : documentMatrixRepository.findAll()) {
-            batch.add(DocumentBranch.builder()
-                    .title(documentMatrix.getName())
-                    .type(documentMatrix.getType())
-                    .status(Document.Status.PENDENTE)
-                    .isActive(true)
-                    .branch(savedBranch)
-                    .documentMatrix(documentMatrix)
-                    .build());
-
-            if (batch.size() == 50) {
-                documentBranchRepository.saveAll(batch);
-                batch.clear();
-            }
-        }
-        if (!batch.isEmpty()) {
-            documentBranchRepository.saveAll(batch);
-        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
