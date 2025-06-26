@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
+import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
@@ -70,7 +71,7 @@ public class CrudContractImpl implements CrudContract {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
-                        userResponsible.getEmail() + " finished contract " + contract.getContractReference(),
+                        userResponsible.getEmail() + " finalizou contrato " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.FINISH,
                         userResponsible);
             }
@@ -95,7 +96,7 @@ public class CrudContractImpl implements CrudContract {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
-                        userResponsible.getEmail() + " suspended contract " + contract.getContractReference(),
+                        userResponsible.getEmail() + " suspendeu contrato " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.UPDATE,
                         userResponsible);
             }
@@ -150,6 +151,20 @@ public class CrudContractImpl implements CrudContract {
         }
 
         employeeRepository.saveAll(employees);
+        for (Employee employee : employees) {
+            if (JwtService.getAuthenticatedUserId() != null) {
+                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                        .orElse(null);
+                if (userResponsible != null) {
+                    auditLogServiceImpl.createAuditLogEmployee(
+                            employee,
+                            userResponsible.getEmail() + " alocou colaborador " + employee.getName()
+                            + " ao contrato " + contract.getContractReference(),
+                            AuditLogEmployee.AuditLogEmployeeActions.ALLOCATE,
+                            userResponsible);
+                }
+            }
+        }
 
         return "Employee added successfully";
     }
@@ -196,6 +211,21 @@ public class CrudContractImpl implements CrudContract {
         }
 
         contractRepository.save(contract);
+
+        for (Employee employee : employees) {
+            if (JwtService.getAuthenticatedUserId() != null) {
+                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                        .orElse(null);
+                if (userResponsible != null) {
+                    auditLogServiceImpl.createAuditLogEmployee(
+                            employee,
+                            userResponsible.getEmail() + " desalocou colaborador " + employee.getName()
+                                    + " do contrato " + contract.getContractReference(),
+                            AuditLogEmployee.AuditLogEmployeeActions.DEALLOCATE,
+                            userResponsible);
+                }
+            }
+        }
 
         return "Employee added successfully";
     }

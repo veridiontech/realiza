@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.auditLogs;
 
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
@@ -12,6 +13,7 @@ import bl.tech.realiza.domains.auditLogs.user.AuditLogUser;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.ultragaz.Board;
@@ -19,6 +21,7 @@ import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.ultragaz.Market;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.repositories.auditLogs.contract.AuditLogContractRepository;
+import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.employee.AuditLogEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogBranchRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogClientRepository;
@@ -44,6 +47,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final AuditLogCenterRepository auditLogCenterRepository;
     private final AuditLogMarketRepository auditLogMarketRepository;
     private final AuditLogUserRepository auditLogUserRepository;
+    private final AuditLogDocumentRepository auditLogDocumentRepository;
 
     @Override
     public void createAuditLogContract(Contract contract, String description, AuditLogContract.AuditLogContractActions action, User userResponsible) {
@@ -59,6 +63,16 @@ public class AuditLogServiceImpl implements AuditLogService {
     public void createAuditLogEmployee(Employee employee, String description, AuditLogEmployee.AuditLogEmployeeActions action, User userResponsible) {
         auditLogEmployeeRepository.save(AuditLogEmployee.builder()
                         .idEmployee(employee)
+                        .action(action)
+                        .description(description)
+                        .idUser(userResponsible)
+                .build());
+    }
+
+    @Override
+    public void createAuditLogDocument(Document document, String description, AuditLogDocument.AuditLogDocumentActions action, User userResponsible) {
+        auditLogDocumentRepository.save(AuditLogDocument.builder()
+                        .idDocumentation(document)
                         .action(action)
                         .description(description)
                         .idUser(userResponsible)

@@ -1,22 +1,28 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
+import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +49,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     private final FileRepository fileRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentProcessingService documentProcessingService;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogServiceImpl;
 
     @Override
     public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
@@ -263,6 +271,22 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 (DocumentProviderSupplier) Hibernate.unproxy(documentSupplier));
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogDocument(
+                        savedDocumentSupplier,
+                        userResponsible.getEmail() + " fez upload do documento "
+                                + savedDocumentSupplier.getTitle() + " para a empresa "
+                                + (savedDocumentSupplier.getProviderSupplier() != null
+                                ? savedDocumentSupplier.getProviderSupplier().getCorporateName()
+                                : "Not identified"),
+                        AuditLogDocument.AuditLogDocumentActions.UPLOAD,
+                        userResponsible);
+            }
+        }
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocument(savedDocumentSupplier.getIdDocumentation())

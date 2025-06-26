@@ -108,7 +108,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractSubcontractor,
-                        userResponsible.getEmail() + " created contract " + savedContractSubcontractor.getContractReference(),
+                        userResponsible.getEmail() + " criou contrato " + savedContractSubcontractor.getContractReference(),
                         AuditLogContract.AuditLogContractActions.CREATE,
                         userResponsible));
         }
@@ -175,7 +175,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogContract(
                         savedContractSubcontractor,
-                        userResponsible.getEmail() + " updated contract " + savedContractSubcontractor.getContractReference(),
+                        userResponsible.getEmail() + " atualizou contrato " + savedContractSubcontractor.getContractReference(),
                         AuditLogContract.AuditLogContractActions.UPDATE,
                         userResponsible);
             }
@@ -195,7 +195,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
-                        userResponsible.getEmail() + " deleted contract " + contract.getContractReference(),
+                        userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.DELETE,
                         userResponsible);
             }

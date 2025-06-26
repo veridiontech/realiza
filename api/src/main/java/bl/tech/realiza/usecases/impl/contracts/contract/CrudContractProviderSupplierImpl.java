@@ -143,7 +143,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
-                        userResponsible.getEmail() + " created contract " + savedContractProviderSupplier.getContractReference(),
+                        userResponsible.getEmail() + " criou contrato " + savedContractProviderSupplier.getContractReference(),
                         AuditLogContract.AuditLogContractActions.CREATE,
                         userResponsible));
         }
@@ -266,7 +266,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
-                        userResponsible.getEmail() + " updated contract " + savedContractProviderSupplier.getContractReference(),
+                        userResponsible.getEmail() + " atualizou contrato " + savedContractProviderSupplier.getContractReference(),
                         AuditLogContract.AuditLogContractActions.UPDATE,
                         userResponsible));
         }
@@ -322,7 +322,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         contract,
-                        userResponsible.getEmail() + " deleted contract " + contract.getContractReference(),
+                        userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.DELETE,
                         userResponsible));
         }

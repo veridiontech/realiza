@@ -92,7 +92,7 @@ public class CrudClientImpl implements CrudClient {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogClient(
                         savedClient,
-                        userResponsible.getEmail() + " created client " + savedClient.getCorporateName(),
+                        userResponsible.getEmail() + " criou cliente " + savedClient.getCorporateName(),
                         AuditLogClient.AuditLogClientActions.CREATE,
                         userResponsible);
             }
@@ -202,7 +202,7 @@ public class CrudClientImpl implements CrudClient {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogClient(
                         savedClient,
-                        userResponsible.getEmail() + " updated client " + savedClient.getCorporateName(),
+                        userResponsible.getEmail() + " atualizou cliente " + savedClient.getCorporateName(),
                         AuditLogClient.AuditLogClientActions.UPDATE,
                         userResponsible);
             }
@@ -237,7 +237,7 @@ public class CrudClientImpl implements CrudClient {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogClient(
                         client,
-                        userResponsible.getEmail() + " deleted client " + client.getCorporateName(),
+                        userResponsible.getEmail() + " deletou cliente " + client.getCorporateName(),
                         AuditLogClient.AuditLogClientActions.UPDATE,
                         userResponsible);
             }

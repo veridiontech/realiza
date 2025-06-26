@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class CrudDocumentImpl implements CrudDocument {
     private final AuditLogDocumentRepository auditLogDocumentRepository;
     private final UserRepository userRepository;
     private final ContractRepository contractRepository;
+    private final AuditLogService auditLogServiceImpl;
 
     @Override
     public void expirationChange() {
@@ -137,6 +139,43 @@ public class CrudDocumentImpl implements CrudDocument {
             }
 
             contractRepository.save(contract);
+        }
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            String owner = "";
+            if (userResponsible != null) {
+                if (document instanceof DocumentEmployee documentEmployee) {
+                    owner = documentEmployee.getEmployee() != null
+                            ? documentEmployee.getEmployee().getName()
+                            + (documentEmployee.getEmployee().getSurname() != null ?
+                            " " + documentEmployee.getEmployee().getSurname() : "")
+                            : "Not Identified";
+                } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                    owner = documentProviderSupplier.getProviderSupplier() != null
+                            ? (documentProviderSupplier.getProviderSupplier().getCorporateName() != null
+                                ? documentProviderSupplier.getProviderSupplier().getCorporateName()
+                                : (documentProviderSupplier.getProviderSupplier().getTradeName() != null
+                                    ? documentProviderSupplier.getProviderSupplier().getTradeName()
+                                    : "Not Identified"))
+                            : "Not Identified";
+                } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+                    owner = documentProviderSubcontractor.getProviderSubcontractor() != null
+                            ? (documentProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
+                            ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                            : (documentProviderSubcontractor.getProviderSubcontractor().getTradeName() != null
+                            ? documentProviderSubcontractor.getProviderSubcontractor().getTradeName()
+                            : "Not Identified"))
+                            : "Not Identified";
+                }
+                auditLogServiceImpl.createAuditLogDocument(
+                        document,
+                        userResponsible.getEmail() + " isentou documento "
+                                + document.getTitle() + " de " + owner,
+                        EXEMPT,
+                        userResponsible);
+            }
         }
 
         return "Document " + document.getTitle() + " exempted from contract " + contract.getContractReference();

@@ -34,6 +34,7 @@ public class AuditLogDocument extends AuditLog {
         DELETE,
         APPROVE,
         REJECT,
+        EXEMPT,
         AI_APPROVE,
         AI_REJECT
     }
