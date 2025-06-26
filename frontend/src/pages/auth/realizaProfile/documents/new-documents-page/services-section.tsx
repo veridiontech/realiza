@@ -47,6 +47,7 @@ export function ServicesSection() {
         },
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      console.log("Serviços retornados:", res.data);
       setServices(res.data);
     } catch (err) {
       console.log(err);
@@ -123,6 +124,7 @@ export function ServicesSection() {
   };
 
   useEffect(() => {
+    console.log("selectedBranch:", selectedBranch);
     if (selectedBranch?.idBranch) {
       getServices();
     }
