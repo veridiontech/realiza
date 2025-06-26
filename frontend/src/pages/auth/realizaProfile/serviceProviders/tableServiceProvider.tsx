@@ -2,7 +2,7 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Eye, Pencil, BadgeCheck, X, MoreVertical } from "lucide-react";
+import { Eye, Pencil, BadgeCheck, X, MoreVertical, History } from "lucide-react"; // Importe o ícone History
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
@@ -169,6 +169,11 @@ useEffect(() => {
   }
 };
 
+const handleHistoryClick = (supplier: any) => {
+  console.log("Histórico do contrato:", supplier);
+  // Adicione aqui a lógica para exibir o histórico do contrato, por exemplo, abrindo um modal.
+};
+
 const getServicesType = async () => {
   try {
     const token = localStorage.getItem("tokenClient");
@@ -263,7 +268,7 @@ const getServicesType = async () => {
 
               </p>
               <p className="text-sm font-semibold text-gray-700">Gestor:</p>
-              <p className="mb-2 text-gray-800">{supplier.responsibleName}</p>
+              <p className="mb-2 text-gray-800">{supplier.responsible}</p>
               <p className="text-sm font-semibold text-gray-700">Ações:</p>
               <div className="flex gap-2">
                 <button
@@ -371,7 +376,7 @@ const getServicesType = async () => {
                   </td>
                 
                   <td className="border border-gray-300 p-2">
-                    {supplier.responsibleName}
+                    {supplier.responsible}
                   </td>
                   <td className="border border-gray-300 p-2">
                     <StatusBadge finished={supplier.finished} />
@@ -382,8 +387,8 @@ const getServicesType = async () => {
                       onClick={() =>
                       setSelectedSupplierId(
                         selectedSupplierId === supplier.idContract ? null : supplier.idContract
-                    )
-                  }
+                      )
+                    }
                   className="p-1 hover:bg-gray-200 rounded"
                 >
                 <MoreVertical className="w-5 h-5" />
@@ -397,34 +402,43 @@ const getServicesType = async () => {
                   setSelectedSupplierId(null);
                 }}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-              >
-              <Eye className="w-4 h-4" /> Visualizar
-              </button>
+                >
+                <Eye className="w-4 h-4" /> Visualizar
+                </button>
+              <button
+                onClick={() => {
+                handleEditClick(supplier);
+                setSelectedSupplierId(null);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+            >
+              <Pencil className="w-4 h-4" /> Editar
+            </button>
+            <button // Novo botão "Histórico"
+                  onClick={() => {
+                    handleHistoryClick(supplier);
+                    setSelectedSupplierId(null);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <History className="w-4 h-4" /> Histórico
+                </button>
             <button
               onClick={() => {
-              handleEditClick(supplier);
-              setSelectedSupplierId(null);
-            }}
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-          >
-            <Pencil className="w-4 h-4" /> Editar
-          </button>
-        <button
-          onClick={() => {
-            setSelectedSupplierId(null);
-            setIsFinalizeModalOpen(true);
-          }}
-          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-        >
-          <BadgeCheck className="w-4 h-4" /> Finalizar
-              </button>
-              <button
-                disabled
-                className="w-full text-left px-4 py-2 text-sm text-gray-400 flex items-center gap-2 cursor-not-allowed"
-              >
-                <X className="w-4 h-4" /> Suspender
-              </button>
-                </div>
+                setSelectedSupplierId(null);
+                setIsFinalizeModalOpen(true);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+            >
+              <BadgeCheck className="w-4 h-4" /> Finalizar
+                  </button>
+                  <button
+                    disabled
+                    className="w-full text-left px-4 py-2 text-sm text-gray-400 flex items-center gap-2 cursor-not-allowed"
+                  >
+                    <X className="w-4 h-4" /> Suspender
+                  </button>
+                  </div>
                 )}
                 </div>
               </td>
@@ -450,7 +464,7 @@ const getServicesType = async () => {
           </div>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-red-600 inline-block" />
-          <span>Finalizado</span>
+            <span>Finalizado</span>
           </div>
         </div>
 
@@ -478,7 +492,7 @@ const getServicesType = async () => {
             </p>
             <p>
               <strong>Gestor do contrato:</strong>{" "}
-              {selectedSupplier.responsibleName}
+              {selectedSupplier.responsible}
             </p>
             <p>
               <strong>Data de Início:</strong>{" "}
