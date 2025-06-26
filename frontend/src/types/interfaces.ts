@@ -37,6 +37,8 @@ export interface propsClient {
 }
 
 export interface propsDocument {
+  documentTypeName: any;
+  idBranch: string;
   documentId?: string;
   idDocument: string;
   title: string;

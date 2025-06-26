@@ -4,16 +4,15 @@ import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.ultragaz.Board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@ToString(exclude = {"branches"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,8 +44,8 @@ public class Client {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
-    @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
+    @JsonManagedReference
     private List<Branch> branches;
 
     @JsonIgnore

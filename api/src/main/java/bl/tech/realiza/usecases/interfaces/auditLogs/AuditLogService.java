@@ -1,10 +1,13 @@
 package bl.tech.realiza.usecases.interfaces.auditLogs;
 
+import bl.tech.realiza.domains.auditLogs.activity.AuditLogActivity;
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
+import bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType;
 import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogBoard;
 import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogCenter;
 import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogMarket;
@@ -12,6 +15,9 @@ import bl.tech.realiza.domains.auditLogs.user.AuditLogUser;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.ultragaz.Board;
@@ -26,7 +32,13 @@ public interface AuditLogService {
     @Async
     void createAuditLogEmployee(Employee employee,String description, AuditLogEmployee.AuditLogEmployeeActions action, User userResponsible);
     @Async
+    void createAuditLogDocument(Document document, String description, AuditLogDocument.AuditLogDocumentActions action, User userResponsible);
+    @Async
     void createAuditLogBranch(Branch branch,String description, AuditLogBranch.AuditLogBranchActions action, User userResponsible);
+    @Async
+    void createAuditLogActivity(Activity activity, String description, AuditLogActivity.AuditLogActivityActions action, User userResponsible);
+    @Async
+    void createAuditLogServiceType(ServiceType serviceType, String description, AuditLogServiceType.AuditLogServiceTypeActions action, User userResponsible);
     @Async
     void createAuditLogClient(Client client,String description, AuditLogClient.AuditLogClientActions action, User userResponsible);
     @Async

@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
+import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
@@ -39,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudContractImpl implements CrudContract {
@@ -68,7 +71,7 @@ public class CrudContractImpl implements CrudContract {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
-                        userResponsible.getEmail() + " finished contract " + contract.getContractReference(),
+                        userResponsible.getEmail() + " finalizou contrato " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.FINISH,
                         userResponsible);
             }
@@ -78,11 +81,42 @@ public class CrudContractImpl implements CrudContract {
     }
 
     @Override
+    public String suspendContract(String contractId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        contract.setIsActive(SUSPENSO);
+        contract.setEndDate(Date.valueOf(LocalDate.now()));
+
+        contract = contractRepository.save(contract);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogContract(
+                        contract,
+                        userResponsible.getEmail() + " suspendeu contrato " + contract.getContractReference(),
+                        AuditLogContract.AuditLogContractActions.UPDATE,
+                        userResponsible);
+            }
+        }
+
+        return "Contract suspended successfully";
+    }
+
+    @Override
     public String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         Contract contractProxy = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
+        switch (contract.getIsActive()) {
+            case PENDENTE -> throw new IllegalArgumentException("Contract is in pendent state");
+            case SUSPENSO -> throw new IllegalArgumentException("Contract is in suspended state");
+            case NEGADO -> throw new IllegalArgumentException("Contract was denied");
+        }
 
         List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
@@ -117,6 +151,20 @@ public class CrudContractImpl implements CrudContract {
         }
 
         employeeRepository.saveAll(employees);
+        for (Employee employee : employees) {
+            if (JwtService.getAuthenticatedUserId() != null) {
+                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                        .orElse(null);
+                if (userResponsible != null) {
+                    auditLogServiceImpl.createAuditLogEmployee(
+                            employee,
+                            userResponsible.getEmail() + " alocou colaborador " + employee.getName()
+                            + " ao contrato " + contract.getContractReference(),
+                            AuditLogEmployee.AuditLogEmployeeActions.ALLOCATE,
+                            userResponsible);
+                }
+            }
+        }
 
         return "Employee added successfully";
     }
@@ -127,6 +175,11 @@ public class CrudContractImpl implements CrudContract {
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
+        switch (contract.getIsActive()) {
+            case PENDENTE -> throw new IllegalArgumentException("Contract is in pendent state");
+            case NEGADO -> throw new IllegalArgumentException("Contract was denied");
+        }
 
         List<Employee> employees = employeeRepository.findAllById(employeeToContractRequestDto.getEmployees());
 
@@ -158,6 +211,21 @@ public class CrudContractImpl implements CrudContract {
         }
 
         contractRepository.save(contract);
+
+        for (Employee employee : employees) {
+            if (JwtService.getAuthenticatedUserId() != null) {
+                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                        .orElse(null);
+                if (userResponsible != null) {
+                    auditLogServiceImpl.createAuditLogEmployee(
+                            employee,
+                            userResponsible.getEmail() + " desalocou colaborador " + employee.getName()
+                                    + " do contrato " + contract.getContractReference(),
+                            AuditLogEmployee.AuditLogEmployeeActions.DEALLOCATE,
+                            userResponsible);
+                }
+            }
+        }
 
         return "Employee added successfully";
     }

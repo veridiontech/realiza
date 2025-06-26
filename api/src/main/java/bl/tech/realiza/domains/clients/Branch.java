@@ -9,12 +9,10 @@ import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.UserClient;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -23,6 +21,7 @@ import java.util.List;
 
 @Data
 @Builder
+@ToString(exclude = {"client"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -56,6 +55,7 @@ public class Branch {
     // -------------------------------
     @ManyToOne
     @JoinColumn(name = "idClient")
+    @JsonBackReference
     private Client client;
 
     @ManyToMany

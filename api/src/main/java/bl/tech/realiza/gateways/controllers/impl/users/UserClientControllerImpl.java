@@ -107,6 +107,21 @@ public class UserClientControllerImpl implements UserClientController {
         return ResponseEntity.ok(pageUserClient);
     }
 
+    @GetMapping("/filtered-client/all-users")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<UserResponseDto>> getAllInnactiveAndActiveUsersClientByClient(@RequestParam(defaultValue = "0") int page,
+                                                                                             @RequestParam(defaultValue = "5") int size,
+                                                                                             @RequestParam(defaultValue = "firstName") String sort,
+                                                                                             @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                                             @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort, "surname"));
+
+        Page<UserResponseDto> pageUserClient = crudUserClient.findAllInnactiveAndActiveByClient(idSearch, pageable);
+
+        return ResponseEntity.ok(pageUserClient);
+    }
+
     @PatchMapping("/change-password/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override

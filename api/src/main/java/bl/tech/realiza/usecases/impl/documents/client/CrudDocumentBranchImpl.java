@@ -1,23 +1,30 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
+import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
+import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
+import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +51,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final BranchRepository branchRepository;
     private final FileRepository fileRepository;
     private final DocumentProcessingService documentProcessingService;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogServiceImpl;
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
@@ -584,6 +593,26 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         documentList.forEach(documentBranch -> documentBranch.setIsActive(isSelected));
 
         documentBranchRepository.saveAll(documentList);
+        String action = "";
+        if (isSelected) {
+            action = "selecionou";
+        } else {
+            action = "deselecionou";
+        }
+        for (Document document : documentList) {
+            if (JwtService.getAuthenticatedUserId() != null) {
+                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                        .orElse(null);
+                if (userResponsible != null) {
+                    auditLogServiceImpl.createAuditLogDocument(
+                            document,
+                            userResponsible.getEmail() + " " + action + " documento "
+                            + document.getTitle(),
+                            AuditLogDocument.AuditLogDocumentActions.UPDATE,
+                            userResponsible);
+                }
+            }
+        }
 
         return "Documents updated successfully";
     }
@@ -624,6 +653,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     public DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto) {
         DocumentBranch documentBranch = documentBranchRepository.findById(idDocumentation)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
+        Integer oldAmount = documentBranch.getExpirationDateAmount();
+        DocumentMatrix.Unit oldUnit = documentBranch.getExpirationDateUnit();
 
         documentBranch.setExpirationDateAmount(documentExpirationUpdateRequestDto.getExpirationDateAmount() != null
                 ? documentExpirationUpdateRequestDto.getExpirationDateAmount()
@@ -633,6 +664,20 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 : documentBranch.getExpirationDateUnit());
 
         documentBranchRepository.save(documentBranch);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogDocument(
+                        documentBranch,
+                        userResponsible.getEmail() + " mudou " + documentBranch.getTitle()
+                                + " validade de " + oldAmount + " " + oldUnit
+                                + " para " + documentBranch.getExpirationDateAmount() + " " + documentBranch.getExpirationDateUnit(),
+                        AuditLogDocument.AuditLogDocumentActions.UPDATE,
+                        userResponsible);
+            }
+        }
 
         return DocumentExpirationResponseDto.builder()
                 .idDocument(documentBranch.getIdDocumentation())

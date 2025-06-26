@@ -15,7 +15,7 @@ import static bl.tech.realiza.domains.documents.Document.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/document")
-@Tag(name = "Validation")
+@Tag(name = "Document")
 public class DocumentControllerImpl implements DocumentController {
 
     private final CrudDocument crudDocument;
@@ -26,5 +26,13 @@ public class DocumentControllerImpl implements DocumentController {
     @Override
     public ResponseEntity<String> changeDocumentStatus(@PathVariable String documentId, @RequestBody DocumentStatusChangeRequestDto documentStatusChangeRequest) {
         return ResponseEntity.ok(crudDocument.changeStatus(documentId, documentStatusChangeRequest));
+    }
+
+    @PostMapping("/{documentId}/exempt")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<String> documentExemption(@PathVariable String documentId, @RequestParam String contractId) {
+        return ResponseEntity.ok(crudDocument.documentExemption(documentId, contractId));
     }
 }

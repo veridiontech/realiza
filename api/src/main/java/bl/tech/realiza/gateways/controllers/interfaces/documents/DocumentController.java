@@ -5,4 +5,5 @@ import org.springframework.http.ResponseEntity;
 
 public interface DocumentController {
     ResponseEntity<String> changeDocumentStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto);
+    ResponseEntity<String> documentExemption(String documentId, String contractId);
 }

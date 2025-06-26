@@ -17,6 +17,7 @@ import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useBranch } from "@/context/Branch-provider";
 import { propsDocument } from "@/types/interfaces";
+import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function OrtherRequirements() {
   const { setDocuments, documents, setNonSelected, nonSelected } =
@@ -115,6 +116,7 @@ export function OrtherRequirements() {
   //
 
   return (
+    <>
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
         <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
@@ -184,5 +186,15 @@ export function OrtherRequirements() {
         <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
+        <div className="flex justify-center w-full px-10 pb-10">
+          <div className="max-w-4xl w-full">
+            <ValidateSection
+              idBranch={selectedBranch?.idBranch!}
+              documentTypeName="SEGURANCA DO TRABALHO"
+              isSelected={true}
+            />
+          </div>
+        </div>
+    </>
   );
 }

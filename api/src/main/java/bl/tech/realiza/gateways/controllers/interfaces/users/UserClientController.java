@@ -17,5 +17,6 @@ public interface UserClientController {
     ResponseEntity<String> updateUserClientProfilePicture(String id, MultipartFile file);
     ResponseEntity<Void> deleteUserClient(String id);
     ResponseEntity<Page<UserResponseDto>> getAllUsersClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<Page<UserResponseDto>> getAllInnactiveAndActiveUsersClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<String> updateUserClientPassword(String id, UserClientRequestDto userClientRequestDto);
 }

@@ -143,7 +143,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
-                        userResponsible.getEmail() + " created contract " + savedContractProviderSupplier.getContractReference(),
+                        userResponsible.getEmail() + " criou contrato " + savedContractProviderSupplier.getContractReference(),
                         AuditLogContract.AuditLogContractActions.CREATE,
                         userResponsible));
         }
@@ -157,22 +157,34 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         return ContractSupplierResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())
-                .serviceType(savedContractProviderSupplier.getServiceTypeBranch() != null ? savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType() : null)
+                .serviceType(savedContractProviderSupplier.getServiceTypeBranch() != null
+                        ? savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType()
+                        : null)
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
-                .idResponsible(savedContractProviderSupplier.getResponsible() != null ? savedContractProviderSupplier.getResponsible().getIdUser() : null)
+                .idResponsible(savedContractProviderSupplier.getResponsible() != null
+                        ? savedContractProviderSupplier.getResponsible().getIdUser()
+                        : null)
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .dateStart(savedContractProviderSupplier.getDateStart())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
                 .activities(savedContractProviderSupplier.getActivities()
                         .stream().map(Activity::getIdActivity).toList())
                 .isActive(savedContractProviderSupplier.getIsActive())
-                .idSupplier(savedContractProviderSupplier.getProviderSupplier() != null ? savedContractProviderSupplier.getProviderSupplier().getIdProvider() : null)
-                .nameSupplier(savedContractProviderSupplier.getProviderSupplier() != null ? savedContractProviderSupplier.getProviderSupplier().getCorporateName() : null)
-                .idBranch(savedContractProviderSupplier.getBranch() != null ? savedContractProviderSupplier.getBranch().getIdBranch() : null)
-                .nameBranch(savedContractProviderSupplier.getBranch() != null ? savedContractProviderSupplier.getBranch().getName() : null)
+                .idSupplier(savedContractProviderSupplier.getProviderSupplier() != null
+                        ? savedContractProviderSupplier.getProviderSupplier().getIdProvider()
+                        : null)
+                .nameSupplier(savedContractProviderSupplier.getProviderSupplier() != null
+                        ? savedContractProviderSupplier.getProviderSupplier().getCorporateName()
+                        : null)
+                .idBranch(savedContractProviderSupplier.getBranch() != null
+                        ? savedContractProviderSupplier.getBranch().getIdBranch()
+                        : null)
+                .nameBranch(savedContractProviderSupplier.getBranch() != null
+                        ? savedContractProviderSupplier.getBranch().getName()
+                        : null)
                 .build();
     }
 
@@ -188,7 +200,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAll(Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActive(ATIVADO, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActiveIn(List.of(ATIVADO, SUSPENSO), pageable);
 
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -207,6 +219,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .endDate(contractProviderSupplier.getEndDate())
                         .finished(contractProviderSupplier.getFinished())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
+                        .isActive(contractProviderSupplier.getIsActive())
                         .activities(contractProviderSupplier.getActivities()
                                 .stream().map(Activity::getIdActivity).toList())
                         .providerSupplier(contractProviderSupplier.getProviderSupplier() != null ? contractProviderSupplier.getProviderSupplier().getIdProvider() : null)
@@ -253,7 +266,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
-                        userResponsible.getEmail() + " updated contract " + savedContractProviderSupplier.getContractReference(),
+                        userResponsible.getEmail() + " atualizou contrato " + savedContractProviderSupplier.getContractReference(),
                         AuditLogContract.AuditLogContractActions.UPDATE,
                         userResponsible));
         }
@@ -278,6 +291,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .endDate(savedContractProviderSupplier.getEndDate())
                 .finished(savedContractProviderSupplier.getFinished())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
+                .isActive(savedContractProviderSupplier.getIsActive())
                 .activities(contractProviderSupplier.getActivities()
                         .stream().map(Activity::getIdActivity).toList())
                 .providerSupplier(contractProviderSupplier.getProviderSupplier() != null
@@ -308,7 +322,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         contract,
-                        userResponsible.getEmail() + " deleted contract " + contract.getContractReference(),
+                        userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
                         AuditLogContract.AuditLogContractActions.DELETE,
                         userResponsible));
         }
@@ -316,22 +330,30 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     }
 
     @Override
-    public Page<ContractResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(idSearch, ATIVADO, pageable);
+    public Page<ContractResponseDto> findAllBySupplier(String idSearch, List<IsActive> isActive, Pageable pageable) {
+        if (isActive == null || isActive.isEmpty()) {
+            isActive = List.of(ATIVADO);
+        }
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIn(idSearch, isActive, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
 
     @Override
-    public Page<ContractResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveAndProviderSupplier_IsActive(idSearch, ATIVADO, true, pageable);
+    public Page<ContractResponseDto> findAllByClient(String idSearch, List<IsActive> isActive, Pageable pageable) {
+        System.out.println("before" + isActive);
+        if (isActive == null || isActive.isEmpty()) {
+            isActive = List.of(ATIVADO);
+        }
+        System.out.println("after" + isActive);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
 
     @Override
     public Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIsTrue(idBranch,idSupplier, ATIVADO, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIn(idBranch,idSupplier, List.of(ATIVADO,SUSPENSO), pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
@@ -342,7 +364,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
-                        .serviceType(contractProviderSupplier.getServiceTypeBranch() != null ? contractProviderSupplier.getServiceTypeBranch().getIdServiceType() : null)
+                        .serviceType(contractProviderSupplier.getServiceTypeBranch() != null
+                                ? contractProviderSupplier.getServiceTypeBranch().getIdServiceType()
+                                : null)
                         .serviceName(contractProviderSupplier.getServiceName())
                         .contractReference(contractProviderSupplier.getContractReference())
                         .description(contractProviderSupplier.getDescription())
@@ -351,6 +375,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .endDate(contractProviderSupplier.getEndDate())
                         .finished(contractProviderSupplier.getFinished())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
+                        .isActive(contractProviderSupplier.getIsActive())
                         .responsible(contractProviderSupplier.getResponsible() != null
                                 ? (contractProviderSupplier.getResponsible().getFirstName() + (contractProviderSupplier.getResponsible().getSurname() != null
                                     ? (" " + contractProviderSupplier.getResponsible().getSurname())
@@ -498,7 +523,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 contractProviderSupplier -> ContractSupplierPermissionResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
                         .contractReference(contractProviderSupplier.getContractReference())
-                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getTradeName())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier() != null
+                                ? contractProviderSupplier.getProviderSupplier().getTradeName()
+                                : null)
                         .build()
         )
                 .sorted(Comparator.comparing(ContractSupplierPermissionResponseDto::getContractReference, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
