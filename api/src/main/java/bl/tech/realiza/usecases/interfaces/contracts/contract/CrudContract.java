@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface CrudContract {
     String finishContract(String idContract);
+    String suspendContract(String contractId);
     String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
     String removeEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
-
     Page<ContractByEmployeeResponseDto> getContractByEmployee(Pageable pageable, String idEmployee);
 }

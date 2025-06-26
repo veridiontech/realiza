@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl.contracts.activity;
 
+import bl.tech.realiza.domains.auditLogs.activity.AuditLogActivity;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
@@ -7,6 +8,7 @@ import bl.tech.realiza.domains.contract.activity.ActivityDocumentsRepo;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepoRepository;
@@ -14,9 +16,13 @@ import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocument
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
+import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static bl.tech.realiza.domains.auditLogs.activity.AuditLogActivity.AuditLogActivityActions.*;
+import static bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType.AuditLogServiceTypeActions.CREATE;
+import static bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType.AuditLogServiceTypeActions.UPDATE;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +49,8 @@ public class CrudActivityImpl implements CrudActivity {
     private final ActivityDocumentRepository activityDocumentRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final ActivityDocumentRepoRepository activityDocumentRepoRepository;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogServiceImpl;
 
     @Override
     public ActivityResponseDto save(ActivityRequestDto activityRequestDto) {
@@ -51,6 +63,18 @@ public class CrudActivityImpl implements CrudActivity {
                 .build();
 
         Activity savedActivity = activityRepository.save(activity);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogActivity(
+                        savedActivity,
+                        userResponsible.getEmail() + " criou a atividade " + activity.getTitle(),
+                        AuditLogActivity.AuditLogActivityActions.CREATE,
+                        userResponsible);
+            }
+        }
 
         return ActivityResponseDto.builder()
                 .idActivity(savedActivity.getIdActivity())
@@ -155,6 +179,18 @@ public class CrudActivityImpl implements CrudActivity {
                 .build();
         ActivityDocuments savedActivityDocuments = activityDocumentRepository.save(activityDocuments);
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogActivity(
+                        activity,
+                        userResponsible.getEmail() + " atribuiu o documento " + documentBranch.getTitle() + " a atividade " + activity.getTitle(),
+                        ALLOCATE,
+                        userResponsible);
+            }
+        }
+
         return ActivityDocumentResponseDto.builder()
                 .idAssociation(savedActivityDocuments.getId())
                 .idActivity(savedActivityDocuments.getActivity().getIdActivity())
@@ -167,6 +203,18 @@ public class CrudActivityImpl implements CrudActivity {
     public String removeDocumentFromActivity(String idActivity, String idDocumentBranch) {
         ActivityDocuments savedActivityDocuments = activityDocumentRepository.findByActivity_IdActivityAndDocumentBranch_IdDocumentation(idActivity, idDocumentBranch);
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogActivity(
+                        savedActivityDocuments.getActivity(),
+                        userResponsible.getEmail() + " removeu o documento " + savedActivityDocuments.getDocumentBranch() + " da atividade " + savedActivityDocuments.getActivity(),
+                        DEALLOCATE,
+                        userResponsible);
+            }
+        }
+
         activityDocumentRepository.delete(savedActivityDocuments);
 
         return "Document removed successfully!";
@@ -178,8 +226,12 @@ public class CrudActivityImpl implements CrudActivity {
 
         Activity activity = activityOptional.orElseThrow(() -> new NotFoundException("Activity not found"));
 
-        activity.setTitle(activityRequestDto.getTitle() != null ? activityRequestDto.getTitle() : activity.getTitle());
-        activity.setRisk(activityRequestDto.getRisk() != null ? activityRequestDto.getRisk() : activity.getRisk());
+        activity.setTitle(activityRequestDto.getTitle() != null
+                ? activityRequestDto.getTitle()
+                : activity.getTitle());
+        activity.setRisk(activityRequestDto.getRisk() != null
+                ? activityRequestDto.getRisk()
+                : activity.getRisk());
 
         Activity savedActivity = activityRepository.save(activity);
 
@@ -188,11 +240,37 @@ public class CrudActivityImpl implements CrudActivity {
                 .title(savedActivity.getTitle())
                 .build();
 
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogActivity(
+                        savedActivity,
+                        userResponsible.getEmail() + " atualizou a atividade " + activity.getTitle(),
+                        AuditLogActivity.AuditLogActivityActions.UPDATE,
+                        userResponsible);
+            }
+        }
+
         return Optional.of(activityResponse);
     }
 
     @Override
     public void delete(String id) {
+        Activity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogActivity(
+                        activity,
+                        userResponsible.getEmail() + " deletou a atividade " + activity.getTitle(),
+                        AuditLogActivity.AuditLogActivityActions.CREATE,
+                        userResponsible);
+            }
+        }
         activityRepository.deleteById(id);
     }
 

@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.ultragaz.Board;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,8 +46,8 @@ public class Client {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
-    @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
+    @JsonManagedReference
     private List<Branch> branches;
 
     @JsonIgnore

@@ -3,10 +3,12 @@ package bl.tech.realiza.domains.contract;
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -72,6 +74,15 @@ public abstract class Contract {
     @JsonIgnore
     private List<Activity> activities;
 
+    @ManyToMany
+    @JoinTable(
+            name = "CONTRACT_DOCUMENT",
+            joinColumns = @JoinColumn(name = "idContract"),
+            inverseJoinColumns = @JoinColumn(name = "idDocumentation")
+    )
+    @JsonManagedReference
+    private List<Document> documents;
+
     @ManyToMany(mappedBy = "contracts")
     private List<Employee> employees;
 
@@ -95,6 +106,7 @@ public abstract class Contract {
     public enum IsActive {
         ATIVADO,
         PENDENTE,
-        NEGADO
+        NEGADO,
+        SUSPENSO
     }
 }

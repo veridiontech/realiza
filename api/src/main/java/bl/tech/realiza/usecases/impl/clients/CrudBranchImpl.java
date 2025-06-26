@@ -101,7 +101,7 @@ public class CrudBranchImpl implements CrudBranch {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLogBranch(
                         savedBranch,
-                        userResponsible.getEmail() + " created branch " + savedBranch.getName(),
+                        userResponsible.getEmail() + " criou filial " + savedBranch.getName(),
                         AuditLogBranch.AuditLogBranchActions.CREATE,
                         userResponsible));
         }
@@ -207,7 +207,7 @@ public class CrudBranchImpl implements CrudBranch {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogBranch(
                         branch,
-                        userResponsible.getEmail() + " updated branch " + branch.getName(),
+                        userResponsible.getEmail() + " atualizou filial " + branch.getName(),
                         AuditLogBranch.AuditLogBranchActions.UPDATE,
                         userResponsible);
             }
@@ -254,7 +254,7 @@ public class CrudBranchImpl implements CrudBranch {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogBranch(
                         branch,
-                        userResponsible.getEmail() + " deleted branch " + branch.getName(),
+                        userResponsible.getEmail() + " deletou filial " + branch.getName(),
                         AuditLogBranch.AuditLogBranchActions.DELETE,
                         userResponsible);
             }

@@ -1,8 +1,8 @@
-package bl.tech.realiza.domains.auditLogs.document;
+package bl.tech.realiza.domains.auditLogs.activity;
 
 import bl.tech.realiza.domains.auditLogs.AuditLog;
-import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
-import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -19,23 +19,19 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@DiscriminatorValue("DOCUMENT")
-public class AuditLogDocument extends AuditLog {
-    private AuditLogDocumentActions action;
+@DiscriminatorValue("ACTIVITY")
+public class AuditLogActivity extends AuditLog {
+    private AuditLogActivityActions action;
 
     @ManyToOne
-    @JoinColumn(name = "idDocumentation")
-    private Document idDocumentation;
+    @JoinColumn(name = "idActivity")
+    private Activity activity;
 
-    public enum AuditLogDocumentActions {
+    public enum AuditLogActivityActions {
         CREATE,
         UPDATE,
-        UPLOAD,
         DELETE,
-        APPROVE,
-        REJECT,
-        EXEMPT,
-        AI_APPROVE,
-        AI_REJECT
+        ALLOCATE,
+        DEALLOCATE
     }
 }

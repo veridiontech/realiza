@@ -1,5 +1,7 @@
 package bl.tech.realiza.gateways.responses.documents;
 
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.Document.Status;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class ContractDocumentAndEmployeeResponseDto {
     public static class DocumentDto {
         private String id;
         private String title;
+        private Status status;
         private String ownerName;
         private Boolean enterprise;
     }

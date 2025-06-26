@@ -1,10 +1,13 @@
 package bl.tech.realiza.usecases.impl.auditLogs;
 
+import bl.tech.realiza.domains.auditLogs.activity.AuditLogActivity;
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
+import bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType;
 import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogBoard;
 import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogCenter;
 import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogMarket;
@@ -12,17 +15,23 @@ import bl.tech.realiza.domains.auditLogs.user.AuditLogUser;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.ultragaz.Board;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.ultragaz.Market;
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.gateways.repositories.auditLogs.activity.AuditLogActivityRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.contract.AuditLogContractRepository;
+import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.employee.AuditLogEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogBranchRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogClientRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogProviderRepository;
+import bl.tech.realiza.gateways.repositories.auditLogs.serviceType.AuditLogServiceTypeRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.ultragaz.AuditLogBoardRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.ultragaz.AuditLogCenterRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.ultragaz.AuditLogMarketRepository;
@@ -44,6 +53,9 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final AuditLogCenterRepository auditLogCenterRepository;
     private final AuditLogMarketRepository auditLogMarketRepository;
     private final AuditLogUserRepository auditLogUserRepository;
+    private final AuditLogDocumentRepository auditLogDocumentRepository;
+    private final AuditLogServiceTypeRepository auditLogServiceTypeRepository;
+    private final AuditLogActivityRepository auditLogActivityRepository;
 
     @Override
     public void createAuditLogContract(Contract contract, String description, AuditLogContract.AuditLogContractActions action, User userResponsible) {
@@ -66,9 +78,39 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
+    public void createAuditLogDocument(Document document, String description, AuditLogDocument.AuditLogDocumentActions action, User userResponsible) {
+        auditLogDocumentRepository.save(AuditLogDocument.builder()
+                        .idDocumentation(document)
+                        .action(action)
+                        .description(description)
+                        .idUser(userResponsible)
+                .build());
+    }
+
+    @Override
     public void createAuditLogBranch(Branch branch, String description, AuditLogBranch.AuditLogBranchActions action, User userResponsible) {
         auditLogBranchRepository.save(AuditLogBranch.builder()
                         .idBranch(branch)
+                        .action(action)
+                        .description(description)
+                        .idUser(userResponsible)
+                .build());
+    }
+
+    @Override
+    public void createAuditLogActivity(Activity activity, String description, AuditLogActivity.AuditLogActivityActions action, User userResponsible) {
+        auditLogActivityRepository.save(AuditLogActivity.builder()
+                        .activity(activity)
+                        .action(action)
+                        .description(description)
+                        .idUser(userResponsible)
+                .build());
+    }
+
+    @Override
+    public void createAuditLogServiceType(ServiceType serviceType, String description, AuditLogServiceType.AuditLogServiceTypeActions action, User userResponsible) {
+        auditLogServiceTypeRepository.save(AuditLogServiceType.builder()
+                        .serviceType(serviceType)
                         .action(action)
                         .description(description)
                         .idUser(userResponsible)
