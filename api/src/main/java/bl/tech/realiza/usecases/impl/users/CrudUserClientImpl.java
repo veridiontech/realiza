@@ -30,6 +30,8 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 
+import static bl.tech.realiza.domains.user.User.Role.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudUserClientImpl implements CrudUserClient {
@@ -209,7 +211,40 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Page<UserResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRoleAndIsActiveIsTrue(idSearch, User.Role.ROLE_CLIENT_MANAGER, pageable);
+        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRoleAndIsActiveIsTrue(idSearch, ROLE_CLIENT_MANAGER, pageable);
+
+        Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
+                userClient -> {
+                    FileDocument fileDocument = null;
+                    if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
+                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
+                        fileDocument = fileDocumentOptional.orElse(null);
+                    }
+
+                    return UserResponseDto.builder()
+                            .idUser(userClient.getIdUser())
+                            .cpf(userClient.getCpf())
+                            .description(userClient.getDescription())
+                            .position(userClient.getPosition())
+                            .role(userClient.getRole())
+                            .firstName(userClient.getFirstName())
+                            .surname(userClient.getSurname())
+                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .email(userClient.getEmail())
+                            .profilePicture(userClient.getProfilePicture())
+                            .telephone(userClient.getTelephone())
+                            .cellphone(userClient.getCellphone())
+                            .branch(userClient.getBranch().getIdBranch())
+                            .build();
+                }
+        );
+
+        return userClientResponseDtoPage;
+    }
+
+    @Override
+    public Page<UserResponseDto> findAllInnactiveAndActiveByClient(String idSearch, Pageable pageable) {
+        Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRole(idSearch, ROLE_CLIENT_MANAGER, pageable);
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {
