@@ -17,6 +17,7 @@ import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
 import { useBranch } from "@/context/Branch-provider";
 import { propsDocument } from "@/types/interfaces";
+import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function AmbientBox() {
   const { setDocuments, documents, setNonSelected, nonSelected } =
@@ -115,6 +116,7 @@ export function AmbientBox() {
   //
 
   return (
+    <>
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
         <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
@@ -182,7 +184,19 @@ export function AmbientBox() {
       </div>
       <div>
         <BoxSelected documents={selectedDocument} isLoading={isLoading} />
+
       </div>
+      
     </div>
+      <div className="flex justify-center w-full px-10 pb-10">
+        <div className="max-w-4xl w-full">
+          <ValidateSection
+            idBranch={selectedBranch?.idBranch!}
+            documentTypeName="MEIO AMBIENTE"
+            isSelected={true}
+          />
+        </div>
+      </div>
+    </>
   );
 }

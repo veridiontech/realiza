@@ -17,6 +17,7 @@ import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
 import { propsDocument } from "@/types/interfaces";
+import { ValidateSection } from "../validate-matrix/validate-section";
 // import { boolean } from "zod";
 
 export function GeralBox() {
@@ -112,6 +113,7 @@ export function GeralBox() {
   }
 
   return (
+    <>
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
         <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
@@ -181,5 +183,15 @@ export function GeralBox() {
         <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
+        <div className="flex justify-center w-full px-10 pb-10">
+          <div className="max-w-4xl w-full">
+            <ValidateSection
+              idBranch={selectedBranch?.idBranch!}
+              documentTypeName="GERAL"
+              isSelected={true}
+            />
+          </div>
+        </div>
+    </>
   );
 }

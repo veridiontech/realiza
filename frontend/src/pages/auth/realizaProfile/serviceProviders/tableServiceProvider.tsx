@@ -12,6 +12,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner"; 
 
+import { useWatch } from "react-hook-form";
+
+
 const editContractSchema = z.object({
   contractReference: z.string().nonempty("Referência do contrato é obrigatória"),
   providerSupplierName: z.string().nonempty("Nome do fornecedor é obrigatório"),
@@ -92,12 +95,19 @@ export function TableServiceProvider() {
   register,
   handleSubmit,
   reset,
+  control,
   formState: { errors },
 } = useForm<z.infer<typeof editContractSchema>>({
   resolver: zodResolver(editContractSchema),
 });
 
+  const hseWatch = useWatch({ control, name: "hse" });
+  const laborWatch = useWatch({ control, name: "labor" });
 
+  const [activities, setActivities] = useState<any[]>([]);
+  const [selectedSsmaActivitiesEdit, setSelectedSsmaActivitiesEdit] = useState<string[]>([]);
+  const [selectedLaborActivitiesEdit, setSelectedLaborActivitiesEdit] = useState<string[]>([]);
+  const [searchSsmaActivityEdit, setSearchSsmaActivityEdit] = useState("");
 
 useEffect(() => {
   if (editFormData) {
@@ -138,6 +148,7 @@ useEffect(() => {
     const payload = {
       ...data,
       subcontractPermission: data.subcontractPermission === "true",
+      idActivities: [...selectedSsmaActivitiesEdit, ...selectedLaborActivitiesEdit], // ⬅️ Adicionado
     };
 
     await axios.put(`${ip}/contract/supplier/${editFormData.idContract}`, payload, {
@@ -152,6 +163,7 @@ useEffect(() => {
     toast.error("Erro ao atualizar contrato");
   }
 };
+
 
 
   const getManager = async () => {
@@ -185,12 +197,38 @@ const getServicesType = async () => {
   }
 };
 
+  const getActivities = async () => {
+  try {
+    const token = localStorage.getItem("tokenClient");
+    const res = await axios.get(`${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setActivities(res.data);
+  } catch (err) {
+    console.error("Erro ao buscar atividades", err);
+  }
+};
+
+  const handleCheckboxChangeEdit = (
+  type: "ssma" | "labor",
+  activityId: string,
+  isChecked: boolean
+) => {
+  const setFunc = type === "ssma" ? setSelectedSsmaActivitiesEdit : setSelectedLaborActivitiesEdit;
+  setFunc((prev) =>
+    isChecked ? [...prev, activityId] : prev.filter((id) => id !== activityId)
+  );
+};
+
+
+
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
       getManager();
       getServicesType();
+      getActivities();
     }
   }, [selectedBranch]);
 
@@ -606,6 +644,7 @@ const getServicesType = async () => {
             Trabalhista
           </label>
         </div>
+
         
 
         <label>
@@ -624,6 +663,59 @@ const getServicesType = async () => {
             <span className="text-red-500">{errors.subcontractPermission.message}</span>
           )}
         </label>
+        {hseWatch && (
+        <div className="flex flex-col gap-2">
+          <label className="text-white">Tipo de atividade SSMA</label>
+
+            <input
+              type="text"
+              value={searchSsmaActivityEdit}
+              onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
+              placeholder="Buscar atividade SSMA..."
+              className="border rounded px-2 py-1 text-sm"
+            />
+
+          <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
+            {activities
+              .filter((a) =>
+                a.title.toLowerCase().includes(searchSsmaActivityEdit.toLowerCase())
+            )
+            .map((activity: any) => (
+              <label key={activity.idActivity} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedSsmaActivitiesEdit.includes(activity.idActivity)}
+                  onChange={(e) =>
+                    handleCheckboxChangeEdit("ssma", activity.idActivity, e.target.checked)
+                }
+              />
+              {activity.title}
+            </label>
+          ))}
+      </div>
+    </div>
+  )}
+
+            {laborWatch && (
+              <div className="flex flex-col gap-2">
+                <label className="text-white">Tipo de atividade Trabalhista</label>
+
+                <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
+                  {activities.map((activity: any) => (
+                    <label key={activity.idActivity} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedLaborActivitiesEdit.includes(activity.idActivity)}
+                        onChange={(e) =>
+                        handleCheckboxChangeEdit("labor", activity.idActivity, e.target.checked)
+                        }
+                      />
+                {activity.title}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
         <label>
           Descrição
