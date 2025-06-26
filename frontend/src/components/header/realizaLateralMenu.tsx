@@ -27,7 +27,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
   const { user, logout } = useUser();
   const getIdUser = user?.idUser;
 
-  const [activeMenuKey, setActiveMenuKey] = useState<string | null>(null);
+  const [, setActiveMenuKey] = useState<string | null>(null);
 
   return (
     <SheetContent
