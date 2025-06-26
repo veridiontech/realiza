@@ -1,11 +1,14 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
+import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
+import bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeClient;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeRepo;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -14,8 +17,12 @@ import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBr
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.*;
+import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +34,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType.AuditLogServiceTypeActions.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +46,8 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     private final BranchRepository branchRepository;
     private final ServiceTypeClientRepository serviceTypeClientRepository;
     private final ClientRepository clientRepository;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogServiceImpl;
 
     @Override
     public ServiceTypeRepoResponseDto saveServiceTypeRepo(ServiceTypeRequestDto serviceTypeRequestDto) {
@@ -87,6 +98,19 @@ public class CrudServiceTypeImpl implements CrudServiceType {
 
     @Override
     public void deleteServiceType(String idServiceType) {
+        ServiceType serviceType = serviceTypeRepository.findById(idServiceType)
+                .orElseThrow(() -> new NotFoundException("Service type not found"));
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogServiceType(
+                        serviceType,
+                        userResponsible.getEmail() + " deletou tipo de serviço " + serviceType.getTitle(),
+                        DELETE,
+                        userResponsible);
+            }
+        }
         serviceTypeRepository.deleteById(idServiceType);
     }
 
@@ -107,7 +131,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
 
     @Override
     public ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto) {
-        return toResponseBranch(serviceTypeBranchRepository.save(
+        ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.save(
                 ServiceTypeBranch.builder()
                         .title(serviceTypeRequestDto.getTitle())
                         .risk(serviceTypeRequestDto.getRisk())
@@ -116,15 +140,46 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                                         .orElseThrow(() -> new NotFoundException("Branch not found"))
                         )
                         .build()
-        ));
+        );
+
+        ServiceType serviceType = (ServiceType) Hibernate.unproxy(serviceTypeBranch);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogServiceType(
+                        serviceType,
+                        userResponsible.getEmail() + " criou tipo de serviço " + serviceType.getTitle(),
+                        CREATE,
+                        userResponsible);
+            }
+        }
+
+        return toResponseBranch(serviceTypeBranch);
     }
 
     @Override
     public ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto) {
-        return toResponseBranch((ServiceTypeBranch) Hibernate.unproxy(updateServiceType(
+        ServiceTypeBranch serviceTypeBranch = (ServiceTypeBranch) Hibernate.unproxy(updateServiceType(
                 serviceTypeRepository.findById(idServiceType)
                         .orElseThrow(() -> new NotFoundException("Service type not found")),
-                serviceTypeRequestDto)));
+                serviceTypeRequestDto));
+
+        ServiceType serviceType = (ServiceType) Hibernate.unproxy(serviceTypeBranch);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogServiceType(
+                        serviceType,
+                        userResponsible.getEmail() + " atualizou tipo de serviço " + serviceType.getTitle(),
+                        UPDATE,
+                        userResponsible);
+            }
+        }
+        return toResponseBranch(serviceTypeBranch);
     }
 
     @Override
