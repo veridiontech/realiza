@@ -169,12 +169,9 @@ export function ServicesSection() {
     if (!serviceToDelete) return;
 
     try {
-      await axios.delete(
-        `${ip}/contract/service-type/${serviceToDelete}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
+      await axios.delete(`${ip}/contract/service-type/${serviceToDelete}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
 
       setServices((prevServices) =>
         prevServices.filter(
@@ -215,7 +212,7 @@ export function ServicesSection() {
         <h1 className="text-[30px]">Serviços</h1>
       </div>
       <div className="flex items-start gap-10">
-        <div className="border border-neutral-300 rounded-md w-[50vw] p-3 shadow-md">
+        <div className="border border-neutral-300 rounded-md w-[40vw] p-3 shadow-md">
           <div className="flex items-center gap-1 rounded-sm border border-neutral-400 p-2">
             <Search />
             <input
@@ -245,7 +242,7 @@ export function ServicesSection() {
                   filteredServices.map((service) => (
                     <div
                       key={service.idServiceType}
-                      className="flex items-center gap-5 "
+                      className="flex items-center gap-5 justify-between"
                     >
                       {editingTitleId === service.idServiceType ? (
                         <>
@@ -279,28 +276,29 @@ export function ServicesSection() {
                       )}
 
                       <span>-</span>
-                      <button
-                        type="button"
-                        onClick={() => openDeleteModal(service.idServiceType)}
-                      >
-                        <Trash2 height="15" width="15" color="#9d2626" />
-                      </button>
-
-                      <select
-                        value={service.risk}
-                        onChange={(e) =>
-                          updateRisk(
-                            service.idServiceType,
-                            e.target.value as Service["risk"]
-                          )
-                        }
-                        className="border border-neutral-400 rounded-sm p-1"
-                      >
-                        <option value="LOW">BAIXO</option>
-                        <option value="MEDIUM">MÉDIO</option>
-                        <option value="HIGH">ALTO</option>
-                        <option value="VERY_HIGH">MUITO ALTO</option>
-                      </select>
+                      <div className="flex gap-4">
+                        <select
+                          value={service.risk}
+                          onChange={(e) =>
+                            updateRisk(
+                              service.idServiceType,
+                              e.target.value as Service["risk"]
+                            )
+                          }
+                          className="border border-neutral-400 rounded-sm p-1"
+                        >
+                          <option value="LOW">BAIXO</option>
+                          <option value="MEDIUM">MÉDIO</option>
+                          <option value="HIGH">ALTO</option>
+                          <option value="VERY_HIGH">MUITO ALTO</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => openDeleteModal(service.idServiceType)}
+                        >
+                          <Trash2 height="18" width="18" color="#9d2626" />
+                        </button>
+                      </div>
                     </div>
                   ))
                 ) : (
