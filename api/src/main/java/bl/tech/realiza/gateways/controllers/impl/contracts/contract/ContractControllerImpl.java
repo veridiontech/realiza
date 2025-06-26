@@ -31,6 +31,13 @@ public class ContractControllerImpl implements ContractController {
         return ResponseEntity.ok(crudContractImpl.finishContract(idContract));
     }
 
+    @PostMapping("/suspend/{contractId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
+    public ResponseEntity<String> suspendContract(@PathVariable String contractId) {
+        return ResponseEntity.ok(crudContractImpl.suspendContract(contractId));
+    }
+
     @PostMapping("/add-employee/{idContract}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")

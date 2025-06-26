@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
+
 @Service
 @RequiredArgsConstructor
 public class CrudContractImpl implements CrudContract {
@@ -75,6 +77,31 @@ public class CrudContractImpl implements CrudContract {
         }
 
         return "Contract finished successfully";
+    }
+
+    @Override
+    public String suspendContract(String contractId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        contract.setIsActive(SUSPENSO);
+        contract.setEndDate(Date.valueOf(LocalDate.now()));
+
+        contract = contractRepository.save(contract);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLogContract(
+                        contract,
+                        userResponsible.getEmail() + " suspended contract " + contract.getContractReference(),
+                        AuditLogContract.AuditLogContractActions.UPDATE,
+                        userResponsible);
+            }
+        }
+
+        return "Contract suspended successfully";
     }
 
     @Override

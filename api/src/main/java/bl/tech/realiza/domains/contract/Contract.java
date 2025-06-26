@@ -106,6 +106,7 @@ public abstract class Contract {
     public enum IsActive {
         ATIVADO,
         PENDENTE,
-        NEGADO
+        NEGADO,
+        SUSPENSO
     }
 }
