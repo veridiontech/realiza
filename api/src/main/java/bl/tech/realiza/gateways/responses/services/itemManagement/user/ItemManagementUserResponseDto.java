@@ -17,6 +17,7 @@ public class ItemManagementUserResponseDto {
     private ItemManagement.SolicitationType solicitationType; // criação/inativação
     private String clientTradeName; // nome do cliente na qual essa usuário pertence
     private String clientCnpj; // cnpj do cliente
+    private String branchName; // nome da filial
 
     private String requesterFullName; // nome do requirente
     private String requesterEmail; // email do requirente

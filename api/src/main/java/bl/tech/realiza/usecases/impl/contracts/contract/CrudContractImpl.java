@@ -33,6 +33,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +58,7 @@ public class CrudContractImpl implements CrudContract {
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
         contract.setFinished(true);
+        contract.setEndDate(Date.valueOf(LocalDate.now()));
 
         contract = contractRepository.save(contract);
 

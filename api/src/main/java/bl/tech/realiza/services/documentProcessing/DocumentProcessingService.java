@@ -29,6 +29,9 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+
 @Slf4j
 @Service
 public class DocumentProcessingService {
@@ -79,14 +82,13 @@ public class DocumentProcessingService {
                 throw new IOException("Erro ao converter o PDF para imagem.");
             }
 
-            DocumentIAValidationResponse result = identifyDocumentType(imageBase64);
+            DocumentIAValidationResponse result = identifyDocumentType(imageBase64,document.getDocumentMatrix().getName());
 
             if (result.isAutoValidate()) {
-                document.setStatus(result.isValid() ? Document.Status.APROVADO_IA : Document.Status.REPROVADO_IA);
+                document.setStatus(result.isValid() ? APROVADO_IA : REPROVADO_IA);
                 log.info("[{}] Resultado IA: status automático definido como {}", threadName, document.getStatus());
             } else {
-                document.setStatus(Document.Status.EM_ANALISE);
-                log.info("[{}] Resultado IA: sem validação automática. Status definido como EM_ANALISE", threadName);
+                log.info("[{}] Resultado IA: sem validação automática. Status não alterado pelo motivo {}", threadName, result.getReason());
             }
 
             document.setVersionDate(LocalDateTime.now());
@@ -95,7 +97,6 @@ public class DocumentProcessingService {
 
         } catch (Exception e) {
             log.error("[{}] Falha no processamento assíncrono do documento ID={}", threadName, document.getIdDocumentation(), e);
-            document.setStatus(Document.Status.EM_ANALISE);
             documentRepository.save(document);
         }
     }
@@ -137,14 +138,14 @@ public class DocumentProcessingService {
         }
     }
 
-    private DocumentIAValidationResponse identifyDocumentType(String imageBase64) {
+    private DocumentIAValidationResponse identifyDocumentType(String imageBase64, String documentTypeName) {
         log.info("Iniciando envio da imagem para OpenAI para análise...");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(OPENAI_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String prompt = buildPrompt();
+        String prompt = buildPrompt(documentTypeName);
 
         Map<String, Object> imageContent = Map.of(
                 "type", "image_url",
@@ -212,8 +213,8 @@ public class DocumentProcessingService {
 
             DocumentIAValidationResponse parsed = objectMapper.readValue(content, DocumentIAValidationResponse.class);
 
-            log.info("Parsing concluído com sucesso. Tipo: {}, AutoValidate: {}, Válido: {}",
-                    parsed.getDocumentType(), parsed.isAutoValidate(), parsed.isValid());
+            log.info("Parsing concluído com sucesso. Tipo: {}, AutoValidate: {}, Válido: {}, Reason: {}",
+                    parsed.getDocumentType(), parsed.isAutoValidate(), parsed.isValid(), parsed.getReason());
 
             return parsed;
 
@@ -223,37 +224,58 @@ public class DocumentProcessingService {
         }
     }
 
-    private String buildPrompt() {
-        return "Você é um assistente especializado na análise de documentos. "
-                + "Sua tarefa é identificar o tipo do documento e validar sua autenticidade e validade com base nas informações fornecidas. "
-                + "Sempre retorne a resposta no formato JSON puro, sem explicações adicionais. "
-                + "Aqui estão as diretrizes para cada campo no JSON de resposta: "
-                + "1️⃣ documentType: O tipo do documento detectado, como 'CPF', 'CNH', 'RG', 'Passaporte', etc. "
-                + "2️⃣ autoValidate: true se todas as informações necessárias para validar o documento estão presentes e são suficientes para um julgamento definitivo. Caso contrário, false. "
-                + "3️⃣ isValid: true se o documento for válido, respeitando as regras abaixo. Caso contrário, false. "
-                + "4️⃣ reason: Explique por que o documento é inválido, se aplicável. "
-                + "Se o autoValidate for false, a reason deve indicar o motivo pelo qual o documento não pode ser validado. "
-                + "Se o isValid for false, a reason deve indicar a razão específica da invalidez. "
-                + "❗IMPORTANTE❗ Regras para documentos: "
-                + "- **CPF**: Verifique se a sequência numérica é válida e se não está na lista de CPFs inválidos conhecidos (como 000.000.000-00). "
-                + "- **CNH**: Verifique a data de validade e se a CNH está vencida. Caso esteja, o isValid deve ser false e a reason deve ser 'CNH vencida'. "
-                + "- **RG**: Se houver data de emissão, considere inválido se for muito antigo (>10 anos). "
-                + "- **Passaporte**: Verifique a data de expiração. Passaportes vencidos não são válidos. "
-                + "🔍 Exemplo de resposta válida:\n"
-                + "{\n"
-                + "  \"documentType\": \"CPF\",\n"
-                + "  \"autoValidate\": true,\n"
-                + "  \"isValid\": true,\n"
-                + "  \"reason\": \"O documento pode ser validado e está de acordo.\"\n"
-                + "}\n"
-                + "🔍 Exemplo de resposta inválida:\n"
-                + "{\n"
-                + "  \"documentType\": \"CNH\",\n"
-                + "  \"autoValidate\": true,\n"
-                + "  \"isValid\": false,\n"
-                + "  \"reason\": \"CNH vencida em 23/05/2023\"\n"
-                + "}";
+    private String buildPrompt(String expectedType) {
+        return """
+    Você é um assistente especializado na análise de documentos.
+    ⚠️ O tipo esperado para este documento é: "%s". A IA deve confirmar se o documento realmente corresponde a esse tipo e validá-lo com base nisso.
+    Use isso como referência ao aplicar as regras abaixo e identificar se o documento enviado corresponde ao tipo esperado.
+
+    Sua tarefa é identificar o tipo do documento e validar sua autenticidade e validade com base nas informações fornecidas.
+    Sempre responda apenas com um JSON puro, sem explicações adicionais.
+
+    Use as seguintes regras para preencher os campos:
+    - documentType: tipo do documento identificado ("CPF", "CNH", "ASO", "Ficha de EPI", etc.).
+    - autoValidate: true se o documento possui todas as informações necessárias para julgamento automático de validade. Caso contrário, false.
+    - isValid: true se o documento for considerado legítimo, válido e com dados compatíveis. Caso o conteúdo esteja ausente, ilegível, fora dos padrões ou inválido, defina como false.
+    - reason: explique de forma clara e curta o motivo de o documento não ser válido ou não poder ser validado automaticamente.
+
+    🔁 Prioridade de resposta:
+    1. Se o documento for de um tipo que **não possui estrutura padronizada ou dados estruturáveis o suficiente** para permitir validação automática, defina `autoValidate = false` e use como razão principal algo como:  
+       **"O documento não possui estrutura suficiente para validação automática"**
+    2. Caso o documento esteja também em branco, ilegível ou claramente inválido, **você pode complementar** a razão com esse fator — mas **sem substituir o motivo principal da impossibilidade estrutural**.
+
+    ⚠️ Importante:
+    Mesmo que autoValidate seja false, você ainda pode (e deve) definir isValid como false se o documento estiver completamente vazio, ilegível ou claramente inválido.
+
+    ❗Regras específicas:
+    - CPF: Verifique se a sequência numérica é válida e se não é uma sequência inválida conhecida (como 000.000.000-00).
+    - CNH: Verifique se está vencida. Se sim, isValid deve ser false e a reason deve indicar "CNH vencida".
+    - RG: Se a data de emissão for muito antiga (>10 anos), considerar inválido.
+    - Passaporte: Verifique a data de expiração. Vencidos não são válidos.
+
+    🔍 Exemplo de resposta válida:
+    {
+      "documentType": "CPF",
+      "autoValidate": true,
+      "isValid": true,
+      "reason": "O documento pode ser validado e está de acordo."
     }
 
+    🔍 Exemplo de resposta com autoValidate false (prioridade correta):
+    {
+      "documentType": "ASO",
+      "autoValidate": false,
+      "isValid": false,
+      "reason": "O documento não possui estrutura suficiente para validação automática"
+    }
 
+    🔍 Exemplo de resposta com motivo composto:
+    {
+      "documentType": "Ficha de EPI",
+      "autoValidate": false,
+      "isValid": false,
+      "reason": "O documento não possui estrutura suficiente para validação automática e está em branco"
+    }
+    """.formatted(expectedType);
+    }
 }

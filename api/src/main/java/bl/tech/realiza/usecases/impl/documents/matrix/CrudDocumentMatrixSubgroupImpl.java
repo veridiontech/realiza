@@ -43,7 +43,9 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentSubgroup(savedDocumentMatrixSubgroup.getIdDocumentSubgroup())
                 .subgroupName(savedDocumentMatrixSubgroup.getSubgroupName())
-                .idDocumentGroup(savedDocumentMatrixSubgroup.getGroup().getIdDocumentGroup())
+                .idDocumentGroup(savedDocumentMatrixSubgroup.getGroup() != null
+                        ? savedDocumentMatrixSubgroup.getGroup().getIdDocumentGroup()
+                        : null)
                 .build();
 
         return documentMatrixResponse;
@@ -59,7 +61,9 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentSubgroup(documentMatrixSubgroup.getIdDocumentSubgroup())
                 .subgroupName(documentMatrixSubgroup.getSubgroupName())
-                .idDocumentGroup(documentMatrixSubgroup.getGroup().getIdDocumentGroup())
+                .idDocumentGroup(documentMatrixSubgroup.getGroup() != null
+                        ? documentMatrixSubgroup.getGroup().getIdDocumentGroup()
+                        : null)
                 .build();
 
         return Optional.of(documentMatrixResponse);
@@ -73,7 +77,9 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
                 documentMatrixSubgroup -> DocumentMatrixResponseDto.builder()
                         .idDocumentSubgroup(documentMatrixSubgroup.getIdDocumentSubgroup())
                         .subgroupName(documentMatrixSubgroup.getSubgroupName())
-                        .idDocumentGroup(documentMatrixSubgroup.getGroup().getIdDocumentGroup())
+                        .idDocumentGroup(documentMatrixSubgroup.getGroup() != null
+                                ? documentMatrixSubgroup.getGroup().getIdDocumentGroup()
+                                : null)
                         .build()
         );
 
@@ -91,7 +97,9 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentSubgroup(documentMatrixSubgroup.getIdDocumentSubgroup())
                 .subgroupName(documentMatrixSubgroup.getSubgroupName())
-                .idDocumentGroup(documentMatrixSubgroup.getGroup().getIdDocumentGroup())
+                .idDocumentGroup(documentMatrixSubgroup.getGroup() != null
+                        ? documentMatrixSubgroup.getGroup().getIdDocumentGroup()
+                        : null)
                 .build();
 
         return Optional.of(documentMatrixResponse);
@@ -110,7 +118,9 @@ public class CrudDocumentMatrixSubgroupImpl implements CrudDocumentMatrixSubgrou
                 documentMatrixSubgroup -> DocumentMatrixResponseDto.builder()
                         .idDocumentSubgroup(documentMatrixSubgroup.getIdDocumentSubgroup())
                         .subgroupName(documentMatrixSubgroup.getSubgroupName())
-                        .idDocumentGroup(documentMatrixSubgroup.getGroup().getIdDocumentGroup())
+                        .idDocumentGroup(documentMatrixSubgroup.getGroup() != null
+                                ? documentMatrixSubgroup.getGroup().getIdDocumentGroup()
+                                : null)
                         .build()
         );
 

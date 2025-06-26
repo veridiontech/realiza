@@ -27,7 +27,7 @@ public class ReportService {
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
     public Long countSuppliersByBranch(String branchId) {
-        return providerRepository.countByBranches_IdBranchAndIsActiveIsTrue(branchId);
+        return null;
     }
 
     public Long countSubcontractorsByBranch(String branchId) {
