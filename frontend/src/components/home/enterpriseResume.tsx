@@ -25,17 +25,9 @@ export function EnterpriseResume() {
             </p>
         </div>
       </div>
-      {/* <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <ModalCreateCliente />
-        <>
-          <Button
-            variant={"ghost"}
-            className="dark:bg-primary-foreground rounded-full bg-neutral-200 w-[2vw] p-2 text-zinc-600 hover:bg-neutral-300"
-          >
-            <ChevronRight size={24} className="dark:text-white" />
-          </Button>
-        </>
-      </div> */}
+      </div>
     </div>
     )
   }

@@ -29,23 +29,23 @@ export function DocumentViewer({
     null
   );
 
-  const handleChangeStatus = async (status: string) => {
+  const handleChangeStatus = async (status: string, notes: string) => {
     try {
       const token = localStorage.getItem("tokenClient");
       const response = await axios.post(
         `${ip}/document/${documentId}/change-status`,
-        null,
         {
-          params: { status },
+          status,
+          notes
+        },
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
       console.log("status:", response.data);
-      toast(
-        `Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`
-      );
+      toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
       if (onStatusChange) {
         onStatusChange(documentId, status);
       }
@@ -56,21 +56,20 @@ export function DocumentViewer({
     }
   };
 
-  const handleReprovar = async () => {
+  const handleReprovar = async (notes: string) => {
     if (justification.length > 1000) {
-      setJustificationError(
-        "A justificativa não pode ter mais de 1000 caracteres."
-      );
+      setJustificationError("A justificativa não pode ter mais de 1000 caracteres.");
       return;
     }
-
     try {
       const token = localStorage.getItem("tokenClient");
       const response = await axios.post(
         `${ip}/document/${documentId}/change-status`,
-        { justification },
         {
-          params: { status: "REPROVADO" },
+          status: "REPROVADO",
+          notes
+        },
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -203,7 +202,7 @@ export function DocumentViewer({
         <div className="mt-6 flex justify-center">
           <div className="flex flex-row gap-6">
             <button
-              onClick={() => handleChangeStatus("APROVADO")}
+              onClick={() => handleChangeStatus("APROVADO", "")}
               className="h-12 w-[10rem] rounded-full bg-green-400 font-bold text-white hover:bg-green-300"
             >
               Aprovar
@@ -229,7 +228,7 @@ export function DocumentViewer({
                 )}
                 <div className="mt-4 flex gap-4">
                   <button
-                    onClick={handleReprovar}
+                    onClick={() => handleReprovar(justification)}
                     className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
                   >
                     Confirmar Reprovação
