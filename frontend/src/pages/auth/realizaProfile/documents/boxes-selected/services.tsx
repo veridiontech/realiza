@@ -16,6 +16,7 @@ import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
+import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function TrainingBox() {
   const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
@@ -105,6 +106,7 @@ export function TrainingBox() {
   }
 
   return (
+    <>
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
         <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
@@ -174,5 +176,15 @@ export function TrainingBox() {
         <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
+        <div className="flex justify-center w-full px-10 pb-10">
+          <div className="max-w-4xl w-full">
+            <ValidateSection
+              idBranch={selectedBranch?.idBranch!}
+              documentTypeName="SAUDE"
+              isSelected={true}
+            />
+          </div>
+        </div>
+    </>
   );
 }
