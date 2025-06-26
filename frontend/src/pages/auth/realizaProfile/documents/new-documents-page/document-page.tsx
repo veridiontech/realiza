@@ -3,14 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ActiviteSectionBox } from "./activities-section";
 import { ServicesSection } from "./services-section";
-// import { toast } from "sonner";
+import { HistorySection } from "./history-section"; // Importando o componente de Histórico
 
 export function DocumentPageNew() {
   const [selectTab, setSelectedTab] = useState("document");
-
-  // useEffect(() => {
-  //   toast.info("Selecione um cliente e uma filial para dar início")
-  // }, [])
 
   return (
     <div className="p-6 md:p-10 flex flex-col gap-6 md:gap-10">
@@ -56,14 +52,27 @@ export function DocumentPageNew() {
             }`}
             onClick={() => setSelectedTab("services")}
           >
-            Serviços 
+            Serviços
+          </Button>
+          {/* Novo botão Histórico */}
+          <Button
+            className={`${
+              selectTab === "historical"
+                ? "bg-realizaBlue"
+                : "bg-transparent border text-black border-black hover:bg-neutral-300"
+            }`}
+            onClick={() => setSelectedTab("historical")}
+          >
+            Histórico
           </Button>
         </div>
       </div>
       <div>
         {selectTab === "document" && <NewDocumentBox />}
         {selectTab === "activities" && <ActiviteSectionBox />}
-        {selectTab === "services" && <ServicesSection /> }
+        {selectTab === "services" && <ServicesSection />}
+        {/* Condição para renderizar o conteúdo do Histórico */}
+        {selectTab === "historical" && <HistorySection />} {/* Exibe a seção de Histórico */}
       </div>
     </div>
   );

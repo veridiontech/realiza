@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-// import { Puff } from "react-loader-spinner";
 import {
   Dialog,
   DialogContent,
@@ -21,54 +20,13 @@ import { useClient } from "@/context/Client-Provider";
 import { toast } from "sonner";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
-// 🛠 Regex mais seguro (exige hífen)
-const cepRegex = /^\d{5}-\d{3}$/;
-const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
-
-// interface adressProps {
-//   city: string;
-//   state: string;
-//   adress: string;
-// }
-
-async function validarCEPExiste(cep: string): Promise<boolean> {
-  try {
-    const cepLimpo = cep.replace(/\D/g, "");
-    const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-    if (!res.ok) return false;
-    const data = await res.json();
-    return !data.erro;
-  } catch {
-    return false;
-  }
-}
-
-function validarTelefoneRepetido(telefone: string) {
-  // Remove tudo que não for número
-  const digits = telefone.replace(/\D/g, "");
-  // Verifica se todos os dígitos são iguais
-  return !/^(\d)\1+$/.test(digits);
-}
-
 const editModalEnterpriseSchema = z.object({
   cnpj: z.string(),
-  cep: z
-    .string()
-    .nonempty("CEP é obrigatório")
-    .regex(cepRegex, "CEP inválido, use o formato 12345-678")
-    .refine(validarCEPExiste, {
-      message: "CEP não encontrado",
-    }),
+  cep: z.string().nonempty("CEP é obrigatório"),
   corporateName: z.string(),
   tradeName: z.string(),
   email: z.string(),
-  telephone: z
-    .string()
-    .nonempty("Celular é obrigatório")
-    .regex(phoneRegex, "Telefone inválido, use o formato (XX) XXXXX-XXXX")
-    .refine(validarTelefoneRepetido, {
-      message: "Telefone inválido: não pode ter números repetidos",
-    }),
+  telephone: z.string().nonempty("Celular é obrigatório"),
   state: z.string(),
   city: z.string(),
   address: z.string(),
@@ -79,13 +37,11 @@ type EditModalEnterpriseSchema = z.infer<typeof editModalEnterpriseSchema>;
 
 export function EditModalEnterprise() {
   const [cepValue, setCepValue] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
   const { client, setClient, refreshClient, refreshClients } = useClient();
   const [isOpen, setIsOpen] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false)
-
-  console.log(client);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editHistory, setEditHistory] = useState<any[]>([]);
 
   const {
     register,
@@ -97,10 +53,13 @@ export function EditModalEnterprise() {
     resolver: zodResolver(editModalEnterpriseSchema),
   });
 
-  useEffect(() => {
-    const rawCEP = getValues("cep") || "";
-    setCepValue(formatCEP(rawCEP));
-  }, [getValues]);
+  // Função para formatar o CEP
+  const formatCEP = (value: string) => {
+    return value
+      .replace(/\D/g, "") // Remove tudo que não for número
+      .replace(/(\d{5})(\d)/, "$1-$2") // Formata para o padrão "XXXXX-XXX"
+      .slice(0, 9); // Limita o comprimento a 9 caracteres (CEP com o hífen)
+  };
 
   const getDatasEnterprise = async () => {
     try {
@@ -126,33 +85,20 @@ export function EditModalEnterprise() {
     }
   };
 
-  // const findCep = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const cepLimpo = cepValue.replace(/\D/g, "");
-  //     const res = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-  //     if (res.data) {
-  //       setValuesAdress({
-  //         city: res.data.localidade,
-  //         state: res.data.uf,
-  //         adress: res.data.logradouro,
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.log("Não foi possível buscar o CEP", err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // const setValuesAdress = (data: adressProps) => {
-  //   setValue("city", data.city);
-  //   setValue("state", data.state);
-  //   setValue("adress", data.adress);
-  // };
+  const getEditHistory = async () => {
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/client/${client?.idClient}/history`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+      setEditHistory(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar histórico de edições", err);
+    }
+  };
 
   const onSubmit = async (data: EditModalEnterpriseSchema) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       await axios.put(`${ip}/client/${client?.idClient}`, data, {
@@ -161,9 +107,9 @@ export function EditModalEnterprise() {
       const res = await axios.get(`${ip}/client/${client?.idClient}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-     
-      if(client) {
-        await refreshClient(client.idClient)
+
+      if (client) {
+        await refreshClient(client.idClient);
         await refreshClients();
       }
       setClient(res.data);
@@ -173,36 +119,22 @@ export function EditModalEnterprise() {
       console.error("Erro ao atualizar cliente:", err);
       toast.error("Erro ao atualizar cliente, tente novamente");
     } finally {
-      setIsLoading(false)
-    }
-  };
-
-  const formatCEP = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .slice(0, 9);
-  };
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, "");
-
-    if (digits.length <= 2) {
-      return digits;
-    } else if (digits.length <= 6) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    } else if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (client) {
       getDatasEnterprise();
+      getEditHistory();
     }
-  }, [client]);
+  }, [isOpen, client]);
+
+  useEffect(() => {
+    // Usando o getValues para pegar o valor do campo 'cep' e formatá-lo
+    const rawCEP = getValues("cep") || ""; // Acessando o valor do campo "cep"
+    setCepValue(formatCEP(rawCEP)); // Usando o valor do campo para atualizar o estado
+  }, [getValues]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -263,11 +195,7 @@ export function EditModalEnterprise() {
                 value={phoneValue}
                 {...register("telephone")}
                 onChange={(e) => {
-                  const formattedPhone = formatPhone(e.target.value);
-                  setPhoneValue(formattedPhone);
-                  setValue("telephone", formattedPhone, {
-                    shouldValidate: true,
-                  });
+                  setPhoneValue(e.target.value);
                 }}
                 placeholder="(00) 00000-0000"
                 maxLength={15}
@@ -285,9 +213,7 @@ export function EditModalEnterprise() {
                 value={cepValue}
                 {...register("cep")}
                 onChange={(e) => {
-                  const formatted = formatCEP(e.target.value);
-                  setCepValue(formatted);
-                  setValue("cep", formatted, { shouldValidate: true });
+                  setCepValue(e.target.value);
                 }}
                 placeholder="00000-000"
                 maxLength={9}
@@ -333,9 +259,29 @@ export function EditModalEnterprise() {
             </div>
             <Button className="bg-realizaBlue w-full md:w-auto" type="submit">
               {isLoading ? "Carregando..." : "Confirmar edição"}
-              
             </Button>
           </form>
+
+          {/* Seção de Histórico de Edições */}
+          <div className="mt-6 text-white">
+            <h4 className="text-lg font-semibold">Histórico de Edições</h4>
+            <div className="overflow-y-auto max-h-[300px]">
+              {editHistory.length > 0 ? (
+                <ul>
+                  {editHistory.map((entry, index) => (
+                    <li key={index} className="border-b py-2">
+                      <strong>{entry.date}</strong>
+                      <p>
+                        {entry.field}: {entry.oldValue} → {entry.newValue}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Nenhuma edição registrada.</p>
+              )}
+            </div>
+          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
