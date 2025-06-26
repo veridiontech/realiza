@@ -2,6 +2,7 @@ package bl.tech.realiza.services.setup;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.activity.Activity;
@@ -126,6 +127,8 @@ public class SetupService {
         documentBranch = documentBranchRepository.findAllById(idDocuments);
 
         ProviderSupplier finalNewProviderSupplier = contractProviderSupplier.getProviderSupplier();
+        List<Contract> contracts = new ArrayList<>();
+        contracts.add(contractProviderSupplier);
 
         List<DocumentProviderSupplier> batch = new ArrayList<>(50);
         for (DocumentBranch document : documentBranch) {
@@ -136,6 +139,7 @@ public class SetupService {
                     .isActive(true)
                     .documentMatrix(document.getDocumentMatrix())
                     .providerSupplier(finalNewProviderSupplier)
+                    .contracts(contracts)
                     .build());
 
             if (batch.size() == 50) {
@@ -184,6 +188,9 @@ public class SetupService {
         ProviderSubcontractor finalNewProviderSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
         List<DocumentProviderSubcontractor> batch = new ArrayList<>(50);
 
+        List<Contract> contracts = new ArrayList<>();
+        contracts.add(contractProviderSubcontractor);
+
         for (DocumentProviderSupplier document : documentSupplier) {
             batch.add(DocumentProviderSubcontractor.builder()
                     .title(document.getTitle())
@@ -192,6 +199,7 @@ public class SetupService {
                     .isActive(true)
                     .documentMatrix(document.getDocumentMatrix())
                     .providerSubcontractor(finalNewProviderSubcontractor)
+                    .contracts(contracts)
                     .build());
 
             if (batch.size() == 50) {
@@ -223,6 +231,9 @@ public class SetupService {
 
         List<DocumentEmployee> batch = new ArrayList<>(50);
 
+        List<Contract> contracts = new ArrayList<>();
+        contracts.add(contractProviderSupplier);
+
         for (Employee employee : employees) {
             for (DocumentProviderSupplier document : documentSupplier) {
                 batch.add(DocumentEmployee.builder()
@@ -232,6 +243,7 @@ public class SetupService {
                         .isActive(true)
                         .documentMatrix(document.getDocumentMatrix())
                         .employee(employee)
+                        .contracts(contracts)
                         .build());
 
                 if (batch.size() == 50) {
@@ -265,6 +277,9 @@ public class SetupService {
 
         List<DocumentEmployee> batch = new ArrayList<>(50);
 
+        List<Contract> contracts = new ArrayList<>();
+        contracts.add(contractProviderSubcontractor);
+
         for (Employee employee : employees) {
             for (DocumentProviderSubcontractor document : documentSubcontractor) {
                 batch.add(DocumentEmployee.builder()
@@ -274,6 +289,7 @@ public class SetupService {
                         .isActive(true)
                         .documentMatrix(document.getDocumentMatrix())
                         .employee(employee)
+                        .contracts(contracts)
                         .build());
 
                 if (batch.size() == 50) {

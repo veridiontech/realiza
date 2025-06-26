@@ -2,7 +2,9 @@ package bl.tech.realiza.domains.documents;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,6 +53,10 @@ public abstract class Document {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
+
+    @ManyToMany(mappedBy = "documents")
+    @JsonBackReference
+    private List<Contract> contracts;
 
     @JsonIgnore
     @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)

@@ -157,22 +157,34 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
         return ContractSupplierResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())
-                .serviceType(savedContractProviderSupplier.getServiceTypeBranch() != null ? savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType() : null)
+                .serviceType(savedContractProviderSupplier.getServiceTypeBranch() != null
+                        ? savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType()
+                        : null)
                 .serviceDuration(savedContractProviderSupplier.getServiceDuration())
                 .serviceName(savedContractProviderSupplier.getServiceName())
                 .contractReference(savedContractProviderSupplier.getContractReference())
                 .description(savedContractProviderSupplier.getDescription())
-                .idResponsible(savedContractProviderSupplier.getResponsible() != null ? savedContractProviderSupplier.getResponsible().getIdUser() : null)
+                .idResponsible(savedContractProviderSupplier.getResponsible() != null
+                        ? savedContractProviderSupplier.getResponsible().getIdUser()
+                        : null)
                 .expenseType(savedContractProviderSupplier.getExpenseType())
                 .dateStart(savedContractProviderSupplier.getDateStart())
                 .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
                 .activities(savedContractProviderSupplier.getActivities()
                         .stream().map(Activity::getIdActivity).toList())
                 .isActive(savedContractProviderSupplier.getIsActive())
-                .idSupplier(savedContractProviderSupplier.getProviderSupplier() != null ? savedContractProviderSupplier.getProviderSupplier().getIdProvider() : null)
-                .nameSupplier(savedContractProviderSupplier.getProviderSupplier() != null ? savedContractProviderSupplier.getProviderSupplier().getCorporateName() : null)
-                .idBranch(savedContractProviderSupplier.getBranch() != null ? savedContractProviderSupplier.getBranch().getIdBranch() : null)
-                .nameBranch(savedContractProviderSupplier.getBranch() != null ? savedContractProviderSupplier.getBranch().getName() : null)
+                .idSupplier(savedContractProviderSupplier.getProviderSupplier() != null
+                        ? savedContractProviderSupplier.getProviderSupplier().getIdProvider()
+                        : null)
+                .nameSupplier(savedContractProviderSupplier.getProviderSupplier() != null
+                        ? savedContractProviderSupplier.getProviderSupplier().getCorporateName()
+                        : null)
+                .idBranch(savedContractProviderSupplier.getBranch() != null
+                        ? savedContractProviderSupplier.getBranch().getIdBranch()
+                        : null)
+                .nameBranch(savedContractProviderSupplier.getBranch() != null
+                        ? savedContractProviderSupplier.getBranch().getName()
+                        : null)
                 .build();
     }
 
@@ -342,7 +354,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
-                        .serviceType(contractProviderSupplier.getServiceTypeBranch() != null ? contractProviderSupplier.getServiceTypeBranch().getIdServiceType() : null)
+                        .serviceType(contractProviderSupplier.getServiceTypeBranch() != null
+                                ? contractProviderSupplier.getServiceTypeBranch().getIdServiceType()
+                                : null)
                         .serviceName(contractProviderSupplier.getServiceName())
                         .contractReference(contractProviderSupplier.getContractReference())
                         .description(contractProviderSupplier.getDescription())
@@ -498,7 +512,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 contractProviderSupplier -> ContractSupplierPermissionResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())
                         .contractReference(contractProviderSupplier.getContractReference())
-                        .providerSupplierName(contractProviderSupplier.getProviderSupplier().getTradeName())
+                        .providerSupplierName(contractProviderSupplier.getProviderSupplier() != null
+                                ? contractProviderSupplier.getProviderSupplier().getTradeName()
+                                : null)
                         .build()
         )
                 .sorted(Comparator.comparing(ContractSupplierPermissionResponseDto::getContractReference, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))

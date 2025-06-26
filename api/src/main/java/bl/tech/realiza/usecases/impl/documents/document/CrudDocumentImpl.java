@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.documents.document;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument.AuditLogDocumentActions;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
@@ -9,6 +10,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
@@ -34,6 +36,7 @@ public class CrudDocumentImpl implements CrudDocument {
     private final CrudNotification crudNotification;
     private final AuditLogDocumentRepository auditLogDocumentRepository;
     private final UserRepository userRepository;
+    private final ContractRepository contractRepository;
 
     @Override
     public void expirationChange() {
@@ -113,5 +116,29 @@ public class CrudDocumentImpl implements CrudDocument {
                         .build());
 
         return "Document status changed to " + documentStatusChangeRequestDto.getStatus().name();
+    }
+
+    @Override
+    public String documentExemption(String documentId, String contractId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        if (document.getContracts().contains(contract)) {
+            document.getContracts().remove(contract);
+            contract.getDocuments().remove(document);
+
+            if (document.getContracts().isEmpty()) {
+                documentRepository.delete(document);
+            } else {
+                documentRepository.save(document);
+            }
+
+            contractRepository.save(contract);
+        }
+
+        return "Document " + document.getTitle() + " exempted from contract " + contract.getContractReference();
     }
 }
