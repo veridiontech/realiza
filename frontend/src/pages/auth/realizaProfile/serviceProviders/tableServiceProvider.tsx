@@ -2,7 +2,14 @@ import { useBranch } from "@/context/Branch-provider";
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Eye, Pencil, BadgeCheck, X, MoreVertical, History } from "lucide-react"; // Importe o ícone History
+import {
+  Eye,
+  Pencil,
+  BadgeCheck,
+  X,
+  MoreVertical,
+  History,
+} from "lucide-react"; // Importe o ícone History
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
@@ -10,11 +17,13 @@ import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 import { useWatch } from "react-hook-form";
 
 const editContractSchema = z.object({
-  contractReference: z.string().nonempty("Referência do contrato é obrigatória"),
+  contractReference: z
+    .string()
+    .nonempty("Referência do contrato é obrigatória"),
   providerSupplierName: z.string().nonempty("Nome do fornecedor é obrigatório"),
   serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
   idResponsible: z.string().nonempty("Selecione um gestor"),
@@ -26,8 +35,6 @@ const editContractSchema = z.object({
   labor: z.boolean(),
   description: z.string().optional(),
 });
-
-
 
 function StatusBadge({ finished }: { finished?: boolean }) {
   const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
@@ -59,7 +66,6 @@ function Modal({
           backgroundColor: "#000",
         }}
       >
-
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-white hover:text-gray-300"
@@ -81,8 +87,8 @@ export function TableServiceProvider() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
   const [editFormData, setEditFormData] = useState<any | null>(null);
+  const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
     null
   );
@@ -91,28 +97,33 @@ export function TableServiceProvider() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const {
-  register,
-  handleSubmit,
-  reset,
-  control,
-  formState: { errors },
-} = useForm<z.infer<typeof editContractSchema>>({
-  resolver: zodResolver(editContractSchema),
-});
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<z.infer<typeof editContractSchema>>({
+    resolver: zodResolver(editContractSchema),
+  });
 
   const hseWatch = useWatch({ control, name: "hse" });
   const laborWatch = useWatch({ control, name: "labor" });
 
   const [activities, setActivities] = useState<any[]>([]);
-  const [selectedSsmaActivitiesEdit, setSelectedSsmaActivitiesEdit] = useState<string[]>([]);
-  const [selectedLaborActivitiesEdit, setSelectedLaborActivitiesEdit] = useState<string[]>([]);
+  const [selectedSsmaActivitiesEdit, setSelectedSsmaActivitiesEdit] = useState<
+    string[]
+  >([]);
+  const [selectedLaborActivitiesEdit, setSelectedLaborActivitiesEdit] =
+    useState<string[]>([]);
   const [searchSsmaActivityEdit, setSearchSsmaActivityEdit] = useState("");
 
   useEffect(() => {
     if (editFormData) {
       reset({
         ...editFormData,
-        subcontractPermission: editFormData.subcontractPermission ? "true" : "false",
+        subcontractPermission: editFormData.subcontractPermission
+          ? "true"
+          : "false",
         hse: editFormData.hse ?? false,
         labor: editFormData.labor ?? false,
       });
@@ -142,17 +153,24 @@ export function TableServiceProvider() {
     }
   };
   const onSubmitEdit = async (data: z.infer<typeof editContractSchema>) => {
-  try {
-    const token = localStorage.getItem("tokenClient");
-    const payload = {
-      ...data,
-      subcontractPermission: data.subcontractPermission === "true",
-      idActivities: [...selectedSsmaActivitiesEdit, ...selectedLaborActivitiesEdit], // ⬅️ Adicionado
-    };
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const payload = {
+        ...data,
+        subcontractPermission: data.subcontractPermission === "true",
+        idActivities: [
+          ...selectedSsmaActivitiesEdit,
+          ...selectedLaborActivitiesEdit,
+        ], // ⬅️ Adicionado
+      };
 
-      await axios.put(`${ip}/contract/supplier/${editFormData.idContract}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put(
+        `${ip}/contract/supplier/${editFormData.idContract}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       toast.success("Contrato atualizado com sucesso");
       await getSupplier();
@@ -162,7 +180,6 @@ export function TableServiceProvider() {
       toast.error("Erro ao atualizar contrato");
     }
   };
-
 
   const getManager = async () => {
     try {
@@ -202,30 +219,33 @@ export function TableServiceProvider() {
   };
 
   const getActivities = async () => {
-  try {
-    const token = localStorage.getItem("tokenClient");
-    const res = await axios.get(`${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setActivities(res.data);
-  } catch (err) {
-    console.error("Erro ao buscar atividades", err);
-  }
-};
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const res = await axios.get(
+        `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setActivities(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar atividades", err);
+    }
+  };
 
   const handleCheckboxChangeEdit = (
-  type: "ssma" | "labor",
-  activityId: string,
-  isChecked: boolean
-) => {
-  const setFunc = type === "ssma" ? setSelectedSsmaActivitiesEdit : setSelectedLaborActivitiesEdit;
-  setFunc((prev) =>
-    isChecked ? [...prev, activityId] : prev.filter((id) => id !== activityId)
-  );
-};
-
-
-
+    type: "ssma" | "labor",
+    activityId: string,
+    isChecked: boolean
+  ) => {
+    const setFunc =
+      type === "ssma"
+        ? setSelectedSsmaActivitiesEdit
+        : setSelectedLaborActivitiesEdit;
+    setFunc((prev) =>
+      isChecked ? [...prev, activityId] : prev.filter((id) => id !== activityId)
+    );
+  };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -298,11 +318,11 @@ export function TableServiceProvider() {
 
               <p className="text-sm font-semibold text-gray-700">
                 Data de finalização:
-
               </p>
               <p className="mb-2 text-gray-800 ">
-                {supplier.dateFinish ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR") : "-"}
-
+                {supplier.dateFinish
+                  ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR")
+                  : "-"}
               </p>
               <p className="text-sm font-semibold text-gray-700">Gestor:</p>
               <p className="mb-2 text-gray-800">{supplier.responsible}</p>
@@ -374,7 +394,6 @@ export function TableServiceProvider() {
               <th className="border border-gray-300 p-2 text-left">Gestor</th>
               <th className="border border-gray-300 p-2 text-left">Status</th>
               <th className="border border-gray-300 p-2 text-left">Ações</th>
-
             </tr>
           </thead>
           <tbody>
@@ -407,9 +426,10 @@ export function TableServiceProvider() {
                   </td>
                   <td className="border border-gray-300 p-2">
                     {supplier.dateFinish
-                      ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR") : "-"
-                    }
-
+                      ? new Date(supplier.dateFinish).toLocaleDateString(
+                          "pt-BR"
+                        )
+                      : "-"}
                   </td>
 
                   <td className="border border-gray-300 p-2">
@@ -423,7 +443,9 @@ export function TableServiceProvider() {
                       <button
                         onClick={() =>
                           setSelectedSupplierId(
-                            selectedSupplierId === supplier.idContract ? null : supplier.idContract
+                            selectedSupplierId === supplier.idContract
+                              ? null
+                              : supplier.idContract
                           )
                         }
                         className="p-1 hover:bg-gray-200 rounded"
@@ -504,7 +526,6 @@ export function TableServiceProvider() {
             <span>Finalizado</span>
           </div>
         </div>
-
       </div>
 
       {isViewModalOpen && selectedSupplier && (
@@ -536,8 +557,12 @@ export function TableServiceProvider() {
               {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}
             </p>
             <p>
-              <strong>Data de Finalização:</strong> {" "}
-              {selectedSupplier.dateFinish ? new Date(selectedSupplier.dateFinish).toLocaleDateString("pt-BR") : "-"}
+              <strong>Data de Finalização:</strong>{" "}
+              {selectedSupplier.dateFinish
+                ? new Date(selectedSupplier.dateFinish).toLocaleDateString(
+                    "pt-BR"
+                  )
+                : "-"}
             </p>
             <p>
               <strong>Descrição:</strong> {selectedSupplier.description}
@@ -553,7 +578,10 @@ export function TableServiceProvider() {
       )}
 
       {isEditModalOpen && editFormData && (
-        <Modal title="Editar Contrato" onClose={() => setIsEditModalOpen(false)}>
+        <Modal
+          title="Editar Contrato"
+          onClose={() => setIsEditModalOpen(false)}
+        >
           <div className="text-white space-y-4 max-h-[80vh] overflow-auto w-[90vw] md:w-[600px]">
             <form
               onSubmit={handleSubmit(onSubmitEdit)}
@@ -566,7 +594,9 @@ export function TableServiceProvider() {
                   {...register("contractReference")}
                 />
                 {errors.contractReference && (
-                  <span className="text-red-500">{errors.contractReference.message}</span>
+                  <span className="text-red-500">
+                    {errors.contractReference.message}
+                  </span>
                 )}
               </label>
 
@@ -577,7 +607,9 @@ export function TableServiceProvider() {
                   {...register("providerSupplierName")}
                 />
                 {errors.providerSupplierName && (
-                  <span className="text-red-500">{errors.providerSupplierName.message}</span>
+                  <span className="text-red-500">
+                    {errors.providerSupplierName.message}
+                  </span>
                 )}
               </label>
 
@@ -588,13 +620,18 @@ export function TableServiceProvider() {
                   {...register("serviceName")}
                 />
                 {errors.serviceName && (
-                  <span className="text-red-500">{errors.serviceName.message}</span>
+                  <span className="text-red-500">
+                    {errors.serviceName.message}
+                  </span>
                 )}
               </label>
 
               <label>
                 Gestor
-                <select {...register("idResponsible")} className="w-full rounded border px-2 py-1">
+                <select
+                  {...register("idResponsible")}
+                  className="w-full rounded border px-2 py-1"
+                >
                   <option value="">Selecione</option>
                   {managers.map((m: any) => (
                     <option key={m.idUser} value={m.idUser}>
@@ -603,7 +640,9 @@ export function TableServiceProvider() {
                   ))}
                 </select>
                 {errors.idResponsible && (
-                  <span className="text-red-500">{errors.idResponsible.message}</span>
+                  <span className="text-red-500">
+                    {errors.idResponsible.message}
+                  </span>
                 )}
               </label>
 
@@ -615,35 +654,50 @@ export function TableServiceProvider() {
                   {...register("dateStart")}
                 />
                 {errors.dateStart && (
-                  <span className="text-red-500">{errors.dateStart.message}</span>
+                  <span className="text-red-500">
+                    {errors.dateStart.message}
+                  </span>
                 )}
               </label>
 
               <label>
                 Tipo de Despesa
-                <select {...register("expenseType")} className="w-full rounded border px-2 py-1">
+                <select
+                  {...register("expenseType")}
+                  className="w-full rounded border px-2 py-1"
+                >
                   <option value="">Selecione</option>
                   <option value="CAPEX">CAPEX</option>
                   <option value="OPEX">OPEX</option>
                   <option value="NENHUM">Nenhuma</option>
                 </select>
                 {errors.expenseType && (
-                  <span className="text-red-500">{errors.expenseType.message}</span>
+                  <span className="text-red-500">
+                    {errors.expenseType.message}
+                  </span>
                 )}
               </label>
 
               <label>
                 Tipo do Serviço
-                <select {...register("idServiceType")} className="w-full rounded border px-2 py-1">
+                <select
+                  {...register("idServiceType")}
+                  className="w-full rounded border px-2 py-1"
+                >
                   <option value="">Selecione</option>
                   {servicesType.map((service: any) => (
-                    <option key={service.idServiceType} value={service.idServiceType}>
+                    <option
+                      key={service.idServiceType}
+                      value={service.idServiceType}
+                    >
                       {service.title}
                     </option>
                   ))}
                 </select>
                 {errors.idServiceType && (
-                  <span className="text-red-500">{errors.idServiceType.message}</span>
+                  <span className="text-red-500">
+                    {errors.idServiceType.message}
+                  </span>
                 )}
               </label>
 
@@ -658,76 +712,107 @@ export function TableServiceProvider() {
                 </label>
               </div>
 
-
-        <label>
-          Permitir Subcontratação?
-          <div className="flex gap-3">
-            <label className="flex items-center gap-1">
-              <input type="radio" value="true" {...register("subcontractPermission")} />
-              Sim
-            </label>
-            <label className="flex items-center gap-1">
-              <input type="radio" value="false" {...register("subcontractPermission")} />
-              Não
-            </label>
-          </div>
-          {errors.subcontractPermission && (
-            <span className="text-red-500">{errors.subcontractPermission.message}</span>
-          )}
-        </label>
-        {hseWatch && (
-        <div className="flex flex-col gap-2">
-          <label className="text-white">Tipo de atividade SSMA</label>
-
-            <input
-              type="text"
-              value={searchSsmaActivityEdit}
-              onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
-              placeholder="Buscar atividade SSMA..."
-              className="border rounded px-2 py-1 text-sm"
-            />
-
-          <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
-            {activities
-              .filter((a) =>
-                a.title.toLowerCase().includes(searchSsmaActivityEdit.toLowerCase())
-            )
-            .map((activity: any) => (
-              <label key={activity.idActivity} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedSsmaActivitiesEdit.includes(activity.idActivity)}
-                  onChange={(e) =>
-                    handleCheckboxChangeEdit("ssma", activity.idActivity, e.target.checked)
-                }
-              />
-              {activity.title}
-            </label>
-          ))}
-      </div>
-    </div>
-  )}
-
-            {laborWatch && (
-              <div className="flex flex-col gap-2">
-                <label className="text-white">Tipo de atividade Trabalhista</label>
-
-                <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
-                  {activities.map((activity: any) => (
-                    <label key={activity.idActivity} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedLaborActivitiesEdit.includes(activity.idActivity)}
-                        onChange={(e) =>
-                        handleCheckboxChangeEdit("labor", activity.idActivity, e.target.checked)
-                        }
-                      />
-                {activity.title}
+              <label>
+                Permitir Subcontratação?
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="radio"
+                      value="true"
+                      {...register("subcontractPermission")}
+                    />
+                    Sim
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="radio"
+                      value="false"
+                      {...register("subcontractPermission")}
+                    />
+                    Não
+                  </label>
+                </div>
+                {errors.subcontractPermission && (
+                  <span className="text-red-500">
+                    {errors.subcontractPermission.message}
+                  </span>
+                )}
               </label>
-            ))}
-          </div>
-        </div>
-      )}
+              {hseWatch && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-white">Tipo de atividade SSMA</label>
+
+                  <input
+                    type="text"
+                    value={searchSsmaActivityEdit}
+                    onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
+                    placeholder="Buscar atividade SSMA..."
+                    className="border rounded px-2 py-1 text-sm"
+                  />
+
+                  <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
+                    {activities
+                      .filter((a) =>
+                        a.title
+                          .toLowerCase()
+                          .includes(searchSsmaActivityEdit.toLowerCase())
+                      )
+                      .map((activity: any) => (
+                        <label
+                          key={activity.idActivity}
+                          className="flex items-center gap-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedSsmaActivitiesEdit.includes(
+                              activity.idActivity
+                            )}
+                            onChange={(e) =>
+                              handleCheckboxChangeEdit(
+                                "ssma",
+                                activity.idActivity,
+                                e.target.checked
+                              )
+                            }
+                          />
+                          {activity.title}
+                        </label>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {laborWatch && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-white">
+                    Tipo de atividade Trabalhista
+                  </label>
+
+                  <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
+                    {activities.map((activity: any) => (
+                      <label
+                        key={activity.idActivity}
+                        className="flex items-center gap-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedLaborActivitiesEdit.includes(
+                            activity.idActivity
+                          )}
+                          onChange={(e) =>
+                            handleCheckboxChangeEdit(
+                              "labor",
+                              activity.idActivity,
+                              e.target.checked
+                            )
+                          }
+                        />
+                        {activity.title}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <label>
                 Descrição
@@ -757,7 +842,6 @@ export function TableServiceProvider() {
           </div>
         </Modal>
       )}
-
 
       {isFinalizeModalOpen && (
         <Modal
@@ -809,7 +893,10 @@ export function TableServiceProvider() {
       )}
 
       {isHistoryModalOpen && selectedSupplier && (
-        <Modal title="Histórico do documento" onClose={() => setIsHistoryModalOpen(false)}>
+        <Modal
+          title="Histórico do documento"
+          onClose={() => setIsHistoryModalOpen(false)}
+        >
           <div className="text-white space-y-2 max-h-[400px] overflow-auto">
             <p>Historico</p>
           </div>
