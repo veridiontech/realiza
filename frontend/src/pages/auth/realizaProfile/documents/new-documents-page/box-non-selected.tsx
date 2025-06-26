@@ -50,7 +50,13 @@ export function BoxNonSelected({
   }
 
   return (
+    <div className="relative w-fit">
+          <span className="absolute -top-5 left-2 text-sm text-gray-500">
+            Documentos desalocados
+          </span>
+        
     <div className="border p-5 shadow-md w-[35vw]">
+
       <div className="flex items-center gap-2 rounded-md border p-2">
         <Search />
         <input className="outline-none" />
@@ -78,6 +84,7 @@ export function BoxNonSelected({
           )}
         </div>
       </ScrollArea>
+    </div>
     </div>
   );
 }
