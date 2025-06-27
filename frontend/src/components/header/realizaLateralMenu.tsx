@@ -49,7 +49,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
       />
-      
+
       <h3 className="pl-4 pt-6 text-xs text-white">Prestadores de serviço</h3>
 
       <RealizaMenuItem
@@ -70,6 +70,8 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
       />
+
+      
 
       <h3 className="pl-4 pt-6 text-xs text-white">Gestão de fornecedores</h3>
 
