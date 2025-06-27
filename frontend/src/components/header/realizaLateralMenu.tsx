@@ -49,16 +49,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
       />
-      <RealizaMenuItem
-        to={`/sistema/dashboard/${getIdUser}`}
-        icon={<Home />}
-        label="Início"
-        menuKey="home"
-
-        setActiveMenuKey={setActiveMenuKey}
-        onClick={onClose}
-      />
-
+      
       <h3 className="pl-4 pt-6 text-xs text-white">Prestadores de serviço</h3>
 
       <RealizaMenuItem
