@@ -11,7 +11,6 @@ interface RealizaMenuItemProps {
   setActiveMenuKey?: (key: string) => void;
   onClick?: () => void;
 }
-
 export function RealizaMenuItem({
   to,
   icon,
