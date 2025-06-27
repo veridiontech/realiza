@@ -86,7 +86,7 @@ export function ValidateSection({
     {
         headers: {
         Authorization: `Bearer ${token}`,
-            },
+          },
         }
     );
 
@@ -144,7 +144,7 @@ export function ValidateSection({
             <td className="px-2 py-1">
               <button
                 onClick={() => handleSave(doc.idDocument)}
-                className="text-green-600 font-semibold text-sm"
+                className="text-red-600 font-semibold text-sm"
               >
                 Salvar
               </button>
