@@ -209,7 +209,7 @@ public class CrudActivityImpl implements CrudActivity {
             if (userResponsible != null) {
                 auditLogServiceImpl.createAuditLogActivity(
                         savedActivityDocuments.getActivity(),
-                        userResponsible.getEmail() + " removeu o documento " + savedActivityDocuments.getDocumentBranch() + " da atividade " + savedActivityDocuments.getActivity(),
+                        userResponsible.getEmail() + " removeu o documento " + savedActivityDocuments.getDocumentBranch().getTitle() + " da atividade " + savedActivityDocuments.getActivity().getTitle(),
                         DEALLOCATE,
                         userResponsible);
             }
