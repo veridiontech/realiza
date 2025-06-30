@@ -1,11 +1,22 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ip } from "@/utils/ip";
 import axios from "axios";
-import { Eye, Notebook, NotebookText, Plus, Upload, User } from "lucide-react";
+import {
+  Eye,
+  Notebook,
+  NotebookText,
+  Plus,
+  Upload,
+  User,
+  FileX2,
+  MoreVertical,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
+
+const [selectedDocumentMenuId, setSelectedDocumentMenuId] = useState<string | null>(null);
 
 
 export function ContarctsByProvider() {
@@ -18,8 +29,12 @@ export function ContarctsByProvider() {
   const [provider, setProvider] = useState<any>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isViewerModalOpen, setIsViewerModalOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
-  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
+    null
+  );
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<
+    string | null
+  >(null);
 
   const token = localStorage.getItem("tokenClient");
 
@@ -171,17 +186,49 @@ export function ContarctsByProvider() {
                         {doc.ownerName}
                       </span>
                     </div>
-                    <div className="flex gap-3">
-                      <Eye
-                        className="cursor-pointer text-[#34495E] hover:text-[#2C3E50] transition duration-200"
-                        onClick={() => handleOpenViewerModal(doc.id)}
-                      />
-                      <Upload
-                        className="cursor-pointer text-[#34495E] hover:text-[#2C3E50] transition duration-200"
+                    <div className="relative inline-block text-left">
+                      <button
                         onClick={() =>
-                          handleOpenUploadModal(doc.id, doc.title)
+                          setSelectedDocumentMenuId(
+                            selectedDocumentMenuId === doc.id ? null : doc.id
+                          )
                         }
-                      />
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <MoreVertical className="w-5 h-5 text-[#34495E]" />
+                      </button>
+
+                      {selectedDocumentMenuId === doc.id && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                          <button
+                            onClick={() => {
+                              handleOpenViewerModal(doc.id);
+                              setSelectedDocumentMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" /> Visualizar
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleOpenUploadModal(doc.id, doc.title);
+                              setSelectedDocumentMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <Upload className="w-4 h-4" /> Upload
+                          </button>
+                          <button
+                            onClick={() => {
+                              console.log("Isentar documento:", doc.id);
+                              setSelectedDocumentMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 flex items-center gap-2"
+                          >
+                            <FileX2 className="w-4 h-4" /> Isentar
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
