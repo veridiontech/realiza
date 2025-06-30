@@ -343,7 +343,7 @@ export function TableServiceProvider() {
                 <button
                   title="Finalizar"
                   onClick={() => {
-                    setSelectedSupplierId(supplier.contract?.idContract);
+                    setSelectedSupplierId(supplier.idContract);
                     setIsFinalizeModalOpen(true);
                   }}
                 >
@@ -427,8 +427,8 @@ export function TableServiceProvider() {
                   <td className="border border-gray-300 p-2">
                     {supplier.dateFinish
                       ? new Date(supplier.dateFinish).toLocaleDateString(
-                          "pt-BR"
-                        )
+                        "pt-BR"
+                      )
                       : "-"}
                   </td>
 
@@ -484,7 +484,7 @@ export function TableServiceProvider() {
                           </button>
                           <button
                             onClick={() => {
-                              setSelectedSupplierId(null);
+                              setSelectedSupplierId(supplier.idContract);
                               setIsFinalizeModalOpen(true);
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
@@ -560,8 +560,8 @@ export function TableServiceProvider() {
               <strong>Data de Finalização:</strong>{" "}
               {selectedSupplier.dateFinish
                 ? new Date(selectedSupplier.dateFinish).toLocaleDateString(
-                    "pt-BR"
-                  )
+                  "pt-BR"
+                )
                 : "-"}
             </p>
             <p>
@@ -862,22 +862,32 @@ export function TableServiceProvider() {
               </button>
               <button
                 onClick={async () => {
-                  if (!selectedSupplierId) return;
+                  if (!selectedSupplierId) {
+                    console.warn("ID do contrato não está definido.");
+                    return;
+                  }
+
+                  const tokenFromStorage = localStorage.getItem("tokenClient");
+                  const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
+                  const payload = { status: "Contrato Cancelado" };
+
+                  console.log("🔄 Iniciando finalização de contrato");
+                  console.log("➡️ Endpoint:", endpoint);
+                  console.log("📦 Payload:", payload);
+
                   try {
-                    const tokenFromStorage =
-                      localStorage.getItem("tokenClient");
-                    await axios.post(
-                      `${ip}/contract/finish/${selectedSupplierId}`,
-                      { status: "Contrato Cancelado" },
-                      {
-                        headers: {
-                          Authorization: `Bearer ${tokenFromStorage}`,
-                        },
-                      }
-                    );
+                    const response = await axios.post(endpoint, payload, {
+                      headers: {
+                        Authorization: `Bearer ${tokenFromStorage}`,
+                      },
+                    });
+
+                    console.log("✅ Contrato finalizado:", response.data);
+                    toast.success("Contrato finalizado com sucesso");
                     await getSupplier();
-                  } catch (err) {
-                    console.error("Erro ao cancelar contrato", err);
+                  } catch (err: any) {
+                    console.error("❌ Erro ao finalizar contrato", err);
+                    toast.error("Erro ao finalizar contrato");
                   } finally {
                     setIsFinalizeModalOpen(false);
                     setSelectedSupplierId(null);
