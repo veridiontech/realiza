@@ -176,8 +176,6 @@ export function ThirdCompany() {
           <BoxSelected documents={selectedDocument} isLoading={isLoading} />
         </div>
       </div>
-
-      
       <div className="flex justify-center w-full px-10 pb-10">
         <div className="max-w-4xl w-full">
           <ValidateSection

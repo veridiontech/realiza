@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { propsDocument } from "@/types/interfaces";
+import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function ThirdCollaborators() {
   const { setDocuments, documents, setNonSelected, nonSelected } =
@@ -115,6 +116,7 @@ export function ThirdCollaborators() {
   };
 
   return (
+    <>
     <div className="flex items-center justify-center gap-10 p-10">
       <div>
         <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
@@ -195,5 +197,15 @@ export function ThirdCollaborators() {
         <BoxSelected documents={selectedDocument} isLoading={isLoading} />
       </div>
     </div>
+        <div className="flex justify-center w-full px-10 pb-10">
+          <div className="max-w-4xl w-full">
+            <ValidateSection
+              idBranch={selectedBranch?.idBranch!}
+              documentTypeName="Saude"
+              isSelected={true}
+            />
+          </div>
+        </div>
+    </>
   );
 }
