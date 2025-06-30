@@ -115,49 +115,51 @@ export function MiddleSection() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow"
+      className="flex flex-col gap-6 rounded-lg p-6 shadow"
     >
       <div className="flex items-center gap-2">
-        <PersonStanding className="text-realizaBlue h-7 w-7" />
-        <h2 className="text-realizaBlue mb-4 text-lg">Informações Pessoais</h2>
+        <PersonStanding className="text-realizaBlue h-6 w-6" />
+        <h2 className="text-realizaBlue text-base font-medium">Informações Pessoais</h2>
       </div>
 
-      <div>
-        <Label>Nome</Label>
-        <Input {...register("firstName")} placeholder="Digite seu nome" />
-        {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
+  
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Nome:</Label>
+          <Input {...register("firstName")} placeholder="Digite seu nome" />
+          {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
       </div>
 
-      <div>
-        <Label>Sobrenome</Label>
-        <Input {...register("surname")} placeholder="Digite seu sobrenome" />
-        {errors.surname && <p className="text-sm text-red-500">{errors.surname.message}</p>}
-      </div>
+        <div>
+          <Label>Sobrenome:</Label>
+          <Input {...register("surname")} placeholder="Digite seu sobrenome" />
+          {errors.surname && <p className="text-sm text-red-500">{errors.surname.message}</p>}
+        </div>
 
-      <div>
-        <Label>E-mail</Label>
-        <Input {...register("email")} placeholder="Digite seu e-mail" />
-        {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-      </div>
+        <div>
+          <Label>E-mail:</Label>
+          <Input {...register("email")} placeholder="Digite seu e-mail" />
+          {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+        </div>
 
-      <div>
-        <Label>Telefone</Label>
-        <Input
-          type="text"
-          value={phoneValue}
-          onChange={(e) => {
-            const formatted = formatPhone(e.target.value);
-            setPhoneValue(formatted);
-            setValue("telephone", formatted, { shouldValidate: true });
-          }}
-          placeholder="(00) 00000-0000"
-          maxLength={15}
-        />
-        {errors.telephone && <p className="text-sm text-red-500">{errors.telephone.message}</p>}
-      </div>
+        <div>
+          <Label>Telefone:</Label>
+          <Input
+            type="text"
+            value={phoneValue}
+            onChange={(e) => {
+              const formatted = formatPhone(e.target.value);
+              setPhoneValue(formatted);
+              setValue("telephone", formatted, { shouldValidate: true });
+            }}
+            placeholder="(00) 00000-0000"
+            maxLength={15}
+          />
+          {errors.telephone && <p className="text-sm text-red-500">{errors.telephone.message}</p>}
+        </div>
 
-      <div>
-        <Label>CPF</Label>
+      <div className="md:col-span-2">
+        <Label>CPF:</Label>
         <Input
           type="text"
           value={cpfValue}
@@ -172,25 +174,27 @@ export function MiddleSection() {
         {errors.cpf && <p className="text-sm text-red-500">{errors.cpf.message}</p>}
       </div>
 
-      <div>
-        <Label>Descrição</Label>
-        <textarea
-          {...register("description")}
-          className={`w-full rounded border p-3 ${errors.description ? "border-red-500" : "border-gray-300"}`}
-          placeholder="Digite uma descrição sobre você"
-          rows={4}
-        />
-        {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
+      <div className="md:col-span-2">
+        <Label>Descrição:</Label>
+          <textarea
+            {...register("description")}
+            className={`w-full rounded border p-3 text-sm ${errors.description ? "border-red-500" : "border-gray-300"}`}
+            placeholder="Digite uma descrição sobre você"
+            rows={4}
+          />
+          {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
+        </div>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="bg-realizaBlue hover:bg-realizaBlue w-[20vw] rounded p-3 text-white"
-        >
-          Salvar
+      <div className="flex justify-end mt-4">
+          <button
+            type="submit"
+            className="bg-[#1f2f54] hover:bg-[#152446] text-white rounded px-6 py-2 text-sm font-medium shadow-sm transition"
+          >
+          Salvar alterações
         </button>
       </div>
     </form>
+
   );
 }
