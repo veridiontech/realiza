@@ -3,17 +3,28 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
+import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.activity.ActivityControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.activity.ActivityRiskControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentTypeControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeRiskControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
@@ -29,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +56,8 @@ public class CrudBranchImpl implements CrudBranch {
     private final CrudActivityImpl crudActivityImpl;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
+    private final ActivityRepository activityRepository;
+    private final ServiceTypeBranchRepository serviceTypeBranchRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -245,5 +259,63 @@ public class CrudBranchImpl implements CrudBranch {
         Page<Branch> pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
 
         return getBranchResponseDtos(pageBranch);
+    }
+
+    @Override
+    public ControlPanelResponseDto findControlPanelSummary(String branchId) {
+        ControlPanelResponseDto response = ControlPanelResponseDto.builder().build();
+        response.setDocuments(new ArrayList<>());
+        response.setActivities(new ArrayList<>());
+        response.setServices(new ArrayList<>());
+
+        // documents
+        List<DocumentControlPanelResponseDto> documents = documentBranchRepository.findAllControlPanelDocumentResponseDtoByBranch_IdBranch(branchId);
+        Map<String, List<DocumentControlPanelResponseDto>> documentsByType = documents.stream()
+                .collect(Collectors.groupingBy(DocumentControlPanelResponseDto::getType));
+
+        documentsByType.forEach((type, docList) -> {
+            docList.forEach(doc -> doc.setType(null));
+
+            response.getDocuments().add(
+                    DocumentTypeControlPanelResponseDto.builder()
+                            .typeName(type)
+                            .documents(docList)
+                            .build()
+            );
+        });
+
+        // activities
+        List<ActivityControlPanelResponseDto> activities = activityRepository.findAllControlPanelActivityResponseDtoByBranch_IdBranch(branchId);
+        Map<Activity.Risk, List<ActivityControlPanelResponseDto>> activitiesByRisk = activities.stream()
+                .collect(Collectors.groupingBy(ActivityControlPanelResponseDto::getRisk));
+
+        activitiesByRisk.forEach((risk, activityList) -> {
+            activityList.forEach(activity -> activity.setRisk(null));
+
+            response.getActivities().add(
+                    ActivityRiskControlPanelResponseDto.builder()
+                            .risk(risk)
+                            .activities(activityList)
+                            .build()
+            );
+        });
+
+        // service types
+        List<ServiceTypeControlPanelResponseDto> services = serviceTypeBranchRepository.findAllControlPanelActivityResponseDtoByBranch_IdBranch(branchId);
+        Map<ServiceType.Risk, List<ServiceTypeControlPanelResponseDto>> servicesByRisk = services.stream()
+                .collect(Collectors.groupingBy(ServiceTypeControlPanelResponseDto::getRisk));
+
+        servicesByRisk.forEach((risk, serviceList) -> {
+            serviceList.forEach(service -> service.setRisk(null));
+
+            response.getServices().add(
+                    ServiceTypeRiskControlPanelResponseDto.builder()
+                            .risk(risk)
+                            .services(serviceList)
+                            .build()
+            );
+        });
+
+        return response;
     }
 }

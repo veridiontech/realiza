@@ -68,6 +68,7 @@ public class SetupService {
     }
 
     public void setupBranch(String branchId) {
+        log.info("Started setup branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
@@ -84,13 +85,16 @@ public class SetupService {
                     .build());
 
             if (batch.size() == 50) {
+                log.info("Saving batch 💾 {}", batch.size());
                 documentBranchRepository.saveAll(batch);
                 batch.clear();
             }
         }
         if (!batch.isEmpty()) {
+            log.info("Saving final batch 💾 {}", batch.size());
             documentBranchRepository.saveAll(batch);
         }
+        log.info("Docs finished ✔️ {}", batch.size());
         crudActivity.transferFromRepo(branch.getIdBranch());
     }
 

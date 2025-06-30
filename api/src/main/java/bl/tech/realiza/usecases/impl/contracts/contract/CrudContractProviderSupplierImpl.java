@@ -341,11 +341,9 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllByClient(String idSearch, List<IsActive> isActive, Pageable pageable) {
-        System.out.println("before" + isActive);
         if (isActive == null || isActive.isEmpty()) {
             isActive = List.of(ATIVADO);
         }
-        System.out.println("after" + isActive);
         Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);

@@ -2,7 +2,8 @@ package bl.tech.realiza.gateways.repositories.documents.client;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,29 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     Long countByBranch_IdBranchAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, Document.Status status, String groupName);
 
     List<DocumentBranch> findAllByBranch_IdBranch(String id);
+
+    @Query("""
+    SELECT d.type
+    FROM DocumentBranch d
+    GROUP BY d.type
+""")
+    List<String> findAllTypes();
+
+    @Query("""
+    SELECT new bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentControlPanelResponseDto(
+        d.idDocumentation,
+        d.title,
+        d.expirationDateAmount,
+        d.expirationDateUnit,
+        d.type
+    )
+    FROM DocumentBranch d
+    WHERE d.branch.idBranch = :branchId
+        AND d.isActive = true
+""")
+    List<DocumentControlPanelResponseDto> findAllControlPanelDocumentResponseDtoByBranch_IdBranch(
+            @Param("branchId") String id
+    );
 
     @Query("""
     SELECT new bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto(
