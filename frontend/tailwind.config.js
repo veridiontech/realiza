@@ -37,7 +37,7 @@ export default {
   			'870': '870px',
   			'965': '965px'
   		},
-  		heigh: {
+  		height: {
   			'400': '400px'
   		},
   		colors: {

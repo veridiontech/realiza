@@ -7,8 +7,10 @@ interface SplashPageProps {
 
 const SplashPage = ({ nome }: SplashPageProps) => {
   return (
-    <div className="flex h-screen items-center justify-center bg-[#34495e]">
-      <div className="text-center">
+    <>
+    <div className="flex h-screen items-center justify-center">
+      <div className="text-center z-10 relative">
+
         <motion.h1
           initial={{ x: "-100vw", opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -42,6 +44,7 @@ const SplashPage = ({ nome }: SplashPageProps) => {
         </motion.p>
       </div>
     </div>
+    </>
   );
 };
 

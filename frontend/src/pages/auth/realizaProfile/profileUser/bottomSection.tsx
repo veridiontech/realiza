@@ -54,70 +54,71 @@ export function BottomSection() {
   };
 
   return (
-    <div className="mt-6 flex flex-col rounded-lg bg-white p-6 shadow">
-      <div className="flex flex-row gap-2">
-        <LockKeyhole className="text-realizaBlue h-7 w-7" />
-        <h2 className="text-realizaBlue text-lg">Segurança</h2>
-      </div>
-      <form
-        onSubmit={handleSubmit(newPassword)}
-        className="flex w-full flex-col gap-4"
-      >
-        <div className="relative">
-          <label className="mt-8 block text-sm font-medium text-gray-700">
-            Sua senha
-          </label>
-          <input
-            type={showPassword ? "text" : "password"}
-            {...register("password")}
-            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${errors.password
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-realizaBlue border-gray-300"
-              }`}
-            placeholder="Digite sua senha"
-            title={errors.password?.message}
-          />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-3 mt-12 flex items-center text-gray-500 hover:text-gray-700"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? "🔒" : "👁️"}
-          </button>
-        </div>
-        <div className="relative">
-          <label className="mt-8 block text-sm font-medium text-gray-700">
-            Nova Senha
-          </label>
-          <input
-            type={showPassword ? "text" : "password"}
-            {...register("newPassword")}
-            className={`block w-full rounded-md border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 ${errors.newPassword
-                ? "border-red-500 focus:ring-red-500"
-                : "focus:ring-realizaBlue border-gray-300"
-              }`}
-            placeholder="Digite sua nova senha"
-          />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-3 mt-12 flex items-center text-gray-500 hover:text-gray-700"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? "🔒" : "👁️"}
-          </button>
-        </div>
-        {errors.newPassword && (
-          <p className="text-sm text-red-500">{errors.newPassword.message}</p>
-        )}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            className="bg-realizaBlue hover:bg-realizaBlue w-[20vw] rounded p-3 text-white"
-          >
-            Alterar Senha
-          </button>
-        </div>
-      </form>
+  <div className="mt-6 flex flex-col rounded-lg bg-white p-6 shadow">
+    <div className="flex items-center gap-2 mb-6">
+      <LockKeyhole className="text-realizaBlue h-6 w-6" />
+      <h2 className="text-realizaBlue text-base font-medium">Segurança</h2>
     </div>
-  );
+
+    <form onSubmit={handleSubmit(newPassword)} className="flex w-full flex-col gap-6">
+      
+      <div className="relative">
+        <label className="block text-sm text-gray-700 mb-1">Sua senha</label>
+        <input
+          type={showPassword ? "text" : "password"}
+          {...register("password")}
+          placeholder="Digite sua senha"
+          title={errors.password?.message}
+          className={`w-full rounded border px-3 py-2 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 ${errors.password
+              ? "border-red-500 focus:ring-red-500"
+              : "border-gray-300 focus:ring-realizaBlue"
+            }`}
+        />
+        <button
+          type="button"
+          className="absolute top-9 right-3 text-gray-500 hover:text-gray-700"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? "🔒" : "👁️"}
+        </button>
+      </div>
+
+      
+      <div className="relative">
+        <label className="block text-sm text-gray-700 mb-1">Nova Senha</label>
+        <input
+          type={showPassword ? "text" : "password"}
+          {...register("newPassword")}
+          placeholder="Digite sua nova senha"
+          className={`w-full rounded border px-3 py-2 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 ${errors.newPassword
+              ? "border-red-500 focus:ring-red-500"
+              : "border-gray-300 focus:ring-realizaBlue"
+            }`}
+        />
+        <button
+          type="button"
+          className="absolute top-9 right-3 text-gray-500 hover:text-gray-700"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? "🔒" : "👁️"}
+        </button>
+      </div>
+
+     
+      {errors.newPassword && (
+        <p className="text-sm text-red-500 -mt-4">{errors.newPassword.message}</p>
+      )}
+
+      
+      <div className="flex justify-end mt-2">
+        <button
+          type="submit"
+          className="bg-[#1f2f54] hover:bg-[#152446] text-white px-6 py-2 rounded text-sm font-medium shadow-sm transition"
+        >
+          Salvar Alterações
+        </button>
+      </div>
+    </form>
+  </div>
+);
 }
