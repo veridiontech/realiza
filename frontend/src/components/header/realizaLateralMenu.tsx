@@ -71,6 +71,8 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
 
+      
+
       <h3 className="pl-4 pt-6 text-xs text-white">Gestão de fornecedores</h3>
 
       <RealizaMenuItem

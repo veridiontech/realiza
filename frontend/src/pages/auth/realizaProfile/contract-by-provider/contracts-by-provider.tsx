@@ -1,12 +1,20 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ip } from "@/utils/ip";
 import axios from "axios";
-import { Eye, Notebook, NotebookText, Plus, Upload, User } from "lucide-react";
+import {
+  Eye,
+  Notebook,
+  NotebookText,
+  Plus,
+  Upload,
+  User,
+  MoreVertical,
+  FileX2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
-
 
 export function ContarctsByProvider() {
   const id = useParams();
@@ -18,8 +26,16 @@ export function ContarctsByProvider() {
   const [provider, setProvider] = useState<any>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isViewerModalOpen, setIsViewerModalOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
-  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
+    null
+  );
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<
+    string | null
+  >(null);
+
+  const [openMenuDocumentId, setOpenMenuDocumentId] = useState<string | null>(
+    null
+  );
 
   const token = localStorage.getItem("tokenClient");
 
@@ -92,6 +108,26 @@ export function ContarctsByProvider() {
     setSelectedDocumentId(null);
   };
 
+  // const exemptDocument = async (documentId: string, documentTitle: string) => {
+  // try {
+  //   await axios.patch(
+  //     `${ip}/document/exempt/${documentId}`,
+  //     {},
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     }
+  //   );
+     
+  //   };
+  //   catch (error) {
+  //    console.error("Erro:", error);
+
+  //   alert(`Documento "${documentTitle}" isento com sucesso!`)
+  // }
+
+
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
       <div className="bg-realizaBlue border rounded-md flex flex-col w-[25vw]">
@@ -158,7 +194,7 @@ export function ContarctsByProvider() {
               className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
             />
 
-            <div className="flex flex-col gap-4 overflow-y-auto max-h-[35vh] pr-2">
+            <div className="flex flex-col gap-4 overflow-y-auto max-h-[35vh] pr-2 relative">
               {filteredDocuments.length > 0 ? (
                 filteredDocuments.map((doc: any) => (
                   <div
@@ -171,17 +207,46 @@ export function ContarctsByProvider() {
                         {doc.ownerName}
                       </span>
                     </div>
+
                     <div className="flex gap-3">
-                      <Eye
-                        className="cursor-pointer text-[#34495E] hover:text-[#2C3E50] transition duration-200"
-                        onClick={() => handleOpenViewerModal(doc.id)}
-                      />
-                      <Upload
-                        className="cursor-pointer text-[#34495E] hover:text-[#2C3E50] transition duration-200"
+                      <button
                         onClick={() =>
-                          handleOpenUploadModal(doc.id, doc.title)
+                          setOpenMenuDocumentId(
+                            openMenuDocumentId === doc.id ? null : doc.id
+                          )
                         }
-                      />
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+                      {openMenuDocumentId === doc.id && (
+                        <div className="absolute right-10  mt-2 w-15 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                          <button
+                            onClick={() => handleOpenViewerModal(doc.id)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <Eye className="w-5 h-5 text-base" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleOpenUploadModal(doc.id, doc.title)
+                            }
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <Upload className="w-5 h-5 text-base" />
+                          </button>
+                          <button
+                            type="button"
+                            // onClick={() => exemptDocument(doc.id, doc.title)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <FileX2
+                              className="w-5 h-5 text-base"
+                              color="#b31933"
+                            />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))

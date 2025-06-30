@@ -6,7 +6,7 @@ import { router } from "./routes"; // Certifique-se de que foi criado com `creat
 import { FormDataProvider } from "./context/formDataProvider";
 import { ThemeProvider } from "./context/Theme-Provider";
 // import { UserProvider } from "./context/user-provider";
-import { Toaster } from "sonner";
+import { Toaster } from "sonner"; 
 import { ClientProvider } from "./context/Client-Provider";
 import { DocumentProvider } from "./context/Document-provider";
 import { BranchProvider } from "./context/Branch-provider";
