@@ -10,26 +10,29 @@ import { useBranch } from "@/context/Branch-provider";
 export function EnterpriseResume() {
   const { client } = useClient();
   const { selectedBranch } = useBranch();
-  
-  if(!client) {
-    return(
-      <div className="dark:bg-primary flex  items-start justify-between rounded bg-white p-4 shadow md:flex-row">
-      <div className="flex items-center gap-3">
-        <div className="bg-neutral-300 p-5 rounded-md">
-          <BriefcaseBusiness className="text-neutral-600" size={50}/>
-        </div>
-        <div className="flex flex-col gap-1">
-            <h3 className="text-lg font-semibold text-realizaBlue">Selecione um cliente</h3>
+
+  if (!client) {
+    return (
+      <div className="dark:bg-primary flex items-start justify-between rounded bg-white p-4 shadow md:flex-row">
+        <div className="flex items-center gap-3">
+          <div className="bg-neutral-300 p-5 rounded-md">
+            <BriefcaseBusiness className="text-neutral-600" size={50} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-lg font-semibold text-realizaBlue">
+              Selecione um cliente
+            </h3>
             <p className="text-neutral-400 w-[20vw] text-[14px]">
-              é necessário selecionar um cliente, para que suas informações apareçam no dashboard
+              é necessário selecionar um cliente, para que suas informações
+              apareçam no dashboard
             </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <ModalCreateCliente />
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <ModalCreateCliente />
-      </div>
-    </div>
-    )
+    );
   }
 
   return (
