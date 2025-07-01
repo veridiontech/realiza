@@ -59,7 +59,7 @@ export function FormCreateUserSupplier() {
   const [suppliers, setSuppliers] = useState<propsSupplier[]>([]);
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {

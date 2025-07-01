@@ -62,7 +62,7 @@ export function FormCreateUserRealiza() {
   const [isLoading, setIsLoading] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const {

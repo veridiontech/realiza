@@ -585,12 +585,12 @@ export function TableServiceProvider() {
           <div className="text-white space-y-4 max-h-[80vh] overflow-auto w-[90vw] md:w-[600px]">
             <form
               onSubmit={handleSubmit(onSubmitEdit)}
-              className="flex flex-col gap-3 text-black"
+              className="flex flex-col gap-3 [&>label]:text-white"
             >
-              <label>
+              <label >
                 Referência do Contrato
                 <input
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                   {...register("contractReference")}
                 />
                 {errors.contractReference && (
@@ -603,7 +603,7 @@ export function TableServiceProvider() {
               <label>
                 Nome do Fornecedor
                 <input
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                   {...register("providerSupplierName")}
                 />
                 {errors.providerSupplierName && (
@@ -616,7 +616,7 @@ export function TableServiceProvider() {
               <label>
                 Nome do Serviço
                 <input
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                   {...register("serviceName")}
                 />
                 {errors.serviceName && (
@@ -630,7 +630,7 @@ export function TableServiceProvider() {
                 Gestor
                 <select
                   {...register("idResponsible")}
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                 >
                   <option value="">Selecione</option>
                   {managers.map((m: any) => (
@@ -650,7 +650,7 @@ export function TableServiceProvider() {
                 Data de Início
                 <input
                   type="date"
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                   {...register("dateStart")}
                 />
                 {errors.dateStart && (
@@ -664,7 +664,7 @@ export function TableServiceProvider() {
                 Tipo de Despesa
                 <select
                   {...register("expenseType")}
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                 >
                   <option value="">Selecione</option>
                   <option value="CAPEX">CAPEX</option>
@@ -682,7 +682,7 @@ export function TableServiceProvider() {
                 Tipo do Serviço
                 <select
                   {...register("idServiceType")}
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                 >
                   <option value="">Selecione</option>
                   {servicesType.map((service: any) => (
@@ -817,7 +817,7 @@ export function TableServiceProvider() {
               <label>
                 Descrição
                 <textarea
-                  className="w-full rounded border px-2 py-1"
+                  className="w-full rounded border px-2 py-1 text-black"
                   rows={3}
                   {...register("description")}
                 />
