@@ -121,7 +121,16 @@ public class CrudContractImpl implements CrudContract {
                     employee.setSituation(Employee.Situation.ALOCADO);
                 }
             }
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUPPLIER", null, null, contractProviderSupplier.getIdContract(), null, null, employees.stream().map(Employee::getIdEmployee).toList()));
+
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUPPLIER",
+                    null,
+                    null,
+                    contractProviderSupplier.getIdContract(),
+                    null,
+                    null,
+                    null,
+                    employees.stream().map(Employee::getIdEmployee).toList()));
+
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
                 if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(), employee.getSubcontract().getIdProvider())) {
@@ -134,12 +143,22 @@ public class CrudContractImpl implements CrudContract {
                     employee.setSituation(Employee.Situation.ALOCADO);
                 }
             }
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUBCONTRACT", null, null, null, contractProviderSubcontractor.getIdContract(), null, employees.stream().map(Employee::getIdEmployee).toList()));
+
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUBCONTRACT",
+                    null,
+                    null,
+                    null,
+                    contractProviderSubcontractor.getIdContract(),
+                    null,
+                    null,
+                    employees.stream().map(Employee::getIdEmployee).toList()));
+
         } else {
             throw new NotFoundException("Invalid contract type");
         }
 
         employeeRepository.saveAll(employees);
+
         for (Employee employee : employees) {
             if (JwtService.getAuthenticatedUserId() != null) {
                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -188,29 +207,25 @@ public class CrudContractImpl implements CrudContract {
                 if (!Objects.equals(contractProviderSupplier.getProviderSupplier().getIdProvider(), employee.getSupplier().getIdProvider())) {
                     throw new IllegalArgumentException("Contract provider does not match employee provider");
                 }
-
-                employee.getContracts().remove(contract);
             }
-
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
                 if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(), employee.getSubcontract().getIdProvider())) {
                     throw new IllegalArgumentException("Contract provider does not match employee provider");
                 }
-
-                employee.getContracts().remove(contract);
             }
         } else {
             throw new NotFoundException("Invalid contract type");
         }
 
-        for (Employee employee : employees) {
-            if (employee.getContracts().isEmpty() && !employee.getSituation().equals(Employee.Situation.DESALOCADO)) {
-                employee.setSituation(Employee.Situation.DESALOCADO);
-            }
-        }
-
-        contractRepository.save(contract);
+        setupAsyncQueueProducer.sendSetup(new SetupMessage("REMOVE_EMPLOYEE_CONTRACT",
+                null,
+                null,
+                null,
+                null,
+                contract.getIdContract(),
+                null,
+                employees.stream().map(Employee::getIdEmployee).toList()));
 
         for (Employee employee : employees) {
             if (JwtService.getAuthenticatedUserId() != null) {

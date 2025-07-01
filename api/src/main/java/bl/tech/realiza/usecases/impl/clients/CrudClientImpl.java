@@ -73,7 +73,14 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient.getIdClient(), null, null, null, null, null));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT",
+                savedClient.getIdClient(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
 
         crudBranchImpl.save(BranchCreateRequestDto.builder()
                 .name(savedClient.getTradeName() != null
