@@ -20,16 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CONTRACT")
 public class AuditLogContract extends AuditLog {
-    private AuditLogContractActions action;
-
     @ManyToOne
     @JoinColumn(name = "idContract")
     private Contract contract;
-
-    public enum AuditLogContractActions {
-        CREATE,
-        UPDATE,
-        DELETE,
-        FINISH
-    }
 }

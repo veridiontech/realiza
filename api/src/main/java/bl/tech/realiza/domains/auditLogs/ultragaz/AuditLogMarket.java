@@ -20,15 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("MARKET")
 public class AuditLogMarket extends AuditLog {
-    private AuditLogMarketActions action;
-
     @ManyToOne
     @JoinColumn(name = "idMarket")
     private Market idMarket;
-
-    public enum AuditLogMarketActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
 }

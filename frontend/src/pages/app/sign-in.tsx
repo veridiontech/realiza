@@ -136,17 +136,21 @@ export function SignIn() {
     );
   }
 
-  return (
-    <div className="min-h-screen p-32 bg-transparent">
+return (
+  
+  <div className="relative min-h-screen bg-transparent overflow-hidden">
+    <div className="relative z-10 p-6 md:p-32">
       <div className="flex flex-col gap-5">
         <div className="flex flex-col items-start gap-4">
-          <img src={logo}/>
-        <h1 className="text-center text-3xl font-bold text-white">Bem Vindo a <span className="text-[#C0B15B]">Realiza Assessoria</span></h1>
-        <span className="text-center block text-sm text-white">
-          Insira seu e-mail e senha para continuar
-        </span>
+          <img src={logo} />
+          <h1 className="text-center text-3xl font-bold text-white">
+            Bem Vindo a <span className="text-[#C0B15B]">Realiza Assessoria</span>
+          </h1>
+          <span className="text-center block text-sm text-white">
+            Insira seu e-mail e senha para continuar
+          </span>
         </div>
-  
+
         <Form
           className="mt-10 flex flex-col gap-4"
           onSubmit={handleSubmit(getUser)}
@@ -165,14 +169,14 @@ export function SignIn() {
               <span className="text-red-500 text-sm">{errors.email.message}</span>
             )}
           </div>
-  
+
           <div>
-            <label htmlFor="password"  className="block text-sm font-medium text-white">
+            <label htmlFor="password" className="block text-sm font-medium text-white">
               Senha
             </label>
             <div className="relative">
               <input
-              className="mt-1 block w-full rounded-md border bg-transparent border-neutral-400 px-3 py-2 text-white shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
+                className="mt-1 block w-full rounded-md border bg-transparent border-neutral-400 px-3 py-2 text-white shadow-sm focus:border-realizaBlue focus:ring-2 focus:ring-realizaBlue"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
               />
@@ -188,14 +192,14 @@ export function SignIn() {
               <span className="text-red-500 text-sm">{errors.password.message}</span>
             )}
           </div>
-  
+
           <div className="text-xs text-white">
             Esqueceu a senha?{" "}
             <Link to="/forgot-password" className="text-white hover:underline">
               Recupere aqui!
             </Link>
           </div>
-  
+
           <button
             className="mt-4 w-full rounded bg-[#C0B15B] text-realizaBlue px-4 py-2 font-bold hover:bg-neutral-400"
             type="submit"
@@ -206,5 +210,6 @@ export function SignIn() {
         </Form>
       </div>
     </div>
-  );
-}    
+  </div>
+);
+}

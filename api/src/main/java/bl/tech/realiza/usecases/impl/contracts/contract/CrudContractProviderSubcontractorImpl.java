@@ -5,6 +5,7 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -109,7 +110,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractSubcontractor,
                         userResponsible.getEmail() + " criou contrato " + savedContractSubcontractor.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.CREATE,
+                            AuditLogActions.CREATE,
                         userResponsible));
         }
 
@@ -176,7 +177,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 auditLogServiceImpl.createAuditLogContract(
                         savedContractSubcontractor,
                         userResponsible.getEmail() + " atualizou contrato " + savedContractSubcontractor.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }
@@ -196,7 +197,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
                         userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.DELETE,
+                        AuditLogActions.DELETE,
                         userResponsible);
             }
         }

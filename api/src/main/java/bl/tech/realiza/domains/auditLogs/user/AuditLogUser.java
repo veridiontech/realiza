@@ -1,7 +1,7 @@
 package bl.tech.realiza.domains.auditLogs.user;
 
 import bl.tech.realiza.domains.auditLogs.AuditLog;
-import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.user.User;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -20,18 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("USER")
 public class AuditLogUser extends AuditLog {
-    private AuditLogUserActions action;
-
     @ManyToOne
-    @JoinColumn(name = "idEmployee")
-    private Employee idEmployee;
-
-    public enum AuditLogUserActions {
-        CREATE,
-        UPDATE,
-        DELETE,
-        ACTIVATE,
-        LOGIN,
-        LOGOUT,
-    }
+    @JoinColumn(name = "idUser")
+    private User user;
 }

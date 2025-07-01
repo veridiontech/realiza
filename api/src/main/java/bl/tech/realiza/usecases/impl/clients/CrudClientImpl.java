@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -93,7 +94,7 @@ public class CrudClientImpl implements CrudClient {
                 auditLogServiceImpl.createAuditLogClient(
                         savedClient,
                         userResponsible.getEmail() + " criou cliente " + savedClient.getCorporateName(),
-                        AuditLogClient.AuditLogClientActions.CREATE,
+                        AuditLogActions.CREATE,
                         userResponsible);
             }
         }
@@ -203,7 +204,7 @@ public class CrudClientImpl implements CrudClient {
                 auditLogServiceImpl.createAuditLogClient(
                         savedClient,
                         userResponsible.getEmail() + " atualizou cliente " + savedClient.getCorporateName(),
-                        AuditLogClient.AuditLogClientActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }
@@ -238,7 +239,7 @@ public class CrudClientImpl implements CrudClient {
                 auditLogServiceImpl.createAuditLogClient(
                         client,
                         userResponsible.getEmail() + " deletou cliente " + client.getCorporateName(),
-                        AuditLogClient.AuditLogClientActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }

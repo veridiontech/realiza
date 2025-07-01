@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
-import { Oval, Radio } from "react-loader-spinner";
+import { Oval } from "react-loader-spinner"; // 'Radio' removido
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
@@ -96,11 +96,11 @@ export function ModalTesteSendSupplier() {
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
-  const { datasSender, setDatasSender } = useDataSendEmailContext();
+  const { setDatasSender } = useDataSendEmailContext(); // 'datasSender' removido, pois não é lido diretamente
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
-  const [isMainModalOpen, setIsMainModalOpen] = useState(false); // controla o primeiro modal
+  const [isMainModalOpen, setIsMainModalOpen] = useState(false);
   const [cnpjValue, setCnpjValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [searchService, setSearchService] = useState("");
@@ -156,6 +156,8 @@ export function ModalTesteSendSupplier() {
     register: registerSubContract,
     handleSubmit: handleSubmitSubContract,
     formState: { errors: errorsSubContract },
+    setValue: setValueSubContract,
+    getValues: getValuesSubContract,
   } = useForm<ModalSendEmailFormSchemaSubContractor>({
     resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
   });
@@ -185,16 +187,25 @@ export function ModalTesteSendSupplier() {
   };
 
   useEffect(() => {
-    setCnpjValue(getValues("cnpj") || "");
-    setPhoneValue(getValues("phone") || "");
-  }, [getValues]);
+    if (isSubcontractor === "contratado") {
+      setCnpjValue(getValues("cnpj") || "");
+      setPhoneValue(getValues("phone") || "");
+    } else if (isSubcontractor === "subcontratado") {
+      setCnpjValue(getValuesSubContract("cnpj") || "");
+      setPhoneValue(getValuesSubContract("phone") || "");
+    }
+  }, [getValues, getValuesSubContract, isSubcontractor]);
 
   const handleCNPJSearch = async () => {
-    const cnpjValue = getValues("cnpj");
+    const cnpjValueToSearch = isSubcontractor === "contratado" ? getValues("cnpj") : getValuesSubContract("cnpj");
     setIsLoading(true);
     try {
-      const companyData = await fetchCompanyByCNPJ(cnpjValue);
-      setValue("corporateName", companyData.razaoSocial || "");
+      const companyData = await fetchCompanyByCNPJ(cnpjValueToSearch);
+      if (isSubcontractor === "contratado") {
+        setValue("corporateName", companyData.razaoSocial || "");
+      } else {
+        setValueSubContract("corporateName", companyData.razaoSocial || "");
+      }
     } catch (error) {
       toast.error("Erro ao buscar dados do CNPJ");
     } finally {
@@ -215,8 +226,6 @@ export function ModalTesteSendSupplier() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      console.log(res.data);
-
       setSuppliers(res.data);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
@@ -227,7 +236,6 @@ export function ModalTesteSendSupplier() {
     if (selectedBranch?.idBranch) {
       getSupplier();
       setSuppliers([]);
-      console.log("FORNECEDORES DISPONÍVEIS:", suppliers);
     }
   }, [selectedBranch]);
 
@@ -242,14 +250,14 @@ export function ModalTesteSendSupplier() {
           },
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
-      ); console.log("aaa", activitieData)
+      );
       setActivities(activitieData.data);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const createClient = async (data: ModalSendEmailFormSchema) => {
+  const createClient = async (data: ModalSendEmailFormSchema | ModalSendEmailFormSchemaSubContractor) => {
     setIsLoading(true);
 
     const emailAtual = data.email.toLowerCase();
@@ -325,9 +333,8 @@ export function ModalTesteSendSupplier() {
         idBranch: selectedBranch?.idBranch,
         idActivities: selectedActivities,
       };
-      console.log("enviando dados do contrato", payload);
+
       setDatasSender(payload);
-      console.log("dados recebidos:", datasSender);
 
       await axios.post(`${ip}/contract/supplier`, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
@@ -362,7 +369,6 @@ export function ModalTesteSendSupplier() {
         },
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-      console.log("servicos:", res.data);
       setServicesType(res.data);
     } catch (err) {
       console.log("Erro ao buscar serviços", err);
@@ -446,7 +452,7 @@ export function ModalTesteSendSupplier() {
                       setValue("cnpj", formatted, { shouldValidate: true });
                     }}
                     className="w-full"
-                  // {...register("cnpj")}
+                    // Removido {...register("cnpj")} aqui para evitar onChange duplicado
                   />
                   {isLoading ? (
                     <div
@@ -472,9 +478,9 @@ export function ModalTesteSendSupplier() {
                     </div>
                   )}
                 </div>
-                {errorsSubContract.cnpj && (
+                {errors.cnpj && (
                   <span className="text-red-600">
-                    {errorsSubContract.cnpj.message}
+                    {errors.cnpj.message}
                   </span>
                 )}
               </div>
@@ -482,7 +488,7 @@ export function ModalTesteSendSupplier() {
               <div className="mb-1">
                 <Label className="text-white">Razão Social</Label>
                 <Input
-                  type="corporateName"
+                  type="text" // Alterado para type="text"
                   placeholder="Digite a razão social do novo prestador"
                   {...register("corporateName")}
                   className="w-full"
@@ -512,7 +518,11 @@ export function ModalTesteSendSupplier() {
                   }}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
+                  // Removido {...register("phone")} aqui para evitar onChange duplicado
                 />
+                {errors.phone && (
+                  <span className="text-red-600">{errors.phone.message}</span>
+                )}
               </div>
 
               <div className="flex justify-end">
@@ -535,9 +545,10 @@ export function ModalTesteSendSupplier() {
                     onChange={(e) => {
                       const formatted = formatCNPJ(e.target.value);
                       setCnpjValue(formatted);
-                      setValue("cnpj", formatted, { shouldValidate: true });
+                      setValueSubContract("cnpj", formatted, { shouldValidate: true });
                     }}
                     className="w-full"
+                    // Removido {...registerSubContract("cnpj")} aqui para evitar onChange duplicado
                   />
                   {isLoading ? (
                     <div
@@ -573,20 +584,16 @@ export function ModalTesteSendSupplier() {
               <div className="mb-1">
                 <Label className="text-white">Razão Social</Label>
                 <Input
-                  type="corporateName"
-                  placeholder="Digite a razão social do novo prestador"
-                  {...register("corporateName")}
-                  className="w-full"
-                />
-              </div>
-              <div className="mb-1">
-                <Label className="text-white">Razão Social</Label>
-                <Input
-                  type="corporateName"
+                  type="text" // Alterado para type="text"
                   placeholder="Digite a razão social do novo prestador"
                   {...registerSubContract("corporateName")}
                   className="w-full"
                 />
+                {errorsSubContract.corporateName && (
+                  <span className="text-red-600">
+                    {errorsSubContract.corporateName.message}
+                  </span>
+                )}
               </div>
               <div className="mb-1">
                 <Label className="text-white">Email</Label>
@@ -610,11 +617,17 @@ export function ModalTesteSendSupplier() {
                   onChange={(e) => {
                     const formattedPhone = formatPhone(e.target.value);
                     setPhoneValue(formattedPhone);
-                    setValue("phone", formattedPhone, { shouldValidate: true });
+                    setValueSubContract("phone", formattedPhone, { shouldValidate: true });
                   }}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
+                  // Removido {...registerSubContract("phone")} aqui para evitar onChange duplicado
                 />
+                {errorsSubContract.phone && (
+                  <span className="text-red-600">
+                    {errorsSubContract.phone.message}
+                  </span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <Label className="text-white">Selecione um contrato</Label>
@@ -645,10 +658,11 @@ export function ModalTesteSendSupplier() {
               <div className="flex justify-end">
                 {isLoading ? (
                   <Button>
-                    <Radio
+                    <Oval
                       visible={true}
-                      height="80"
-                      width="80"
+                      height="30"
+                      width="30"
+                      color="#fff"
                       ariaLabel="radio-loading"
                       wrapperStyle={{}}
                       wrapperClass=""
@@ -698,6 +712,7 @@ export function ModalTesteSendSupplier() {
                           type="text"
                           {...registerContract("cnpj")}
                           value={pushCnpj || "erro ao puxar cnpj"}
+                          readOnly
                         />
                         {errorsContract.cnpj && (
                           <span className="text-red-600">
@@ -712,7 +727,7 @@ export function ModalTesteSendSupplier() {
                       <select
                         key={getIdManager}
                         className="rounded-md border p-2"
-                        {...registerContract("idResponsible")} // Associando ao idResponsible
+                        {...registerContract("idResponsible")}
                       >
                         <option value="" disabled>
                           Selecione um gestor
@@ -821,7 +836,6 @@ export function ModalTesteSendSupplier() {
                     <div className="flex flex-col gap-1">
                       <Label className="text-white">Tipo do Serviço</Label>
 
-                      {/* Campo de busca */}
                       <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
                         <Search className="text-neutral-500 w-5 h-5" />
                         <input
@@ -833,7 +847,6 @@ export function ModalTesteSendSupplier() {
                         />
                       </div>
 
-                      {/* Select com filtro aplicado */}
                       <select
                         {...registerContract("idServiceType")}
                         className="rounded-md border p-2 w-full mt-1"
@@ -868,7 +881,6 @@ export function ModalTesteSendSupplier() {
                       <div className="flex flex-col gap-2">
                         <Label className="text-white">Tipo de atividade</Label>
 
-                        {/* Campo de busca */}
                         <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
                           <Search className="text-neutral-500 w-5 h-5" />
                           <input
@@ -880,7 +892,6 @@ export function ModalTesteSendSupplier() {
                           />
                         </div>
 
-                        {/* Lista filtrada com checkboxes */}
                         <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
                           <div className="flex flex-col gap-2">
                             {Array.isArray(activities) &&
@@ -984,9 +995,9 @@ export function ModalTesteSendSupplier() {
                       <Button className="bg-realizaBlue" type="submit" disabled={isButtonDisabled}>
                         <Oval
                           visible={true}
-                          height="80"
-                          width="80"
-                          color="#4fa94d"
+                          height="30"
+                          width="30"
+                          color="#fff"
                           ariaLabel="oval-loading"
                           wrapperStyle={{}}
                           wrapperClass=""

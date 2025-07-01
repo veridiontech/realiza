@@ -3,7 +3,7 @@ package bl.tech.realiza.gateways.controllers.impl.clients;
 import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchControlller;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
-import bl.tech.realiza.usecases.impl.clients.CrudBranchImpl;
+import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -102,5 +101,12 @@ public class BranchControllerImpl implements BranchControlller {
         Page<BranchResponseDto> pageBranch = crudBranch.findAllByClient(idSearch, pageable);
 
         return ResponseEntity.ok(pageBranch);
+    }
+
+    @GetMapping("/control-panel/{branchId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<ControlPanelResponseDto> getControlPanelSummarizedByBranch(@PathVariable String branchId) {
+        return ResponseEntity.ok(crudBranch.findControlPanelSummary(branchId));
     }
 }

@@ -20,15 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CLIENT")
 public class AuditLogClient extends AuditLog {
-    private AuditLogClientActions action;
-
     @ManyToOne
     @JoinColumn(name = "idClient")
-    private Client idClient;
-
-    public enum AuditLogClientActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
+    private Client client;
 }

@@ -20,15 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("BRANCH")
 public class AuditLogBranch extends AuditLog {
-    private AuditLogBranchActions action;
-
     @ManyToOne
     @JoinColumn(name = "idBranch")
-    private Branch idBranch;
-
-    public enum AuditLogBranchActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
+    private Branch branch;
 }
