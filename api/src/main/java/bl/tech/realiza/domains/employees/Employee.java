@@ -152,4 +152,8 @@ public abstract class Employee {
         SOCIO,
         TEMPORARIO
     }
+
+    public String getFullName() {
+        return String.format("%s %s", this.name != null ? this.name : "", this.surname != null ? this.surname : "").trim();
+    }
 }

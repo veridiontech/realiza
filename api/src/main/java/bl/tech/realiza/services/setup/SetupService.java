@@ -20,6 +20,7 @@ import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
@@ -32,9 +33,13 @@ import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,6 +62,7 @@ public class SetupService {
     private final ClientRepository clientRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
+    private final ContractRepository contractRepository;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
@@ -312,4 +318,37 @@ public class SetupService {
         log.info("Finished setup employee to contract subcontractor ✔️ {}, {}", employeeIds, contractProviderSubcontractorId);
     }
 
+    public void setupRemoveEmployeeFromContract(String contractId, List<String> employeeIds) {
+        log.info("Started setup remove employee from contract subcontractor ⌛ {}, {}", employeeIds, contractId);
+        Contract contractProxy = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
+        List<Employee> employees = employeeRepository.findAllById(employeeIds);
+
+        for (Employee employee : employees) {
+            if (employee.getContracts().isEmpty() && !employee.getSituation().equals(Employee.Situation.DESALOCADO)) {
+                employee.setSituation(Employee.Situation.DESALOCADO);
+            }
+            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
+            for (DocumentEmployee documentEmployee : documentEmployeeList) {
+
+                if (documentEmployee.getContracts().contains(contract) && documentEmployee.getContracts().size() == 1) {
+                    documentEmployee.getContracts().remove(contract);
+                    if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24) {
+                        documentEmployeeRepository.deleteById(documentEmployee.getIdDocumentation());
+                    }
+                } else if (documentEmployee.getContracts().contains(contract)) {
+                    documentEmployee.getContracts().remove(contract);
+                }
+            }
+            documentEmployeeRepository.saveAll(documentEmployeeList);
+            employee.getContracts().remove(contract);
+        }
+
+        employeeRepository.saveAll(employees);
+
+        log.info("Finished setup remove employee from contract subcontractor ✔️ {}, {}", employeeIds, contractId);
+    }
 }

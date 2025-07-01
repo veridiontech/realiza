@@ -74,10 +74,6 @@ public abstract class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Notification> notifications;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    private List<AuditLog> auditLogs;
-
     public enum Role {
         ROLE_ADMIN,
         ROLE_REALIZA_PLUS,
@@ -89,5 +85,9 @@ public abstract class User {
         ROLE_SUBCONTRACTOR_RESPONSIBLE,
         ROLE_SUBCONTRACTOR_MANAGER,
         ROLE_VIEWER
+    }
+
+    public String getFullName() {
+        return String.format("%s %s", this.firstName != null ? this.firstName : "", this.surname != null ? this.surname : "").trim();
     }
 }

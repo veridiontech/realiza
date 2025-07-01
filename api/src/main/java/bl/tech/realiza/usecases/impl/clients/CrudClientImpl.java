@@ -1,9 +1,9 @@
 package bl.tech.realiza.usecases.impl.clients;
 
-import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -30,6 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +73,14 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT", savedClient.getIdClient(), null, null, null, null, null));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT",
+                savedClient.getIdClient(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
 
         crudBranchImpl.save(BranchCreateRequestDto.builder()
                 .name(savedClient.getTradeName() != null
@@ -91,11 +101,13 @@ public class CrudClientImpl implements CrudClient {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogClient(
-                        savedClient,
+                auditLogServiceImpl.createAuditLog(
+                        savedClient.getIdClient(),
+                        CLIENT,
                         userResponsible.getEmail() + " criou cliente " + savedClient.getCorporateName(),
-                        AuditLogActions.CREATE,
-                        userResponsible);
+                        null,
+                        CREATE,
+                        userResponsible.getIdUser());
             }
         }
 
@@ -201,11 +213,13 @@ public class CrudClientImpl implements CrudClient {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogClient(
-                        savedClient,
+                auditLogServiceImpl.createAuditLog(
+                        savedClient.getIdClient(),
+                        CLIENT,
                         userResponsible.getEmail() + " atualizou cliente " + savedClient.getCorporateName(),
-                        AuditLogActions.UPDATE,
-                        userResponsible);
+                        null,
+                        UPDATE,
+                        userResponsible.getIdUser());
             }
         }
 
@@ -236,11 +250,13 @@ public class CrudClientImpl implements CrudClient {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogClient(
-                        client,
+                auditLogServiceImpl.createAuditLog(
+                        client.getIdClient(),
+                        CLIENT,
                         userResponsible.getEmail() + " deletou cliente " + client.getCorporateName(),
-                        AuditLogActions.UPDATE,
-                        userResponsible);
+                        null,
+                        UPDATE,
+                        userResponsible.getIdUser());
             }
         }
         clientRepository.deleteById(id);

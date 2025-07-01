@@ -1,11 +1,11 @@
 package bl.tech.realiza.usecases.impl.contracts.contract;
 
-import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -38,6 +38,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 @Service
 @RequiredArgsConstructor
@@ -103,15 +106,24 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUBCONTRACT", null, null, null, savedContractSubcontractor.getIdContract(), activities.stream().map(Activity::getIdActivity).toList(), null));
+        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUBCONTRACT",
+                null,
+                null,
+                null,
+                savedContractSubcontractor.getIdContract(),
+                null,
+                activities.stream().map(Activity::getIdActivity).toList(),
+                null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> auditLogServiceImpl.createAuditLogContract(
-                        savedContractSubcontractor,
+                    userResponsible -> auditLogServiceImpl.createAuditLog(
+                        savedContractSubcontractor.getIdContract(),
+                        CONTRACT,
                         userResponsible.getEmail() + " criou contrato " + savedContractSubcontractor.getContractReference(),
-                            AuditLogActions.CREATE,
-                        userResponsible));
+                        null,
+                        CREATE,
+                        userResponsible.getIdUser()));
         }
 
         // criar solicitação
@@ -174,11 +186,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogContract(
-                        savedContractSubcontractor,
+                auditLogServiceImpl.createAuditLog(
+                        savedContractSubcontractor.getIdContract(),
+                        CONTRACT,
                         userResponsible.getEmail() + " atualizou contrato " + savedContractSubcontractor.getContractReference(),
-                        AuditLogActions.UPDATE,
-                        userResponsible);
+                        null,
+                        UPDATE,
+                        userResponsible.getIdUser());
             }
         }
 
@@ -194,11 +208,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogContract(
-                        contract,
+                auditLogServiceImpl.createAuditLog(
+                        contract.getIdContract(),
+                        CONTRACT,
                         userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
-                        AuditLogActions.DELETE,
-                        userResponsible);
+                        null,
+                        DELETE,
+                        userResponsible.getIdUser());
             }
         }
         contractProviderSubcontractorRepository.deleteById(id);

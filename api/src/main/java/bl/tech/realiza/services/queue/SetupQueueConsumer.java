@@ -47,6 +47,10 @@ public class SetupQueueConsumer {
                     setupService.setupEmployeeToContractSubcontract(message.getContractSubcontractorId(), message.getEmployeeIds());
                     logService.logSuccess("EMPLOYEE_CONTRACT_SUBCONTRACT", message.getContractSubcontractorId(), start);
                 }
+                case "REMOVE_EMPLOYEE_CONTRACT" -> {
+                    setupService.setupRemoveEmployeeFromContract(message.getContractId(), message.getEmployeeIds());
+                    logService.logSuccess("REMOVE_EMPLOYEE_CONTRACT", message.getContractId(), start);
+                }
                 default -> throw new IllegalArgumentException("Tipo inválido: " + message.getType());
             }
         } catch (Exception e) {
@@ -59,7 +63,6 @@ public class SetupQueueConsumer {
     public void handleDlq(SetupMessage message) {
         System.err.printf("🔁 Mensagem movida para DLQ: %s - %s%n", message.getType(), getId(message));
     }
-
 
     private String getId(SetupMessage msg) {
         return switch (msg.getType()) {
