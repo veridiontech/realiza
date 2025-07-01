@@ -111,11 +111,11 @@ public class CrudDocumentImpl implements CrudDocument {
                 .orElseThrow(() -> new NotFoundException("User not found"));
         auditLogDocumentRepository.save(
                 AuditLogDocument.builder()
-                        .idDocumentation(document)
+                        .document(document)
                         .description(user.getEmail() + " " + action.name() + " document " + document.getTitle())
                         .notes(documentStatusChangeRequestDto.getNotes())
                         .action(action)
-                        .idUser(user)
+                        .user(user)
                         .build());
 
         return "Document status changed to " + documentStatusChangeRequestDto.getStatus().name();
