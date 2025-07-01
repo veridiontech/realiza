@@ -9,11 +9,10 @@ import {
   X,
   MoreVertical,
   History,
-} from "lucide-react"; // Importe o ícone History
+} from "lucide-react";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
-//
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,26 +20,30 @@ import { toast } from "sonner";
 import { useWatch } from "react-hook-form";
 
 const editContractSchema = z.object({
-  contractReference: z
-    .string()
-    .nonempty("Referência do contrato é obrigatória"),
-  providerSupplierName: z.string().nonempty("Nome do fornecedor é obrigatório"),
-  serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
-  idResponsible: z.string().nonempty("Selecione um gestor"),
-  dateStart: z.string().nonempty("Data de início é obrigatória"),
-  expenseType: z.enum(["CAPEX", "OPEX", "NENHUM"]),
-  idServiceType: z.string().nonempty("Tipo de serviço é obrigatório"),
-  subcontractPermission: z.enum(["true", "false"]),
-  hse: z.boolean(),
-  labor: z.boolean(),
+  contractReference: z.string().optional(),
+  providerSupplierName: z.string().optional(),
+  serviceName: z.string().optional(),
+  idResponsible: z.string().optional(),
+  dateStart: z.string().optional(),
+  expenseType: z.enum(["CAPEX", "OPEX", "NENHUM"]).optional(),
+  idServiceType: z.string().optional(),
+  subcontractPermission: z.enum(["true", "false"]).optional(),
+  hse: z.boolean().optional(),
+  labor: z.boolean().optional(),
   description: z.string().optional(),
 });
 
-function StatusBadge({ finished }: { finished?: boolean }) {
+function StatusBadge({ finished, suspended }: { finished?: boolean, suspended?: boolean }) {
   const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
-  const isFinalizado = finished === true;
+  let statusStyle = "";
 
-  const statusStyle = isFinalizado ? "bg-red-600" : "bg-green-600";
+  if (suspended) {
+    statusStyle = "bg-orange-400"; // Cor para status 'Suspenso'
+  } else if (finished === true) {
+    statusStyle = "bg-red-600"; // Cor para status 'Finalizado'
+  } else {
+    statusStyle = "bg-green-600"; // Cor para status 'Ativo'
+  }
 
   return <span className={`${baseClass} ${statusStyle}`}></span>;
 }
@@ -95,6 +98,11 @@ export function TableServiceProvider() {
   const [managers, setManagers] = useState<any[]>([]);
   const [servicesType, setServicesType] = useState<any[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+
+  // Novo estado para o filtro de status
+  const [statusFilter, setStatusFilter] = useState<
+    "Todos" | "Ativo" | "Finalizado" | "Suspenso"
+  >("Todos");
 
   const {
     register,
@@ -161,7 +169,7 @@ export function TableServiceProvider() {
         idActivities: [
           ...selectedSsmaActivitiesEdit,
           ...selectedLaborActivitiesEdit,
-        ], // ⬅️ Adicionado
+        ],
       };
 
       await axios.put(
@@ -268,16 +276,33 @@ export function TableServiceProvider() {
     setIsEditModalOpen(true);
   };
 
+  // Lógica de filtragem aprimorada
   const filteredSuppliers = suppliers.filter((supplier) => {
     const term = searchTerm.toLowerCase();
-    return (
+    const matchesSearchTerm =
       supplier.contractReference?.toLowerCase().includes(term) ||
       supplier.providerSupplierName?.toLowerCase().includes(term) ||
       supplier.providerSupplierCnpj?.includes(term) ||
-      supplier.serviceName?.toLowerCase().includes(term) ||
-      (term === "ativo" && !supplier.finished) ||
-      (term === "finalizado" && supplier.finished)
-    );
+      supplier.serviceName?.toLowerCase().includes(term);
+
+    const isFinished = supplier.finished === true;
+    // Assumimos que 'suspended' é uma nova propriedade booleana no objeto supplier
+    // Você precisará garantir que essa propriedade seja retornada pela sua API quando a funcionalidade estiver pronta.
+    const isSuspended = supplier.suspended === true; 
+    const isActive = !isFinished && !isSuspended;
+
+    switch (statusFilter) {
+      case "Todos":
+        return matchesSearchTerm;
+      case "Ativo":
+        return matchesSearchTerm && isActive;
+      case "Finalizado":
+        return matchesSearchTerm && isFinished;
+      case "Suspenso":
+        return matchesSearchTerm && isSuspended;
+      default:
+        return matchesSearchTerm;
+    }
   });
 
   return (
@@ -286,8 +311,8 @@ export function TableServiceProvider() {
       <div className="block md:hidden space-y-4">
         {loading ? (
           <p className="text-center text-gray-600">Carregando...</p>
-        ) : suppliers.length > 0 ? (
-          suppliers.map((supplier: any) => (
+        ) : filteredSuppliers.length > 0 ? ( // Usar filteredSuppliers aqui
+          filteredSuppliers.map((supplier: any) => (
             <div
               key={supplier.idProvider}
               className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
@@ -316,9 +341,6 @@ export function TableServiceProvider() {
                 {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
               </p>
 
-              <p className="text-sm font-semibold text-gray-700">
-                Data de finalização:
-              </p>
               <p className="mb-2 text-gray-800 ">
                 {supplier.dateFinish
                   ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR")
@@ -351,7 +373,7 @@ export function TableServiceProvider() {
                 </button>
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
-              <StatusBadge finished={supplier.finished} />
+              <StatusBadge finished={supplier.finished} suspended={supplier.suspended} />
             </div>
           ))
         ) : (
@@ -362,14 +384,56 @@ export function TableServiceProvider() {
       </div>
 
       <div className="rounded-lg border bg-white p-4 shadow-lg flex flex-col gap-5">
-        <div className="flex items-center  justify-between">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
           <input
             type="text"
-            placeholder="Buscar por contrato, fornecedor, CNPJ, serviço ou status..."
+            placeholder="Buscar por contrato, fornecedor, CNPJ, serviço..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm bg-neutral-100"
           />
+          <div className="flex gap-2 flex-wrap justify-center md:justify-start">
+            <button
+              onClick={() => setStatusFilter("Todos")}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Todos"
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setStatusFilter("Ativo")}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Ativo"
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Ativo
+            </button>
+            <button
+              onClick={() => setStatusFilter("Finalizado")}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Finalizado"
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Finalizado
+            </button>
+            <button
+              onClick={() => setStatusFilter("Suspenso")}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Suspenso"
+                  ? "bg-orange-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Suspenso
+            </button>
+          </div>
           <ModalTesteSendSupplier />
         </div>
         <table className="w-full border-collapse border border-gray-300">
@@ -400,7 +464,7 @@ export function TableServiceProvider() {
             {loading ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={9} // Colspan ajustado
                   className="border border-gray-300 p-2 text-center"
                 >
                   Carregando...
@@ -427,8 +491,8 @@ export function TableServiceProvider() {
                   <td className="border border-gray-300 p-2">
                     {supplier.dateFinish
                       ? new Date(supplier.dateFinish).toLocaleDateString(
-                        "pt-BR"
-                      )
+                          "pt-BR"
+                        )
                       : "-"}
                   </td>
 
@@ -436,7 +500,7 @@ export function TableServiceProvider() {
                     {supplier.responsible}
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <StatusBadge finished={supplier.finished} />
+                    <StatusBadge finished={supplier.finished} suspended={supplier.suspended} />
                   </td>
                   <td className="border border-gray-300 p-2 text-center align-middle">
                     <div className="relative inline-block text-left">
@@ -473,7 +537,7 @@ export function TableServiceProvider() {
                           >
                             <Pencil className="w-4 h-4" /> Editar
                           </button>
-                          <button // Novo botão "Histórico"
+                          <button
                             onClick={() => {
                               handleHistoryClick(supplier);
                               setSelectedSupplierId(null);
@@ -506,7 +570,7 @@ export function TableServiceProvider() {
             ) : (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={9} // Colspan ajustado
                   className="border border-gray-300 p-2 text-center"
                 >
                   Nenhum fornecedor encontrado.
@@ -515,7 +579,6 @@ export function TableServiceProvider() {
             )}
           </tbody>
         </table>
-        {/*legenda dos status dos contratos*/}
         <div className="mt-4 text-sm text-gray-600 flex gap-4 items-center justify-end">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-green-600 inline-block" />
@@ -524,6 +587,10 @@ export function TableServiceProvider() {
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-red-600 inline-block" />
             <span>Finalizado</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded-full bg-orange-400 inline-block" />
+            <span>Suspenso</span>
           </div>
         </div>
       </div>
@@ -554,14 +621,16 @@ export function TableServiceProvider() {
             </p>
             <p>
               <strong>Data de Início:</strong>{" "}
-              {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}
+              {new Date(selectedSupplier.dateStart).toLocaleDateString(
+                "pt-BR"
+              )}
             </p>
             <p>
               <strong>Data de Finalização:</strong>{" "}
               {selectedSupplier.dateFinish
                 ? new Date(selectedSupplier.dateFinish).toLocaleDateString(
-                  "pt-BR"
-                )
+                    "pt-BR"
+                  )
                 : "-"}
             </p>
             <p>
@@ -587,7 +656,7 @@ export function TableServiceProvider() {
               onSubmit={handleSubmit(onSubmitEdit)}
               className="flex flex-col gap-3 [&>label]:text-white"
             >
-              <label >
+              <label>
                 Referência do Contrato
                 <input
                   className="w-full rounded border px-2 py-1 text-black"
