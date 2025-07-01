@@ -39,6 +39,8 @@ public abstract class Document {
     @Builder.Default
     private Boolean isActive = true;
     @Builder.Default
+    private Boolean doesBlock = true;
+    @Builder.Default
     private Boolean isDocumentUnique = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default

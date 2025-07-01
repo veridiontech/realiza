@@ -28,7 +28,8 @@ public class DocumentMatrix {
     @Builder.Default
     private Unit expirationDateUnit = Unit.DAYS;
     private String type;
-    private String doesBlock;
+    @Builder.Default
+    private Boolean doesBlock = true;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 

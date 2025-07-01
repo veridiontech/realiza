@@ -14,7 +14,7 @@ public class DocumentMatrixResponseDto {
     private String risk;
     private String expiration;
     private String type;
-    private String doesBlock;
+    private Boolean doesBlock;
     private String idDocumentSubgroup;
     private String subgroupName;
     private String idDocumentGroup;
