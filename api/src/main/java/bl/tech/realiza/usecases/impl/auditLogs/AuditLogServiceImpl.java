@@ -139,6 +139,24 @@ public class AuditLogServiceImpl implements AuditLogService {
                                     .supplierCorporateName(contractSupplier.getProviderSupplier() != null
                                             ? contractSupplier.getProviderSupplier().getCorporateName()
                                             : null)
+                                    .contractId(contract.getIdContract())
+                                    .contractReference(contract.getContractReference())
+                                    .responsibleId(contract.getResponsible() != null
+                                            ? contract.getResponsible().getIdUser()
+                                            : null)
+                                    .responsibleFullName(contract.getResponsible() != null
+                                            ? contract.getResponsible().getFullName()
+                                            : null)
+                                    .clientId(contractSupplier.getBranch() != null
+                                            ? (contractSupplier.getBranch().getClient() != null
+                                                ? contractSupplier.getBranch().getClient().getIdClient()
+                                                : null)
+                                            : null)
+                                    .clientCorporateName(contractSupplier.getBranch() != null
+                                            ? (contractSupplier.getBranch().getClient() != null
+                                            ? contractSupplier.getBranch().getClient().getCorporateName()
+                                            : null)
+                                            : null)
                                     .build()
                     );
                 } else if (contract instanceof ContractProviderSubcontractor contractSubcontractor) {

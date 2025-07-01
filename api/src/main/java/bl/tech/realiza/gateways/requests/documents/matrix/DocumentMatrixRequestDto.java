@@ -8,6 +8,6 @@ public class DocumentMatrixRequestDto {
     private String risk;
     private String expiration;
     private String type;
-    private String doesBlock;
+    private Boolean doesBlock;
     private String subgroup;
 }

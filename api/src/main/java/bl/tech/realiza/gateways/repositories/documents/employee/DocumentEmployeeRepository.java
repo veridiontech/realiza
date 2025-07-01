@@ -20,7 +20,7 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
 
     @Query("""
     SELECT
-            SUM(CASE WHEN de.status != :status THEN 1 ELSE 0 END) AS total,
+            COUNT(de) AS total,
             SUM(CASE WHEN de.status = :status THEN 1 ELSE 0 END) AS pendentes
     FROM DocumentEmployee de
     JOIN de.employee e
@@ -71,7 +71,9 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
     SELECT COUNT(d)
     FROM DocumentEmployee d
     JOIN d.employee e
-    WHERE e.branch.idBranch = :branchId AND d.status = :status
+    JOIN e.contracts c
+    JOIN ContractProviderSupplier cps ON TYPE(c) = ContractProviderSupplier
+    WHERE cps.branch.idBranch = :branchId AND d.status = :status
 """)
     Long countByBranchIdAndStatus(@Param("branchId") String branchId, @Param("status") Document.Status status);
 
@@ -80,10 +82,11 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
     FROM DocumentEmployee d
     JOIN d.employee e
     JOIN e.contracts c
-    WHERE TYPE(c) = ContractProviderSupplier
-      AND TREAT(c AS ContractProviderSupplier).branch.idBranch = :branchId
+    JOIN ContractProviderSupplier cps ON TYPE(c) = ContractProviderSupplier
+    WHERE cps.branch.idBranch = :branchId
 """)
     Long countByBranchId(@Param("branchId") String branchId);
+
 
 
 
