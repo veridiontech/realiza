@@ -45,9 +45,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SetupService {
 
-    private final CrudServiceType crudServiceType;
     private final BranchRepository branchRepository;
-    private final CrudActivity crudActivity;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final ActivityRepository activityRepository;
@@ -61,9 +59,10 @@ public class SetupService {
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
 
     public void setupNewClient(String clientId) {
+        log.info("Started setup client ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
-
+        log.info("Finished setup client ✔️ {}", clientId);
 //        crudServiceType.transferFromRepoToClient(client.getIdClient());
     }
 
@@ -97,6 +96,7 @@ public class SetupService {
     }
 
     public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {
+        log.info("Started setup contract supplier ⌛ {}", contractProviderSupplierId);
         List<Activity> activities = new ArrayList<>(List.of());
         List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentBranch> documentBranch;
@@ -153,9 +153,11 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentProviderSupplierRepository.saveAll(batch);
         }
+        log.info("Finished setup contract supplier ✔️ {}", contractProviderSupplierId);
     }
 
     public void setupContractSubcontractor(String contractProviderSubcontractorId, List<String> activityIds) {
+        log.info("Started setup contract subcontractor ⌛ {}", contractProviderSubcontractorId);
         List<Activity> activities = new ArrayList<>(List.of());;
         List<DocumentProviderSupplier> documentSupplier;
         List<String> idDocuments = new ArrayList<>(List.of());
@@ -213,10 +215,11 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentProviderSubcontractorRepository.saveAll(batch);
         }
-
+        log.info("Finished setup contract subcontractor ✔️ {}", contractProviderSubcontractorId);
     }
 
     public void setupEmployeeToContractSupplier(String contractProviderSupplierId, List<String> employeeIds) {
+        log.info("Started setup employee to contract supplier ⌛ {}, {}", employeeIds, contractProviderSupplierId);
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSupplierId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
@@ -258,11 +261,13 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentEmployeeRepository.saveAll(batch);
         }
+        log.info("Finished setup employee to contract supplier ✔️ {}, {}", employeeIds, contractProviderSupplierId);
     }
 
 
 
     public void setupEmployeeToContractSubcontract(String contractProviderSubcontractorId, List<String> employeeIds) {
+        log.info("Started setup employee to contract subcontractor ⌛ {}, {}", employeeIds, contractProviderSubcontractorId);
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
@@ -304,6 +309,7 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentEmployeeRepository.saveAll(batch);
         }
+        log.info("Finished setup employee to contract subcontractor ✔️ {}, {}", employeeIds, contractProviderSubcontractorId);
     }
 
 }
