@@ -11,5 +11,5 @@ public interface AuditLogService {
     @Async
     void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String notes, AuditLogActionsEnum action, String userResponsibleId);
 
-    Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActionsEnum action, AuditLogTypeEnum auditLogTypeEnum, Pageable pageable);
+    Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActionsEnum action, AuditLogTypeEnum auditLogTypeEnum, String userId, Pageable pageable);
 }

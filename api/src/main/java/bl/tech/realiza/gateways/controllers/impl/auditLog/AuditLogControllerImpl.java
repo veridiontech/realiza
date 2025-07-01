@@ -27,14 +27,14 @@ public class AuditLogControllerImpl implements AuditLogController {
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Page<AuditLogResponseDto>> getAuditLog(@RequestParam String id,
-                                                                 @RequestParam AuditLogActionsEnum action,
+                                                                 @RequestParam(required = false) AuditLogActionsEnum action,
                                                                  @RequestParam AuditLogTypeEnum auditLogTypeEnum,
-                                                                 @RequestParam String userId,
+                                                                 @RequestParam(required = false) String userId,
                                                                  @RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "10") int size,
                                                                  @RequestParam(defaultValue = "createdAt") String sort,
                                                                  @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
-        return ResponseEntity.ok(auditLogServiceImpl.getAuditLogs(id, action, auditLogTypeEnum, pageable));
+        return ResponseEntity.ok(auditLogServiceImpl.getAuditLogs(id, action, auditLogTypeEnum, userId, pageable));
     }
 }
