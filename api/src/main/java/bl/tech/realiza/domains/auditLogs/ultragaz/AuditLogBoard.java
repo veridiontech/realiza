@@ -20,15 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("BOARD")
 public class AuditLogBoard extends AuditLog {
-    private AuditLogBoardActions action;
-
     @ManyToOne
     @JoinColumn(name = "idBoard")
     private Board idBoard;
-
-    public enum AuditLogBoardActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
 }

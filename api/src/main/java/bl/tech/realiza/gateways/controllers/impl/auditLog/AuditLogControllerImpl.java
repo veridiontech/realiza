@@ -14,6 +14,7 @@ import bl.tech.realiza.domains.enums.AuditLogType;
 import bl.tech.realiza.gateways.controllers.interfaces.auditLog.AuditLogController;
 import bl.tech.realiza.gateways.responses.auditLog.*;
 import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Audit Log")
 public class AuditLogControllerImpl implements AuditLogController {
 
-    private final AuditLogServiceImpl auditLogServiceImpl;
+    private final AuditLogService auditLogServiceImpl;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

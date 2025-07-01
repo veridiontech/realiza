@@ -20,15 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("CENTER")
 public class AuditLogCenter extends AuditLog {
-    private AuditLogCenterActions action;
-
     @ManyToOne
     @JoinColumn(name = "idCenter")
     private Center idCenter;
-
-    public enum AuditLogCenterActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
 }
