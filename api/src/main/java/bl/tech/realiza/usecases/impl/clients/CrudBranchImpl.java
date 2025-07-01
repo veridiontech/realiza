@@ -5,6 +5,7 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -94,7 +95,7 @@ public class CrudBranchImpl implements CrudBranch {
                     userResponsible -> auditLogServiceImpl.createAuditLogBranch(
                         savedBranch,
                         userResponsible.getEmail() + " criou filial " + savedBranch.getName(),
-                        AuditLogBranch.AuditLogBranchActions.CREATE,
+                            AuditLogActions.CREATE,
                         userResponsible));
         }
 
@@ -200,7 +201,7 @@ public class CrudBranchImpl implements CrudBranch {
                 auditLogServiceImpl.createAuditLogBranch(
                         branch,
                         userResponsible.getEmail() + " atualizou filial " + branch.getName(),
-                        AuditLogBranch.AuditLogBranchActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }
@@ -247,7 +248,7 @@ public class CrudBranchImpl implements CrudBranch {
                 auditLogServiceImpl.createAuditLogBranch(
                         branch,
                         userResponsible.getEmail() + " deletou filial " + branch.getName(),
-                        AuditLogBranch.AuditLogBranchActions.DELETE,
+                        AuditLogActions.DELETE,
                         userResponsible);
             }
         }

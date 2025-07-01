@@ -8,6 +8,7 @@ import bl.tech.realiza.domains.contract.activity.ActivityDocumentsRepo;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -33,10 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static bl.tech.realiza.domains.auditLogs.activity.AuditLogActivity.AuditLogActivityActions.*;
-import static bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType.AuditLogServiceTypeActions.CREATE;
-import static bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType.AuditLogServiceTypeActions.UPDATE;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +68,7 @@ public class CrudActivityImpl implements CrudActivity {
                 auditLogServiceImpl.createAuditLogActivity(
                         savedActivity,
                         userResponsible.getEmail() + " criou a atividade " + activity.getTitle(),
-                        AuditLogActivity.AuditLogActivityActions.CREATE,
+                        AuditLogActions.CREATE,
                         userResponsible);
             }
         }
@@ -186,7 +183,7 @@ public class CrudActivityImpl implements CrudActivity {
                 auditLogServiceImpl.createAuditLogActivity(
                         activity,
                         userResponsible.getEmail() + " atribuiu o documento " + documentBranch.getTitle() + " a atividade " + activity.getTitle(),
-                        ALLOCATE,
+                        AuditLogActions.ALLOCATE,
                         userResponsible);
             }
         }
@@ -210,7 +207,7 @@ public class CrudActivityImpl implements CrudActivity {
                 auditLogServiceImpl.createAuditLogActivity(
                         savedActivityDocuments.getActivity(),
                         userResponsible.getEmail() + " removeu o documento " + savedActivityDocuments.getDocumentBranch().getTitle() + " da atividade " + savedActivityDocuments.getActivity().getTitle(),
-                        DEALLOCATE,
+                        AuditLogActions.DEALLOCATE,
                         userResponsible);
             }
         }
@@ -247,7 +244,7 @@ public class CrudActivityImpl implements CrudActivity {
                 auditLogServiceImpl.createAuditLogActivity(
                         savedActivity,
                         userResponsible.getEmail() + " atualizou a atividade " + activity.getTitle(),
-                        AuditLogActivity.AuditLogActivityActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }
@@ -267,7 +264,7 @@ public class CrudActivityImpl implements CrudActivity {
                 auditLogServiceImpl.createAuditLogActivity(
                         activity,
                         userResponsible.getEmail() + " deletou a atividade " + activity.getTitle(),
-                        AuditLogActivity.AuditLogActivityActions.CREATE,
+                        AuditLogActions.CREATE,
                         userResponsible);
             }
         }

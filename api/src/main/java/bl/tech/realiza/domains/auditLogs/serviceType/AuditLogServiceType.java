@@ -21,15 +21,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("ACTIVITY")
 public class AuditLogServiceType extends AuditLog {
-    private AuditLogServiceTypeActions action;
-
     @ManyToOne
     @JoinColumn(name = "idServiceType")
     private ServiceType serviceType;
-
-    public enum AuditLogServiceTypeActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
 }

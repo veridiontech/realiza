@@ -75,7 +75,7 @@ public abstract class User {
     private List<Notification> notifications;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "idUser", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<AuditLog> auditLogs;
 
     public enum Role {

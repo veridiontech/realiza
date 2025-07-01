@@ -21,17 +21,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("ACTIVITY")
 public class AuditLogActivity extends AuditLog {
-    private AuditLogActivityActions action;
-
     @ManyToOne
     @JoinColumn(name = "idActivity")
     private Activity activity;
-
-    public enum AuditLogActivityActions {
-        CREATE,
-        UPDATE,
-        DELETE,
-        ALLOCATE,
-        DEALLOCATE
-    }
 }

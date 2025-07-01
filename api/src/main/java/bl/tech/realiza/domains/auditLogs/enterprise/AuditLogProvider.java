@@ -20,15 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("PROVIDER")
 public class AuditLogProvider extends AuditLog {
-    private AuditLogProviderActions action;
-
     @ManyToOne
     @JoinColumn(name = "idProvider")
-    private Provider idProvider;
-
-    public enum AuditLogProviderActions {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
+    private Provider provider;
 }

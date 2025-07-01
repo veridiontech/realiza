@@ -12,6 +12,7 @@ import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
@@ -144,7 +145,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
                         userResponsible.getEmail() + " criou contrato " + savedContractProviderSupplier.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.CREATE,
+                            AuditLogActions.CREATE,
                         userResponsible));
         }
 
@@ -267,7 +268,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         savedContractProviderSupplier,
                         userResponsible.getEmail() + " atualizou contrato " + savedContractProviderSupplier.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.UPDATE,
+                            AuditLogActions.UPDATE,
                         userResponsible));
         }
 
@@ -323,7 +324,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLogContract(
                         contract,
                         userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.DELETE,
+                            AuditLogActions.DELETE,
                         userResponsible));
         }
         contractProviderSupplierRepository.deleteById(id);

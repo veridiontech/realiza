@@ -10,6 +10,7 @@ import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.User;
@@ -72,7 +73,7 @@ public class CrudContractImpl implements CrudContract {
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
                         userResponsible.getEmail() + " finalizou contrato " + contract.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.FINISH,
+                        AuditLogActions.FINISH,
                         userResponsible);
             }
         }
@@ -97,7 +98,7 @@ public class CrudContractImpl implements CrudContract {
                 auditLogServiceImpl.createAuditLogContract(
                         contract,
                         userResponsible.getEmail() + " suspendeu contrato " + contract.getContractReference(),
-                        AuditLogContract.AuditLogContractActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }
@@ -160,7 +161,7 @@ public class CrudContractImpl implements CrudContract {
                             employee,
                             userResponsible.getEmail() + " alocou colaborador " + employee.getName()
                             + " ao contrato " + contract.getContractReference(),
-                            AuditLogEmployee.AuditLogEmployeeActions.ALLOCATE,
+                            AuditLogActions.ALLOCATE,
                             userResponsible);
                 }
             }
@@ -221,7 +222,7 @@ public class CrudContractImpl implements CrudContract {
                             employee,
                             userResponsible.getEmail() + " desalocou colaborador " + employee.getName()
                                     + " do contrato " + contract.getContractReference(),
-                            AuditLogEmployee.AuditLogEmployeeActions.DEALLOCATE,
+                            AuditLogActions.DEALLOCATE,
                             userResponsible);
                 }
             }
