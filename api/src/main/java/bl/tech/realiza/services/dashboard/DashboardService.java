@@ -168,7 +168,7 @@ public class DashboardService {
                     .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), PENDENTE);
             Object[] employeeSupplier = (Object[]) employeeSupplierRaw[0];
 
-            Object[] subcontractorRaw = documentProviderSupplierRepository
+            Object[] subcontractorRaw = documentProviderSubcontractorRepository
                     .countTotalAndPendentesByBranch(b.getIdBranch(), PENDENTE);
             Object[] subcontractor = (Object[]) subcontractorRaw[0];
 
@@ -177,7 +177,6 @@ public class DashboardService {
             Object[] employeeSubcontractor = (Object[]) employeeSubcontractorRaw[0];
 
 
-            long supp = getSafeLong(supplier, 0);
             long total = getSafeLong(supplier, 0)
                     + getSafeLong(employeeSupplier, 0)
                     + getSafeLong(subcontractor, 0)
@@ -188,22 +187,32 @@ public class DashboardService {
                     + getSafeLong(subcontractor, 1)
                     + getSafeLong(employeeSubcontractor, 1);
 
-            double adherence = total > 0 ? (pendentes * 100.0 / total) : 100;
+            double adherence = total > 0 ? ((total - pendentes) * 100.0 / total) : 100;
             adherence = Math.round(adherence * 100.0) / 100.0;
 
-            long docEmployeeApproved = documentEmployeeRepository.countByBranchIdAndStatus(branchId, APROVADO);
-            // Agora calcular conformidade
-            long aprovados = documentEmployeeRepository.countByBranchIdAndStatus(branchId, APROVADO)
-                    + documentProviderSupplierRepository.countByBranchIdAndStatus(branchId, APROVADO)
-                    + documentProviderSubcontractorRepository.countByBranchIdAndStatus(branchId, APROVADO);
+            supplierRaw = documentProviderSupplierRepository
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), APROVADO);
+            supplier = (Object[]) supplierRaw[0];
 
-            long docEmployeeValid = documentEmployeeRepository.countByBranchId(branchId);
-            long totalValidos = documentEmployeeRepository.countByBranchId(branchId)
-                    + documentProviderSupplierRepository.countByBranchId(branchId)
-                    + documentProviderSubcontractorRepository.countByBranchId(branchId);
+            employeeSupplierRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSupplierBranch(b.getIdBranch(), APROVADO);
+            employeeSupplier = (Object[]) employeeSupplierRaw[0];
 
-            double conformity = totalValidos > 0 ? (aprovados * 100.0 / totalValidos) : 0;
-            int nonConforming = (int) (totalValidos - aprovados);
+            subcontractorRaw = documentProviderSubcontractorRepository
+                    .countTotalAndPendentesByBranch(b.getIdBranch(), APROVADO);
+            subcontractor = (Object[]) subcontractorRaw[0];
+
+            employeeSubcontractorRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSubcontractorBranch(b.getIdBranch(), APROVADO);
+            employeeSubcontractor = (Object[]) employeeSubcontractorRaw[0];
+
+            long aprovados = getSafeLong(supplier, 1)
+                    + getSafeLong(employeeSupplier, 1)
+                    + getSafeLong(subcontractor, 1)
+                    + getSafeLong(employeeSubcontractor, 1);
+
+            double conformity = total > 0 ? new BigDecimal(aprovados * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+            int nonConforming = (int) (total - aprovados);
 
             DashboardDetailsResponseDto.Conformity level;
             if (conformity < 60) {
