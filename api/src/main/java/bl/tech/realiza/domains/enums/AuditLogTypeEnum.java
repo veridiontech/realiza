@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.enums;
 
-public enum AuditLogType {
+public enum AuditLogTypeEnum {
     ACTIVITY,
     CONTRACT,
     DOCUMENT,

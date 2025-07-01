@@ -6,7 +6,8 @@ import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeClient;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeRepo;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -31,6 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 
 @Service
@@ -100,11 +104,13 @@ public class CrudServiceTypeImpl implements CrudServiceType {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogServiceType(
-                        serviceType,
+                auditLogServiceImpl.createAuditLog(
+                        serviceType.getIdServiceType(),
+                        SERVICE_TYPE,
                         userResponsible.getEmail() + " deletou tipo de serviço " + serviceType.getTitle(),
-                        AuditLogActions.DELETE,
-                        userResponsible);
+                        null,
+                        DELETE,
+                        userResponsible.getIdUser());
             }
         }
         serviceTypeRepository.deleteById(idServiceType);
@@ -144,11 +150,13 @@ public class CrudServiceTypeImpl implements CrudServiceType {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogServiceType(
-                        serviceType,
+                auditLogServiceImpl.createAuditLog(
+                        serviceType.getIdServiceType(),
+                        SERVICE_TYPE,
                         userResponsible.getEmail() + " criou tipo de serviço " + serviceType.getTitle(),
-                        AuditLogActions.CREATE,
-                        userResponsible);
+                        null,
+                        CREATE,
+                        userResponsible.getIdUser());
             }
         }
 
@@ -168,11 +176,13 @@ public class CrudServiceTypeImpl implements CrudServiceType {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogServiceType(
-                        serviceType,
+                auditLogServiceImpl.createAuditLog(
+                        serviceType.getIdServiceType(),
+                        SERVICE_TYPE,
                         userResponsible.getEmail() + " atualizou tipo de serviço " + serviceType.getTitle(),
-                        AuditLogActions.UPDATE,
-                        userResponsible);
+                        null,
+                        UPDATE,
+                        userResponsible.getIdUser());
             }
         }
         return toResponseBranch(serviceTypeBranch);

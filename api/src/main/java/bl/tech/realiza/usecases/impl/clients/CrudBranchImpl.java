@@ -1,11 +1,11 @@
 package bl.tech.realiza.usecases.impl.clients;
 
-import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -42,6 +42,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 @Service
 @RequiredArgsConstructor
@@ -92,11 +95,13 @@ public class CrudBranchImpl implements CrudBranch {
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> auditLogServiceImpl.createAuditLogBranch(
-                        savedBranch,
+                    userResponsible -> auditLogServiceImpl.createAuditLog(
+                        savedBranch.getIdBranch(),
+                        BRANCH,
                         userResponsible.getEmail() + " criou filial " + savedBranch.getName(),
-                            AuditLogActions.CREATE,
-                        userResponsible));
+                        null,
+                        CREATE,
+                        userResponsible.getIdUser()));
         }
 
         return BranchResponseDto.builder()
@@ -198,11 +203,13 @@ public class CrudBranchImpl implements CrudBranch {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogBranch(
-                        branch,
+                auditLogServiceImpl.createAuditLog(
+                        branch.getIdBranch(),
+                        BRANCH,
                         userResponsible.getEmail() + " atualizou filial " + branch.getName(),
-                        AuditLogActions.UPDATE,
-                        userResponsible);
+                        null,
+                        UPDATE,
+                        userResponsible.getIdUser());
             }
         }
 
@@ -245,11 +252,13 @@ public class CrudBranchImpl implements CrudBranch {
             Branch branch = branchRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Branch not found"));
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogBranch(
-                        branch,
+                auditLogServiceImpl.createAuditLog(
+                        branch.getIdBranch(),
+                        BRANCH,
                         userResponsible.getEmail() + " deletou filial " + branch.getName(),
-                        AuditLogActions.DELETE,
-                        userResponsible);
+                        null,
+                        DELETE,
+                        userResponsible.getIdUser());
             }
         }
         branchRepository.deleteById(id);

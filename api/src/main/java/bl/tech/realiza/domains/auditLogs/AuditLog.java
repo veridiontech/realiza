@@ -1,7 +1,6 @@
 package bl.tech.realiza.domains.auditLogs;
 
-import bl.tech.realiza.domains.enums.AuditLogActions;
-import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,9 +26,10 @@ public abstract class AuditLog {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private AuditLogActions action;
+    private AuditLogActionsEnum action;
 
-    @ManyToOne
-    @JoinColumn(name = "idUser")
-    private User user;
+    private String userResponsibleId;
+    private String userResponsibleCpf;
+    private String userResponsibleFullName;
+    private String userResponsibleEmail;
 }

@@ -20,7 +20,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("BRANCH")
 public class AuditLogBranch extends AuditLog {
-    @ManyToOne
-    @JoinColumn(name = "idBranch")
-    private Branch branch;
+    private String branchId;
+    private String branchName;
 }

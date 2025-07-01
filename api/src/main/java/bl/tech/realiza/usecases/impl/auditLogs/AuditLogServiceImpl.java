@@ -1,6 +1,5 @@
 package bl.tech.realiza.usecases.impl.auditLogs;
 
-import bl.tech.realiza.domains.auditLogs.AuditLog;
 import bl.tech.realiza.domains.auditLogs.activity.AuditLogActivity;
 import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
@@ -9,24 +8,25 @@ import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogBranch;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
 import bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType;
-import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogBoard;
-import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogCenter;
-import bl.tech.realiza.domains.auditLogs.ultragaz.AuditLogMarket;
 import bl.tech.realiza.domains.auditLogs.user.AuditLogUser;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.activity.Activity;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
+import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
-import bl.tech.realiza.domains.enums.AuditLogActions;
-import bl.tech.realiza.domains.enums.AuditLogType;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
+import bl.tech.realiza.domains.enums.OwnerEnum;
 import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.domains.ultragaz.Board;
-import bl.tech.realiza.domains.ultragaz.Center;
-import bl.tech.realiza.domains.ultragaz.Market;
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.activity.AuditLogActivityRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.contract.AuditLogContractRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
@@ -35,20 +35,22 @@ import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogBranch
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogClientRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.enterprise.AuditLogProviderRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.serviceType.AuditLogServiceTypeRepository;
-import bl.tech.realiza.gateways.repositories.auditLogs.ultragaz.AuditLogBoardRepository;
-import bl.tech.realiza.gateways.repositories.auditLogs.ultragaz.AuditLogCenterRepository;
-import bl.tech.realiza.gateways.repositories.auditLogs.ultragaz.AuditLogMarketRepository;
 import bl.tech.realiza.gateways.repositories.auditLogs.user.AuditLogUserRepository;
+import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
+import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.responses.auditLog.AuditLogResponseDto;
-import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentControlPanelResponseDto;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,382 +61,452 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final AuditLogBranchRepository auditLogBranchRepository;
     private final AuditLogClientRepository auditLogClientRepository;
     private final AuditLogProviderRepository auditLogProviderRepository;
-    private final AuditLogBoardRepository auditLogBoardRepository;
-    private final AuditLogCenterRepository auditLogCenterRepository;
-    private final AuditLogMarketRepository auditLogMarketRepository;
     private final AuditLogUserRepository auditLogUserRepository;
     private final AuditLogDocumentRepository auditLogDocumentRepository;
     private final AuditLogServiceTypeRepository auditLogServiceTypeRepository;
     private final AuditLogActivityRepository auditLogActivityRepository;
+    private final UserRepository userRepository;
+    private final ServiceTypeBranchRepository serviceTypeBranchRepository;
+    private final ProviderRepository providerRepository;
+    private final ContractRepository contractRepository;
+    private final DocumentRepository documentRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ClientRepository clientRepository;
+    private final BranchRepository branchRepository;
+    private final ActivityRepository activityRepository;
 
     @Override
-    public void createAuditLogContract(Contract contract, String description, AuditLogActions action, User userResponsible) {
-        auditLogContractRepository.save(AuditLogContract.builder()
-                .contract(contract)
-                .action(action)
-                .description(description)
-                .user(userResponsible)
-                .build());
+    public void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String notes, AuditLogActionsEnum action, String userResponsibleId) {
+        User userResponsible = userRepository.findById(userResponsibleId)
+                .orElseThrow(() ->  new NotFoundException("User not found"));
+        switch (typeEnum) {
+            case SERVICE_TYPE -> {
+                ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Service type not found"));
+                auditLogServiceTypeRepository.save(
+                        AuditLogServiceType.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .serviceTypeId(serviceTypeBranch.getIdServiceType())
+                                .serviceTypeTitle(serviceTypeBranch.getTitle())
+                                .build()
+                );
+            }
+            case PROVIDER -> {
+                Provider provider = providerRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Provider not found"));
+                auditLogProviderRepository.save(
+                        AuditLogProvider.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .providerId(provider.getIdProvider())
+                                .providerCorporateName(provider.getCorporateName())
+                                .build()
+                );
+            }
+            case CONTRACT -> {
+                Contract contract = contractRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
+                if (contract instanceof ContractProviderSupplier contractSupplier) {
+                    auditLogContractRepository.save(
+                            AuditLogContract.builder()
+                                    .description(description)
+                                    .notes(notes)
+                                    .action(action)
+                                    .userResponsibleId(userResponsible.getIdUser())
+                                    .userResponsibleEmail(userResponsible.getEmail())
+                                    .userResponsibleCpf(userResponsible.getCpf())
+                                    .userResponsibleFullName(userResponsible.getFullName())
+                                    .branchId(contractSupplier.getBranch() != null
+                                            ? contractSupplier.getBranch().getIdBranch()
+                                            : null)
+                                    .branchName(contractSupplier.getBranch() != null
+                                            ? contractSupplier.getBranch().getName()
+                                            : null)
+                                    .supplierId(contractSupplier.getProviderSupplier() != null
+                                            ? contractSupplier.getProviderSupplier().getIdProvider()
+                                            : null)
+                                    .supplierCorporateName(contractSupplier.getProviderSupplier() != null
+                                            ? contractSupplier.getProviderSupplier().getCorporateName()
+                                            : null)
+                                    .build()
+                    );
+                } else if (contract instanceof ContractProviderSubcontractor contractSubcontractor) {
+                    auditLogContractRepository.save(
+                            AuditLogContract.builder()
+                                    .description(description)
+                                    .notes(notes)
+                                    .action(action)
+                                    .userResponsibleId(userResponsible.getIdUser())
+                                    .userResponsibleEmail(userResponsible.getEmail())
+                                    .userResponsibleCpf(userResponsible.getCpf())
+                                    .userResponsibleFullName(userResponsible.getFullName())
+                                    .supplierId(contractSubcontractor.getProviderSupplier() != null
+                                            ? contractSubcontractor.getProviderSupplier().getIdProvider()
+                                            : null)
+                                    .supplierCorporateName(contractSubcontractor.getProviderSupplier() != null
+                                            ? contractSubcontractor.getProviderSupplier().getCorporateName()
+                                            : null)
+                                    .subcontractorId(contractSubcontractor.getProviderSubcontractor() != null
+                                            ? contractSubcontractor.getProviderSubcontractor().getIdProvider()
+                                            : null)
+                                    .subcontractorCorporateName(contractSubcontractor.getProviderSubcontractor() != null
+                                            ? contractSubcontractor.getProviderSubcontractor().getCorporateName()
+                                            : null)
+                                    .build()
+                    );
+                }
+            }
+            case USER -> {
+                User user = userRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("User not found"));
+                auditLogUserRepository.save(
+                        AuditLogUser.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .userId(user.getIdUser())
+                                .userEmail(user.getEmail())
+                                .userCpf(user.getCpf())
+                                .userFullName(user.getFullName())
+                                .build()
+                );
+            }
+            case DOCUMENT -> {
+                Document document = documentRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Document not found"));
+                if (document instanceof DocumentProviderSupplier documentSupplier) {
+                    auditLogDocumentRepository.save(
+                            AuditLogDocument.builder()
+                                    .description(description)
+                                    .notes(notes)
+                                    .action(action)
+                                    .userResponsibleId(userResponsible.getIdUser())
+                                    .userResponsibleEmail(userResponsible.getEmail())
+                                    .userResponsibleCpf(userResponsible.getCpf())
+                                    .userResponsibleFullName(userResponsible.getFullName())
+                                    .ownerId(documentSupplier.getProviderSupplier() != null
+                                            ? documentSupplier.getProviderSupplier().getIdProvider()
+                                            : null)
+                                    .owner(OwnerEnum.SUPPLIER)
+                                    .build()
+                    );
+                } else if (document instanceof DocumentProviderSubcontractor documentSubcontractor) {
+                    auditLogDocumentRepository.save(
+                            AuditLogDocument.builder()
+                                    .description(description)
+                                    .notes(notes)
+                                    .action(action)
+                                    .userResponsibleId(userResponsible.getIdUser())
+                                    .userResponsibleEmail(userResponsible.getEmail())
+                                    .userResponsibleCpf(userResponsible.getCpf())
+                                    .userResponsibleFullName(userResponsible.getFullName())
+                                    .ownerId(documentSubcontractor.getProviderSubcontractor() != null
+                                            ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
+                                            : null)
+                                    .owner(OwnerEnum.SUBCONTRACTOR)
+                                    .build()
+                    );
+                } else if (document instanceof DocumentEmployee documentEmployee) {
+                    auditLogDocumentRepository.save(
+                            AuditLogDocument.builder()
+                                    .description(description)
+                                    .notes(notes)
+                                    .action(action)
+                                    .userResponsibleId(userResponsible.getIdUser())
+                                    .userResponsibleEmail(userResponsible.getEmail())
+                                    .userResponsibleCpf(userResponsible.getCpf())
+                                    .userResponsibleFullName(userResponsible.getFullName())
+                                    .ownerId(documentEmployee.getEmployee() != null
+                                            ? documentEmployee.getEmployee().getIdEmployee()
+                                            : null)
+                                    .owner(OwnerEnum.EMPLOYEE)
+                                    .build()
+                    );
+                }
+            }
+            case EMPLOYEE -> {
+                Employee employee = employeeRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Employee not found"));
+                auditLogEmployeeRepository.save(
+                        AuditLogEmployee.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .employeeId(employee.getIdEmployee())
+                                .employeeFullName(employee.getFullName())
+                                .enterpriseId(employee.getSupplier() != null
+                                        ? employee.getSupplier().getIdProvider()
+                                        : employee.getSubcontract() != null
+                                            ? employee.getSubcontract().getIdProvider()
+                                            : null)
+                                .enterpriseCorporateName(employee.getSupplier() != null
+                                        ? employee.getSupplier().getCorporateName()
+                                        : employee.getSubcontract() != null
+                                        ? employee.getSubcontract().getCorporateName()
+                                        : null)
+                                .build()
+                );
+            }
+            case CLIENT -> {
+                Client client = clientRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Client not found"));
+                auditLogClientRepository.save(
+                        AuditLogClient.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .clientId(client.getIdClient())
+                                .clientCorporateName(client.getCorporateName())
+                                .build()
+                );
+            }
+            case BRANCH -> {
+                Branch branch = branchRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Branch not found"));
+                auditLogBranchRepository.save(
+                        AuditLogBranch.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .branchId(branch.getIdBranch())
+                                .branchName(branch.getName())
+                                .build()
+                );
+            }
+            case ACTIVITY -> {
+                Activity activity = activityRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Activity not found"));
+                auditLogActivityRepository.save(
+                        AuditLogActivity.builder()
+                                .description(description)
+                                .notes(notes)
+                                .action(action)
+                                .userResponsibleId(userResponsible.getIdUser())
+                                .userResponsibleEmail(userResponsible.getEmail())
+                                .userResponsibleCpf(userResponsible.getCpf())
+                                .userResponsibleFullName(userResponsible.getFullName())
+                                .activityId(activity.getIdActivity())
+                                .activityTitle(activity.getTitle())
+                                .branchId(activity.getBranch() != null
+                                        ? activity.getBranch().getIdBranch()
+                                        : null)
+                                .branchName(activity.getBranch() != null
+                                        ? activity.getBranch().getName()
+                                        : null)
+                                .build()
+                );
+            }
+        }
     }
 
     @Override
-    public void createAuditLogEmployee(Employee employee, String description, AuditLogActions action, User userResponsible) {
-        auditLogEmployeeRepository.save(AuditLogEmployee.builder()
-                        .employee(employee)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogDocument(Document document, String description, AuditLogActions action, User userResponsible) {
-        auditLogDocumentRepository.save(AuditLogDocument.builder()
-                        .document(document)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogBranch(Branch branch, String description, AuditLogActions action, User userResponsible) {
-        auditLogBranchRepository.save(AuditLogBranch.builder()
-                        .branch(branch)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogActivity(Activity activity, String description, AuditLogActions action, User userResponsible) {
-        auditLogActivityRepository.save(AuditLogActivity.builder()
-                        .activity(activity)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogServiceType(ServiceType serviceType, String description, AuditLogActions action, User userResponsible) {
-        auditLogServiceTypeRepository.save(AuditLogServiceType.builder()
-                        .serviceType(serviceType)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogClient(Client client, String description, AuditLogActions action, User userResponsible) {
-        auditLogClientRepository.save(AuditLogClient.builder()
-                        .client(client)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogProvider(Provider provider, String description, AuditLogActions action, User userResponsible) {
-        auditLogProviderRepository.save(AuditLogProvider.builder()
-                        .provider(provider)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogBoard(Board board, String description, AuditLogActions action, User userResponsible) {
-        auditLogBoardRepository.save(AuditLogBoard.builder()
-                        .idBoard(board)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogCenter(Center center, String description, AuditLogActions action, User userResponsible) {
-        auditLogCenterRepository.save(AuditLogCenter.builder()
-                        .idCenter(center)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogMarket(Market market, String description, AuditLogActions action, User userResponsible) {
-        auditLogMarketRepository.save(AuditLogMarket.builder()
-                        .idMarket(market)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public void createAuditLogUser(User user, String description, AuditLogActions action, User userResponsible) {
-        auditLogUserRepository.save(AuditLogUser.builder()
-                        .user(user)
-                        .action(action)
-                        .description(description)
-                        .user(userResponsible)
-                .build());
-    }
-
-    @Override
-    public Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActions action, AuditLogType auditLogType, Pageable pageable) {
-        switch (auditLogType) {
+    public Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActionsEnum action, AuditLogTypeEnum auditLogTypeEnum, Pageable pageable) {
+        switch (auditLogTypeEnum) {
             case BRANCH -> {
                 Page<AuditLogBranch> auditLogPage = action != null
-                        ? auditLogBranchRepository.findAllByBranch_IdBranchAndAction(id, action, pageable)
-                        : auditLogBranchRepository.findAllByBranch_IdBranch(id, pageable);
+                        ? auditLogBranchRepository.findAllByBranchIdAndAction(id, action, pageable)
+                        : auditLogBranchRepository.findAllByBranchId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .branchId(auditLog.getBranch() != null
-                                ? auditLog.getBranch().getIdBranch()
-                                : null)
-                        .branchName(auditLog.getBranch() != null
-                                ? auditLog.getBranch().getName()
-                                : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .branchId(auditLog.getBranchId())
+                        .branchName(auditLog.getBranchName())
                         .build());
             }
             case ACTIVITY -> {
                 Page<AuditLogActivity> auditLogPage = action != null
-                        ? auditLogActivityRepository.findAllByActivity_idActivityAndAction(id, action, pageable)
-                        : auditLogActivityRepository.findAllByActivity_idActivity(id, pageable);
+                        ? auditLogActivityRepository.findAllByActivityIdAndAction(id, action, pageable)
+                        : auditLogActivityRepository.findAllByActivityId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .activityId(auditLog.getActivity() != null
-                                ? auditLog.getActivity().getIdActivity()
-                                : null)
-                        .activityName(auditLog.getActivity() != null
-                                ? auditLog.getActivity().getTitle()
-                                : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .activityId(auditLog.getActivityId())
+                        .activityTitle(auditLog.getActivityTitle())
+                        .branchId(auditLog.getBranchId())
+                        .branchName(auditLog.getBranchName())
                         .build());
             }
             case CLIENT -> {
                 Page<AuditLogClient> auditLogPage = action != null
-                        ? auditLogClientRepository.findAllByClient_idClientAndAction(id, action, pageable)
-                        : auditLogClientRepository.findAllByClient_idClient(id, pageable);
+                        ? auditLogClientRepository.findAllByClientIdAndAction(id, action, pageable)
+                        : auditLogClientRepository.findAllByClientId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .clientId(auditLog.getClient() != null
-                                ? auditLog.getClient().getIdClient()
-                                : null)
-                        .clientName(auditLog.getClient() != null
-                                ? auditLog.getClient().getCorporateName()
-                                : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .clientId(auditLog.getClientId())
+                        .clientCorporateName(auditLog.getClientCorporateName())
                         .build());
             }
             case EMPLOYEE -> {
                 Page<AuditLogEmployee> auditLogPage = action != null
-                        ? auditLogEmployeeRepository.findAllByEmployee_idEmployeeAndAction(id, action, pageable)
-                        : auditLogEmployeeRepository.findAllByEmployee_idEmployee(id, pageable);
+                        ? auditLogEmployeeRepository.findAllByEmployeeIdAndAction(id, action, pageable)
+                        : auditLogEmployeeRepository.findAllByEmployeeId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .employeeId(auditLog.getEmployee() != null
-                                ? auditLog.getEmployee().getIdEmployee()
-                                : null)
-                        .employeeName(auditLog.getEmployee() != null
-                                ? auditLog.getEmployee().getName()
-                                    + (auditLog.getEmployee().getSurname() != null
-                                    ? auditLog.getEmployee().getSurname()
-                                    : "")
-                                : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .employeeId(auditLog.getEmployeeId())
+                        .employeeName(auditLog.getEmployeeFullName())
+                        .enterpriseId(auditLog.getEnterpriseId())
+                        .enterpriseCorporateName(auditLog.getEnterpriseCorporateName())
                         .build());
             }
             case DOCUMENT -> {
                 Page<AuditLogDocument> auditLogPage = action != null
-                        ? auditLogDocumentRepository.findAllByDocument_IdDocumentationAndAction(id, action, pageable)
-                        : auditLogDocumentRepository.findAllByDocument_IdDocumentation(id, pageable);
+                        ? auditLogDocumentRepository.findAllByDocumentIdAndAction(id, action, pageable)
+                        : auditLogDocumentRepository.findAllByDocumentId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .documentId(auditLog.getDocument() != null
-                                ? auditLog.getDocument().getIdDocumentation()
-                                : null)
-                        .documentName(auditLog.getDocument() != null
-                            ? auditLog.getDocument().getTitle()
-                            : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .documentId(auditLog.getDocumentId())
+                        .documentTitle(auditLog.getDocumentTitle())
+                        .owner(auditLog.getOwner())
+                        .ownerId(auditLog.getOwnerId())
                         .build());
             }
             case USER -> {
                 Page<AuditLogUser> auditLogPage = action != null
-                        ? auditLogUserRepository.findAllByUser_idUserAndAction(id, action, pageable)
-                        : auditLogUserRepository.findAllByUser_idUser(id, pageable);
+                        ? auditLogUserRepository.findAllByUserIdAndAction(id, action, pageable)
+                        : auditLogUserRepository.findAllByUserId(id, pageable);
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .userId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .userName(auditLog.getUser() != null
-                            ? auditLog.getUser().getFirstName()
-                            + (auditLog.getUser().getSurname() != null
-                                ? auditLog.getUser().getSurname()
-                                : "")
-                            : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .userId(auditLog.getUserId())
+                        .userCpf(auditLog.getUserCpf())
+                        .userFullName(auditLog.getUserFullName())
+                        .userEmail(auditLog.getUserEmail())
                         .build());
             }
             case CONTRACT -> {
                 Page<AuditLogContract> auditLogPage = action != null
-                        ? auditLogContractRepository.findAllByContract_idContractAndAction(id, action, pageable)
-                        : auditLogContractRepository.findAllByContract_idContract(id, pageable);
+                        ? auditLogContractRepository.findAllByContractIdAndAction(id, action, pageable)
+                        : auditLogContractRepository.findAllByContractId(id, pageable);
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .contractId(auditLog.getContract() != null
-                                ? auditLog.getContract().getIdContract()
-                                : null)
-                        .contractName(auditLog.getContract() != null
-                            ? auditLog.getContract().getContractReference()
-                            : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .contractId(auditLog.getContractId())
+                        .contractReference(auditLog.getContractReference())
+                        .responsibleId(auditLog.getResponsibleId())
+                        .responsibleFullName(auditLog.getResponsibleFullName())
+                        .clientId(auditLog.getClientId())
+                        .clientCorporateName(auditLog.getClientCorporateName())
+                        .branchId(auditLog.getBranchId())
+                        .branchName(auditLog.getBranchName())
+                        .supplierId(auditLog.getSupplierId())
+                        .supplierCorporateName(auditLog.getSupplierCorporateName())
+                        .subcontractorId(auditLog.getSubcontractorId())
+                        .subcontractorCorporateName(auditLog.getSubcontractorCorporateName())
                         .build());
             }
             case PROVIDER -> {
                 Page<AuditLogProvider> auditLogPage = action != null
-                        ? auditLogProviderRepository.findAllByProvider_idProviderAndAction(id, action, pageable)
-                        : auditLogProviderRepository.findAllByProvider_idProvider(id, pageable);
+                        ? auditLogProviderRepository.findAllByProviderIdAndAction(id, action, pageable)
+                        : auditLogProviderRepository.findAllByProviderId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .providerId(auditLog.getProvider() != null
-                                ? auditLog.getProvider().getIdProvider()
-                                : null)
-                        .providerName(auditLog.getProvider() != null
-                            ? auditLog.getProvider().getCorporateName()
-                            : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .providerId(auditLog.getProviderId())
+                        .providerCorporateName(auditLog.getProviderCorporateName())
                         .build());
             }
             case SERVICE_TYPE -> {
                 Page<AuditLogServiceType> auditLogPage = action != null
-                        ? auditLogServiceTypeRepository.findAllByServiceType_idServiceTypeAndAction(id, action, pageable)
-                        : auditLogServiceTypeRepository.findAllByServiceType_idServiceType(id, pageable);
+                        ? auditLogServiceTypeRepository.findAllByServiceTypeIdAndAction(id, action, pageable)
+                        : auditLogServiceTypeRepository.findAllByServiceTypeId(id, pageable);
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
                         .createdAt(auditLog.getCreatedAt())
-                        .responsibleId(auditLog.getUser() != null
-                                ? auditLog.getUser().getIdUser()
-                                : null)
-                        .responsibleFullName(auditLog.getUser() != null
-                                ? (auditLog.getUser().getFirstName()
-                                + (auditLog.getUser().getSurname() != null
-                                    ? auditLog.getUser().getSurname()
-                                    : ""))
-                                : null)
-                        .serviceTypeId(auditLog.getServiceType() != null
-                                ? auditLog.getServiceType().getIdServiceType()
-                                : null)
-                        .serviceTypeName(auditLog.getServiceType() != null
-                            ? auditLog.getServiceType().getTitle()
-                            : null)
+                        .userResponsibleId(auditLog.getUserResponsibleId())
+                        .userResponsibleCpf(auditLog.getUserResponsibleCpf())
+                        .userResponsibleFullName(auditLog.getUserResponsibleFullName())
+                        .userResponsibleEmail(auditLog.getUserResponsibleEmail())
+                        .serviceTypeId(auditLog.getServiceTypeId())
+                        .serviceTypeTitle(auditLog.getServiceTypeTitle())
+                        .branchId(auditLog.getBranchId())
+                        .branchName(auditLog.getBranchName())
                         .build());
             }
             default -> throw new IllegalArgumentException("Invalid log type");

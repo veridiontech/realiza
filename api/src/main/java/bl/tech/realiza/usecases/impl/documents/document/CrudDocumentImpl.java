@@ -6,7 +6,8 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
@@ -27,8 +28,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
-import static bl.tech.realiza.domains.enums.AuditLogActions.APPROVE;
-import static bl.tech.realiza.domains.enums.AuditLogActions.REJECT;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.APPROVE;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.REJECT;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +104,7 @@ public class CrudDocumentImpl implements CrudDocument {
         document.setStatus(documentStatusChangeRequestDto.getStatus());
         documentRepository.save(document);
 
-        AuditLogActions action;
+        AuditLogActionsEnum action;
         switch (documentStatusChangeRequestDto.getStatus()) {
             case REPROVADO -> action = REJECT;
             case APROVADO -> action = APPROVE;
@@ -109,14 +112,19 @@ public class CrudDocumentImpl implements CrudDocument {
         }
         User user = userRepository.findById(Objects.requireNonNull(JwtService.getAuthenticatedUserId()))
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        auditLogDocumentRepository.save(
-                AuditLogDocument.builder()
-                        .document(document)
-                        .description(user.getEmail() + " " + action.name() + " document " + document.getTitle())
-                        .notes(documentStatusChangeRequestDto.getNotes())
-                        .action(action)
-                        .user(user)
-                        .build());
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLog(
+                        document.getIdDocumentation(),
+                        DOCUMENT,
+                        user.getEmail() + " " + action.name() + " document " + document.getTitle(),
+                        null,
+                        EXEMPT,
+                        userResponsible.getIdUser());
+            }
+        }
 
         return "Document status changed to " + documentStatusChangeRequestDto.getStatus().name();
     }
@@ -170,12 +178,14 @@ public class CrudDocumentImpl implements CrudDocument {
                             : "Not Identified"))
                             : "Not Identified";
                 }
-                auditLogServiceImpl.createAuditLogDocument(
-                        document,
+                auditLogServiceImpl.createAuditLog(
+                        document.getIdDocumentation(),
+                        DOCUMENT,
                         userResponsible.getEmail() + " isentou documento "
                                 + document.getTitle() + " de " + owner,
-                        AuditLogActions.EXEMPT,
-                        userResponsible);
+                        null,
+                        EXEMPT,
+                        userResponsible.getIdUser());
             }
         }
 

@@ -1,6 +1,6 @@
 package bl.tech.realiza.domains.enums;
 
-public enum AuditLogActions {
+public enum AuditLogActionsEnum {
     CREATE,
     UPDATE,
     DELETE,

@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.auditLogs.document;
 
 import bl.tech.realiza.domains.auditLogs.AuditLog;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.enums.OwnerEnum;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -20,7 +21,8 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("DOCUMENT")
 public class AuditLogDocument extends AuditLog {
-    @ManyToOne
-    @JoinColumn(name = "idDocumentation")
-    private Document document;
+    private String documentId;
+    private String documentTitle;
+    private String ownerId;
+    private OwnerEnum owner;
 }
