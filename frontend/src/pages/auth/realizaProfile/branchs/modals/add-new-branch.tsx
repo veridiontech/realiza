@@ -211,22 +211,22 @@ const handleCnpj = async () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-  <DialogTrigger asChild>
-    <Button className="bg-realizaBlue hidden md:block"> Adiciona Filial +</Button>
-  </DialogTrigger>
-  <DialogTrigger asChild>
-    <Button className="bg-realizaBlue md:hidden">+</Button>
-  </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="bg-realizaBlue hidden md:block"> Adiciona Filial +</Button>
+      </DialogTrigger>
+    <DialogTrigger asChild>
+      <Button className="bg-realizaBlue md:hidden">+</Button>
+    </DialogTrigger>
 
-  <DialogContent className="p-0 overflow-hidden rounded-xl shadow-lg w-full max-w-[700px] max-h-[90vh] bg-white">
-    {/* Cabeçalho */}
-    <div className="bg-[#2f4050] px-6 py-3 flex items-center gap-2">
-      <span className="text-white text-lg font-semibold">📂 Cadastro de Filial</span>
-    </div>
+      <DialogContent className="p-0 overflow-hidden rounded-xl shadow-lg w-full max-w-[700px] max-h-[90vh] bg-white">
+      {/* Cabeçalho */}
+      <div className="bg-[#2f4050] px-6 py-3 flex items-center gap-2">
+        <span className="text-white text-lg font-semibold">📂 Cadastro de Filial</span>
+      </div>
 
-    {/* Formulário */}
-    <ScrollArea className="max-h-[70vh] px-6 py-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      {/* Formulário */}
+      <ScrollArea className="max-h-[70vh] px-6 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         
         {/* CNPJ */}
         <div className="flex flex-col gap-2">
@@ -378,28 +378,26 @@ const handleCnpj = async () => {
 
     {/* Rodapé com botão de voltar */}
     <div className="flex items-center justify-between px-6 py-3 bg-white border-t">
-  <Button variant="ghost" onClick={() => setIsOpen(false)}>
-    ⬅ Voltar
-  </Button>
+      <Button variant="ghost" onClick={() => setIsOpen(false)}>
+        ⬅ Voltar
+      </Button>
 
-  {loading ? (
-    <Button disabled className="bg-[#2f4050] text-white px-6 py-2 rounded-md">
-      <Oval height="20" width="20" color="#fff" />
-    </Button>
-  ) : (
-    <Button
-      type="submit"
-      onClick={handleSubmit(onSubmit)}
-      className="bg-[#2f4050] text-white px-6 py-2 rounded-md hover:bg-[#1d2a38] transition"
-    >
-      Cadastrar
-    </Button>
-  )}
-</div>
+      {loading ? (
+        <Button disabled className="bg-[#2f4050] text-white px-6 py-2 rounded-md">
+          <Oval height="20" width="20" color="#fff" />
+        </Button>
+      ) : (
+        <Button
+          type="submit"
+          onClick={handleSubmit(onSubmit)}
+          className="bg-[#2f4050] text-white px-6 py-2 rounded-md hover:bg-[#1d2a38] transition"
+        >
+        Cadastrar
+      </Button>
+      )}
+    </div>
 
   </DialogContent>
 </Dialog>
-
-
-  );
+);
 }
