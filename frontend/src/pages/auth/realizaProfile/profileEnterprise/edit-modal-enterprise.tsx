@@ -139,10 +139,12 @@ export function EditModalEnterprise() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="hidden md:block bg-realizaBlue">
-          <Pencil />
+        <Button className="border border-gray-300 bg-[#34495E] text-white hover:bg-gray-100 px-14 py-2 flex items-center gap-2 text-sm font-medium ">
+          <Pencil size={12} />
+        Editar perfil
         </Button>
       </DialogTrigger>
+
       <DialogTrigger asChild>
         <Button className="md:hidden bg-realizaBlue">
           Editar perfil empresarial

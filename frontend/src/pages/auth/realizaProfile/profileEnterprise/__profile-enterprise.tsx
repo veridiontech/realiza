@@ -1,77 +1,107 @@
-import { Mail, Phone } from "lucide-react";
+import { Mail, Upload } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
-// import { useClient } from "@/context/Client-Provider";
-// import { Skeleton } from "@/components/ui/skeleton";
 import { UploadDocumentButton } from "@/components/ui/upload-document-button";
-// import { useUser } from "@/context/user-provider"
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useClient } from "@/context/Client-Provider";
 
 export function ProfileEnterpriseReprise() {
-  // const { user } = useUser();
-  const [loading,] = useState(false);
+  const [loading] = useState(false);
   const { client } = useClient();
 
-  // 🧠 Prioridade: prop > state da rota > contexto
   const firstLetter = client?.corporateName?.charAt(0) || "";
   const lastLetter = client?.corporateName?.slice(-1) || "";
 
-  // const isclientResponsible = user?.role === "ROLE_client_RESPONSIBLE";
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatar(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <>
-      <Helmet title="profile" />
-      <section className="mx-4 flex flex-col md:mx-8 lg:mx-20">
-        <div className="dark:bg-primary mb-10 rounded-t-xl bg-white">
-          <div className="bg-realizaBlue min-h-[100px] w-full rounded-t-xl" />
-          <div className="shadow-custom-blue relative flex w-full flex-col px-4 pb-10 sm:px-6 md:px-8 lg:px-12">
-            <div className="flex flex-col items-center justify-between md:flex-row">
-              <div className="relative bottom-10 left-1 flex items-center gap-4">
-                <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
-                  <div className="text-[40px] text-white">
-                    {firstLetter}
-                    {lastLetter}
-                  </div>
+      <Helmet title="Perfil da Empresa" />
+      <section className="mx-4 my-10 flex flex-col gap-8 md:mx-10 lg:mx-32 xl:mx-40 lg:flex-row">
+        <div className="w-full max-w-sm rounded-xl bg-white shadow-md p-6 flex flex-col items-center gap-6">
+          <div
+            className="w-28 h-28 rounded-full border-4 border-realizaBlue flex items-center justify-center text-3xl font-bold text-realizaBlue cursor-pointer overflow-hidden relative group"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {avatar ? (
+              <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <>
+                {firstLetter}{lastLetter}
+                <div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                  <Upload size={20} className="text-white" />
                 </div>
-                <div className="relative top-5 flex flex-col gap-2 md:gap-5 dark:text-white">
-                  { loading ? "Carregando..." : <span>{client?.corporateName}</span> }
-                  {client ? <div>{client.tradeName}</div> : <div></div>}
-                </div>
-              </div>
-              <div className="flex space-x-4">
-                <UploadDocumentButton />
-                <EditModalEnterprise />
-              </div>
-            </div>
+              </>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
           </div>
+
+          <UploadDocumentButton text="Visualizar documentos" />
+          <EditModalEnterprise />
         </div>
 
-        <div className="flex flex-col gap-8 lg:flex-row">
-          <div className="shadow-custom-blue mb-10 flex flex-1 flex-col gap-6 bg-white px-4 py-5 md:px-6 md:py-6">
-            <h2 className="text-lg font-medium">Formas de contato</h2>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-row items-center gap-2">
-                <Mail />
-                <span>E-mail: {client?.email || "Não disponível"}</span>
-              </div>
-              <div className="flex flex-row items-center gap-2">
-                <Phone />
-                <span className="flex items-center gap-2">
-                  <span>CNPJ: </span>
-                  <span>{client?.cnpj || "Não disponível"}</span>
+       
+        <div className="flex-1 rounded-xl shadow-md bg-white overflow-hidden">
+          
+          <div className="bg-gradient-to-r from-[#6983BE] to-[#546A96] text-white px-8 py-6">
+            <h2 className="text-xl font-semibold">{client?.corporateName || "Nome da Empresa"}</h2>
+            <p className="text-sm underline opacity-90">
+              {client?.tradeName || "Nome Fantasia"} / {client?.cnpj || "CNPJ não disponível"}
+            </p>
+          </div>
+
+          <div className="p-8 space-y-6">
+            <h3 className="text-base font-semibold text-gray-800">Formas de contato</h3>
+
+            <div className="flex flex-col gap-3 text-sm">
+              <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2">
+                <Mail size={18} />
+                <span>
+                  E-mail:&nbsp;
+                  <a href={`mailto:${client?.email}`} className="text-[#2A3F57] underline">
+                    {client?.email || "Não disponível"}
+                  </a>
                 </span>
               </div>
-              {/* <div className="flex flex-row items-center gap-2">
-                <Locate />
-                <span className="flex items-center gap-2">
-                  <span>Cep: </span>
-                  <span>{client?.cep || "Não disponível"}</span>
+
+              {/*<div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2">
+                <Phone size={18} />
+                <span>
+                  Telefone:&nbsp;
+                  <span className="text-[#2A3F57] underline">
+                    {client?.phone || "Não disponível"}
+                  </span>
                 </span>
-              </div> */}
+              </div>
+
+              <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2">
+                <MapPin size={18} />
+                <span>
+                  Cep:&nbsp;
+                  <span className="text-[#2A3F57] underline">
+                    {client?.cep || "Não disponível"}
+                  </span>
+                </span>
+              </div>*/}
             </div>
-            <span>Outras formas de contato</span>
           </div>
         </div>
       </section>
