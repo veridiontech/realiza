@@ -90,7 +90,7 @@ export function Branch() {
 
   return (
     <div className="m-4 flex justify-center">
-      <div className="flex w-full max-w-7xl flex-col rounded-lg bg-white p-4 shadow-md">
+      <div className="flex w-full max-w-[80vw] flex-col rounded-lg bg-white p-4 shadow-md">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl">Filiais</h1>
           <AddNewBranch />

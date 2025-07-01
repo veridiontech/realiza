@@ -258,12 +258,12 @@ export function Dashboard() {
   }, [selectedBranch?.idBranch]);
 
   useEffect(() => {
-  if (!isOpen) {
-    reset();
-    setCpfValue("");
-    setPhoneValue(""); 
-  }
-}, [isOpen, reset]);
+    if (!isOpen) {
+      reset();
+      setCpfValue("");
+      setPhoneValue("");
+    }
+  }, [isOpen, reset]);
 
   useEffect(() => {
     const fetchConformity = async () => {
@@ -301,7 +301,7 @@ export function Dashboard() {
       <>
         <Helmet title="Dashboard" />
         <section className="relative bottom-[5vw] pb-10 pt-14">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-[80vw]">
             <div className="flex flex-col gap-10">
               <EnterpriseResume />
               {client?.isUltragaz && <UltraSection />}
@@ -397,7 +397,7 @@ export function Dashboard() {
                 <div className="flex flex-col gap-4">
                   <div>
                     <nav className="flex items-center justify-between">
-                      <div className="flex items-center gap-5">
+                      <div className="flex items-center gap-2">
                         <Button
                           variant={"ghost"}
                           className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
@@ -730,10 +730,10 @@ export function Dashboard() {
               </div>
             </div>
           </div>
-          <div className="mt-9 flex gap-">
-<ActiveContracts count={data?.activeContractQuantity ?? 0} />
-<Employees count={data?.activeEmployeeQuantity ?? 0} />
-<Suppliers count={data?.activeSupplierQuantity ?? 0} />
+          <div className="mt-9 flex w-full">
+            <ActiveContracts count={data?.activeContractQuantity ?? 0} />
+            <Employees count={data?.activeEmployeeQuantity ?? 0} />
+            <Suppliers count={data?.activeSupplierQuantity ?? 0} />
             <AllocatedEmployees />
           </div>
           <div className="mt-5 w-full text-right">

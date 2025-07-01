@@ -108,25 +108,34 @@ export function ContarctsByProvider() {
     setSelectedDocumentId(null);
   };
 
-  // const exemptDocument = async (documentId: string, documentTitle: string) => {
-  // try {
-  //   await axios.patch(
-  //     `${ip}/document/exempt/${documentId}`,
-  //     {},
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     }
-  //   );
-     
-  //   };
-  //   catch (error) {
-  //    console.error("Erro:", error);
+  const exemptDocument = async (documentId: string, documentTitle: string) => {
+    try {
+      const selectedContract = contracts.find(
+        (contract: any) => contract.serviceName === selectedContractName
+      );
 
-  //   alert(`Documento "${documentTitle}" isento com sucesso!`)
-  // }
+      if (!selectedContract) {
+        alert("Contrato selecionado não encontrado.");
+        return;
+      }
 
+      await axios.post(
+        `${ip}/document/${documentId}/exempt`,
+        {},
+        {
+          params: { contractId: selectedContract.idContract },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(`Documento "${documentTitle}" isento com sucesso!`);
+    } catch (error: any) {
+      console.error("Erro:", error.response?.data || error.message);
+      alert("Erro ao isentar o documento.");
+    }
+  };
 
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
@@ -237,7 +246,7 @@ export function ContarctsByProvider() {
                           </button>
                           <button
                             type="button"
-                            // onClick={() => exemptDocument(doc.id, doc.title)}
+                            onClick={() => exemptDocument(doc.id, doc.title)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
                             <FileX2
