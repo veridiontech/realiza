@@ -6,6 +6,7 @@ import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -275,7 +276,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                                 + (savedDocumentEmployee.getEmployee() != null
                                     ? savedDocumentEmployee.getEmployee().getName()
                                     : "Not identified"),
-                        AuditLogDocument.AuditLogDocumentActions.UPLOAD,
+                        AuditLogActions.UPLOAD,
                         userResponsible);
             }
         }

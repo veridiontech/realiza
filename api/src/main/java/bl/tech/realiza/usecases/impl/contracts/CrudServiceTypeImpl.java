@@ -1,13 +1,12 @@
 package bl.tech.realiza.usecases.impl.contracts;
 
-import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
-import bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeClient;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeRepo;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -21,7 +20,6 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.*;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import com.google.common.collect.Lists;
@@ -33,8 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static bl.tech.realiza.domains.auditLogs.serviceType.AuditLogServiceType.AuditLogServiceTypeActions.*;
 
 
 @Service
@@ -107,7 +103,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                 auditLogServiceImpl.createAuditLogServiceType(
                         serviceType,
                         userResponsible.getEmail() + " deletou tipo de serviço " + serviceType.getTitle(),
-                        DELETE,
+                        AuditLogActions.DELETE,
                         userResponsible);
             }
         }
@@ -151,7 +147,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                 auditLogServiceImpl.createAuditLogServiceType(
                         serviceType,
                         userResponsible.getEmail() + " criou tipo de serviço " + serviceType.getTitle(),
-                        CREATE,
+                        AuditLogActions.CREATE,
                         userResponsible);
             }
         }
@@ -175,7 +171,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                 auditLogServiceImpl.createAuditLogServiceType(
                         serviceType,
                         userResponsible.getEmail() + " atualizou tipo de serviço " + serviceType.getTitle(),
-                        UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }

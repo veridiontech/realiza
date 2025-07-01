@@ -1,12 +1,12 @@
 package bl.tech.realiza.usecases.impl.documents.document;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
-import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument.AuditLogDocumentActions;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
@@ -26,8 +26,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import static bl.tech.realiza.domains.auditLogs.document.AuditLogDocument.AuditLogDocumentActions.*;
 import static bl.tech.realiza.domains.documents.Document.Status.*;
+import static bl.tech.realiza.domains.enums.AuditLogActions.APPROVE;
+import static bl.tech.realiza.domains.enums.AuditLogActions.REJECT;
 
 @Service
 @RequiredArgsConstructor
@@ -100,7 +101,7 @@ public class CrudDocumentImpl implements CrudDocument {
         document.setStatus(documentStatusChangeRequestDto.getStatus());
         documentRepository.save(document);
 
-        AuditLogDocumentActions action;
+        AuditLogActions action;
         switch (documentStatusChangeRequestDto.getStatus()) {
             case REPROVADO -> action = REJECT;
             case APROVADO -> action = APPROVE;
@@ -173,7 +174,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         document,
                         userResponsible.getEmail() + " isentou documento "
                                 + document.getTitle() + " de " + owner,
-                        EXEMPT,
+                        AuditLogActions.EXEMPT,
                         userResponsible);
             }
         }

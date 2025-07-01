@@ -20,18 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("EMPLOYEE")
 public class AuditLogEmployee extends AuditLog {
-    private AuditLogEmployeeActions action;
-
     @ManyToOne
     @JoinColumn(name = "idEmployee")
-    private Employee idEmployee;
-
-    public enum AuditLogEmployeeActions {
-        CREATE,
-        UPDATE,
-        DELETE,
-        ALLOCATE,
-        DEALLOCATE,
-        STATUS_CHANGE
-    }
+    private Employee employee;
 }

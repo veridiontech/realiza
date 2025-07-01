@@ -6,6 +6,7 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -608,7 +609,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                             document,
                             userResponsible.getEmail() + " " + action + " documento "
                             + document.getTitle(),
-                            AuditLogDocument.AuditLogDocumentActions.UPDATE,
+                            AuditLogActions.UPDATE,
                             userResponsible);
                 }
             }
@@ -674,7 +675,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         userResponsible.getEmail() + " mudou " + documentBranch.getTitle()
                                 + " validade de " + oldAmount + " " + oldUnit
                                 + " para " + documentBranch.getExpirationDateAmount() + " " + documentBranch.getExpirationDateUnit(),
-                        AuditLogDocument.AuditLogDocumentActions.UPDATE,
+                        AuditLogActions.UPDATE,
                         userResponsible);
             }
         }

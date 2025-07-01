@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl.documents.provider;
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
@@ -273,7 +274,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                                 + (savedDocumentSubcontractor.getProviderSubcontractor() != null
                                 ? savedDocumentSubcontractor.getProviderSubcontractor().getCorporateName()
                                 : "Not identified"),
-                        AuditLogDocument.AuditLogDocumentActions.UPLOAD,
+                        AuditLogActions.UPLOAD,
                         userResponsible);
             }
         }

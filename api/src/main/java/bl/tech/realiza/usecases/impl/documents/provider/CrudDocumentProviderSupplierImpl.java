@@ -5,6 +5,7 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.enums.AuditLogActions;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
@@ -283,7 +284,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                                 + (savedDocumentSupplier.getProviderSupplier() != null
                                 ? savedDocumentSupplier.getProviderSupplier().getCorporateName()
                                 : "Not identified"),
-                        AuditLogDocument.AuditLogDocumentActions.UPLOAD,
+                        AuditLogActions.UPLOAD,
                         userResponsible);
             }
         }

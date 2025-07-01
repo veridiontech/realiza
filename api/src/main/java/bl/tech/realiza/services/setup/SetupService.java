@@ -64,13 +64,14 @@ public class SetupService {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
 
-        crudServiceType.transferFromRepoToClient(client.getIdClient());
+//        crudServiceType.transferFromRepoToClient(client.getIdClient());
     }
 
     public void setupBranch(String branchId) {
+        log.info("Started setup branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
-        crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
+//        crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (var documentMatrix : documentMatrixRepository.findAll()) {
@@ -91,7 +92,8 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
-        crudActivity.transferFromRepo(branch.getIdBranch());
+        log.info("Finished setup branch ✔️ {}", branchId);
+//        crudActivity.transferFromRepo(branch.getIdBranch());
     }
 
     public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {
