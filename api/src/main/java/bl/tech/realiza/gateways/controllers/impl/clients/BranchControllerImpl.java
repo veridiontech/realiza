@@ -103,6 +103,21 @@ public class BranchControllerImpl implements BranchControlller {
         return ResponseEntity.ok(pageBranch);
     }
 
+    @GetMapping("/filtered-client/unfiltered")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClientUnfiltered(@RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "5") int size,
+                                                                          @RequestParam(defaultValue = "name") String sort,
+                                                                          @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                          @RequestParam String idSearch) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        Page<BranchResponseDto> pageBranch = crudBranch.findAllByClientUnfiltered(idSearch, pageable);
+
+        return ResponseEntity.ok(pageBranch);
+    }
+
     @GetMapping("/control-panel/{branchId}")
     @ResponseStatus(HttpStatus.OK)
     @Override

@@ -40,6 +40,7 @@ import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPer
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
@@ -49,13 +50,12 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
@@ -80,6 +80,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
     private final SetupAsyncQueueProducer setupQueueProducer;
+    private final JwtService jwtService;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
@@ -367,7 +368,25 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         if (isActive == null || isActive.isEmpty()) {
             isActive = List.of(ATIVADO);
         }
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = null;
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+        if (requester.getAdmin()
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+            contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
+        } else {
+            if (!requester.getBranchAccess().contains(idSearch)) {
+                return new PageImpl<>(Collections.emptyList(), pageable, 0);
+            }
+            List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllById(requester.getContractAccess());
+            List<ContractProviderSupplier> filteredContracts = contractProviderSuppliers.stream()
+                    .filter(contract -> contract.getBranch().getIdBranch().equals(idSearch))
+                    .sorted(Comparator.comparing(Contract::getContractReference))
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .limit(pageable.getPageSize())
+                    .collect(Collectors.toList());
+            contractProviderSupplierPage = new PageImpl<>(filteredContracts, pageable, filteredContracts.size());
+        }
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }

@@ -2,6 +2,8 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
@@ -28,6 +30,7 @@ import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTy
 import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeRiskControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
@@ -37,6 +40,7 @@ import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +66,7 @@ public class CrudBranchImpl implements CrudBranch {
     private final DocumentBranchRepository documentBranchRepository;
     private final ActivityRepository activityRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
+    private final JwtService jwtService;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -273,9 +278,31 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public Page<BranchResponseDto> findAllByClient(String idSearch, Pageable pageable) {
-        Page<Branch> pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
+
+        Page<Branch> pageBranch = null;
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+
+        if (requester.getAdmin()
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+            pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
+        } else {
+            List<Branch> contractProviderSuppliers = branchRepository.findAllById(requester.getBranchAccess());
+            List<Branch> filteredBranches = contractProviderSuppliers.stream()
+                    .filter(branch -> requester.getContractAccess().contains(branch.getIdBranch()))
+                    .sorted(Comparator.comparing(Branch::getName))
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .limit(pageable.getPageSize())
+                    .collect(Collectors.toList());
+            pageBranch = new PageImpl<>(filteredBranches, pageable, filteredBranches.size());
+        }
 
         return getBranchResponseDtos(pageBranch);
+    }
+
+    @Override
+    public Page<BranchResponseDto> findAllByClientUnfiltered(String idSearch, Pageable pageable) {
+        return null;
     }
 
     @Override
