@@ -4,7 +4,6 @@ import bl.tech.realiza.gateways.controllers.interfaces.clients.ClientControlller
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.services.auth.TokenManagerService;
-import bl.tech.realiza.usecases.impl.clients.CrudClientImpl;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

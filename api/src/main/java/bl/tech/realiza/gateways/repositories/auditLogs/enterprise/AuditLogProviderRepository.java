@@ -9,4 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AuditLogProviderRepository extends JpaRepository<AuditLogProvider, String> {
     Page<AuditLogProvider> findAllByProviderId(String id, Pageable pageable);
     Page<AuditLogProvider> findAllByProviderIdAndAction(String id, AuditLogActionsEnum action, Pageable pageable);
+
+    Page<AuditLogProvider> findAllByProviderIdAndUserResponsibleId(String id, String idUser, Pageable pageable);
+
+    Page<AuditLogProvider> findAllByProviderIdAndActionAndUserResponsibleId(String id, AuditLogActionsEnum action, String idUser, Pageable pageable);
 }

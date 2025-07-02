@@ -89,7 +89,6 @@ public class DashboardService {
         supplierQuantity = providerSupplierRepository.countByBranches_IdBranchAndIsActiveIsTrue(branchId);
 
         // quantidade de funcionarios alocados
-        // TODO adicionar quantidade de funcionarios alocados
         allocatedEmployeeQuantity = employeeRepository.countAllByBranch_IdBranchAndSituation(branchId, ALOCADO);
 
         return DashboardHomeResponseDto.builder()

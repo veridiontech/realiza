@@ -52,6 +52,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+
 @Service
 @RequiredArgsConstructor
 public class AuditLogServiceImpl implements AuditLogService {
@@ -345,17 +349,34 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActionsEnum action, AuditLogTypeEnum auditLogTypeEnum, Pageable pageable) {
+    public Page<AuditLogResponseDto> getAuditLogs(String id, AuditLogActionsEnum action, AuditLogTypeEnum auditLogTypeEnum, String userResponsibleId, Pageable pageable) {
+        User user = null;
+        if (userResponsibleId != null && !userResponsibleId.isEmpty()) {
+            user = userRepository.findById(userResponsibleId)
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+        }
         switch (auditLogTypeEnum) {
             case BRANCH -> {
-                Page<AuditLogBranch> auditLogPage = action != null
-                        ? auditLogBranchRepository.findAllByBranchIdAndAction(id, action, pageable)
-                        : auditLogBranchRepository.findAllByBranchId(id, pageable);
+                Page<AuditLogBranch> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogBranchRepository.findAllByBranchIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogBranchRepository.findAllByBranchId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogBranchRepository.findAllByBranchIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogBranchRepository.findAllByBranchIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -366,14 +387,26 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case ACTIVITY -> {
-                Page<AuditLogActivity> auditLogPage = action != null
-                        ? auditLogActivityRepository.findAllByActivityIdAndAction(id, action, pageable)
-                        : auditLogActivityRepository.findAllByActivityId(id, pageable);
+                Page<AuditLogActivity> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogActivityRepository.findAllByActivityIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogActivityRepository.findAllByActivityId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogActivityRepository.findAllByActivityIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogActivityRepository.findAllByActivityIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -386,14 +419,26 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case CLIENT -> {
-                Page<AuditLogClient> auditLogPage = action != null
-                        ? auditLogClientRepository.findAllByClientIdAndAction(id, action, pageable)
-                        : auditLogClientRepository.findAllByClientId(id, pageable);
+                Page<AuditLogClient> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogClientRepository.findAllByClientIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogClientRepository.findAllByClientId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogClientRepository.findAllByClientIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogClientRepository.findAllByClientIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -404,14 +449,26 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case EMPLOYEE -> {
-                Page<AuditLogEmployee> auditLogPage = action != null
-                        ? auditLogEmployeeRepository.findAllByEmployeeIdAndAction(id, action, pageable)
-                        : auditLogEmployeeRepository.findAllByEmployeeId(id, pageable);
+                Page<AuditLogEmployee> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogEmployeeRepository.findAllByEmployeeIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogEmployeeRepository.findAllByEmployeeId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogEmployeeRepository.findAllByEmployeeIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogEmployeeRepository.findAllByEmployeeIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -424,14 +481,26 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case DOCUMENT -> {
-                Page<AuditLogDocument> auditLogPage = action != null
-                        ? auditLogDocumentRepository.findAllByDocumentIdAndAction(id, action, pageable)
-                        : auditLogDocumentRepository.findAllByDocumentId(id, pageable);
+                Page<AuditLogDocument> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogDocumentRepository.findAllByDocumentIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogDocumentRepository.findAllByDocumentId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogDocumentRepository.findAllByDocumentIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogDocumentRepository.findAllByDocumentIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -444,13 +513,25 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case USER -> {
-                Page<AuditLogUser> auditLogPage = action != null
-                        ? auditLogUserRepository.findAllByUserIdAndAction(id, action, pageable)
-                        : auditLogUserRepository.findAllByUserId(id, pageable);
+                Page<AuditLogUser> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogUserRepository.findAllByUserIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogUserRepository.findAllByUserId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogUserRepository.findAllByUserIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogUserRepository.findAllByUserIdAndAction(id, action, pageable);
+                    }
+                }
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -463,13 +544,25 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case CONTRACT -> {
-                Page<AuditLogContract> auditLogPage = action != null
-                        ? auditLogContractRepository.findAllByContractIdAndAction(id, action, pageable)
-                        : auditLogContractRepository.findAllByContractId(id, pageable);
+                Page<AuditLogContract> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogContractRepository.findAllByContractIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogContractRepository.findAllByContractId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogContractRepository.findAllByContractIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogContractRepository.findAllByContractIdAndAction(id, action, pageable);
+                    }
+                }
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -490,14 +583,26 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case PROVIDER -> {
-                Page<AuditLogProvider> auditLogPage = action != null
-                        ? auditLogProviderRepository.findAllByProviderIdAndAction(id, action, pageable)
-                        : auditLogProviderRepository.findAllByProviderId(id, pageable);
+                Page<AuditLogProvider> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogProviderRepository.findAllByProviderIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogProviderRepository.findAllByProviderId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogProviderRepository.findAllByProviderIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogProviderRepository.findAllByProviderIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())
@@ -508,14 +613,26 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .build());
             }
             case SERVICE_TYPE -> {
-                Page<AuditLogServiceType> auditLogPage = action != null
-                        ? auditLogServiceTypeRepository.findAllByServiceTypeIdAndAction(id, action, pageable)
-                        : auditLogServiceTypeRepository.findAllByServiceTypeId(id, pageable);
+                Page<AuditLogServiceType> auditLogPage = null;
+                if (action == ALL || action == null) {
+                    if (user != null) {
+                        auditLogPage = auditLogServiceTypeRepository.findAllByServiceTypeIdAndUserResponsibleId(id, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogServiceTypeRepository.findAllByServiceTypeId(id, pageable);
+                    }
+                } else {
+                    if (user != null) {
+                        auditLogPage = auditLogServiceTypeRepository.findAllByServiceTypeIdAndActionAndUserResponsibleId(id, action, user.getIdUser(), pageable);
+                    } else {
+                        auditLogPage = auditLogServiceTypeRepository.findAllByServiceTypeIdAndAction(id, action, pageable);
+                    }
+                }
 
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
                         .notes(auditLog.getNotes())
+                        .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
                         .userResponsibleCpf(auditLog.getUserResponsibleCpf())

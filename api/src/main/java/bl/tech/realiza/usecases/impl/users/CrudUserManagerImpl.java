@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
@@ -11,6 +12,7 @@ import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -26,13 +28,12 @@ import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,8 @@ public class CrudUserManagerImpl implements CrudUserManager {
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final EmailSender emailSender;
     private final RandomPasswordService randomPasswordService;
+    private final ProfileRepository profileRepository;
+    private final ContractRepository contractRepository;
 
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
@@ -112,7 +115,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
         UserManager savedUserManager = userManagerRepository.save(newUserManager);
 
-        UserResponseDto userManagerResponse = UserResponseDto.builder()
+        return UserResponseDto.builder()
                 .idUser(savedUserManager.getIdUser())
                 .cpf(savedUserManager.getCpf())
                 .description(savedUserManager.getDescription())
@@ -126,8 +129,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .telephone(savedUserManager.getTelephone())
                 .cellphone(savedUserManager.getCellphone())
                 .build();
-
-        return userManagerResponse;
     }
 
     @Override
@@ -163,7 +164,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
     public Page<UserResponseDto> findAll(Pageable pageable) {
         Page<UserManager> userManagerPage = userManagerRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<UserResponseDto> userManagerResponseDtoPage = userManagerPage.map(
+        return userManagerPage.map(
                 userManager -> {
                     FileDocument fileDocument = null;
                     if (userManager.getProfilePicture() != null && !userManager.getProfilePicture().isEmpty()) {
@@ -185,7 +186,6 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .build();
                 }
         );
-        return userManagerResponseDtoPage;
     }
 
     @Override
@@ -303,6 +303,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
                     Branch branch = branchRepository.findById(userCreateRequestDto.getIdEnterprise())
                                     .orElse(null);
+
                     if (branch == null) {
                         Client client = clientRepository.findById(userCreateRequestDto.getIdEnterprise())
                                 .orElseThrow(() -> new NotFoundException("Client not found"));
@@ -310,19 +311,42 @@ public class CrudUserManagerImpl implements CrudUserManager {
                         branch = branchRepository.findFirstByClient_IdClientOrderByCreationDateAsc(client.getIdClient());
                     }
 
+                    Profile profile = null;
+                    List<Branch> branchAccessList = new ArrayList<>();
+                    List<Contract> contractAccessList = new ArrayList<>();
+
+                    if (userCreateRequestDto.getProfileId() != null && !userCreateRequestDto.getProfileId().isEmpty()) {
+                        profile = profileRepository.findById(userCreateRequestDto.getProfileId())
+                                .orElseThrow(() -> new NotFoundException("Profile not found"));
+                    }
+
+                    if (userCreateRequestDto.getBranchAccessIds() != null && !userCreateRequestDto.getBranchAccessIds().isEmpty()) {
+                        branchAccessList = branchRepository.findAllById(userCreateRequestDto.getBranchAccessIds());
+                        if (branchAccessList.isEmpty()) {
+                            branchAccessList.add(branch);
+                        }
+                    }
+
+                    if (userCreateRequestDto.getContractAccessIds() != null && !userCreateRequestDto.getContractAccessIds().isEmpty()) {
+                        contractAccessList = contractRepository.findAllById(userCreateRequestDto.getContractAccessIds());
+                    }
+
                     userClientRepository.save(UserClient.builder()
-                                    .cpf(userCreateRequestDto.getCpf())
-                                    .description(userCreateRequestDto.getDescription())
-                                    .position(userCreateRequestDto.getPosition())
-                                    .role(userCreateRequestDto.getRole())
-                                    .firstName(userCreateRequestDto.getFirstName())
-                                    .surname(userCreateRequestDto.getSurname())
-                                    .email(userCreateRequestDto.getEmail())
-                                    .password(encryptedPassword)
-                                    .telephone(userCreateRequestDto.getTelephone())
-                                    .cellphone(userCreateRequestDto.getCellphone())
-                                    .branch(branch)
-                                    .isActive(true)
+                            .cpf(userCreateRequestDto.getCpf())
+                            .description(userCreateRequestDto.getDescription())
+                            .position(userCreateRequestDto.getPosition())
+                            .role(userCreateRequestDto.getRole())
+                            .firstName(userCreateRequestDto.getFirstName())
+                            .surname(userCreateRequestDto.getSurname())
+                            .email(userCreateRequestDto.getEmail())
+                            .password(encryptedPassword)
+                            .telephone(userCreateRequestDto.getTelephone())
+                            .cellphone(userCreateRequestDto.getCellphone())
+                            .branch(branch)
+                            .profile(profile)
+                            .branchesAccess(branchAccessList)
+                            .contractsAccess(contractAccessList)
+                            .isActive(true)
                             .build());
                 } else {
                     throw new IllegalArgumentException("Invalid role for CLIENT enterprise");
