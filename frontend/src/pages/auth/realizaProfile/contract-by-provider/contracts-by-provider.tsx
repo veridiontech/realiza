@@ -16,9 +16,14 @@ import { useParams } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
 
+interface Contract {
+  idContract: string;
+  serviceName: string;
+}
+
 export function ContarctsByProvider() {
   const id = useParams();
-  const [contracts, setContracts] = useState([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [documents, setDocuments] = useState([]);
   const [collaborators, setCollaborators] = useState([]);
   const [selectedContractName, setSelectedContractName] = useState("");
