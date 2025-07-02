@@ -9,7 +9,6 @@ import {
   X,
   MoreVertical,
   History,
-  FileText,
   ScrollText,
 } from "lucide-react";
 //import bgModalRealiza from "@/assets/modalBG.jpeg";
@@ -114,7 +113,6 @@ export function TableServiceProvider() {
     handleSubmit,
     reset,
     control,
-    formState: { errors },
   } = useForm<z.infer<typeof editContractSchema>>({
     resolver: zodResolver(editContractSchema),
   });
