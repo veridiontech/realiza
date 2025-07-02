@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmployee, String> {
     Page<DocumentEmployee> findAllByEmployee_IdEmployee(String idSearch, Pageable pageable);
+    Page<DocumentEmployee> findAllByEmployee_IdEmployeeAndType(String idSearch, String type, Pageable pageable);
     List<DocumentEmployee> findAllByEmployee_IdEmployee(String idSearch);
     List<DocumentEmployee> findAllByRequest(Document.Request request);
     Long countByEmployee_Branch_IdBranchAndStatus(String branchId, Document.Status status);

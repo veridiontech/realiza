@@ -15,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.sql.Date;
 import java.util.HashMap;
@@ -90,10 +92,8 @@ public class JwtService {
         claims.put("clientTradeName", user.getBranch().getClient().getTradeName());
         claims.put("clientCorporateName", user.getBranch().getClient().getCorporateName());
         if (!user.getBranchesAccess().stream().map(Branch::getIdBranch).toList().isEmpty()) {
-            System.out.println("Not empty");
             claims.put("branchAccess", user.getBranchesAccess().stream().map(Branch::getIdBranch).toList());
         } else {
-            System.out.println("Empty");
             user.getBranchesAccess().add(user.getBranch());
             claims.put("branchAccess", user.getBranchesAccess().stream().map(Branch::getIdBranch).toList());
         }
@@ -329,5 +329,20 @@ public class JwtService {
     public static String getAuthenticatedUserId() {
         UserResponseDto user = getAuthenticatedUser();
         return user != null ? user.getIdUser() : null;
+    }
+
+    public String getTokenFromRequest() {
+        String token = null;
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        if (attributes != null) {
+            token = attributes.getRequest().getHeader("Authorization");
+        }
+
+        if (token != null && token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+
+        return null;
     }
 }

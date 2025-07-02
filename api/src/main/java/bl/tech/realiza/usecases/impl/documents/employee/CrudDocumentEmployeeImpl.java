@@ -19,6 +19,7 @@ import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequ
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +53,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     private final DocumentProcessingService documentProcessingService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final JwtService jwtService;
 
     @Override
     public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
@@ -297,9 +300,39 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public Page<DocumentResponseDto> findAllByEmployee(String idSearch, Pageable pageable) {
-        Page<DocumentEmployee> documentEmployeePage = documentEmployeeRepository.findAllByEmployee_IdEmployee(idSearch, pageable);
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+        List<DocumentEmployee> allDocuments = new ArrayList<>();
 
-        Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
+        if (requester.getAdmin()
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+        allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployee(idSearch, pageable).getContent());
+        } else {
+            if (requester.getLaboral()) {
+                allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployeeAndType(idSearch, "trabalhista",pageable).getContent());
+            }
+            if (requester.getWorkplaceSafety()) {
+                allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployeeAndType(idSearch, "segurança do trabalho",pageable).getContent());
+            }
+            if (requester.getRegistrationAndCertificates()) {
+                allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployeeAndType(idSearch, "meio ambiente",pageable).getContent());
+            }
+            if (requester.getGeneral()) {
+                allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployeeAndType(idSearch, "cadastro e certidões",pageable).getContent());
+            }
+            if (requester.getHealth()) {
+                allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployeeAndType(idSearch, "geral",pageable).getContent());
+            }
+            if (requester.getEnvironment()) {
+                allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployeeAndType(idSearch, "saude",pageable).getContent());
+            }
+        }
+
+
+        return new PageImpl<>(allDocuments.stream()
+                .sorted(Comparator.comparing(DocumentEmployee::getAssignmentDate).reversed())
+                .limit(pageable.getPageSize())
+                .map(
                 documentEmployee -> {
                     FileDocument fileDocument = null;
                     if (documentEmployee.getDocumentation() != null && ObjectId.isValid(documentEmployee.getDocumentation())) {
@@ -320,10 +353,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                                     ? documentEmployee.getEmployee().getIdEmployee()
                                     : null)
                             .build();
-                }
-        );
-
-        return documentEmployeeResponseDtoPage;
+                }).collect(Collectors.toList()), pageable, allDocuments.size());
     }
 
     @Override
