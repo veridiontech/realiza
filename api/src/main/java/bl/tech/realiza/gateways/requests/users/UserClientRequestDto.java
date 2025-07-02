@@ -3,6 +3,8 @@ package bl.tech.realiza.gateways.requests.users;
 import bl.tech.realiza.domains.user.User;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UserClientRequestDto {
     private String cpf;
@@ -19,6 +21,10 @@ public class UserClientRequestDto {
     private String cellphone;
     private String branch;
     private String idUser;
+
+    private String profileId;
+    private List<String> branchAccessIds;
+    private List<String> contractAccessIds;
 
     public enum Role {
         ROLE_CLIENT_RESPONSIBLE,

@@ -1,14 +1,18 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
+import bl.tech.realiza.domains.user.Profile;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
+import bl.tech.realiza.gateways.repositories.users.ProfileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
@@ -26,9 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Optional;
+import java.util.*;
 
 import static bl.tech.realiza.domains.user.User.Role.*;
 
@@ -41,10 +43,11 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
     private final CrudItemManagement crudItemManagementImpl;
+    private final ProfileRepository profileRepository;
+    private final ContractRepository contractRepository;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
-
         if (Arrays.stream(UserClientRequestDto.Role.values())
                 .noneMatch(role -> role.name().equals(userClientRequestDto.getRole().name()))) {
             throw new BadRequestException("Invalid Role");
@@ -56,15 +59,34 @@ public class CrudUserClientImpl implements CrudUserClient {
             throw new BadRequestException("Invalid branch");
         }
 
-        Optional<Branch> branchOptional = branchRepository.findById(userClientRequestDto.getBranch());
-        Branch branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
+        Branch branch = branchRepository.findById(userClientRequestDto.getBranch())
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        String encryptedPassword = passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword());
+        Profile profile = null;
+        List<Branch> branchAccessList = new ArrayList<>();
+        List<Contract> contractAccessList = new ArrayList<>();
+
+        if (userClientRequestDto.getProfileId() != null && !userClientRequestDto.getProfileId().isEmpty()) {
+            profile = profileRepository.findById(userClientRequestDto.getProfileId())
+                    .orElseThrow(() -> new NotFoundException("Profile not found"));
+        }
+
+        if (userClientRequestDto.getBranchAccessIds() != null && !userClientRequestDto.getBranchAccessIds().isEmpty()) {
+            branchAccessList = branchRepository.findAllById(userClientRequestDto.getBranchAccessIds());
+            if (branchAccessList.isEmpty()) {
+                branchAccessList.add(branch);
+            }
+        }
+
+        if (userClientRequestDto.getContractAccessIds() != null && !userClientRequestDto.getContractAccessIds().isEmpty()) {
+            contractAccessList = contractRepository.findAllById(userClientRequestDto.getContractAccessIds());
+        }
+
 
         UserClient newUserClient = UserClient.builder()
                 .cpf(userClientRequestDto.getCpf())
                 .description(userClientRequestDto.getDescription())
-                .password(encryptedPassword)
+                .password(passwordEncryptionService.encryptPassword(userClientRequestDto.getPassword()))
                 .position(userClientRequestDto.getPosition())
                 .role(userClientRequestDto.getRole())
                 .firstName(userClientRequestDto.getFirstName())
@@ -74,6 +96,9 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .telephone(userClientRequestDto.getTelephone())
                 .cellphone(userClientRequestDto.getCellphone())
                 .branch(branch)
+                .profile(profile)
+                .branchesAccess(branchAccessList)
+                .contractsAccess(contractAccessList)
                 .build();
 
         UserClient userClient = userClientRepository.findById(userClientRequestDto.getIdUser())
@@ -99,7 +124,9 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .profilePicture(savedUserClient.getProfilePicture())
                 .telephone(savedUserClient.getTelephone())
                 .cellphone(savedUserClient.getCellphone())
-                .branch(savedUserClient.getBranch().getIdBranch())
+                .branch(savedUserClient.getBranch() != null
+                        ? savedUserClient.getBranch().getIdBranch()
+                        : null)
                 .build();
     }
 
