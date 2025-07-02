@@ -6,7 +6,7 @@ import { useState, useRef } from "react";
 import { useClient } from "@/context/Client-Provider";
 
 export function ProfileEnterpriseReprise() {
-  const [loading] = useState(false);
+  // const [loading] = useState(false);
   const { client } = useClient();
 
   const firstLetter = client?.corporateName?.charAt(0) || "";
