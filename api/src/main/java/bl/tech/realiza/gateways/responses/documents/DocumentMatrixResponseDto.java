@@ -15,6 +15,7 @@ public class DocumentMatrixResponseDto {
     private String expiration;
     private String type;
     private Boolean doesBlock;
+    private Boolean isDocumentUnique;
     private String idDocumentSubgroup;
     private String subgroupName;
     private String idDocumentGroup;

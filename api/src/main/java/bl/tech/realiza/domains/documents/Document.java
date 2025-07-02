@@ -40,8 +40,6 @@ public abstract class Document {
     private Boolean isActive = true;
     @Builder.Default
     private Boolean doesBlock = true;
-    @Builder.Default
-    private Boolean isDocumentUnique = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;

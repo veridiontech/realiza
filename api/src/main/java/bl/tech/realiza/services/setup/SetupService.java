@@ -250,7 +250,7 @@ public class SetupService {
                         .filter(de -> de.getTitle().equals(document.getTitle()))
                         .findFirst()
                         .orElse(null);
-                if (existingDocument != null && document.getIsDocumentUnique()) {
+                if (existingDocument != null && document.getDocumentMatrix().getIsDocumentUnique()) {
                     existingDocument.getContracts().add(contractProviderSupplier);
                     existingDocumentCheck = true;
                 } else if (existingDocument == null) {
@@ -311,7 +311,7 @@ public class SetupService {
                         .filter(de -> de.getTitle().equals(document.getTitle()))
                         .findFirst()
                         .orElse(null);
-                if (existingDocument != null && document.getIsDocumentUnique()) {
+                if (existingDocument != null && document.getDocumentMatrix().getIsDocumentUnique()) {
                     existingDocument.getContracts().add(contractProviderSubcontractor);
                     existingDocumentCheck = true;
                 } else if (existingDocument == null) {

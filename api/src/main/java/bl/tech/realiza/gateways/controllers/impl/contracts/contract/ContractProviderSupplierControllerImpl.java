@@ -149,7 +149,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @GetMapping("/by-responsible/{responsibleId}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<List<ContractResponsibleResponseDto>> getContractByResponsible(@PathVariable String responsibleId) {
+    public ResponseEntity<ContractResponsibleResponseDto> getContractByResponsible(@PathVariable String responsibleId) {
         return ResponseEntity.ok(crudContractSupplier.findAllByResponsible(responsibleId));
     }
 

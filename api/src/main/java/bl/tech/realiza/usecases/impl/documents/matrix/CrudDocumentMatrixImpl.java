@@ -46,6 +46,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .idDocumentMatrix(savedDocumentMatrix.getIdDocument())
                 .type(savedDocumentMatrix.getType())
                 .doesBlock(savedDocumentMatrix.getDoesBlock())
+                .isDocumentUnique(savedDocumentMatrix.getIsDocumentUnique())
                 .idDocumentSubgroup(savedDocumentMatrix.getSubGroup() != null
                         ? savedDocumentMatrix.getSubGroup().getIdDocumentSubgroup()
                         : null)
@@ -65,6 +66,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .name(documentMatrix.getName())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
+                .isDocumentUnique(documentMatrix.getIsDocumentUnique())
                 .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                         ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
                         : null)
@@ -83,6 +85,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         .name(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
+                        .isDocumentUnique(documentMatrix.getIsDocumentUnique())
                         .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                                 ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
                                 : null)
@@ -102,16 +105,28 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
         DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
-        documentMatrix.setName(documentMatrixRequestDto.getName() != null ? documentMatrixRequestDto.getName() : documentMatrix.getName());
-        documentMatrix.setType(documentMatrixRequestDto.getType() != null ? documentMatrixRequestDto.getType() : documentMatrix.getType());
-        documentMatrix.setDoesBlock(documentMatrixRequestDto.getDoesBlock() != null ? documentMatrixRequestDto.getDoesBlock() : documentMatrix.getDoesBlock());
-        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null ? documentMatrixSubgroup : documentMatrix.getSubGroup());
+        documentMatrix.setName(documentMatrixRequestDto.getName() != null
+                ? documentMatrixRequestDto.getName()
+                : documentMatrix.getName());
+        documentMatrix.setType(documentMatrixRequestDto.getType() != null
+                ? documentMatrixRequestDto.getType()
+                : documentMatrix.getType());
+        documentMatrix.setDoesBlock(documentMatrixRequestDto.getDoesBlock() != null
+                ? documentMatrixRequestDto.getDoesBlock()
+                : documentMatrix.getDoesBlock());
+        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null
+                ? documentMatrixSubgroup
+                : documentMatrix.getSubGroup());
+        documentMatrix.setIsDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique() != null
+                ? documentMatrixRequestDto.getIsDocumentUnique()
+                : documentMatrix.getIsDocumentUnique());
 
         DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
                 .name(documentMatrix.getName())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
+                .isDocumentUnique(documentMatrix.getIsDocumentUnique())
                 .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                         ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
                         : null)
@@ -135,6 +150,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         .name(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
+                        .isDocumentUnique(documentMatrix.getIsDocumentUnique())
                         .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                                 ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
                                 : null)
@@ -154,6 +170,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         .name(documentMatrix.getName())
                         .type(documentMatrix.getType())
                         .doesBlock(documentMatrix.getDoesBlock())
+                        .isDocumentUnique(documentMatrix.getIsDocumentUnique())
                         .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                                 ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
                                 : null)

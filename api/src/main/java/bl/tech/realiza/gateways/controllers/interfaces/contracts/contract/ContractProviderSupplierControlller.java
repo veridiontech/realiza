@@ -23,6 +23,6 @@ public interface ContractProviderSupplierControlller {
     ResponseEntity<Page<ContractResponseDto>> getAllBySupplierAndBranch(int page, int size, String sort, Sort.Direction direction, String idBranch, String idSupplier);
     ResponseEntity<ContractAndSupplierCreateResponseDto> createContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto);
     ResponseEntity<List<ContractSupplierPermissionResponseDto>> getByBranchAndSubcontractPermission(String idBranch);
-    ResponseEntity<List<ContractResponsibleResponseDto>> getContractByResponsible(String responsibleId);
+    ResponseEntity<ContractResponsibleResponseDto> getContractByResponsible(String responsibleId);
     ResponseEntity<String> updateResponsibleFromContract(String contractId, String responsibleId);
 }
