@@ -17,7 +17,6 @@ import { useSupplier } from "@/context/Supplier-context";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { color } from "framer-motion";
 import { Search, IdCard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
