@@ -9,8 +9,10 @@ import {
   X,
   MoreVertical,
   History,
+  FileText,
+  ScrollText,
 } from "lucide-react";
-import bgModalRealiza from "@/assets/modalBG.jpeg";
+//import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 import { z } from "zod";
@@ -59,29 +61,31 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div
-        className="p-6 rounded-lg shadow-lg w-[90vw] md:w-[640px] relative text-white"
-        style={{
-          backgroundImage: `url(${bgModalRealiza})`,
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          backgroundColor: "#000",
-        }}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-white hover:text-gray-300"
-          title="Fechar"
-        >
-          <X className="w-5 h-5" />
-        </button>
-        <h2 className="text-lg font-semibold text-white mb-4 pr-6">{title}</h2>
-        <div>{children}</div>
+      <div className="bg-white rounded-md shadow-lg w-[90vw] md:w-[640px] relative">
+        {/* HEADER */}
+        <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 rounded-t-md h-[60px]">
+          <div className="flex items-center gap-2">
+            <div className="bg-yellow-400 p-[6px] rounded-sm flex items-center justify-center">
+              <ScrollText className="w-4 h-4 text-[#2E3C4D]" />
+            </div>
+            <h2 className="text-white text-base font-semibold">{title}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:text-gray-300"
+            title="Fechar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* BODY */}
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );
 }
+
 
 export function TableServiceProvider() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -597,314 +601,291 @@ export function TableServiceProvider() {
 
       {isViewModalOpen && selectedSupplier && (
         <Modal
-          title="Visualizar Contrato"
+          title="Visualizar detalhes de contrato"
           onClose={() => setIsViewModalOpen(false)}
         >
-          <div className="text-white space-y-2 max-h-[400px] overflow-auto">
-            <p>
-              <strong>Referência do Contrato:</strong>{" "}
-              {selectedSupplier.contractReference}
-            </p>
-            <p>
-              <strong>Nome do Fornecedor:</strong>{" "}
-              {selectedSupplier.providerSupplierName}
-            </p>
-            <p>
-              <strong>CNPJ:</strong> {selectedSupplier.providerSupplierCnpj}
-            </p>
-            <p>
-              <strong>Nome do Serviço:</strong> {selectedSupplier.serviceName}
-            </p>
-            <p>
-              <strong>Gestor do contrato:</strong>{" "}
-              {selectedSupplier.responsible}
-            </p>
-            <p>
-              <strong>Data de Início:</strong>{" "}
-              {new Date(selectedSupplier.dateStart).toLocaleDateString(
-                "pt-BR"
-              )}
-            </p>
-            <p>
-              <strong>Data de Finalização:</strong>{" "}
-              {selectedSupplier.dateFinish
-                ? new Date(selectedSupplier.dateFinish).toLocaleDateString(
-                    "pt-BR"
-                  )
-                : "-"}
-            </p>
-            <p>
-              <strong>Descrição:</strong> {selectedSupplier.description}
-            </p>
-            <p>
-              <strong>Tipo de Despesa:</strong> {selectedSupplier.expenseType}
-            </p>
-            <p>
-              <strong>Filial:</strong> {selectedSupplier.branchName}
-            </p>
+        <div className="bg-white rounded-md p-4 shadow text-gray-800 max-h-[70vh] overflow-y-auto space-y-4 text-sm">
+          <div>
+            <p className="font-semibold text-gray-500">Referência do contrato:</p>
+            <p className="border-b border-gray-200 pb-1">{selectedSupplier.contractReference}</p>
           </div>
-        </Modal>
-      )}
+
+        <div>
+          <p className="font-semibold text-gray-500">Nome do Fornecedor:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.providerSupplierName}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">CNPJ:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.providerSupplierCnpj}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Nome do serviço:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.serviceName}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Gestor do contrato:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.responsible}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Data de início:</p>
+          <p className="border-b border-gray-200 pb-1">
+            {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}
+          </p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Data de finalização:</p>
+          <p className="border-b border-gray-200 pb-1">
+            {selectedSupplier.dateFinish
+              ? new Date(selectedSupplier.dateFinish).toLocaleDateString("pt-BR")
+              : "-"}
+          </p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Descrição:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.description}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Tipo de Despesa:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.expenseType}</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-500">Filial:</p>
+          <p className="border-b border-gray-200 pb-1">{selectedSupplier.branchName}</p>
+        </div>
+      </div>
+    </Modal>
+  )}
+
 
       {isEditModalOpen && editFormData && (
-        <Modal
-          title="Editar Contrato"
-          onClose={() => setIsEditModalOpen(false)}
-        >
-          <div className="text-white space-y-4 max-h-[80vh] overflow-auto w-[90vw] md:w-[600px]">
+        <Modal title="Editar contrato" onClose={() => setIsEditModalOpen(false)}>
+          <div className="text-gray-800 space-y-4 max-h-[80vh] overflow-auto w-full p-1">
             <form
               onSubmit={handleSubmit(onSubmitEdit)}
-              className="flex flex-col gap-3 [&>label]:text-white"
+              className="flex flex-col gap-4 text-sm"
             >
-              <label>
-                Referência do Contrato
-                <input
-                  className="w-full rounded border px-2 py-1 text-black"
-                  {...register("contractReference")}
-                />
-                {errors.contractReference && (
-                  <span className="text-red-500">
-                    {errors.contractReference.message}
-                  </span>
-                )}
-              </label>
+        
+          <label className="space-y-1">
+            <span className="font-semibold">Referência do contrato*</span>
+            <input
+              className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+              {...register("contractReference")}
+              disabled
+            />
+          </label>
 
-              <label>
-                Nome do Fornecedor
-                <input
-                  className="w-full rounded border px-2 py-1 text-black"
-                  {...register("providerSupplierName")}
-                />
-                {errors.providerSupplierName && (
-                  <span className="text-red-500">
-                    {errors.providerSupplierName.message}
-                  </span>
-                )}
-              </label>
+       
+          <label className="space-y-1">
+            <span className="font-semibold">Nome do fornecedor*</span>
+              <input
+                className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                {...register("providerSupplierName")}
+                disabled
+              />
+            </label>
 
-              <label>
-                Nome do Serviço
-                <input
-                  className="w-full rounded border px-2 py-1 text-black"
-                  {...register("serviceName")}
-                />
-                {errors.serviceName && (
-                  <span className="text-red-500">
-                    {errors.serviceName.message}
-                  </span>
-                )}
-              </label>
+     
+          <label className="space-y-1">
+            <span className="font-semibold">Nome do serviço*</span>
+              <input
+                className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                {...register("serviceName")}
+                disabled
+              />
+          </label>
 
-              <label>
-                Gestor
-                <select
-                  {...register("idResponsible")}
-                  className="w-full rounded border px-2 py-1 text-black"
-                >
-                  <option value="">Selecione</option>
-                  {managers.map((m: any) => (
-                    <option key={m.idUser} value={m.idUser}>
-                      {m.firstName} {m.surname}
-                    </option>
-                  ))}
-                </select>
-                {errors.idResponsible && (
-                  <span className="text-red-500">
-                    {errors.idResponsible.message}
-                  </span>
-                )}
-              </label>
+        
+          <label className="space-y-1">
+            <span className="font-semibold">Data de início*</span>
+              <input
+                type="date"
+                className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                {...register("dateStart")}
+              />
+          </label>
 
-              <label>
-                Data de Início
-                <input
-                  type="date"
-                  className="w-full rounded border px-2 py-1 text-black"
-                  {...register("dateStart")}
-                />
-                {errors.dateStart && (
-                  <span className="text-red-500">
-                    {errors.dateStart.message}
-                  </span>
-                )}
-              </label>
+        
+          <label className="space-y-1">
+            <span className="font-semibold">Gestor do contrato</span>
+            <select
+              {...register("idResponsible")}
+              className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+            >
+              <option value="">Selecione</option>
+              {managers.map((m: any) => (
+                <option key={m.idUser} value={m.idUser}>
+                  {m.firstName} {m.surname}
+                </option>
+              ))}
+            </select>
+          </label>
 
-              <label>
-                Tipo de Despesa
-                <select
-                  {...register("expenseType")}
-                  className="w-full rounded border px-2 py-1 text-black"
-                >
-                  <option value="">Selecione</option>
-                  <option value="CAPEX">CAPEX</option>
-                  <option value="OPEX">OPEX</option>
-                  <option value="NENHUM">Nenhuma</option>
-                </select>
-                {errors.expenseType && (
-                  <span className="text-red-500">
-                    {errors.expenseType.message}
-                  </span>
-                )}
-              </label>
+        
+        <label className="space-y-1">
+          <span className="font-semibold">Tipo de Despesa</span>
+          <select
+            {...register("expenseType")}
+            className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+          >
+            <option value="">Selecione</option>
+            <option value="CAPEX">CAPEX</option>
+            <option value="OPEX">OPEX</option>
+            <option value="NENHUM">Nenhuma</option>
+          </select>
+        </label>
 
-              <label>
-                Tipo do Serviço
-                <select
-                  {...register("idServiceType")}
-                  className="w-full rounded border px-2 py-1 text-black"
-                >
-                  <option value="">Selecione</option>
-                  {servicesType.map((service: any) => (
-                    <option
-                      key={service.idServiceType}
-                      value={service.idServiceType}
-                    >
-                      {service.title}
-                    </option>
-                  ))}
-                </select>
-                {errors.idServiceType && (
-                  <span className="text-red-500">
-                    {errors.idServiceType.message}
-                  </span>
-                )}
-              </label>
+        
+        <label className="space-y-1">
+          <span className="font-semibold">Tipo do Serviço</span>
+          <select
+            {...register("idServiceType")}
+            className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+          >
+            <option value="">Selecione</option>
+            {servicesType.map((service: any) => (
+              <option
+                key={service.idServiceType}
+                value={service.idServiceType}
+              >
+                {service.title}
+              </option>
+            ))}
+          </select>
+        </label>
 
-              <div className="flex gap-4 items-center">
-                <label className="flex gap-2 items-center">
-                  <input type="checkbox" {...register("hse")} />
-                  SSMA
-                </label>
-                <label className="flex gap-2 items-center">
-                  <input type="checkbox" {...register("labor")} />
-                  Trabalhista
-                </label>
-              </div>
+        <div className="space-y-1">
+          <p className="font-semibold">Permitir Subcontratação?</p>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="true"
+                {...register("subcontractPermission")}
+              />
+              Sim
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="false"
+                {...register("subcontractPermission")}
+              />
+              Não
+            </label>
+          </div>
+        </div>
 
-              <label>
-                Permitir Subcontratação?
-                <div className="flex gap-3">
-                  <label className="flex items-center gap-1">
+        
+        <div className="flex gap-6 pt-2">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("hse")} />
+            SSMA
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("labor")} />
+            Trabalhista
+          </label>
+        </div>
+
+     
+        {hseWatch && (
+          <div className="space-y-2">
+            <label className="font-semibold">Tipo de atividade SSMA</label>
+            <input
+              type="text"
+              value={searchSsmaActivityEdit}
+              onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
+              placeholder="Buscar atividade..."
+              className="w-full rounded border px-3 py-2 text-sm bg-[#F2F3F5]"
+            />
+            <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
+              {activities
+                .filter((a) =>
+                  a.title
+                    .toLowerCase()
+                    .includes(searchSsmaActivityEdit.toLowerCase())
+                )
+                .map((activity: any) => (
+                  <label key={activity.idActivity} className="flex gap-2 py-1">
                     <input
-                      type="radio"
-                      value="true"
-                      {...register("subcontractPermission")}
+                      type="checkbox"
+                      checked={selectedSsmaActivitiesEdit.includes(
+                        activity.idActivity
+                      )}
+                      onChange={(e) =>
+                        handleCheckboxChangeEdit(
+                          "ssma",
+                          activity.idActivity,
+                          e.target.checked
+                        )
+                      }
                     />
-                    Sim
+                    {activity.title}
                   </label>
-                  <label className="flex items-center gap-1">
-                    <input
-                      type="radio"
-                      value="false"
-                      {...register("subcontractPermission")}
-                    />
-                    Não
-                  </label>
-                </div>
-                {errors.subcontractPermission && (
-                  <span className="text-red-500">
-                    {errors.subcontractPermission.message}
-                  </span>
-                )}
-              </label>
-              {hseWatch && (
-                <div className="flex flex-col gap-2">
-                  <label className="text-white">Tipo de atividade SSMA</label>
+                ))}
+            </div>
+          </div>
+        )}
 
+        
+        {laborWatch && (
+          <div className="space-y-2">
+            <label className="font-semibold">Tipo de atividade Trabalhista</label>
+            <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
+              {activities.map((activity: any) => (
+                <label key={activity.idActivity} className="flex gap-2 py-1">
                   <input
-                    type="text"
-                    value={searchSsmaActivityEdit}
-                    onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
-                    placeholder="Buscar atividade SSMA..."
-                    className="border rounded px-2 py-1 text-sm"
-                  />
-
-                  <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
-                    {activities
-                      .filter((a) =>
-                        a.title
-                          .toLowerCase()
-                          .includes(searchSsmaActivityEdit.toLowerCase())
+                    type="checkbox"
+                    checked={selectedLaborActivitiesEdit.includes(
+                      activity.idActivity
+                    )}
+                    onChange={(e) =>
+                      handleCheckboxChangeEdit(
+                        "labor",
+                        activity.idActivity,
+                        e.target.checked
                       )
-                      .map((activity: any) => (
-                        <label
-                          key={activity.idActivity}
-                          className="flex items-center gap-2"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedSsmaActivitiesEdit.includes(
-                              activity.idActivity
-                            )}
-                            onChange={(e) =>
-                              handleCheckboxChangeEdit(
-                                "ssma",
-                                activity.idActivity,
-                                e.target.checked
-                              )
-                            }
-                          />
-                          {activity.title}
-                        </label>
-                      ))}
-                  </div>
-                </div>
-              )}
+                    }
+                  />
+                  {activity.title}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
 
-              {laborWatch && (
-                <div className="flex flex-col gap-2">
-                  <label className="text-white">
-                    Tipo de atividade Trabalhista
-                  </label>
+        {/* Descrição */}
+        <label className="space-y-1">
+          <span className="font-semibold">Descrição</span>
+          <textarea
+            rows={3}
+            className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+            {...register("description")}
+          />
+        </label>
 
-                  <div className="bg-white text-black rounded p-2 max-h-[150px] overflow-y-auto">
-                    {activities.map((activity: any) => (
-                      <label
-                        key={activity.idActivity}
-                        className="flex items-center gap-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedLaborActivitiesEdit.includes(
-                            activity.idActivity
-                          )}
-                          onChange={(e) =>
-                            handleCheckboxChangeEdit(
-                              "labor",
-                              activity.idActivity,
-                              e.target.checked
-                            )
-                          }
-                        />
-                        {activity.title}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <label>
-                Descrição
-                <textarea
-                  className="w-full rounded border px-2 py-1 text-black"
-                  rows={3}
-                  {...register("description")}
-                />
-              </label>
-
-              <div className="flex justify-end gap-4 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="bg-red-600 px-4 py-2 rounded text-white"
-                >
-                  Cancelar
-                </button>
+        {/* Botões */}
+          <div className="flex justify-end gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
+            >
+              Cancelar
+              </button>
                 <button
                   type="submit"
-                  className="bg-green-600 px-4 py-2 rounded text-white"
+                  className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
                 >
-                  Salvar
+                Salvar alterações
                 </button>
               </div>
             </form>
