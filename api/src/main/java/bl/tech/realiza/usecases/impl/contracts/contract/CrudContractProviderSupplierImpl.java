@@ -46,6 +46,7 @@ import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -139,6 +140,12 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .providerSupplier(newProviderSupplier)
                 .branch(branch)
                 .build());
+
+        UserClient userClient = userClientRepository.findById(savedContractProviderSupplier.getResponsible().getIdUser())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        userClient.getContractsAccess().add(savedContractProviderSupplier);
+        userClientRepository.save(userClient);
 
         setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER",
                 null,

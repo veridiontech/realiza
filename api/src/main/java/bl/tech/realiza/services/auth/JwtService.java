@@ -1,6 +1,7 @@
 package bl.tech.realiza.services.auth;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -88,6 +89,48 @@ public class JwtService {
         claims.put("idClient", user.getBranch().getClient().getIdClient());
         claims.put("clientTradeName", user.getBranch().getClient().getTradeName());
         claims.put("clientCorporateName", user.getBranch().getClient().getCorporateName());
+        if (!user.getBranchesAccess().stream().map(Branch::getIdBranch).toList().isEmpty()) {
+            System.out.println("Not empty");
+            claims.put("branchAccess", user.getBranchesAccess().stream().map(Branch::getIdBranch).toList());
+        } else {
+            System.out.println("Empty");
+            user.getBranchesAccess().add(user.getBranch());
+            claims.put("branchAccess", user.getBranchesAccess().stream().map(Branch::getIdBranch).toList());
+        }
+        claims.put("contractAccess", user.getContractsAccess().stream().map(Contract::getIdContract).toList());
+        claims.put("admin", user.getProfile() != null
+                ? user.getProfile().getAdmin()
+                : false);
+        claims.put("viewer", user.getProfile() != null
+                ? user.getProfile().getViewer()
+                : true);
+        claims.put("manager", user.getProfile() != null
+                ? user.getProfile().getManager()
+                : false);
+        claims.put("inspector", user.getProfile() != null
+                ? user.getProfile().getInspector()
+                : false);
+        claims.put("laboral", user.getProfile() != null
+                ? user.getProfile().getLaboral()
+                : false);
+        claims.put("workplaceSafety", user.getProfile() != null
+                ? user.getProfile().getWorkplaceSafety()
+                : false);
+        claims.put("registrationAndCertificates", user.getProfile() != null
+                ? user.getProfile().getRegistrationAndCertificates()
+                : false);
+        claims.put("general", user.getProfile() != null
+                ? user.getProfile().getGeneral()
+                : false);
+        claims.put("health", user.getProfile() != null
+                ? user.getProfile().getHealth()
+                : false);
+        claims.put("environment", user.getProfile() != null
+                ? user.getProfile().getEnvironment()
+                : false);
+        claims.put("concierge", user.getProfile() != null
+                ? user.getProfile().getConcierge()
+                : false);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -175,18 +218,55 @@ public class JwtService {
     }
 
     public UserResponseDto extractAllClaims(String token) {
-        Map<String, Object> claims =  Jwts.parser()
+        // Parse do JWT para obter as claims
+        Map<String, Object> claims = Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody();
 
+        // Extração dos branches (branches IDs) do token
         Object branchesObject = claims.get("branches");
         List<String> branchesIds = (branchesObject instanceof List<?>)
                 ? ((List<?>) branchesObject).stream()
                 .map(Object::toString)
                 .collect(Collectors.toList())
-                : List.of();
+                : List.of(); // Se não existir, retorna uma lista vazia
 
+        // Extração do branchesAccess do token
+        Object branchesAccessObject = claims.get("branchAccess");
+        List<String> branchesAccessIds = (branchesAccessObject instanceof List<?>)
+                ? ((List<?>) branchesAccessObject).stream()
+                .map(Object::toString)
+                .collect(Collectors.toList())
+                : List.of(); // Se não existir, retorna uma lista vazia
+
+        // Extração do contractAccess do token
+        Object contractAccessObject = claims.get("contractAccess");
+        List<String> contractAccessIds = (contractAccessObject instanceof List<?>)
+                ? ((List<?>) contractAccessObject).stream()
+                .map(Object::toString)
+                .collect(Collectors.toList())
+                : List.of(); // Se não existir, retorna uma lista vazia
+
+        // Extração das claims de perfil (como laboral, manager, etc.)
+        Map<String, Boolean> profileClaims = new HashMap<>();
+        String[] profileKeys = {"admin",
+                "viewer",
+                "manager",
+                "inspector",
+                "laboral",
+                "workplaceSafety",
+                "registrationAndCertificates",
+                "general",
+                "health",
+                "environment",
+                "concierge"};
+
+        for (String key : profileKeys) {
+            profileClaims.put(key, (Boolean) claims.getOrDefault(key, null));
+        }
+
+        // Construção do DTO com todas as claims extraídas, incluindo as novas
         return UserResponseDto.builder()
                 .idUser((String) claims.getOrDefault("idUser", ""))
                 .branch((String) claims.getOrDefault("idBranch", ""))
@@ -204,6 +284,20 @@ public class JwtService {
                 .tradeName((String) claims.getOrDefault("clientTradeName", ""))
                 .corporateName((String) claims.getOrDefault("clientCorporateName", ""))
                 .branches(branchesIds)
+                .branchAccess(branchesAccessIds)
+                .contractAccess(contractAccessIds)
+                .corporateName((String) claims.getOrDefault("clientCorporateName", "")) // Corrigido duplicação
+                .admin(profileClaims.get("admin"))
+                .viewer(profileClaims.get("viewer"))
+                .manager(profileClaims.get("manager"))
+                .inspector(profileClaims.get("inspector"))
+                .laboral(profileClaims.get("laboral"))
+                .workplaceSafety(profileClaims.get("workplaceSafety"))
+                .registrationAndCertificates(profileClaims.get("registrationAndCertificates"))
+                .general(profileClaims.get("general"))
+                .health(profileClaims.get("health"))
+                .environment(profileClaims.get("environment"))
+                .concierge(profileClaims.get("concierge"))
                 .build();
     }
 
