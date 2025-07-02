@@ -2,8 +2,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
@@ -19,7 +17,6 @@ import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { z } from "zod";
-import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useBranch } from "@/context/Branch-provider";
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/;
@@ -215,167 +212,192 @@ const handleCnpj = async () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-realizaBlue hidden md:block">+</Button>
+        <Button className="bg-realizaBlue hidden md:block"> Adiciona Filial +</Button>
       </DialogTrigger>
-      <DialogTrigger asChild>
-        <Button className="bg-realizaBlue md:hidden">+</Button>
-      </DialogTrigger>
-      <DialogContent style={{ backgroundImage: `url(${bgModalRealiza})` }}>
-        <DialogHeader>
-          <DialogTitle className="text-white">Cadastro de filial</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="h-[40vh] p-3">
-          <form onSubmit={handleSubmit(onSubmit)} className="m-2 flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <Label className="text-white">CNPJ</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  value={cnpjValue}
-                  onChange={(e) => {
-                    const formatted = formatCNPJ(e.target.value);
-                    setCnpjValue(formatted);
-                    setValue("cnpj", formatted, { shouldValidate: true });
-                  }}
-                  placeholder="00.000.000/0000-00"
-                  maxLength={18}
-                />
-                <div
-                  onClick={handleCnpj}
-                  className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
-                >
-                  <Search className="text-white" />
-                </div>
-              </div>
-              {errors.cnpj && (
-                <span className="text-sm text-red-600">{errors.cnpj.message}</span>
-              )}
-              {razaoSocial && (
-                <p className="mt-1 text-sm text-white">
-                  Razão social: <strong>{razaoSocial}</strong>
-                </p>
-              )}
+    <DialogTrigger asChild>
+      <Button className="bg-realizaBlue md:hidden">+</Button>
+    </DialogTrigger>
+
+      <DialogContent className="p-0 overflow-hidden rounded-xl shadow-lg w-full max-w-[700px] max-h-[90vh] bg-white">
+      {/* Cabeçalho */}
+      <div className="bg-[#2f4050] px-6 py-3 flex items-center gap-2">
+        <span className="text-white text-lg font-semibold">📂 Cadastro de Filial</span>
+      </div>
+
+      {/* Formulário */}
+      <ScrollArea className="max-h-[70vh] px-6 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        
+        {/* CNPJ */}
+        <div className="flex flex-col gap-2">
+          <Label className="text-gray-700">CNPJ*</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              value={cnpjValue}
+              onChange={(e) => {
+                const formatted = formatCNPJ(e.target.value);
+                setCnpjValue(formatted);
+                setValue("cnpj", formatted, { shouldValidate: true });
+              }}
+              placeholder="00.000.000/0000-00"
+              maxLength={18}
+              className="bg-[#f5f5f5] text-gray-700 rounded-md w-full"
+            />
+            <div
+              onClick={handleCnpj}
+              className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
+            >
+              <Search className="text-white" />
             </div>
+          </div>
+          {errors.cnpj && (
+            <span className="text-sm text-red-600">{errors.cnpj.message}</span>
+          )}
+          {razaoSocial && (
+            <p className="mt-1 text-sm text-gray-700">
+              Razão social: <strong>{razaoSocial}</strong>
+            </p>
+          )}
+        </div>
 
-            {/* <div>
-              <Label className="text-white">Email</Label>
-              <Input type="email" placeholder="Digite seu e-mail" {...register("email")} />
-              {errors.email && (
-                <span className="text-sm text-red-600">{errors.email.message}</span>
-              )}
-            </div> */}
+        {/* Nome da filial */}
+        <div>
+          <Label className="text-gray-700">Nome da filial*</Label>
+          <Input
+            type="text"
+            placeholder="Digite o nome da filial"
+            {...register("name")}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.name && <span className="text-sm text-red-600">{errors.name.message}</span>}
+        </div>
 
-            {/* <div>
-              <Label className="text-white">Nome da filial</Label>
-              <Input type="text" placeholder="Digite o nome da filial" {...register("name")} />
-              {errors.name && (
-                <span className="text-sm text-red-600">{errors.name.message}</span>
-              )}
-            </div> */}
+        {/* CEP */}
+        <div>
+          <Label className="text-gray-700">CEP*</Label>
+          <Input
+            type="text"
+            value={cepValue}
+            {...register("cep")}
+            onChange={(e) => {
+              const formattedCEP = formatCEP(e.target.value);
+              setCepValue(formattedCEP);
+              setValue("cep", formattedCEP, { shouldValidate: true });
+            }}
+            placeholder="00000-000"
+            maxLength={9}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
+        </div>
 
-            <div>
-              <Label className="text-white">Nome da filial</Label>
-              <Input type="text" placeholder="Digite a nome da filial" {...register("name")} />
-              {errors.name && (
-                <span className="text-sm text-red-600">{errors.name.message}</span>
-              )}
-            </div>
+        {/* Cidade */}
+        <div>
+          <Label className="text-gray-700">Cidade*</Label>
+          <Input
+            type="text"
+            placeholder="Digite a cidade"
+            {...register("city")}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
+        </div>
 
-            <div>
-              <Label className="text-white">CEP</Label>
-              <Input
-                type="text"
-                value={cepValue}
-                {...register("cep")}
-                onChange={(e) => {
-                  const formattedCEP = formatCEP(e.target.value);
-                  setCepValue(formattedCEP);
-                  setValue("cep", formattedCEP, { shouldValidate: true });
-                }}
-                placeholder="00000-000"
-                maxLength={9}
-              />
-              {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
-            </div>
+        {/* Endereço */}
+        <div>
+          <Label className="text-gray-700">Endereço*</Label>
+          <Input
+            type="text"
+            placeholder="Digite o endereço"
+            {...register("address")}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
+        </div>
 
-            <div>
-              <Label className="text-white">Cidade</Label>
-              <Input type="text" placeholder="Digite sua cidade" {...register("city")} />
-              {errors.city && (
-                <span className="text-sm text-red-600">{errors.city.message}</span>
-              )}
-            </div>
+        {/* Número */}
+        <div>
+          <Label className="text-gray-700">Número*</Label>
+          <Input
+            type="text"
+            placeholder="Digite o número"
+            {...register("number")}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
+        </div>
 
-            <div>
-              <Label className="text-white">Endereço</Label>
-              <Input type="text" placeholder="Digite seu endereço" {...register("address")} />
-              {errors.address && (
-                <span className="text-sm text-red-600">{errors.address.message}</span>
-              )}
-            </div>
+        {/* País */}
+        <div>
+          <Label className="text-gray-700">País*</Label>
+          <Input
+            type="text"
+            placeholder="Digite o país"
+            {...register("country")}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.country && <span className="text-sm text-red-600">{errors.country.message}</span>}
+        </div>
 
-            <div>
-              <Label className="text-white">Número</Label>
-              <Input type="text" placeholder="Digite o número" {...register("number")} />
-              {errors.number && (
-                <span className="text-sm text-red-600">{errors.number.message}</span>
-              )}
-            </div>
+        {/* Estado */}
+        <div>
+          <Label className="text-gray-700">Estado*</Label>
+          <Input
+            type="text"
+            placeholder="Digite o estado"
+            {...register("state")}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
+        </div>
 
-            <div>
-              <Label className="text-white">País</Label>
-              <Input type="text" placeholder="Digite seu país" {...register("country")} />
-              {errors.country && (
-                <span className="text-sm text-red-600">{errors.country.message}</span>
-              )}
-            </div>
+        {/* Telefone */}
+        <div className="flex flex-col gap-2">
+          <Label className="text-gray-700">Telefone</Label>
+          <Input
+            type="text"
+            value={phoneValue}
+            onChange={(e) => {
+              const formattedPhone = formatPhone(e.target.value);
+              setPhoneValue(formattedPhone);
+              setValue("telephone", formattedPhone, { shouldValidate: true });
+            }}
+            placeholder="(00) 00000-0000"
+            maxLength={15}
+            className="bg-[#f5f5f5] text-gray-700 rounded-md"
+          />
+          {errors.telephone && (
+            <span className="text-sm text-red-600">{errors.telephone.message}</span>
+          )}
+        </div>
 
-            <div>
-              <Label className="text-white">Estado</Label>
-              <Input type="text" placeholder="Digite seu estado" {...register("state")} />
-              {errors.state && (
-                <span className="text-sm text-red-600">{errors.state.message}</span>
-              )}
-            </div>
+      
+      </form>
+    </ScrollArea>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-white">Telefone</Label>
-              <Input
-                type="text"
-                value={phoneValue}
-                onChange={(e) => {
-                  const formattedPhone = formatPhone(e.target.value);
-                  setPhoneValue(formattedPhone);
-                  setValue("telephone", formattedPhone, { shouldValidate: true });
-                }}
-                placeholder="(00) 00000-0000"
-                maxLength={15}
-              />
-              {errors.telephone && (
-                <span className="text-sm text-red-600">{errors.telephone.message}</span>
-              )}
-            </div>
+    {/* Rodapé com botão de voltar */}
+    <div className="flex items-center justify-between px-6 py-3 bg-white border-t">
+      <Button variant="ghost" onClick={() => setIsOpen(false)}>
+        ⬅ Voltar
+      </Button>
 
-            <div className="flex justify-end">
-              {loading ? (
-                <Button disabled type="submit" className="bg-realizaBlue">
-                  <Oval
-                    visible={true}
-                    height="30"
-                    width="30"
-                    color="#34495D"
-                    ariaLabel="puff-loading"
-                  />
-                </Button>
-              ) : (
-                <Button type="submit" className="bg-realizaBlue">
-                  Cadastrar
-                </Button>
-              )}
-            </div>
-          </form>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
-  );
+      {loading ? (
+        <Button disabled className="bg-[#2f4050] text-white px-6 py-2 rounded-md">
+          <Oval height="20" width="20" color="#fff" />
+        </Button>
+      ) : (
+        <Button
+          type="submit"
+          onClick={handleSubmit(onSubmit)}
+          className="bg-[#2f4050] text-white px-6 py-2 rounded-md hover:bg-[#1d2a38] transition"
+        >
+        Cadastrar
+      </Button>
+      )}
+    </div>
+
+  </DialogContent>
+</Dialog>
+);
 }
