@@ -9,7 +9,6 @@ import {
   X,
   MoreVertical,
   History,
-  FileText,
   ScrollText,
 } from "lucide-react";
 //import bgModalRealiza from "@/assets/modalBG.jpeg";
@@ -102,6 +101,7 @@ export function TableServiceProvider() {
   const [managers, setManagers] = useState<any[]>([]);
   const [servicesType, setServicesType] = useState<any[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [contractHistory, setContractHistory] = useState<any[]>([]);
 
   // Novo estado para o filtro de status
   const [statusFilter, setStatusFilter] = useState<
@@ -113,7 +113,6 @@ export function TableServiceProvider() {
     handleSubmit,
     reset,
     control,
-    formState: { errors },
   } = useForm<z.infer<typeof editContractSchema>>({
     resolver: zodResolver(editContractSchema),
   });
@@ -175,7 +174,7 @@ export function TableServiceProvider() {
           ...selectedLaborActivitiesEdit,
         ],
       };
-
+      console.log("Payload enviado para edição:", payload);
       await axios.put(
         `${ip}/contract/supplier/${editFormData.idContract}`,
         payload,
@@ -183,7 +182,6 @@ export function TableServiceProvider() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       toast.success("Contrato atualizado com sucesso");
       await getSupplier();
       setIsEditModalOpen(false);
@@ -212,6 +210,7 @@ export function TableServiceProvider() {
     console.log("Histórico do contrato:", supplier);
     setSelectedSupplier(supplier);
     setIsHistoryModalOpen(true);
+    getContractHistory(supplier.idContract);
   };
 
   const getServicesType = async () => {
@@ -242,6 +241,24 @@ export function TableServiceProvider() {
       setActivities(res.data);
     } catch (err) {
       console.error("Erro ao buscar atividades", err);
+    }
+  };
+
+  const getContractHistory = async (contractId: string) => {
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/audit-log`, {
+        params: {
+          id: contractId,
+          auditLogTypeEnum: "CONTRACT",
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("📜 Histórico:", res.data.content);
+      setContractHistory(res.data.content || []);
+    } catch (error) {
+      console.error("❌ Erro ao buscar histórico do contrato", error);
+      toast.error("Erro ao buscar histórico");
     }
   };
 
@@ -292,7 +309,7 @@ export function TableServiceProvider() {
     const isFinished = supplier.finished === true;
     // Assumimos que 'suspended' é uma nova propriedade booleana no objeto supplier
     // Você precisará garantir que essa propriedade seja retornada pela sua API quando a funcionalidade estiver pronta.
-    const isSuspended = supplier.suspended === true; 
+    const isSuspended = supplier.suspended === true;
     const isActive = !isFinished && !isSuspended;
 
     switch (statusFilter) {
@@ -308,6 +325,28 @@ export function TableServiceProvider() {
         return matchesSearchTerm;
     }
   });
+
+  function traduzirAcao(acao: string) {
+  const traducoes: Record<string, string> = {
+    ALL: "Todas",
+    CREATE: "Criado",
+    UPDATE: "Atualizado",
+    DELETE: "Deletado",
+    UPLOAD: "Enviado",
+    FINISH: "Finalizado",
+    APPROVE: "Aprovado",
+    REJECT: "Rejeitado",
+    EXEMPT: "Isento",
+    ALLOCATE: "Alocado",
+    DEALLOCATE: "Desalocado",
+    STATUS_CHANGE: "Mudança de Status",
+    ACTIVATE: "Ativado",
+    LOGIN: "Login",
+    LOGOUT: "Logout",
+  };
+
+  return traducoes[acao] ?? acao;
+}
 
   return (
     <div className="p-5 md:p-10">
@@ -399,41 +438,37 @@ export function TableServiceProvider() {
           <div className="flex gap-2 flex-wrap justify-center md:justify-start">
             <button
               onClick={() => setStatusFilter("Todos")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                statusFilter === "Todos"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Todos"
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+                }`}
             >
               Todos
             </button>
             <button
               onClick={() => setStatusFilter("Ativo")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                statusFilter === "Ativo"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Ativo"
                   ? "bg-green-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+                }`}
             >
               Ativo
             </button>
             <button
               onClick={() => setStatusFilter("Finalizado")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                statusFilter === "Finalizado"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Finalizado"
                   ? "bg-red-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+                }`}
             >
               Finalizado
             </button>
             <button
               onClick={() => setStatusFilter("Suspenso")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                statusFilter === "Suspenso"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Suspenso"
                   ? "bg-orange-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+                }`}
             >
               Suspenso
             </button>
@@ -495,8 +530,8 @@ export function TableServiceProvider() {
                   <td className="border border-gray-300 p-2">
                     {supplier.dateFinish
                       ? new Date(supplier.dateFinish).toLocaleDateString(
-                          "pt-BR"
-                        )
+                        "pt-BR"
+                      )
                       : "-"}
                   </td>
 
@@ -954,11 +989,22 @@ export function TableServiceProvider() {
 
       {isHistoryModalOpen && selectedSupplier && (
         <Modal
-          title="Histórico do documento"
+          title="Histórico do contrato"
           onClose={() => setIsHistoryModalOpen(false)}
         >
           <div className="text-white space-y-2 max-h-[400px] overflow-auto">
-            <p>Historico</p>
+            {contractHistory.length > 0 ? (
+              contractHistory.map((log, index) => (
+                <div key={index} className="border-b border-gray-500 pb-2 mb-2">
+                  <p><strong>Ação:</strong> {traduzirAcao(log.action)}</p>
+                  <p><strong>Usuário:</strong> {log.userResponsibleFullName}</p>
+                  <p><strong>Data:</strong> {new Date(log.createdAt).toLocaleString("pt-BR")}</p>
+                  {log.message && <p><strong>Mensagem:</strong> {log.message}</p>}
+                </div>
+              ))
+            ) : (
+              <p>Nenhuma entrada de histórico encontrada.</p>
+            )}
           </div>
         </Modal>
       )}
