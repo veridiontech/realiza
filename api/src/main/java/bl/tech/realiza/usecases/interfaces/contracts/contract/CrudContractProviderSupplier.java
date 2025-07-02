@@ -4,10 +4,7 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplierCreateResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,5 +22,6 @@ public interface CrudContractProviderSupplier {
     Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable);
     ContractAndSupplierCreateResponseDto saveContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto);
     List<ContractSupplierPermissionResponseDto> findAllByBranchAndSubcontractPermission(String idBranch);
-
+    ContractResponsibleResponseDto findAllByResponsible(String responsibleId);
+    String updateResponsible(String contractId, String responsibleId);
 }
