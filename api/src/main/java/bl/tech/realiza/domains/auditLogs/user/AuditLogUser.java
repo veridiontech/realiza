@@ -20,7 +20,8 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("USER")
 public class AuditLogUser extends AuditLog {
-    @ManyToOne
-    @JoinColumn(name = "idUser")
-    private User user;
+    private String userId;
+    private String userCpf;
+    private String userFullName;
+    private String userEmail;
 }

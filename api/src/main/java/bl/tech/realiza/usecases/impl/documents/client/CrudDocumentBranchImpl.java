@@ -1,12 +1,11 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
-import bl.tech.realiza.domains.auditLogs.contract.AuditLogContract;
-import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -24,7 +23,6 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,6 +39,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 import static bl.tech.realiza.domains.services.FileDocument.Owner.*;
 
 @Service
@@ -183,7 +183,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .title(documentBranch.getTitle())
-                        .owner(BRANCH)
+                        .owner(FileDocument.Owner.BRANCH)
                         .ownerId(documentBranch.getBranch() != null
                                 ? documentBranch.getBranch().getIdBranch()
                                 : null)
@@ -605,12 +605,14 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                         .orElse(null);
                 if (userResponsible != null) {
-                    auditLogServiceImpl.createAuditLogDocument(
-                            document,
+                    auditLogServiceImpl.createAuditLog(
+                            document.getIdDocumentation(),
+                            DOCUMENT,
                             userResponsible.getEmail() + " " + action + " documento "
                             + document.getTitle(),
-                            AuditLogActions.UPDATE,
-                            userResponsible);
+                            null,
+                            UPDATE,
+                            userResponsible.getIdUser());
                 }
             }
         }
@@ -670,13 +672,15 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogDocument(
-                        documentBranch,
+                auditLogServiceImpl.createAuditLog(
+                        documentBranch.getIdDocumentation(),
+                        DOCUMENT,
                         userResponsible.getEmail() + " mudou " + documentBranch.getTitle()
                                 + " validade de " + oldAmount + " " + oldUnit
                                 + " para " + documentBranch.getExpirationDateAmount() + " " + documentBranch.getExpirationDateUnit(),
-                        AuditLogActions.UPDATE,
-                        userResponsible);
+                        null,
+                        UPDATE,
+                        userResponsible.getIdUser());
             }
         }
 

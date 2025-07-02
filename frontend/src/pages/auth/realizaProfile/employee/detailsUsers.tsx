@@ -21,7 +21,7 @@ interface UserData {
   email: string;
   position: string;
   role: string;
-  status: string;
+  status?: string;
   idUser: string;
 }
 
@@ -45,10 +45,11 @@ export function DetailsUsers() {
           },
         });
 
-        // Aqui definimos o status como "ACTIVE" se não existir
-        const user = response.data;
+        const user: UserData = response.data;
+
+        // Define status padrão como "ACTIVE" caso não venha nada
         if (!user.status) {
-          user.status = "ACTIVE"; // Define o status como "ACTIVE" se não estiver presente
+          user.status = "ACTIVE";
         }
 
         setUserData(user);
@@ -71,9 +72,13 @@ export function DetailsUsers() {
     try {
       const token = localStorage.getItem("tokenClient");
 
+      const updatedStatus =
+        userData.status?.toUpperCase() === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
       const payload = {
         cpf: userData.cpf,
-        description: userData.status === "ACTIVE" ? "Usuário inativado" : "Usuário reativado",
+        description:
+          updatedStatus === "INACTIVE" ? "Usuário inativado" : "Usuário reativado",
         password: "",
         newPassword: "",
         position: userData.position,
@@ -86,7 +91,7 @@ export function DetailsUsers() {
         cellphone: "",
         branch: "",
         idUser: userData.idUser,
-        status: userData.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+        status: updatedStatus,
       };
 
       await axios.put(`${ip}/user/client/${id}`, payload, {
@@ -96,14 +101,15 @@ export function DetailsUsers() {
       });
 
       toast.success(
-        `Usuário ${userData.status === "ACTIVE" ? "inativado" : "reativado"} com sucesso!`
+        `Usuário ${updatedStatus === "INACTIVE" ? "inativado" : "reativado"} com sucesso!`
       );
 
-      setUserData({ ...userData, status: payload.status });
+      setUserData({ ...userData, status: updatedStatus });
       setOpenDialog(false);
     } catch (err: any) {
       console.error("Erro ao alterar status:", err);
-      const errorMessage = err.response?.data?.message || "Erro ao atualizar status do usuário.";
+      const errorMessage =
+        err.response?.data?.message || "Erro ao atualizar status do usuário.";
       toast.error(errorMessage);
     } finally {
       setProcessing(false);
@@ -114,7 +120,8 @@ export function DetailsUsers() {
   if (error) return <p className="text-red-600 p-4">{error}</p>;
   if (!userData) return <p className="text-red-600 p-4">Usuário não encontrado.</p>;
 
-  const isActive = userData.status === "ACTIVE";
+  // Garante que "undefined" ou valor inesperado seja tratado como "ACTIVE"
+  const isActive = !userData.status || userData.status.toUpperCase() === "ACTIVE";
 
   return (
     <>
@@ -122,13 +129,23 @@ export function DetailsUsers() {
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md mt-6">
         <h1 className="text-2xl font-bold mb-4 text-realizaBlue">Detalhes do Usuário</h1>
         <ul className="space-y-2 text-gray-700 mb-6">
-          <li><strong>Nome:</strong> {userData.firstName} {userData.surname}</li>
-          <li><strong>CPF:</strong> {userData.cpf}</li>
-          <li><strong>Email:</strong> {userData.email}</li>
-          <li><strong>Cargo:</strong> {userData.position}</li>
+          <li>
+            <strong>Nome:</strong> {userData.firstName} {userData.surname}
+          </li>
+          <li>
+            <strong>CPF:</strong> {userData.cpf}
+          </li>
+          <li>
+            <strong>Email:</strong> {userData.email}
+          </li>
+          <li>
+            <strong>Cargo:</strong> {userData.position}
+          </li>
           <li>
             <strong>Status:</strong>{" "}
-            <span className={`font-semibold ${isActive ? "text-green-600" : "text-red-600"}`}>
+            <span
+              className={`font-semibold ${isActive ? "text-green-600" : "text-red-600"}`}
+            >
               {isActive ? "Ativo" : "Inativo"}
             </span>
           </li>

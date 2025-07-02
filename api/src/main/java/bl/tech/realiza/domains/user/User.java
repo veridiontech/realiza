@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.user;
 
+import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.auditLogs.AuditLog;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -55,6 +56,23 @@ public abstract class User {
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
+
+    @ManyToMany
+    @JoinTable(
+            name = "CONTRACT_ACCESS",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "contractId")
+    )
+    private List<Contract> contractsAccess;
+
+    @ManyToMany
+    @JoinTable(
+            name = "BRANCH_ACCESS",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "branchId")
+    )
+    private List<Branch> branchesAccess;
+
     @JsonIgnore
     @JsonManagedReference
     @OneToMany(mappedBy = "requester", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -74,9 +92,9 @@ public abstract class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<Notification> notifications;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    private List<AuditLog> auditLogs;
+    @ManyToOne
+    @JoinColumn(name = "profileId")
+    private Profile profile;
 
     public enum Role {
         ROLE_ADMIN,
@@ -89,5 +107,9 @@ public abstract class User {
         ROLE_SUBCONTRACTOR_RESPONSIBLE,
         ROLE_SUBCONTRACTOR_MANAGER,
         ROLE_VIEWER
+    }
+
+    public String getFullName() {
+        return String.format("%s %s", this.firstName != null ? this.firstName : "", this.surname != null ? this.surname : "").trim();
     }
 }

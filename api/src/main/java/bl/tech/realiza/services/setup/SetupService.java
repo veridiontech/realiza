@@ -20,6 +20,7 @@ import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
@@ -28,16 +29,16 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
-import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
-import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +58,7 @@ public class SetupService {
     private final ClientRepository clientRepository;
     private final ContractProviderSupplierRepository contractProviderSupplierRepository;
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
+    private final ContractRepository contractRepository;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
@@ -220,6 +222,7 @@ public class SetupService {
 
     public void setupEmployeeToContractSupplier(String contractProviderSupplierId, List<String> employeeIds) {
         log.info("Started setup employee to contract supplier ⌛ {}, {}", employeeIds, contractProviderSupplierId);
+
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSupplierId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
@@ -235,26 +238,39 @@ public class SetupService {
                         providerSupplier.getIdProvider(), "Treinamentos e certificações", true));
 
         List<DocumentEmployee> batch = new ArrayList<>(50);
-
         List<Contract> contracts = new ArrayList<>();
         contracts.add(contractProviderSupplier);
 
         for (Employee employee : employees) {
-            for (DocumentProviderSupplier document : documentSupplier) {
-                batch.add(DocumentEmployee.builder()
-                        .title(document.getTitle())
-                        .status(Document.Status.PENDENTE)
-                        .type(document.getType())
-                        .isActive(true)
-                        .documentMatrix(document.getDocumentMatrix())
-                        .employee(employee)
-                        .contracts(contracts)
-                        .build());
+            Boolean existingDocumentCheck = false;
+            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
 
+            for (DocumentProviderSupplier document : documentSupplier) {
+                DocumentEmployee existingDocument = documentEmployeeList.stream()
+                        .filter(de -> de.getTitle().equals(document.getTitle()))
+                        .findFirst()
+                        .orElse(null);
+                if (existingDocument != null && document.getIsDocumentUnique()) {
+                    existingDocument.getContracts().add(contractProviderSupplier);
+                    existingDocumentCheck = true;
+                } else if (existingDocument == null) {
+                    batch.add(DocumentEmployee.builder()
+                            .title(document.getTitle())
+                            .status(Document.Status.PENDENTE)
+                            .type(document.getType())
+                            .isActive(true)
+                            .documentMatrix(document.getDocumentMatrix())
+                            .employee(employee)
+                            .contracts(contracts)
+                            .build());
+                }
                 if (batch.size() == 50) {
                     documentEmployeeRepository.saveAll(batch);
                     batch.clear();
                 }
+            }
+            if (existingDocumentCheck) {
+                documentEmployeeRepository.saveAll(documentEmployeeList);
             }
         }
 
@@ -264,10 +280,9 @@ public class SetupService {
         log.info("Finished setup employee to contract supplier ✔️ {}, {}", employeeIds, contractProviderSupplierId);
     }
 
-
-
     public void setupEmployeeToContractSubcontract(String contractProviderSubcontractorId, List<String> employeeIds) {
         log.info("Started setup employee to contract subcontractor ⌛ {}, {}", employeeIds, contractProviderSubcontractorId);
+
         ContractProviderSubcontractor contractProviderSubcontractor = contractProviderSubcontractorRepository.findById(contractProviderSubcontractorId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
@@ -288,20 +303,36 @@ public class SetupService {
         contracts.add(contractProviderSubcontractor);
 
         for (Employee employee : employees) {
+            Boolean existingDocumentCheck = false;
+            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
+
             for (DocumentProviderSubcontractor document : documentSubcontractor) {
-                batch.add(DocumentEmployee.builder()
-                        .title(document.getTitle())
-                        .status(Document.Status.PENDENTE)
-                        .type(document.getType())
-                        .isActive(true)
-                        .documentMatrix(document.getDocumentMatrix())
-                        .employee(employee)
-                        .contracts(contracts)
-                        .build());
+                DocumentEmployee existingDocument = documentEmployeeList.stream()
+                        .filter(de -> de.getTitle().equals(document.getTitle()))
+                        .findFirst()
+                        .orElse(null);
+                if (existingDocument != null && document.getIsDocumentUnique()) {
+                    existingDocument.getContracts().add(contractProviderSubcontractor);
+                    existingDocumentCheck = true;
+                } else if (existingDocument == null) {
+                    batch.add(DocumentEmployee.builder()
+                            .title(document.getTitle())
+                            .status(Document.Status.PENDENTE)
+                            .type(document.getType())
+                            .isActive(true)
+                            .documentMatrix(document.getDocumentMatrix())
+                            .employee(employee)
+                            .contracts(contracts)
+                            .build());
+                }
 
                 if (batch.size() == 50) {
                     documentEmployeeRepository.saveAll(batch);
                     batch.clear();
+                }
+
+                if (existingDocumentCheck) {
+                    documentEmployeeRepository.saveAll(documentEmployeeList);
                 }
             }
         }
@@ -312,4 +343,37 @@ public class SetupService {
         log.info("Finished setup employee to contract subcontractor ✔️ {}, {}", employeeIds, contractProviderSubcontractorId);
     }
 
+    public void setupRemoveEmployeeFromContract(String contractId, List<String> employeeIds) {
+        log.info("Started setup remove employee from contract subcontractor ⌛ {}, {}", employeeIds, contractId);
+        Contract contractProxy = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        Contract contract = (Contract) Hibernate.unproxy(contractProxy);
+
+        List<Employee> employees = employeeRepository.findAllById(employeeIds);
+
+        for (Employee employee : employees) {
+            if (employee.getContracts().isEmpty() && !employee.getSituation().equals(Employee.Situation.DESALOCADO)) {
+                employee.setSituation(Employee.Situation.DESALOCADO);
+            }
+            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
+            for (DocumentEmployee documentEmployee : documentEmployeeList) {
+
+                if (documentEmployee.getContracts().contains(contract) && documentEmployee.getContracts().size() == 1) {
+                    documentEmployee.getContracts().remove(contract);
+                    if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24) {
+                        documentEmployeeRepository.deleteById(documentEmployee.getIdDocumentation());
+                    }
+                } else if (documentEmployee.getContracts().contains(contract)) {
+                    documentEmployee.getContracts().remove(contract);
+                }
+            }
+            documentEmployeeRepository.saveAll(documentEmployeeList);
+            employee.getContracts().remove(contract);
+        }
+
+        employeeRepository.saveAll(employees);
+
+        log.info("Finished setup remove employee from contract subcontractor ✔️ {}, {}", employeeIds, contractId);
+    }
 }

@@ -8,6 +8,8 @@ import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.ultragaz.Center;
+import bl.tech.realiza.domains.user.Profile;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -99,6 +101,10 @@ public class Branch {
     @JsonIgnore
     @ManyToMany(mappedBy = "branches")
     private List<ProviderSupplier> providerSuppliers;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "branchesAccess")
+    private List<User> userAccess;
 
     @JsonIgnore
     @OneToMany(mappedBy = "branch")

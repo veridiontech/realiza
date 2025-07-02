@@ -1,9 +1,9 @@
 package bl.tech.realiza.usecases.impl.documents.provider;
 
-import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
@@ -19,7 +19,6 @@ import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.provider.CrudDocumentProviderSubcontractor;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +35,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
 @Service
 @RequiredArgsConstructor
@@ -267,15 +268,17 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLogDocument(
-                        savedDocumentSubcontractor,
+                auditLogServiceImpl.createAuditLog(
+                        savedDocumentSubcontractor.getIdDocumentation(),
+                        DOCUMENT,
                         userResponsible.getEmail() + " fez upload do documento "
                                 + savedDocumentSubcontractor.getTitle() + " para a empresa "
                                 + (savedDocumentSubcontractor.getProviderSubcontractor() != null
                                 ? savedDocumentSubcontractor.getProviderSubcontractor().getCorporateName()
                                 : "Not identified"),
-                        AuditLogActions.UPLOAD,
-                        userResponsible);
+                        null,
+                        UPLOAD,
+                        userResponsible.getIdUser());
             }
         }
 

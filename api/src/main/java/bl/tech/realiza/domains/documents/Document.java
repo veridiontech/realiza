@@ -1,7 +1,6 @@
 package bl.tech.realiza.domains.documents;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
-import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -39,6 +38,10 @@ public abstract class Document {
     private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private Boolean doesBlock = true;
+    @Builder.Default
+    private Boolean isDocumentUnique = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Request request = Request.NONE;

@@ -21,7 +21,8 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @DiscriminatorValue("ACTIVITY")
 public class AuditLogServiceType extends AuditLog {
-    @ManyToOne
-    @JoinColumn(name = "idServiceType")
-    private ServiceType serviceType;
+    private String serviceTypeId;
+    private String serviceTypeTitle;
+    private String branchId;
+    private String branchName;
 }

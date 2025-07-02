@@ -3,7 +3,7 @@ import axios from "axios";
 import { Table } from "@/components/ui/tableVanila";
 import { AddDocument } from "./modals/addDocument";
 import { useParams } from "react-router-dom";
-import { Eye, Upload, User } from "lucide-react";
+import { Eye, Upload, User, MoreVertical, FileX2 } from "lucide-react";
 import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
 import { Blocks } from "react-loader-spinner";
@@ -25,15 +25,53 @@ export function DetailsEmployee() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
-  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
+    null
+  );
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<
+    string | null
+  >(null);
 
   const handleStatusChange = (id: string, newStatus: string) => {
-    setDocuments(prevDocuments =>
-      prevDocuments.map(doc =>
+    setDocuments((prevDocuments) =>
+      prevDocuments.map((doc) =>
         doc.idDocument === id ? { ...doc, status: newStatus } : doc
       )
     );
+  };
+  const exemptDocument = async (documentId: string, documentTitle: string) => {
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const contractId = employee?.contracts?.[0]?.idContract;
+
+      if (!contractId) {
+        toast.error("Contrato não encontrado para isentar o documento.");
+        return;
+      }
+
+      await axios.post(
+        `${ip}/document/${documentId}/exempt`,
+        {},
+        {
+          params: { contractId },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success(`Documento "${documentTitle}" isento com sucesso!`);
+
+      setDocuments((prevDocs) =>
+        prevDocs.map((doc) =>
+          doc.idDocument === documentId ? { ...doc, status: "ISENTO" } : doc
+        )
+      );
+    } catch (error: any) {
+      console.error(
+        "Erro ao isentar o documento:",
+        error.response?.data || error.message
+      );
+      toast.error("Erro ao isentar o documento.");
+    }
   };
 
   const fetchEmployee = async () => {
@@ -44,26 +82,33 @@ export function DetailsEmployee() {
       });
       setEmployee(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Erro ao carregar o Colaborador.");
+      setError(
+        err.response?.data?.message || "Erro ao carregar o Colaborador."
+      );
     }
   };
 
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem("tokenClient");
-      const response = await axios.get(`${ip}/document/employee/filtered-employee`, {
-        params: {
-          idSearch: id,
-          page: 0,
-          size: 10,
-          sort: "creationDate",
-          direction: "DESC",
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${ip}/document/employee/filtered-employee`,
+        {
+          params: {
+            idSearch: id,
+            page: 0,
+            size: 10,
+            sort: "creationDate",
+            direction: "DESC",
+          },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setDocuments(response.data.content || []);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Erro ao carregar os documentos.");
+      setError(
+        err.response?.data?.message || "Erro ao carregar os documentos."
+      );
     }
   };
 
@@ -87,14 +132,19 @@ export function DetailsEmployee() {
       toast.success("Situação atualizada com sucesso!");
       fetchEmployee();
     } catch (error: any) {
-      console.error("Erro ao atualizar situação:", error.response?.data || error.message);
+      console.error(
+        "Erro ao atualizar situação:",
+        error.response?.data || error.message
+      );
       toast.error("Erro ao atualizar situação.");
     }
   };
 
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() => setIsLoading(false));
+    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() =>
+      setIsLoading(false)
+    );
   }, [id]);
 
   const columns: {
@@ -102,76 +152,102 @@ export function DetailsEmployee() {
     label: string;
     render?: (value: string, row: Document) => React.ReactNode;
   }[] = [
-      {
-        key: "title",
-        label: "Documento",
-      },
-      {
-        key: "creationDate",
-        label: "Data de Envio",
-        render: (value: string) =>
-          new Date(value).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          }),
-      },
-      {
-        key: "status",
-        label: "Status",
-        render: (value: string) => {
-          let statusClass = "";
-          let statusText = value;
+    {
+      key: "title",
+      label: "Documento",
+    },
+    {
+      key: "creationDate",
+      label: "Data de Envio",
+      render: (value: string) =>
+        new Date(value).toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (value: string) => {
+        let statusClass = "";
+        let statusText = value;
 
-          if (value === "PENDENTE") {
-            statusClass = "text-yellow-500";
-          } else if (value === "APROVADO") {
-            statusClass = "text-green-600";
-          } else if (value === "REPROVADO") {
-            statusClass = "text-red-600";
-          } else if (value === "EM_ANALISE") {
-            statusClass = "text-yellow-500";
-          } else if (value === "REPROVADO_IA") {
-            statusClass = "text-red-600";
-          } else if (value === "APROVADO_IA") {
-            statusClass = "text-green-600";
-          }
+        if (value === "PENDENTE") {
+          statusClass = "text-yellow-500";
+        } else if (value === "APROVADO") {
+          statusClass = "text-green-600";
+        } else if (value === "REPROVADO") {
+          statusClass = "text-red-600";
+        } else if (value === "EM_ANALISE") {
+          statusClass = "text-yellow-500";
+        } else if (value === "REPROVADO_IA") {
+          statusClass = "text-red-600";
+        } else if (value === "APROVADO_IA") {
+          statusClass = "text-green-600";
+        }
 
-          return (
-            <span className={`text-sm font-medium ${statusClass}`}>
-              {statusText}
-            </span>
-          );
-        },
+        return (
+          <span className={`text-sm font-medium ${statusClass}`}>
+            {statusText}
+          </span>
+        );
       },
-      {
-        key: "idDocument",
-        label: "Ações",
-        render: (_: string, row: Document) => (
-          <div className="flex space-x-2">
-            <button
-              className="text-realizaBlue hover:underline"
-              onClick={() => {
-                setSelectedDocumentId(row.idDocument);
-                setIsViewerOpen(true);
-              }}
-            >
-              <Eye size={16} />
-            </button>
-            <button
-              className="text-realizaBlue hover:underline"
-              onClick={() => {
-                setSelectedDocumentId(row.idDocument);
-                setSelectedDocumentTitle(row.title);
-                setTimeout(() => setIsModalOpen(true), 0);
-              }}
-            >
-              <Upload size={16} />
-            </button>
-          </div>
-        ),
-      },
-    ];
+    },
+    {
+      key: "idDocument",
+      label: "Ações",
+      render: (_: string, row: Document) => (
+        <div className="relative inline-block text-left">
+          <button
+            className="text-realizaBlue hover:underline"
+            onClick={() =>
+              setSelectedDocumentId(
+                selectedDocumentId === row.idDocument ? null : row.idDocument
+              )
+            }
+          >
+            <MoreVertical size={16} />
+          </button>
+
+          {selectedDocumentId === row.idDocument && (
+            <div className="absolute z-10 w-32 top-0 right-10 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div className="py-1 text-sm text-gray-700">
+                <button
+                  onClick={() => {
+                    setIsViewerOpen(true);
+                    setSelectedDocumentId(row.idDocument);
+                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                >
+                  <Eye size={14} className="inline mr-2" />
+                  Visualizar
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedDocumentId(row.idDocument);
+                    setSelectedDocumentTitle(row.title);
+                    setTimeout(() => setIsModalOpen(true), 0);
+                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                >
+                  <Upload size={14} className="inline mr-2" />
+                  Reenviar
+                </button>
+                <button
+                  onClick={() => exemptDocument(row.idDocument, row.title)}
+                  className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+                >
+                  <FileX2 size={14} className="inline mr-2" />
+                  Isentar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -197,9 +273,13 @@ export function DetailsEmployee() {
               <User className="text-white" />
             </div>
             <div className="flex flex-col gap-1">
-              <h3 className="text-lg font-medium">{employee.name} {employee.surname}</h3>
+              <h3 className="text-lg font-medium">
+                {employee.name} {employee.surname}
+              </h3>
               <div className="flex items-center gap-2">
-                <label htmlFor="situation" className="text-sm text-gray-500">Situação:</label>
+                <label htmlFor="situation" className="text-sm text-gray-500">
+                  Situação:
+                </label>
                 <select
                   id="situation"
                   value={employee.situation}
@@ -210,12 +290,18 @@ export function DetailsEmployee() {
                   <option value="DESALOCADO">Desalocado</option>
                   <option value="DEMITIDO">Demitido</option>
                   <option value="AFASTADO">Afastado</option>
-                  <option value="LICENCA_MATERNIDADE">Licença Maternidade</option>
+                  <option value="LICENCA_MATERNIDADE">
+                    Licença Maternidade
+                  </option>
                   <option value="LICENCA_MEDICA">Licença Médica</option>
                   <option value="LICENCA_MILITAR">Licença Militar</option>
                   <option value="FERIAS">Férias</option>
-                  <option value="ALISTAMENTO_MILITAR">Alistamento Militar</option>
-                  <option value="APOSENTADORIA_POR_INVALIDEZ">Aposentadoria por Invalidez</option>
+                  <option value="ALISTAMENTO_MILITAR">
+                    Alistamento Militar
+                  </option>
+                  <option value="APOSENTADORIA_POR_INVALIDEZ">
+                    Aposentadoria por Invalidez
+                  </option>
                 </select>
               </div>
             </div>
@@ -232,16 +318,22 @@ export function DetailsEmployee() {
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="p-2 text-left text-sm text-stone-600">Atividade</th>
-                    <th className="p-2 text-left text-sm text-stone-600">Tipo de Atividade</th>
-                    <th className="p-2 text-left text-sm text-stone-600">Feito por</th>
-                    <th className="p-2 text-left text-sm text-stone-600">Data</th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Atividade
+                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Tipo de Atividade
+                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Feito por
+                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">
+                      Data
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    {/* <td className="p-2 text-stone-600">...</td> */}
-                  </tr>
+                  <tr>{/* <td className="p-2 text-stone-600">...</td> */}</tr>
                 </tbody>
               </table>
             </div>

@@ -1,12 +1,16 @@
 package bl.tech.realiza.gateways.repositories.auditLogs.enterprise;
 
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
-import bl.tech.realiza.domains.enums.AuditLogActions;
+import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AuditLogProviderRepository extends JpaRepository<AuditLogProvider, String> {
-    Page<AuditLogProvider> findAllByProvider_idProvider(String id, Pageable pageable);
-    Page<AuditLogProvider> findAllByProvider_idProviderAndAction(String id, AuditLogActions action, Pageable pageable);
+    Page<AuditLogProvider> findAllByProviderId(String id, Pageable pageable);
+    Page<AuditLogProvider> findAllByProviderIdAndAction(String id, AuditLogActionsEnum action, Pageable pageable);
+
+    Page<AuditLogProvider> findAllByProviderIdAndUserResponsibleId(String id, String idUser, Pageable pageable);
+
+    Page<AuditLogProvider> findAllByProviderIdAndActionAndUserResponsibleId(String id, AuditLogActionsEnum action, String idUser, Pageable pageable);
 }

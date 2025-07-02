@@ -14,31 +14,79 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [logs] = useState([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [showJustification, setShowJustification] = useState(false);
   const [justification, setJustification] = useState("");
   const [justificationError, setJustificationError] = useState<string | null>(null);
 
+  const fetchFileData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/document/employee/${documentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const fileData = res.data.fileData;
+
+      if (fileData) {
+        const binaryString = atob(fileData);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const pdfBlob = new Blob([bytes], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        setPdfUrl(pdfUrl);
+      } else {
+        setError("Nenhum dado de arquivo encontrado.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao buscar o documento.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/document/${documentId}/logs`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setLogs(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar logs:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (documentId) {
+      fetchFileData();
+      fetchLogs();
+    }
+  }, [documentId]);
+
   const handleChangeStatus = async (status: string, notes: string) => {
     try {
       const token = localStorage.getItem("tokenClient");
-      const response = await axios.post(
+      await axios.post(
         `${ip}/document/${documentId}/change-status`,
-        {
-          status,
-          notes
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { status, notes },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("status:", response.data);
+
       toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
+
       if (onStatusChange) {
         onStatusChange(documentId, status);
       }
+
+      await fetchLogs(); // Atualiza a tabela
       onClose();
     } catch (err) {
       console.error(err);
@@ -52,74 +100,14 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
       return;
     }
 
-    try {
-      const token = localStorage.getItem("tokenClient");
-      const response = await axios.post(
-        `${ip}/document/${documentId}/change-status`,
-        {
-          status: "REPROVADO",
-          notes
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("status:", response.data);
-      toast("Documento reprovado com sucesso!");
-      if (onStatusChange) {
-        onStatusChange(documentId, "REPROVADO");
-      }
-      onClose();
-    } catch (err) {
-      console.error(err);
-      toast("Erro ao atualizar o status do documento.");
-    }
+    await handleChangeStatus("REPROVADO", notes);
   };
-
-  useEffect(() => {
-    const fetchFileData = async () => {
-      setLoading(true);
-      try {
-        const tokenFromStorage = localStorage.getItem("tokenClient");
-        const res = await axios.get(`${ip}/document/employee/${documentId}`,
-          {
-            headers: { Authorization: `Bearer ${tokenFromStorage}` }
-          }
-        );
-        const fileData = res.data.fileData;
-
-        if (fileData) {
-          const binaryString = atob(fileData);
-          const len = binaryString.length;
-          const bytes = new Uint8Array(len);
-          for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-
-          const pdfBlob = new Blob([bytes], { type: "application/pdf" });
-          const pdfUrl = URL.createObjectURL(pdfBlob);
-          setPdfUrl(pdfUrl);
-        } else {
-          setError("Nenhum dado de arquivo encontrado.");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Erro ao buscar o documento.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFileData();
-  }, [documentId]);
 
   const columns: GridColDef[] = [
     { field: "usuario", headerName: "Usuário", flex: 1 },
     { field: "acao", headerName: "Ação", flex: 1 },
     { field: "data", headerName: "Data", flex: 1 },
-    { field: "historico", headerName: "Histórico", flex: 2 },
+    { field: "notes", headerName: "Histórico", flex: 2 }, // <-- Ajuste o nome conforme o campo do backend
   ];
 
   return (
@@ -132,9 +120,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
           ✖
         </button>
 
-        <h2 className="mb-4 text-center text-lg font-bold">
-          Visualizar Documento
-        </h2>
+        <h2 className="mb-4 text-center text-lg font-bold">Visualizar Documento</h2>
 
         {loading && <p>Carregando...</p>}
         {error && <p className="text-red-500">{error}</p>}
@@ -167,6 +153,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
               autoHeight
               disableRowSelectionOnClick
               className="border border-gray-300"
+              getRowId={(row) => row.id || row._id || Math.random()}
               sx={{
                 "& .MuiDataGrid-root": {
                   minWidth: "100%",
@@ -192,10 +179,13 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
               Reprovar
             </button>
             {showJustification && (
-              <div className="mt-4">
+              <div className="mt-4 w-full">
                 <textarea
                   value={justification}
-                  onChange={(e) => setJustification(e.target.value)}
+                  onChange={(e) => {
+                    setJustification(e.target.value);
+                    setJustificationError(null);
+                  }}
                   maxLength={1000}
                   rows={4}
                   className="w-full border border-gray-300 p-2 rounded-md"
