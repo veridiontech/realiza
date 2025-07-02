@@ -302,7 +302,16 @@ public class CrudBranchImpl implements CrudBranch {
 
     @Override
     public Page<BranchResponseDto> findAllByClientUnfiltered(String idSearch, Pageable pageable) {
-        return null;
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+        if (!requester.getAdmin()
+                && !(requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS))) {
+            if (!requester.getIdClient().equals(idSearch)) {
+                throw new IllegalArgumentException("Client Id and user don't match");
+            }
+        }
+        Page<Branch> pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
+        return getBranchResponseDtos(pageBranch);
     }
 
     @Override
