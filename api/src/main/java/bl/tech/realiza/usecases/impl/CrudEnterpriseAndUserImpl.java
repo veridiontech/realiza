@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.impl;
 
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.User;
@@ -71,7 +73,13 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 null,
                 null,
                 null,
-                null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 

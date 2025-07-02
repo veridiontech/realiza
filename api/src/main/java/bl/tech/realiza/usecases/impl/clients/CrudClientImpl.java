@@ -2,6 +2,8 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.services.FileDocument;
@@ -80,11 +82,17 @@ public class CrudClientImpl implements CrudClient {
                 null,
                 null,
                 null,
-                null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         crudBranchImpl.save(BranchCreateRequestDto.builder()
                 .name(savedClient.getTradeName() != null
-                        ? savedClient.getTradeName() + " Base"
+                        ? savedClient.getTradeName()
                         : "Base")
                 .cnpj(savedClient.getCnpj())
                 .cep(savedClient.getCep())
@@ -94,6 +102,7 @@ public class CrudClientImpl implements CrudClient {
                 .telephone(savedClient.getTelephone())
                 .address(savedClient.getAddress())
                 .number(savedClient.getNumber())
+                .base(true)
                 .client(savedClient.getIdClient())
                 .build());
 

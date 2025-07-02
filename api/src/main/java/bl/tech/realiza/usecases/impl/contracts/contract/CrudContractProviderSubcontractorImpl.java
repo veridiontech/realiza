@@ -4,8 +4,7 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -113,7 +112,13 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 savedContractSubcontractor.getIdContract(),
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
-                null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -164,8 +169,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         Optional<UserProviderSupplier> providerSupplierOptional = userProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getIdProviderSupplier());
         UserProviderSupplier userProviderSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-        if (contractProviderSubcontractorRequestDto.getHse() && !contractProviderSubcontractorRequestDto.getIdActivityList().isEmpty()) {
-            activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getIdActivityList());
+        if (contractProviderSubcontractorRequestDto.getHse() && !contractProviderSubcontractorRequestDto.getIdActivities().isEmpty()) {
+            activities = activityRepository.findAllById(contractProviderSubcontractorRequestDto.getIdActivities());
             if (activities.isEmpty()) {
                 throw new NotFoundException("Activities not found");
             }
@@ -178,7 +183,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         contractProviderSubcontractor.setExpenseType(contractProviderSubcontractorRequestDto.getExpenseType() != null ? contractProviderSubcontractorRequestDto.getExpenseType() : contractProviderSubcontractor.getExpenseType());
         contractProviderSubcontractor.setDateStart(contractProviderSubcontractorRequestDto.getStartDate() != null ? contractProviderSubcontractorRequestDto.getStartDate() : contractProviderSubcontractor.getDateStart());
         contractProviderSubcontractor.setEndDate(contractProviderSubcontractorRequestDto.getEndDate() != null ? contractProviderSubcontractorRequestDto.getEndDate() : contractProviderSubcontractor.getEndDate());
-        contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getIdActivityList() != null ? activities : contractProviderSubcontractor.getActivities());
+        contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getIdActivities() != null ? activities : contractProviderSubcontractor.getActivities());
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
 

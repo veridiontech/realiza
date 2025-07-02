@@ -92,18 +92,44 @@ public class CrudBranchImpl implements CrudBranch {
                 .telephone(branchCreateRequestDto.getTelephone())
                 .address(branchCreateRequestDto.getAddress())
                 .number(branchCreateRequestDto.getNumber())
+                .base(branchCreateRequestDto.getBase() != null
+                        ? branchCreateRequestDto.getBase()
+                        : false)
                 .client(client)
                 .center(center)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH",
-                null,
-                savedBranch.getIdBranch(),
-                null,
-                null,
-                null,
-                null,
-                null));
+        if (branchCreateRequestDto.getReplicateFromBase()) {
+            setupQueueProducer.sendSetup(new SetupMessage("REPLICATE_BRANCH",
+                    null,
+                    savedBranch.getIdBranch(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        } else {
+            setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH",
+                    null,
+                    savedBranch.getIdBranch(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

@@ -3,6 +3,8 @@ package bl.tech.realiza.usecases.impl.contracts.contract;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -150,7 +152,13 @@ public class CrudContractImpl implements CrudContract {
                     null,
                     null,
                     null,
-                    employees.stream().map(Employee::getIdEmployee).toList()));
+                    employees.stream().map(Employee::getIdEmployee).toList(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
 
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
@@ -172,7 +180,13 @@ public class CrudContractImpl implements CrudContract {
                     contractProviderSubcontractor.getIdContract(),
                     null,
                     null,
-                    employees.stream().map(Employee::getIdEmployee).toList()));
+                    employees.stream().map(Employee::getIdEmployee).toList(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
 
         } else {
             throw new NotFoundException("Invalid contract type");
@@ -246,7 +260,13 @@ public class CrudContractImpl implements CrudContract {
                 null,
                 contract.getIdContract(),
                 null,
-                employees.stream().map(Employee::getIdEmployee).toList()));
+                employees.stream().map(Employee::getIdEmployee).toList(),
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         for (Employee employee : employees) {
             if (JwtService.getAuthenticatedUserId() != null) {

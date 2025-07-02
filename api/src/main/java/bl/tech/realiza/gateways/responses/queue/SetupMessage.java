@@ -1,5 +1,7 @@
 package bl.tech.realiza.gateways.responses.queue;
 
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,4 +21,10 @@ public class SetupMessage implements Serializable {
     private String contractId;
     private List<String> activityIds;
     private List<String> employeeIds;
+    private String activityId;
+    private String serviceTypeBranchId;
+    private String documentId;
+    private String title;
+    private Activity.Risk activityRisk;
+    private ServiceType.Risk serviceTypeRisk;
 }

@@ -5,14 +5,13 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.Contract.IsActive;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
@@ -44,12 +43,10 @@ import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -153,7 +150,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 null,
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
-                null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -266,7 +269,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     .orElseThrow(() -> new NotFoundException("User not found"));
         }
 
-        List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivityList());
+        List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
 
         contractProviderSupplier.setServiceTypeBranch(contractProviderSupplierRequestDto.getIdServiceType() != null ? serviceTypeBranch : contractProviderSupplier.getServiceTypeBranch());
         contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());
@@ -577,7 +580,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         List<UserClient> responsibleList = userClientRepository.findAllByBranch_IdBranchAndRoleAndProfile_ManagerIsTrue(responsibleId, ROLE_CLIENT_MANAGER)
                 .stream().sorted(Comparator.comparing(User::getFullName)).toList();
         List<ContractProviderSupplier> contractProviderSupplierList = contractProviderSupplierRepository.findAllByResponsible_IdUser(responsibleId)
-                .stream().sorted(Comparator.comparing(Contract::getContractReference)).toList();;
+                .stream().sorted(Comparator.comparing(Contract::getContractReference)).toList();
 
         return ContractResponsibleResponseDto.builder()
                 .contracts(

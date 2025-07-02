@@ -5,8 +5,10 @@ import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.contract.activity.ActivityDocumentsRepo;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepoRepository;
@@ -18,7 +20,9 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
@@ -47,9 +51,10 @@ public class CrudActivityImpl implements CrudActivity {
     private final ActivityDocumentRepoRepository activityDocumentRepoRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
 
     @Override
-    public ActivityResponseDto save(ActivityRequestDto activityRequestDto) {
+    public ActivityResponseDto save(ActivityRequestDto activityRequestDto, Boolean replicate) {
 
         Activity activity = Activity.builder()
                 .title(activityRequestDto.getTitle())
@@ -59,6 +64,27 @@ public class CrudActivityImpl implements CrudActivity {
                 .build();
 
         Activity savedActivity = activityRepository.save(activity);
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("CREATE_ACTIVITY",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    savedActivity.getIdActivity(),
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -161,7 +187,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument) {
+    public ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument, Boolean replicate) {
         Activity activity = activityRepository.findById(idActivity)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
@@ -173,6 +199,27 @@ public class CrudActivityImpl implements CrudActivity {
                 .documentBranch(documentBranch)
                 .build();
         ActivityDocuments savedActivityDocuments = activityDocumentRepository.save(activityDocuments);
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    savedActivityDocuments.getActivity().getIdActivity(),
+                    null,
+                    savedActivityDocuments.getDocumentBranch().getIdDocumentation(),
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -194,8 +241,29 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public String removeDocumentFromActivity(String idActivity, String idDocumentBranch) {
+    public String removeDocumentFromActivity(String idActivity, String idDocumentBranch, Boolean replicate) {
         ActivityDocuments savedActivityDocuments = activityDocumentRepository.findByActivity_IdActivityAndDocumentBranch_IdDocumentation(idActivity, idDocumentBranch);
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    savedActivityDocuments.getActivity().getIdActivity(),
+                    null,
+                    savedActivityDocuments.getDocumentBranch().getIdDocumentation(),
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -214,10 +282,12 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto) {
+    public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto, Boolean replicate) {
         Optional<Activity> activityOptional = activityRepository.findById(id);
 
         Activity activity = activityOptional.orElseThrow(() -> new NotFoundException("Activity not found"));
+        String oldTitle = activity.getTitle();
+        Activity.Risk oldRisk = activity.getRisk();
 
         activity.setTitle(activityRequestDto.getTitle() != null
                 ? activityRequestDto.getTitle()
@@ -227,6 +297,27 @@ public class CrudActivityImpl implements CrudActivity {
                 : activity.getRisk());
 
         Activity savedActivity = activityRepository.save(activity);
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("UPDATE_ACTIVITY",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    savedActivity.getIdActivity(),
+                    null,
+                    null,
+                    oldTitle,
+                    oldRisk,
+                    ServiceType.Risk.LOW));
+        }
 
         ActivityResponseDto activityResponse = ActivityResponseDto.builder()
                 .idActivity(savedActivity.getIdActivity())
@@ -248,9 +339,30 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(String id, Boolean replicate) {
         Activity activity = activityRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("DELETE_ACTIVITY",
+                    activity.getBranch().getClient().getIdClient(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    activity.getIdActivity(),
+                    null,
+                    null,
+                    activity.getTitle(),
+                    activity.getRisk(),
+                    ServiceType.Risk.LOW));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

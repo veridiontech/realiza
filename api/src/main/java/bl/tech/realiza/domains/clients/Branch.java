@@ -48,6 +48,8 @@ public class Branch {
     private String address;
     private String number;
     @Builder.Default
+    private Boolean base = false;
+    @Builder.Default
     private Boolean isActive = true;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();

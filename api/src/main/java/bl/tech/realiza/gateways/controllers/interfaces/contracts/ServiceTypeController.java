@@ -12,15 +12,15 @@ import java.util.List;
 
 public interface ServiceTypeController {
     ResponseEntity<ServiceTypeRepoResponseDto> createServiceTypeRepo(ServiceTypeRequestDto serviceTypeRequestDto);
-    ResponseEntity<ServiceTypeBranchResponseDto> createServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto);
+    ResponseEntity<ServiceTypeBranchResponseDto> createServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate);
     ResponseEntity<ServiceTypeClientResponseDto> createServiceTypeClient(String clientId, ServiceTypeRequestDto serviceTypeRequestDto);
     ResponseEntity<ServiceTypeFullResponseDto> getOneServiceType(String idServiceType);
     ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypes();
     ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypesByOwner(String idOwner, CrudServiceType.Owner owner);
 
     ResponseEntity<ServiceTypeRepoResponseDto> updateServiceTypeRepo(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
-    ResponseEntity<ServiceTypeBranchResponseDto> updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
+    ResponseEntity<ServiceTypeBranchResponseDto> updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate);
     ResponseEntity<ServiceTypeClientResponseDto> updateServiceTypeClient(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
 
-    ResponseEntity<Void> deleteServiceType(String idServiceType);
+    ResponseEntity<Void> deleteServiceType(String idServiceType, Boolean replicate);
 }
