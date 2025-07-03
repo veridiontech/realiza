@@ -16,4 +16,6 @@ public interface BranchRepository extends JpaRepository<Branch, String> {
     Branch findFirstByClient_IdClientOrderByCreationDateAsc(String idClient);
 
     Collection<Branch> findAllByIsActive(boolean b);
+
+    Branch findFirstByClient_IdClientAndIsActiveIsTrueAndBaseIsTrueOrderByCreationDate(String idClient);
 }

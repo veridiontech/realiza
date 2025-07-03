@@ -19,7 +19,6 @@ public class SetupQueueConsumer {
 
     private final SetupService setupService;
     private final QueueLogService logService;
-    private final ActivityRepository activityRepository;
 
     @RabbitListener(queues = RabbitConfig.SETUP_QUEUE)
     public void consume(SetupMessage message) {
