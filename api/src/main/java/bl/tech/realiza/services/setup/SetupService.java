@@ -393,10 +393,10 @@ public class SetupService {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
         log.info("Started setup service type replicate branch ⌛ {}", branchId);
-        List<ServiceTypeBranch> serviceTypeBranchbatch = new ArrayList<>(50);
+        List<ServiceTypeBranch> serviceTypeBranchBatch = new ArrayList<>(50);
         Branch base = branchRepository.findFirstByClient_IdClientAndIsActiveIsTrueAndBaseIsTrueOrderByCreationDate(branch.getClient().getIdClient());
         for (ServiceTypeBranch serviceTypeBranch : serviceTypeBranchRepository.findAllByBranch_IdBranch(base.getIdBranch())) {
-            serviceTypeBranchbatch.add(
+            serviceTypeBranchBatch.add(
                     ServiceTypeBranch.builder()
                             .title(serviceTypeBranch.getTitle())
                             .risk(serviceTypeBranch.getRisk())
@@ -404,14 +404,14 @@ public class SetupService {
                             .build()
             );
 
-            if (serviceTypeBranchbatch.size() == 50) {
-                serviceTypeBranchRepository.saveAll(serviceTypeBranchbatch);
-                serviceTypeBranchbatch.clear();
+            if (serviceTypeBranchBatch.size() == 50) {
+                serviceTypeBranchRepository.saveAll(serviceTypeBranchBatch);
+                serviceTypeBranchBatch.clear();
             }
         }
-        if (!serviceTypeBranchbatch.isEmpty()) {
-            serviceTypeBranchRepository.saveAll(serviceTypeBranchbatch);
-            serviceTypeBranchbatch.clear();
+        if (!serviceTypeBranchBatch.isEmpty()) {
+            serviceTypeBranchRepository.saveAll(serviceTypeBranchBatch);
+            serviceTypeBranchBatch.clear();
         }
 
         log.info("Started setup document replicate branch ⌛ {}", branchId);
@@ -665,12 +665,14 @@ public class SetupService {
         for (DocumentBranch doc : documents) {
             if (activityBranchMap.containsKey(doc.getBranch().getIdBranch())) {
                 Activity activity = activityBranchMap.get(doc.getBranch().getIdBranch());
-                batch.add(
-                        ActivityDocuments.builder()
-                                .activity(activity)
-                                .documentBranch(document)
-                                .build()
-                );
+                if (activityDocumentRepository.findByActivity_IdActivityAndDocumentBranch_IdDocumentation(activity.getIdActivity(),doc.getIdDocumentation()) == null) {
+                    batch.add(
+                            ActivityDocuments.builder()
+                                    .activity(activity)
+                                    .documentBranch(document)
+                                    .build()
+                    );
+                }
 
                 if (batch.size() == 50) {
                     activityDocumentRepository.saveAll(batch);
@@ -691,9 +693,11 @@ public class SetupService {
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
         List<ActivityDocuments> activityDocumentsList = activityDocumentRepository
-                .findAllByActivity_Branch_Client_IdClientAndDocumentBranch_Branch_Client_IdClient(
+                .findAllByActivity_Branch_Client_IdClientAndActivity_TitleAndDocumentBranch_Branch_Client_IdClientAndDocumentBranch_Title(
                         activityBase.getBranch().getClient().getIdClient(),
-                        document.getBranch().getClient().getIdClient());
+                        activityBase.getTitle(),
+                        document.getBranch().getClient().getIdClient(),
+                        document.getTitle());
 
         List<ActivityDocuments> batch = new ArrayList<>(50);
         for (ActivityDocuments activityDocument : activityDocumentsList) {

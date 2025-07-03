@@ -12,5 +12,5 @@ public interface IaAdditionalPromptController {
     ResponseEntity<List<IaAdditionalPromptResponseDto>> getAllPrompt();
     ResponseEntity<IaAdditionalPromptResponseDto> getOnePrompt(String id);
     ResponseEntity<IaAdditionalPromptResponseDto> updatePrompt(String id, IaAdditionalPromptRequestDto iaAdditionalPromptRequestDto);
-    ResponseEntity<IaAdditionalPromptNameListResponseDto> getAllPromptNameList();
+    ResponseEntity<List<IaAdditionalPromptNameListResponseDto>> getAllPromptNameList();
 }
