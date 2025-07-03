@@ -1,10 +1,16 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.usecases.interfaces.users.CrudUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,26 @@ public class CrudUserImpl implements CrudUser {
             user.setIsActive(false);
             userRepository.save(user);
             return "User inactivated";
+        }
+    }
+
+    @Override
+    public void fourDigitCodeCheck() {
+        List<User> users = userRepository.findAllByForgotPasswordCodeIsNotNull();
+        List<User> batch = new ArrayList<>(50);
+        for (User user : users) {
+            if (ChronoUnit.HOURS.between(user.getForgotPasswordCodeDate(), LocalDateTime.now()) >= 1) {
+                user.setForgotPasswordCode(null);
+                user.setForgotPasswordCodeDate(null);
+                batch.add(user);
+            }
+            if (batch.size() == 50) {
+                userRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            userRepository.saveAll(batch);
         }
     }
 }

@@ -2,7 +2,6 @@ package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.auditLogs.AuditLog;
 import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -52,6 +51,8 @@ public abstract class User {
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+    private String forgotPasswordCode;
+    private LocalDateTime forgotPasswordCodeDate;
 
     // -------------------------------
     // Relacionamentos CONTRATUAIS

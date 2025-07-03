@@ -17,6 +17,7 @@ public class IaAdditionalPrompt {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(length = 1000)
     private String description;
 
     @OneToOne

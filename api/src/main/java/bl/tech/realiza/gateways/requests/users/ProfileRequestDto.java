@@ -19,6 +19,7 @@ public class ProfileRequestDto {
     private Boolean health;
     private Boolean environment;
     private Boolean concierge;
+    private String clientId;
     private List<String> branchIds;
     private List<String> contractIds;
 }

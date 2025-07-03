@@ -17,6 +17,7 @@ public interface EmployeeController {
     ResponseEntity<PageResponse<EmployeeResponseDto>> getAllEmployeesByEnterprise(int page, int size, String sort, Sort.Direction direction, Provider.Company company, String idSearch);
     ResponseEntity<Page<EmployeeResponseDto>> getAllEmployeesByContract(int page, int size, String sort, Sort.Direction direction, String idContract);
     ResponseEntity<EmployeeResponseDto> changeEmployeeSituation(String employeeId, Employee.Situation situation);
+    ResponseEntity<Boolean> checkEmployeeStatus(String employeeId);
 
     // brazilian
     ResponseEntity<EmployeeResponseDto> createEmployeeBrazilian(EmployeeBrazilianRequestDto employeeBrazilianRequestDto);

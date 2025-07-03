@@ -40,7 +40,7 @@ public class EmailControllerImpl {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> sendEmailPasswordRecovery(@RequestParam String email) {
         try {
-            emailSender.sendPasswordRecoveryEmail(email);
+//            emailSender.sendPasswordRecoveryEmail(email, "");
             return ResponseEntity.ok("Password recovery email sent successfully!");
         } catch (Exception e) {
             return ResponseEntity.ok(e.getMessage());

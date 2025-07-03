@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
@@ -8,6 +10,7 @@ import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
@@ -37,6 +40,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
     private final FileRepository fileRepository;
     private final ContractRepository contractRepository;
     private final EmployeeRepository employeeRepository;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
 
     @Override
     public Page<EmployeeResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable) {
@@ -240,6 +244,14 @@ public class CrudEmployeeImpl implements CrudEmployee {
         } else {
             throw new NotFoundException("Employee not found");
         }
+    }
+
+    @Override
+    public Boolean checkEmployeeStatus(String employeeId) {
+        if (!employeeRepository.existsById(employeeId)) {
+            throw new NotFoundException("Employee not found");
+        }
+        return !documentEmployeeRepository.existsBlockingDocs(employeeId);
     }
 
     private EmployeeResponseDto convertBrazilianToDto(EmployeeBrazilian employeeBrazilian) {

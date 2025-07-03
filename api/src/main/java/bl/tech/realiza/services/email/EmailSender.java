@@ -1,6 +1,7 @@
 package bl.tech.realiza.services.email;
 
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.controllers.impl.services.EmailControllerImpl;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailEnterpriseInviteRequestDto;
@@ -191,24 +192,23 @@ public class EmailSender {
         }
     }
 
-    public void sendPasswordRecoveryEmail(String email) {
-        User user = userRepository.findByEmailAndIsActive(email, true);
+    public void sendPasswordRecoveryEmail(String email, String fourDigitCode) {
+        User user = userRepository.findByEmailAndForgotPasswordCodeAndIsActiveIsTrue(email, fourDigitCode+email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         try {
-            
-            String token = tokenManagerService.generateToken();
             String emailBody;
-
             try (var inputStream = Objects.requireNonNull(
                     EmailControllerImpl.class.getResourceAsStream("/templates/email-password-recovery.html"))) {
                 emailBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
-                        .replace("#TOKEN_PLACEHOLDER#", token)
-                        .replace("#ID_PLACEHOLDER#",user.getIdUser());
+                        .replace("#1#", String.valueOf(fourDigitCode.charAt(0)))
+                        .replace("#2#", String.valueOf(fourDigitCode.charAt(1)))
+                        .replace("#3#", String.valueOf(fourDigitCode.charAt(2)))
+                        .replace("#4#", String.valueOf(fourDigitCode.charAt(3)));
             } catch (Exception e) {
                 throw new RuntimeException("Failed to generate email", e);
             }
 
-            
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(dotenv.get("GMAIL_EMAIL"));
