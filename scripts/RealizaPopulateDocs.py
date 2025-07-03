@@ -20,7 +20,7 @@ def executar_scripts_no_diretorio(diretorio):
                 print(f"Erro ao executar {arquivo}: {e}")
 
 def main():
-    diretorio = r"C:/Users/Rogerio/Downloads/BLComunicacoes/Realiza"  # Pasta onde estão os scripts .py
+    diretorio = os.path.dirname(os.path.abspath(__file__))
     executar_scripts_no_diretorio(diretorio)
 
 if __name__ == "__main__":

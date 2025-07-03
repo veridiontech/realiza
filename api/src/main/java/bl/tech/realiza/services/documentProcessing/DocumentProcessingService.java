@@ -2,8 +2,11 @@ package bl.tech.realiza.services.documentProcessing;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.services.IaAdditionalPrompt;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.services.IaAdditionalPromptRepository;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -42,13 +45,14 @@ public class DocumentProcessingService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DocumentRepository documentRepository;
     private final RestTemplate restTemplate;
+    private final IaAdditionalPromptRepository iaAdditionalPromptRepository;
 
 
     public DocumentProcessingService(Dotenv dotenv1,
                                      Dotenv dotenv,
                                      DocumentBranchRepository documentBranchRepository,
                                      DocumentRepository documentRepository,
-                                     RestTemplate restTemplate) {
+                                     RestTemplate restTemplate, IaAdditionalPromptRepository iaAdditionalPromptRepository) {
         this.dotenv = dotenv1;
 
         this.OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null
@@ -68,6 +72,7 @@ public class DocumentProcessingService {
             throw new IllegalArgumentException("OPENAI_API_KEY is missing.");
         }
         this.documentRepository = documentRepository;
+        this.iaAdditionalPromptRepository = iaAdditionalPromptRepository;
     }
 
     @Async("taskExecutor")
@@ -225,57 +230,65 @@ public class DocumentProcessingService {
     }
 
     private String buildPrompt(String expectedType) {
-        return """
-    Você é um assistente especializado na análise de documentos.
-    ⚠️ O tipo esperado para este documento é: "%s". A IA deve confirmar se o documento realmente corresponde a esse tipo e validá-lo com base nisso.
-    Use isso como referência ao aplicar as regras abaixo e identificar se o documento enviado corresponde ao tipo esperado.
+        IaAdditionalPrompt additionalPrompt = iaAdditionalPromptRepository.findByDocumentMatrix_Name(expectedType);
 
-    Sua tarefa é identificar o tipo do documento e validar sua autenticidade e validade com base nas informações fornecidas.
-    Sempre responda apenas com um JSON puro, sem explicações adicionais.
+        String prompt =  """
+            Você é um assistente especializado na análise de documentos.
+            ⚠️ O tipo esperado para este documento é: "%s". A IA deve confirmar se o documento realmente corresponde a esse tipo e validá-lo com base nisso.
+            Use isso como referência ao aplicar as regras abaixo e identificar se o documento enviado corresponde ao tipo esperado.
+        
+            Sua tarefa é identificar o tipo do documento e validar sua autenticidade e validade com base nas informações fornecidas.
+            Sempre responda apenas com um JSON puro, sem explicações adicionais.
+        
+            Use as seguintes regras para preencher os campos:
+            - documentType: tipo do documento identificado ("CPF", "CNH", "ASO", "Ficha de EPI", etc.).
+            - autoValidate: true se o documento possui todas as informações necessárias para julgamento automático de validade. Caso contrário, false.
+            - isValid: true se o documento for considerado legítimo, válido e com dados compatíveis. Caso o conteúdo esteja ausente, ilegível, fora dos padrões ou inválido, defina como false.
+            - reason: explique de forma clara e curta o motivo de o documento não ser válido ou não poder ser validado automaticamente.
+        
+            🔁 Prioridade de resposta:
+            1. Se o documento for de um tipo que **não possui estrutura padronizada ou dados estruturáveis o suficiente** para permitir validação automática, defina `autoValidate = false` e use como razão principal algo como:  
+               **"O documento não possui estrutura suficiente para validação automática"**
+            2. Caso o documento esteja também em branco, ilegível ou claramente inválido, **você pode complementar** a razão com esse fator — mas **sem substituir o motivo principal da impossibilidade estrutural**.
+        
+            ⚠️ Importante:
+            Mesmo que autoValidate seja false, você ainda pode (e deve) definir isValid como false se o documento estiver completamente vazio, ilegível ou claramente inválido.
+        
+            ❗Regras específicas:
+            - CPF: Verifique se a sequência numérica é válida e se não é uma sequência inválida conhecida (como 000.000.000-00).
+            - CNH: Verifique se está vencida. Se sim, isValid deve ser false e a reason deve indicar "CNH vencida".
+            - RG: Se a data de emissão for muito antiga (>10 anos), considerar inválido.
+            - Passaporte: Verifique a data de expiração. Vencidos não são válidos.
+        
+            🔍 Exemplo de resposta válida:
+            {
+              "documentType": "CPF",
+              "autoValidate": true,
+              "isValid": true,
+              "reason": "O documento pode ser validado e está de acordo."
+            }
+        
+            🔍 Exemplo de resposta com autoValidate false (prioridade correta):
+            {
+              "documentType": "ASO",
+              "autoValidate": false,
+              "isValid": false,
+              "reason": "O documento não possui estrutura suficiente para validação automática"
+            }
+        
+            🔍 Exemplo de resposta com motivo composto:
+            {
+              "documentType": "Ficha de EPI",
+              "autoValidate": false,
+              "isValid": false,
+              "reason": "O documento não possui estrutura suficiente para validação automática e está em branco"
+            }
+            """.formatted(expectedType);
 
-    Use as seguintes regras para preencher os campos:
-    - documentType: tipo do documento identificado ("CPF", "CNH", "ASO", "Ficha de EPI", etc.).
-    - autoValidate: true se o documento possui todas as informações necessárias para julgamento automático de validade. Caso contrário, false.
-    - isValid: true se o documento for considerado legítimo, válido e com dados compatíveis. Caso o conteúdo esteja ausente, ilegível, fora dos padrões ou inválido, defina como false.
-    - reason: explique de forma clara e curta o motivo de o documento não ser válido ou não poder ser validado automaticamente.
+        if (additionalPrompt != null && additionalPrompt.getDescription() != null && !additionalPrompt.getDescription().isEmpty()) {
+            prompt += "\n\n" + additionalPrompt.getDescription();
+        }
 
-    🔁 Prioridade de resposta:
-    1. Se o documento for de um tipo que **não possui estrutura padronizada ou dados estruturáveis o suficiente** para permitir validação automática, defina `autoValidate = false` e use como razão principal algo como:  
-       **"O documento não possui estrutura suficiente para validação automática"**
-    2. Caso o documento esteja também em branco, ilegível ou claramente inválido, **você pode complementar** a razão com esse fator — mas **sem substituir o motivo principal da impossibilidade estrutural**.
-
-    ⚠️ Importante:
-    Mesmo que autoValidate seja false, você ainda pode (e deve) definir isValid como false se o documento estiver completamente vazio, ilegível ou claramente inválido.
-
-    ❗Regras específicas:
-    - CPF: Verifique se a sequência numérica é válida e se não é uma sequência inválida conhecida (como 000.000.000-00).
-    - CNH: Verifique se está vencida. Se sim, isValid deve ser false e a reason deve indicar "CNH vencida".
-    - RG: Se a data de emissão for muito antiga (>10 anos), considerar inválido.
-    - Passaporte: Verifique a data de expiração. Vencidos não são válidos.
-
-    🔍 Exemplo de resposta válida:
-    {
-      "documentType": "CPF",
-      "autoValidate": true,
-      "isValid": true,
-      "reason": "O documento pode ser validado e está de acordo."
-    }
-
-    🔍 Exemplo de resposta com autoValidate false (prioridade correta):
-    {
-      "documentType": "ASO",
-      "autoValidate": false,
-      "isValid": false,
-      "reason": "O documento não possui estrutura suficiente para validação automática"
-    }
-
-    🔍 Exemplo de resposta com motivo composto:
-    {
-      "documentType": "Ficha de EPI",
-      "autoValidate": false,
-      "isValid": false,
-      "reason": "O documento não possui estrutura suficiente para validação automática e está em branco"
-    }
-    """.formatted(expectedType);
+        return prompt;
     }
 }

@@ -1,7 +1,7 @@
 import openpyxl
 import mysql.connector
 import uuid
-from mysql.connector import errorcode
+import os
 from datetime import datetime
 
 # Configuração de conexão com o banco de dados
@@ -83,7 +83,8 @@ def processar_service_types(service_types):
             print("Conexão com o banco encerrada.")
 
 def main():
-    path = "C:/Users/Rogerio/Documents/BL_SISTEMA NOVO_PARAMETRIZACOES.xlsx"
+    base_dir = os.path.dirname(__file__)
+    path = os.path.join(base_dir, "BL_SISTEMA NOVO_PARAMETRIZACOES.xlsx")
     service_types = importar_service_types(path)
     processar_service_types(service_types)
 

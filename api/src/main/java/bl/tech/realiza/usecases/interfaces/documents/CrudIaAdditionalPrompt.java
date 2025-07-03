@@ -9,7 +9,7 @@ import java.util.List;
 public interface CrudIaAdditionalPrompt {
     IaAdditionalPromptResponseDto save(IaAdditionalPromptRequestDto requestDto);
     IaAdditionalPromptResponseDto update(String id, IaAdditionalPromptRequestDto requestDto);
-    IaAdditionalPromptResponseDto delete(String id);
+    void delete(String id);
     IaAdditionalPromptResponseDto findById(String id);
     List<IaAdditionalPromptResponseDto> findAll();
     List<IaAdditionalPromptNameListResponseDto> findAllNameList();

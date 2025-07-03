@@ -1,7 +1,7 @@
 import openpyxl
 import mysql.connector
 import uuid
-from mysql.connector import errorcode
+import os
 from datetime import datetime
 
 # Configuração de conexão com o banco de dados
@@ -100,7 +100,8 @@ def processar_atividades_e_documentos(atividades_documentos):
 
 
 def main():
-    path = "C:/Users/Rogerio/Documents/BL_DOCTOS POR ATIVIDADE_IGUA.xlsx"
+    base_dir = os.path.dirname(__file__)
+    path = os.path.join(base_dir, "BL_DOCTOS POR ATIVIDADE_IGUA.xlsx")
     atividades_documentos = importar_atividades_e_documentos(path)
     processar_atividades_e_documentos(atividades_documentos)
 
