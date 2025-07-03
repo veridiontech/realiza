@@ -225,6 +225,8 @@ public class AuditLogServiceImpl implements AuditLogService {
                                             ? documentSupplier.getProviderSupplier().getIdProvider()
                                             : null)
                                     .owner(OwnerEnum.SUPPLIER)
+                                    .documentId(documentSupplier.getIdDocumentation())
+                                    .documentTitle(documentSupplier.getTitle())
                                     .build()
                     );
                 } else if (document instanceof DocumentProviderSubcontractor documentSubcontractor) {
@@ -241,6 +243,8 @@ public class AuditLogServiceImpl implements AuditLogService {
                                             ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
                                             : null)
                                     .owner(OwnerEnum.SUBCONTRACTOR)
+                                    .documentId(documentSubcontractor.getIdDocumentation())
+                                    .documentTitle(documentSubcontractor.getTitle())
                                     .build()
                     );
                 } else if (document instanceof DocumentEmployee documentEmployee) {
@@ -257,6 +261,8 @@ public class AuditLogServiceImpl implements AuditLogService {
                                             ? documentEmployee.getEmployee().getIdEmployee()
                                             : null)
                                     .owner(OwnerEnum.EMPLOYEE)
+                                    .documentId(documentEmployee.getIdDocumentation())
+                                    .documentTitle(documentEmployee.getTitle())
                                     .build()
                     );
                 }
