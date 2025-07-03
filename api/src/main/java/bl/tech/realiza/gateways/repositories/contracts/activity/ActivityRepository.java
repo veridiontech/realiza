@@ -26,6 +26,16 @@ public interface ActivityRepository extends JpaRepository<Activity, String > {
     List<ActivityControlPanelResponseDto> findAllControlPanelActivityResponseDtoByBranch_IdBranch(
             @Param("branchId") String id);
 
+    @Query("""
+    SELECT b.idBranch
+    FROM Activity a
+    JOIN a.branch b
+    WHERE a.idActivity = :activityId
+""")
+    String findBranchIdByActivity(
+            @Param("activityId") String id
+    );
+
     List<Activity> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
 
     List<Activity> findAllByBranch_Client_IdClientAndTitleAndRisk(String idClient, String title, Activity.Risk risk);

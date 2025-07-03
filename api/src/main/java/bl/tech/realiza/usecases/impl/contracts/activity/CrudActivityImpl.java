@@ -20,6 +20,7 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentForActivityResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
@@ -32,6 +33,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,15 +152,32 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public List<ActivityDocumentResponseDto> findAllDocumentsByActivity(String idActivity) {
-        Activity activity = activityRepository.findById(idActivity)
-                .orElseThrow(() -> new NotFoundException("Activity not found"));
-        List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(idActivity);
-        List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranch(activity.getBranch() != null ? activity.getBranch().getIdBranch() : null);
-        List<String> documentBranchIds = activityDocumentsList.stream()
-                .map(documents -> documents.getDocumentBranch() != null ? documents.getDocumentBranch().getIdDocumentation() : null)
-                .toList();
+        LocalDateTime startTimer = LocalDateTime.now();
+        System.out.println("Start: " + startTimer);
 
-        return documentBranches.stream()
+        String branchId = activityRepository.findBranchIdByActivity(idActivity);
+        if (branchId == null) {
+            throw new NotFoundException("Activity not found");
+        }
+
+        LocalDateTime activitiesTimer = LocalDateTime.now();
+        System.out.println("Found activity: " + Duration.between(startTimer,activitiesTimer).toMillis() + " ms");
+
+        List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(idActivity);
+        LocalDateTime activityDocumentsTimer = LocalDateTime.now();
+        System.out.println("Found activity documents: " + Duration.between(activitiesTimer,activityDocumentsTimer).toMillis() + " ms");
+
+        List<DocumentForActivityResponseDto> documentBranches = documentBranchRepository.findAllByBranchForActivity(branchId);
+        LocalDateTime documentBranchesTimer = LocalDateTime.now();
+        System.out.println("Found document branches: " + Duration.between(activityDocumentsTimer,documentBranchesTimer).toMillis() + " ms");
+
+        Set<String> documentBranchIds = activityDocumentsList.stream()
+                .map(doc -> doc.getDocumentBranch().getIdDocumentation())
+                .collect(Collectors.toSet());
+        LocalDateTime documentBranchIdsTimer = LocalDateTime.now();
+        System.out.println("Extracted documentBranchIds: " + Duration.between(documentBranchesTimer,documentBranchIdsTimer).toMillis() + " ms");
+
+        List<ActivityDocumentResponseDto> response = documentBranches.stream()
                 .filter(documentBranch -> {
                     String type = documentBranch.getType();
                     return type != null && (
@@ -184,6 +204,11 @@ public class CrudActivityImpl implements CrudActivity {
                 })
                 .sorted(Comparator.comparing(ActivityDocumentResponseDto::getDocumentTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                 .toList();
+
+        LocalDateTime responseTimer = LocalDateTime.now();
+        System.out.println("Response build: " + Duration.between(documentBranchIdsTimer,responseTimer).toMillis() + " ms");
+
+        return response;
     }
 
     @Override
