@@ -49,14 +49,16 @@ public class CrudContractImpl implements CrudContract {
 
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        if (requester.getAdmin()
+        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
                 || requester.getManager()) {
 
             Contract contract = contractRepository.findById(idContract)
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
-            if (requester.getContractAccess().contains(contract.getIdContract())) {
+            if (requester.getContractAccess().contains(contract.getIdContract())
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                 contract.setFinished(true);
                 contract.setEndDate(Date.valueOf(LocalDate.now()));
 
@@ -85,13 +87,15 @@ public class CrudContractImpl implements CrudContract {
     public String suspendContract(String contractId) {
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        if (requester.getAdmin()
+        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
                 || requester.getManager()) {
             Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
-            if (requester.getContractAccess().contains(contract.getIdContract())) {
+            if (requester.getContractAccess().contains(contract.getIdContract())
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                 contract.setIsActive(SUSPENSO);
                 contract.setEndDate(Date.valueOf(LocalDate.now()));
 

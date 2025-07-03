@@ -371,7 +371,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         }
         Page<ContractProviderSupplier> contractProviderSupplierPage = null;
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
-        if (requester.getAdmin()
+        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                 || requester.getRole().equals(ROLE_REALIZA_BASIC)
                 || requester.getRole().equals(ROLE_REALIZA_PLUS)) {
             contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);

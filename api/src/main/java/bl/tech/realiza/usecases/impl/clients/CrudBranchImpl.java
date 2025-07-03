@@ -308,7 +308,7 @@ public class CrudBranchImpl implements CrudBranch {
         Page<Branch> pageBranch = null;
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        if (requester.getAdmin()
+        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
             pageBranch = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(idSearch, pageable);
