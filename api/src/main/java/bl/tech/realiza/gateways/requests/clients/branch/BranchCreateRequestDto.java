@@ -25,7 +25,9 @@ public class BranchCreateRequestDto {
     private String address;
     @NotEmpty
     private String number;
+    private Boolean base;
     private String client;
+    private Boolean replicateFromBase;
     private List<String> center;
     private List<String> documents;
 }

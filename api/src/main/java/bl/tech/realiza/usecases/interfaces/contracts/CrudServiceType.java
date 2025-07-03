@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CrudServiceType {
     // any
-    void deleteServiceType(String idServiceType);
+    void deleteServiceType(String idServiceType, Boolean replicate);
     ServiceTypeFullResponseDto getServiceType(String idServiceType);
     List<ServiceTypeFullResponseDto> getAllServiceType();
     List<ServiceTypeFullResponseDto> getAllServiceType(String idOwner, Owner owner);
@@ -20,8 +20,8 @@ public interface CrudServiceType {
     ServiceTypeRepoResponseDto updateServiceTypeRepo(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
 
     // Branch
-    ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto);
-    ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
+    ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate);
+    ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate);
 
     // Client
     ServiceTypeClientResponseDto saveServiceTypeClient(String clientId, ServiceTypeRequestDto serviceTypeRequestDto);

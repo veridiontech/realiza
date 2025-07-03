@@ -5,10 +5,7 @@ import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.Contra
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplierCreateResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.*;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,13 +28,13 @@ import java.util.Optional;
 @Tag(name = "Contract Supplier")
 public class ContractProviderSupplierControllerImpl implements ContractProviderSupplierControlller {
 
-    private final CrudContractProviderSupplier crudSupplier;
+    private final CrudContractProviderSupplier crudContractSupplier;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<ContractSupplierResponseDto> createContractProviderSupplier(@RequestBody @Valid ContractSupplierPostRequestDto contractSupplierRequestDto) {
-        ContractSupplierResponseDto supplier = crudSupplier.save(contractSupplierRequestDto);
+        ContractSupplierResponseDto supplier = crudContractSupplier.save(contractSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }
@@ -46,7 +43,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<ContractResponseDto>> getOneContractProviderSupplier(@PathVariable String id) {
-        Optional<ContractResponseDto> contractSupplier = crudSupplier.findOne(id);
+        Optional<ContractResponseDto> contractSupplier = crudContractSupplier.findOne(id);
 
         return ResponseEntity.of(Optional.of(contractSupplier));
     }
@@ -60,7 +57,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAll(pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAll(pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }
@@ -69,7 +66,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<ContractResponseDto>> updateContractProviderSupplier(@PathVariable String id, @RequestBody @Valid ContractRequestDto contractSupplierRequestDto) {
-        Optional<ContractResponseDto> supplier = crudSupplier.update(id, contractSupplierRequestDto);
+        Optional<ContractResponseDto> supplier = crudContractSupplier.update(id, contractSupplierRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }
@@ -78,7 +75,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
     public ResponseEntity<Void> deleteContractProviderSupplier(@PathVariable String id) {
-        crudSupplier.delete(id);
+        crudContractSupplier.delete(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -94,7 +91,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                                @RequestParam(required = false) List<Contract.IsActive> isActive) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAllBySupplier(idSearch, isActive, pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllBySupplier(idSearch, isActive, pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }
@@ -110,7 +107,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                              @RequestParam(required = false) List<Contract.IsActive> isActive) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSupplier = crudSupplier.findAllByClient(idSearch, isActive, pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllByClient(idSearch, isActive, pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }
@@ -126,7 +123,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                @RequestParam String idSupplier) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> contractResponse = crudSupplier.findAllBySupplierAndBranch(idSupplier, idBranch, pageable);
+        Page<ContractResponseDto> contractResponse = crudContractSupplier.findAllBySupplierAndBranch(idSupplier, idBranch, pageable);
 
         return ResponseEntity.ok(contractResponse);
     }
@@ -136,7 +133,7 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Override
     public ResponseEntity<ContractAndSupplierCreateResponseDto> createContractAndSupplier(@RequestBody @Valid ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto) {
 
-        ContractAndSupplierCreateResponseDto supplier = crudSupplier.saveContractAndSupplier(contractAndSupplierCreateRequestDto);
+        ContractAndSupplierCreateResponseDto supplier = crudContractSupplier.saveContractAndSupplier(contractAndSupplierCreateRequestDto);
 
         return ResponseEntity.of(Optional.of(supplier));
     }
@@ -146,6 +143,20 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
     @Operation(summary = "Busca os contratos entre fornecedor e cliente que permitem subcontratação utilizando id da filial")
     @Override
     public ResponseEntity<List<ContractSupplierPermissionResponseDto>> getByBranchAndSubcontractPermission(@RequestParam String idBranch) {
-        return ResponseEntity.ok(crudSupplier.findAllByBranchAndSubcontractPermission(idBranch));
+        return ResponseEntity.ok(crudContractSupplier.findAllByBranchAndSubcontractPermission(idBranch));
+    }
+
+    @GetMapping("/by-responsible/{responsibleId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<ContractResponsibleResponseDto> getContractByResponsible(@PathVariable String responsibleId) {
+        return ResponseEntity.ok(crudContractSupplier.findAllByResponsible(responsibleId));
+    }
+
+    @GetMapping("/{contractId}/update-responsible/{responsibleId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> updateResponsibleFromContract(@PathVariable String contractId, @PathVariable String responsibleId) {
+        return ResponseEntity.ok(crudContractSupplier.updateResponsible(contractId,responsibleId));
     }
 }

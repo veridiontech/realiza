@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.contracts.serviceType;
 
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeControlPanelResponseDto;
@@ -23,4 +24,6 @@ public interface ServiceTypeBranchRepository extends JpaRepository<ServiceTypeBr
 """)
     List<ServiceTypeControlPanelResponseDto> findAllControlPanelActivityResponseDtoByBranch_IdBranch(
             @Param("branchId") String branchId);
+
+    List<ServiceTypeBranch> findAllByBranch_Client_IdClientAndTitleAndRisk(String clientId, String title, ServiceType.Risk risk);
 }

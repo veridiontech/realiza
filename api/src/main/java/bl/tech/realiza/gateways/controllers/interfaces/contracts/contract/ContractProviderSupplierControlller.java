@@ -4,10 +4,7 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplierCreateResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -26,4 +23,6 @@ public interface ContractProviderSupplierControlller {
     ResponseEntity<Page<ContractResponseDto>> getAllBySupplierAndBranch(int page, int size, String sort, Sort.Direction direction, String idBranch, String idSupplier);
     ResponseEntity<ContractAndSupplierCreateResponseDto> createContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto);
     ResponseEntity<List<ContractSupplierPermissionResponseDto>> getByBranchAndSubcontractPermission(String idBranch);
+    ResponseEntity<ContractResponsibleResponseDto> getContractByResponsible(String responsibleId);
+    ResponseEntity<String> updateResponsibleFromContract(String contractId, String responsibleId);
 }

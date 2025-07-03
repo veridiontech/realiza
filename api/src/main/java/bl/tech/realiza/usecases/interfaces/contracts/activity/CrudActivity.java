@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrudActivity {
-    ActivityResponseDto save(ActivityRequestDto activityRequestDto);
+    ActivityResponseDto save(ActivityRequestDto activityRequestDto, Boolean replicate);
     Optional<ActivityResponseDto> findOne(String id);
     Page<ActivityResponseDto> findAll(Pageable pageable);
     List<ActivityResponseDto> findAllByBranch(String idBranch);
     List<ActivityDocumentResponseDto> findAllDocumentsByActivity(String idActivity);
-    ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument);
-    String removeDocumentFromActivity(String idActivity, String idDocumentBranch);
-    Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto);
-    void delete(String id);
+    ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument, Boolean replicate);
+    String removeDocumentFromActivity(String idActivity, String idDocumentBranch, Boolean replicate);
+    Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto, Boolean replicate);
+    void delete(String id, Boolean replicate);
     void transferFromRepo(String idBranch);
 }

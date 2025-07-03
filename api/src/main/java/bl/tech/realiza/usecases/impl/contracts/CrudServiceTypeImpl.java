@@ -2,12 +2,11 @@ package bl.tech.realiza.usecases.impl.contracts;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeClient;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeRepo;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -20,7 +19,9 @@ import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeRe
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.*;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import com.google.common.collect.Lists;
@@ -48,6 +49,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
 
     @Override
     public ServiceTypeRepoResponseDto saveServiceTypeRepo(ServiceTypeRequestDto serviceTypeRequestDto) {
@@ -97,9 +99,31 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
-    public void deleteServiceType(String idServiceType) {
+    public void deleteServiceType(String idServiceType, Boolean replicate) {
         ServiceType serviceType = serviceTypeRepository.findById(idServiceType)
                 .orElseThrow(() -> new NotFoundException("Service type not found"));
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate && serviceType instanceof ServiceTypeBranch serviceTypeBranch) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("DELETE_SERVICE_TYPE",
+                    serviceTypeBranch.getBranch().getClient().getIdClient(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    serviceTypeBranch.getIdServiceType(),
+                    null,
+                    serviceTypeBranch.getTitle(),
+                    Activity.Risk.LOW,
+                    serviceTypeBranch.getRisk()));
+        }
+
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
@@ -132,7 +156,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
-    public ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto) {
+    public ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate) {
         ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.save(
                 ServiceTypeBranch.builder()
                         .title(serviceTypeRequestDto.getTitle())
@@ -145,6 +169,27 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         );
 
         ServiceType serviceType = (ServiceType) Hibernate.unproxy(serviceTypeBranch);
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("CREATE_SERVICE_TYPE",
+                    serviceTypeBranch.getBranch().getClient().getIdClient(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    serviceTypeBranch.getIdServiceType(),
+                    null,
+                    serviceTypeBranch.getTitle(),
+                    Activity.Risk.LOW,
+                    serviceTypeBranch.getRisk()));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -164,13 +209,34 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
-    public ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto) {
+    public ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate) {
         ServiceTypeBranch serviceTypeBranch = (ServiceTypeBranch) Hibernate.unproxy(updateServiceType(
                 serviceTypeRepository.findById(idServiceType)
                         .orElseThrow(() -> new NotFoundException("Service type not found")),
                 serviceTypeRequestDto));
 
         ServiceType serviceType = (ServiceType) Hibernate.unproxy(serviceTypeBranch);
+
+        if (replicate == null) {
+            replicate = false;
+        }
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("UPDATE_SERVICE_TYPE",
+                    serviceTypeBranch.getBranch().getClient().getIdClient(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    serviceTypeBranch.getIdServiceType(),
+                    null,
+                    serviceTypeBranch.getTitle(),
+                    Activity.Risk.LOW,
+                    serviceTypeBranch.getRisk()));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())

@@ -32,9 +32,9 @@ public class Profile {
     @Builder.Default
     private Boolean viewer = true; // colaborador - pode só visualizar os serviços da filial
     @Builder.Default
-    private Boolean manager = false; // gestor - visualiza e conclui contratos que for responsável
+    private Boolean manager = false; // gestor - visualiza e conclui / suspende contratos que for responsável
     @Builder.Default
-    private Boolean inspector = false; // fiscal - visualiza e conclui contratos que for responsável
+    private Boolean inspector = false; // fiscal - visualiza contratos que for responsável
     @Builder.Default
     private Boolean laboral = false; // trabalhista - visualiza todos os documentos trabalhista do contrato que for vinculado
     @Builder.Default

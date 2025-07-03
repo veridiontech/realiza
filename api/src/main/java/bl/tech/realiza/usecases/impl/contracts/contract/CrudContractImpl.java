@@ -3,6 +3,8 @@ package bl.tech.realiza.usecases.impl.contracts.contract;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -12,6 +14,7 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
@@ -39,59 +42,79 @@ public class CrudContractImpl implements CrudContract {
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final JwtService jwtService;
 
     @Override
     public String finishContract(String idContract) {
-        Contract contract = contractRepository.findById(idContract)
-                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        contract.setFinished(true);
-        contract.setEndDate(Date.valueOf(LocalDate.now()));
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        contract = contractRepository.save(contract);
+        if (requester.getAdmin()
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                || requester.getManager()) {
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLog(
-                        contract.getIdContract(),
-                        CONTRACT,
-                        userResponsible.getEmail() + " finalizou contrato " + contract.getContractReference(),
-                        null,
-                        FINISH,
-                        userResponsible.getIdUser());
+            Contract contract = contractRepository.findById(idContract)
+                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+            if (requester.getContractAccess().contains(contract.getIdContract())) {
+                contract.setFinished(true);
+                contract.setEndDate(Date.valueOf(LocalDate.now()));
+
+                contract = contractRepository.save(contract);
+
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                            .orElse(null);
+                    if (userResponsible != null) {
+                        auditLogServiceImpl.createAuditLog(
+                                contract.getIdContract(),
+                                CONTRACT,
+                                userResponsible.getEmail() + " finalizou contrato " + contract.getContractReference(),
+                                null,
+                                FINISH,
+                                userResponsible.getIdUser());
+                    }
+                }
+                return "Contract finished successfully";
             }
         }
-
-        return "Contract finished successfully";
+        throw new IllegalArgumentException("User don't have permission to finish a contract");
     }
 
     @Override
     public String suspendContract(String contractId) {
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new NotFoundException("Contract not found"));
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        contract.setIsActive(SUSPENSO);
-        contract.setEndDate(Date.valueOf(LocalDate.now()));
+        if (requester.getAdmin()
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                || requester.getManager()) {
+            Contract contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+            if (requester.getContractAccess().contains(contract.getIdContract())) {
+                contract.setIsActive(SUSPENSO);
+                contract.setEndDate(Date.valueOf(LocalDate.now()));
 
-        contract = contractRepository.save(contract);
+                contract = contractRepository.save(contract);
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLog(
-                        contract.getIdContract(),
-                        CONTRACT,
-                        userResponsible.getEmail() + " suspendeu contrato " + contract.getContractReference(),
-                        null,
-                        UPDATE,
-                        userResponsible.getIdUser());
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                            .orElse(null);
+                    if (userResponsible != null) {
+                        auditLogServiceImpl.createAuditLog(
+                                contract.getIdContract(),
+                                CONTRACT,
+                                userResponsible.getEmail() + " suspendeu contrato " + contract.getContractReference(),
+                                null,
+                                UPDATE,
+                                userResponsible.getIdUser());
+                    }
+                }
+
+                return "Contract suspended successfully";
             }
         }
-
-        return "Contract suspended successfully";
+        throw new IllegalArgumentException("User don't have permission to suspend a contract");
     }
 
     @Override
@@ -129,7 +152,13 @@ public class CrudContractImpl implements CrudContract {
                     null,
                     null,
                     null,
-                    employees.stream().map(Employee::getIdEmployee).toList()));
+                    employees.stream().map(Employee::getIdEmployee).toList(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
 
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
@@ -151,7 +180,13 @@ public class CrudContractImpl implements CrudContract {
                     contractProviderSubcontractor.getIdContract(),
                     null,
                     null,
-                    employees.stream().map(Employee::getIdEmployee).toList()));
+                    employees.stream().map(Employee::getIdEmployee).toList(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
 
         } else {
             throw new NotFoundException("Invalid contract type");
@@ -225,7 +260,13 @@ public class CrudContractImpl implements CrudContract {
                 null,
                 contract.getIdContract(),
                 null,
-                employees.stream().map(Employee::getIdEmployee).toList()));
+                employees.stream().map(Employee::getIdEmployee).toList(),
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         for (Employee employee : employees) {
             if (JwtService.getAuthenticatedUserId() != null) {

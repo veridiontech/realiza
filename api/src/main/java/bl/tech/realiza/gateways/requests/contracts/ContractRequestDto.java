@@ -1,7 +1,6 @@
 package bl.tech.realiza.gateways.requests.contracts;
 
 import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.documents.Document;
 import lombok.Data;
 
 import java.sql.Date;
@@ -26,7 +25,7 @@ public class ContractRequestDto {
     // contract supplier
     private Boolean subcontractPermission;
     private String idServiceType;
-    private List<String> idActivityList;
+    private List<String> idActivities;
     private String idBranch;
     private String idSupplierContract;
     private String idProviderSupplier; // also for subcontractor

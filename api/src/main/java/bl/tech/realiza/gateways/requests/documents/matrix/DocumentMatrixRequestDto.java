@@ -9,5 +9,6 @@ public class DocumentMatrixRequestDto {
     private String expiration;
     private String type;
     private Boolean doesBlock;
+    private Boolean isDocumentUnique;
     private String subgroup;
 }

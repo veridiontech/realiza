@@ -22,6 +22,7 @@ public class ContractDocumentAndEmployeeResponseDto {
     public static class DocumentDto {
         private String id;
         private String title;
+        private String type;
         private Status status;
         private String ownerName;
         private Boolean enterprise;

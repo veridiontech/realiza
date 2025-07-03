@@ -86,10 +86,10 @@ def inserir_dados_no_bd(dados):
                     id_doc = str(uuid.uuid4())  # Gerar um ID único
                     cursor.execute(
                         """
-                        INSERT INTO document_matrix (creation_date, expiration_date_amount, name, id_document_subgroup, type, id_document)
-                        VALUES (NOW(), %s, %s, %s, %s, %s)
+                        INSERT INTO document_matrix (creation_date, expiration_date_amount, name, id_document_subgroup, type, id_document, does_block)
+                        VALUES (NOW(), %s, %s, %s, %s, %s, %s)
                         """,
-                        (expiration, document_name, subgroup_id, doc_type, id_doc)
+                        (expiration, document_name, subgroup_id, doc_type, id_doc, does_block)
                     )
                     print(f"Documento '{document_name}' inserido com sucesso.")
 

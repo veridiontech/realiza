@@ -5,14 +5,13 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.Contract.IsActive;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
@@ -34,12 +33,10 @@ import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequ
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractAndSupplierCreateResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierPermissionResponseDto;
-import bl.tech.realiza.gateways.responses.contracts.contract.ContractSupplierResponseDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.*;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
@@ -48,18 +45,17 @@ import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProvid
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
+import static bl.tech.realiza.domains.user.User.Role.*;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +75,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
     private final SetupAsyncQueueProducer setupQueueProducer;
+    private final JwtService jwtService;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
@@ -140,6 +137,12 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 .branch(branch)
                 .build());
 
+        UserClient userClient = userClientRepository.findById(savedContractProviderSupplier.getResponsible().getIdUser())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        userClient.getContractsAccess().add(savedContractProviderSupplier);
+        userClientRepository.save(userClient);
+
         setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER",
                 null,
                 null,
@@ -147,7 +150,13 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                 null,
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
-                null));
+                null,
+                null,
+                null,
+                null,
+                null,
+                Activity.Risk.LOW,
+                ServiceType.Risk.LOW));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -260,7 +269,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     .orElseThrow(() -> new NotFoundException("User not found"));
         }
 
-        List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivityList());
+        List<Activity> activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
 
         contractProviderSupplier.setServiceTypeBranch(contractProviderSupplierRequestDto.getIdServiceType() != null ? serviceTypeBranch : contractProviderSupplier.getServiceTypeBranch());
         contractProviderSupplier.setServiceName(contractProviderSupplierRequestDto.getServiceName() != null ? contractProviderSupplierRequestDto.getServiceName() : contractProviderSupplier.getServiceName());
@@ -360,7 +369,25 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         if (isActive == null || isActive.isEmpty()) {
             isActive = List.of(ATIVADO);
         }
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = null;
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+        if (requester.getAdmin()
+                || requester.getRole().equals(ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(ROLE_REALIZA_PLUS)) {
+            contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
+        } else {
+            if (!requester.getBranchAccess().contains(idSearch)) {
+                return new PageImpl<>(Collections.emptyList(), pageable, 0);
+            }
+            List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllById(requester.getContractAccess());
+            List<ContractProviderSupplier> filteredContracts = contractProviderSuppliers.stream()
+                    .filter(contract -> contract.getBranch().getIdBranch().equals(idSearch))
+                    .sorted(Comparator.comparing(Contract::getContractReference))
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .limit(pageable.getPageSize())
+                    .collect(Collectors.toList());
+            contractProviderSupplierPage = new PageImpl<>(filteredContracts, pageable, filteredContracts.size());
+        }
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
@@ -544,5 +571,70 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         )
                 .sorted(Comparator.comparing(ContractSupplierPermissionResponseDto::getContractReference, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                 .toList();
+    }
+
+    @Override
+    public ContractResponsibleResponseDto findAllByResponsible(String responsibleId) {
+        userClientRepository.findById(responsibleId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        List<UserClient> responsibleList = userClientRepository.findAllByBranch_IdBranchAndRoleAndProfile_ManagerIsTrue(responsibleId, ROLE_CLIENT_MANAGER)
+                .stream().sorted(Comparator.comparing(User::getFullName)).toList();
+        List<ContractProviderSupplier> contractProviderSupplierList = contractProviderSupplierRepository.findAllByResponsible_IdUser(responsibleId)
+                .stream().sorted(Comparator.comparing(Contract::getContractReference)).toList();
+
+        return ContractResponsibleResponseDto.builder()
+                .contracts(
+                        contractProviderSupplierList
+                                .stream()
+                                .map(
+                                        contractProviderSupplier -> ContractResponsibleResponseDto.ContractResponsibleInfosResponseDto.builder()
+                                                .contractId(contractProviderSupplier.getIdContract())
+                                                .contractReference(contractProviderSupplier.getContractReference())
+                                                .responsibleId(contractProviderSupplier.getResponsible() != null
+                                                        ? contractProviderSupplier.getResponsible().getIdUser()
+                                                        : null)
+                                                .responsibleFullName(contractProviderSupplier.getResponsible() != null
+                                                        ? contractProviderSupplier.getResponsible().getFullName()
+                                                        : null)
+                                                .build()
+                                ).toList()
+                )
+                .responsibleList(
+                        responsibleList
+                                .stream()
+                                .map(
+                                        userClient -> ContractResponsibleResponseDto.ResponsibleResponseDto.builder()
+                                                .responsibleId(userClient.getIdUser())
+                                                .responsibleFullName(userClient.getFullName())
+                                                .build()
+                                ).toList())
+                .build();
+    }
+
+    @Override
+    public String updateResponsible(String contractId, String responsibleId) {
+        ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+        UserClient userClient = userClientRepository.findById(responsibleId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        String oldResponsibleFullName = contractProviderSupplier.getResponsible().getFullName();
+        String newResponsibleFullName = userClient.getFullName();
+
+        contractProviderSupplier.setResponsible(userClient);
+        contractProviderSupplierRepository.save(contractProviderSupplier);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                    userResponsible -> auditLogServiceImpl.createAuditLog(
+                            contractProviderSupplier.getIdContract(),
+                            CONTRACT,
+                            userResponsible.getEmail() + " atualizou contrato " + contractProviderSupplier.getContractReference(),
+                            "Mudou o responsável de " + oldResponsibleFullName
+                                    + " para " + newResponsibleFullName,
+                            UPDATE,
+                            userResponsible.getIdUser()));
+        }
+
+        return "Responsible updated successfully";
     }
 }

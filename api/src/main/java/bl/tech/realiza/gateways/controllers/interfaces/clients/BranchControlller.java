@@ -17,5 +17,6 @@ public interface BranchControlller {
     ResponseEntity<Optional<BranchResponseDto>> updateBranch(String id, BranchCreateRequestDto branchCreateRequestDto);
     ResponseEntity<Void> deleteBranch(String id);
     ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);
+    ResponseEntity<Page<BranchResponseDto>> getAllBranchesByClientUnfiltered(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<ControlPanelResponseDto> getControlPanelSummarizedByBranch(String branchId);
 }

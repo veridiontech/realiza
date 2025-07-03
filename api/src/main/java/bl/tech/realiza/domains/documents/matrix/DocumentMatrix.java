@@ -31,6 +31,8 @@ public class DocumentMatrix {
     @Builder.Default
     private Boolean doesBlock = true;
     @Builder.Default
+    private Boolean isDocumentUnique = true;
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum Unit {

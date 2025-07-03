@@ -30,6 +30,21 @@ public class UserResponseDto {
     private String cellphone;
     private List<String> branches;
 
+
+    private List<String> branchAccess;
+    private List<String> contractAccess;
+    private Boolean admin;
+    private Boolean viewer;
+    private Boolean manager;
+    private Boolean inspector;
+    private Boolean laboral;
+    private Boolean workplaceSafety;
+    private Boolean registrationAndCertificates;
+    private Boolean general;
+    private Boolean health;
+    private Boolean environment;
+    private Boolean concierge;
+
     // client
     private String branch;
     private String idClient;

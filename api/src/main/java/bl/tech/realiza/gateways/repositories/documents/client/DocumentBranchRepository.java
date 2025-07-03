@@ -66,4 +66,5 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
             @Param("isSelected") Boolean isSelected
     );
 
+    List<DocumentBranch> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
 }
