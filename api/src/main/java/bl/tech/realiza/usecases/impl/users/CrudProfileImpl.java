@@ -1,7 +1,9 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.user.Profile;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.users.ProfileRepository;
 import bl.tech.realiza.gateways.requests.users.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.ProfileNameResponseDto;
@@ -16,9 +18,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CrudProfileImpl implements CrudProfile {
     private final ProfileRepository profileRepository;
+    private final ClientRepository clientRepository;
 
     @Override
     public ProfileResponseDto save(ProfileRequestDto profileRequestDto) {
+        Client client = clientRepository.findById(profileRequestDto.getClientId())
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
         return toDto(profileRepository.save(Profile.builder()
                 .name(profileRequestDto.getName())
                 .admin(profileRequestDto.getAdmin())
@@ -32,6 +38,7 @@ public class CrudProfileImpl implements CrudProfile {
                 .health(profileRequestDto.getHealth())
                 .environment(profileRequestDto.getEnvironment())
                 .concierge(profileRequestDto.getConcierge())
+                .client(client)
                 .build()));
     }
 

@@ -7,9 +7,6 @@ import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.services.PageResponse;
-import bl.tech.realiza.usecases.impl.employees.CrudEmployeeBrazilianImpl;
-import bl.tech.realiza.usecases.impl.employees.CrudEmployeeForeignerImpl;
-import bl.tech.realiza.usecases.impl.employees.CrudEmployeeImpl;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeBrazilian;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeForeigner;
@@ -74,6 +71,13 @@ public class EmployeeControllerImpl implements EmployeeController {
     @Override
     public ResponseEntity<EmployeeResponseDto> changeEmployeeSituation(@PathVariable String employeeId, @RequestParam Employee.Situation situation) {
         return ResponseEntity.ok(crudEmployee.changeSituation(employeeId, situation));
+    }
+
+    @GetMapping("/{employeeId}/status-check")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Boolean> checkEmployeeStatus(@PathVariable String employeeId) {
+        return ResponseEntity.ok(crudEmployee.checkEmployeeStatus(employeeId));
     }
 
     @PostMapping("/brazilian")

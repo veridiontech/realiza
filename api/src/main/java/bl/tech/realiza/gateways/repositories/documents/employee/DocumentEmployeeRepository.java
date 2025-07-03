@@ -88,7 +88,11 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
 """)
     Long countByBranchId(@Param("branchId") String branchId);
 
-
-
-
+    @Query("""
+    SELECT COUNT(d) > 0 FROM DocumentEmployee d
+    WHERE d.employee.idEmployee = :employeeId
+      AND d.doesBlock = true
+      AND d.status != 'APROVADO'
+""")
+    boolean existsBlockingDocs(@Param("employeeId") String employeeId);
 }
