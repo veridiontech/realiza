@@ -608,7 +608,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                     auditLogServiceImpl.createAuditLog(
                             document.getIdDocumentation(),
                             DOCUMENT,
-                            userResponsible.getEmail() + " " + action + " documento "
+                            userResponsible.getFullName() + " " + action + " documento "
                             + document.getTitle(),
                             null,
                             UPDATE,
@@ -675,7 +675,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 auditLogServiceImpl.createAuditLog(
                         documentBranch.getIdDocumentation(),
                         DOCUMENT,
-                        userResponsible.getEmail() + " mudou " + documentBranch.getTitle()
+                        userResponsible.getFullName() + " mudou " + documentBranch.getTitle()
                                 + " validade de " + oldAmount + " " + oldUnit
                                 + " para " + documentBranch.getExpirationDateAmount() + " " + documentBranch.getExpirationDateUnit(),
                         null,

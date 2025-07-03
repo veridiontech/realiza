@@ -163,7 +163,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                         savedContractProviderSupplier.getIdContract(),
                         CONTRACT,
-                        userResponsible.getEmail() + " criou contrato " + savedContractProviderSupplier.getContractReference(),
+                        userResponsible.getFullName() + " criou contrato "
+                                + savedContractProviderSupplier.getContractReference(),
                             null,
                             CREATE,
                         userResponsible.getIdUser()));
@@ -288,7 +289,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                         savedContractProviderSupplier.getIdContract(),
                         CONTRACT,
-                        userResponsible.getEmail() + " atualizou contrato " + savedContractProviderSupplier.getContractReference(),
+                        userResponsible.getFullName() + " atualizou contrato "
+                                + savedContractProviderSupplier.getContractReference(),
                         null,
                         UPDATE,
                         userResponsible.getIdUser()));
@@ -346,7 +348,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                         contract.getIdContract(),
                         CONTRACT,
-                        userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
+                        userResponsible.getFullName() + " deletou contrato "
+                                + contract.getContractReference(),
                         null,
                         DELETE,
                         userResponsible.getIdUser()));
@@ -628,7 +631,8 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                             contractProviderSupplier.getIdContract(),
                             CONTRACT,
-                            userResponsible.getEmail() + " atualizou contrato " + contractProviderSupplier.getContractReference(),
+                            userResponsible.getFullName() + " atualizou contrato "
+                                    + contractProviderSupplier.getContractReference(),
                             "Mudou o responsável de " + oldResponsibleFullName
                                     + " para " + newResponsibleFullName,
                             UPDATE,

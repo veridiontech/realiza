@@ -271,7 +271,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 auditLogServiceImpl.createAuditLog(
                         savedDocumentSubcontractor.getIdDocumentation(),
                         DOCUMENT,
-                        userResponsible.getEmail() + " fez upload do documento "
+                        userResponsible.getFullName() + " fez upload do documento "
                                 + savedDocumentSubcontractor.getTitle() + " para a empresa "
                                 + (savedDocumentSubcontractor.getProviderSubcontractor() != null
                                 ? savedDocumentSubcontractor.getProviderSubcontractor().getCorporateName()

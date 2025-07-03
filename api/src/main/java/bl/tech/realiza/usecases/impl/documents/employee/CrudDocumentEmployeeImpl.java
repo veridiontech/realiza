@@ -273,11 +273,9 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 auditLogServiceImpl.createAuditLog(
                         savedDocumentEmployee.getIdDocumentation(),
                         DOCUMENT,
-                        userResponsible.getEmail() + " fez upload do documento "
+                        userResponsible.getFullName() + " fez upload do documento "
                                 + savedDocumentEmployee.getTitle() + " para o colaborador "
-                                + (savedDocumentEmployee.getEmployee() != null
-                                    ? savedDocumentEmployee.getEmployee().getName()
-                                    : "Not identified"),
+                                + savedDocumentEmployee.getEmployee().getFullName(),
                         null,
                         UPLOAD,
                         userResponsible.getIdUser());
