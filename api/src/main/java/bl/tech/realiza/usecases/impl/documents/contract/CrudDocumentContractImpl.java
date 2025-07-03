@@ -38,9 +38,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         for (Employee employee : contract.getEmployees()) {
             employeeDtos.add(ContractDocumentAndEmployeeResponseDto.EmployeeDto.builder()
                     .id(employee.getIdEmployee())
-                    .name(employee.getName()
-                            + (employee.getSurname() != null
-                            ? " " + employee.getSurname() : ""))
+                    .name(employee.getFullName())
                     .cboTitle(employee.getCbo() != null
                             ? employee.getCbo().getTitle() : null)
                     .build());
@@ -53,9 +51,9 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .title(documentEmployee.getTitle())
                                 .status(documentEmployee.getStatus())
                                 .type(documentEmployee.getType())
-                                .ownerName(documentEmployee.getEmployee().getName()
-                                        + (documentEmployee.getEmployee().getSurname() != null
-                                        ? " " + documentEmployee.getEmployee().getSurname() : ""))
+                                .ownerName(documentEmployee.getEmployee().getFullName())
+                                .hasDoc(documentEmployee.getIdDocumentation() != null
+                                        && !documentEmployee.getIdDocumentation().isEmpty())
                                 .enterprise(false)
                                 .build());
             }
@@ -78,6 +76,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .ownerName(documentProviderSupplier.getProviderSupplier() != null
                                         ? documentProviderSupplier.getProviderSupplier().getCorporateName()
                                         : null)
+                                .hasDoc(documentProviderSupplier.getIdDocumentation() != null
+                                        && !documentProviderSupplier.getIdDocumentation().isEmpty())
                                 .enterprise(true)
                                 .build());
                     }
@@ -142,6 +142,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .ownerName(documentProviderSubcontractor.getProviderSubcontractor() != null
                                         ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
                                         : null)
+                                .hasDoc(documentProviderSubcontractor.getIdDocumentation() != null
+                                        && !documentProviderSubcontractor.getIdDocumentation().isEmpty())
                                 .enterprise(true)
                                 .build());
                     }

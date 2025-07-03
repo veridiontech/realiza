@@ -26,6 +26,7 @@ public class ContractDocumentAndEmployeeResponseDto {
         private Status status;
         private String ownerName;
         private Boolean enterprise;
+        private Boolean hasDoc;
     }
 
     @Data
