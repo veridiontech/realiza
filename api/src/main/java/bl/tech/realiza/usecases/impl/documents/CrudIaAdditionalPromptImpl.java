@@ -48,17 +48,12 @@ public class CrudIaAdditionalPromptImpl implements CrudIaAdditionalPrompt {
 
     @Override
     public List<IaAdditionalPromptResponseDto> findAll() {
-        return toDto(iaAdditionalPromptRepository.findAll());
+        return iaAdditionalPromptRepository.findAllIaAdditionalPromptToDto();
     }
 
     @Override
     public List<IaAdditionalPromptNameListResponseDto> findAllNameList() {
-        return iaAdditionalPromptRepository.findAll().stream().map(
-                iaAdditionalPrompt -> IaAdditionalPromptNameListResponseDto.builder()
-                        .id(iaAdditionalPrompt.getId())
-                        .documentTitle(iaAdditionalPrompt.getDocumentMatrix().getName())
-                        .build()
-        ).toList();
+        return iaAdditionalPromptRepository.findAllIaAdditionalPromptNameListToDto();
     }
 
     private IaAdditionalPrompt toEntity(IaAdditionalPromptRequestDto requestDto) {
