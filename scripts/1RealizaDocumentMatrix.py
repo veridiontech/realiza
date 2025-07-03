@@ -4,6 +4,7 @@ import pandas as pd
 import mysql.connector
 from mysql.connector import errorcode
 import uuid
+import os
 
 # Configurações de conexão com o banco de dados MySQL
 DB_CONFIG = {
@@ -15,7 +16,8 @@ DB_CONFIG = {
 }
 
 def importar_excel():
-    path = "C:/Users/Rogerio/Downloads/BL_SISTEMA NOVO_PARAMETRIZACOES (1).xlsx"
+    base_dir = os.path.dirname(__file__)
+    path = os.path.join(base_dir, "BL_SISTEMA NOVO_PARAMETRIZACOES (1).xlsx")
     try:
         dados = pd.read_excel(path, sheet_name="MATRIZ GERAL DE DOCTOS", engine='openpyxl')
         print("Dados importados com sucesso!")

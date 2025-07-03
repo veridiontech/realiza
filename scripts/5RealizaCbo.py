@@ -1,7 +1,7 @@
 import uuid
 import csv
+import os
 import mysql.connector
-from mysql.connector import errorcode
 
 # Configuração da conexão com o banco de dados
 DB_CONFIG = {
@@ -13,7 +13,8 @@ DB_CONFIG = {
 }
 
 # Caminho do arquivo CSV
-CSV_PATH = r"C:\Users\Rogerio\Downloads\ESTRUTURA CBO\CBO2002 - Ocupacao.csv"
+BASE_DIR = os.path.dirname(__file__)
+CSV_PATH = os.path.join(BASE_DIR, "CBO2002 - Ocupacao.csv")
 
 def importar_cbo(csv_path):
     try:

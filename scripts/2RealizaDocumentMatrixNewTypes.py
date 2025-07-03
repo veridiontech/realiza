@@ -1,7 +1,6 @@
 import openpyxl
 import mysql.connector
-import uuid
-from mysql.connector import errorcode
+import os
 
 # Conexão DB
 DB_CONFIG = {
@@ -111,7 +110,8 @@ def processar_dados(documentos):
 
 
 def main():
-    path = "C:/Users/Rogerio/Documents/BL_SISTEMA NOVO_PARAMETRIZACOES.xlsx"
+    base_dir = os.path.dirname(__file__)
+    path = os.path.join(base_dir, "BL_SISTEMA NOVO_PARAMETRIZACOES.xlsx")
     docs_com_tipo = importar_com_cor(path)
     processar_dados(docs_com_tipo)
 
