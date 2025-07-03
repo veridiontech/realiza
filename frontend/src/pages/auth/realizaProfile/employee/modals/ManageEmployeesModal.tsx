@@ -12,6 +12,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Puff } from "react-loader-spinner";
+import { Pointer, CircleX, Files, FileCheck2  } from "lucide-react";
 
 interface Employee {
   idEmployee: string;
@@ -31,21 +32,25 @@ interface Contract {
   serviceName: string;
 }
 
-export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) {
+export function ManageEmployeesModal({
+  idProvider,
+}: ManageEmployeesModalProps) {
   const [activeTab, setActiveTab] = useState<"alocar" | "desalocar">("alocar");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [mainModalOpen, setMainModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [selectContractsModalOpen, setSelectContractsModalOpen] = useState(false);
+  const [selectContractsModalOpen, setSelectContractsModalOpen] =
+    useState(false);
   const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
   const [allocatedEmployees, setAllocatedEmployees] = useState<Employee[]>([]);
-  const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<string[]>([]);
+  const [selectedAllocatedEmployees, setSelectedAllocatedEmployees] = useState<
+    string[]
+  >([]);
   const [isAllocating, setIsAllocating] = useState(false);
-
 
   useEffect(() => {
     if (mainModalOpen) {
@@ -54,9 +59,12 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
           setLoading(true);
           try {
             const tokenFromStorage = localStorage.getItem("tokenClient");
-            const res = await axios.get(`${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`, {
-              headers: { Authorization: `Bearer ${tokenFromStorage}` }
-            });
+            const res = await axios.get(
+              `${ip}/employee?idSearch=${idProvider}&enterprise=SUPPLIER`,
+              {
+                headers: { Authorization: `Bearer ${tokenFromStorage}` },
+              }
+            );
             const data = res.data.content || res.data;
             const sorted = [...data].sort((a: Employee, b: Employee) =>
               `${a.name} ${a.surname}`.localeCompare(`${b.name} ${b.surname}`)
@@ -75,9 +83,12 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
           setLoading(true);
           try {
             const tokenFromStorage = localStorage.getItem("tokenClient");
-            const res = await axios.get(`${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`, {
-              headers: { Authorization: `Bearer ${tokenFromStorage}` }
-            });
+            const res = await axios.get(
+              `${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`,
+              {
+                headers: { Authorization: `Bearer ${tokenFromStorage}` },
+              }
+            );
             setContracts(res.data.content || []);
           } catch (error) {
             console.error("Erro ao buscar contratos:", error);
@@ -99,7 +110,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
         params: {
           idContract: contractId,
-        }
+        },
       });
       setAllocatedEmployees(res.data.content || []);
       setSelectedAllocatedEmployees([]);
@@ -111,7 +122,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   };
 
   const handleDeallocate = async () => {
-    if (selectedContracts.length !== 1 || selectedAllocatedEmployees.length === 0) {
+    if (
+      selectedContracts.length !== 1 ||
+      selectedAllocatedEmployees.length === 0
+    ) {
       toast.error("Selecione 1 contrato e pelo menos 1 colaborador.");
       return;
     }
@@ -178,7 +192,10 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       setMainModalOpen(false);
       setSelectContractsModalOpen(true);
     } else if (activeTab === "desalocar") {
-      if (selectedAllocatedEmployees.length === 0 || selectedContracts.length !== 1) {
+      if (
+        selectedAllocatedEmployees.length === 0 ||
+        selectedContracts.length !== 1
+      ) {
         toast.error("Selecione 1 contrato e pelo menos 1 colaborador.");
         return;
       }
@@ -190,9 +207,12 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   const getContracts = async () => {
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      });
+      const res = await axios.get(
+        `${ip}/contract/supplier/filtered-supplier?idSearch=${idProvider}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
       setContracts(res.data.content);
     } catch (err) {
       console.log(err);
@@ -208,7 +228,9 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
   const toggleSelectContract = async (id: string) => {
     if (activeTab === "desalocar") {
       setSelectedContracts((prev) => {
-        const updated = prev.includes(id) ? prev.filter((cid) => cid !== id) : [id];
+        const updated = prev.includes(id)
+          ? prev.filter((cid) => cid !== id)
+          : [id];
         return updated;
       });
       await fetchAllocatedEmployees(id);
@@ -265,21 +287,22 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       </Button>
 
       <Dialog open={confirmModalOpen} onOpenChange={setConfirmModalOpen}>
-        <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white text-center text-lg">
-              O que você deseja fazer?
+        <DialogContent className="border border-[#2E3C57] text-white max-w-xl pt-3 px-3">
+          <DialogHeader className="bg-[#1F2A40] p-5 rounded-sm">
+            <DialogTitle className="text-white text-start text-lg">
+              O que deseja realizar?
             </DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 mt-6">
+          <div className="flex items-center gap-4 mt-2 ">
             <Button
               onClick={() => {
                 setActiveTab("alocar");
                 setConfirmModalOpen(false);
                 setMainModalOpen(true);
               }}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-md transition-colors"
+              className="w-full bg-green-500 bg-opacity-10 hover:bg-green-200 text-green-500 font-semibold text-md py-6 transition-colors"
             >
+              <Pointer />
               Alocar Colaborador
             </Button>
             <Button
@@ -288,8 +311,9 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                 setConfirmModalOpen(false);
                 setMainModalOpen(true);
               }}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded-md transition-colors"
+              className="w-full bg-red-500 bg-opacity-10 hover:bg-red-200 text-red-500 font-semibold text-md py-6 transition-colors"
             >
+              <CircleX />
               Desalocar Colaborador
             </Button>
           </div>
@@ -297,11 +321,8 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       </Dialog>
 
       <Dialog open={mainModalOpen} onOpenChange={setMainModalOpen}>
-        <DialogContent
-          style={{ backgroundImage: `url(${bgModalRealiza})` }}
-          className="max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white"
-        >
-          <DialogHeader>
+        <DialogContent className=" max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white pt-2 px-2">
+          <DialogHeader className="bg-[#1F2A40] p-5 rounded-sm">
             <DialogTitle className="text-white">
               {activeTab === "alocar"
                 ? "Alocar Colaboradores"
@@ -311,7 +332,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
           <Button
             onClick={toggleSelectAll}
-            className="mb-3 bg-[#3A4C70] hover:bg-[#506A93] text-white font-medium px-4 py-2 rounded-md"
+            className="mb-3 bg-[#fff] hover:bg-[#fff0f0] border justify-start text-black font-medium px-4 py-2 rounded-md"
           >
             {activeTab === "alocar"
               ? selectedEmployees.length === employees.length
@@ -324,9 +345,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
           <ScrollArea className="h-[60vh] mt-2 space-y-2">
             {loading ? (
-              <p>
-                Carregando...
-              </p>
+              <p>Carregando...</p>
             ) : activeTab === "alocar" ? (
               employees.length > 0 ? (
                 employees.map((emp) => {
@@ -335,11 +354,13 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                     <button
                       key={emp.idEmployee}
                       onClick={() => toggleSelect(emp.idEmployee)}
-                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
-                        ? "bg-green-600 border-green-400"
-                        : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                        }`}
+                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
+                        isSelected
+                          ? "bg-green-100 border-green-100 text-green-600 font-semibold"
+                          : "bg-[#fffafa] hover:bg-green-200 border-none text-gray-700 font-semibold"
+                      }`}
                     >
+                     
                       {emp.name} {emp.surname}
                     </button>
                   );
@@ -351,7 +372,9 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
               selectedContracts.length === 1 ? (
                 allocatedEmployees.length > 0 ? (
                   allocatedEmployees.map((emp) => {
-                    const isSelected = selectedAllocatedEmployees.includes(emp.idEmployee);
+                    const isSelected = selectedAllocatedEmployees.includes(
+                      emp.idEmployee
+                    );
                     return (
                       <button
                         key={emp.idEmployee}
@@ -362,10 +385,11 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                               : [...prev, emp.idEmployee]
                           );
                         }}
-                        className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
-                          ? "bg-red-600 border-red-400"
-                          : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                          }`}
+                        className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
+                          isSelected
+                            ? "bg-red-600 border-red-400"
+                            : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                        }`}
                       >
                         {emp.name} {emp.surname}
                       </button>
@@ -376,23 +400,32 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
                 )
               ) : (
                 contracts.map((contract) => {
-                  const isSelected = selectedContracts.includes(contract.idContract);
+                  const isSelected = selectedContracts.includes(
+                    contract.idContract
+                  );
                   return (
                     <button
                       key={contract.idContract}
                       onClick={() => toggleSelectContract(contract.idContract)}
-                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
-                        ? "bg-green-600 border-red-400"
-                        : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                        }`}
+                      className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${
+                        isSelected
+                          ? "bg-green-600 border-red-400"
+                          : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
+                      }`}
                     >
                       <div className="flex flex-col">
-                        <span className="font-semibold">{contract.serviceName}</span>
-                        <span className="text-sm text-gray-300">{contract.contractReference}</span>
+                        <span className="font-semibold">
+                          {contract.serviceName}
+                        </span>
+                        <span className="text-sm text-gray-300">
+                          {contract.contractReference}
+                        </span>
                         <span className="text-sm text-gray-300">
                           {new Date(contract.dateStart).toLocaleDateString()}
                         </span>
-                        <span className="text-sm text-gray-400">{contract.description}</span>
+                        <span className="text-sm text-gray-400">
+                          {contract.description}
+                        </span>
                       </div>
                     </button>
                   );
@@ -405,52 +438,70 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
           {((activeTab === "alocar" && selectedEmployees.length > 0) ||
             (activeTab === "desalocar" && selectedContracts.length > 0)) && (
-              <div className="mt-4 flex justify-end">
-                <Button
-                  onClick={handleConfirm}
-                  className={`${activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
-                    } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
-                >
-                  Proxima etapa
-                </Button>
-              </div>
-            )}
+            <div className="mt-4 flex justify-end">
+              <Button
+                onClick={handleConfirm}
+                className={`${
+                  activeTab === "alocar" ? "bg-green-600" : "bg-red-600"
+                } hover:brightness-110 text-white font-semibold px-6 py-2 rounded-md`}
+              >
+                Proxima etapa
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
-      <Dialog open={selectContractsModalOpen} onOpenChange={setSelectContractsModalOpen}>
-        <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white text-center text-lg">
+      <Dialog
+        open={selectContractsModalOpen}
+        onOpenChange={setSelectContractsModalOpen}
+      >
+        <DialogContent className="max-w-[85vw] sm:max-w-[40vw] md:max-w-[35vw] text-white pt-2 px-5">
+          <DialogHeader className="bg-[#fff] py-5 px-2 rounded-lg">
+            <DialogTitle className="text-black text-start text-lg flex gap-3 items-center">
+              <Pointer width={18} height={18}/>
               Selecione os contratos
-              <ScrollArea className="h-[50vh] mt-4 space-y-2">
-                {contracts.length > 0 ? (
-                  contracts.map((contract) => {
-                    const isSelected = selectedContracts.includes(contract.idContract);
-                    return (
-                      <button
-                        key={contract.idContract}
-                        onClick={() => toggleSelectContract(contract.idContract)}
-                        className={`w-full text-left p-3 rounded-md border transition-all duration-200 ${isSelected
-                          ? "bg-green-600 border-green-400"
-                          : "bg-[#2E3C57] hover:bg-[#3A4C70] border-[#3A4C70]"
-                          }`}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{contract.serviceName}</span>
-                          <span className="text-sm text-gray-300">{contract.contractReference}</span>
-                          <span className="text-sm text-gray-300">{new Date(contract.dateStart).toLocaleDateString()}</span>
-                          <span className="text-sm text-gray-400">{contract.description}</span>
-                        </div>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <p>Nenhum contrato disponível.</p>
-                )}
-              </ScrollArea>
             </DialogTitle>
           </DialogHeader>
+          <ScrollArea className="h-[50vh] mt-4 space-y-2">
+            {contracts.length > 0 ? (
+              contracts.map((contract) => {
+                const isSelected = selectedContracts.includes(
+                  contract.idContract
+                );
+                return (
+                  <button
+                    key={contract.idContract}
+                    onClick={() => toggleSelectContract(contract.idContract)}
+                    className={`w-full text-left p-3 rounded-md border transition-all duration-200 flex gap-5 items-center ${
+                      isSelected
+                        ? "bg-green-100 border-green-100 text-green-600 font-semibold"
+                        : "bg-[#fffafa] hover:bg-green-200 border-none text-gray-700 font-semibold"
+                    }`}
+                  >
+                     <Files width={70} height={70}/>
+                    <div className="flex flex-col">
+                      <span className="font-semibold">
+                        {contract.serviceName}
+                      </span>
+                      <span className="text-sm text-gray-300">
+                        {contract.contractReference}
+                      </span>
+                      <span className="text-sm text-gray-300">
+                        {new Date(contract.dateStart).toLocaleDateString()}
+                      </span>
+                      <span className="text-sm text-gray-400">
+                        {contract.description}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <p>Nenhum contrato disponível.</p>
+            )}
+          </ScrollArea>
+
           <div className="mt-6 flex justify-end gap-3">
             <Button
               onClick={() => {
@@ -476,20 +527,29 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
       </Dialog>
 
       <Dialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
-        <DialogContent className="bg-[#1F2A40] border border-[#2E3C57] text-white max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-white text-center text-lg">
-              {activeTab === "alocar" ? "Confirme a alocação" : "Confirme a desalocação"}
+        <DialogContent className="bg-[#fff] border border-[#2E3C57] text-black max-w-lg p-0">
+          <DialogHeader className="bg-[#1F2A40] py-4 px-5">
+            <DialogTitle className="text-white text-start text-lg flex gap-3 items-center">
+              <FileCheck2 />
+              {activeTab === "alocar"
+                ? "Confirme a alocação"
+                : "Confirme a desalocação"}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 px-5">
             <div>
-              <h3 className="font-semibold mb-2">Colaboradores Selecionados:</h3>
-              <ul className="list-disc list-inside text-sm text-gray-300">
+              <h3 className="font-semibold mb-2">
+                Colaboradores Selecionados:
+              </h3>
+              <ul className="list-disc list-inside font-normal text-sm text-gray-500">
                 {(activeTab === "alocar"
-                  ? employees.filter((emp) => selectedEmployees.includes(emp.idEmployee))
-                  : allocatedEmployees.filter((emp) => selectedAllocatedEmployees.includes(emp.idEmployee))
+                  ? employees.filter((emp) =>
+                      selectedEmployees.includes(emp.idEmployee)
+                    )
+                  : allocatedEmployees.filter((emp) =>
+                      selectedAllocatedEmployees.includes(emp.idEmployee)
+                    )
                 ).map((emp) => (
                   <li key={emp.idEmployee}>
                     {emp.name} {emp.surname}
@@ -500,7 +560,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
 
             <div>
               <h3 className="font-semibold mb-2">Contratos Selecionados:</h3>
-              <ul className="list-disc list-inside text-sm text-gray-300">
+              <ul className="list-disc list-inside font-normal text-sm text-gray-500">
                 {contracts
                   .filter((ct) => selectedContracts.includes(ct.idContract))
                   .map((ct) => (
@@ -512,7 +572,7 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
             </div>
           </div>
 
-          <div className="mt-6 flex justify-between">
+          <div className="mt-6 flex justify-between p-5">
             <Button
               onClick={() => {
                 setFinalConfirmOpen(false);
@@ -523,7 +583,9 @@ export function ManageEmployeesModal({ idProvider }: ManageEmployeesModalProps) 
               Voltar
             </Button>
             <Button
-              onClick={activeTab === "alocar" ? handleAllocate : handleDeallocate}
+              onClick={
+                activeTab === "alocar" ? handleAllocate : handleDeallocate
+              }
               disabled={isAllocating}
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-md flex items-center justify-center gap-2"
             >
