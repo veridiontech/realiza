@@ -20,6 +20,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useWatch } from "react-hook-form";
 
+import likeImage from "@/assets/like.png";
+
+
 const editContractSchema = z.object({
   contractReference: z.string().optional(),
   providerSupplierName: z.string().optional(),
@@ -929,63 +932,74 @@ export function TableServiceProvider() {
       )}
 
       {isFinalizeModalOpen && (
-        <Modal
-          title="Finalizar Contrato"
-          onClose={() => {
-            setIsFinalizeModalOpen(false);
-            setSelectedSupplierId(null);
-          }}
-        >
-          <div className="text-white">
-            <p className="mb-4">Deseja realmente finalizar este contrato?</p>
-            <div className="flex gap-4 justify-end">
-              <button
-                onClick={() => setIsFinalizeModalOpen(false)}
-                className="bg-red-600 px-4 py-2 rounded"
-              >
-                Não
-              </button>
-              <button
-                onClick={async () => {
-                  if (!selectedSupplierId) {
-                    console.warn("ID do contrato não está definido.");
-                    return;
-                  }
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-md w-[90vw] max-w-[520px] p-6 shadow-lg relative">
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="text-[#2E3C4D] text-lg font-semibold flex items-center gap-2">
+              <X className="w-5 h-5 text-[#C9C9C9]" />
+              Finalizar contrato
+              </h2>
+            <button onClick={() => setIsFinalizeModalOpen(false)}>
+            <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+          </button>
+        </div>
 
-                  const tokenFromStorage = localStorage.getItem("tokenClient");
-                  const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
-                  const payload = { status: "Contrato Cancelado" };
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <img
+              src={likeImage} 
+              alt="Ilustração de confirmação"
+              className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
+            />
 
-                  console.log("🔄 Iniciando finalização de contrato");
-                  console.log("➡️ Endpoint:", endpoint);
-                  console.log("📦 Payload:", payload);
-
-                  try {
-                    const response = await axios.post(endpoint, payload, {
-                      headers: {
-                        Authorization: `Bearer ${tokenFromStorage}`,
-                      },
-                    });
-
-                    console.log("✅ Contrato finalizado:", response.data);
-                    toast.success("Contrato finalizado com sucesso");
-                    await getSupplier();
-                  } catch (err: any) {
-                    console.error("❌ Erro ao finalizar contrato", err);
-                    toast.error("Erro ao finalizar contrato");
-                  } finally {
-                    setIsFinalizeModalOpen(false);
-                    setSelectedSupplierId(null);
-                  }
-                }}
-                className="bg-green-600 px-4 py-2 rounded"
-              >
-                Sim
-              </button>
-            </div>
+          <div className="flex-1 text-sm text-gray-700 space-y-2">
+            <p className="font-semibold">
+              Deseja realmente finalizar este contrato?
+            </p>
+            <p>
+              Essa ação é <strong>permanente</strong> e <strong>não poderá ser desfeita</strong>.
+              O contrato será <strong>removido</strong> e não estará mais disponível.
+            </p>
           </div>
-        </Modal>
-      )}
+        </div>
+
+      <div className="mt-6 flex justify-end gap-4">
+        <button
+          onClick={() => setIsFinalizeModalOpen(false)}
+          className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+        >
+          Voltar
+        </button>
+        <button
+          onClick={async () => {
+            if (!selectedSupplierId) return;
+
+            const token = localStorage.getItem("tokenClient");
+            const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
+            const payload = { status: "Contrato Cancelado" };
+
+            try {
+              const response = await axios.post(endpoint, payload, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              toast.success("Contrato finalizado com sucesso");
+              await getSupplier();
+            } catch (err) {
+              toast.error("Erro ao finalizar contrato");
+              console.error(err);
+            } finally {
+              setIsFinalizeModalOpen(false);
+              setSelectedSupplierId(null);
+            }
+          }}
+          className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
+        >
+          Finalizar contrato
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {isHistoryModalOpen && selectedSupplier && (
         <Modal

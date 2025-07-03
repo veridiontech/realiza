@@ -392,38 +392,35 @@ export function ModalTesteSendSupplier() {
       </DialogTrigger>
       <DialogContent
         style={{
-          backgroundImage: `url(${bgModalRealiza})`,
+          //backgroundImage: `url(${bgModalRealiza})`,
         }}
         className="max-w-[90vw] md:max-w-[45vw]"
       >
-        <DialogHeader>
-          <DialogTitle className="text-white">
-            Cadastrar novo prestador
-          </DialogTitle>
-        </DialogHeader>
-        <div>
-          {selectedBranch ? (
-            <span className="text-white">
-              <strong>Filial:</strong> {selectedBranch?.name}
-            </span>
-          ) : (
-            <span className="text-white">Nenhuma filial selecionada</span>
-          )}
+        <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 h-[60px] min-w-full">
+          <h2 className="text-white text-base font-semibold">Cadastrar novo prestador</h2>
+      </div>
+
+
+
+        <div className="bg-[#F2F3F5] text-sm text-gray-800 p-2 px-4 rounded shadow mb-4">
+          <strong>Filial:</strong> {selectedBranch?.name ?? "Nenhuma filial selecionada"}
         </div>
+
         <div>
           <div className="flex flex-col gap-2">
-            <Label className="text-white">Selecione uma das opções</Label>
+            <Label className="text-black">Selecione uma das opções</Label>
             <div className="flex flex-col gap-2 md:flex-row">
-              <label className="flex items-center gap-1 text-white">
+              <label className="flex items-center gap-1 text-black">
                 <input
                   type="radio"
                   value="sim"
                   checked={isSubcontractor === "contratado"}
                   onChange={() => setIsSubContractor("contratado")}
+                  
                 />
                 Contratado direto
               </label>
-              <label className="flex items-center gap-1 text-white">
+              <label className="flex items-center gap-1 text-black">
                 <input
                   type="radio"
                   value="nao"
@@ -440,7 +437,7 @@ export function ModalTesteSendSupplier() {
               className="flex flex-col gap-4"
             >
               <div className="relative">
-                <Label className="text-white">CNPJ</Label>
+                <Label className="text-black">CNPJ</Label>
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
@@ -451,13 +448,14 @@ export function ModalTesteSendSupplier() {
                       setCnpjValue(formatted);
                       setValue("cnpj", formatted, { shouldValidate: true });
                     }}
-                    className="w-full"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                     // Removido {...register("cnpj")} aqui para evitar onChange duplicado
                   />
                   {isLoading ? (
                     <div
                       onClick={handleCNPJSearch}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-black transition-all hover:bg-neutral-500"
                     >
                       <Oval
                         visible={true}
@@ -472,7 +470,7 @@ export function ModalTesteSendSupplier() {
                   ) : (
                     <div
                       onClick={handleCNPJSearch}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-black transition-all hover:bg-neutral-500"
                     >
                       <Search />
                     </div>
@@ -486,28 +484,30 @@ export function ModalTesteSendSupplier() {
               </div>
 
               <div className="mb-1">
-                <Label className="text-white">Razão Social</Label>
+                <Label className="text-black">Razão Social</Label>
                 <Input
                   type="text" // Alterado para type="text"
                   placeholder="Digite a razão social do novo prestador"
                   {...register("corporateName")}
-                  className="w-full"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                 />
               </div>
               <div className="mb-1">
-                <Label className="text-white">Email</Label>
+                <Label className="text-black">Email</Label>
                 <Input
                   type="email"
                   placeholder="Digite o email do novo prestador"
                   {...register("email")}
-                  className="w-full"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                 />
                 {errors.email && (
                   <span className="text-red-600">{errors.email.message}</span>
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <Label className="text-white">Telefone</Label>
+                <Label className="text-black">Telefone</Label>
                 <Input
                   type="text"
                   value={phoneValue}
@@ -518,6 +518,8 @@ export function ModalTesteSendSupplier() {
                   }}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                   // Removido {...register("phone")} aqui para evitar onChange duplicado
                 />
                 {errors.phone && (
@@ -536,7 +538,7 @@ export function ModalTesteSendSupplier() {
               className="flex flex-col gap-4"
             >
               <div className="relative">
-                <Label className="text-white">CNPJ</Label>
+                <Label className="text-black">CNPJ</Label>
                 <div className="flex items-center gap-3">
                   <Input
                     type="text"
@@ -547,13 +549,14 @@ export function ModalTesteSendSupplier() {
                       setCnpjValue(formatted);
                       setValueSubContract("cnpj", formatted, { shouldValidate: true });
                     }}
-                    className="w-full"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                     // Removido {...registerSubContract("cnpj")} aqui para evitar onChange duplicado
                   />
                   {isLoading ? (
                     <div
                       onClick={handleCNPJSearch}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-black transition-all hover:bg-neutral-500"
                     >
                       <Oval
                         visible={true}
@@ -568,7 +571,7 @@ export function ModalTesteSendSupplier() {
                   ) : (
                     <div
                       onClick={handleCNPJSearch}
-                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-white transition-all hover:bg-neutral-500"
+                      className="bg-realizaBlue cursor-pointer rounded-lg p-2 text-black transition-all hover:bg-neutral-500"
                     >
                       <Search />
                     </div>
@@ -582,12 +585,13 @@ export function ModalTesteSendSupplier() {
               </div>
 
               <div className="mb-1">
-                <Label className="text-white">Razão Social</Label>
+                <Label className="text-black">Razão Social</Label>
                 <Input
                   type="text" // Alterado para type="text"
                   placeholder="Digite a razão social do novo prestador"
                   {...registerSubContract("corporateName")}
-                  className="w-full"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                 />
                 {errorsSubContract.corporateName && (
                   <span className="text-red-600">
@@ -596,12 +600,13 @@ export function ModalTesteSendSupplier() {
                 )}
               </div>
               <div className="mb-1">
-                <Label className="text-white">Email</Label>
+                <Label className="text-black">Email</Label>
                 <Input
                   type="email"
                   placeholder="Digite o email do novo prestador"
                   {...registerSubContract("email")}
-                  className="w-full"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                 />
                 {errorsSubContract.email && (
                   <span className="text-red-600">
@@ -610,7 +615,7 @@ export function ModalTesteSendSupplier() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <Label className="text-white">Telefone</Label>
+                <Label className="text-black">Telefone</Label>
                 <Input
                   type="text"
                   value={phoneValue}
@@ -621,6 +626,8 @@ export function ModalTesteSendSupplier() {
                   }}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
+
                   // Removido {...registerSubContract("phone")} aqui para evitar onChange duplicado
                 />
                 {errorsSubContract.phone && (
@@ -630,7 +637,7 @@ export function ModalTesteSendSupplier() {
                 )}
               </div>
               <div className="flex flex-col gap-1">
-                <Label className="text-white">Selecione um contrato</Label>
+                <Label className="text-black">Selecione um contrato</Label>
                 <select
                   defaultValue={""}
                   className="rounded-lg p-2"
@@ -680,31 +687,31 @@ export function ModalTesteSendSupplier() {
             <DialogContent
               className="max-w-[95vw] border-none md:max-w-[45vw]"
               style={{
-                backgroundImage: `url(${bgModalRealiza})`,
+                //backgroundImage: `url(${bgModalRealiza})`,
               }}
             >
-              <DialogHeader>
-                <DialogTitle className="text-white">
+              <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
+                <DialogTitle className="text-white flex items-center gap-2 text-base font-semibold">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" className="w-5 h-5 stroke-yellow-400" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"/>
+                  </svg>
                   Faça o contrato
                 </DialogTitle>
               </DialogHeader>
-              <div>
-                {selectedBranch ? (
-                  <span className="text-white">
-                    <strong>Filial:</strong> {selectedBranch?.name}
-                  </span>
-                ) : (
-                  <span className="text-white">Nenhuma filial selecionada</span>
-                )}
+              <div className="bg-[#F3F4F6] px-6 py-2">
+                <p className="text-sm text-gray-700 font-medium">
+                  Filial: {selectedBranch?.cnpj} {selectedBranch?.name} Base
+                </p>
               </div>
-              <ScrollArea className="h-[60vh] w-full px-5">
-                <div className="p-4">
+
+              <ScrollArea className="h-[60vh] w-full px-2">
+                <div className="w-full flex flex-col gap-4">
                   <form
                     className="flex flex-col gap-2"
                     onSubmit={handleSubmitContract(createContract)}
                   >
                     <div>
-                      <Label className="text-white">
+                      <Label className="text-black">
                         CNPJ do novo prestador
                       </Label>
                       <div>
@@ -723,7 +730,7 @@ export function ModalTesteSendSupplier() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <Label className="text-white">Gestor do serviço</Label>
+                      <Label className="text-black">Gestor do serviço</Label>
                       <select
                         key={getIdManager}
                         className="rounded-md border p-2"
@@ -750,7 +757,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label className="text-white">Nome do Serviço</Label>
+                      <Label className="text-black">Nome do Serviço</Label>
                       <Input {...registerContract("serviceName")} />
                       {errorsContract.serviceName && (
                         <span className="text-red-500">
@@ -759,7 +766,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label className="text-white">
+                      <Label className="text-black">
                         Data de início efetivo
                       </Label>
                       <Input type="date" {...registerContract("dateStart")} />
@@ -770,7 +777,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div>
-                      <Label className="text-white">
+                      <Label className="text-black">
                         Referência do contrato
                       </Label>
                       <Input {...registerContract("contractReference")} />
@@ -781,7 +788,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Tipo de despesa</Label>
+                      <Label className="text-black">Tipo de despesa</Label>
                       <select
                         {...registerContract("expenseType")}
                         className="rounded-md border p-2"
@@ -802,10 +809,10 @@ export function ModalTesteSendSupplier() {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <Label className="text-white">Tipo de Gestão</Label>
+                      <Label className="text-black">Tipo de Gestão</Label>
                       <div className="flex flex-col items-start gap-3">
                         <div className="flex flex-row-reverse gap-2">
-                          <Label className="text-[14px] text-white">SSMA</Label>
+                          <Label className="text-[14px] text-black">SSMA</Label>
                           <input
                             type="checkbox"
                             checked={isSsma}
@@ -817,7 +824,7 @@ export function ModalTesteSendSupplier() {
                           />
                         </div>
                         <div className="flex flex-row-reverse gap-2">
-                          <Label className="text-[14px] text-white">
+                          <Label className="text-[14px] text-black">
                             TRABALHISTA
                           </Label>
                           <input
@@ -834,7 +841,7 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">Tipo do Serviço</Label>
+                      <Label className="text-black">Tipo do Serviço</Label>
 
                       <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
                         <Search className="text-neutral-500 w-5 h-5" />
@@ -879,7 +886,7 @@ export function ModalTesteSendSupplier() {
 
                     {isSsma === true && (
                       <div className="flex flex-col gap-2">
-                        <Label className="text-white">Tipo de atividade</Label>
+                        <Label className="text-black">Tipo de atividade</Label>
 
                         <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
                           <Search className="text-neutral-500 w-5 h-5" />
@@ -926,7 +933,7 @@ export function ModalTesteSendSupplier() {
 
                     {isSsma === true && selectedActivities.length > 0 && (
                       <div className="flex flex-col gap-1 mt-2">
-                        <Label className="text-white">Atividades selecionadas</Label>
+                        <Label className="text-black">Atividades selecionadas</Label>
                         <div className="bg-white rounded-md border p-2 h-auto min-h-[3rem] max-h-[10rem] overflow-y-auto">
                           <ul className="list-disc ml-4 text-sm text-black">
                             {selectedActivities.map((idAtividade) => {
@@ -945,7 +952,7 @@ export function ModalTesteSendSupplier() {
                     )}
 
                     <div className="flex flex-col gap-1">
-                      <Label className="text-white">
+                      <Label className="text-black">
                         Descrição detalhada do serviço
                       </Label>
                       <textarea
@@ -961,9 +968,9 @@ export function ModalTesteSendSupplier() {
 
                     {isSubcontractor === "contratado" && (
                       <div className="flex flex-col gap-2 mt-3">
-                        <Label className="text-white">Permitir subcontratação?</Label>
+                        <Label className="text-black">Permitir subcontratação?</Label>
                         <div className="flex gap-4">
-                          <label className="flex items-center gap-2 text-white">
+                          <label className="flex items-center gap-2 text-black">
                             <input
                               type="radio"
                               value="true"
@@ -973,7 +980,7 @@ export function ModalTesteSendSupplier() {
                             />
                             Sim
                           </label>
-                          <label className="flex items-center gap-2 text-white">
+                          <label className="flex items-center gap-2 text-black">
                             <input
                               type="radio"
                               value="false"
