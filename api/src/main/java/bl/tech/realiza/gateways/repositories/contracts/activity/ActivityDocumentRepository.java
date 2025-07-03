@@ -27,4 +27,6 @@ public interface ActivityDocumentRepository extends JpaRepository<ActivityDocume
     WHERE ad.activity.idActivity = :idActivity
 """)
     List<ActivityDocumentResponseDto> findDocumentsByActivity(@Param("idActivity") String idActivity);
+
+    List<ActivityDocuments> findAllByActivity_Branch_Client_IdClientAndActivity_TitleAndDocumentBranch_Branch_Client_IdClientAndDocumentBranch_Title(String idClient, String title, String idClient1, String title1);
 }
