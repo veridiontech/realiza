@@ -36,12 +36,13 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .name(documentMatrixRequestDto.getName())
                 .type(documentMatrixRequestDto.getType())
                 .doesBlock(documentMatrixRequestDto.getDoesBlock())
+                .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
                 .subGroup(documentMatrixSubgroup)
                 .build();
 
         DocumentMatrix savedDocumentMatrix = documentMatrixRepository.save(newDocumentMatrix);
 
-        DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
+        return DocumentMatrixResponseDto.builder()
                 .name(savedDocumentMatrix.getName())
                 .idDocumentMatrix(savedDocumentMatrix.getIdDocument())
                 .type(savedDocumentMatrix.getType())
@@ -51,8 +52,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         ? savedDocumentMatrix.getSubGroup().getIdDocumentSubgroup()
                         : null)
                 .build();
-
-        return documentMatrixResponse;
     }
 
     @Override
@@ -79,7 +78,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     public Page<DocumentMatrixResponseDto> findAll(Pageable pageable) {
         Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAll(pageable);
 
-        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixPage.map(
+        return documentMatrixPage.map(
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
                         .name(documentMatrix.getName())
@@ -91,8 +90,6 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                                 : null)
                         .build()
         );
-
-        return documentMatrixResponseDtoPage;
     }
 
     @Override
@@ -144,7 +141,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     public Page<DocumentMatrixResponseDto> findAllBySubgroup(String idSearch, Pageable pageable) {
         Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable);
 
-        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixPage.map(
+        return documentMatrixPage.map(
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
                         .name(documentMatrix.getName())
@@ -156,15 +153,13 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                                 : null)
                         .build()
         );
-
-        return documentMatrixResponseDtoPage;
     }
 
     @Override
     public Page<DocumentMatrixResponseDto> findAllByGroup(String idSearch, Pageable pageable) {
         Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable);
 
-        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixPage.map(
+        return documentMatrixPage.map(
                 documentMatrix -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(documentMatrix.getIdDocument())
                         .name(documentMatrix.getName())
@@ -176,7 +171,5 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                                 : null)
                         .build()
         );
-
-        return documentMatrixResponseDtoPage;
     }
 }

@@ -89,7 +89,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                     .thenComparing(ContractDocumentAndEmployeeResponseDto.DocumentDto::getTitle, String.CASE_INSENSITIVE_ORDER));
 
 
-            if (requester.getAdmin()
+            if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                 return ContractDocumentAndEmployeeResponseDto.builder()
@@ -148,7 +148,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                 }
             }
 
-            if (requester.getAdmin()
+            if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                 return ContractDocumentAndEmployeeResponseDto.builder()

@@ -303,7 +303,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
         List<DocumentEmployee> allDocuments = new ArrayList<>();
 
-        if (requester.getAdmin()
+        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
         allDocuments.addAll(documentEmployeeRepository.findAllByEmployee_IdEmployee(idSearch, pageable).getContent());
