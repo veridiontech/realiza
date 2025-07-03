@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class IaAditionalPrompt {
+public class IaAdditionalPrompt {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String description;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     private DocumentMatrix documentMatrix;
 }

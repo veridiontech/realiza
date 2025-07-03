@@ -708,4 +708,50 @@ public class SetupService {
             activityDocumentRepository.deleteAll(batch);
         }
     }
+
+    public void replicateAllocateDocumentToBranch(String documentId, String title) {
+        DocumentBranch documentBase = documentBranchRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        List<DocumentBranch> documentBranchList = documentBranchRepository.findAllByBranch_Client_IdClientAndTitle(documentBase.getBranch().getClient().getIdClient(), title);
+
+        documentBranchList.remove(documentBase);
+
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (DocumentBranch document : documentBranchList) {
+            document.setIsActive(true);
+            batch.add(document);
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
+    }
+
+    public void replicateDeallocateDocumentToBranch(String documentId, String title) {
+        DocumentBranch documentBase = documentBranchRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        List<DocumentBranch> documentBranchList = documentBranchRepository.findAllByBranch_Client_IdClientAndTitle(documentBase.getBranch().getClient().getIdClient(), title);
+
+        documentBranchList.remove(documentBase);
+
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (DocumentBranch document : documentBranchList) {
+            document.setIsActive(false);
+            batch.add(document);
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
+    }
 }

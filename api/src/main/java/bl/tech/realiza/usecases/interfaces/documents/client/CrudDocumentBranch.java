@@ -22,9 +22,9 @@ public interface CrudDocumentBranch {
     DocumentResponseDto findAllSelectedDocuments (String id);
     List<DocumentSummarizedResponseDto> findAllFilteredDocuments(String id, String documentTypeName, Boolean isSelected);
     List<DocumentExpirationResponseDto> findAllFilteredDocumentsExpiration(String idBranch, String documentTypeName, Boolean isSelected);
-    String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection);
+    String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection, Boolean replicate);
     String addRequiredDocument(String idEnterprise, String documentMatrixId);
     void removeRequiredDocument(String documentId);
 
-    DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto);
+    DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate);
 }
