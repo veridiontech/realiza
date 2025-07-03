@@ -4,10 +4,13 @@ import bl.tech.realiza.domains.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
     Collection<User> findAllByIsActive(Boolean b);
     Collection<User> findAllByDeleteRequest(Boolean b);
     User findByEmailAndIsActive(String email, Boolean isActive);
+    User findByForgotPasswordCode(String forgotPasswordCode);
+    Optional<User> findByEmailAndForgotPasswordCodeAndIsActiveIsTrue(String userEmail, String forgotPasswordCode);
 }

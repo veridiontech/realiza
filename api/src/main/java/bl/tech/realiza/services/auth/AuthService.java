@@ -19,7 +19,8 @@ public class AuthService {
     private final JwtService jwtService;
 
     public String login(String email, String password) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (user == null || !passwordService.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid email or password");

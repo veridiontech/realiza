@@ -56,4 +56,29 @@ public class AuthControllerImpl implements AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/forgot-my-password")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> sendForgotPasswordCode(@RequestParam String userEmail) {
+
+        String response = passwordRecoveryService.createAndSendFourDigitCodeToRecoverPassword(userEmail);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/validate-code")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Boolean> validateCode(@RequestParam String userEmail, @RequestParam String fourDigitCode) {
+
+        return ResponseEntity.ok(passwordRecoveryService.validateCode(fourDigitCode, userEmail));
+    }
+
+    @PostMapping("/change-my-password")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> changePasswordByCode(@RequestParam String fourDigitCode, @RequestParam String userEmail, @RequestParam String newPassword) {
+
+        return ResponseEntity.ok(passwordRecoveryService.changePasswordWithCode(fourDigitCode, userEmail, newPassword));
+    }
 }
