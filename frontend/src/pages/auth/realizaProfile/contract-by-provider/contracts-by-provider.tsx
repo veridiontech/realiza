@@ -75,7 +75,7 @@ export function ContarctsByProvider() {
       const res = await axios.get(`${ip}/document/contract/${idContract}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      console.log("documentos: ", res.data);
       setDocuments(res.data.documentDtos || []);
       setCollaborators(res.data.employeeDtos || []);
       setSelectedContractName(serviceName);
@@ -160,9 +160,8 @@ export function ContarctsByProvider() {
             {contracts.map((contract: any, index) => (
               <div
                 key={contract.idContract}
-                className={`w-full p-2 cursor-pointer ${
-                  index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
-                }`}
+                className={`w-full p-2 cursor-pointer ${index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
+                  }`}
                 onClick={() =>
                   getAllDatas(contract.idContract, contract.serviceName)
                 }
@@ -235,12 +234,14 @@ export function ContarctsByProvider() {
                       </button>
                       {openMenuDocumentId === doc.id && (
                         <div className="absolute right-10  mt-2 w-15 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                          <button
-                            onClick={() => handleOpenViewerModal(doc.id)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          >
-                            <Eye className="w-5 h-5 text-base" />
-                          </button>
+                          {doc.hasDoc && (
+                            <button
+                              onClick={() => handleOpenViewerModal(doc.id)}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <Eye className="w-5 h-5 text-base" />
+                            </button>
+                          )}
                           <button
                             onClick={() =>
                               handleOpenUploadModal(doc.id, doc.title)

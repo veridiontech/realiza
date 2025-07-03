@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ActiviteSectionBox } from "./activities-section";
 import { ServicesSection } from "./services-section";
 import { HistorySection } from "./history-section";
-import { useBranch } from "@/context/Branch-provider"; // ✅ CORRETO
+import { useBranch } from "@/context/Branch-provider"; 
+import { ProfilesSection } from "./profiles-section";
 
 export function DocumentPageNew() {
   const [selectTab, setSelectedTab] = useState("document");
 
-  const { selectedBranch } = useBranch(); // ✅ pega branch corretamente
+  const { selectedBranch } = useBranch();
   const idBranch = selectedBranch?.idBranch;
 
   return (
@@ -43,6 +44,7 @@ export function DocumentPageNew() {
       <div>
         {selectTab === "document" && <NewDocumentBox />}
         {selectTab === "activities" && <ActiviteSectionBox />}
+        {selectTab === "profiles" && <ProfilesSection  />}
         {selectTab === "services" && <ServicesSection />}
         {selectTab === "historical" && idBranch && (
           <HistorySection idBranch={idBranch} />

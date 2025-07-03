@@ -9,7 +9,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { BoxNonSelected } from "../new-documents-page/box-non-selected";
-// import { propsDocument } from "@/types/interfaces";
 import { BoxSelected } from "../new-documents-page/box-selected";
 import { useDocument } from "@/context/Document-provider";
 import { useBranch } from "@/context/Branch-provider";
@@ -20,12 +19,12 @@ import { propsDocument } from "@/types/interfaces";
 import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function ThirdCollaborators() {
-  const { setDocuments, documents, setNonSelected, nonSelected } =
-    useDocument();
+  const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
   const [notSelectedDocument, setNotSelectedDocument] = useState([]);
   const [selectedDocument, setSelectedDocument] = useState<any>([]);
   const { selectedBranch } = useBranch();
   const [isLoading, setIsLoading] = useState(false);
+  const [replicate, setReplicate] = useState(false);
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -34,23 +33,17 @@ export function ThirdCollaborators() {
       const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
-          headers: {
-            Authorization: `Bearer ${tokenFromStorage}`,
-          },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
           params: { documentTypeName: "SAUDE", isSelected: true },
         }
       );
       const resNonSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
-          headers: {
-            Authorization: `Bearer ${tokenFromStorage}`,
-          },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
           params: { documentTypeName: "SAUDE", isSelected: false },
         }
       );
-      console.log("teste", resSelected.data);
-      console.log("teste", resNonSelected.data);
 
       setNotSelectedDocument(resNonSelected.data);
       setSelectedDocument(resSelected.data);
@@ -61,34 +54,22 @@ export function ThirdCollaborators() {
     }
   };
 
-  const filterIdDocuments = nonSelected.map(
-    (document: propsDocument) => document.idDocument
-  );
-  // .map((document) => document.idDocumentation);
-
-  const filterIdDocumentsSelected = documents.map(
-    (document: propsDocument) => document.idDocument
-  );
+  const filterIdDocuments = nonSelected.map((document: propsDocument) => document.idDocument);
+  const filterIdDocumentsSelected = documents.map((document: propsDocument) => document.idDocument);
 
   const sendDocuments = async (
     isSelected: boolean,
-    idDocumentation: string[]
+    idDocumentation: string[],
+    replicate: boolean
   ) => {
-    // const
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
-      console.log("Desalocando documentos:", filterIdDocumentsSelected);
-      console.log("selecionando documentos não selecionados:", idDocumentation);
       await axios.post(
         `${ip}/document/branch/document-matrix/update`,
         idDocumentation,
         {
-          headers: {
-            Authorization: `Bearer ${tokenFromStorage}`,
-          },
-          params: {
-            isSelected,
-          },
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+          params: { isSelected, replicate },
         }
       );
       clearArray();
@@ -117,17 +98,19 @@ export function ThirdCollaborators() {
 
   return (
     <>
-    <div className="flex items-center justify-center gap-10 p-10">
-      <div>
-        <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
-      </div>
-      <div className="flex flex-col gap-5">
+      <div className="flex items-center justify-center gap-10 p-10">
         <div>
+          <BoxNonSelected documents={notSelectedDocument} isLoading={isLoading} />
+        </div>
+        <div className="flex flex-col gap-5">
           <AlertDialog>
             <AlertDialogTrigger
-              className={`w-[10vw] rounded-md p-4 transition-all duration-300 "cursor-not-allowed bg-gray-300 text-gray-500" : "bg-realizaBlue text-white"}`}
-              
-               disabled={nonSelected.length === 0}
+              className={`w-[10vw] rounded-md p-4 transition-all duration-300 ${
+                nonSelected.length === 0
+                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                  : "bg-realizaBlue text-white"
+              }`}
+              disabled={nonSelected.length === 0}
             >
               Alocar novos documentos
             </AlertDialogTrigger>
@@ -146,11 +129,20 @@ export function ThirdCollaborators() {
                   )}
                 </ul>
               </div>
+              <div className="mt-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={replicate}
+                    onChange={() => setReplicate(!replicate)}
+                    className="h-4 w-4"
+                  />
+                  Replicar alteração para outras filiais
+                </label>
+              </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => sendDocuments(true, filterIdDocuments)}
-                >
+                <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments, replicate)}>
                   Confirmar
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -159,7 +151,11 @@ export function ThirdCollaborators() {
 
           <AlertDialog>
             <AlertDialogTrigger
-              className={`w-[10vw] rounded-md p-3 transition-all duration-300 "cursor-not-allowed bg-red-300 text-red-500" : "bg-red-600 text-white"}`}
+              className={`w-[10vw] rounded-md p-3 transition-all duration-300 ${
+                documents.length === 0
+                  ? "cursor-not-allowed bg-red-300 text-red-500"
+                  : "bg-red-600 text-white"
+              }`}
               disabled={documents.length === 0}
             >
               Desalocar documentos
@@ -179,33 +175,40 @@ export function ThirdCollaborators() {
                   )}
                 </ul>
               </div>
+              <div className="mt-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={replicate}
+                    onChange={() => setReplicate(!replicate)}
+                    className="h-4 w-4"
+                  />
+                  Replicar alteração para outras filiais
+                </label>
+              </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() =>
-                    sendDocuments(false, filterIdDocumentsSelected)
-                  }
-                >
+                <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected, replicate)}>
                   Confirmar
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </div>
-      <div>
-        <BoxSelected documents={selectedDocument} isLoading={isLoading} />
-      </div>
-    </div>
-        <div className="flex justify-center w-full px-10 pb-10">
-          <div className="max-w-4xl w-full">
-            <ValidateSection
-              idBranch={selectedBranch?.idBranch!}
-              documentTypeName="Saude"
-              isSelected={true}
-            />
-          </div>
+        <div>
+          <BoxSelected documents={selectedDocument} isLoading={isLoading} />
         </div>
+      </div>
+
+      <div className="flex justify-center w-full px-10 pb-10">
+        <div className="max-w-4xl w-full">
+          <ValidateSection
+            idBranch={selectedBranch?.idBranch!}
+            documentTypeName="Saude"
+            isSelected={true}
+          />
+        </div>
+      </div>
     </>
   );
 }

@@ -60,13 +60,13 @@ const newBranchFormSchema = z.object({
   address: z.string().min(1, "O endereço é obrigatório."),
   number: z.string().nonempty("Número é obrigatório"),
   telephone: z.string()
-      .optional()
-      .refine((val) => !val || phoneRegex.test(val), {
-        message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
-      })
-      .refine((val) => !val || validarNumerosRepetidos(val), {
-        message: "Telefone inválido: não pode ter números repetidos"
-      }),
+    .optional()
+    .refine((val) => !val || phoneRegex.test(val), {
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+    })
+    .refine((val) => !val || validarNumerosRepetidos(val), {
+      message: "Telefone inválido: não pode ter números repetidos"
+    }),
 });
 
 type NewBranchFormSchema = z.infer<typeof newBranchFormSchema>;
@@ -79,7 +79,8 @@ export function AddNewBranch() {
   const [phoneValue, setPhoneValue] = useState("");
   const [razaoSocial, setRazaoSocial] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { addBranch, setSelectedBranch  } = useBranch();
+  const { addBranch, setSelectedBranch } = useBranch();
+  const [replicateFromBase, setReplicateFromBase] = useState(false);
 
   const {
     register,
@@ -107,48 +108,50 @@ export function AddNewBranch() {
     setPhoneValue(formatPhone(rawPhone));
   }, [getValues]);
 
-const handleCnpj = async () => {
-  const cnpj = getValues("cnpj").replace(/\D/g, "");
-  if (cnpj.length !== 14) {
-    toast.error("CNPJ inválido");
-    return;
-  }
+  const handleCnpj = async () => {
+    const cnpj = getValues("cnpj").replace(/\D/g, "");
+    if (cnpj.length !== 14) {
+      toast.error("CNPJ inválido");
+      return;
+    }
 
-  try {
-    const res = await axios.get(`https://open.cnpja.com/office/${cnpj}`);
-    const razao = res.data.company.name || "Razão social não encontrada";
+    try {
+      const res = await axios.get(`https://open.cnpja.com/office/${cnpj}`);
+      const razao = res.data.company.name || "Razão social não encontrada";
 
-    const rawCep = res.data.address.zip || "";
-    const formattedCep = formatCEP(rawCep);
-    const city = res.data.address.city;
-    const address = res.data.address.street;
-    const country = res.data.address.country.name;
-    const state = res.data.address.state;
-    const number = res.data.address.number;
+      const rawCep = res.data.address.zip || "";
+      const formattedCep = formatCEP(rawCep);
+      const city = res.data.address.city;
+      const address = res.data.address.street;
+      const country = res.data.address.country.name;
+      const state = res.data.address.state;
+      const number = res.data.address.number;
 
-    console.log("CEP formatado", formattedCep);
-    setValue("number", number);
-    setValue("state", state);
-    setValue("country", country);
-    setValue("address", address);
-    setValue("cep", formattedCep); 
-    setCepValue(formattedCep); 
-    setValue("city", city);
-    setValue("name", razao);
-    setRazaoSocial(razao);
-    toast.success("Sucesso ao buscar CNPJ");
-  } catch (err) {
-    setRazaoSocial(null);
-    toast.error("Erro ao buscar CNPJ");
-    console.error("Erro ao buscar CNPJ:", err);
-  }
-};
+      console.log("CEP formatado", formattedCep);
+      setValue("number", number);
+      setValue("state", state);
+      setValue("country", country);
+      setValue("address", address);
+      setValue("cep", formattedCep);
+      setCepValue(formattedCep);
+      setValue("city", city);
+      setValue("name", razao);
+      setRazaoSocial(razao);
+      toast.success("Sucesso ao buscar CNPJ");
+    } catch (err) {
+      setRazaoSocial(null);
+      toast.error("Erro ao buscar CNPJ");
+      console.error("Erro ao buscar CNPJ:", err);
+    }
+  };
 
 
   const onSubmit = async (data: NewBranchFormSchema) => {
     const payload = {
       ...data,
       client: client?.idClient,
+      replicateFromBase,
+      base: false
     };
     setLoading(true);
     try {
@@ -214,190 +217,202 @@ const handleCnpj = async () => {
       <DialogTrigger asChild>
         <Button className="bg-realizaBlue hidden md:block"> Adiciona Filial +</Button>
       </DialogTrigger>
-    <DialogTrigger asChild>
-      <Button className="bg-realizaBlue md:hidden">+</Button>
-    </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="bg-realizaBlue md:hidden">+</Button>
+      </DialogTrigger>
 
       <DialogContent className="p-0 overflow-hidden rounded-xl shadow-lg w-full max-w-[700px] max-h-[90vh] bg-white">
-      {/* Cabeçalho */}
-      <div className="bg-[#2f4050] px-6 py-3 flex items-center gap-2">
-        <span className="text-white text-lg font-semibold">📂 Cadastro de Filial</span>
-      </div>
+        {/* Cabeçalho */}
+        <div className="bg-[#2f4050] px-6 py-3 flex items-center gap-2">
+          <span className="text-white text-lg font-semibold">📂 Cadastro de Filial</span>
+        </div>
 
-      {/* Formulário */}
-      <ScrollArea className="max-h-[70vh] px-6 py-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        
-        {/* CNPJ */}
-        <div className="flex flex-col gap-2">
-          <Label className="text-gray-700">CNPJ*</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              type="text"
-              value={cnpjValue}
-              onChange={(e) => {
-                const formatted = formatCNPJ(e.target.value);
-                setCnpjValue(formatted);
-                setValue("cnpj", formatted, { shouldValidate: true });
-              }}
-              placeholder="00.000.000/0000-00"
-              maxLength={18}
-              className="bg-[#f5f5f5] text-gray-700 rounded-md w-full"
-            />
-            <div
-              onClick={handleCnpj}
-              className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
-            >
-              <Search className="text-white" />
+        {/* Formulário */}
+        <ScrollArea className="max-h-[70vh] px-6 py-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
+            {/* CNPJ */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-gray-700">CNPJ*</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={cnpjValue}
+                  onChange={(e) => {
+                    const formatted = formatCNPJ(e.target.value);
+                    setCnpjValue(formatted);
+                    setValue("cnpj", formatted, { shouldValidate: true });
+                  }}
+                  placeholder="00.000.000/0000-00"
+                  maxLength={18}
+                  className="bg-[#f5f5f5] text-gray-700 rounded-md w-full"
+                />
+                <div
+                  onClick={handleCnpj}
+                  className="bg-realizaBlue cursor-pointer rounded-lg p-2 hover:bg-gray-500"
+                >
+                  <Search className="text-white" />
+                </div>
+              </div>
+              {errors.cnpj && (
+                <span className="text-sm text-red-600">{errors.cnpj.message}</span>
+              )}
+              {razaoSocial && (
+                <p className="mt-1 text-sm text-gray-700">
+                  Razão social: <strong>{razaoSocial}</strong>
+                </p>
+              )}
             </div>
-          </div>
-          {errors.cnpj && (
-            <span className="text-sm text-red-600">{errors.cnpj.message}</span>
+
+            {/* Nome da filial */}
+            <div>
+              <Label className="text-gray-700">Nome da filial*</Label>
+              <Input
+                type="text"
+                placeholder="Digite o nome da filial"
+                {...register("name")}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.name && <span className="text-sm text-red-600">{errors.name.message}</span>}
+            </div>
+
+            {/* CEP */}
+            <div>
+              <Label className="text-gray-700">CEP*</Label>
+              <Input
+                type="text"
+                value={cepValue}
+                {...register("cep")}
+                onChange={(e) => {
+                  const formattedCEP = formatCEP(e.target.value);
+                  setCepValue(formattedCEP);
+                  setValue("cep", formattedCEP, { shouldValidate: true });
+                }}
+                placeholder="00000-000"
+                maxLength={9}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
+            </div>
+
+            {/* Cidade */}
+            <div>
+              <Label className="text-gray-700">Cidade*</Label>
+              <Input
+                type="text"
+                placeholder="Digite a cidade"
+                {...register("city")}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
+            </div>
+
+            {/* Endereço */}
+            <div>
+              <Label className="text-gray-700">Endereço*</Label>
+              <Input
+                type="text"
+                placeholder="Digite o endereço"
+                {...register("address")}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
+            </div>
+
+            {/* Número */}
+            <div>
+              <Label className="text-gray-700">Número*</Label>
+              <Input
+                type="text"
+                placeholder="Digite o número"
+                {...register("number")}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
+            </div>
+
+            {/* País */}
+            <div>
+              <Label className="text-gray-700">País*</Label>
+              <Input
+                type="text"
+                placeholder="Digite o país"
+                {...register("country")}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.country && <span className="text-sm text-red-600">{errors.country.message}</span>}
+            </div>
+
+            {/* Estado */}
+            <div>
+              <Label className="text-gray-700">Estado*</Label>
+              <Input
+                type="text"
+                placeholder="Digite o estado"
+                {...register("state")}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
+            </div>
+
+            {/* Telefone */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-gray-700">Telefone</Label>
+              <Input
+                type="text"
+                value={phoneValue}
+                onChange={(e) => {
+                  const formattedPhone = formatPhone(e.target.value);
+                  setPhoneValue(formattedPhone);
+                  setValue("telephone", formattedPhone, { shouldValidate: true });
+                }}
+                placeholder="(00) 00000-0000"
+                maxLength={15}
+                className="bg-[#f5f5f5] text-gray-700 rounded-md"
+              />
+              {errors.telephone && (
+                <span className="text-sm text-red-600">{errors.telephone.message}</span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="replicateFromBase"
+                checked={replicateFromBase}
+                onChange={(e) => setReplicateFromBase(e.target.checked)}
+              />
+              <Label htmlFor="replicateFromBase" className="text-gray-700">
+                Replicar parametrização da base?
+              </Label>
+            </div>
+
+
+          </form>
+        </ScrollArea>
+
+        {/* Rodapé com botão de voltar */}
+        <div className="flex items-center justify-between px-6 py-3 bg-white border-t">
+          <Button variant="ghost" onClick={() => setIsOpen(false)}>
+            ⬅ Voltar
+          </Button>
+
+          {loading ? (
+            <Button disabled className="bg-[#2f4050] text-white px-6 py-2 rounded-md">
+              <Oval height="20" width="20" color="#fff" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              onClick={handleSubmit(onSubmit)}
+              className="bg-[#2f4050] text-white px-6 py-2 rounded-md hover:bg-[#1d2a38] transition"
+            >
+              Cadastrar
+            </Button>
           )}
-          {razaoSocial && (
-            <p className="mt-1 text-sm text-gray-700">
-              Razão social: <strong>{razaoSocial}</strong>
-            </p>
-          )}
         </div>
 
-        {/* Nome da filial */}
-        <div>
-          <Label className="text-gray-700">Nome da filial*</Label>
-          <Input
-            type="text"
-            placeholder="Digite o nome da filial"
-            {...register("name")}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.name && <span className="text-sm text-red-600">{errors.name.message}</span>}
-        </div>
-
-        {/* CEP */}
-        <div>
-          <Label className="text-gray-700">CEP*</Label>
-          <Input
-            type="text"
-            value={cepValue}
-            {...register("cep")}
-            onChange={(e) => {
-              const formattedCEP = formatCEP(e.target.value);
-              setCepValue(formattedCEP);
-              setValue("cep", formattedCEP, { shouldValidate: true });
-            }}
-            placeholder="00000-000"
-            maxLength={9}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.cep && <span className="text-sm text-red-600">{errors.cep.message}</span>}
-        </div>
-
-        {/* Cidade */}
-        <div>
-          <Label className="text-gray-700">Cidade*</Label>
-          <Input
-            type="text"
-            placeholder="Digite a cidade"
-            {...register("city")}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.city && <span className="text-sm text-red-600">{errors.city.message}</span>}
-        </div>
-
-        {/* Endereço */}
-        <div>
-          <Label className="text-gray-700">Endereço*</Label>
-          <Input
-            type="text"
-            placeholder="Digite o endereço"
-            {...register("address")}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.address && <span className="text-sm text-red-600">{errors.address.message}</span>}
-        </div>
-
-        {/* Número */}
-        <div>
-          <Label className="text-gray-700">Número*</Label>
-          <Input
-            type="text"
-            placeholder="Digite o número"
-            {...register("number")}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
-        </div>
-
-        {/* País */}
-        <div>
-          <Label className="text-gray-700">País*</Label>
-          <Input
-            type="text"
-            placeholder="Digite o país"
-            {...register("country")}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.country && <span className="text-sm text-red-600">{errors.country.message}</span>}
-        </div>
-
-        {/* Estado */}
-        <div>
-          <Label className="text-gray-700">Estado*</Label>
-          <Input
-            type="text"
-            placeholder="Digite o estado"
-            {...register("state")}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.state && <span className="text-sm text-red-600">{errors.state.message}</span>}
-        </div>
-
-        {/* Telefone */}
-        <div className="flex flex-col gap-2">
-          <Label className="text-gray-700">Telefone</Label>
-          <Input
-            type="text"
-            value={phoneValue}
-            onChange={(e) => {
-              const formattedPhone = formatPhone(e.target.value);
-              setPhoneValue(formattedPhone);
-              setValue("telephone", formattedPhone, { shouldValidate: true });
-            }}
-            placeholder="(00) 00000-0000"
-            maxLength={15}
-            className="bg-[#f5f5f5] text-gray-700 rounded-md"
-          />
-          {errors.telephone && (
-            <span className="text-sm text-red-600">{errors.telephone.message}</span>
-          )}
-        </div>
-
-      
-      </form>
-    </ScrollArea>
-
-    {/* Rodapé com botão de voltar */}
-    <div className="flex items-center justify-between px-6 py-3 bg-white border-t">
-      <Button variant="ghost" onClick={() => setIsOpen(false)}>
-        ⬅ Voltar
-      </Button>
-
-      {loading ? (
-        <Button disabled className="bg-[#2f4050] text-white px-6 py-2 rounded-md">
-          <Oval height="20" width="20" color="#fff" />
-        </Button>
-      ) : (
-        <Button
-          type="submit"
-          onClick={handleSubmit(onSubmit)}
-          className="bg-[#2f4050] text-white px-6 py-2 rounded-md hover:bg-[#1d2a38] transition"
-        >
-        Cadastrar
-      </Button>
-      )}
-    </div>
-
-  </DialogContent>
-</Dialog>
-);
+      </DialogContent>
+    </Dialog>
+  );
 }
