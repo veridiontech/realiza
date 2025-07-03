@@ -394,7 +394,8 @@ public class SetupService {
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
         log.info("Started setup service type replicate branch ⌛ {}", branchId);
         List<ServiceTypeBranch> serviceTypeBranchbatch = new ArrayList<>(50);
-        for (ServiceTypeBranch serviceTypeBranch : serviceTypeBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch())) {
+        Branch base = branchRepository.findFirstByClient_IdClientAndIsActiveIsTrueAndBaseIsTrueOrderByCreationDate(branch.getClient().getIdClient());
+        for (ServiceTypeBranch serviceTypeBranch : serviceTypeBranchRepository.findAllByBranch_IdBranch(base.getIdBranch())) {
             serviceTypeBranchbatch.add(
                     ServiceTypeBranch.builder()
                             .title(serviceTypeBranch.getTitle())
@@ -415,7 +416,7 @@ public class SetupService {
 
         log.info("Started setup document replicate branch ⌛ {}", branchId);
         List<DocumentBranch> batch = new ArrayList<>(50);
-        for (var document : documentBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch())) {
+        for (var document : documentBranchRepository.findAllByBranch_IdBranch(base.getIdBranch())) {
             batch.add(DocumentBranch.builder()
                     .title(document.getTitle())
                     .type(document.getType())
@@ -438,7 +439,7 @@ public class SetupService {
         log.info("Started setup activity replicate branch ⌛ {}", branchId);
         List<Activity> activitybatch = new ArrayList<>(50);
         Map<String, Activity> repoToNewActivityMap = new HashMap<>();
-        for (Activity activity : activityRepository.findAllByBranch_IdBranch(branch.getIdBranch())) {
+        for (Activity activity : activityRepository.findAllByBranch_IdBranch(base.getIdBranch())) {
             Activity newActivity = Activity.builder()
                     .title(activity.getTitle())
                     .risk(activity.getRisk())
@@ -458,12 +459,12 @@ public class SetupService {
         }
 
         log.info("Started setup documents by activity replicate branch ⌛ {}", branchId);
-        List<DocumentBranch> allBranchDocs = documentBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch());
+        List<DocumentBranch> allBranchDocs = documentBranchRepository.findAllByBranch_IdBranch(base.getIdBranch());
         Map<String, DocumentBranch> matrixIdToBranchDocMap = allBranchDocs.stream()
                 .filter(doc -> doc.getDocumentMatrix() != null)
                 .collect(Collectors.toMap(doc -> doc.getDocumentMatrix().getIdDocument(), doc -> doc));
 
-        List<ActivityDocuments> docs = activityDocumentRepository.findAllByDocumentBranch_Branch_IdBranch(branch.getIdBranch());
+        List<ActivityDocuments> docs = activityDocumentRepository.findAllByDocumentBranch_Branch_IdBranch(base.getIdBranch());
 
         List<ActivityDocuments> newActivityDocs = new ArrayList<>();
 
