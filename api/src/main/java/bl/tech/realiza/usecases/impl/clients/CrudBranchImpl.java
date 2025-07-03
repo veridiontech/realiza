@@ -136,7 +136,8 @@ public class CrudBranchImpl implements CrudBranch {
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                         savedBranch.getIdBranch(),
                         BRANCH,
-                        userResponsible.getEmail() + " criou filial " + savedBranch.getName(),
+                        userResponsible.getFullName() + " criou filial "
+                                + savedBranch.getName(),
                         null,
                         CREATE,
                         userResponsible.getIdUser()));
@@ -244,7 +245,8 @@ public class CrudBranchImpl implements CrudBranch {
                 auditLogServiceImpl.createAuditLog(
                         branch.getIdBranch(),
                         BRANCH,
-                        userResponsible.getEmail() + " atualizou filial " + branch.getName(),
+                        userResponsible.getFullName() + " atualizou filial "
+                                + branch.getName(),
                         null,
                         UPDATE,
                         userResponsible.getIdUser());
@@ -293,7 +295,8 @@ public class CrudBranchImpl implements CrudBranch {
                 auditLogServiceImpl.createAuditLog(
                         branch.getIdBranch(),
                         BRANCH,
-                        userResponsible.getEmail() + " deletou filial " + branch.getName(),
+                        userResponsible.getFullName() + " deletou filial "
+                                + branch.getName(),
                         null,
                         DELETE,
                         userResponsible.getIdUser());

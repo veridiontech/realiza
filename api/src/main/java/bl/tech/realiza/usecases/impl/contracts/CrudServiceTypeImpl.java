@@ -131,7 +131,8 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                 auditLogServiceImpl.createAuditLog(
                         serviceType.getIdServiceType(),
                         SERVICE_TYPE,
-                        userResponsible.getEmail() + " deletou tipo de serviço " + serviceType.getTitle(),
+                        userResponsible.getFullName() + " deletou serviço "
+                                + serviceType.getTitle(),
                         null,
                         DELETE,
                         userResponsible.getIdUser());
@@ -198,7 +199,8 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                 auditLogServiceImpl.createAuditLog(
                         serviceType.getIdServiceType(),
                         SERVICE_TYPE,
-                        userResponsible.getEmail() + " criou tipo de serviço " + serviceType.getTitle(),
+                        userResponsible.getFullName() + " criou serviço "
+                                + serviceType.getTitle(),
                         null,
                         CREATE,
                         userResponsible.getIdUser());
@@ -245,7 +247,8 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                 auditLogServiceImpl.createAuditLog(
                         serviceType.getIdServiceType(),
                         SERVICE_TYPE,
-                        userResponsible.getEmail() + " atualizou tipo de serviço " + serviceType.getTitle(),
+                        userResponsible.getFullName() + " atualizou serviço "
+                                + serviceType.getTitle(),
                         null,
                         UPDATE,
                         userResponsible.getIdUser());

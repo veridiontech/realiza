@@ -125,7 +125,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                         savedContractSubcontractor.getIdContract(),
                         CONTRACT,
-                        userResponsible.getEmail() + " criou contrato " + savedContractSubcontractor.getContractReference(),
+                        userResponsible.getFullName() + " criou contrato "
+                                + savedContractSubcontractor.getContractReference(),
                         null,
                         CREATE,
                         userResponsible.getIdUser()));
@@ -194,7 +195,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 auditLogServiceImpl.createAuditLog(
                         savedContractSubcontractor.getIdContract(),
                         CONTRACT,
-                        userResponsible.getEmail() + " atualizou contrato " + savedContractSubcontractor.getContractReference(),
+                        userResponsible.getFullName() + " atualizou contrato "
+                                + savedContractSubcontractor.getContractReference(),
                         null,
                         UPDATE,
                         userResponsible.getIdUser());
@@ -216,7 +218,8 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 auditLogServiceImpl.createAuditLog(
                         contract.getIdContract(),
                         CONTRACT,
-                        userResponsible.getEmail() + " deletou contrato " + contract.getContractReference(),
+                        userResponsible.getFullName() + " deletou contrato "
+                                + contract.getContractReference(),
                         null,
                         DELETE,
                         userResponsible.getIdUser());

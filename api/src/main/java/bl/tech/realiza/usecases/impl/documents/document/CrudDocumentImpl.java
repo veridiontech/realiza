@@ -119,7 +119,8 @@ public class CrudDocumentImpl implements CrudDocument {
                 auditLogServiceImpl.createAuditLog(
                         document.getIdDocumentation(),
                         DOCUMENT,
-                        user.getEmail() + " " + action.name() + " document " + document.getTitle(),
+                        user.getFullName() + " " + action.name()
+                                + " document " + document.getTitle(),
                         null,
                         EXEMPT,
                         userResponsible.getIdUser());
@@ -181,7 +182,7 @@ public class CrudDocumentImpl implements CrudDocument {
                 auditLogServiceImpl.createAuditLog(
                         document.getIdDocumentation(),
                         DOCUMENT,
-                        userResponsible.getEmail() + " isentou documento "
+                        userResponsible.getFullName() + " isentou documento "
                                 + document.getTitle() + " de " + owner,
                         null,
                         EXEMPT,

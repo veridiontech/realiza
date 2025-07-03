@@ -94,7 +94,8 @@ public class CrudActivityImpl implements CrudActivity {
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                             savedActivity.getIdActivity(),
                             ACTIVITY,
-                            userResponsible.getEmail() + " criou a atividade " + activity.getTitle(),
+                            userResponsible.getFullName() + " criou a atividade "
+                                    + activity.getTitle(),
                             null,
                             CREATE,
                             userResponsible.getIdUser()));
@@ -152,32 +153,20 @@ public class CrudActivityImpl implements CrudActivity {
 
     @Override
     public List<ActivityDocumentResponseDto> findAllDocumentsByActivity(String idActivity) {
-        LocalDateTime startTimer = LocalDateTime.now();
-        System.out.println("Start: " + startTimer);
-
         String branchId = activityRepository.findBranchIdByActivity(idActivity);
+
         if (branchId == null) {
             throw new NotFoundException("Activity not found");
         }
 
-        LocalDateTime activitiesTimer = LocalDateTime.now();
-        System.out.println("Found activity: " + Duration.between(startTimer,activitiesTimer).toMillis() + " ms");
-
         List<ActivityDocuments> activityDocumentsList = activityDocumentRepository.findAllByActivity_IdActivity(idActivity);
-        LocalDateTime activityDocumentsTimer = LocalDateTime.now();
-        System.out.println("Found activity documents: " + Duration.between(activitiesTimer,activityDocumentsTimer).toMillis() + " ms");
-
         List<DocumentForActivityResponseDto> documentBranches = documentBranchRepository.findAllByBranchForActivity(branchId);
-        LocalDateTime documentBranchesTimer = LocalDateTime.now();
-        System.out.println("Found document branches: " + Duration.between(activityDocumentsTimer,documentBranchesTimer).toMillis() + " ms");
 
         Set<String> documentBranchIds = activityDocumentsList.stream()
                 .map(doc -> doc.getDocumentBranch().getIdDocumentation())
                 .collect(Collectors.toSet());
-        LocalDateTime documentBranchIdsTimer = LocalDateTime.now();
-        System.out.println("Extracted documentBranchIds: " + Duration.between(documentBranchesTimer,documentBranchIdsTimer).toMillis() + " ms");
 
-        List<ActivityDocumentResponseDto> response = documentBranches.stream()
+        return documentBranches.stream()
                 .filter(documentBranch -> {
                     String type = documentBranch.getType();
                     return type != null && (
@@ -204,11 +193,6 @@ public class CrudActivityImpl implements CrudActivity {
                 })
                 .sorted(Comparator.comparing(ActivityDocumentResponseDto::getDocumentTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
                 .toList();
-
-        LocalDateTime responseTimer = LocalDateTime.now();
-        System.out.println("Response build: " + Duration.between(documentBranchIdsTimer,responseTimer).toMillis() + " ms");
-
-        return response;
     }
 
     @Override
@@ -251,7 +235,9 @@ public class CrudActivityImpl implements CrudActivity {
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                             activity.getIdActivity(),
                             ACTIVITY,
-                            userResponsible.getEmail() + " atribuiu o documento " + documentBranch.getTitle() + " a atividade " + activity.getTitle(),
+                            userResponsible.getFullName() + " atribuiu o documento "
+                                    + documentBranch.getTitle() + " a atividade "
+                                    + activity.getTitle(),
                             null,
                             ALLOCATE,
                             userResponsible.getIdUser()));
@@ -295,7 +281,10 @@ public class CrudActivityImpl implements CrudActivity {
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                             savedActivityDocuments.getActivity().getIdActivity(),
                             ACTIVITY,
-                            userResponsible.getEmail() + " removeu o documento " + savedActivityDocuments.getDocumentBranch().getTitle() + " da atividade " + savedActivityDocuments.getActivity().getTitle(),
+                            userResponsible.getFullName() + " removeu o documento "
+                                    + savedActivityDocuments.getDocumentBranch().getTitle()
+                                    + " da atividade "
+                                    + savedActivityDocuments.getActivity().getTitle(),
                             null,
                             DEALLOCATE,
                             userResponsible.getIdUser()));
@@ -354,7 +343,8 @@ public class CrudActivityImpl implements CrudActivity {
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                             savedActivity.getIdActivity(),
                             ACTIVITY,
-                            userResponsible.getEmail() + " atualizou a atividade " + activity.getTitle(),
+                            userResponsible.getFullName() + " atualizou a atividade "
+                                    + activity.getTitle(),
                             null,
                             UPDATE,
                             userResponsible.getIdUser()));
@@ -394,7 +384,8 @@ public class CrudActivityImpl implements CrudActivity {
                     userResponsible -> auditLogServiceImpl.createAuditLog(
                             activity.getIdActivity(),
                             ACTIVITY,
-                            userResponsible.getEmail() + " deletou a atividade " + activity.getTitle(),
+                            userResponsible.getFullName() + " deletou a atividade "
+                                    + activity.getTitle(),
                             null,
                             DELETE,
                             userResponsible.getIdUser()));

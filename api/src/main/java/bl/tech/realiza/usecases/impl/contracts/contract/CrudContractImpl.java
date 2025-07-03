@@ -71,7 +71,8 @@ public class CrudContractImpl implements CrudContract {
                         auditLogServiceImpl.createAuditLog(
                                 contract.getIdContract(),
                                 CONTRACT,
-                                userResponsible.getEmail() + " finalizou contrato " + contract.getContractReference(),
+                                userResponsible.getFullName() + " finalizou contrato "
+                                        + contract.getContractReference(),
                                 null,
                                 FINISH,
                                 userResponsible.getIdUser());
@@ -108,7 +109,8 @@ public class CrudContractImpl implements CrudContract {
                         auditLogServiceImpl.createAuditLog(
                                 contract.getIdContract(),
                                 CONTRACT,
-                                userResponsible.getEmail() + " suspendeu contrato " + contract.getContractReference(),
+                                userResponsible.getFullName() + " suspendeu contrato "
+                                        + contract.getContractReference(),
                                 null,
                                 UPDATE,
                                 userResponsible.getIdUser());
@@ -206,8 +208,9 @@ public class CrudContractImpl implements CrudContract {
                     auditLogServiceImpl.createAuditLog(
                             employee.getIdEmployee(),
                             CONTRACT,
-                            userResponsible.getEmail() + " alocou colaborador " + employee.getName()
-                            + " ao contrato " + contract.getContractReference(),
+                            userResponsible.getFullName() + " alocou colaborador "
+                                    + employee.getFullName()
+                                    + " ao contrato " + contract.getContractReference(),
                             null,
                             ALLOCATE,
                             userResponsible.getIdUser());
@@ -215,7 +218,8 @@ public class CrudContractImpl implements CrudContract {
                     auditLogServiceImpl.createAuditLog(
                             employee.getIdEmployee(),
                             EMPLOYEE,
-                            userResponsible.getEmail() + " alocou colaborador " + employee.getName()
+                            userResponsible.getFullName() + " alocou colaborador "
+                                    + employee.getFullName()
                                     + " ao contrato " + contract.getContractReference(),
                             null,
                             ALLOCATE,
@@ -280,7 +284,8 @@ public class CrudContractImpl implements CrudContract {
                     auditLogServiceImpl.createAuditLog(
                             employee.getIdEmployee(),
                             CONTRACT,
-                            userResponsible.getEmail() + " desalocou colaborador " + employee.getName()
+                            userResponsible.getFullName() + " desalocou colaborador "
+                                    + employee.getFullName()
                                     + " do contrato " + contract.getContractReference(),
                             null,
                             DEALLOCATE,
@@ -289,7 +294,8 @@ public class CrudContractImpl implements CrudContract {
                     auditLogServiceImpl.createAuditLog(
                             employee.getIdEmployee(),
                             EMPLOYEE,
-                            userResponsible.getEmail() + " desalocou colaborador " + employee.getName()
+                            userResponsible.getFullName() + " desalocou colaborador "
+                                    + employee.getFullName()
                                     + " do contrato " + contract.getContractReference(),
                             null,
                             DEALLOCATE,

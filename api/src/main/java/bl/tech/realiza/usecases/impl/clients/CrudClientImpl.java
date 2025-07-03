@@ -113,7 +113,8 @@ public class CrudClientImpl implements CrudClient {
                 auditLogServiceImpl.createAuditLog(
                         savedClient.getIdClient(),
                         CLIENT,
-                        userResponsible.getEmail() + " criou cliente " + savedClient.getCorporateName(),
+                        userResponsible.getFullName() + " criou cliente "
+                                + savedClient.getCorporateName(),
                         null,
                         CREATE,
                         userResponsible.getIdUser());
@@ -225,7 +226,8 @@ public class CrudClientImpl implements CrudClient {
                 auditLogServiceImpl.createAuditLog(
                         savedClient.getIdClient(),
                         CLIENT,
-                        userResponsible.getEmail() + " atualizou cliente " + savedClient.getCorporateName(),
+                        userResponsible.getFullName() + " atualizou cliente "
+                                + savedClient.getCorporateName(),
                         null,
                         UPDATE,
                         userResponsible.getIdUser());
@@ -262,7 +264,8 @@ public class CrudClientImpl implements CrudClient {
                 auditLogServiceImpl.createAuditLog(
                         client.getIdClient(),
                         CLIENT,
-                        userResponsible.getEmail() + " deletou cliente " + client.getCorporateName(),
+                        userResponsible.getFullName() + " deletou cliente "
+                                + client.getCorporateName(),
                         null,
                         UPDATE,
                         userResponsible.getIdUser());
