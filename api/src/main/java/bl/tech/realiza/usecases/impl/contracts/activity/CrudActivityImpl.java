@@ -214,7 +214,7 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT",
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT_FROM_ACTIVITY",
                     null,
                     null,
                     null,
@@ -260,7 +260,7 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT",
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT_FROM_ACTIVITY",
                     null,
                     null,
                     null,

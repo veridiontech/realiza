@@ -160,8 +160,9 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<String> updateSelectedBranchDocuments(
             @RequestParam Boolean isSelected,
-            @RequestBody List<String> documentList) {
-        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocuments(isSelected, documentList));
+            @RequestBody List<String> documentList,
+            @RequestParam Boolean replicate) {
+        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocuments(isSelected, documentList, replicate));
     }
 
     @PostMapping("/document-matrix/expiration/update/{idDocumentation}")
@@ -170,7 +171,8 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(
             @PathVariable String idDocumentation,
-            @RequestBody DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto) {
-        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocumentExpiration(idDocumentation, documentExpirationUpdateRequestDto));
+            @RequestBody DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto,
+            @RequestParam Boolean replicate) {
+        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocumentExpiration(idDocumentation, documentExpirationUpdateRequestDto, replicate));
     }
 }

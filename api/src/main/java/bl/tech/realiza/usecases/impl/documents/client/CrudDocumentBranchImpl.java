@@ -1,6 +1,8 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -21,8 +23,10 @@ import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDt
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
+import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
+import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
@@ -54,6 +58,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final DocumentProcessingService documentProcessingService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
@@ -580,9 +585,13 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection) {
+    public String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection, Boolean replicate) {
         if (documentCollection == null || documentCollection.isEmpty()) {
             throw new BadRequestException("Invalid documents");
+        }
+
+        if (replicate == null) {
+            replicate = false;
         }
 
         List<DocumentBranch> documentList = documentBranchRepository.findAllById(documentCollection);
@@ -598,7 +607,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         if (isSelected) {
             action = "selecionou";
         } else {
-            action = "deselecionou";
+            action = "desselecionou";
         }
         for (Document document : documentList) {
             if (JwtService.getAuthenticatedUserId() != null) {
@@ -613,6 +622,40 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                             null,
                             UPDATE,
                             userResponsible.getIdUser());
+                }
+            }
+
+            if (replicate) {
+                if (isSelected) {
+                    setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT_FROM_BRANCH",
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            document.getIdDocumentation(),
+                            document.getTitle(),
+                            Activity.Risk.LOW,
+                            ServiceType.Risk.LOW));
+                } else {
+                    setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT_FROM_BRANCH",
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            document.getIdDocumentation(),
+                            document.getTitle(),
+                            Activity.Risk.LOW,
+                            ServiceType.Risk.LOW));
                 }
             }
         }
@@ -653,7 +696,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto) {
+    public DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate) {
         DocumentBranch documentBranch = documentBranchRepository.findById(idDocumentation)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
         Integer oldAmount = documentBranch.getExpirationDateAmount();

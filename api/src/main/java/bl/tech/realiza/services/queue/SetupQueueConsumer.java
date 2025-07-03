@@ -61,13 +61,21 @@ public class SetupQueueConsumer {
                     setupService.replicateDeleteServiceType(message.getClientId(), message.getTitle(), message.getServiceTypeRisk());
                     logService.logSuccess("DELETE_ACTIVITY", message.getActivityId(), start);
                 }
-                case "ALLOCATE_DOCUMENT" -> {
+                case "ALLOCATE_DOCUMENT_FROM_ACTIVITY" -> {
                     setupService.replicateAllocateDocumentToActivity(message.getDocumentId(), message.getActivityId());
-                    logService.logSuccess("ALLOCATE_DOCUMENT", message.getDocumentId(), start);
+                    logService.logSuccess("ALLOCATE_DOCUMENT_FROM_ACTIVITY", message.getDocumentId(), start);
                 }
-                case "DEALLOCATE_DOCUMENT" -> {
+                case "DEALLOCATE_DOCUMENT_FROM_ACTIVITY" -> {
                     setupService.replicateDeallocateDocumentToActivity(message.getDocumentId(), message.getActivityId());
-                    logService.logSuccess("DEALLOCATE_DOCUMENT", message.getDocumentId(), start);
+                    logService.logSuccess("DEALLOCATE_DOCUMENT_FROM_ACTIVITY", message.getDocumentId(), start);
+                }
+                case "ALLOCATE_DOCUMENT_FROM_BRANCH" -> {
+                    setupService.replicateAllocateDocumentToBranch(message.getDocumentId(), message.getTitle());
+                    logService.logSuccess("ALLOCATE_DOCUMENT_FROM_BRANCH", message.getDocumentId(), start);
+                }
+                case "DEALLOCATE_DOCUMENT_FROM_BRANCH" -> {
+                    setupService.replicateDeallocateDocumentToBranch(message.getDocumentId(), message.getTitle());
+                    logService.logSuccess("DEALLOCATE_DOCUMENT_FROM_BRANCH", message.getDocumentId(), start);
                 }
                 case "NEW_CONTRACT_SUPPLIER" -> {
                     setupService.setupContractSupplier(message.getContractSupplierId(), message.getActivityIds());
