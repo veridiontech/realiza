@@ -7,6 +7,8 @@ import bl.tech.realiza.services.email.EmailSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class PasswordRecoveryService {
@@ -47,6 +49,7 @@ public class PasswordRecoveryService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
         user.setPassword(passwordEncryptionService.encryptPassword(newPassword));
         user.setForgotPasswordCode(null);
+        user.setForgotPasswordCodeDate(LocalDateTime.now());
         userRepository.save(user);
 
         return "Password updated successfully";

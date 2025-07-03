@@ -52,6 +52,7 @@ public abstract class User {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     private String forgotPasswordCode;
+    private LocalDateTime forgotPasswordCodeDate;
 
     // -------------------------------
     // Relacionamentos CONTRATUAIS
