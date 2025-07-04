@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Blocks } from "react-loader-spinner";
 
 export function ActivitiesBox() {
-  // const [checkedDocs, setCheckedDocs] = useState<string[]>([]); // Array para armazenar os documentos selecionados
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
   const [documentsByActivitie, setDocumentsByActivitie] = useState([]);
@@ -18,6 +17,8 @@ export function ActivitiesBox() {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [showReplicateConfirmation, setShowReplicateConfirmation] = useState(false);
+  const [pendingOperation, setPendingOperation] = useState<any>(null);
 
   const getActivitie = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -36,27 +37,6 @@ export function ActivitiesBox() {
       setIsLoading(false);
     }
   };
-
-  // // Função para buscar todos os documentos da filial
-  // const getAllDocuments = async () => {
-  //   setLoadingAllDocuments(true);
-  //   try {
-  //     const tokenFromStorage = localStorage.getItem("tokenClient");
-  //     const res = await axios.get(`${ip}/document/branch/filtered-branch`, {
-  //       params: {
-  //         idSearch: selectedBranch?.idBranch,
-  //         size: 1000,
-  //         headers: { Authorization: `Bearer ${tokenFromStorage}` }
-  //       },
-  //     });
-  //     console.log(res.data.content);
-  //     setActivitiesAll(res.data.content);
-  //   } catch (err) {
-  //     console.log("Erro ao buscar todos documentos da filial:", err);
-  //   } finally {
-  //     setLoadingAllDocuments(false);
-  //   }
-  // };
 
   const getDocumentByActivitie = async (id: string) => {
     console.log("id selecionado", id);
@@ -81,12 +61,13 @@ export function ActivitiesBox() {
 
   const removeDocumentByActivitie = async (
     idActivity: string,
-    idDocumentBranch: string
+    idDocumentBranch: string,
+    replicate: boolean
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const res = await axios.post(
-        `${ip}/contract/activity/remove-document-from-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}`,
+        `${ip}/contract/activity/remove-document-from-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
         {},
         {
           headers: {
@@ -95,22 +76,22 @@ export function ActivitiesBox() {
         }
       );
       console.log(res.data);
-      toast.success("Sucesso ao remover documento");
     } catch (err: any) {
       console.log("Erro ao remover documento:", err);
-      toast.error("Erro ao remover documento");
+      throw err;
     }
   };
 
   const addDocumentByActivitie = async (
     idActivity: string,
-    idDocumentBranch: string
+    idDocumentBranch: string,
+    replicate: boolean
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const res = await axios.post(
-        `${ip}/contract/activity/add-document-to-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}`,
-        {}, // corpo vazio, pois o body não é usado
+        `${ip}/contract/activity/add-document-to-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${tokenFromStorage}`,
@@ -118,45 +99,60 @@ export function ActivitiesBox() {
         }
       );
       console.log(res.data);
-      toast.success("Sucesso ao adicionar documento à atividade");
     } catch (err: any) {
       console.log("Erro ao adicionar documento:", err);
-      toast.error("Erro ao adicionar documento à atividade");
+      throw err;
     }
   };
 
-  const handleSelectDocument = async (document: any, idDocument: string) => {
+  const handleSelectDocument = async (_document: any, idDocument: string) => {
     const idActivity = activitieSelected?.idActivity;
     if (!idActivity) return;
 
     setLoadingDocumentId(idDocument);
 
-    try {
-      if (document.selected === true) {
-        await removeDocumentByActivitie(idActivity, idDocument);
+    setPendingOperation({
+      type: _document.selected === true ? "remove" : "add",
+      idActivity: idActivity,
+      idDocumentBranch: idDocument,
+      document: _document,
+    });
+    
+    setShowReplicateConfirmation(true);
+  };
 
-        // Atualiza visualmente o documento removido
+  const handleConfirmReplication = async (replicate: boolean) => {
+    setShowReplicateConfirmation(false);
+    if (!pendingOperation) return;
+
+    const { type, idActivity, idDocumentBranch } = pendingOperation;
+
+    try {
+      if (type === "remove") {
+        await removeDocumentByActivitie(idActivity, idDocumentBranch, replicate);
         setDocumentsByActivitie((prevDocs: any) =>
           prevDocs.map((doc: any) =>
-            doc.idDocument === idDocument ? { ...doc, selected: false } : doc
+            doc.idDocument === idDocumentBranch ? { ...doc, selected: false } : doc
           )
         );
       } else {
-        await addDocumentByActivitie(idActivity, idDocument);
-
+        await addDocumentByActivitie(idActivity, idDocumentBranch, replicate);
         setDocumentsByActivitie((prevDocs: any) =>
           prevDocs.map((doc: any) =>
-            doc.idDocument === idDocument ? { ...doc, selected: true } : doc
+            doc.idDocument === idDocumentBranch ? { ...doc, selected: true } : doc
           )
         );
       }
-
-      // Você ainda pode manter a chamada real de atualização, se quiser garantir os dados
-      // await getDocumentByActivitie(idActivity);
+      toast.success("Operação realizada com sucesso!");
+    } catch (err) {
+      console.error("Erro na operação:", err);
+      toast.error("Erro ao realizar a operação.");
     } finally {
       setLoadingDocumentId(null);
+      setPendingOperation(null);
     }
   };
+
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -235,6 +231,29 @@ export function ActivitiesBox() {
           </ScrollArea>
         </div>
       </div>
+
+      {showReplicateConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h3 className="text-lg font-semibold mb-4">Replicar Alteração?</h3>
+            <p className="mb-6">Deseja replicar esta alteração para todas as outras filiais?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => handleConfirmReplication(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+              >
+                Sim
+              </button>
+              <button
+                onClick={() => handleConfirmReplication(false)}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+              >
+                Não
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

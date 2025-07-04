@@ -15,7 +15,7 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
-import { ValidateSection } from "../validate-matrix/validate-section"; 
+import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function ThirdCompany() {
   const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
@@ -23,6 +23,7 @@ export function ThirdCompany() {
   const [selectedDocument, setSelectedDocument] = useState<any>([]);
   const { selectedBranch } = useBranch();
   const [isLoading, setIsLoading] = useState(false);
+  const [replicate, setReplicate] = useState(false);
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -59,14 +60,14 @@ export function ThirdCompany() {
   const filterIdDocuments = nonSelected.map((document: any) => document.idDocument);
   const filterIdDocumentsSelected = documents.map((document: any) => document.idDocument);
 
-  const sendDocuments = async (isSelected: boolean, idDocument: string[]) => {
+  const sendDocuments = async (isSelected: boolean, idDocument: string[], replicate: boolean) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       await axios.post(`${ip}/document/branch/document-matrix/update`, idDocument, {
         headers: {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
-        params: { isSelected },
+        params: { isSelected, replicate },
       });
       clearArray();
       pullDatas();
@@ -102,11 +103,10 @@ export function ThirdCompany() {
           <div>
             <AlertDialog>
               <AlertDialogTrigger
-                className={`w-[10vw] rounded-md p-4 transition-all duration-300 ${
-                  nonSelected.length === 0
+                className={`w-[10vw] rounded-md p-4 transition-all duration-300 ${nonSelected.length === 0
                     ? "cursor-not-allowed bg-gray-300 text-gray-500"
                     : "bg-realizaBlue text-white"
-                }`}
+                  }`}
                 disabled={nonSelected.length === 0}
               >
                 Alocar novos documentos
@@ -126,9 +126,20 @@ export function ThirdCompany() {
                     )}
                   </ul>
                 </div>
+                <div className="mt-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={replicate}
+                      onChange={() => setReplicate(!replicate)}
+                      className="h-4 w-4"
+                    />
+                    Replicar alteração para outras filiais
+                  </label>
+                </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments)}>
+                  <AlertDialogAction onClick={() => sendDocuments(true, filterIdDocuments, replicate)}>
                     Confirmar
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -138,11 +149,10 @@ export function ThirdCompany() {
           <div>
             <AlertDialog>
               <AlertDialogTrigger
-                className={`w-[10vw] rounded-md p-3 transition-all duration-300 ${
-                  documents.length === 0
+                className={`w-[10vw] rounded-md p-3 transition-all duration-300 ${documents.length === 0
                     ? "cursor-not-allowed bg-red-300 text-red-500"
                     : "bg-red-600 text-white"
-                }`}
+                  }`}
                 disabled={documents.length === 0}
               >
                 Desalocar documentos
@@ -162,9 +172,20 @@ export function ThirdCompany() {
                     )}
                   </ul>
                 </div>
+                <div className="mt-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={replicate}
+                      onChange={() => setReplicate(!replicate)}
+                      className="h-4 w-4"
+                    />
+                    Replicar alteração para outras filiais
+                  </label>
+                </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected)}>
+                  <AlertDialogAction onClick={() => sendDocuments(false, filterIdDocumentsSelected, replicate)}>
                     Confirmar
                   </AlertDialogAction>
                 </AlertDialogFooter>

@@ -123,7 +123,7 @@ export function LateralMenu({ onClose }: { onClose: () => void }) {
       <h3 className="pl-4 pt-6 text-xs text-white">Funcionalidades</h3>
 
       <RealizaMenuItem
-        to={`/sistema/controlPanel/${getIdUser}`}
+        to={`/sistema/configPanel/${getIdUser}`}
         icon={<Cog />}
         label="Configurações gerais"
         menuKey="configuracoes"
