@@ -45,7 +45,7 @@ export function ConformityGaugeChart({
   }
 
   return (
-    <Card className="w-full h-96">
+    <Card className="w-full h-full">
       <CardHeader className="pb-0">
         <CardTitle className="text-muted-foreground text-base">
           Conformidade

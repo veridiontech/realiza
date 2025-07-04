@@ -392,8 +392,8 @@ export function Dashboard() {
         <div className="container relative bottom-[6vw] mx-auto max-w-7xl">
           <div className="flex flex-col gap-10">
             <EnterpriseResume />
-            <div className="flex items-center gap-5">
-              <div className="h-[60vh] w-[95vw] rounded-lg border bg-white p-8 shadow-sm">
+            <div className="flex items-center gap-10">
+              <div className="h-[60vh] w-[70vw] rounded-lg border bg-white p-8 shadow-sm">
                 <div className="flex flex-col gap-4">
                   <div>
                     <nav className="flex items-center justify-between">
@@ -720,7 +720,7 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <div className="w-full flex justify-center">
+              <div className="w-[30vw] flex justify-center">
                 <div className="h-[60vh] w-[30vw] rounded-lg border bg-white p-5 shadow-sm">
                   <ConformityGaugeChart
                     percentage={data?.adherence}
