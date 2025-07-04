@@ -1,5 +1,4 @@
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-import employeeSuccessImg from "@/assets/employee_success.svg";
 
 import { Button } from "@/components/ui/button";
 import {

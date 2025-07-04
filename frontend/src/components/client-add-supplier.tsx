@@ -17,7 +17,6 @@ import { useEffect, useState } from "react";
 import { Oval } from "react-loader-spinner"; // 'Radio' removido
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
-import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { useBranch } from "@/context/Branch-provider";
 import { Search } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
