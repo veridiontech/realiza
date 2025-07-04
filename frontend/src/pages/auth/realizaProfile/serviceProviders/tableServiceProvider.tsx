@@ -978,7 +978,7 @@ export function TableServiceProvider() {
             const payload = { status: "Contrato Cancelado" };
 
             try {
-              const response = await axios.post(endpoint, payload, {
+               await axios.post(endpoint, payload, {
                 headers: { Authorization: `Bearer ${token}` },
               });
               toast.success("Contrato finalizado com sucesso");
