@@ -392,7 +392,6 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
           <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent
               className="max-w-[45vw] border-none"
-              style={{ backgroundImage: `url(${bgModalRealiza})` }}
             >
               <DialogHeader>
                 <DialogTitle className="flex flex-col gap-5 text-white">
@@ -555,53 +554,6 @@ const createClient = async (data: ModalSendEmailFormSchema) => {
                         </span>
                       )}
                     </div>
-                    {/* <div>
-                      <Label className="text-white">Risco do contrato</Label>
-                      <select
-                        {...registerContract("risk")}
-                        className="w-full rounded-md border p-2"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          Selecione o risco do contrato
-                        </option>
-                        <option value="LOW_LESS_THAN_8H">
-                          LOW_LESS_THAN_8H
-                        </option>
-                        <option value="LOW_LESS_THAN_1M">
-                          LOW_LESS_THAN_1M
-                        </option>
-                        <option value="LOW_LESS_THAN_6M">
-                          LOW_LESS_THAN_6M
-                        </option>
-                        <option value="LOW_MORE_THAN_6M">
-                          LOW_MORE_THAN_6M
-                        </option>
-                        <option value="MEDIUM_LESS_THAN_1M">
-                          MEDIUM_LESS_THAN_1M
-                        </option>
-                        <option value="MEDIUM_LESS_THAN_6M">
-                          MEDIUM_LESS_THAN_6M
-                        </option>
-                        <option value="MEDIUM_MORE_THAN_6M">
-                          MEDIUM_MORE_THAN_6M
-                        </option>
-                        <option value="HIGH_LESS_THAN_1M">
-                          HIGH_LESS_THAN_1M
-                        </option>
-                        <option value="HIGH_LESS_THAN_6M">
-                          HIGH_LESS_THAN_6M
-                        </option>
-                        <option value="HIGH_MORE_THAN_6M">
-                          HIGH_MORE_THAN_6M
-                        </option>
-                      </select>
-                      {errorsContract.risk && (
-                        <span className="text-red-500">
-                          {errorsContract.risk.message}
-                        </span>
-                      )}
-                    </div> */}
                     <Button className="bg-realizaBlue" type="submit">
                       Criar contrato
                     </Button>
