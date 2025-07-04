@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "sonner"; // Mantemos o toast para o sucesso
+import { toast } from "sonner";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 
@@ -11,11 +11,10 @@ type Profile = {
 
 export function ProfilesSection() {
   const { client } = useClient();
-  const clientId = client?.idClient
+  const clientId = client?.idClient;
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null); // Não precisamos mais deste estado se não vamos exibir o erro na UI
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -39,25 +38,29 @@ export function ProfilesSection() {
     try {
       const response = await axios.get(`${ip}/profile/by-name/${clientId}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
-      }
-    )
+      });
+
+      console.log("✅ Dados brutos dos perfis recebidos:", response.data);
+
       const data = Array.isArray(response.data) ? response.data : [];
-      console.log("perfis: " , response.data);
       setProfiles(data);
     } catch (err) {
-      console.error("Erro ao buscar perfis:", err); 
+      console.error("❌ Erro ao buscar perfis:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProfiles();
+    if (clientId) {
+      console.log("📦 clientId do contexto:", clientId);
+      fetchProfiles();
+    }
   }, [clientId]);
 
   const handleCreateProfile = async () => {
     if (!clientId || !name.trim()) {
-      console.warn("Validação: Nome do perfil ou ID do cliente ausente."); // Loga o aviso
+      console.warn("⚠️ Validação: Nome do perfil ou ID do cliente ausente.");
       return;
     }
 
@@ -83,8 +86,6 @@ export function ProfilesSection() {
         environment: true,
         concierge: true,
       };
-    } else if (viewer) {
-      // All false by default
     } else if (manager || isInspector) {
       permissions = {
         inspector: isInspector,
@@ -110,11 +111,16 @@ export function ProfilesSection() {
       contractIds: [],
     };
 
-    console.log("Enviando perfil para criação:", newProfile);
+    console.log("📤 Enviando perfil para criação:", newProfile);
+    const tokenFromStorage = localStorage.getItem("tokenClient");
 
     try {
-      await axios.post("/profile", newProfile);
-      toast.success("Perfil criado com sucesso!"); // Mantém o toast de sucesso
+      const result = await axios.post(`${ip}/profile`, newProfile, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      });
+
+      console.log("✅ Resposta da criação de perfil:", result.data);
+      toast.success("Perfil criado com sucesso!");
 
       // Reset form
       setName("");
@@ -133,8 +139,7 @@ export function ProfilesSection() {
 
       fetchProfiles();
     } catch (err: any) {
-      // Removido toast.error. Apenas loga o erro no console.
-      console.error("Erro ao criar perfil:", err.response || err);
+      console.error("❌ Erro ao criar perfil:", err.response || err);
     }
   };
 
@@ -144,7 +149,6 @@ export function ProfilesSection() {
         <h2 className="text-xl font-semibold mb-4">Perfis vinculados ao cliente</h2>
 
         {loading && <p className="text-gray-500">Carregando perfis...</p>}
-        {/* {error && <p className="text-red-600">{error}</p>} */} {/* Removido, pois não estamos exibindo erros via estado */}
 
         {!loading && profiles.length === 0 && (
           <p className="text-gray-500">Nenhum perfil encontrado para este cliente.</p>
@@ -163,7 +167,6 @@ export function ProfilesSection() {
           </ul>
         )}
 
-        {/* Formulário */}
         <div className="border-t pt-4">
           <h3 className="text-lg font-medium mb-2">Criar novo perfil</h3>
 
