@@ -8,6 +8,7 @@ import {
 import { ip } from "@/utils/ip";
 import axios from "axios";
 import { useEffect } from "react";
+import { Eye, BookOpen } from "lucide-react";
 
 interface MoreDetailsProps {
   idSolicitation: string;
@@ -47,39 +48,45 @@ export function MoreDetails({
 }: MoreDetailsProps) {
   // const [moreDetailsProvider, setMoreDetailsProvider] = useState(null)
 
-  const token = localStorage.getItem("tokenClient")
+  const token = localStorage.getItem("tokenClient");
 
-  const getMoreDetails = async() => {
-    try{
-      const res = await axios.get(`${ip}/item-management/new-provider/details/${idSolicitation}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+  const getMoreDetails = async () => {
+    try {
+      const res = await axios.get(
+        `${ip}/item-management/new-provider/details/${idSolicitation}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      })
+      );
       console.log(res.data);
       // setMoreDetailsProvider(res.data)
-    }catch(err: any) {
+    } catch (err: any) {
       console.log(err);
     }
-  }
+  };
 
   useEffect(() => {
-    if(idSolicitation) {
-      getMoreDetails()
+    if (idSolicitation) {
+      getMoreDetails();
     }
-  }, [idSolicitation])
+  }, [idSolicitation]);
 
   return (
     <Dialog>
       <DialogTrigger className="bg-realizaBlue rounded-md p-2 text-white">
-        Mais detalhes
+        <Eye width={20} height={20} />
       </DialogTrigger>
-      <DialogContent className="min-w-[45vw]">
-        <DialogHeader>
-          <DialogTitle>DETALHES DA SOLICITAÇÃO</DialogTitle>
+      <DialogContent className="min-w-[45vw] p-0 m-0 border-none rounded-md">
+        <DialogHeader className="flex flex-row items-center gap-4 bg-realizaBlue p-4 ">
+          <BookOpen className="text-[#C0B15B]" />
+          <DialogTitle className="text-xl mt-0 text-white">
+            DETALHES DA SOLICITAÇÃO
+          </DialogTitle>
         </DialogHeader>
         <div key={idSolicitation}>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 pt-2 pb-5 px-5">
             <h1 className="font-semibold">Solicitação de</h1>
             <div className="flex gap-1 flex-col">
               <p className="">
@@ -88,6 +95,10 @@ export function MoreDetails({
               <p className="">
                 <strong>Email:</strong> {requester.email}
               </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <p className="font-semibold">CNPJ:</p>
+              <span>{client.cnpj}</span>
             </div>
             <div>
               <div>
@@ -110,10 +121,6 @@ export function MoreDetails({
                 <div className="flex items-center gap-1">
                   <p className="font-semibold">Nome Fantasia: </p>
                   <span>{client.tradeName}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <p className="font-semibold">cnpj:</p>
-                  <span>{client.cnpj}</span>
                 </div>
               </div>
             </div>
