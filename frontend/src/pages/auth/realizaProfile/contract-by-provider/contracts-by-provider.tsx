@@ -15,7 +15,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
-
+import { CreateDocument } from "../employee/modals/CreateDocument";
+  
 interface Contract {
   idContract: string;
   serviceName: string;
@@ -37,10 +38,10 @@ export function ContarctsByProvider() {
   const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<
     string | null
   >(null);
-
   const [openMenuDocumentId, setOpenMenuDocumentId] = useState<string | null>(
     null
   );
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // NOVO
 
   const token = localStorage.getItem("tokenClient");
 
@@ -50,7 +51,6 @@ export function ContarctsByProvider() {
         params: { idSearch: id.id },
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("contrato", id);
       setContracts(res.data.content);
     } catch (err) {
       console.log(err);
@@ -59,7 +59,6 @@ export function ContarctsByProvider() {
 
   const getProvider = async () => {
     const res = await axios.get(`${ip}/supplier/${id.id}`);
-    console.log(res.data);
     setProvider(res.data);
   };
 
@@ -142,6 +141,10 @@ export function ContarctsByProvider() {
     }
   };
 
+  const selectedContractId =
+    contracts.find((c) => c.serviceName === selectedContractName)?.idContract ||
+    "";
+
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
       <div className="bg-realizaBlue border rounded-md flex flex-col w-[25vw]">
@@ -195,7 +198,10 @@ export function ContarctsByProvider() {
                 <NotebookText />
                 <h2 className="text-[20px]">Documentos vinculados:</h2>
               </div>
-              <div className="bg-realizaBlue p-2 rounded-md text-white hover:bg-blue-700 transition duration-300 cursor-pointer">
+              <div
+                className="bg-realizaBlue p-2 rounded-md text-white hover:bg-blue-700 transition duration-300 cursor-pointer"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
                 <Plus />
               </div>
             </div>
@@ -234,7 +240,7 @@ export function ContarctsByProvider() {
                         <MoreVertical className="w-5 h-5" />
                       </button>
                       {openMenuDocumentId === doc.id && (
-                        <div className="absolute right-10  mt-2 w-15 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                        <div className="absolute right-10 mt-2 w-15 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                           <button
                             onClick={() => handleOpenViewerModal(doc.id)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
@@ -319,6 +325,15 @@ export function ContarctsByProvider() {
           documentId={selectedDocumentId}
         />
       )}
+
+      <CreateDocument
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        contractId={selectedContractId}
+        onSuccess={() =>
+          getAllDatas(selectedContractId, selectedContractName)
+        }
+      />
     </div>
   );
 }

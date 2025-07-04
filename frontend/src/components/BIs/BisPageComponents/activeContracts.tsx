@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileUser } from "lucide-react";
+import { User } from "lucide-react";
 
 interface ActiveContractProps {
   count?: number;
@@ -32,7 +32,7 @@ export function ActiveContracts({ count }: ActiveContractProps) {
           alignContent: "center",
         }}
       >
-        <FileUser height={80} width={70} color="#cccccc" />
+        <User height={80} width={70} color="#cccccc" />
       </div>
       <div
         style={{

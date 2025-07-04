@@ -24,7 +24,7 @@ interface StatusDocumentChartProps {
 // O gráfico usará uma cor padrão se um status novo aparecer.
 const STATUS_COLORS: Record<string, string> = {
   PENDENTE: '#fde68a',     // Amarelo
-  REPROVADO_IA: '#fca5a5', // Vermelho
+  REPROVADO: '#fca5a5', // Vermelho
   VENCIDO: '#fbbf24',      // Laranja
   ISENCAO: '#a5b4fc',      // Azul
   APROVADO: '#86efac',      // Verde

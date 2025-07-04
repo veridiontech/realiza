@@ -92,6 +92,7 @@ export function TableServiceProvider() {
   const { selectedBranch } = useBranch();
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState<any | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
@@ -296,6 +297,20 @@ export function TableServiceProvider() {
     setEditFormData({ ...supplier });
     setIsEditModalOpen(true);
   };
+
+  const handleSuspend = async (contractId: string) => {
+  try {
+    const response = await axios.patch(
+      `https://realiza.onrender.com/contract/suspend/${contractId}`,
+      { idBranch: selectedBranch?.idBranch }
+    );
+    toast.success("Contrato suspenso com sucesso!");
+    console.log("✅ Contrato suspenso:", response.data);
+  } catch (error) {
+    toast.error("Erro ao suspender contrato.");
+    console.error("❌ Erro na suspensão:", error);
+  }
+};
 
   // Lógica de filtragem aprimorada
   const filteredSuppliers = suppliers.filter((supplier) => {
@@ -595,11 +610,14 @@ export function TableServiceProvider() {
                             <BadgeCheck className="w-4 h-4" /> Finalizar
                           </button>
                           <button
-                            disabled
-                            className="w-full text-left px-4 py-2 text-sm text-gray-400 flex items-center gap-2 cursor-not-allowed"
-                          >
-                            <X className="w-4 h-4" /> Suspender
-                          </button>
+                          onClick={() => {
+                            setSelectedSupplierId(supplier.idContract);
+                            setIsSuspendModalOpen(true);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          <X className="w-4 h-4" /> Suspender
+                        </button>
                         </div>
                       )}
                     </div>
@@ -1008,6 +1026,46 @@ export function TableServiceProvider() {
           </div>
         </Modal>
       )}
+      {isSuspendModalOpen && selectedSupplier && (
+  <Modal
+    title="Suspender contrato"
+    onClose={() => {
+      setIsSuspendModalOpen(false);
+      setSelectedSupplier(null);
+    }}
+  >
+    <div className="text-white space-y-4">
+      <p>
+        Tem certeza de que deseja <strong>suspender</strong> o contrato de{" "}
+        <strong>{selectedSupplier.providerSupplierName}</strong>? Essa ação poderá ser desfeita futuramente, mas o contrato ficará inativo enquanto estiver suspenso.
+      </p>
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => {
+            setIsSuspendModalOpen(false);
+            setSelectedSupplier(null);
+          }}
+          className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700"
+        >
+          Cancelar
+        </button>
+
+        <button
+          onClick={() => {
+            handleSuspend(selectedSupplier.idContract);
+            setIsSuspendModalOpen(false);
+            setSelectedSupplier(null);
+          }}
+          className="px-4 py-2 bg-yellow-600 rounded hover:bg-yellow-700"
+        >
+          Confirmar Suspensão
+        </button>
+      </div>
+    </div>
+  </Modal>
+)}
+
     </div>
   );
 }
