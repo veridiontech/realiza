@@ -1308,21 +1308,13 @@ export function NewModalCreateEmployee({
             </DialogTitle>
           </DialogHeader>
           <div className="flex ">
-            <div className="flex flex-col items-center justify-center gap-4 py-4 w-[50%]">
+            <div className="flex flex-col items-center justify-center gap-4 py-4 w-[100%]">
               <p className="text-md text-gray-700 text-start">
                 Colaborador <strong>"{employeeName}"</strong> adicionado com
                 sucesso à aba de colaboradores. Se deseja visualizar este
                 colaborador, acesse a aba de colaboradores vinculados ao
                 fornecedor <strong>"{supplierName}"</strong>.
               </p>
-            </div>
-
-            <div className="flex flex-col items-center gap-4 py-4 w-[50%]">
-              <img
-                src={employeeSuccessImg}
-                alt="Ilustração"
-                className="h-[80%] w-[80%] absolute top-5"
-              />
             </div>
           </div>
           <DialogFooter className="flex justify-center">

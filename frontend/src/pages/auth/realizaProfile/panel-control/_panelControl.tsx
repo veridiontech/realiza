@@ -10,8 +10,8 @@ export function ControlPanel() {
     <div>
       <div className="relative bottom-[3vw] flex w-full flex-col items-center justify-center gap-9 rounded-md bg-white p-4 shadow-sm">
         <div className="flex w-full flex-row items-center justify-between gap-4">
-          <div className="flex flex-col items-start gap-3">
-            <h2 className="text-center text-lg font-semibold">
+          <div className="flex items-center gap-3 justify-between w-full px-5">
+            <h2 className="text-center text-lg font-semibold flex">
               Painel de Controle
             </h2>
             <div className="flex items-center gap-2">
