@@ -1,13 +1,13 @@
 package bl.tech.realiza.configs;
 
+import bl.tech.realiza.services.auth.ExternalJwtAuthenticationFilter;
 import bl.tech.realiza.services.auth.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,7 +24,10 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ExternalJwtAuthenticationFilter externalJwtAuthenticationFilter) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
@@ -35,13 +38,16 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/email-images/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*").permitAll()
 //                        .anyRequest().permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
 //                .httpBasic(Customizer.withDefaults());
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(externalJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, ExternalJwtAuthenticationFilter.class);
+
 
         return http.build();
     }

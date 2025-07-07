@@ -19,6 +19,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,18 @@ public class JwtService {
             throw new IllegalArgumentException("EXPIRATION_TIME must be a valid long value.");
         }
         this.providerSupplierRepository = providerSupplierRepository;
+    }
+
+    public String generateExternalToken(String enterpriseName, String enterpriseCnpj) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("enterpriseName", enterpriseName);
+        claims.put("enterpriseCnpj", enterpriseCnpj);
+        claims.put("createdAt", LocalDateTime.now().toString());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
     }
 
     public String generateTokenManager(UserManager user) {
@@ -299,6 +312,13 @@ public class JwtService {
                 .environment(profileClaims.get("environment"))
                 .concierge(profileClaims.get("concierge"))
                 .build();
+    }
+
+    public Map<String, Object> extractClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public String getIdBranchFromToken() {

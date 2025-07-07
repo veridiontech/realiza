@@ -1,6 +1,5 @@
 package bl.tech.realiza.services.auth;
 
-import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,23 +13,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class ExternalJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/api/");
+        return !request.getRequestURI().startsWith("/api/");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -39,25 +39,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
         try {
-            UserResponseDto userResponse = jwtService.extractAllClaims(token);
+            Map<String, Object> claims = jwtService.extractClaims(token);
 
-            List<GrantedAuthority> authorities = Collections.singletonList(
-                    new SimpleGrantedAuthority(userResponse.getRole().name())
-            );
+            // Crie uma autenticação mínima com role EXTERNAL
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("EXTERNAL"));
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userResponse,
-                    null,
+                    claims.get("enterpriseCnpj"), // principal
+                    null, // credentials
                     authorities
             );
-
             SecurityContextHolder.getContext().setAuthentication(authToken);
+
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token externo inválido");
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 }
+
