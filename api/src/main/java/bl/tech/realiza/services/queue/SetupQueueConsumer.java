@@ -38,44 +38,48 @@ public class SetupQueueConsumer {
                     logService.logSuccess("REPLICATE_BRANCH", message.getBranchId(), start);
                 }
                 case "CREATE_ACTIVITY" -> {
-                    setupService.replicateCreateActivity(message.getActivityId());
+                    setupService.replicateCreateActivity(message.getActivityId(), message.getBranchIds());
                     logService.logSuccess("CREATE_ACTIVITY", message.getActivityId(), start);
                 }
                 case "UPDATE_ACTIVITY" -> {
-                    setupService.replicateUpdateActivity(message.getActivityId(), message.getTitle(), message.getActivityRisk());
+                    setupService.replicateUpdateActivity(message.getActivityId(), message.getTitle(), message.getActivityRisk(), message.getBranchIds());
                     logService.logSuccess("UPDATE_ACTIVITY", message.getActivityId(), start);
                 }
                 case "DELETE_ACTIVITY" -> {
-                    setupService.replicateDeleteActivity(message.getClientId(), message.getTitle(), message.getActivityRisk());
+                    setupService.replicateDeleteActivity(message.getClientId(), message.getTitle(), message.getActivityRisk(), message.getBranchIds());
                     logService.logSuccess("DELETE_ACTIVITY", message.getActivityId(), start);
                 }
                 case "CREATE_SERVICE_TYPE" -> {
-                    setupService.replicateCreateServiceType(message.getServiceTypeBranchId());
+                    setupService.replicateCreateServiceType(message.getServiceTypeBranchId(), message.getBranchIds());
                     logService.logSuccess("CREATE_ACTIVITY", message.getActivityId(), start);
                 }
                 case "UPDATE_SERVICE_TYPE" -> {
-                    setupService.replicateUpdateServiceType(message.getServiceTypeBranchId(), message.getTitle(), message.getServiceTypeRisk());
+                    setupService.replicateUpdateServiceType(message.getServiceTypeBranchId(), message.getTitle(), message.getServiceTypeRisk(), message.getBranchIds());
                     logService.logSuccess("UPDATE_ACTIVITY", message.getActivityId(), start);
                 }
                 case "DELETE_SERVICE_TYPE" -> {
-                    setupService.replicateDeleteServiceType(message.getClientId(), message.getTitle(), message.getServiceTypeRisk());
+                    setupService.replicateDeleteServiceType(message.getClientId(), message.getTitle(), message.getServiceTypeRisk(), message.getBranchIds());
                     logService.logSuccess("DELETE_ACTIVITY", message.getActivityId(), start);
                 }
                 case "ALLOCATE_DOCUMENT_FROM_ACTIVITY" -> {
-                    setupService.replicateAllocateDocumentToActivity(message.getDocumentId(), message.getActivityId());
+                    setupService.replicateAllocateDocumentToActivity(message.getDocumentId(), message.getActivityId(), message.getBranchIds());
                     logService.logSuccess("ALLOCATE_DOCUMENT_FROM_ACTIVITY", message.getDocumentId(), start);
                 }
                 case "DEALLOCATE_DOCUMENT_FROM_ACTIVITY" -> {
-                    setupService.replicateDeallocateDocumentToActivity(message.getDocumentId(), message.getActivityId());
+                    setupService.replicateDeallocateDocumentToActivity(message.getDocumentId(), message.getActivityId(), message.getBranchIds());
                     logService.logSuccess("DEALLOCATE_DOCUMENT_FROM_ACTIVITY", message.getDocumentId(), start);
                 }
                 case "ALLOCATE_DOCUMENT_FROM_BRANCH" -> {
-                    setupService.replicateAllocateDocumentToBranch(message.getDocumentId(), message.getTitle());
+                    setupService.replicateAllocateDocumentToBranch(message.getDocumentId(), message.getTitle(), message.getBranchIds());
                     logService.logSuccess("ALLOCATE_DOCUMENT_FROM_BRANCH", message.getDocumentId(), start);
                 }
                 case "DEALLOCATE_DOCUMENT_FROM_BRANCH" -> {
-                    setupService.replicateDeallocateDocumentToBranch(message.getDocumentId(), message.getTitle());
+                    setupService.replicateDeallocateDocumentToBranch(message.getDocumentId(), message.getTitle(), message.getBranchIds());
                     logService.logSuccess("DEALLOCATE_DOCUMENT_FROM_BRANCH", message.getDocumentId(), start);
+                }
+                case "EXPIRATION_DATE_DOCUMENT_UPDATE" -> {
+                    setupService.replicateExpirationDateDocumentUpdate(message.getDocumentId(), message.getBranchIds());
+                    logService.logSuccess("EXPIRATION_DATE_DOCUMENT_UPDATE", message.getDocumentId(), start);
                 }
                 case "NEW_CONTRACT_SUPPLIER" -> {
                     setupService.setupContractSupplier(message.getContractSupplierId(), message.getActivityIds());
