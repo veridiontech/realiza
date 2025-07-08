@@ -10,10 +10,7 @@ import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
-import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.users.*;
-import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
-import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
@@ -23,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +34,6 @@ public class CrudNotificationImpl implements CrudNotification {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final UserManagerRepository userManagerRepository;
-    private final ProviderRepository providerRepository;
     private final UserProviderSupplierRepository userProviderSupplierRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final DocumentRepository documentRepository;
@@ -129,7 +127,7 @@ public class CrudNotificationImpl implements CrudNotification {
 
     @Override
     public Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable) {
-        Page<Notification> notificationPage = notificationRepository.findAllByUser_IdUser(idSearch, pageable);
+        Page<Notification> notificationPage = notificationRepository.findByUserAndRecentReadMark(idSearch, LocalDateTime.now().minusHours(24),pageable);
 
         return notificationPage.map(
                 notification -> NotificationResponseDto.builder()
@@ -346,6 +344,7 @@ public class CrudNotificationImpl implements CrudNotification {
         notifications.forEach(
                 notification -> {
                     notification.setIsRead(true);
+                    notification.setReadAt(LocalDateTime.now());
                 }
         );
 
@@ -358,6 +357,7 @@ public class CrudNotificationImpl implements CrudNotification {
                 .orElseThrow(() -> new NotFoundException("Notification not found"));
 
         notification.setIsRead(true);
+        notification.setReadAt(LocalDateTime.now());
 
         notificationRepository.save(notification);
     }
