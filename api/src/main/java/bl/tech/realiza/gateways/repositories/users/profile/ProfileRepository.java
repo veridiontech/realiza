@@ -1,6 +1,6 @@
-package bl.tech.realiza.gateways.repositories.users;
+package bl.tech.realiza.gateways.repositories.users.profile;
 
-import bl.tech.realiza.domains.user.Profile;
+import bl.tech.realiza.domains.user.profile.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

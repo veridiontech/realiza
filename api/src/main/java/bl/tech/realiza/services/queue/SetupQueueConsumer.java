@@ -29,6 +29,10 @@ public class SetupQueueConsumer {
                     setupService.setupNewClient(message.getClientId());
                     logService.logSuccess("NEW_CLIENT", message.getClientId(), start);
                 }
+                case "NEW_CLIENT_PROFILES" -> {
+                    setupService.setupNewClientProfiles(message.getClientId());
+                    logService.logSuccess("NEW_CLIENT_PROFILES", message.getClientId(), start);
+                }
                 case "NEW_BRANCH" -> {
                     setupService.setupBranch(message.getBranchId());
                     logService.logSuccess("NEW_BRANCH", message.getBranchId(), start);

@@ -1,14 +1,14 @@
-package bl.tech.realiza.usecases.impl.users;
+package bl.tech.realiza.usecases.impl.users.profile;
 
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.user.Profile;
+import bl.tech.realiza.domains.user.profile.Profile;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.users.ProfileRepository;
-import bl.tech.realiza.gateways.requests.users.ProfileRequestDto;
-import bl.tech.realiza.gateways.responses.users.ProfileNameResponseDto;
-import bl.tech.realiza.gateways.responses.users.ProfileResponseDto;
-import bl.tech.realiza.usecases.interfaces.users.CrudProfile;
+import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
+import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
+import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

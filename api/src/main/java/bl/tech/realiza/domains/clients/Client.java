@@ -3,7 +3,7 @@ package bl.tech.realiza.domains.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.ultragaz.Board;
-import bl.tech.realiza.domains.user.Profile;
+import bl.tech.realiza.domains.user.profile.Profile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
