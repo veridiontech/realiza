@@ -76,6 +76,12 @@ export function DetailsEmployee() {
     }
   };
 
+  const position = employee?.position;
+  if (position && position.getId) {
+  } else {
+  console.warn('Position ou getId não encontrado.');
+  }
+
   const fetchEmployee = async () => {
     try {
       const token = localStorage.getItem("tokenClient");

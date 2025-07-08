@@ -241,7 +241,7 @@ export function ProfilesSection() {
                       setIsInspector(true);
                     }}
                   />
-                  Inspetor
+                  Fiscal de contrato
                 </label>
               </div>
             </div>
