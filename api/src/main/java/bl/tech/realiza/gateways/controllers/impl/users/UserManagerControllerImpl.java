@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -107,6 +108,7 @@ public class UserManagerControllerImpl implements UserManagerController {
 
     @PostMapping("/new-user")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override
     public ResponseEntity<String> createNewUserByManagerAccount(@RequestBody UserCreateRequestDto userCreateRequestDto) {
         return ResponseEntity.ok(crudUserManager.createNewUserActivated(userCreateRequestDto));
