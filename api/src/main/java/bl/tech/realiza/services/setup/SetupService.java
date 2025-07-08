@@ -18,6 +18,8 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.user.profile.Profile;
+import bl.tech.realiza.domains.user.profile.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
@@ -35,6 +37,8 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
+import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
+import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -69,6 +73,8 @@ public class SetupService {
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
     private final ContractRepository contractRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
+    private final ProfileRepoRepository profileRepoRepository;
+    private final ProfileRepository profileRepository;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
@@ -76,6 +82,45 @@ public class SetupService {
                 .orElseThrow(() -> new NotFoundException("Client not found"));
         log.info("Finished setup client ✔️ {}", clientId);
 //        crudServiceType.transferFromRepoToClient(client.getIdClient());
+    }
+
+    public void setupNewClientProfiles(String clientId) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+        List<ProfileRepo> profileRepos = profileRepoRepository.findAll();
+        List<Profile> profiles = new ArrayList<>();
+        for (ProfileRepo profileRepo : profileRepos) {
+            profiles.add(
+                    Profile.builder()
+                            .name(profileRepo.getName())
+                            .description(profileRepo.getDescription())
+                            .admin(profileRepo.getAdmin())
+                            .viewer(profileRepo.getViewer())
+                            .manager(profileRepo.getManager())
+                            .inspector(profileRepo.getInspector())
+                            .documentViewer(profileRepo.getDocumentViewer())
+                            .registrationUser(profileRepo.getRegistrationUser())
+                            .registrationContract(profileRepo.getRegistrationContract())
+                            .laboral(profileRepo.getLaboral())
+                            .workplaceSafety(profileRepo.getWorkplaceSafety())
+                            .registrationAndCertificates(profileRepo.getRegistrationAndCertificates())
+                            .general(profileRepo.getGeneral())
+                            .health(profileRepo.getHealth())
+                            .environment(profileRepo.getEnvironment())
+                            .concierge(profileRepo.getConcierge())
+                            .client(client)
+                            .build()
+            );
+
+            if (profiles.size() == 50) {
+                profileRepository.saveAll(profiles);
+                profiles.clear();
+            }
+        }
+
+        if (!profiles.isEmpty()) {
+
+        }
     }
 
     public void setupBranch(String branchId) {

@@ -1,25 +1,18 @@
-package bl.tech.realiza.domains.user;
+package bl.tech.realiza.domains.user.profile;
 
-import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "USER_PROFILE")
-public class Profile {
+@Table(name = "USER_PROFILE_REPO")
+public class ProfileRepo {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -55,13 +48,4 @@ public class Profile {
     private Boolean environment = false; // meio ambiente - visualiza todos os documentos ssma do contrato que for vinculado
     @Builder.Default
     private Boolean concierge = false; // portaria - apenas acesso ao modulo de portaria
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.DETACH)
-    private List<User> users;
-
-    @ManyToOne
-    @JoinColumn(name = "idClient")
-    @JsonBackReference
-    private Client client;
 }

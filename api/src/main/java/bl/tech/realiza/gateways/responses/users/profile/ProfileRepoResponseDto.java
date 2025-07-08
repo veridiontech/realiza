@@ -1,11 +1,16 @@
-package bl.tech.realiza.gateways.requests.users;
+package bl.tech.realiza.gateways.responses.users.profile;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class ProfileRequestDto {
+@Builder
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class ProfileRepoResponseDto {
+    private String id;
     private String name;
     private String description;
     private Boolean admin;
@@ -23,6 +28,4 @@ public class ProfileRequestDto {
     private Boolean environment;
     private Boolean concierge;
     private String clientId;
-    private List<String> branchIds;
-    private List<String> contractIds;
 }

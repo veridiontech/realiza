@@ -50,7 +50,7 @@ public class CrudClientImpl implements CrudClient {
     private final CrudBranchImpl crudBranchImpl;
 
     @Override
-    public ClientResponseDto save(ClientRequestDto clientRequestDto) {
+    public ClientResponseDto save(ClientRequestDto clientRequestDto, Boolean profilesFromRepo) {
 
         Client client = clientRepository.findByCnpj(clientRequestDto.getCnpj())
                 .orElse(null);
@@ -90,6 +90,28 @@ public class CrudClientImpl implements CrudClient {
                 null,
                 Activity.Risk.LOW,
                 ServiceType.Risk.LOW));
+
+        if (profilesFromRepo == null) {
+            profilesFromRepo = false;
+        }
+
+        if (profilesFromRepo) {
+            setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT_PROFILES",
+                    savedClient.getIdClient(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        }
 
         crudBranchImpl.save(BranchCreateRequestDto.builder()
                 .name(savedClient.getTradeName() != null

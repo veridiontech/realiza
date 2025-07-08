@@ -33,7 +33,7 @@ public class EmployeeResponseDto {
     private String postalCode;
     private String gender;
     private String positionId;
-    private String positionTitle;
+    private String position;
     private String registration;
     private Double salary;
     private String cellphone;

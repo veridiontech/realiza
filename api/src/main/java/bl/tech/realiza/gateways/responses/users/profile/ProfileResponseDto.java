@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.responses.users;
+package bl.tech.realiza.gateways.responses.users.profile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

@@ -18,7 +18,6 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
@@ -187,8 +186,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(savedEmployeeBrazilian.getCity())
                 .postalCode(savedEmployeeBrazilian.getPostalCode())
                 .gender(savedEmployeeBrazilian.getGender())
-                .positionId(savedEmployeeBrazilian.getPosition().getId())
-                .positionTitle(savedEmployeeBrazilian.getPosition().getTitle())
+                .positionId(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getId()
+                        : null)
+                .position(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(savedEmployeeBrazilian.getRegistration())
                 .salary(savedEmployeeBrazilian.getSalary())
                 .cellphone(savedEmployeeBrazilian.getCellphone())
@@ -242,8 +245,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(employeeBrazilian.getCity())
                 .postalCode(employeeBrazilian.getPostalCode())
                 .gender(employeeBrazilian.getGender())
-                .positionId(employeeBrazilian.getPosition().getId())
-                .positionTitle(employeeBrazilian.getPosition().getTitle())
+                .positionId(employeeBrazilian.getPosition() != null
+                        ? employeeBrazilian.getPosition().getId()
+                        : null)
+                .position(employeeBrazilian.getPosition() != null
+                        ? employeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(employeeBrazilian.getRegistration())
                 .salary(employeeBrazilian.getSalary())
                 .cellphone(employeeBrazilian.getCellphone())
@@ -299,8 +306,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .postalCode(employeeBrazilian.getPostalCode())
                             .addressLine2(employeeBrazilian.getAddressLine2())
                             .gender(employeeBrazilian.getGender())
-                            .positionId(employeeBrazilian.getPosition().getId())
-                            .positionTitle(employeeBrazilian.getPosition().getTitle())
+                            .positionId(employeeBrazilian.getPosition() != null
+                                    ? employeeBrazilian.getPosition().getId()
+                                    : null)
+                            .position(employeeBrazilian.getPosition() != null
+                                    ? employeeBrazilian.getPosition().getTitle()
+                                    : null)
                             .registration(employeeBrazilian.getRegistration())
                             .salary(employeeBrazilian.getSalary())
                             .cellphone(employeeBrazilian.getCellphone())
@@ -457,8 +468,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(savedEmployeeBrazilian.getCity())
                 .postalCode(savedEmployeeBrazilian.getPostalCode())
                 .gender(savedEmployeeBrazilian.getGender())
-                .positionId(savedEmployeeBrazilian.getPosition().getId())
-                .positionTitle(savedEmployeeBrazilian.getPosition().getTitle())
+                .positionId(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getId()
+                        : null)
+                .position(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(savedEmployeeBrazilian.getRegistration())
                 .salary(savedEmployeeBrazilian.getSalary())
                 .cellphone(savedEmployeeBrazilian.getCellphone())
