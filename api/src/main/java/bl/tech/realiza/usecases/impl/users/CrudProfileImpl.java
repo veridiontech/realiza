@@ -31,6 +31,8 @@ public class CrudProfileImpl implements CrudProfile {
                 .viewer(profileRequestDto.getViewer())
                 .manager(profileRequestDto.getManager())
                 .inspector(profileRequestDto.getInspector())
+                .documentViewer(profileRequestDto.getDocumentViewer())
+                .registration(profileRequestDto.getRegistration())
                 .laboral(profileRequestDto.getLaboral())
                 .workplaceSafety(profileRequestDto.getWorkplaceSafety())
                 .registrationAndCertificates(profileRequestDto.getRegistrationAndCertificates())
@@ -83,6 +85,12 @@ public class CrudProfileImpl implements CrudProfile {
         profile.setInspector(profileRequestDto.getInspector() != null
                 ? profileRequestDto.getInspector()
                 : profile.getInspector());
+        profile.setDocumentViewer(profileRequestDto.getDocumentViewer() != null
+                ? profileRequestDto.getDocumentViewer()
+                : profile.getDocumentViewer());
+        profile.setRegistration(profileRequestDto.getRegistration() != null
+                ? profileRequestDto.getRegistration()
+                : profile.getRegistration());
         profile.setLaboral(profileRequestDto.getLaboral() != null
                 ? profileRequestDto.getLaboral()
                 : profile.getLaboral());
@@ -121,6 +129,8 @@ public class CrudProfileImpl implements CrudProfile {
                 .viewer(profile.getViewer())
                 .manager(profile.getManager())
                 .inspector(profile.getInspector())
+                .documentViewer(profile.getDocumentViewer())
+                .registration(profile.getRegistration())
                 .laboral(profile.getLaboral())
                 .workplaceSafety(profile.getWorkplaceSafety())
                 .registrationAndCertificates(profile.getRegistrationAndCertificates())
