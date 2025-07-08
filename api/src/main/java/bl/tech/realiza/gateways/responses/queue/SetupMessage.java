@@ -16,6 +16,7 @@ public class SetupMessage implements Serializable {
     private String type;
     private String clientId;
     private String branchId;
+    private List<String> branchIds;
     private String contractSupplierId;
     private String contractSubcontractorId;
     private String contractId;

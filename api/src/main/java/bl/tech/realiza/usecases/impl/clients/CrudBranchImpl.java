@@ -112,12 +112,14 @@ public class CrudBranchImpl implements CrudBranch {
                     null,
                     null,
                     null,
+                    null,
                     Activity.Risk.LOW,
                     ServiceType.Risk.LOW));
         } else {
             setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH",
                     null,
                     savedBranch.getIdBranch(),
+                    null,
                     null,
                     null,
                     null,

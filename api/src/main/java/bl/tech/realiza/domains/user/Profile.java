@@ -36,6 +36,12 @@ public class Profile {
     @Builder.Default
     private Boolean inspector = false; // fiscal - visualiza contratos que for responsável
     @Builder.Default
+    private Boolean documentViewer = false; // pode visualizar pdf do documento
+    @Builder.Default
+    private Boolean registrationUser = false; // pode cadastrar novos usuários
+    @Builder.Default
+    private Boolean registrationContract = false; // pode cadastrar novos contratos
+    @Builder.Default
     private Boolean laboral = false; // trabalhista - visualiza todos os documentos trabalhista do contrato que for vinculado
     @Builder.Default
     private Boolean workplaceSafety = false; // ssma - visualiza todos os documentos ssma do contrato que for vinculado

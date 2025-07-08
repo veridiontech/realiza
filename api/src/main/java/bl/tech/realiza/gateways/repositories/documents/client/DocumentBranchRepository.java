@@ -81,4 +81,5 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     );
 
     List<DocumentBranch> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
+    List<DocumentBranch> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
 }

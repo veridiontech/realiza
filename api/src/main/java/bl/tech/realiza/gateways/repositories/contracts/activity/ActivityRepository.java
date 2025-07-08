@@ -38,5 +38,8 @@ public interface ActivityRepository extends JpaRepository<Activity, String > {
 
     List<Activity> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
 
+    List<Activity> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
+
     List<Activity> findAllByBranch_Client_IdClientAndTitleAndRisk(String idClient, String title, Activity.Risk risk);
+    List<Activity> findAllByBranch_IdBranchAndTitleAndRisk(String idBranch, String title, Activity.Risk risk);
 }

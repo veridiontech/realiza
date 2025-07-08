@@ -1,20 +1,17 @@
 package bl.tech.realiza.services.documentProcessing;
 
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.services.IaAdditionalPrompt;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
-import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.services.IaAdditionalPromptRepository;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -46,13 +43,13 @@ public class DocumentProcessingService {
     private final DocumentRepository documentRepository;
     private final RestTemplate restTemplate;
     private final IaAdditionalPromptRepository iaAdditionalPromptRepository;
+    private final CrudNotification crudNotification;
 
 
     public DocumentProcessingService(Dotenv dotenv1,
                                      Dotenv dotenv,
-                                     DocumentBranchRepository documentBranchRepository,
                                      DocumentRepository documentRepository,
-                                     RestTemplate restTemplate, IaAdditionalPromptRepository iaAdditionalPromptRepository) {
+                                     RestTemplate restTemplate, IaAdditionalPromptRepository iaAdditionalPromptRepository, CrudNotification crudNotification) {
         this.dotenv = dotenv1;
 
         this.OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null
@@ -73,6 +70,7 @@ public class DocumentProcessingService {
         }
         this.documentRepository = documentRepository;
         this.iaAdditionalPromptRepository = iaAdditionalPromptRepository;
+        this.crudNotification = crudNotification;
     }
 
     @Async("taskExecutor")
@@ -99,6 +97,7 @@ public class DocumentProcessingService {
             document.setVersionDate(LocalDateTime.now());
             documentRepository.save(document);
             log.info("[{}] Documento ID={} salvo com novo status {}", threadName, document.getIdDocumentation(), document.getStatus());
+            crudNotification.saveValidationNotificationForRealizaUsers(document.getIdDocumentation());
 
         } catch (Exception e) {
             log.error("[{}] Falha no processamento assíncrono do documento ID={}", threadName, document.getIdDocumentation(), e);

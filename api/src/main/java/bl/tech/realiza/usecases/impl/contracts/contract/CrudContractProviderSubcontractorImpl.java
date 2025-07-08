@@ -109,6 +109,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 null,
                 null,
                 null,
+                null,
                 savedContractSubcontractor.getIdContract(),
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),

@@ -89,7 +89,12 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .city(employeeBrazilian.getCity())
                             .postalCode(employeeBrazilian.getPostalCode())
                             .gender(employeeBrazilian.getGender())
-                            .position(employeeBrazilian.getPosition())
+                            .positionId(employeeBrazilian.getPosition() != null
+                                    ? employeeBrazilian.getPosition().getId()
+                                    : null)
+                            .positionTitle(employeeBrazilian.getPosition() != null
+                                    ? employeeBrazilian.getPosition().getTitle()
+                                    : null)
                             .registration(employeeBrazilian.getRegistration())
                             .salary(employeeBrazilian.getSalary())
                             .cellphone(employeeBrazilian.getCellphone())
@@ -140,7 +145,12 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .city(employeeForeigner.getCity())
                             .postalCode(employeeForeigner.getPostalCode())
                             .gender(employeeForeigner.getGender())
-                            .position(employeeForeigner.getPosition())
+                            .positionId(employeeForeigner.getPosition() != null
+                                    ? employeeForeigner.getPosition().getId()
+                                    : null)
+                            .positionTitle(employeeForeigner.getPosition() != null
+                                    ? employeeForeigner.getPosition().getTitle()
+                                    : null)
                             .registration(employeeForeigner.getRegistration())
                             .salary(employeeForeigner.getSalary())
                             .cellphone(employeeForeigner.getCellphone())
@@ -279,7 +289,12 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .city(employeeBrazilian.getCity())
                 .postalCode(employeeBrazilian.getPostalCode())
                 .gender(employeeBrazilian.getGender())
-                .position(employeeBrazilian.getPosition())
+                .positionId(employeeBrazilian.getPosition() != null
+                        ? employeeBrazilian.getPosition().getId()
+                        : null)
+                .positionTitle(employeeBrazilian.getPosition() != null
+                        ? employeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(employeeBrazilian.getRegistration())
                 .salary(employeeBrazilian.getSalary())
                 .cellphone(employeeBrazilian.getCellphone())
@@ -329,7 +344,12 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .city(employeeForeigner.getCity())
                 .postalCode(employeeForeigner.getPostalCode())
                 .gender(employeeForeigner.getGender())
-                .position(employeeForeigner.getPosition())
+                .positionId(employeeForeigner.getPosition() != null
+                        ? employeeForeigner.getPosition().getId()
+                        : null)
+                .positionTitle(employeeForeigner.getPosition() != null
+                        ? employeeForeigner.getPosition().getTitle()
+                        : null)
                 .registration(employeeForeigner.getRegistration())
                 .salary(employeeForeigner.getSalary())
                 .cellphone(employeeForeigner.getCellphone())

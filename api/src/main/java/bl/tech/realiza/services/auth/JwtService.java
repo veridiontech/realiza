@@ -110,6 +110,15 @@ public class JwtService {
         claims.put("inspector", user.getProfile() != null
                 ? user.getProfile().getInspector()
                 : false);
+        claims.put("documentViewer", user.getProfile() != null
+                ? user.getProfile().getDocumentViewer()
+                : false);
+        claims.put("registrationUser", user.getProfile() != null
+                ? user.getProfile().getRegistrationUser()
+                : false);
+        claims.put("registrationContract", user.getProfile() != null
+                ? user.getProfile().getRegistrationContract()
+                : false);
         claims.put("laboral", user.getProfile() != null
                 ? user.getProfile().getLaboral()
                 : false);
@@ -254,6 +263,9 @@ public class JwtService {
                 "viewer",
                 "manager",
                 "inspector",
+                "documentViewer",
+                "registrationUser",
+                "registrationContract",
                 "laboral",
                 "workplaceSafety",
                 "registrationAndCertificates",
@@ -291,6 +303,9 @@ public class JwtService {
                 .viewer(profileClaims.get("viewer"))
                 .manager(profileClaims.get("manager"))
                 .inspector(profileClaims.get("inspector"))
+                .documentViewer(profileClaims.get("documentViewer"))
+                .registrationUser(profileClaims.get("registrationUser"))
+                .registrationContract(profileClaims.get("registrationContract"))
                 .laboral(profileClaims.get("laboral"))
                 .workplaceSafety(profileClaims.get("workplaceSafety"))
                 .registrationAndCertificates(profileClaims.get("registrationAndCertificates"))

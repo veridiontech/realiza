@@ -26,4 +26,5 @@ public interface ServiceTypeBranchRepository extends JpaRepository<ServiceTypeBr
             @Param("branchId") String branchId);
 
     List<ServiceTypeBranch> findAllByBranch_Client_IdClientAndTitleAndRisk(String clientId, String title, ServiceType.Risk risk);
+    List<ServiceTypeBranch> findAllByBranch_IdBranchAndTitleAndRisk(String branchId, String title, ServiceType.Risk risk);
 }

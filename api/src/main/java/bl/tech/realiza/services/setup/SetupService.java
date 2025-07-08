@@ -7,7 +7,6 @@ import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
-import bl.tech.realiza.domains.contract.activity.ActivityDocumentsRepo;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
@@ -70,8 +69,6 @@ public class SetupService {
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
     private final ContractRepository contractRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
-    private final ActivityDocumentRepoRepository activityDocumentRepoRepository;
-    private final DocumentRepository documentRepository;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
@@ -495,15 +492,14 @@ public class SetupService {
         log.info("Finished setup replicate branch ✔️ {}", branchId);
     }
 
-    public void replicateCreateActivity(String activityId) {
+    public void replicateCreateActivity(String activityId, List<String> branchIds) {
         Activity activityBase = activityRepository.findById(activityId)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
-        Branch base = activityBase.getBranch();
+        branchIds.remove(activityBase.getBranch().getIdBranch());
+        List<Branch> branches = branchRepository.findAllById(branchIds);
 
-        List<Branch> branches = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(base.getClient().getIdClient());
-
-        branches.remove(base);
+        branches.remove(activityBase.getBranch());
 
         List<Activity> batch = new ArrayList<>(50);
         for (Branch branch : branches) {
@@ -525,13 +521,17 @@ public class SetupService {
         }
     }
 
-    public void replicateUpdateActivity(String activityId, String title, Activity.Risk risk) {
+    public void replicateUpdateActivity(String activityId, String title, Activity.Risk risk, List<String> branchIds) {
         Activity activityBase = activityRepository.findById(activityId)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
-        Branch base = activityBase.getBranch();
+        branchIds.remove(activityBase.getBranch().getIdBranch());
 
-        List<Activity> activities = activityRepository.findAllByBranch_Client_IdClientAndTitle(base.getClient().getIdClient(), activityBase.getTitle());
+        List<Activity> activities = new ArrayList<>();
+
+        for (String branch : branchIds) {
+            activities.addAll(activityRepository.findAllByBranch_IdBranchAndTitle(branch, activityBase.getTitle()));
+        }
 
         activities.remove(activityBase);
 
@@ -553,8 +553,13 @@ public class SetupService {
         }
     }
 
-    public void replicateDeleteActivity(String clientId, String title, Activity.Risk risk) {
-        List<Activity> activities = activityRepository.findAllByBranch_Client_IdClientAndTitleAndRisk(clientId, title, risk);
+    public void replicateDeleteActivity(String clientId, String title, Activity.Risk risk, List<String> branchIds) {
+
+        List<Activity> activities = new ArrayList<>();
+
+        for (String branch : branchIds) {
+            activities.addAll(activityRepository.findAllByBranch_IdBranchAndTitle(branch, title));
+        }
 
         List<Activity> batch = new ArrayList<>(50);
         for (Activity activity : activities) {
@@ -571,15 +576,14 @@ public class SetupService {
         }
     }
 
-    public void replicateCreateServiceType(String serviceTypeBranchId) {
+    public void replicateCreateServiceType(String serviceTypeBranchId, List<String> branchIds) {
         ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(serviceTypeBranchId)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
-        Branch base = serviceTypeBranch.getBranch();
+        branchIds.remove(serviceTypeBranch.getBranch().getIdBranch());
+        List<Branch> branches = branchRepository.findAllById(branchIds);
 
-        List<Branch> branches = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(base.getClient().getIdClient());
-
-        branches.remove(base);
+        branches.remove(serviceTypeBranch.getBranch());
 
         List<ServiceTypeBranch> batch = new ArrayList<>(50);
         for (Branch branch : branches) {
@@ -601,13 +605,16 @@ public class SetupService {
         }
     }
 
-    public void replicateUpdateServiceType(String serviceTypeBranchId, String title, ServiceType.Risk risk) {
+    public void replicateUpdateServiceType(String serviceTypeBranchId, String title, ServiceType.Risk risk, List<String> branchIds) {
         ServiceTypeBranch activityBase = serviceTypeBranchRepository.findById(serviceTypeBranchId)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
-        Branch base = activityBase.getBranch();
+        branchIds.remove(activityBase.getBranch().getIdBranch());
 
-        List<ServiceTypeBranch> activities = serviceTypeBranchRepository.findAllByBranch_Client_IdClientAndTitleAndRisk(base.getClient().getIdClient(), title,risk);
+        List<ServiceTypeBranch> activities = new ArrayList<>();
+        for (String branchId : branchIds) {
+            activities.addAll(serviceTypeBranchRepository.findAllByBranch_IdBranchAndTitleAndRisk(branchId, title,risk));
+        }
 
         activities.remove(activityBase);
 
@@ -629,8 +636,12 @@ public class SetupService {
         }
     }
 
-    public void replicateDeleteServiceType(String clientId, String title, ServiceType.Risk risk) {
-        List<ServiceTypeBranch> serviceTypeBranches = serviceTypeBranchRepository.findAllByBranch_Client_IdClientAndTitleAndRisk(clientId, title, risk);
+    public void replicateDeleteServiceType(String clientId, String title, ServiceType.Risk risk, List<String> branchIds) {
+        List<ServiceTypeBranch> serviceTypeBranches = new ArrayList<>();
+
+        for (String branchId : branchIds) {
+            serviceTypeBranches.addAll(serviceTypeBranchRepository.findAllByBranch_IdBranchAndTitleAndRisk(branchId, title, risk));
+        }
 
         List<ServiceTypeBranch> batch = new ArrayList<>(50);
         for (ServiceTypeBranch serviceTypeBranch : serviceTypeBranches) {
@@ -647,17 +658,24 @@ public class SetupService {
         }
     }
 
-    public void replicateAllocateDocumentToActivity(String documentId, String activityId) {
+    public void replicateAllocateDocumentToActivity(String documentId, String activityId, List<String> branchIds) {
         Activity activityBase = activityRepository.findById(activityId)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
         DocumentBranch document = documentBranchRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        Branch base = activityBase.getBranch();
-        List<Activity> activities = activityRepository.findAllByBranch_Client_IdClientAndTitleAndRisk(base.getClient().getIdClient(), activityBase.getTitle(), activityBase.getRisk());
+        branchIds.remove(activityBase.getBranch().getIdBranch());
 
-        List<DocumentBranch> documents = documentBranchRepository.findAllByBranch_Client_IdClientAndTitle(base.getClient().getIdClient(), document.getTitle());
+        List<Activity> activities = new ArrayList<>();
+        List<DocumentBranch> documents = new ArrayList<>();
+        for (String branchId : branchIds) {
+            activities.addAll(activityRepository.findAllByBranch_IdBranchAndTitleAndRisk(branchId, activityBase.getTitle(), activityBase.getRisk()));
+            documents.addAll(documentBranchRepository.findAllByBranch_IdBranchAndTitle(branchId, document.getTitle()));
+        }
+        activities.remove(activityBase);
+        documents.remove(document);
+
         Map<String, Activity> activityBranchMap = activities.stream()
                 .collect(Collectors.toMap(activity -> activity.getBranch().getIdBranch(), activity -> activity));
 
@@ -685,19 +703,23 @@ public class SetupService {
         }
     }
 
-    public void replicateDeallocateDocumentToActivity(String documentId, String activityId) {
+    public void replicateDeallocateDocumentToActivity(String documentId, String activityId, List<String> branchIds) {
         Activity activityBase = activityRepository.findById(activityId)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
         DocumentBranch document = documentBranchRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        List<ActivityDocuments> activityDocumentsList = activityDocumentRepository
-                .findAllByActivity_Branch_Client_IdClientAndActivity_TitleAndDocumentBranch_Branch_Client_IdClientAndDocumentBranch_Title(
-                        activityBase.getBranch().getClient().getIdClient(),
+        List<ActivityDocuments> activityDocumentsList = new ArrayList<>();
+        branchIds.remove(activityBase.getBranch().getIdBranch());
+        for (String branchId : branchIds) {
+            activityDocumentsList.addAll(activityDocumentRepository
+                .findAllByActivity_Branch_IdBranchAndActivity_TitleAndDocumentBranch_Branch_IdBranchAndDocumentBranch_Title(
+                        branchId,
                         activityBase.getTitle(),
-                        document.getBranch().getClient().getIdClient(),
-                        document.getTitle());
+                        branchId,
+                        document.getTitle()));
+        }
 
         List<ActivityDocuments> batch = new ArrayList<>(50);
         for (ActivityDocuments activityDocument : activityDocumentsList) {
@@ -713,11 +735,15 @@ public class SetupService {
         }
     }
 
-    public void replicateAllocateDocumentToBranch(String documentId, String title) {
+    public void replicateAllocateDocumentToBranch(String documentId, String title, List<String> branchIds) {
         DocumentBranch documentBase = documentBranchRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        List<DocumentBranch> documentBranchList = documentBranchRepository.findAllByBranch_Client_IdClientAndTitle(documentBase.getBranch().getClient().getIdClient(), title);
+        List<DocumentBranch> documentBranchList = new ArrayList<>();
+        branchIds.remove(documentBase.getBranch().getIdBranch());
+        for (String branchId : branchIds) {
+            documentBranchList.addAll(documentBranchRepository.findAllByBranch_IdBranchAndTitle(branchId, title));
+        }
 
         documentBranchList.remove(documentBase);
 
@@ -736,17 +762,49 @@ public class SetupService {
         }
     }
 
-    public void replicateDeallocateDocumentToBranch(String documentId, String title) {
+    public void replicateDeallocateDocumentToBranch(String documentId, String title, List<String> branchIds) {
         DocumentBranch documentBase = documentBranchRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
-        List<DocumentBranch> documentBranchList = documentBranchRepository.findAllByBranch_Client_IdClientAndTitle(documentBase.getBranch().getClient().getIdClient(), title);
+        List<DocumentBranch> documentBranchList = new ArrayList<>();
+        branchIds.remove(documentBase.getBranch().getIdBranch());
+        for (String branchId : branchIds) {
+            documentBranchList.addAll(documentBranchRepository.findAllByBranch_IdBranchAndTitle(branchId, title));
+        }
 
         documentBranchList.remove(documentBase);
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (DocumentBranch document : documentBranchList) {
             document.setIsActive(false);
+            batch.add(document);
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
+    }
+
+    public void replicateExpirationDateDocumentUpdate(String documentId, List<String> branchIds) {
+        DocumentBranch documentBase = documentBranchRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        List<DocumentBranch> documentBranchList = new ArrayList<>();
+        branchIds.remove(documentBase.getBranch().getIdBranch());
+        for (String branchId : branchIds) {
+            documentBranchList.addAll(documentBranchRepository.findAllByBranch_IdBranchAndTitle(branchId, documentBase.getTitle()));
+        }
+
+        documentBranchList.remove(documentBase);
+
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (DocumentBranch document : documentBranchList) {
+            document.setExpirationDateAmount(documentBase.getExpirationDateAmount());
+            document.setExpirationDateUnit(documentBase.getExpirationDateUnit());
             batch.add(document);
 
             if (batch.size() == 50) {

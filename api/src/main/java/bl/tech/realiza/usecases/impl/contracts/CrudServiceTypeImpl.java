@@ -99,7 +99,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
-    public void deleteServiceType(String idServiceType, Boolean replicate) {
+    public void deleteServiceType(String idServiceType, Boolean replicate, List<String> branchIds) {
         ServiceType serviceType = serviceTypeRepository.findById(idServiceType)
                 .orElseThrow(() -> new NotFoundException("Service type not found"));
 
@@ -111,6 +111,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("DELETE_SERVICE_TYPE",
                     serviceTypeBranch.getBranch().getClient().getIdClient(),
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
@@ -157,7 +158,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
-    public ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate) {
+    public ServiceTypeBranchResponseDto saveServiceTypeBranch(String branchId, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate, List<String> branchIds) {
         ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.save(
                 ServiceTypeBranch.builder()
                         .title(serviceTypeRequestDto.getTitle())
@@ -179,6 +180,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("CREATE_SERVICE_TYPE",
                     serviceTypeBranch.getBranch().getClient().getIdClient(),
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
@@ -211,7 +213,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     }
 
     @Override
-    public ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate) {
+    public ServiceTypeBranchResponseDto updateServiceTypeBranch(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto, Boolean replicate, List<String> branchIds) {
         ServiceTypeBranch serviceTypeBranch = (ServiceTypeBranch) Hibernate.unproxy(updateServiceType(
                 serviceTypeRepository.findById(idServiceType)
                         .orElseThrow(() -> new NotFoundException("Service type not found")),
@@ -227,6 +229,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("UPDATE_SERVICE_TYPE",
                     serviceTypeBranch.getBranch().getClient().getIdClient(),
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
