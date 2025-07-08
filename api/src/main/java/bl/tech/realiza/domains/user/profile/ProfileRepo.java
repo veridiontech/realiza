@@ -37,15 +37,15 @@ public class ProfileRepo {
     @Builder.Default
     private Boolean laboral = false; // trabalhista - visualiza todos os documentos trabalhista do contrato que for vinculado
     @Builder.Default
-    private Boolean workplaceSafety = false; // ssma - visualiza todos os documentos ssma do contrato que for vinculado
+    private Boolean workplaceSafety = false; // segurança - visualiza todos os documentos segurança do contrato que for vinculado
     @Builder.Default
     private Boolean registrationAndCertificates = false; // ssma - visualiza todos os documentos ssma do contrato que for vinculado
     @Builder.Default
-    private Boolean general = false; // ssma - visualiza todos os documentos ssma do contrato que for vinculado
+    private Boolean general = false; // geral - visualiza todos os documentos geral do contrato que for vinculado
     @Builder.Default
-    private Boolean health = false; // ssma - visualiza todos os documentos ssma do contrato que for vinculado
+    private Boolean health = false; // saude - visualiza todos os documentos saude do contrato que for vinculado
     @Builder.Default
-    private Boolean environment = false; // meio ambiente - visualiza todos os documentos ssma do contrato que for vinculado
+    private Boolean environment = false; // meio ambiente - visualiza todos os documentos meio ambiente do contrato que for vinculado
     @Builder.Default
     private Boolean concierge = false; // portaria - apenas acesso ao modulo de portaria
 }
