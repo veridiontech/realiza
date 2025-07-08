@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
-import { Eye, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 
 export function TableProviders() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [serviceFilter, setServiceFilter] = useState<string>("");
   const navigate = useNavigate();
+
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [selectedService, setSelectedService] = useState<string>("");
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -24,18 +28,24 @@ export function TableProviders() {
         }
 
         const response = await axios.get(`${ip}/supplier/by-client`, {
-          params: {
-            clientId,
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          params: { clientId },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        setSuppliers(response.data.content || []);
+        const suppliersList = response.data.content || [];
+        setSuppliers(suppliersList);
+
+        // Extrair e setar tipos de serviço únicos
+        const types = new Set<string>();
+        suppliersList.forEach((s: any) => {
+          s.serviceTypes?.forEach((t: any) => types.add(t?.name));
+        });
+        setServiceTypes(Array.from(types));
+
       } catch (error) {
         console.error("Erro ao buscar fornecedores:", error);
         setSuppliers([]);
+        setServiceTypes([]);
       } finally {
         setLoading(false);
       }
@@ -44,9 +54,26 @@ export function TableProviders() {
     fetchSuppliers();
   }, []);
 
-  const filteredSuppliers = suppliers.filter((s) =>
-    serviceFilter ? s?.serviceType?.name === serviceFilter : true
-  );
+  useEffect(() => {
+    if (!selectedService) {
+      setFilteredSuppliers(suppliers);
+    } else {
+      setFilteredSuppliers(
+        suppliers.filter((s: any) =>
+          s.serviceTypes?.some((t: any) => t?.name === selectedService)
+        )
+      );
+    }
+  }, [selectedService, suppliers]);
+
+  // Filtragem adicional pelo serviço, conforme a variável serviceFilter
+  useEffect(() => {
+    setFilteredSuppliers(
+      suppliers.filter((s: any) =>
+        serviceFilter ? s?.serviceType?.name === serviceFilter : true
+      )
+    );
+  }, [serviceFilter, suppliers]);
 
   return (
     <div className="p-4 pt-0 md:p-4 md:pt-0">
@@ -58,18 +85,16 @@ export function TableProviders() {
       {/* Filtro por tipo de serviço */}
       <div className="mb-4">
         <select
-          value={serviceFilter}
-          onChange={(e) => setServiceFilter(e.target.value)}
+          value={selectedService}
+          onChange={(e) => setSelectedService(e.target.value)}
           className="rounded border border-gray-300 px-3 py-2 text-sm"
         >
           <option value="">Todos os tipos de serviço</option>
-          {[...new Set(suppliers.map((s) => s?.serviceType?.name))]
-            .filter(Boolean)
-            .map((type, i) => (
-              <option key={i} value={type}>
-                {type}
-              </option>
-            ))}
+          {serviceTypes.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -121,18 +146,6 @@ export function TableProviders() {
 
       {/* Versão Desktop */}
       <div className="hidden md:block min-h-[60vh] rounded-lg bg-white p-6 shadow-lg">
-        {/* Campo de busca (não funcional por enquanto) */}
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-gray-300 bg-[#F0F2F1] px-4 py-2">
-          <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M10 2a8 8 0 105.3 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Pesquisar unidades, opções etc..."
-            className="w-full bg-transparent text-sm text-gray-700 placeholder-gray-500 outline-none"
-          />
-        </div>
-
         <table className="w-full border-collapse text-left text-sm text-gray-700">
           <thead className="bg-[#DDE3DC] text-gray-700">
             <tr>
@@ -164,7 +177,13 @@ export function TableProviders() {
                     </div>
                   </td>
                   <td className="px-4 py-3">{supplier.cnpj}</td>
-                  <td className="px-4 py-3">{supplier?.serviceType?.name || "Não informado"}</td>
+                  <td className="px-4 py-3">
+                    {supplier.serviceTypes?.map((s: any, i: number) => (
+                      <span key={i} className="mr-1 inline-block rounded bg-[#E5E7EB] px-2 py-0.5 text-xs text-gray-700">
+                        {s?.name}
+                      </span>
+                    ))}
+                  </td>
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => navigate(`/sistema/fornecedor/${supplier.idProvider}`)}
