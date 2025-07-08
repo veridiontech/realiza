@@ -13,7 +13,8 @@ public class ProfileRequestDto {
     private Boolean manager;
     private Boolean inspector;
     private Boolean documentViewer;
-    private Boolean registration;
+    private Boolean registrationUser;
+    private Boolean registrationContract;
     private Boolean laboral;
     private Boolean workplaceSafety;
     private Boolean registrationAndCertificates;

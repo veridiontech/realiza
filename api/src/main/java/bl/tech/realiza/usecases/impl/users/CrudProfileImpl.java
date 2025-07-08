@@ -32,7 +32,8 @@ public class CrudProfileImpl implements CrudProfile {
                 .manager(profileRequestDto.getManager())
                 .inspector(profileRequestDto.getInspector())
                 .documentViewer(profileRequestDto.getDocumentViewer())
-                .registration(profileRequestDto.getRegistration())
+                .registrationUser(profileRequestDto.getRegistrationUser())
+                .registrationContract(profileRequestDto.getRegistrationContract())
                 .laboral(profileRequestDto.getLaboral())
                 .workplaceSafety(profileRequestDto.getWorkplaceSafety())
                 .registrationAndCertificates(profileRequestDto.getRegistrationAndCertificates())
@@ -88,9 +89,12 @@ public class CrudProfileImpl implements CrudProfile {
         profile.setDocumentViewer(profileRequestDto.getDocumentViewer() != null
                 ? profileRequestDto.getDocumentViewer()
                 : profile.getDocumentViewer());
-        profile.setRegistration(profileRequestDto.getRegistration() != null
-                ? profileRequestDto.getRegistration()
-                : profile.getRegistration());
+        profile.setRegistrationUser(profileRequestDto.getRegistrationUser() != null
+                ? profileRequestDto.getRegistrationUser()
+                : profile.getRegistrationUser());
+        profile.setRegistrationContract(profileRequestDto.getRegistrationContract() != null
+                ? profileRequestDto.getRegistrationContract()
+                : profile.getRegistrationContract());
         profile.setLaboral(profileRequestDto.getLaboral() != null
                 ? profileRequestDto.getLaboral()
                 : profile.getLaboral());
@@ -130,7 +134,8 @@ public class CrudProfileImpl implements CrudProfile {
                 .manager(profile.getManager())
                 .inspector(profile.getInspector())
                 .documentViewer(profile.getDocumentViewer())
-                .registration(profile.getRegistration())
+                .registrationUser(profile.getRegistrationUser())
+                .registrationContract(profile.getRegistrationContract())
                 .laboral(profile.getLaboral())
                 .workplaceSafety(profile.getWorkplaceSafety())
                 .registrationAndCertificates(profile.getRegistrationAndCertificates())

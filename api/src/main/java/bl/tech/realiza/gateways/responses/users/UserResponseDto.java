@@ -37,6 +37,9 @@ public class UserResponseDto {
     private Boolean viewer;
     private Boolean manager;
     private Boolean inspector;
+    private Boolean documentViewer;
+    private Boolean registrationUser;
+    private Boolean registrationContract;
     private Boolean laboral;
     private Boolean workplaceSafety;
     private Boolean registrationAndCertificates;
