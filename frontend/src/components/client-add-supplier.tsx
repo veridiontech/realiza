@@ -18,7 +18,7 @@ import { Oval } from "react-loader-spinner"; // 'Radio' removido
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { useBranch } from "@/context/Branch-provider";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
@@ -391,12 +391,15 @@ export function ModalTesteSendSupplier() {
       </DialogTrigger>
       <DialogContent
         style={{
-          //backgroundImage: `url(${bgModalRealiza})`,
+        // backgroundImage: `url(${bgModalRealiza})`,
         }}
-        className="max-w-[90vw] md:max-w-[45vw]"
+      className="max-w-[90vw] md:max-w-[45vw]"
       >
-        <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 h-[60px] min-w-full">
-          <h2 className="text-white text-base font-semibold">Cadastrar novo prestador</h2>
+      <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 h-[60px] min-w-full">
+        <h2 className="text-white text-base font-semibold flex items-center gap-2">
+          <UserPlus className="w-5 h-5 text-[#C0B15B]" />
+          Cadastrar novo prestador
+        </h2>
       </div>
 
 

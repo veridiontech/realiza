@@ -8,6 +8,7 @@ import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.domains.user.UserManager;
+import bl.tech.realiza.domains.user.profile.Profile;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -17,6 +18,7 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepo
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.*;
+import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;

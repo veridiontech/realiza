@@ -1,10 +1,13 @@
 package bl.tech.realiza.gateways.controllers.impl.users;
 
 import bl.tech.realiza.gateways.controllers.interfaces.users.ProfileController;
-import bl.tech.realiza.gateways.requests.users.ProfileRequestDto;
-import bl.tech.realiza.gateways.responses.users.ProfileNameResponseDto;
-import bl.tech.realiza.gateways.responses.users.ProfileResponseDto;
-import bl.tech.realiza.usecases.interfaces.users.CrudProfile;
+import bl.tech.realiza.gateways.requests.users.profile.ProfileRepoRequestDto;
+import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
+import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
+import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfileRepo;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,43 @@ import java.util.List;
 @Tag(name = "Profile")
 public class ProfileControllerImpl implements ProfileController {
     private final CrudProfile crudProfile;
+    private final CrudProfileRepo crudProfileRepo;
+
+    @PostMapping("/repo")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<ProfileRepoResponseDto> createProfileRepo(@Valid @RequestBody ProfileRepoRequestDto profileRequestDto) {
+        return ResponseEntity.ok(crudProfileRepo.save(profileRequestDto));
+    }
+
+    @GetMapping("/repo/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<ProfileRepoResponseDto> getOneProfileRepo(@PathVariable String id) {
+        return ResponseEntity.ok(crudProfileRepo.findOne(id));
+    }
+
+    @GetMapping("/repo")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<ProfileRepoResponseDto>> getAllProfilesRepo() {
+        return ResponseEntity.ok(crudProfileRepo.findAll());
+    }
+
+    @PutMapping("/repo/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<ProfileRepoResponseDto> updateProfileRepo(@PathVariable String id, @Valid @RequestBody ProfileRepoRequestDto profileRequestDto) {
+        return ResponseEntity.ok(crudProfileRepo.update(id, profileRequestDto));
+    }
+
+    @DeleteMapping("/repo/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
+    public ResponseEntity<Void> deleteProfileRepo(@PathVariable String id) {
+        crudProfileRepo.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

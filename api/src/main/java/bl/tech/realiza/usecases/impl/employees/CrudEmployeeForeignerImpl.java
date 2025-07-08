@@ -11,6 +11,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Cbo;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
+import bl.tech.realiza.domains.employees.Position;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
@@ -24,6 +25,7 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.CboRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
+import bl.tech.realiza.gateways.repositories.employees.PositionRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -58,6 +60,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final CboRepository cboRepository;
+    private final PositionRepository positionRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
@@ -108,6 +111,8 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         Cbo cbo = cboRepository.findById(employeeForeignerRequestDto.getCboId())
                 .orElseThrow(() -> new NotFoundException("CBO not found"));
 
+        Position position = positionRepository.findById(employeeForeignerRequestDto.getPositionId())
+                .orElseThrow(() -> new NotFoundException("Position not found"));
 
         newEmployeeForeigner = EmployeeForeigner.builder()
                 .pis(employeeForeignerRequestDto.getPis())
@@ -125,7 +130,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .city(employeeForeignerRequestDto.getCity())
                 .postalCode(employeeForeignerRequestDto.getPostalCode())
                 .gender(employeeForeignerRequestDto.getGender())
-                .position(employeeForeignerRequestDto.getPosition())
                 .registration(employeeForeignerRequestDto.getRegistration())
                 .salary(employeeForeignerRequestDto.getSalary())
                 .cellphone(employeeForeignerRequestDto.getCellphone())
@@ -134,6 +138,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .directory(employeeForeignerRequestDto.getDirectory())
                 .levelOfEducation(employeeForeignerRequestDto.getLevelOfEducation())
                 .cbo(cbo)
+                .position(position)
                 .situation(Employee.Situation.DESALOCADO)
                 .rneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate())
@@ -174,7 +179,12 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .city(savedEmployeeForeigner.getCity())
                 .postalCode(savedEmployeeForeigner.getPostalCode())
                 .gender(savedEmployeeForeigner.getGender())
-                .position(savedEmployeeForeigner.getPosition())
+                .positionId(savedEmployeeForeigner.getPosition() != null
+                        ? savedEmployeeForeigner.getPosition().getId()
+                        : null)
+                .position(savedEmployeeForeigner.getPosition() != null
+                        ? savedEmployeeForeigner.getPosition().getTitle()
+                        : null)
                 .registration(savedEmployeeForeigner.getRegistration())
                 .salary(savedEmployeeForeigner.getSalary())
                 .cellphone(savedEmployeeForeigner.getCellphone())
@@ -231,7 +241,12 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .city(employeeForeigner.getCity())
                 .postalCode(employeeForeigner.getPostalCode())
                 .gender(employeeForeigner.getGender())
-                .position(employeeForeigner.getPosition())
+                .positionId(employeeForeigner.getPosition() != null
+                        ? employeeForeigner.getPosition().getId()
+                        : null)
+                .position(employeeForeigner.getPosition() != null
+                        ? employeeForeigner.getPosition().getTitle()
+                        : null)
                 .registration(employeeForeigner.getRegistration())
                 .salary(employeeForeigner.getSalary())
                 .cellphone(employeeForeigner.getCellphone())
@@ -287,7 +302,12 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .city(employeeForeigner.getCity())
                             .postalCode(employeeForeigner.getPostalCode())
                             .gender(employeeForeigner.getGender())
-                            .position(employeeForeigner.getPosition())
+                            .positionId(employeeForeigner.getPosition() != null
+                                    ? employeeForeigner.getPosition().getId()
+                                    : null)
+                            .position(employeeForeigner.getPosition() != null
+                                    ? employeeForeigner.getPosition().getTitle()
+                                    : null)
                             .registration(employeeForeigner.getRegistration())
                             .salary(employeeForeigner.getSalary())
                             .cellphone(employeeForeigner.getCellphone())
@@ -320,6 +340,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     public Optional<EmployeeResponseDto> update(String id, EmployeeForeignerRequestDto employeeForeignerRequestDto) {
         List<Contract> contracts = List.of();
         Cbo cbo = null;
+        Position position = null;
         
         Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
 
@@ -335,6 +356,11 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         if (employeeForeignerRequestDto.getCboId() != null) {
             cbo = cboRepository.findById(employeeForeignerRequestDto.getCboId())
                     .orElseThrow(() -> new NotFoundException("Cbo not found"));
+        }
+
+        if (employeeForeignerRequestDto.getPositionId() != null) {
+            position = positionRepository.findById(employeeForeignerRequestDto.getPositionId())
+                    .orElseThrow(() -> new NotFoundException("Position not found"));
         }
         
         employeeForeigner.setPis(employeeForeignerRequestDto.getPis() != null ? employeeForeignerRequestDto.getPis() : employeeForeigner.getPis());
@@ -352,7 +378,9 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         employeeForeigner.setCity(employeeForeignerRequestDto.getCity() != null ? employeeForeignerRequestDto.getCity() : employeeForeigner.getCity());
         employeeForeigner.setPostalCode(employeeForeignerRequestDto.getPostalCode() != null ? employeeForeignerRequestDto.getPostalCode() : employeeForeigner.getPostalCode());
         employeeForeigner.setGender(employeeForeignerRequestDto.getGender() != null ? employeeForeignerRequestDto.getGender() : employeeForeigner.getGender());
-        employeeForeigner.setPosition(employeeForeignerRequestDto.getPosition() != null ? employeeForeignerRequestDto.getPosition() : employeeForeigner.getPosition());
+        employeeForeigner.setPosition(employeeForeignerRequestDto.getPositionId() != null
+                ? position
+                : employeeForeigner.getPosition());
         employeeForeigner.setRegistration(employeeForeignerRequestDto.getRegistration() != null ? employeeForeignerRequestDto.getRegistration() : employeeForeigner.getRegistration());
         employeeForeigner.setSalary(employeeForeignerRequestDto.getSalary() != null ? employeeForeignerRequestDto.getSalary() : employeeForeigner.getSalary());
         employeeForeigner.setCellphone(employeeForeignerRequestDto.getCellphone() != null ? employeeForeignerRequestDto.getCellphone() : employeeForeigner.getCellphone());
@@ -386,7 +414,12 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .addressLine2(savedEmployeeForeigner.getAddressLine2())
                 .postalCode(savedEmployeeForeigner.getPostalCode())
                 .gender(savedEmployeeForeigner.getGender())
-                .position(savedEmployeeForeigner.getPosition())
+                .positionId(savedEmployeeForeigner.getPosition() != null
+                        ? savedEmployeeForeigner.getPosition().getId()
+                        : null)
+                .position(savedEmployeeForeigner.getPosition() != null
+                        ? savedEmployeeForeigner.getPosition().getTitle()
+                        : null)
                 .registration(savedEmployeeForeigner.getRegistration())
                 .salary(savedEmployeeForeigner.getSalary())
                 .cellphone(savedEmployeeForeigner.getCellphone())

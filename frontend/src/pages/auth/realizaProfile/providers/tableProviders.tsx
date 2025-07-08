@@ -1,4 +1,3 @@
-import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +8,7 @@ export function TableProviders() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { selectedBranch } = useBranch();
+  const [serviceFilter, setServiceFilter] = useState<string>("");
   const navigate = useNavigate();
 
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
@@ -20,19 +19,17 @@ export function TableProviders() {
       setLoading(true);
       try {
         const token = localStorage.getItem("tokenClient");
-        if (!token) {
-          console.error("Token não encontrado.");
+        const clientId = localStorage.getItem("clientId");
+
+        if (!token || !clientId) {
+          console.error("Token ou clientId não encontrados.");
           setLoading(false);
           return;
         }
 
-        const response = await axios.get(`${ip}/supplier/filtered-client`, {
-          params: {
-            idSearch: selectedBranch?.idBranch,
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get(`${ip}/supplier/by-client`, {
+          params: { clientId },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const suppliersList = response.data.content || [];
@@ -54,10 +51,8 @@ export function TableProviders() {
       }
     };
 
-    if (selectedBranch?.idBranch) {
-      fetchSuppliers();
-    }
-  }, [selectedBranch]);
+    fetchSuppliers();
+  }, []);
 
   useEffect(() => {
     if (!selectedService) {
@@ -71,6 +66,15 @@ export function TableProviders() {
     }
   }, [selectedService, suppliers]);
 
+  // Filtragem adicional pelo serviço, conforme a variável serviceFilter
+  useEffect(() => {
+    setFilteredSuppliers(
+      suppliers.filter((s: any) =>
+        serviceFilter ? s?.serviceType?.name === serviceFilter : true
+      )
+    );
+  }, [serviceFilter, suppliers]);
+
   return (
     <div className="p-4 pt-0 md:p-4 md:pt-0">
       <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#34495E] dark:text-white">
@@ -79,11 +83,11 @@ export function TableProviders() {
       </h2>
 
       {/* Filtro por tipo de serviço */}
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4">
         <select
           value={selectedService}
           onChange={(e) => setSelectedService(e.target.value)}
-          className="rounded border px-3 py-2 text-sm"
+          className="rounded border border-gray-300 px-3 py-2 text-sm"
         >
           <option value="">Todos os tipos de serviço</option>
           {serviceTypes.map((type) => (
@@ -94,14 +98,60 @@ export function TableProviders() {
         </select>
       </div>
 
-      {/* Tabela */}
+      {/* Versão Mobile */}
+      <div className="block md:hidden space-y-4">
+        {loading ? (
+          <p className="text-center text-gray-600">Carregando...</p>
+        ) : filteredSuppliers.length > 0 ? (
+          filteredSuppliers.map((supplier: any) => (
+            <div
+              key={supplier.idProvider}
+              className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
+            >
+              <p className="text-sm font-semibold text-gray-700">Nome:</p>
+              <p className="mb-2 text-realizaBlue">
+                {supplier.providerSupplierName}
+              </p>
+
+              <p className="text-sm font-semibold text-gray-700">CNPJ:</p>
+              <p className="mb-2 text-gray-800">{supplier.providerSupplierCnpj}</p>
+
+              <p className="text-sm font-semibold text-gray-700">Tipo de Serviço:</p>
+              <p className="mb-2 text-gray-800">
+                {supplier?.serviceType?.name || "Não informado"}
+              </p>
+
+              <p className="text-sm font-semibold text-gray-700">Data de Início:</p>
+              <p className="mb-2 text-gray-800">
+                {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
+              </p>
+
+              <p className="text-sm font-semibold text-gray-700">Ações:</p>
+              <div className="flex gap-2">
+                <button
+                  title="Visualizar fornecedor"
+                  onClick={() =>
+                    navigate(`/sistema/fornecedor/${supplier.idProvider}`)
+                  }
+                >
+                  <Eye className="w-5 h-5 text-[#34495E]" />
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-600">Nenhum fornecedor encontrado.</p>
+        )}
+      </div>
+
+      {/* Versão Desktop */}
       <div className="hidden md:block min-h-[60vh] rounded-lg bg-white p-6 shadow-lg">
         <table className="w-full border-collapse text-left text-sm text-gray-700">
           <thead className="bg-[#DDE3DC] text-gray-700">
             <tr>
               <th className="px-4 py-3 font-semibold">Nome do Fornecedor</th>
               <th className="px-4 py-3 font-semibold">CNPJ | NIF</th>
-              <th className="px-4 py-3 font-semibold">Tipo(s) de Serviço</th>
+              <th className="px-4 py-3 font-semibold">Tipo de Serviço</th>
               <th className="px-4 py-3 font-semibold text-center">Ações</th>
             </tr>
           </thead>

@@ -16,8 +16,8 @@ public interface ActivityControlller {
     ResponseEntity<Page<ActivityResponseDto>> getAllActivities(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<List<ActivityResponseDto>> getAllActivitiesByBranch(String idBranch);
     ResponseEntity<List<ActivityDocumentResponseDto>> getAllDocumentsByActivity(String idActivity);
-    ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(String idActivity, String idDocumentBranch, Boolean replicate);
-    ResponseEntity<String> removeDocumentsFromActivity(String idActivity, String idDocumentBranch, Boolean replicate);
-    ResponseEntity<Optional<ActivityResponseDto>> updateActivity(String id, ActivityRequestDto activityRequestDto, Boolean replicate);
-    ResponseEntity<Void> deleteActivity(String id, Boolean replicate);
+    ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(String idActivity, String idDocumentBranch, Boolean replicate, List<String> branchIds);
+    ResponseEntity<String> removeDocumentsFromActivity(String idActivity, String idDocumentBranch, Boolean replicate, List<String> branchIds);
+    ResponseEntity<Optional<ActivityResponseDto>> updateActivity(String id, ActivityRequestDto activityRequestDto, Boolean replicate, List<String> branchIds);
+    ResponseEntity<Void> deleteActivity(String id, Boolean replicate, List<String> branchIds);
 }

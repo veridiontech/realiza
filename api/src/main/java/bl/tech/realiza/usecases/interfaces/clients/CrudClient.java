@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public interface CrudClient {
-    ClientResponseDto save(ClientRequestDto clientRequestDto);
+    ClientResponseDto save(ClientRequestDto clientRequestDto, Boolean profilesFromRepo);
     Optional<ClientResponseDto> findOne(String id);
     Page<ClientResponseDto> findAll(Pageable pageable);
     Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto);

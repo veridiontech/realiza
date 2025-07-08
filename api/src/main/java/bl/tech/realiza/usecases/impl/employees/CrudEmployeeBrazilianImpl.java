@@ -11,13 +11,13 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Cbo;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
+import bl.tech.realiza.domains.employees.Position;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
@@ -25,6 +25,7 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.CboRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
+import bl.tech.realiza.gateways.repositories.employees.PositionRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
@@ -58,6 +59,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final CboRepository cboRepository;
+    private final PositionRepository positionRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
@@ -117,6 +119,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         Cbo cbo = cboRepository.findById(employeeBrazilianRequestDto.getCboId())
                 .orElseThrow(() -> new NotFoundException("CBO not found"));
 
+        Position position = positionRepository.findById(employeeBrazilianRequestDto.getPositionId())
+                .orElseThrow(() -> new NotFoundException("Position not found"));
+
         newEmployeeBrazilian = EmployeeBrazilian.builder()
                 .pis(employeeBrazilianRequestDto.getPis())
                 .maritalStatus(employeeBrazilianRequestDto.getMaritalStatus())
@@ -133,7 +138,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(employeeBrazilianRequestDto.getCity())
                 .postalCode(employeeBrazilianRequestDto.getPostalCode())
                 .gender(employeeBrazilianRequestDto.getGender())
-                .position(employeeBrazilianRequestDto.getPosition())
                 .registration(employeeBrazilianRequestDto.getRegistration())
                 .salary(employeeBrazilianRequestDto.getSalary())
                 .cellphone(employeeBrazilianRequestDto.getCellphone())
@@ -142,6 +146,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .directory(employeeBrazilianRequestDto.getDirectory())
                 .levelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation())
                 .cbo(cbo)
+                .position(position)
                 .situation(Employee.Situation.DESALOCADO)
                 .admissionDate(employeeBrazilianRequestDto.getAdmissionDate())
                 .cpf(employeeBrazilianRequestDto.getCpf())
@@ -164,7 +169,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         documentEmployeeRepository.saveAll(documentEmployeeList);
 
-        EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
+        return EmployeeResponseDto.builder()
                 .idEmployee(savedEmployeeBrazilian.getIdEmployee())
                 .pis(savedEmployeeBrazilian.getPis())
                 .maritalStatus(savedEmployeeBrazilian.getMaritalStatus())
@@ -181,7 +186,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(savedEmployeeBrazilian.getCity())
                 .postalCode(savedEmployeeBrazilian.getPostalCode())
                 .gender(savedEmployeeBrazilian.getGender())
-                .position(savedEmployeeBrazilian.getPosition())
+                .positionId(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getId()
+                        : null)
+                .position(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(savedEmployeeBrazilian.getRegistration())
                 .salary(savedEmployeeBrazilian.getSalary())
                 .cellphone(savedEmployeeBrazilian.getCellphone())
@@ -203,8 +213,6 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
-
-        return employeeBrazilianResponse;
     }
 
     @Override
@@ -237,7 +245,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(employeeBrazilian.getCity())
                 .postalCode(employeeBrazilian.getPostalCode())
                 .gender(employeeBrazilian.getGender())
-                .position(employeeBrazilian.getPosition())
+                .positionId(employeeBrazilian.getPosition() != null
+                        ? employeeBrazilian.getPosition().getId()
+                        : null)
+                .position(employeeBrazilian.getPosition() != null
+                        ? employeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(employeeBrazilian.getRegistration())
                 .salary(employeeBrazilian.getSalary())
                 .cellphone(employeeBrazilian.getCellphone())
@@ -293,7 +306,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .postalCode(employeeBrazilian.getPostalCode())
                             .addressLine2(employeeBrazilian.getAddressLine2())
                             .gender(employeeBrazilian.getGender())
-                            .position(employeeBrazilian.getPosition())
+                            .positionId(employeeBrazilian.getPosition() != null
+                                    ? employeeBrazilian.getPosition().getId()
+                                    : null)
+                            .position(employeeBrazilian.getPosition() != null
+                                    ? employeeBrazilian.getPosition().getTitle()
+                                    : null)
                             .registration(employeeBrazilian.getRegistration())
                             .salary(employeeBrazilian.getSalary())
                             .cellphone(employeeBrazilian.getCellphone())
@@ -323,6 +341,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     public Optional<EmployeeResponseDto> update(String id, EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
         List<Contract> contracts = List.of();
         Cbo cbo = null;
+        Position position = null;
 
         Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
 
@@ -340,34 +359,95 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                     .orElseThrow(() -> new NotFoundException("CBO not found"));
         }
 
-        employeeBrazilian.setPis(employeeBrazilianRequestDto.getPis() != null ? employeeBrazilianRequestDto.getPis() : employeeBrazilian.getPis());
-        employeeBrazilian.setMaritalStatus(employeeBrazilianRequestDto.getMaritalStatus() != null ? employeeBrazilianRequestDto.getMaritalStatus() : employeeBrazilian.getMaritalStatus());
-        employeeBrazilian.setContractType(employeeBrazilianRequestDto.getContractType() != null ? employeeBrazilianRequestDto.getContractType() : employeeBrazilian.getContractType());
-        employeeBrazilian.setCep(employeeBrazilianRequestDto.getCep() != null ? employeeBrazilianRequestDto.getCep() : employeeBrazilian.getCep());
-        employeeBrazilian.setName(employeeBrazilianRequestDto.getName() != null ? employeeBrazilianRequestDto.getName() : employeeBrazilian.getName());
-        employeeBrazilian.setSurname(employeeBrazilianRequestDto.getSurname() != null ? employeeBrazilianRequestDto.getSurname() : employeeBrazilian.getSurname());
-        employeeBrazilian.setAddress(employeeBrazilianRequestDto.getAddress() != null ? employeeBrazilianRequestDto.getAddress() : employeeBrazilian.getAddress());
-        employeeBrazilian.setCountry(employeeBrazilianRequestDto.getCountry() != null ? employeeBrazilianRequestDto.getCountry() : employeeBrazilian.getCountry());
-        employeeBrazilian.setAcronym(employeeBrazilianRequestDto.getAcronym() != null ? employeeBrazilianRequestDto.getAcronym() : employeeBrazilian.getAcronym());
-        employeeBrazilian.setState(employeeBrazilianRequestDto.getState() != null ? employeeBrazilianRequestDto.getState() : employeeBrazilian.getState());
-        employeeBrazilian.setBirthDate(employeeBrazilianRequestDto.getBirthDate() != null ? employeeBrazilianRequestDto.getBirthDate() : employeeBrazilian.getBirthDate());
-        employeeBrazilian.setCity(employeeBrazilianRequestDto.getCity() != null ? employeeBrazilianRequestDto.getCity() : employeeBrazilian.getCity());
-        employeeBrazilian.setPostalCode(employeeBrazilianRequestDto.getPostalCode() != null ? employeeBrazilianRequestDto.getPostalCode() : employeeBrazilian.getPostalCode());
-        employeeBrazilian.setAddressLine2(employeeBrazilianRequestDto.getAddressLine2() != null ? employeeBrazilianRequestDto.getAddressLine2() : employeeBrazilian.getAddressLine2());
-        employeeBrazilian.setGender(employeeBrazilianRequestDto.getGender() != null ? employeeBrazilianRequestDto.getGender() : employeeBrazilian.getGender());
-        employeeBrazilian.setPosition(employeeBrazilianRequestDto.getPosition() != null ? employeeBrazilianRequestDto.getPosition() : employeeBrazilian.getPosition());
-        employeeBrazilian.setRegistration(employeeBrazilianRequestDto.getRegistration() != null ? employeeBrazilianRequestDto.getRegistration() : employeeBrazilian.getRegistration());
-        employeeBrazilian.setSalary(employeeBrazilianRequestDto.getSalary() != null ? employeeBrazilianRequestDto.getSalary() : employeeBrazilian.getSalary());
-        employeeBrazilian.setCellphone(employeeBrazilianRequestDto.getCellphone() != null ? employeeBrazilianRequestDto.getCellphone() : employeeBrazilian.getCellphone());
-        employeeBrazilian.setPlatformAccess(employeeBrazilianRequestDto.getPlatformAccess() != null ? employeeBrazilianRequestDto.getPlatformAccess() : employeeBrazilian.getPlatformAccess());
-        employeeBrazilian.setTelephone(employeeBrazilianRequestDto.getTelephone() != null ? employeeBrazilianRequestDto.getTelephone() : employeeBrazilian.getTelephone());
-        employeeBrazilian.setDirectory(employeeBrazilianRequestDto.getDirectory() != null ? employeeBrazilianRequestDto.getDirectory() : employeeBrazilian.getDirectory());
-        employeeBrazilian.setLevelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation() != null ? employeeBrazilianRequestDto.getLevelOfEducation() : employeeBrazilian.getLevelOfEducation());
-        employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCboId() != null ? cbo : employeeBrazilian.getCbo());
-        employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null ? employeeBrazilianRequestDto.getSituation() : employeeBrazilian.getSituation());
-        employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null ? employeeBrazilianRequestDto.getAdmissionDate() : employeeBrazilian.getAdmissionDate());
-        employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null ? contracts : employeeBrazilian.getContracts());
-        employeeBrazilian.setCpf(employeeBrazilianRequestDto.getCpf() != null ? employeeBrazilianRequestDto.getCpf() : employeeBrazilian.getCpf());
+        if (employeeBrazilianRequestDto.getPositionId() != null) {
+            position = positionRepository.findById(employeeBrazilianRequestDto.getPositionId())
+                    .orElseThrow(() -> new NotFoundException("Position not found"));
+        }
+
+        employeeBrazilian.setPis(employeeBrazilianRequestDto.getPis() != null
+                ? employeeBrazilianRequestDto.getPis()
+                : employeeBrazilian.getPis());
+        employeeBrazilian.setMaritalStatus(employeeBrazilianRequestDto.getMaritalStatus() != null
+                ? employeeBrazilianRequestDto.getMaritalStatus()
+                : employeeBrazilian.getMaritalStatus());
+        employeeBrazilian.setContractType(employeeBrazilianRequestDto.getContractType() != null
+                ? employeeBrazilianRequestDto.getContractType()
+                : employeeBrazilian.getContractType());
+        employeeBrazilian.setCep(employeeBrazilianRequestDto.getCep() != null
+                ? employeeBrazilianRequestDto.getCep()
+                : employeeBrazilian.getCep());
+        employeeBrazilian.setName(employeeBrazilianRequestDto.getName() != null
+                ? employeeBrazilianRequestDto.getName()
+                : employeeBrazilian.getName());
+        employeeBrazilian.setSurname(employeeBrazilianRequestDto.getSurname() != null
+                ? employeeBrazilianRequestDto.getSurname()
+                : employeeBrazilian.getSurname());
+        employeeBrazilian.setAddress(employeeBrazilianRequestDto.getAddress() != null
+                ? employeeBrazilianRequestDto.getAddress()
+                : employeeBrazilian.getAddress());
+        employeeBrazilian.setCountry(employeeBrazilianRequestDto.getCountry() != null
+                ? employeeBrazilianRequestDto.getCountry()
+                : employeeBrazilian.getCountry());
+        employeeBrazilian.setAcronym(employeeBrazilianRequestDto.getAcronym() != null
+                ? employeeBrazilianRequestDto.getAcronym()
+                : employeeBrazilian.getAcronym());
+        employeeBrazilian.setState(employeeBrazilianRequestDto.getState() != null
+                ? employeeBrazilianRequestDto.getState()
+                : employeeBrazilian.getState());
+        employeeBrazilian.setBirthDate(employeeBrazilianRequestDto.getBirthDate() != null
+                ? employeeBrazilianRequestDto.getBirthDate()
+                : employeeBrazilian.getBirthDate());
+        employeeBrazilian.setCity(employeeBrazilianRequestDto.getCity() != null
+                ? employeeBrazilianRequestDto.getCity()
+                : employeeBrazilian.getCity());
+        employeeBrazilian.setPostalCode(employeeBrazilianRequestDto.getPostalCode() != null
+                ? employeeBrazilianRequestDto.getPostalCode()
+                : employeeBrazilian.getPostalCode());
+        employeeBrazilian.setAddressLine2(employeeBrazilianRequestDto.getAddressLine2() != null
+                ? employeeBrazilianRequestDto.getAddressLine2()
+                : employeeBrazilian.getAddressLine2());
+        employeeBrazilian.setGender(employeeBrazilianRequestDto.getGender() != null
+                ? employeeBrazilianRequestDto.getGender()
+                : employeeBrazilian.getGender());
+        employeeBrazilian.setPosition(employeeBrazilianRequestDto.getPositionId() != null
+                ? position
+                : employeeBrazilian.getPosition());
+        employeeBrazilian.setRegistration(employeeBrazilianRequestDto.getRegistration() != null
+                ? employeeBrazilianRequestDto.getRegistration()
+                : employeeBrazilian.getRegistration());
+        employeeBrazilian.setSalary(employeeBrazilianRequestDto.getSalary() != null
+                ? employeeBrazilianRequestDto.getSalary()
+                : employeeBrazilian.getSalary());
+        employeeBrazilian.setCellphone(employeeBrazilianRequestDto.getCellphone() != null
+                ? employeeBrazilianRequestDto.getCellphone()
+                : employeeBrazilian.getCellphone());
+        employeeBrazilian.setPlatformAccess(employeeBrazilianRequestDto.getPlatformAccess() != null
+                ? employeeBrazilianRequestDto.getPlatformAccess()
+                : employeeBrazilian.getPlatformAccess());
+        employeeBrazilian.setTelephone(employeeBrazilianRequestDto.getTelephone() != null
+                ? employeeBrazilianRequestDto.getTelephone()
+                : employeeBrazilian.getTelephone());
+        employeeBrazilian.setDirectory(employeeBrazilianRequestDto.getDirectory() != null
+                ? employeeBrazilianRequestDto.getDirectory()
+                : employeeBrazilian.getDirectory());
+        employeeBrazilian.setLevelOfEducation(employeeBrazilianRequestDto.getLevelOfEducation() != null
+                ? employeeBrazilianRequestDto.getLevelOfEducation()
+                : employeeBrazilian.getLevelOfEducation());
+        employeeBrazilian.setCbo(employeeBrazilianRequestDto.getCboId() != null
+                ? cbo
+                : employeeBrazilian.getCbo());
+        employeeBrazilian.setSituation(employeeBrazilianRequestDto.getSituation() != null
+                ? employeeBrazilianRequestDto.getSituation()
+                : employeeBrazilian.getSituation());
+        employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null
+                ? employeeBrazilianRequestDto.getAdmissionDate()
+                : employeeBrazilian.getAdmissionDate());
+        employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null
+                ? contracts
+                : employeeBrazilian.getContracts());
+        employeeBrazilian.setCpf(employeeBrazilianRequestDto.getCpf() != null
+                ? employeeBrazilianRequestDto.getCpf()
+                : employeeBrazilian.getCpf());
 
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(employeeBrazilian);
 
@@ -388,7 +468,12 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .city(savedEmployeeBrazilian.getCity())
                 .postalCode(savedEmployeeBrazilian.getPostalCode())
                 .gender(savedEmployeeBrazilian.getGender())
-                .position(savedEmployeeBrazilian.getPosition())
+                .positionId(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getId()
+                        : null)
+                .position(savedEmployeeBrazilian.getPosition() != null
+                        ? savedEmployeeBrazilian.getPosition().getTitle()
+                        : null)
                 .registration(savedEmployeeBrazilian.getRegistration())
                 .salary(savedEmployeeBrazilian.getSalary())
                 .cellphone(savedEmployeeBrazilian.getCellphone())

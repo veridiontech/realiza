@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class IaAdditionalControllerImpl implements IaAdditionalPromptController 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_REALIZA_PLUS')")
     @Override
     public ResponseEntity<IaAdditionalPromptResponseDto> createPrompt(@Valid  @RequestBody IaAdditionalPromptRequestDto iaAdditionalPromptRequestDto) {
         return ResponseEntity.ok(crudIaAdditionalPrompt.save(iaAdditionalPromptRequestDto));
@@ -31,6 +33,7 @@ public class IaAdditionalControllerImpl implements IaAdditionalPromptController 
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_PLUS')")
     @Override
     public ResponseEntity<List<IaAdditionalPromptResponseDto>> getAllPrompt() {
         return ResponseEntity.ok(crudIaAdditionalPrompt.findAll());
@@ -38,6 +41,7 @@ public class IaAdditionalControllerImpl implements IaAdditionalPromptController 
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_PLUS')")
     @Override
     public ResponseEntity<IaAdditionalPromptResponseDto> getOnePrompt(@PathVariable String id) {
         return ResponseEntity.ok(crudIaAdditionalPrompt.findById(id));
@@ -45,6 +49,7 @@ public class IaAdditionalControllerImpl implements IaAdditionalPromptController 
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_PLUS')")
     @Override
     public ResponseEntity<IaAdditionalPromptResponseDto> updatePrompt(@PathVariable String id, @Valid @RequestBody IaAdditionalPromptRequestDto iaAdditionalPromptRequestDto) {
         return ResponseEntity.ok(crudIaAdditionalPrompt.update(id, iaAdditionalPromptRequestDto));
@@ -52,6 +57,7 @@ public class IaAdditionalControllerImpl implements IaAdditionalPromptController 
 
     @GetMapping("/name-list")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_PLUS')")
     @Override
     public ResponseEntity<List<IaAdditionalPromptNameListResponseDto>> getAllPromptNameList() {
         return ResponseEntity.ok(crudIaAdditionalPrompt.findAllNameList());

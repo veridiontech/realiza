@@ -27,13 +27,13 @@ import java.util.Optional;
 public class ClientControllerImpl implements ClientControlller {
 
     private final CrudClient crudClient;
-    private final TokenManagerService tokenManagerService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ClientResponseDto> createClient(@RequestBody @Valid ClientRequestDto clientRequestDto) {
-        ClientResponseDto client = crudClient.save(clientRequestDto);
+    public ResponseEntity<ClientResponseDto> createClient(@RequestBody @Valid ClientRequestDto clientRequestDto,
+                                                          @RequestParam(required = false) Boolean profilesFromRepo) {
+        ClientResponseDto client = crudClient.save(clientRequestDto, profilesFromRepo);
 
         return ResponseEntity.of(Optional.of(client));
     }

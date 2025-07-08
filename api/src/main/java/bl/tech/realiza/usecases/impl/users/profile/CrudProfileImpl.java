@@ -1,14 +1,14 @@
-package bl.tech.realiza.usecases.impl.users;
+package bl.tech.realiza.usecases.impl.users.profile;
 
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.user.Profile;
+import bl.tech.realiza.domains.user.profile.Profile;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.users.ProfileRepository;
-import bl.tech.realiza.gateways.requests.users.ProfileRequestDto;
-import bl.tech.realiza.gateways.responses.users.ProfileNameResponseDto;
-import bl.tech.realiza.gateways.responses.users.ProfileResponseDto;
-import bl.tech.realiza.usecases.interfaces.users.CrudProfile;
+import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
+import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
+import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +31,9 @@ public class CrudProfileImpl implements CrudProfile {
                 .viewer(profileRequestDto.getViewer())
                 .manager(profileRequestDto.getManager())
                 .inspector(profileRequestDto.getInspector())
+                .documentViewer(profileRequestDto.getDocumentViewer())
+                .registrationUser(profileRequestDto.getRegistrationUser())
+                .registrationContract(profileRequestDto.getRegistrationContract())
                 .laboral(profileRequestDto.getLaboral())
                 .workplaceSafety(profileRequestDto.getWorkplaceSafety())
                 .registrationAndCertificates(profileRequestDto.getRegistrationAndCertificates())
@@ -83,6 +86,15 @@ public class CrudProfileImpl implements CrudProfile {
         profile.setInspector(profileRequestDto.getInspector() != null
                 ? profileRequestDto.getInspector()
                 : profile.getInspector());
+        profile.setDocumentViewer(profileRequestDto.getDocumentViewer() != null
+                ? profileRequestDto.getDocumentViewer()
+                : profile.getDocumentViewer());
+        profile.setRegistrationUser(profileRequestDto.getRegistrationUser() != null
+                ? profileRequestDto.getRegistrationUser()
+                : profile.getRegistrationUser());
+        profile.setRegistrationContract(profileRequestDto.getRegistrationContract() != null
+                ? profileRequestDto.getRegistrationContract()
+                : profile.getRegistrationContract());
         profile.setLaboral(profileRequestDto.getLaboral() != null
                 ? profileRequestDto.getLaboral()
                 : profile.getLaboral());
@@ -121,6 +133,9 @@ public class CrudProfileImpl implements CrudProfile {
                 .viewer(profile.getViewer())
                 .manager(profile.getManager())
                 .inspector(profile.getInspector())
+                .documentViewer(profile.getDocumentViewer())
+                .registrationUser(profile.getRegistrationUser())
+                .registrationContract(profile.getRegistrationContract())
                 .laboral(profile.getLaboral())
                 .workplaceSafety(profile.getWorkplaceSafety())
                 .registrationAndCertificates(profile.getRegistrationAndCertificates())
