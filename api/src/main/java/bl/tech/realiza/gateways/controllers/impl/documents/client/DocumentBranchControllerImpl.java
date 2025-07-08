@@ -3,6 +3,7 @@ package bl.tech.realiza.gateways.controllers.impl.documents.client;
 import bl.tech.realiza.gateways.controllers.interfaces.documents.client.DocumentBranchControlller;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
+import bl.tech.realiza.gateways.requests.documents.client.UpdateDocumentRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
@@ -160,10 +161,9 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     @Override
     public ResponseEntity<String> updateSelectedBranchDocuments(
             @RequestParam Boolean isSelected,
-            @RequestBody List<String> documentList,
-            @RequestParam(required = false) Boolean replicate,
-            @RequestParam(required = false) List<String> branchIds) {
-        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocuments(isSelected, documentList, replicate, branchIds));
+            @RequestBody UpdateDocumentRequestDto updateDocumentRequestDto,
+            @RequestParam(required = false) Boolean replicate) {
+        return ResponseEntity.ok(crudDocumentBranch.updateSelectedDocuments(isSelected, updateDocumentRequestDto.getDocumentIds(), replicate, updateDocumentRequestDto.getBranchIds()));
     }
 
     @PostMapping("/document-matrix/expiration/update/{idDocumentation}")
