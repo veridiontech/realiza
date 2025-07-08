@@ -12,7 +12,7 @@ DB_CONFIG = {
 }
 
 # Lista de perfis para inspetor e gestor
-nomes = ['João', 'Maria', 'Carlos', 'Ana', 'Pedro']
+nomes = ['trabalhista', 'segurança', 'ssma', 'geral', 'saude', 'meio ambiente']
 
 def preencher_perfis():
     try:
@@ -20,61 +20,153 @@ def preencher_perfis():
         cursor = conn.cursor()
         print("Conectado ao banco de dados com sucesso.")
 
-        # Buscar todos os documentos
-        cursor.execute("SELECT id_document FROM document_matrix")
-        documentos = cursor.fetchall()
+        # Buscar todos os profiles
+        cursor.execute("SELECT name FROM user_profile_repo")
+        profiles = cursor.fetchall()
 
-        if not documentos:
-            print("Nenhum documento encontrado na tabela document_matrix.")
-            return
-
-        id_profile = str(uuid.uuid4())
-
-
-        if cursor.fetchone():
-            print(f"Prompt já existente para o documento {id_document}. Ignorado.")
-            continue
+        if not profiles:
+            print("Nenhum profile encontrado na tabela user_profile_repo.")
 
         # Preencher para o perfil "Admin"
-        cursor.execute(
-            "INSERT INTO user_profile_repo (id, admin, description, document_viewer, environment, general, health, inspector, laboral, manager, name, registration_and_certificates, registration_contract, registration_user, viewer, workplace_safety, document_matrix_id_document) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (id_profile, True, "Admin profile", False, False, False, False, False, False, False, "Admin", False, False, False, False, False, id_document)
-        )
-        print(f"Perfil Admin criado para o documento {id_document}")
+        cursor.execute("SELECT name FROM user_profile_repo where name = 'Admin Profile'")
+        profile = cursor.fetchall()
+        if profiles:
+            print("Perfil Admin Profile já existente")
+        else:
+            id_profile = str(uuid.uuid4())
+            cursor.execute(
+                "INSERT INTO user_profile_repo ("
+                "id, "
+                "name, "
+                "description, "
+                "admin, "
+                "viewer, "
+                "manager, "
+                "inspector, "
+                "document_viewer, "
+                "registration_user, "
+                "registration_contract, "
+                "laboral, "
+                "workplace_safety,"
+                "registration_and_certificates, "
+                "general, "
+                "health, "
+                "environment,"
+                "concierge)"
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (id_profile, "Admin profile", "default", True, False, False, False, False, False, False, False, False, False, False, False, False, False)
+            )
+            print(f"Perfil Admin criado com sucesso")
 
         # Preencher para os perfis de "Inspetor" (um por vez, cada um com True)
+        i = 0
         for nome in nomes:
-            inspetor = str(uuid.uuid4())
-            cursor.execute(
-                "INSERT INTO user_profile_repo (id, admin, description, document_viewer, environment, general, health, inspector, laboral, manager, name, registration_and_certificates, registration_contract, registration_user, viewer, workplace_safety, document_matrix_id_document) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (inspetor, False, f"Inspetor profile {nome}", True, False, False, False, True, False, False, nome, False, False, False, False, False, id_document)
-            )
-            print(f"Perfil Inspetor criado para o documento {id_document} com o nome {nome}")
+            cursor.execute(f"SELECT name FROM user_profile_repo where name = 'Inspetor {nome}'")
+            profile = cursor.fetchall()
+            if profiles:
+                print(f"Perfil Inspetor {nome} já existente")
+            else:
+                id_profile = str(uuid.uuid4())
+                listDeTrue = [False,False,False,False,False,False]
+                inspetor = str(uuid.uuid4())
+                listDeTrue[i] = True
+                i = i + 1
+                cursor.execute(
+                    "INSERT INTO user_profile_repo ("
+                    "id, "
+                    "name, "
+                    "description, "
+                    "admin, "
+                    "viewer, "
+                    "manager, "
+                    "inspector, "
+                    "document_viewer, "
+                    "registration_user, "
+                    "registration_contract, "
+                    "laboral, "
+                    "workplace_safety,"
+                    "registration_and_certificates, "
+                    "general, "
+                    "health, "
+                    "environment,"
+                    "concierge)"
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (id_profile, "Inspetor " + nome, "default", False, False, False, True, False, False, False, listDeTrue[0], listDeTrue[1],
+                     listDeTrue[2], listDeTrue[3], listDeTrue[4], listDeTrue[5], False)
+                )
+                print(f"Perfil Inspetor {nome} criado com sucesso")
 
         # Preencher para os perfis de "Gestor" (um por vez, cada um com True)
+        i = 0
         for nome in nomes:
-            gestor = str(uuid.uuid4())
+            cursor.execute(f"SELECT name FROM user_profile_repo where name = 'Gestor {nome}'")
+            profile = cursor.fetchall()
+            if profiles:
+                print(f"Perfil Gestor {nome} já existente")
+            else:
+                id_profile = str(uuid.uuid4())
+                listDeTrue = [False, False, False, False, False, False]
+                inspetor = str(uuid.uuid4())
+                listDeTrue[i] = True
+                i = i + 1
+                cursor.execute(
+                    "INSERT INTO user_profile_repo ("
+                    "id, "
+                    "name, "
+                    "description, "
+                    "admin, "
+                    "viewer, "
+                    "manager, "
+                    "inspector, "
+                    "document_viewer, "
+                    "registration_user, "
+                    "registration_contract, "
+                    "laboral, "
+                    "workplace_safety,"
+                    "registration_and_certificates, "
+                    "general, "
+                    "health, "
+                    "environment,"
+                    "concierge)"
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (id_profile, "Gestor " + nome, "default", False, False, True, False, False, False, False,
+                     listDeTrue[0], listDeTrue[1],
+                     listDeTrue[2], listDeTrue[3], listDeTrue[4], listDeTrue[5], False)
+                )
+                print(f"Perfil Gestor {nome} criado com sucesso")
+
+        # Preencher para o perfil "Gerente Geral"
+        cursor.execute(f"SELECT name FROM user_profile_repo where name = 'Gerente Geral'")
+        profile = cursor.fetchall()
+        if profiles:
+            print(f"Perfil Gerente Geral já existente")
+        else:
+            id_profile = str(uuid.uuid4())
             cursor.execute(
-                "INSERT INTO user_profile_repo (id, admin, description, document_viewer, environment, general, health, inspector, laboral, manager, name, registration_and_certificates, registration_contract, registration_user, viewer, workplace_safety, document_matrix_id_document) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (gestor, False, f"Gestor profile {nome}", True, False, False, False, False, False, True, nome, False, False, False, False, False, id_document)
+                "INSERT INTO user_profile_repo ("
+                "id, "
+                "name, "
+                "description, "
+                "admin, "
+                "viewer, "
+                "manager, "
+                "inspector, "
+                "document_viewer, "
+                "registration_user, "
+                "registration_contract, "
+                "laboral, "
+                "workplace_safety,"
+                "registration_and_certificates, "
+                "general, "
+                "health, "
+                "environment,"
+                "concierge)"
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                id_profile, "Gerente geral profile", "default", False, False, True, True, True, True, True, True, True, True,
+                True, True, True, False)
             )
-            print(f"Perfil Gestor criado para o documento {id_document} com o nome {nome}")
-
-        # Preencher para o perfil "Viewer"
-        viewer = str(uuid.uuid4())
-        cursor.execute(
-            "INSERT INTO user_profile_repo (id, admin, description, document_viewer, environment, general, health, inspector, laboral, manager, name, registration_and_certificates, registration_contract, registration_user, viewer, workplace_safety, document_matrix_id_document) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (viewer, False, "Viewer profile", True, False, False, False, False, False, False, "Viewer", False, False, False, True, False, id_document)
-        )
-        print(f"Perfil Viewer criado para o documento {id_document}")
-
-        # Preencher para o perfil "Gestor Geral" (todos True, exceto Admin e Viewer)
-        gestor_geral = str(uuid.uuid4())
-        cursor.execute(
-            "INSERT INTO user_profile_repo (id, admin, description, document_viewer, environment, general, health, inspector, laboral, manager, name, registration_and_certificates, registration_contract, registration_user, viewer, workplace_safety, document_matrix_id_document) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (gestor_geral, False, "Gestor Geral profile", True, True, True, True, True, True, True, "Gestor Geral", True, True, True, False, True, id_document)
-        )
-        print(f"Perfil Gestor Geral criado para o documento {id_document}")
+            print(f"Perfil Gerente Geral criado com sucesso")
 
         conn.commit()
         print("Todos os perfis foram inseridos com sucesso!")
