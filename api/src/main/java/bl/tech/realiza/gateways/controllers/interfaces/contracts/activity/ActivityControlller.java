@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ActivityControlller {
-    ResponseEntity<ActivityResponseDto> createActivity(ActivityRequestDto activityRequestDto, Boolean replicate, List<String> branchIds);
+    ResponseEntity<ActivityResponseDto> createActivity(ActivityRequestDto activityRequestDto, Boolean replicate);
     ResponseEntity<Optional<ActivityResponseDto>> getOneActivity(String id);
     ResponseEntity<Page<ActivityResponseDto>> getAllActivities(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<List<ActivityResponseDto>> getAllActivitiesByBranch(String idBranch);

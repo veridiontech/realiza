@@ -32,9 +32,8 @@ public class ActivityControllerImpl implements ActivityControlller {
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<ActivityResponseDto> createActivity(@RequestBody @Valid ActivityRequestDto activityRequestDto,
-                                                              @RequestParam(required = false) Boolean replicate,
-                                                              @RequestParam(required = false) List<String> branchIds) {
-        ActivityResponseDto activity = crudActivity.save(activityRequestDto, replicate, branchIds);
+                                                              @RequestParam(required = false) Boolean replicate) {
+        ActivityResponseDto activity = crudActivity.save(activityRequestDto, replicate, activityRequestDto.getBranchIds());
 
         return ResponseEntity.of(Optional.of(activity));
     }
@@ -82,7 +81,7 @@ public class ActivityControllerImpl implements ActivityControlller {
     public ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(@PathVariable String idActivity,
                                                                               @RequestParam String idDocumentBranch,
                                                                               @RequestParam(required = false) Boolean replicate,
-                                                                              @RequestParam(required = false) List<String> branchIds) {
+                                                                              @RequestBody(required = false) List<String> branchIds) {
         return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch, replicate, branchIds));
     }
 
@@ -92,7 +91,7 @@ public class ActivityControllerImpl implements ActivityControlller {
     public ResponseEntity<String> removeDocumentsFromActivity(@PathVariable String idActivity,
                                                               @RequestParam String idDocumentBranch,
                                                               @RequestParam(required = false) Boolean replicate,
-                                                              @RequestParam(required = false) List<String> branchIds) {
+                                                              @RequestBody(required = false) List<String> branchIds) {
         ;
         return ResponseEntity.ok(crudActivity.removeDocumentFromActivity(idActivity, idDocumentBranch, replicate, branchIds));
     }
@@ -103,7 +102,7 @@ public class ActivityControllerImpl implements ActivityControlller {
     public ResponseEntity<Optional<ActivityResponseDto>> updateActivity(@PathVariable String id,
                                                                         @RequestBody @Valid ActivityRequestDto activityRequestDto,
                                                                         @RequestParam(required = false) Boolean replicate,
-                                                                        @RequestParam(required = false) List<String> branchIds) {
+                                                                        @RequestBody(required = false) List<String> branchIds) {
         Optional<ActivityResponseDto> activity = crudActivity.update(id, activityRequestDto, replicate, branchIds);
 
         return ResponseEntity.of(Optional.of(activity));
@@ -114,7 +113,7 @@ public class ActivityControllerImpl implements ActivityControlller {
     @Override
     public ResponseEntity<Void> deleteActivity(@PathVariable String id,
                                                @RequestParam(required = false) Boolean replicate,
-                                               @RequestParam(required = false) List<String> branchIds) {
+                                               @RequestBody(required = false) List<String> branchIds) {
         crudActivity.delete(id, replicate, branchIds);
 
         return ResponseEntity.noContent().build();

@@ -36,9 +36,8 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     @Override
     public ResponseEntity<ServiceTypeBranchResponseDto> createServiceTypeBranch(@PathVariable String branchId,
                                                                                 @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto,
-                                                                                @RequestParam(required = false) Boolean replicate,
-                                                                                @RequestParam(required = false) List<String> branchIds) {
-        return ResponseEntity.ok(crudServiceTypeImpl.saveServiceTypeBranch(branchId, serviceTypeRequestDto, replicate, branchIds));
+                                                                                @RequestParam(required = false) Boolean replicate) {
+        return ResponseEntity.ok(crudServiceTypeImpl.saveServiceTypeBranch(branchId, serviceTypeRequestDto, replicate, serviceTypeRequestDto.getBranchIds()));
     }
 
     @PostMapping("/client/{clientId}")
@@ -93,9 +92,8 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     @Override
     public ResponseEntity<ServiceTypeBranchResponseDto> updateServiceTypeBranch(@PathVariable String idServiceType,
                                                                                 @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto,
-                                                                                @RequestParam(required = false) Boolean replicate,
-                                                                                @RequestParam(required = false) List<String> branchIds) {
-        return ResponseEntity.ok(crudServiceTypeImpl.updateServiceTypeBranch(idServiceType, serviceTypeRequestDto, replicate, branchIds));
+                                                                                @RequestParam(required = false) Boolean replicate) {
+        return ResponseEntity.ok(crudServiceTypeImpl.updateServiceTypeBranch(idServiceType, serviceTypeRequestDto, replicate, serviceTypeRequestDto.getBranchIds()));
     }
 
     @PutMapping("/client/{idServiceType}")
@@ -110,7 +108,7 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     @Override
     public ResponseEntity<Void> deleteServiceType(@PathVariable String idServiceType,
                                                   @RequestParam(required = false) Boolean replicate,
-                                                  @RequestParam(required = false) List<String> branchIds) {
+                                                  @RequestBody(required = false) List<String> branchIds) {
         crudServiceTypeImpl.deleteServiceType(idServiceType, replicate, branchIds);
         return ResponseEntity.noContent().build();
     }

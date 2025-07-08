@@ -119,7 +119,7 @@ public class SetupService {
         }
 
         if (!profiles.isEmpty()) {
-
+            profileRepository.saveAll(profiles);
         }
     }
 

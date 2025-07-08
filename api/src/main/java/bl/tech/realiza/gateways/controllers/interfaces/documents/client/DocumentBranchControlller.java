@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.interfaces.documents.client;
 
 import bl.tech.realiza.gateways.requests.documents.client.DocumentBranchRequestDto;
 import bl.tech.realiza.gateways.requests.documents.client.DocumentExpirationUpdateRequestDto;
+import bl.tech.realiza.gateways.requests.documents.client.UpdateDocumentRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
@@ -24,6 +25,6 @@ public interface DocumentBranchControlller {
     ResponseEntity<Void> removeRequiredDocument(String documentId);
     ResponseEntity<List<DocumentSummarizedResponseDto>> getAllFilteredDocumentBranch(String idBranch, String documentTypeName, Boolean isSelected);
     ResponseEntity<List<DocumentExpirationResponseDto>> getAllFilteredDocumentBranchExpiration(String idBranch, String documentTypeName, Boolean isSelected);
-    ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, List<String> documentList, Boolean replicate, List<String> branchIds);
+    ResponseEntity<String> updateSelectedBranchDocuments(Boolean isSelected, UpdateDocumentRequestDto updateDocumentRequestDto, Boolean replicate);
     ResponseEntity<DocumentExpirationResponseDto> updateSelectedBranchDocumentsExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate, List<String> branchIds);
 }
