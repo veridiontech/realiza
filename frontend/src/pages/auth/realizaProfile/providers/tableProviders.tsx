@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { Eye, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ip } from "@/utils/ip";
@@ -8,7 +8,7 @@ export function TableProviders() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [serviceFilter, setServiceFilter] = useState<string>("");
+  const [serviceFilter] = useState<string>("");
   const navigate = useNavigate();
 
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
