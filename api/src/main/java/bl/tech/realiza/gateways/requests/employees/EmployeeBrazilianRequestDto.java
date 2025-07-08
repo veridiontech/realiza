@@ -23,7 +23,7 @@ public class EmployeeBrazilianRequestDto {
     private String addressLine2;
     private String postalCode;
     private String gender;
-    private String position;
+    private String positionId;
     private String registration;
     private Double salary;
     private String cellphone;

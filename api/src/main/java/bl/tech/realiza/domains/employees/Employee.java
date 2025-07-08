@@ -48,7 +48,6 @@ public abstract class Employee {
     private String country;
     private String addressLine2;
     private String gender;
-    private String position;
     private String registration;
     private Double salary;
     private String cellphone;
@@ -63,11 +62,16 @@ public abstract class Employee {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "positionId")
+    private Position position;
+
+    @ManyToOne
+    @JoinColumn(name = "cboId")
     private Cbo cbo;
 
     @ManyToOne
