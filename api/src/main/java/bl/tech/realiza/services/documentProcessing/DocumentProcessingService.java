@@ -8,6 +8,7 @@ import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.services.IaAdditionalPromptRepository;
 import bl.tech.realiza.gateways.responses.services.DocumentIAValidationResponse;
+import bl.tech.realiza.usecases.impl.users.CrudNotificationImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
@@ -46,13 +47,14 @@ public class DocumentProcessingService {
     private final DocumentRepository documentRepository;
     private final RestTemplate restTemplate;
     private final IaAdditionalPromptRepository iaAdditionalPromptRepository;
+    private final CrudNotificationImpl crudNotificationImpl;
 
 
     public DocumentProcessingService(Dotenv dotenv1,
                                      Dotenv dotenv,
                                      DocumentBranchRepository documentBranchRepository,
                                      DocumentRepository documentRepository,
-                                     RestTemplate restTemplate, IaAdditionalPromptRepository iaAdditionalPromptRepository) {
+                                     RestTemplate restTemplate, IaAdditionalPromptRepository iaAdditionalPromptRepository, CrudNotificationImpl crudNotificationImpl) {
         this.dotenv = dotenv1;
 
         this.OPENAI_API_URL = System.getenv("OPENAI_API_URL") != null
@@ -73,6 +75,7 @@ public class DocumentProcessingService {
         }
         this.documentRepository = documentRepository;
         this.iaAdditionalPromptRepository = iaAdditionalPromptRepository;
+        this.crudNotificationImpl = crudNotificationImpl;
     }
 
     @Async("taskExecutor")
@@ -99,6 +102,7 @@ public class DocumentProcessingService {
             document.setVersionDate(LocalDateTime.now());
             documentRepository.save(document);
             log.info("[{}] Documento ID={} salvo com novo status {}", threadName, document.getIdDocumentation(), document.getStatus());
+            crudNotificationImpl.saveValidationNotificationForRealizaUsers(document.getIdDocumentation());
 
         } catch (Exception e) {
             log.error("[{}] Falha no processamento assíncrono do documento ID={}", threadName, document.getIdDocumentation(), e);

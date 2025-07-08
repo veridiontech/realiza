@@ -33,4 +33,5 @@ public interface CrudNotification {
     void markAllNotificationsAsRead(String userId);
     @Async
     void markOneNotificationAsRead(String notificationId);
+    void saveValidationNotificationForRealizaUsers(String idDocumentation);
 }
