@@ -1,6 +1,6 @@
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
-import { Eye, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ip } from "@/utils/ip";
