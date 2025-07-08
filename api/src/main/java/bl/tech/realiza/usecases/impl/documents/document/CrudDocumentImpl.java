@@ -39,7 +39,6 @@ public class CrudDocumentImpl implements CrudDocument {
 
     private final DocumentRepository documentRepository;
     private final CrudNotification crudNotification;
-    private final AuditLogDocumentRepository auditLogDocumentRepository;
     private final UserRepository userRepository;
     private final ContractRepository contractRepository;
     private final AuditLogService auditLogServiceImpl;
@@ -122,7 +121,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         user.getFullName() + " " + action.name()
                                 + " document " + document.getTitle(),
                         null,
-                        EXEMPT,
+                        action,
                         userResponsible.getIdUser());
             }
         }
