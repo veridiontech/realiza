@@ -5,6 +5,8 @@ import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -26,4 +28,13 @@ public interface ContractProviderSupplierRepository extends JpaRepository<Contra
     List<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActiveAndSubcontractPermissionIsTrue(String idBranch, IsActive isActive);
     Long countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(String idBranch, IsActive isActive);
     List<ContractProviderSupplier> findAllByResponsible_IdUser(String responsibleId);
+
+    @Query("""
+    SELECT COUNT(cps)
+    FROM ContractProviderSupplier cps
+    WHERE cps.branch.client.idClient = :idClient
+        AND cps.isActive IN :activeContract
+""")
+    Long countByClientIdAndIsActive(@Param("idClient") String clientId,
+                                    @Param("activeContract") List<IsActive> activeContract);
 }

@@ -1,8 +1,11 @@
 package bl.tech.realiza.services.dashboard;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
@@ -36,6 +39,7 @@ public class DashboardService {
     private final EmployeeRepository employeeRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
+    private final ClientRepository clientRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         branchRepository.findById(branchId)
@@ -229,6 +233,162 @@ public class DashboardService {
                     .cnpj(b.getCnpj())
                     .adherence(adherence)
                     .conformity(conformity)
+                    .nonConformingDocumentQuantity(nonConforming)
+                    .conformityLevel(level)
+                    .build());
+        }
+
+        return DashboardDetailsResponseDto.builder()
+                .documentStatus(documentStatus)
+                .documentExemption(documentExemption)
+                .pendingRanking(pendingRanking)
+                .build();
+    }
+
+    public DashboardDetailsResponseDto getGeneralDetailsInfo(String clientId,
+                                                            List<String> branchIds,
+                                                            List<String> documentTypes,
+                                                            List<String> responsibleIds,
+                                                            List<Contract.IsActive> activeContract,
+                                                            List<Status> statuses) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+        // quantidade de fornecedores
+        Long supplierQuantity = providerSupplierRepository.countByClientIdAndIsActive(clientId);
+
+        // quantidade de contratos
+        Long contractQuantity = contractProviderSupplierRepository.countByClientIdAndIsActive(clientId, activeContract);
+
+        // funcionários alocados
+        Long allocatedEmployeeQuantity = employeeRepository.countByClientIdAndAllocated(clientId, ALOCADO);
+
+        // conformidade
+        Double conformity = null;
+        Object[] conformityValues = null;
+        if (branchIds.isEmpty()) {
+            conformityValues = documentRepository.countConformityByGeneralClientFilters(clientId,
+                    responsibleIds,
+                    documentTypes);
+        } else {
+            conformityValues = documentRepository.countConformityByGeneralBranchFilters(branchIds,
+                    responsibleIds,
+                    documentTypes);
+        }
+        Long total = (Long) conformityValues[0];
+        Long conformityTrue = (Long) conformityValues[1];
+
+        conformity = total > 0
+                ? new BigDecimal(conformityTrue * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+        // para cada type selecionado, quantidade de documentos com status
+        List<DashboardDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
+        List<DashboardDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
+
+        if (documentTypes == null || documentTypes.isEmpty()) {
+            documentTypes = documentRepository.findDistinctDocumentType();
+        }
+        for (String type : documentTypes) {
+            List<DashboardDetailsResponseDto.Status> statusList = new ArrayList<>();
+            if (statuses == null || statuses.isEmpty()) {
+                statuses = Arrays.asList(Status.values());
+            }
+            for (Status status : statuses) {
+                if (responsibleIds != null && responsibleIds.isEmpty()) {
+                    responsibleIds = null;
+                }
+                if (branchIds != null && branchIds.isEmpty()) {
+                    branchIds = null;
+                }
+                statusList.add(DashboardDetailsResponseDto.Status.builder()
+                        .quantity(
+                                branchIds != null
+                                        ? documentRepository.countByBranchIdsAndTypeAndStatusAndResponsibleIds(branchIds,type,status,responsibleIds).intValue()
+                                        : documentRepository.countByClientIdAndTypeAndStatusAndResponsibleIds(clientId,type,status,responsibleIds).intValue()
+                        )
+                        .type(type)
+                        .build());
+            }
+            documentStatus.add(DashboardDetailsResponseDto.TypeStatus.builder()
+                    .name(type)
+                    .status(statusList)
+                    .build());
+        }
+
+        // ranking de pendencias
+        List<DashboardDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
+        List<String> allBranches = branchRepository.findAllBranchIdsByClientId(clientId);
+
+        for (String branchId : allBranches) {
+            Object[] supplierRaw = documentProviderSupplierRepository
+                    .countTotalAndPendentesByBranch(branchId, PENDENTE);
+            Object[] supplier = (Object[]) supplierRaw[0];
+
+            Object[] employeeSupplierRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSupplierBranch(branchId, PENDENTE);
+            Object[] employeeSupplier = (Object[]) employeeSupplierRaw[0];
+
+            Object[] subcontractorRaw = documentProviderSubcontractorRepository
+                    .countTotalAndPendentesByBranch(branchId, PENDENTE);
+            Object[] subcontractor = (Object[]) subcontractorRaw[0];
+
+            Object[] employeeSubcontractorRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSubcontractorBranch(branchId, PENDENTE);
+            Object[] employeeSubcontractor = (Object[]) employeeSubcontractorRaw[0];
+
+
+            long totalDocumentBranch = getSafeLong(supplier, 0)
+                    + getSafeLong(employeeSupplier, 0)
+                    + getSafeLong(subcontractor, 0)
+                    + getSafeLong(employeeSubcontractor, 0);
+
+            long pendentesDocumentBranch = getSafeLong(supplier, 1)
+                    + getSafeLong(employeeSupplier, 1)
+                    + getSafeLong(subcontractor, 1)
+                    + getSafeLong(employeeSubcontractor, 1);
+
+            double adherence = totalDocumentBranch > 0 ? ((totalDocumentBranch - pendentesDocumentBranch) * 100.0 / totalDocumentBranch) : 100;
+            adherence = Math.round(adherence * 100.0) / 100.0;
+
+            supplierRaw = documentProviderSupplierRepository
+                    .countTotalAndPendentesByBranch(branchId, APROVADO);
+            supplier = (Object[]) supplierRaw[0];
+
+            employeeSupplierRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSupplierBranch(branchId, APROVADO);
+            employeeSupplier = (Object[]) employeeSupplierRaw[0];
+
+            subcontractorRaw = documentProviderSubcontractorRepository
+                    .countTotalAndPendentesByBranch(branchId, APROVADO);
+            subcontractor = (Object[]) subcontractorRaw[0];
+
+            employeeSubcontractorRaw = documentEmployeeRepository
+                    .countTotalAndPendentesByContractSubcontractorBranch(branchId, APROVADO);
+            employeeSubcontractor = (Object[]) employeeSubcontractorRaw[0];
+
+            long aprovados = getSafeLong(supplier, 1)
+                    + getSafeLong(employeeSupplier, 1)
+                    + getSafeLong(subcontractor, 1)
+                    + getSafeLong(employeeSubcontractor, 1);
+
+            double conformityBranch = totalDocumentBranch > 0 ? new BigDecimal(aprovados * 100.0 / totalDocumentBranch).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+            int nonConforming = (int) (totalDocumentBranch - aprovados);
+
+            DashboardDetailsResponseDto.Conformity level;
+            if (conformityBranch < 60) {
+                level = DashboardDetailsResponseDto.Conformity.RISKY;
+            } else if (conformityBranch < 75) {
+                level = DashboardDetailsResponseDto.Conformity.ATTENTION;
+            } else if (conformityBranch < 90) {
+                level = DashboardDetailsResponseDto.Conformity.NORMAL;
+            } else {
+                level = DashboardDetailsResponseDto.Conformity.OK;
+            }
+
+            pendingRanking.add(DashboardDetailsResponseDto.Pending.builder()
+                    .corporateName(branchId)
+                    .cnpj(branchId)
+                    .adherence(adherence)
+                    .conformity(conformityBranch)
                     .nonConformingDocumentQuantity(nonConforming)
                     .conformityLevel(level)
                     .build());

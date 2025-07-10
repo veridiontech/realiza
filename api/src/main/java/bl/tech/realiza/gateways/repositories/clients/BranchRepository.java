@@ -4,6 +4,8 @@ import bl.tech.realiza.domains.clients.Branch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,4 +20,11 @@ public interface BranchRepository extends JpaRepository<Branch, String> {
     Collection<Branch> findAllByIsActive(boolean b);
 
     Branch findFirstByClient_IdClientAndIsActiveIsTrueAndBaseIsTrueOrderByCreationDate(String idClient);
+
+    @Query("""
+    SELECT b.idBranch
+    FROM Branch b
+    WHERE b.client.idClient = :clientId
+""")
+    List<String> findAllBranchIdsByClientId(@Param("clientId") String clientId);
 }

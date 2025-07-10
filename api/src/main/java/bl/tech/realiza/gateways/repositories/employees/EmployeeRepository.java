@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.employees;
 
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.employees.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +31,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
             @Param("situation") Employee.Situation situation
     );
 
+    @Query("""
+    SELECT COUNT(e)
+    FROM Employee e
+    JOIN e.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor ) cpsb
+    WHERE (cps.branch.client.idClient = :clientId
+            OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
+        AND e.situation = :situation
+""")
+    Long countByClientIdAndAllocated(@Param("clientId") String clientId,
+                                     @Param("situation") Employee.Situation situation);
 }

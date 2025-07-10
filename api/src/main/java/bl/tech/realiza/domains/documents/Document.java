@@ -39,6 +39,10 @@ public abstract class Document {
     @Builder.Default
     private Boolean isActive = true;
     @Builder.Default
+    private Boolean adherent = false;
+    @Builder.Default
+    private Boolean conforming = false;
+    @Builder.Default
     private Boolean doesBlock = true;
     @Enumerated(EnumType.STRING)
     @Builder.Default
