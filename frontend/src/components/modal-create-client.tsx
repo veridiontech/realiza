@@ -148,10 +148,8 @@ export function ModalCreateCliente() {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
       });
-
       addClient(response.data);
       setClient(response.data);
-
       toast.success("Cliente criado com sucesso!");
       reset();
       setCnpjData(null);
