@@ -60,9 +60,9 @@ export const modalSendEmailFormSchemaSubContractor = z.object({
 export const contractFormSchema = z.object({
   cnpj: z.string(),
   serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
-  idServiceType: z.string().nonempty("Tipo de serviço é obrigatório"), // Alterei a mensagem para ser mais clara
+  idServiceType: z.string().nonempty("Tipo de serviço é obrigatório"),
   description: z.string().optional(),
-  expenseType: z.string().nonempty("Tipo do serviço é obrigatório"), // Adicionei que é obrigatório
+  expenseType: z.string().nonempty("Tipo do serviço é obrigatório"),
   labor: z.boolean(),
   hse: z.boolean(),
   dateStart: z.string().nonempty("Início efetivo é obrigatório"),
@@ -72,8 +72,8 @@ export const contractFormSchema = z.object({
     .nonempty("Referência do contrato é obrigatório"),
   subcontractPermission: z
     .enum(["true", "false"], {
-      required_error: "Selecione se permite subcontratação",
     })
+    .optional(), 
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -233,8 +233,7 @@ export function ModalTesteSendSupplier() {
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getSupplier();
-      // Não chame getServicesType e getActivities aqui se eles devem ser carregados apenas no 'Próximo'
-      // Se você quiser carregá-los com a abertura da modal principal, coloque-os no useEffect abaixo.
+      setSuppliers([]);
     }
   }, [selectedBranch]);
 
@@ -314,19 +313,9 @@ export function ModalTesteSendSupplier() {
     }
   }, [selectedBranch?.idBranch]);
 
-  // Carrega serviços e atividades quando a modal de contrato pode ser aberta
-  useEffect(() => {
-    if (nextModal && selectedBranch?.idBranch) { // nextModal indica que estamos na fase de contrato
-      getServicesType();
-      getActivities();
-    }
-  }, [nextModal, selectedBranch?.idBranch]);
-
-
   const createContract = async (data: ContractFormSchema) => {
     console.log("createContract function called!");
-    console.log("Form data:", data); // Log dos dados do formulário
-    console.log("idServiceType value:", data.idServiceType); // Log específico para idServiceType
+    console.log("Form data:", data);
 
     if (!providerDatas) {
       toast.error("Dados do prestador não encontrados. Reinicie o processo.");
@@ -381,8 +370,8 @@ export function ModalTesteSendSupplier() {
       }
 
       setDatasSender(payload);
-      console.log("payload being sent to API: ", payload); // Log do payload final
-
+      console.log("payload: " , payload);
+    
       await axios.post(apiUrl, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
@@ -434,7 +423,7 @@ export function ModalTesteSendSupplier() {
       </DialogTrigger>
       <DialogContent
         style={{
-          // backgroundImage: url(${bgModalRealiza}),
+          // backgroundImage: `url(${bgModalRealiza})`,
         }}
         className="max-w-[90vw] md:max-w-[45vw]"
       >
@@ -571,9 +560,9 @@ export function ModalTesteSendSupplier() {
               </div>
 
               <div className="flex justify-end">
-                <Button className="bg-realizaBlue" type="submit"> {/* Alterado para type="submit" */}
-                  Próximo
-                </Button>
+                <Button className="bg-realizaBlue" onClick={() => {
+                  getActivities(), getServicesType(), console.log("Clicado");
+                }}>Próximo</Button>
               </div>
             </form>
           )}
@@ -719,7 +708,7 @@ export function ModalTesteSendSupplier() {
                     />
                   </Button>
                 ) : (
-                  <Button className="bg-realizaBlue" type="submit">
+                  <Button className="bg-realizaBlue" type="submit" onClick={() => { getActivities(), getServicesType() }}>
                     Próximo
                   </Button>
                 )}
@@ -730,7 +719,7 @@ export function ModalTesteSendSupplier() {
             <DialogContent
               className="max-w-[95vw] border-none md:max-w-[45vw]"
               style={{
-                //backgroundImage: url(${bgModalRealiza}),
+                //backgroundImage: `url(${bgModalRealiza})`,
               }}
             >
               <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
@@ -880,12 +869,11 @@ export function ModalTesteSendSupplier() {
                         </div>
                       </div>
 
-                      {/* Removi esta validação duplicada, expenseType já é validado acima */}
-                      {/* {errorsContract.expenseType && (
+                      {errorsContract.expenseType && (
                         <span className="text-red-500">
                           {errorsContract.expenseType.message}
                         </span>
-                      )} */}
+                      )}
                     </div>
                     <div className="flex flex-col gap-1">
                       <Label className="text-black">Tipo do Serviço</Label>
@@ -913,12 +901,12 @@ export function ModalTesteSendSupplier() {
                           .filter((s: any) =>
                             s.title.toLowerCase().includes(searchService.toLowerCase())
                           )
-                          .map((serviceType: any) => ( // Alterei o nome da variável para evitar confusão
+                          .map((idServiceType: any) => (
                             <option
-                              key={serviceType.idServiceType}
-                              value={serviceType.idServiceType}
+                              key={idServiceType.idServiceType}
+                              value={idServiceType.idServiceType}
                             >
-                              {serviceType.title} - {formatarRisco(serviceType.risk as RiscoNivel)}
+                              {idServiceType.title} - {formatarRisco(idServiceType.risk as RiscoNivel)}
                             </option>
                           ))}
                       </select>
