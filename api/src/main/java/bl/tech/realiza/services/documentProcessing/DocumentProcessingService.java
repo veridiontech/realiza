@@ -89,6 +89,8 @@ public class DocumentProcessingService {
 
             if (result.isAutoValidate()) {
                 document.setStatus(result.isValid() ? APROVADO_IA : REPROVADO_IA);
+                document.setAdherent(true);
+                document.setConforming(false);
                 log.info("[{}] Resultado IA: status automático definido como {}", threadName, document.getStatus());
             } else {
                 log.info("[{}] Resultado IA: sem validação automática. Status não alterado pelo motivo {}", threadName, result.getReason());

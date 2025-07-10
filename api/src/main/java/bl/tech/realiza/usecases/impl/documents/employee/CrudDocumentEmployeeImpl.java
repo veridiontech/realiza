@@ -259,6 +259,8 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
             }
             documentEmployee.setDocumentation(fileDocumentId);
             documentEmployee.setStatus(EM_ANALISE);
+            documentEmployee.setAdherent(true);
+            documentEmployee.setConforming(false);
         }
 
         documentProcessingService.processDocumentAsync(file,
