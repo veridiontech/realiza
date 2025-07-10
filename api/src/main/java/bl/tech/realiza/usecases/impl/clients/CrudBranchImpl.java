@@ -89,6 +89,10 @@ public class CrudBranchImpl implements CrudBranch {
                 .center(center)
                 .build());
 
+        if (branchCreateRequestDto.getReplicateFromBase() == null) {
+            branchCreateRequestDto.setReplicateFromBase(false);
+        }
+
         if (branchCreateRequestDto.getReplicateFromBase()) {
             setupQueueProducer.sendSetup(new SetupMessage("REPLICATE_BRANCH",
                     null,
