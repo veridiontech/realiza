@@ -69,7 +69,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
         }
 
         ProviderSubcontractor newProviderSubcontractor = providerSubcontractorRepository.findByCnpj(contractProviderSubcontractorRequestDto.getProviderDatas().getCnpj())
-                .orElseThrow(null);
+                .orElse(null);
 
         ProviderSupplier providerSupplier = providerSupplierRepository.findById(contractProviderSupplier.getProviderSupplier().getIdProvider())
                 .orElseThrow(() -> new NotFoundException("Supplier not found"));
@@ -109,6 +109,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 null,
                 null,
                 null,
+                null,
                 savedContractSubcontractor.getIdContract(),
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
@@ -131,13 +132,6 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                         CREATE,
                         userResponsible.getIdUser()));
         }
-
-        // criar solicitação
-        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
-                .solicitationType(ItemManagement.SolicitationType.CREATION)
-                .idRequester(contractProviderSubcontractorRequestDto.getIdRequester())
-                .idNewProvider(newProviderSubcontractor.getIdProvider())
-                .build());
 
         return toContractSubcontractorResponseDtos(savedContractSubcontractor);
     }

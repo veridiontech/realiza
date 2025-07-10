@@ -31,8 +31,9 @@ public class ActivityControllerImpl implements ActivityControlller {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ActivityResponseDto> createActivity(@RequestBody @Valid ActivityRequestDto activityRequestDto, @RequestParam(required = false) Boolean replicate) {
-        ActivityResponseDto activity = crudActivity.save(activityRequestDto, replicate);
+    public ResponseEntity<ActivityResponseDto> createActivity(@RequestBody @Valid ActivityRequestDto activityRequestDto,
+                                                              @RequestParam(required = false) Boolean replicate) {
+        ActivityResponseDto activity = crudActivity.save(activityRequestDto, replicate, activityRequestDto.getBranchIds());
 
         return ResponseEntity.of(Optional.of(activity));
     }
@@ -77,23 +78,32 @@ public class ActivityControllerImpl implements ActivityControlller {
     @PostMapping("/add-document-to-activity/{idActivity}")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
-    public ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(@PathVariable String idActivity, @RequestParam String idDocumentBranch, @RequestParam(required = false) Boolean replicate) {
-        return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch, replicate));
+    public ResponseEntity<ActivityDocumentResponseDto> addDocumentsToActivity(@PathVariable String idActivity,
+                                                                              @RequestParam String idDocumentBranch,
+                                                                              @RequestParam(required = false) Boolean replicate,
+                                                                              @RequestBody(required = false) List<String> branchIds) {
+        return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch, replicate, branchIds));
     }
 
     @PostMapping("/remove-document-from-activity/{idActivity}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<String> removeDocumentsFromActivity(@PathVariable String idActivity, @RequestParam String idDocumentBranch, @RequestParam(required = false) Boolean replicate) {
+    public ResponseEntity<String> removeDocumentsFromActivity(@PathVariable String idActivity,
+                                                              @RequestParam String idDocumentBranch,
+                                                              @RequestParam(required = false) Boolean replicate,
+                                                              @RequestBody(required = false) List<String> branchIds) {
         ;
-        return ResponseEntity.ok(crudActivity.removeDocumentFromActivity(idActivity, idDocumentBranch, replicate));
+        return ResponseEntity.ok(crudActivity.removeDocumentFromActivity(idActivity, idDocumentBranch, replicate, branchIds));
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<Optional<ActivityResponseDto>> updateActivity(@PathVariable String id, @RequestBody @Valid ActivityRequestDto activityRequestDto, @RequestParam(required = false) Boolean replicate) {
-        Optional<ActivityResponseDto> activity = crudActivity.update(id, activityRequestDto, replicate);
+    public ResponseEntity<Optional<ActivityResponseDto>> updateActivity(@PathVariable String id,
+                                                                        @RequestBody @Valid ActivityRequestDto activityRequestDto,
+                                                                        @RequestParam(required = false) Boolean replicate,
+                                                                        @RequestBody(required = false) List<String> branchIds) {
+        Optional<ActivityResponseDto> activity = crudActivity.update(id, activityRequestDto, replicate, branchIds);
 
         return ResponseEntity.of(Optional.of(activity));
     }
@@ -101,8 +111,10 @@ public class ActivityControllerImpl implements ActivityControlller {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
-    public ResponseEntity<Void> deleteActivity(@PathVariable String id, @RequestParam(required = false) Boolean replicate) {
-        crudActivity.delete(id, replicate);
+    public ResponseEntity<Void> deleteActivity(@PathVariable String id,
+                                               @RequestParam(required = false) Boolean replicate,
+                                               @RequestBody(required = false) List<String> branchIds) {
+        crudActivity.delete(id, replicate, branchIds);
 
         return ResponseEntity.noContent().build();
     }

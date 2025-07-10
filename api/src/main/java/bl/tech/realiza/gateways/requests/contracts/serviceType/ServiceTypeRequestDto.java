@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ServiceTypeRequestDto {
     @NotEmpty
@@ -12,4 +14,5 @@ public class ServiceTypeRequestDto {
     @NotNull
     private ServiceType.Risk risk;
     private String branchId;
+    private List<String> branchIds;
 }

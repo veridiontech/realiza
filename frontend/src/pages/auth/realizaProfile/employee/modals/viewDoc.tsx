@@ -54,11 +54,16 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
   const fetchLogs = async () => {
     try {
       const token = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/document/${documentId}/logs`, {
+      const res = await axios.get(`${ip}/audit-log`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: {
+          id: documentId, 
+          auditLogTypeEnum: "DOCUMENT", 
+        },
       });
 
-      setLogs(res.data);
+      console.log("Logs Retornados:", res.data); 
+      setLogs(res.data.content || []); 
     } catch (err) {
       console.error("Erro ao buscar logs:", err);
     }
@@ -86,7 +91,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
         onStatusChange(documentId, status);
       }
 
-      await fetchLogs(); // Atualiza a tabela
+      await fetchLogs();
       onClose();
     } catch (err) {
       console.error(err);
@@ -103,16 +108,48 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
     await handleChangeStatus("REPROVADO", notes);
   };
 
+  const traduzirAcao = (acao: string) => {
+    const traducoes: Record<string, string> = {
+      CREATE: "Criado",
+      UPDATE: "Atualizado",
+      DELETE: "Deletado",
+      UPLOAD: "Enviado",
+      APPROVE: "Aprovado",
+      REJECT: "Reprovado",
+      EXEMPT: "Isento",
+      STATUS_CHANGE: "Mudança de Status",
+    };
+
+    return traducoes[acao] ?? acao;
+  };
+
+  // Função para formatar a data
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
   const columns: GridColDef[] = [
-    { field: "usuario", headerName: "Usuário", flex: 1 },
-    { field: "acao", headerName: "Ação", flex: 1 },
-    { field: "data", headerName: "Data", flex: 1 },
-    { field: "notes", headerName: "Histórico", flex: 2 }, // <-- Ajuste o nome conforme o campo do backend
+    { field: "userResponsibleFullName", headerName: "Usuário", flex: 1 },
+    { field: "action", headerName: "Ação", flex: 1 },
+    { 
+      field: "createdAt", 
+      headerName: "Data", 
+      flex: 1, 
+      renderCell: (params) => formatDate(params.value)  // Formatar a data antes de exibi-la
+    },
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center gap-8 bg-black bg-opacity-50">
-      <div className="relative w-[50rem] bg-white p-4 shadow-lg">
+      <div className="relative w-[50rem] bg-white p-4 shadow-lg rounded-lg">
         <button
           className="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
           onClick={onClose}
@@ -120,7 +157,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
           ✖
         </button>
 
-        <h2 className="mb-4 text-center text-lg font-bold">Visualizar Documento</h2>
+        <h2 className="mb-4 text-center text-xl font-bold">Visualizar Documento</h2>
 
         {loading && <p>Carregando...</p>}
         {error && <p className="text-red-500">{error}</p>}
@@ -132,7 +169,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
         )}
       </div>
 
-      <div className="relative flex w-[50rem] flex-col bg-white p-4 shadow-lg">
+      <div className="relative flex w-[50rem] flex-col bg-white p-6 shadow-lg rounded-lg">
         <button
           className="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
           onClick={onClose}
@@ -141,77 +178,82 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
         </button>
 
         <div className="mb-6 flex flex-col items-center">
-          <h2 className="text-lg font-bold">Verificação do documento</h2>
+          <h2 className="text-lg font-bold">Verificação do Documento</h2>
         </div>
 
-        <div className="flex h-[350px] w-full flex-col items-start">
-          <div className="h-full w-full overflow-auto">
+        <div className="flex w-full flex-col items-start">
+          <div className="w-full h-[350px] overflow-auto shadow-sm rounded-lg border border-gray-300">
             <DataGrid
-              rows={logs}
+              rows={logs.map(log => ({
+                ...log,
+                action: traduzirAcao(log.action),
+              }))}
               columns={columns}
-              pageSizeOptions={[5, 10]}
+              pageSizeOptions={[5, 10, 15]}
               autoHeight
               disableRowSelectionOnClick
-              className="border border-gray-300"
+              className="border-none"
               getRowId={(row) => row.id || row._id || Math.random()}
               sx={{
                 "& .MuiDataGrid-root": {
                   minWidth: "100%",
                   maxHeight: "100%",
                 },
+                "& .MuiDataGrid-cell": {
+                  border: "none",
+                },
               }}
             />
           </div>
         </div>
 
-        <div className="mt-6 flex justify-center">
-          <div className="flex flex-row gap-6">
-            <button
-              onClick={() => handleChangeStatus("APROVADO", "")}
-              className="h-12 w-[10rem] rounded-full bg-green-400 font-bold text-white hover:bg-green-300"
-            >
-              Aprovar
-            </button>
-            <button
-              onClick={() => setShowJustification(true)}
-              className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
-            >
-              Reprovar
-            </button>
-            {showJustification && (
-              <div className="mt-4 w-full">
-                <textarea
-                  value={justification}
-                  onChange={(e) => {
-                    setJustification(e.target.value);
-                    setJustificationError(null);
-                  }}
-                  maxLength={1000}
-                  rows={4}
-                  className="w-full border border-gray-300 p-2 rounded-md"
-                  placeholder="Informe a justificativa para a reprovação"
-                />
-                {justificationError && (
-                  <p className="text-red-500 text-sm">{justificationError}</p>
-                )}
-                <div className="mt-4 flex gap-4">
-                  <button
-                    onClick={() => handleReprovar(justification)}
-                    className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
-                  >
-                    Confirmar Reprovação
-                  </button>
-                  <button
-                    onClick={() => setShowJustification(false)}
-                    className="h-12 w-[10rem] rounded-full bg-gray-400 font-bold text-white hover:bg-gray-300"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="mt-6 flex justify-center gap-6">
+          <button
+            onClick={() => handleChangeStatus("APROVADO", "")}
+            className="h-12 w-[12rem] rounded-full bg-green-500 text-white hover:bg-green-400 transition-all"
+          >
+            Aprovar
+          </button>
+          <button
+            onClick={() => setShowJustification(true)}
+            className="h-12 w-[12rem] rounded-full bg-red-500 text-white hover:bg-red-400 transition-all"
+          >
+            Reprovar
+          </button>
         </div>
+
+        {showJustification && (
+          <div className="mt-6 w-full">
+            <textarea
+              value={justification}
+              onChange={(e) => {
+                setJustification(e.target.value);
+                setJustificationError(null);
+              }}
+              maxLength={1000}
+              rows={4}
+              className="w-full border border-gray-300 p-2 rounded-md"
+              placeholder="Informe a justificativa para a reprovação"
+            />
+            {justificationError && (
+              <p className="text-red-500 text-sm mt-2">{justificationError}</p>
+            )}
+            <div className="mt-4 flex gap-4">
+              <button
+                onClick={() => handleReprovar(justification)}
+                className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-red-300"
+              >
+                Confirmar Reprovação
+              </button>
+              <button
+                onClick={() => setShowJustification(false)}
+                className="h-12 w-[10rem] rounded-full bg-gray-400 font-bold text-white hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

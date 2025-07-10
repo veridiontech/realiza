@@ -585,7 +585,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection, Boolean replicate) {
+    public String updateSelectedDocuments(Boolean isSelected, List<String> documentCollection, Boolean replicate, List<String> branchIds) {
         if (documentCollection == null || documentCollection.isEmpty()) {
             throw new BadRequestException("Invalid documents");
         }
@@ -609,18 +609,19 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         } else {
             action = "desselecionou";
         }
+        String branchId = documentList.get(0).getBranch().getIdBranch();
         for (Document document : documentList) {
             if (JwtService.getAuthenticatedUserId() != null) {
                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                         .orElse(null);
                 if (userResponsible != null) {
                     auditLogServiceImpl.createAuditLog(
-                            document.getIdDocumentation(),
-                            DOCUMENT,
+                            branchId,
+                            AuditLogTypeEnum.BRANCH,
                             userResponsible.getFullName() + " " + action + " documento "
                             + document.getTitle(),
                             null,
-                            UPDATE,
+                            isSelected ? ALLOCATE : DEALLOCATE,
                             userResponsible.getIdUser());
                 }
             }
@@ -630,6 +631,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                     setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT_FROM_BRANCH",
                             null,
                             null,
+                            branchIds,
                             null,
                             null,
                             null,
@@ -645,6 +647,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                     setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT_FROM_BRANCH",
                             null,
                             null,
+                            branchIds,
                             null,
                             null,
                             null,
@@ -696,7 +699,14 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     }
 
     @Override
-    public DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation, DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto, Boolean replicate) {
+    public DocumentExpirationResponseDto updateSelectedDocumentExpiration(String idDocumentation,
+                                                                          DocumentExpirationUpdateRequestDto documentExpirationUpdateRequestDto,
+                                                                          Boolean replicate,
+                                                                          List<String> branchIds) {
+        if (replicate == null) {
+            replicate = false;
+        }
+
         DocumentBranch documentBranch = documentBranchRepository.findById(idDocumentation)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
         Integer oldAmount = documentBranch.getExpirationDateAmount();
@@ -710,6 +720,24 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 : documentBranch.getExpirationDateUnit());
 
         documentBranchRepository.save(documentBranch);
+
+        if (replicate) {
+            setupAsyncQueueProducer.sendSetup(new SetupMessage("EXPIRATION_DATE_DOCUMENT_UPDATE",
+                    null,
+                    null,
+                    branchIds,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Activity.Risk.LOW,
+                    ServiceType.Risk.LOW));
+        }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())

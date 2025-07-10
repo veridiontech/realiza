@@ -1,10 +1,8 @@
-package bl.tech.realiza.usecases.interfaces.users;
+package bl.tech.realiza.usecases.interfaces.users.profile;
 
-import bl.tech.realiza.gateways.requests.users.ProfileRequestDto;
-import bl.tech.realiza.gateways.responses.users.ProfileNameResponseDto;
-import bl.tech.realiza.gateways.responses.users.ProfileResponseDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
+import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 
 import java.util.List;
 

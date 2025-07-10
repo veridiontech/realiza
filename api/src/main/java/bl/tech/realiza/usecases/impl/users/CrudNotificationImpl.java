@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
@@ -8,10 +9,8 @@ import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
+import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.users.*;
-import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
-import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
@@ -21,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,9 +34,9 @@ public class CrudNotificationImpl implements CrudNotification {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final UserManagerRepository userManagerRepository;
-    private final ProviderRepository providerRepository;
     private final UserProviderSupplierRepository userProviderSupplierRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
+    private final DocumentRepository documentRepository;
 
     @Override
     public NotificationResponseDto save(NotificationRequestDto notificationRequestDto) {
@@ -126,7 +127,7 @@ public class CrudNotificationImpl implements CrudNotification {
 
     @Override
     public Page<NotificationResponseDto> findAllByUser(String idSearch, Pageable pageable) {
-        Page<Notification> notificationPage = notificationRepository.findAllByUser_IdUser(idSearch, pageable);
+        Page<Notification> notificationPage = notificationRepository.findByUserAndRecentReadMark(idSearch, LocalDateTime.now().minusHours(24),pageable);
 
         return notificationPage.map(
                 notification -> NotificationResponseDto.builder()
@@ -343,6 +344,7 @@ public class CrudNotificationImpl implements CrudNotification {
         notifications.forEach(
                 notification -> {
                     notification.setIsRead(true);
+                    notification.setReadAt(LocalDateTime.now());
                 }
         );
 
@@ -355,7 +357,85 @@ public class CrudNotificationImpl implements CrudNotification {
                 .orElseThrow(() -> new NotFoundException("Notification not found"));
 
         notification.setIsRead(true);
+        notification.setReadAt(LocalDateTime.now());
 
         notificationRepository.save(notification);
+    }
+
+    @Override
+    public void saveValidationNotificationForRealizaUsers(String idDocumentation) {
+        List<Notification> notifications = new ArrayList<>();
+        String title = null;
+        String description = null;
+        String ownerName = "";
+        String ownerEnterpriseCorporateName = "";
+        String ownerClientCorporateName = "";
+
+        Document document = documentRepository.findById(idDocumentation)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+        if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+            ownerName = documentProviderSupplier.getProviderSupplier().getCorporateName();
+            ownerEnterpriseCorporateName = " da empresa " + documentProviderSupplier.getProviderSupplier().getCorporateName();
+            ownerClientCorporateName = documentProviderSupplier.getProviderSupplier().getBranches().get(0).getClient().getCorporateName();
+        } else if (document instanceof  DocumentProviderSubcontractor documentProviderSubcontractor) {
+            ownerName = documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier().getCorporateName();
+            ownerEnterpriseCorporateName = " da empresa " + documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier().getCorporateName();
+            ownerClientCorporateName = documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier().getBranches().get(0).getClient().getCorporateName();
+        } else if (document instanceof  DocumentEmployee documentEmployee) {
+            if (documentEmployee.getEmployee().getSupplier() != null) {
+                ownerName = documentEmployee.getEmployee().getFullName();
+                ownerEnterpriseCorporateName = " da empresa " + documentEmployee.getEmployee().getSupplier().getCorporateName();
+                ownerClientCorporateName = documentEmployee.getEmployee().getSupplier().getBranches().get(0).getClient().getCorporateName();
+            } else if (documentEmployee.getEmployee().getSubcontract() != null) {
+                ownerName = documentEmployee.getEmployee().getFullName();
+                ownerEnterpriseCorporateName = " da empresa " + documentEmployee.getEmployee().getSubcontract().getCorporateName();
+                ownerClientCorporateName = documentEmployee.getEmployee().getSupplier().getBranches().get(0).getClient().getCorporateName();
+            }
+        }
+
+        switch (document.getStatus()) {
+            case APROVADO_IA -> {
+                title = "Documento avaliado aguardando conferência";
+                description = document.getTitle() + " do "
+                        + ownerName + ownerEnterpriseCorporateName + " do cliente " + ownerClientCorporateName
+                        + " pré-avaliado como APROVADO aguardando segunda avaliação";
+            }
+            case REPROVADO_IA -> {
+                title = "Documento avaliado aguardando conferência";
+                description = document.getTitle() + " do "
+                        + ownerName + ownerEnterpriseCorporateName + " do cliente " + ownerClientCorporateName
+                        + " pré-avaliado como REPROVADO aguardando segunda avaliação";
+            }
+            case EM_ANALISE -> {
+                title = "Documento avaliado aguardando conferência";
+                description = document.getTitle() + " do "
+                        + ownerName + ownerEnterpriseCorporateName + " do cliente " + ownerClientCorporateName
+                        + " pré-avaliado e mantido EM ANÁLISE aguardando segunda avaliação";
+            }
+        }
+
+        String finalTitle = title;
+        String finalDescription = description;
+
+        List<UserManager> users = userManagerRepository.findAll();
+
+        for (UserManager user : users) {
+            notifications.add(
+                    Notification.builder()
+                            .user(user)
+                            .title(finalTitle)
+                            .description(finalDescription)
+                            .build()
+            );
+
+            if (notifications.size() == 50) {
+                notificationRepository.saveAll(notifications);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.isEmpty()) {
+            notificationRepository.saveAll(notifications);
+        }
     }
 }

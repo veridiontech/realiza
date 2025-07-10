@@ -78,6 +78,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
                 null,
                 null,
                 null,
+                null,
                 Activity.Risk.LOW,
                 ServiceType.Risk.LOW));
 

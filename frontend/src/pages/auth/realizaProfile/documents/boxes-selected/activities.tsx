@@ -12,13 +12,13 @@ export function ActivitiesBox() {
   const [activitieSelected, setActivitieSelected] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
   const [documentsByActivitie, setDocumentsByActivitie] = useState([]);
-  const { selectedBranch } = useBranch();
-  const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(
-    null
-  );
+  const { selectedBranch, branch } = useBranch();
+  const [loadingDocumentId, setLoadingDocumentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showReplicateConfirmation, setShowReplicateConfirmation] = useState(false);
   const [pendingOperation, setPendingOperation] = useState<any>(null);
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+  const [replicate, setReplicate] = useState(false);
 
   const getActivitie = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -38,8 +38,7 @@ export function ActivitiesBox() {
     }
   };
 
-  const getDocumentByActivitie = async (id: string) => {
-    console.log("id selecionado", id);
+  const getDocumentByActivitie = async () => {
     setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
@@ -49,8 +48,6 @@ export function ActivitiesBox() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      console.log(res.data.content);
-      console.log(res.data);
       setDocumentsByActivitie(res.data);
     } catch (err) {
       console.log("Erro ao buscar documentos da atividade:", err);
@@ -62,20 +59,20 @@ export function ActivitiesBox() {
   const removeDocumentByActivitie = async (
     idActivity: string,
     idDocumentBranch: string,
+    branches: string[],
     replicate: boolean
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
-      const res = await axios.post(
+      await axios.post(
         `${ip}/contract/activity/remove-document-from-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
-        {},
+        branches,
         {
           headers: {
             Authorization: `Bearer ${tokenFromStorage}`,
           },
         }
       );
-      console.log(res.data);
     } catch (err: any) {
       console.log("Erro ao remover documento:", err);
       throw err;
@@ -85,20 +82,20 @@ export function ActivitiesBox() {
   const addDocumentByActivitie = async (
     idActivity: string,
     idDocumentBranch: string,
+    branches: string[],
     replicate: boolean
   ) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
-      const res = await axios.post(
+      await axios.post(
         `${ip}/contract/activity/add-document-to-activity/${idActivity}?idDocumentBranch=${idDocumentBranch}&replicate=${replicate}`,
-        {},
+        branches,
         {
           headers: {
             Authorization: `Bearer ${tokenFromStorage}`,
           },
         }
       );
-      console.log(res.data);
     } catch (err: any) {
       console.log("Erro ao adicionar documento:", err);
       throw err;
@@ -117,11 +114,11 @@ export function ActivitiesBox() {
       idDocumentBranch: idDocument,
       document: _document,
     });
-    
+
     setShowReplicateConfirmation(true);
   };
 
-  const handleConfirmReplication = async (replicate: boolean) => {
+  const handleConfirmReplication = async (confirmed: boolean) => {
     setShowReplicateConfirmation(false);
     if (!pendingOperation) return;
 
@@ -129,14 +126,14 @@ export function ActivitiesBox() {
 
     try {
       if (type === "remove") {
-        await removeDocumentByActivitie(idActivity, idDocumentBranch, replicate);
+        await removeDocumentByActivitie(idActivity, idDocumentBranch, selectedBranches, confirmed);
         setDocumentsByActivitie((prevDocs: any) =>
           prevDocs.map((doc: any) =>
             doc.idDocument === idDocumentBranch ? { ...doc, selected: false } : doc
           )
         );
       } else {
-        await addDocumentByActivitie(idActivity, idDocumentBranch, replicate);
+        await addDocumentByActivitie(idActivity, idDocumentBranch, selectedBranches, confirmed);
         setDocumentsByActivitie((prevDocs: any) =>
           prevDocs.map((doc: any) =>
             doc.idDocument === idDocumentBranch ? { ...doc, selected: true } : doc
@@ -150,9 +147,18 @@ export function ActivitiesBox() {
     } finally {
       setLoadingDocumentId(null);
       setPendingOperation(null);
+      setReplicate(false);
+      setSelectedBranches([]);
     }
   };
 
+  const toggleSelectAll = () => {
+    if (selectedBranches.length === branch.length) {
+      setSelectedBranches([]);
+    } else {
+      setSelectedBranches(branch.map((b) => b.idBranch));
+    }
+  };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -162,7 +168,7 @@ export function ActivitiesBox() {
 
   useEffect(() => {
     if (activitieSelected?.idActivity) {
-      getDocumentByActivitie(activitieSelected.idActivity);
+      getDocumentByActivitie();
     }
   }, [activitieSelected]);
 
@@ -172,11 +178,10 @@ export function ActivitiesBox() {
         <BoxActivities
           activities={activities}
           isLoading={isLoading}
-          onSelectActivitie={(activitie: any) =>
-            setActivitieSelected(activitie)
-          }
+          onSelectActivitie={(activitie: any) => setActivitieSelected(activitie)}
         />
       </div>
+
       <div>
         <div className="w-[35vw] border p-5 shadow-md">
           <div className="flex items-center gap-2 rounded-md border p-2">
@@ -186,43 +191,25 @@ export function ActivitiesBox() {
           <ScrollArea className="h-[30vh]">
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <Blocks
-                  height="80"
-                  width="80"
-                  color="#4fa94d"
-                  ariaLabel="blocks-loading"
-                  wrapperStyle={{}}
-                  wrapperClass="blocks-wrapper"
-                  visible={true}
-                />
+                <Blocks height="80" width="80" color="#4fa94d" visible={true} />
               </div>
             ) : (
               <div>
-                {" "}
                 {documentsByActivitie.map((document: any) => (
                   <div
                     key={document.idDocument}
                     className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
                   >
                     {loadingDocumentId === document.idDocument ? (
-                      <Blocks
-                        height="50"
-                        width="50"
-                        color="#4fa94d"
-                        ariaLabel="blocks-loading"
-                        visible={true}
-                      />
+                      <Blocks height="50" width="50" color="#4fa94d" visible={true} />
                     ) : (
                       <input
                         type="checkbox"
                         checked={document.selected === true}
-                        onChange={() =>
-                          handleSelectDocument(document, document.idDocument)
-                        }
+                        onChange={() => handleSelectDocument(document, document.idDocument)}
                         className="cursor-pointer"
                       />
                     )}
-
                     <span>{document.documentTitle || "Documento"}</span>
                   </div>
                 ))}
@@ -234,21 +221,66 @@ export function ActivitiesBox() {
 
       {showReplicateConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
             <h3 className="text-lg font-semibold mb-4">Replicar Alteração?</h3>
-            <p className="mb-6">Deseja replicar esta alteração para todas as outras filiais?</p>
+            <p className="mb-4">Deseja replicar esta alteração para outras filiais?</p>
+
+            <div className="flex items-center gap-2 justify-center mb-4">
+              <input
+                type="checkbox"
+                checked={replicate}
+                onChange={() => setReplicate(!replicate)}
+                className="h-4 w-4"
+              />
+              <label>Habilitar replicação</label>
+            </div>
+
+            {replicate && (
+              <div className="text-left mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedBranches.length === branch.length}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4"
+                  />
+                  <label>Selecionar todas as filiais</label>
+                </div>
+
+                {branch.map((b: any) => (
+                  <div key={b.idBranch} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      value={b.idBranch}
+                      checked={selectedBranches.includes(b.idBranch)}
+                      onChange={(e) => {
+                        const { value, checked } = e.target;
+                        if (checked) {
+                          setSelectedBranches([...selectedBranches, value]);
+                        } else {
+                          setSelectedBranches(selectedBranches.filter((id) => id !== value));
+                        }
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span>{b.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => handleConfirmReplication(true)}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
               >
-                Sim
+                Confirmar
               </button>
               <button
-                onClick={() => handleConfirmReplication(false)}
+                onClick={() => setShowReplicateConfirmation(false)}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
               >
-                Não
+                Cancelar
               </button>
             </div>
           </div>

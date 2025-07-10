@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.responses.users;
+package bl.tech.realiza.gateways.responses.users.profile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ProfileResponseDto {
+public class ProfileRepoResponseDto {
     private String id;
     private String name;
     private String description;
@@ -17,6 +17,9 @@ public class ProfileResponseDto {
     private Boolean viewer;
     private Boolean manager;
     private Boolean inspector;
+    private Boolean documentViewer;
+    private Boolean registrationUser;
+    private Boolean registrationContract;
     private Boolean laboral;
     private Boolean workplaceSafety;
     private Boolean registrationAndCertificates;
@@ -25,22 +28,4 @@ public class ProfileResponseDto {
     private Boolean environment;
     private Boolean concierge;
     private String clientId;
-    private List<ProfileBranchResponseDto> branches;
-    private List<ProfileContractResponseDto> contracts;
-
-    @Data
-    @Builder
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public static class ProfileBranchResponseDto {
-        private String id;
-        private String name;
-    }
-
-    @Data
-    @Builder
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public static class ProfileContractResponseDto {
-        private String id;
-        private String reference;
-    }
 }

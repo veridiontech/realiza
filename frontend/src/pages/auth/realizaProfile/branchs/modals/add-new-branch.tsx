@@ -12,7 +12,7 @@ import { useClient } from "@/context/Client-Provider";
 import { ip } from "@/utils/ip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { Search } from "lucide-react";
+import { Search, Building } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
@@ -222,10 +222,15 @@ export function AddNewBranch() {
       </DialogTrigger>
 
       <DialogContent className="p-0 overflow-hidden rounded-xl shadow-lg w-full max-w-[700px] max-h-[90vh] bg-white">
-        {/* Cabeçalho */}
-        <div className="bg-[#2f4050] px-6 py-3 flex items-center gap-2">
-          <span className="text-white text-lg font-semibold">📂 Cadastro de Filial</span>
+        {/* Cabeçalho estilo segunda imagem com ícone */}
+        <div className="bg-[#2E3C4D] px-6 py-3">
+          <h2 className="text-white text-base font-semibold flex items-center gap-2">
+          <Building className="w-5 h-5 text-[#C0B15B]" />
+          Cadastro de Filial
+          </h2>
         </div>
+
+
 
         {/* Formulário */}
         <ScrollArea className="max-h-[70vh] px-6 py-4">

@@ -146,6 +146,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER",
                 null,
                 null,
+                null,
                 savedContractProviderSupplier.getIdContract(),
                 null,
                 null,

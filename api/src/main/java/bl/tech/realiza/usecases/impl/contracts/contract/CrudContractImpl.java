@@ -154,6 +154,7 @@ public class CrudContractImpl implements CrudContract {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUPPLIER",
                     null,
                     null,
+                    null,
                     contractProviderSupplier.getIdContract(),
                     null,
                     null,
@@ -180,6 +181,7 @@ public class CrudContractImpl implements CrudContract {
             }
 
             setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUBCONTRACT",
+                    null,
                     null,
                     null,
                     null,
@@ -262,6 +264,7 @@ public class CrudContractImpl implements CrudContract {
         }
 
         setupAsyncQueueProducer.sendSetup(new SetupMessage("REMOVE_EMPLOYEE_CONTRACT",
+                null,
                 null,
                 null,
                 null,

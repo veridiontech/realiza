@@ -2,12 +2,8 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -16,7 +12,6 @@ import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
-import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
@@ -33,8 +28,6 @@ import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
-import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
-import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -60,9 +53,6 @@ public class CrudBranchImpl implements CrudBranch {
     private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
     private final SetupAsyncQueueProducer setupQueueProducer;
-    private final CrudServiceTypeImpl crudServiceTypeImpl;
-    private final CrudActivityImpl crudActivityImpl;
-    private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final ActivityRepository activityRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
@@ -99,10 +89,15 @@ public class CrudBranchImpl implements CrudBranch {
                 .center(center)
                 .build());
 
+        if (branchCreateRequestDto.getReplicateFromBase() == null) {
+            branchCreateRequestDto.setReplicateFromBase(false);
+        }
+
         if (branchCreateRequestDto.getReplicateFromBase()) {
             setupQueueProducer.sendSetup(new SetupMessage("REPLICATE_BRANCH",
                     null,
                     savedBranch.getIdBranch(),
+                    null,
                     null,
                     null,
                     null,
@@ -118,6 +113,7 @@ public class CrudBranchImpl implements CrudBranch {
             setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH",
                     null,
                     savedBranch.getIdBranch(),
+                    null,
                     null,
                     null,
                     null,

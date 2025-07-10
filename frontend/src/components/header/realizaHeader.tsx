@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { Bell, LogOut, Menu, Plus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "@/assets/logoRealiza/Logo Realiza Completo 1.png";
-// import { Button } from "../ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { LateralMenu } from "./realizaLateralMenu";
-// import { ToggleTheme } from "../toggle-theme";
 import { useUser } from "@/context/user-provider";
 import axios from "axios";
 import { ip } from "@/utils/ip";
@@ -26,11 +24,13 @@ import { useMarket } from "@/context/context-ultra/Market-provider";
 import { useCenter } from "@/context/context-ultra/Center-provider";
 import { useBranchUltra } from "@/context/context-ultra/BranchUltra-provider";
 import bannerHeader from "@/assets/banner/Rectangle 42203.png";
-import { Solicitation } from "@/pages/auth/realizaProfile/panel-control/provider-solicitations";
 
-interface ApiResponse {
-  content: Solicitation[];
-  totalPages: number;
+interface Notification {
+  idNotification: string;
+  title: string;
+  description: string;
+  isRead: boolean;
+  user: string;
 }
 
 export function Header() {
@@ -38,7 +38,7 @@ export function Header() {
   const { branch, selectedBranch, setSelectedBranch } = useBranch();
   const { user, logout } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [solicitations, setSolicitations] = useState<Solicitation[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { boards, setSelectedBoard, selectedBoard } = useBoard();
   const { markets, setSelectedMarket, selectedMarket } = useMarket();
   const { center, selectedCenter, setSelectedCenter } = useCenter();
@@ -46,7 +46,27 @@ export function Header() {
     useBranchUltra();
   const getIdUser = user?.idUser;
 
-  // Busca clientes
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/user/notification/filtered-user`, {
+        params: { idSearch: getIdUser },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setNotifications(res.data.content || []);
+    } catch (err) {
+      console.error("Erro ao buscar notificações:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (getIdUser) {
+      fetchNotifications();
+    }
+  }, [getIdUser]);
+
   useEffect(() => {
     const getAllClients = async () => {
       try {
@@ -76,11 +96,10 @@ export function Header() {
     };
 
     getAllClients();
-    fetchSolicitations();
   }, []);
 
   useEffect(() => {
-      console.log("Cliente atual:", client?.tradeName);
+    console.log("Cliente atual:", client?.tradeName);
     if (client && !clients.some((c) => c.idClient === client.idClient)) {
       setClients((prev) => [...prev, client]);
     }
@@ -99,41 +118,19 @@ export function Header() {
     }
   };
 
-  const fetchSolicitations = async () => {
-    // setLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const response = await axios.get<ApiResponse>(
-        `${ip}/item-management/new-provider`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      console.log("solicitacao:", response.data.content);
-      setSolicitations(response.data.content);
-    } catch (err: any) {
-      // setError(err);
-    } finally {
-      // setLoading(false);
-    }
-  };
-
   console.log("diretorias: ", boards);
   console.log("diretoria selecionada:", selectedBoard);
 
   const handleMouseEnter = () => setMenuOpen(true);
   const handleMouseLeave = () => setMenuOpen(false);
 
-  const pendingSolicitationsCount = solicitations.filter(
-    (solicitation) => solicitation.status === "PENDING"
-  ).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   if (client?.isUltragaz === true) {
     return (
       <header className="dark:bg-primary relative p-5">
-        <div>{/* seach */}</div>
+        <div></div>
         <div className="flex items-center justify-between">
-          {/* Botão que abre o menu lateral via hover */}
           <div className="flex items-center">
             <div
               className="relative"
@@ -142,7 +139,7 @@ export function Header() {
             >
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
-                  <Menu size={40} className="text-white border p-2 rounded-full"/>
+                  <Menu size={40} className="text-white border p-2 rounded-full" />
                 </SheetTrigger>
                 <SheetContent
                   className="h-full overflow-auto dark:bg-white"
@@ -272,63 +269,40 @@ export function Header() {
                 </select>
               </div>
             </div>
-            {/* Seleção de cliente */}
           </div>
-          {/* Perfil do usuário e demais itens */}
           <div className="hidden items-center lg:flex md:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="cursor-pointer rounded-full bg-gray-300 p-2">
+                <div className="cursor-pointer rounded-full bg-gray-300 p-2 relative">
                   <Bell />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs px-2">
+                      {unreadCount}
+                    </span>
+                  )}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="mr-32 flex flex-col gap-2 p-5">
-                {/* Verificando se solicitations existe e se há itens pendentes */}
-                {solicitations && solicitations.length > 0 ? (
-                  // Filtra solicitações com status "PENDING"
-                  <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
-                    {solicitations.filter(
-                      (solicitation) => solicitation.status === "PENDING"
-                    ).length > 0 ? (
-                      solicitations
-                        .filter(
-                          (solicitation) => solicitation.status === "PENDING"
-                        )
-                        .map((solicitation) => (
-                          <div
-                            className="border p-4 shadow-md border-l-[#F97316] border-l-[10px] "
-                            key={solicitation.idSolicitation}
-                          >
-                            <div className="flex flex-col gap-2 ">
-                              <div className="flex items-center gap-2 ">
-                                <strong>Título:</strong>
-                                <span>{solicitation.title}</span>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <strong>Detalhes da solicitação:</strong>{" "}
-                                <span className="text-[14px]">
-                                  {solicitation.details}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        <span className="text-black">Nenhuma notificação</span>
+                {notifications.length > 0 ? (
+                  <ScrollArea className="h-[40vh] w-[20vw]">
+                    {notifications.map((n) => (
+                      <div
+                        key={n.idNotification}
+                        className={`border p-4 shadow-md ${
+                          !n.isRead ? "border-l-[#F97316] border-l-[10px]" : ""
+                        }`}
+                      >
+                        <div className="font-semibold">{n.title}</div>
+                        <div className="text-sm">{n.description}</div>
                       </div>
-                    )}
+                    ))}
                   </ScrollArea>
                 ) : (
-                  <div>
-                    <span className="text-black">Nenhuma notificação</span>
-                  </div>
+                  <div className="text-center">Nenhuma notificação</div>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="ml-12 flex items-center gap-8">
-              {/* <ToggleTheme /> */}
-
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center">
@@ -381,45 +355,42 @@ export function Header() {
       style={{ backgroundImage: `url(${bannerHeader})` }}
     >
       <div className="flex items-center md:justify-between justify-center">
-        {/* Botão que abre o menu lateral via hover */}
-<div className="flex items-center gap-5">
-  <div
-    className="relative"
-    onMouseEnter={handleMouseEnter}
-    onMouseLeave={handleMouseLeave}
-  >
-    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-      <SheetTrigger asChild>
-        <Menu size={40} className="text-white border p-2 rounded-full"/>
-      </SheetTrigger>
-      <SheetContent
-        className="h-full overflow-auto dark:bg-white"
-        side="left"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <LateralMenu onClose={() => setMenuOpen(false)} />
-      </SheetContent>
-    </Sheet>
-  </div>
-  <div className="hidden md:flex items-center gap-4">
-    <Link to={`/sistema/dashboard/${getIdUser}`}>
-      <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
-    </Link>
-    <div className="flex flex-col text-white">
-      <span className="font-semibold text-sm">Cliente: {client?.corporateName || 'Não selecionado'}</span>
-      <span className="font-semibold text-sm">Filial: {selectedBranch?.name || 'Não selecionada'}</span>
-    </div>
-  </div>
-</div>
-        {/* Perfil do usuário e demais itens */}
+        <div className="flex items-center gap-5">
+          <div
+            className="relative"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Menu size={40} className="text-white border p-2 rounded-full" />
+              </SheetTrigger>
+              <SheetContent
+                className="h-full overflow-auto dark:bg-white"
+                side="left"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <LateralMenu onClose={() => setMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          </div>
+          <div className="hidden md:flex items-center gap-4">
+            <Link to={`/sistema/dashboard/${getIdUser}`}>
+              <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
+            </Link>
+            <div className="flex flex-col text-white">
+              <span className="font-semibold text-sm">Cliente: {client?.corporateName || 'Não selecionado'}</span>
+              <span className="font-semibold text-sm">Filial: {selectedBranch?.name || 'Não selecionada'}</span>
+            </div>
+          </div>
+        </div>
         <div className="hidden items-center gap-14 md:flex">
           <div className="flex gap-10 items-start">
             <div className="flex items-center gap-4">
               <div className="block md:hidden text-realizaBlue mr-4 text-xl">
                 Cliente:
               </div>
-            
 
 
               <select
@@ -470,67 +441,42 @@ export function Header() {
                 </select>
               </div>
             </div>
-            {/* Seleção de cliente */}
           </div>
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="cursor-pointer rounded-full bg-gray-300 p-2 relative">
                   <Bell />
-                  {/* Exibir contagem de notificações pendentes */}
-                  {pendingSolicitationsCount > 0 && (
+                  {unreadCount > 0 && (
                     <span className="absolute top-0 right-0 rounded-full bg-red-500 text-white text-xs px-2 py-1">
-                      {pendingSolicitationsCount}
+                      {unreadCount}
                     </span>
                   )}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="mr-32 flex flex-col gap-2 p-5">
-                {/* Verificando se solicitations existe e se há itens pendentes */}
-                {solicitations && solicitations.length > 0 ? (
+                {notifications.length > 0 ? (
                   <ScrollArea className="h-[40vh] w-[20vw] overflow-auto">
-                    {solicitations.filter(
-                      (solicitation) => solicitation.status === "PENDING"
-                    ).length > 0 ? (
-                      solicitations
-                        .filter(
-                          (solicitation) => solicitation.status === "PENDING"
-                        )
-                        .map((solicitation) => (
-                          <div
-                            className="border p-4 shadow-md border-l-[#F97316] border-l-[10px] "
-                            key={solicitation.idSolicitation}
-                          >
-                            <div className="flex flex-col gap-2 ">
-                              <div className="flex items-center gap-2 ">
-                                <strong>Título:</strong>
-                                <span>{solicitation.title}</span>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <strong>Detalhes da solicitação:</strong>{" "}
-                                <span className="text-[14px]">
-                                  {solicitation.details}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        <span className="text-black">Nenhuma notificação</span>
+                    {notifications.map((n) => (
+                      <div
+                        className={`border p-4 shadow-md ${
+                          !n.isRead ? "border-l-[#F97316] border-l-[10px]" : ""
+                        } `}
+                        key={n.idNotification}
+                      >
+                        <div className="font-semibold">{n.title}</div>
+                        <div className="text-sm">{n.description}</div>
                       </div>
-                    )}
+                    ))}
                   </ScrollArea>
                 ) : (
-                  <div>
+                  <div className="flex items-center justify-center">
                     <span className="text-black">Nenhuma notificação</span>
                   </div>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="ml-12 hidden md:flex items-center gap-8">
-              {/* <ToggleTheme /> */}
-
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white overflow-hidden flex items-center justify-center">

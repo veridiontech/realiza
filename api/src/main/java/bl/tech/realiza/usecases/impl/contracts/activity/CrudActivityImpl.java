@@ -57,7 +57,7 @@ public class CrudActivityImpl implements CrudActivity {
     private final SetupAsyncQueueProducer setupAsyncQueueProducer;
 
     @Override
-    public ActivityResponseDto save(ActivityRequestDto activityRequestDto, Boolean replicate) {
+    public ActivityResponseDto save(ActivityRequestDto activityRequestDto, Boolean replicate, List<String> branchIds) {
 
         Activity activity = Activity.builder()
                 .title(activityRequestDto.getTitle())
@@ -76,6 +76,7 @@ public class CrudActivityImpl implements CrudActivity {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("CREATE_ACTIVITY",
                     null,
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
@@ -196,7 +197,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument, Boolean replicate) {
+    public ActivityDocumentResponseDto addDocumentToActivity(String idActivity, String idDocument, Boolean replicate, List<String> branchIds) {
         Activity activity = activityRepository.findById(idActivity)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
@@ -217,6 +218,7 @@ public class CrudActivityImpl implements CrudActivity {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT_FROM_ACTIVITY",
                     null,
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
@@ -252,7 +254,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public String removeDocumentFromActivity(String idActivity, String idDocumentBranch, Boolean replicate) {
+    public String removeDocumentFromActivity(String idActivity, String idDocumentBranch, Boolean replicate, List<String> branchIds) {
         ActivityDocuments savedActivityDocuments = activityDocumentRepository.findByActivity_IdActivityAndDocumentBranch_IdDocumentation(idActivity, idDocumentBranch);
 
         if (replicate == null) {
@@ -263,6 +265,7 @@ public class CrudActivityImpl implements CrudActivity {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT_FROM_ACTIVITY",
                     null,
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
@@ -296,7 +299,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto, Boolean replicate) {
+    public Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto, Boolean replicate, List<String> branchIds) {
         Optional<Activity> activityOptional = activityRepository.findById(id);
 
         Activity activity = activityOptional.orElseThrow(() -> new NotFoundException("Activity not found"));
@@ -320,6 +323,7 @@ public class CrudActivityImpl implements CrudActivity {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("UPDATE_ACTIVITY",
                     null,
                     null,
+                    branchIds,
                     null,
                     null,
                     null,
@@ -354,7 +358,7 @@ public class CrudActivityImpl implements CrudActivity {
     }
 
     @Override
-    public void delete(String id, Boolean replicate) {
+    public void delete(String id, Boolean replicate, List<String> branchIds) {
         Activity activity = activityRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Activity not found"));
 
@@ -366,6 +370,7 @@ public class CrudActivityImpl implements CrudActivity {
             setupAsyncQueueProducer.sendSetup(new SetupMessage("DELETE_ACTIVITY",
                     activity.getBranch().getClient().getIdClient(),
                     null,
+                    branchIds,
                     null,
                     null,
                     null,

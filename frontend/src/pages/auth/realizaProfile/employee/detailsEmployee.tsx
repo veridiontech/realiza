@@ -12,8 +12,10 @@ import { toast } from "sonner";
 interface Document {
   idDocument: string;
   title: string;
-  creationDate: string;
+  assignDate?: string;     
   status: string;
+  expirationDate?: string;
+  creationDate: string;
 }
 
 export function DetailsEmployee() {
@@ -73,6 +75,12 @@ export function DetailsEmployee() {
       toast.error("Erro ao isentar o documento.");
     }
   };
+
+  const position = employee?.position;
+  if (position && position.getId) {
+  } else {
+  console.warn('Position ou getId não encontrado.');
+  }
 
   const fetchEmployee = async () => {
     try {
@@ -148,106 +156,123 @@ export function DetailsEmployee() {
   }, [id]);
 
   const columns: {
-    key: keyof Document;
-    label: string;
-    render?: (value: string, row: Document) => React.ReactNode;
-  }[] = [
-    {
-      key: "title",
-      label: "Documento",
-    },
-    {
-      key: "creationDate",
-      label: "Data de Envio",
-      render: (value: string) =>
-        new Date(value).toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        }),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (value: string) => {
-        let statusClass = "";
-        let statusText = value;
+  key: keyof Document;
+  label: string;
+  className?: string;
+  render?: (value: string | undefined, row: Document) => React.ReactNode;
+}[] = [
+  {
+    key: "title",
+    label: "Documento",
+  },
+  {
+    key: "creationDate",
+    label: "Data de Envio",
+    render: (value) =>
+      value
+        ? new Date(value).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+        : "-",
+  },
+  {
+    key: "assignDate",
+    label: "Data de Atribuição",
+    render: (value) =>
+      value
+        ? new Date(value).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+        : "-",
+  },
+  {
+    key: "expirationDate",
+    label: "Data de Validade",
+    render: (value) =>
+      value
+        ? new Date(value).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+        : "-",
+  },
+  {
+    key: "status",
+    label: "Status",
+    render: (value) => {
+      let statusClass = "";
+      if (value === "PENDENTE" || value === "EM_ANALISE") statusClass = "text-yellow-500";
+      else if (value === "APROVADO" || value === "APROVADO_IA") statusClass = "text-green-600";
+      else if (value === "REPROVADO" || value === "REPROVADO_IA") statusClass = "text-red-600";
 
-        if (value === "PENDENTE") {
-          statusClass = "text-yellow-500";
-        } else if (value === "APROVADO") {
-          statusClass = "text-green-600";
-        } else if (value === "REPROVADO") {
-          statusClass = "text-red-600";
-        } else if (value === "EM_ANALISE") {
-          statusClass = "text-yellow-500";
-        } else if (value === "REPROVADO_IA") {
-          statusClass = "text-red-600";
-        } else if (value === "APROVADO_IA") {
-          statusClass = "text-green-600";
-        }
-
-        return (
-          <span className={`text-sm font-medium ${statusClass}`}>
-            {statusText}
-          </span>
-        );
-      },
+      return (
+        <span className={`text-sm font-medium ${statusClass}`}>
+          {value}
+        </span>
+      );
     },
-    {
-      key: "idDocument",
-      label: "Ações",
-      render: (_: string, row: Document) => (
-        <div className="relative inline-block text-left">
-          <button
-            className="text-realizaBlue hover:underline"
-            onClick={() =>
-              setSelectedDocumentId(
-                selectedDocumentId === row.idDocument ? null : row.idDocument
-              )
-            }
-          >
-            <MoreVertical size={16} />
-          </button>
+  },
+  {
+    key: "idDocument",
+    label: "Ações",
+    render: (_value, row) => (
+      <div className="relative inline-block text-left">
+        <button
+          className="text-realizaBlue hover:underline"
+          onClick={() =>
+            setSelectedDocumentId(
+              selectedDocumentId === row.idDocument ? null : row.idDocument
+            )
+          }
+        >
+          <MoreVertical size={16} />
+        </button>
 
-          {selectedDocumentId === row.idDocument && (
-            <div className="absolute z-10 w-32 top-0 right-10 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-              <div className="py-1 text-sm text-gray-700">
-                <button
-                  onClick={() => {
-                    setIsViewerOpen(true);
-                    setSelectedDocumentId(row.idDocument);
-                  }}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                >
-                  <Eye size={14} className="inline mr-2" />
-                  Visualizar
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedDocumentId(row.idDocument);
-                    setSelectedDocumentTitle(row.title);
-                    setTimeout(() => setIsModalOpen(true), 0);
-                  }}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                >
-                  <Upload size={14} className="inline mr-2" />
-                  Reenviar
-                </button>
-                <button
-                  onClick={() => exemptDocument(row.idDocument, row.title)}
-                  className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
-                >
-                  <FileX2 size={14} className="inline mr-2" />
-                  Isentar
-                </button>
-              </div>
+        {selectedDocumentId === row.idDocument && (
+          <div className="absolute z-10 w-32 top-0 right-10 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="py-1 text-sm text-gray-700">
+              <button
+                onClick={() => {
+                  setIsViewerOpen(true);
+                  setSelectedDocumentId(row.idDocument);
+                }}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+              >
+                <Eye size={14} className="inline mr-2" />
+                Visualizar
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedDocumentId(row.idDocument);
+                  setSelectedDocumentTitle(row.title);
+                  setTimeout(() => setIsModalOpen(true), 0);
+                }}
+                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+              >
+                <Upload size={14} className="inline mr-2" />
+                Reenviar
+              </button>
+              <button
+                onClick={() => exemptDocument(row.idDocument, row.title)}
+                className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+              >
+                <FileX2 size={14} className="inline mr-2" />
+                Isentar
+              </button>
             </div>
-          )}
-        </div>
-      ),
-    },
-  ];
+          </div>
+        )}
+      </div>
+    ),
+  },
+];
+
+
 
   if (isLoading) {
     return (

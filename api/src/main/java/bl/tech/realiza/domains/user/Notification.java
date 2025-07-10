@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,7 @@ public class Notification {
     private String description;
     @Builder.Default
     private Boolean isRead = false;
+    private LocalDateTime readAt;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
