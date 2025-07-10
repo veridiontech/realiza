@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { HousePlus } from "lucide-react";
 
-export function AllocatedEmployees() {
-  const count = 1330;
+interface AllocatedEmployeesProps {
+  count?: number;
+}
+
+export function AllocatedEmployees({ count }: AllocatedEmployeesProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+
+  console.log("count dentro do componente:", count);
 
   return (
     <div
@@ -100,7 +105,7 @@ export function AllocatedEmployees() {
             display: "flex",
           }}
         >
-          {count.toLocaleString("pt-BR")}
+          {count?.toLocaleString("pt-BR")}
         </div>
       </div>
     </div>

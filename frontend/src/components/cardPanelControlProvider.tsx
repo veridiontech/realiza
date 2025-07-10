@@ -16,7 +16,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -211,17 +210,17 @@ export function CardPanelControlProvider({
                     Deseja mesmo dispensar a solicitação de acesso de{" "}
                     <span className="text-red-500">{enterpriseName}</span> ao
                     sistema?
+                    <div className="flex justify-between mt-5 ">
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeny}
+                        className="bg-red-600"
+                      >
+                        Dispensar
+                      </AlertDialogAction>
+                    </div>
                   </AlertDialogTitle>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeny}
-                    className="bg-red-600"
-                  >
-                    Dispensar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
             {isLoading ? (
@@ -259,19 +258,17 @@ export function CardPanelControlProvider({
                     <AlertDialogTitle className="w-[60%]">
                       Deseja mesmo confirmar o acesso de {enterpriseName} ao
                       sistema?
+                      <div className="flex justify-between mt-5 ">
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleApprove}
+                          className="bg-green-600 text-white"
+                        >
+                          Aceitar
+                        </AlertDialogAction>
+                      </div>
                     </AlertDialogTitle>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>
-                      Cancelar
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleApprove}
-                      className="bg-green-600 text-white"
-                    >
-                      Aceitar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             )}
