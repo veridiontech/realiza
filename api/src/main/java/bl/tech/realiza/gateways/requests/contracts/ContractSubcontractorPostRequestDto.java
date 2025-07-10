@@ -30,6 +30,5 @@ public class ContractSubcontractorPostRequestDto {
     @NotEmpty
     private String idContractSupplier;
 
-    @NotEmpty
     private ContractSupplierPostRequestDto.ProviderDatas providerDatas;
 }
