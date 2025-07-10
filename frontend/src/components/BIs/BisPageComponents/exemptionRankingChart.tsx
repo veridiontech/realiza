@@ -10,6 +10,13 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 
+const COLORS = {
+  gridStroke: '#e0e0e0',  // Cor da grade
+  axisTick: '#9e9e9e',    // Cor dos ticks do eixo
+  barFill: '#4f97ff',     // Cor da barra do gráfico
+  labelFill: '#000000'    // Cor do texto das labels
+}
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null
 
@@ -66,4 +73,3 @@ export function ExemptionPendingChart({ data }: any) {
     </Card>
   )
 }
-
