@@ -114,7 +114,7 @@ export function HistorySection({ idBranch }: HistorySectionProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [filterUser, setFilterUser] = useState("");
-  const [filterAction, setFilterAction] = useState("");
+  const [filterAction] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
