@@ -9,6 +9,8 @@ import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useBranch } from "@/context/Branch-provider";
 import { useEffect, useState } from "react";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 export const MonittoringBis = () => {
   const { selectedBranch } = useBranch();
@@ -28,7 +30,7 @@ export const MonittoringBis = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log(data);
+        // console.log(data);
 
         setDocumentExemptionData(data.documentExemption);
 
@@ -44,12 +46,12 @@ export const MonittoringBis = () => {
         setChartData(formattedChart);
 
         const formattedTable = data.pendingRanking.map((r: any) => ({
-          name: r.corporateName, 
-          cnpj: r.cnpj, 
-          adherence: r.adherence, 
-          conformity: r.conformity, 
-          nonConformDocs: r.nonConformingDocumentQuantity, 
-          conformityLevel: r.conformityLevel, 
+          name: r.corporateName,
+          cnpj: r.cnpj,
+          adherence: r.adherence,
+          conformity: r.conformity,
+          nonConformDocs: r.nonConformingDocumentQuantity,
+          conformityLevel: r.conformityLevel,
         }));
         setTableData(formattedTable);
       } catch (err) {
@@ -60,10 +62,37 @@ export const MonittoringBis = () => {
     getData();
   }, [selectedBranch?.idBranch, token]);
 
+  const generatePDF = () => {
+    // Seleciona a div que contém os gráficos e a tabela
+    const content = document.getElementById("contentToCapture");
+
+    if (content) {
+      // Usando html2canvas para capturar a imagem da tela
+
+            console.log('Capturando o conteúdo...', content)
+
+      html2canvas(content).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        
+        console.log('Canvas gerado:', canvas)
+
+        // Criando o PDF a partir da captura da tela
+        const doc = new jsPDF();
+        doc.addImage(imgData, "PNG", 10, 10, 180, 160); // Adiciona a imagem capturada ao PDF
+        doc.save("graficos_completos.pdf"); // Salva o PDF
+                console.log('PDF gerado!')
+
+      });
+    } else {
+      console.log('Nenhum conteúdo encontrado para capturar.')
+    }
+
+  };
+
   return (
     <>
       <Helmet title="monitoring table" />
-      <section className="mx-5 md:mx-20 flex flex-col gap-12 pb-20">
+      <section className="mx-5 md:mx-20 flex flex-col gap-12 pb-20" id="contentToCapture">
         <div className="overflow-x-auto mt-10 pb-10">
           <StatusDocumentChart data={chartData} />
         </div>
@@ -77,6 +106,12 @@ export const MonittoringBis = () => {
             </div>
           </div>
         </div>
+        <button
+          onClick={generatePDF}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Gerar PDF com Gráficos
+        </button>
       </section>
     </>
   );
