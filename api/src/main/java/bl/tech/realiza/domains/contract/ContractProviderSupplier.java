@@ -26,9 +26,6 @@ public class ContractProviderSupplier extends Contract {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
-    @ManyToOne
-    @JoinColumn(name = "idServiceType")
-    private ServiceTypeBranch serviceTypeBranch;
 
     @ManyToOne
     @JoinColumn(name = "idProviderSupplier")
