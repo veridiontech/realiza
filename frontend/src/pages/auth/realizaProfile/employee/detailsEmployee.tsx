@@ -191,7 +191,7 @@ export function DetailsEmployee() {
   },
   {
     key: "expirationDate",
-    label: "Data de Expiração",
+    label: "Data de Validade",
     render: (value) =>
       value
         ? new Date(value).toLocaleDateString("pt-BR", {
