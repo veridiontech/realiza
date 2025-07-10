@@ -609,18 +609,19 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         } else {
             action = "desselecionou";
         }
+        String branchId = documentList.get(0).getBranch().getIdBranch();
         for (Document document : documentList) {
             if (JwtService.getAuthenticatedUserId() != null) {
                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                         .orElse(null);
                 if (userResponsible != null) {
                     auditLogServiceImpl.createAuditLog(
-                            document.getIdDocumentation(),
-                            DOCUMENT,
+                            branchId,
+                            AuditLogTypeEnum.BRANCH,
                             userResponsible.getFullName() + " " + action + " documento "
                             + document.getTitle(),
                             null,
-                            UPDATE,
+                            isSelected ? ALLOCATE : DEALLOCATE,
                             userResponsible.getIdUser());
                 }
             }
