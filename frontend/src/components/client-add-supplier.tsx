@@ -142,7 +142,6 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-
   const {
     register: registerContract,
     handleSubmit: handleSubmitContract,
@@ -311,10 +310,6 @@ export function ModalTesteSendSupplier() {
     }
   }, [selectedBranch?.idBranch]);
 
-  useEffect(() => {
-    getActivities();
-  }, []);
-
   const createContract = async (data: ContractFormSchema) => {
     if (!providerDatas) {
       toast.error("Dados do prestador não encontrados. Reinicie o processo.");
@@ -373,11 +368,6 @@ export function ModalTesteSendSupplier() {
       console.log("Erro ao buscar serviços", err);
     }
   };
-
-  useEffect(() => {
-    getActivities();
-    getServicesType();
-  }, []);
 
   return (
     <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
@@ -530,7 +520,8 @@ export function ModalTesteSendSupplier() {
               </div>
 
               <div className="flex justify-end">
-                <Button className="bg-realizaBlue">Próximo</Button>
+                <Button className="bg-realizaBlue" onClick={() =>{getActivities(), getServicesType(), console.log("Clicado");
+                }}>Próximo</Button>
               </div>
             </form>
           )}
