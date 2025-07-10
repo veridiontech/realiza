@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { useWatch } from "react-hook-form";
 
 import likeImage from "@/assets/like.png";
-
+import { useNavigate } from "react-router-dom";
 
 const editContractSchema = z.object({
   contractReference: z.string().optional(),
@@ -37,7 +37,13 @@ const editContractSchema = z.object({
   description: z.string().optional(),
 });
 
-function StatusBadge({ finished, suspended }: { finished?: boolean, suspended?: boolean }) {
+function StatusBadge({
+  finished,
+  suspended,
+}: {
+  finished?: boolean;
+  suspended?: boolean;
+}) {
   const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
   let statusStyle = "";
 
@@ -88,7 +94,6 @@ function Modal({
   );
 }
 
-
 export function TableServiceProvider() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -105,18 +110,16 @@ export function TableServiceProvider() {
   const [servicesType, setServicesType] = useState<any[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [contractHistory, setContractHistory] = useState<any[]>([]);
+  const navigate = useNavigate();
 
   // Novo estado para o filtro de status
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Ativo" | "Finalizado" | "Suspenso"
   >("Todos");
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-  } = useForm<z.infer<typeof editContractSchema>>({
+  const { register, handleSubmit, reset, control } = useForm<
+    z.infer<typeof editContractSchema>
+  >({
     resolver: zodResolver(editContractSchema),
   });
 
@@ -288,11 +291,6 @@ export function TableServiceProvider() {
     }
   }, [selectedBranch]);
 
-  const handleViewClick = (supplier: any) => {
-    setSelectedSupplier(supplier);
-    setIsViewModalOpen(true);
-  };
-
   const handleEditClick = (supplier: any) => {
     console.log("Supplier editando:", supplier);
     setSelectedSupplier(supplier);
@@ -330,26 +328,26 @@ export function TableServiceProvider() {
   });
 
   function traduzirAcao(acao: string) {
-  const traducoes: Record<string, string> = {
-    ALL: "Todas",
-    CREATE: "Criado",
-    UPDATE: "Atualizado",
-    DELETE: "Deletado",
-    UPLOAD: "Enviado",
-    FINISH: "Finalizado",
-    APPROVE: "Aprovado",
-    REJECT: "Rejeitado",
-    EXEMPT: "Isento",
-    ALLOCATE: "Alocado",
-    DEALLOCATE: "Desalocado",
-    STATUS_CHANGE: "Mudança de Status",
-    ACTIVATE: "Ativado",
-    LOGIN: "Login",
-    LOGOUT: "Logout",
-  };
+    const traducoes: Record<string, string> = {
+      ALL: "Todas",
+      CREATE: "Criado",
+      UPDATE: "Atualizado",
+      DELETE: "Deletado",
+      UPLOAD: "Enviado",
+      FINISH: "Finalizado",
+      APPROVE: "Aprovado",
+      REJECT: "Rejeitado",
+      EXEMPT: "Isento",
+      ALLOCATE: "Alocado",
+      DEALLOCATE: "Desalocado",
+      STATUS_CHANGE: "Mudança de Status",
+      ACTIVATE: "Ativado",
+      LOGIN: "Login",
+      LOGOUT: "Logout",
+    };
 
-  return traducoes[acao] ?? acao;
-}
+    return traducoes[acao] ?? acao;
+  }
 
   return (
     <div className="p-5 md:p-10">
@@ -398,7 +396,9 @@ export function TableServiceProvider() {
               <div className="flex gap-2">
                 <button
                   title="Visualizar contrato"
-                  onClick={() => handleViewClick(supplier)}
+                  onClick={() =>
+                    navigate(`/sistema/fornecedor/${supplier.providerSupplier}`)
+                  }
                 >
                   <Eye className="w-5 h-5" />
                 </button>
@@ -419,7 +419,10 @@ export function TableServiceProvider() {
                 </button>
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
-              <StatusBadge finished={supplier.finished} suspended={supplier.suspended} />
+              <StatusBadge
+                finished={supplier.finished}
+                suspended={supplier.suspended}
+              />
             </div>
           ))
         ) : (
@@ -441,37 +444,41 @@ export function TableServiceProvider() {
           <div className="flex gap-2 flex-wrap justify-center md:justify-start">
             <button
               onClick={() => setStatusFilter("Todos")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Todos"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Todos"
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              }`}
             >
               Todos
             </button>
             <button
               onClick={() => setStatusFilter("Ativo")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Ativo"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Ativo"
                   ? "bg-green-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              }`}
             >
               Ativo
             </button>
             <button
               onClick={() => setStatusFilter("Finalizado")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Finalizado"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Finalizado"
                   ? "bg-red-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              }`}
             >
               Finalizado
             </button>
             <button
               onClick={() => setStatusFilter("Suspenso")}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${statusFilter === "Suspenso"
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                statusFilter === "Suspenso"
                   ? "bg-orange-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              }`}
             >
               Suspenso
             </button>
@@ -533,8 +540,8 @@ export function TableServiceProvider() {
                   <td className="border border-gray-300 p-2">
                     {supplier.dateFinish
                       ? new Date(supplier.dateFinish).toLocaleDateString(
-                        "pt-BR"
-                      )
+                          "pt-BR"
+                        )
                       : "-"}
                   </td>
 
@@ -542,7 +549,10 @@ export function TableServiceProvider() {
                     {supplier.responsible}
                   </td>
                   <td className="border border-gray-300 p-2">
-                    <StatusBadge finished={supplier.finished} suspended={supplier.suspended} />
+                    <StatusBadge
+                      finished={supplier.finished}
+                      suspended={supplier.suspended}
+                    />
                   </td>
                   <td className="border border-gray-300 p-2 text-center align-middle">
                     <div className="relative inline-block text-left">
@@ -562,10 +572,11 @@ export function TableServiceProvider() {
                       {selectedSupplierId === supplier.idContract && (
                         <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                           <button
-                            onClick={() => {
-                              handleViewClick(supplier);
-                              setSelectedSupplierId(null);
-                            }}
+                            onClick={() =>
+                              navigate(
+                                `/sistema/fornecedor/${supplier.providerSupplier}`
+                              )
+                            }
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
                             <Eye className="w-4 h-4" /> Visualizar
@@ -642,288 +653,314 @@ export function TableServiceProvider() {
           title="Visualizar detalhes de contrato"
           onClose={() => setIsViewModalOpen(false)}
         >
-        <div className="bg-white rounded-md p-4 shadow text-gray-800 max-h-[70vh] overflow-y-auto space-y-4 text-sm">
-          <div>
-            <p className="font-semibold text-gray-500">Referência do contrato:</p>
-            <p className="border-b border-gray-200 pb-1">{selectedSupplier.contractReference}</p>
+          <div className="bg-white rounded-md p-4 shadow text-gray-800 max-h-[70vh] overflow-y-auto space-y-4 text-sm">
+            <div>
+              <p className="font-semibold text-gray-500">
+                Referência do contrato:
+              </p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.contractReference}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Nome do Fornecedor:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.providerSupplierName}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">CNPJ:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.providerSupplierCnpj}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Nome do serviço:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.serviceName}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Gestor do contrato:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.responsible}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Data de início:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {new Date(selectedSupplier.dateStart).toLocaleDateString(
+                  "pt-BR"
+                )}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">
+                Data de finalização:
+              </p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.dateFinish
+                  ? new Date(selectedSupplier.dateFinish).toLocaleDateString(
+                      "pt-BR"
+                    )
+                  : "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Descrição:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.description}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Tipo de Despesa:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.expenseType}
+              </p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-500">Filial:</p>
+              <p className="border-b border-gray-200 pb-1">
+                {selectedSupplier.branchName}
+              </p>
+            </div>
           </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Nome do Fornecedor:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.providerSupplierName}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">CNPJ:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.providerSupplierCnpj}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Nome do serviço:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.serviceName}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Gestor do contrato:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.responsible}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Data de início:</p>
-          <p className="border-b border-gray-200 pb-1">
-            {new Date(selectedSupplier.dateStart).toLocaleDateString("pt-BR")}
-          </p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Data de finalização:</p>
-          <p className="border-b border-gray-200 pb-1">
-            {selectedSupplier.dateFinish
-              ? new Date(selectedSupplier.dateFinish).toLocaleDateString("pt-BR")
-              : "-"}
-          </p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Descrição:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.description}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Tipo de Despesa:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.expenseType}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-gray-500">Filial:</p>
-          <p className="border-b border-gray-200 pb-1">{selectedSupplier.branchName}</p>
-        </div>
-      </div>
-    </Modal>
-  )}
-
+        </Modal>
+      )}
 
       {isEditModalOpen && editFormData && (
-        <Modal title="Editar contrato" onClose={() => setIsEditModalOpen(false)}>
+        <Modal
+          title="Editar contrato"
+          onClose={() => setIsEditModalOpen(false)}
+        >
           <div className="text-gray-800 space-y-4 max-h-[80vh] overflow-auto w-full p-1">
             <form
               onSubmit={handleSubmit(onSubmitEdit)}
               className="flex flex-col gap-4 text-sm"
             >
-        
-          <label className="space-y-1">
-            <span className="font-semibold">Referência do contrato*</span>
-            <input
-              className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-              {...register("contractReference")}
-              disabled
-            />
-          </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Referência do contrato*</span>
+                <input
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  {...register("contractReference")}
+                  disabled
+                />
+              </label>
 
-       
-          <label className="space-y-1">
-            <span className="font-semibold">Nome do fornecedor*</span>
-              <input
-                className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-                {...register("providerSupplierName")}
-                disabled
-              />
-            </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Nome do fornecedor*</span>
+                <input
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  {...register("providerSupplierName")}
+                  disabled
+                />
+              </label>
 
-     
-          <label className="space-y-1">
-            <span className="font-semibold">Nome do serviço*</span>
-              <input
-                className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-                {...register("serviceName")}
-                disabled
-              />
-          </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Nome do serviço*</span>
+                <input
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  {...register("serviceName")}
+                  disabled
+                />
+              </label>
 
-        
-          <label className="space-y-1">
-            <span className="font-semibold">Data de início*</span>
-              <input
-                type="date"
-                className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-                {...register("dateStart")}
-              />
-          </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Data de início*</span>
+                <input
+                  type="date"
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  {...register("dateStart")}
+                />
+              </label>
 
-        
-          <label className="space-y-1">
-            <span className="font-semibold">Gestor do contrato</span>
-            <select
-              {...register("idResponsible")}
-              className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-            >
-              <option value="">Selecione</option>
-              {managers.map((m: any) => (
-                <option key={m.idUser} value={m.idUser}>
-                  {m.firstName} {m.surname}
-                </option>
-              ))}
-            </select>
-          </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Gestor do contrato</span>
+                <select
+                  {...register("idResponsible")}
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                >
+                  <option value="">Selecione</option>
+                  {managers.map((m: any) => (
+                    <option key={m.idUser} value={m.idUser}>
+                      {m.firstName} {m.surname}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-        
-        <label className="space-y-1">
-          <span className="font-semibold">Tipo de Despesa</span>
-          <select
-            {...register("expenseType")}
-            className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-          >
-            <option value="">Selecione</option>
-            <option value="CAPEX">CAPEX</option>
-            <option value="OPEX">OPEX</option>
-            <option value="NENHUM">Nenhuma</option>
-          </select>
-        </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Tipo de Despesa</span>
+                <select
+                  {...register("expenseType")}
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                >
+                  <option value="">Selecione</option>
+                  <option value="CAPEX">CAPEX</option>
+                  <option value="OPEX">OPEX</option>
+                  <option value="NENHUM">Nenhuma</option>
+                </select>
+              </label>
 
-        
-        <label className="space-y-1">
-          <span className="font-semibold">Tipo do Serviço</span>
-          <select
-            {...register("idServiceType")}
-            className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-          >
-            <option value="">Selecione</option>
-            {servicesType.map((service: any) => (
-              <option
-                key={service.idServiceType}
-                value={service.idServiceType}
-              >
-                {service.title}
-              </option>
-            ))}
-          </select>
-        </label>
+              <label className="space-y-1">
+                <span className="font-semibold">Tipo do Serviço</span>
+                <select
+                  {...register("idServiceType")}
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                >
+                  <option value="">Selecione</option>
+                  {servicesType.map((service: any) => (
+                    <option
+                      key={service.idServiceType}
+                      value={service.idServiceType}
+                    >
+                      {service.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-        <div className="space-y-1">
-          <p className="font-semibold">Permitir Subcontratação?</p>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="true"
-                {...register("subcontractPermission")}
-              />
-              Sim
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="false"
-                {...register("subcontractPermission")}
-              />
-              Não
-            </label>
-          </div>
-        </div>
-
-        
-        <div className="flex gap-6 pt-2">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" {...register("hse")} />
-            SSMA
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" {...register("labor")} />
-            Trabalhista
-          </label>
-        </div>
-
-     
-        {hseWatch && (
-          <div className="space-y-2">
-            <label className="font-semibold">Tipo de atividade SSMA</label>
-            <input
-              type="text"
-              value={searchSsmaActivityEdit}
-              onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
-              placeholder="Buscar atividade..."
-              className="w-full rounded border px-3 py-2 text-sm bg-[#F2F3F5]"
-            />
-            <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
-              {activities
-                .filter((a) =>
-                  a.title
-                    .toLowerCase()
-                    .includes(searchSsmaActivityEdit.toLowerCase())
-                )
-                .map((activity: any) => (
-                  <label key={activity.idActivity} className="flex gap-2 py-1">
+              <div className="space-y-1">
+                <p className="font-semibold">Permitir Subcontratação?</p>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2">
                     <input
-                      type="checkbox"
-                      checked={selectedSsmaActivitiesEdit.includes(
-                        activity.idActivity
-                      )}
-                      onChange={(e) =>
-                        handleCheckboxChangeEdit(
-                          "ssma",
-                          activity.idActivity,
-                          e.target.checked
-                        )
-                      }
+                      type="radio"
+                      value="true"
+                      {...register("subcontractPermission")}
                     />
-                    {activity.title}
+                    Sim
                   </label>
-                ))}
-            </div>
-          </div>
-        )}
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      value="false"
+                      {...register("subcontractPermission")}
+                    />
+                    Não
+                  </label>
+                </div>
+              </div>
 
-        
-        {laborWatch && (
-          <div className="space-y-2">
-            <label className="font-semibold">Tipo de atividade Trabalhista</label>
-            <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
-              {activities.map((activity: any) => (
-                <label key={activity.idActivity} className="flex gap-2 py-1">
-                  <input
-                    type="checkbox"
-                    checked={selectedLaborActivitiesEdit.includes(
-                      activity.idActivity
-                    )}
-                    onChange={(e) =>
-                      handleCheckboxChangeEdit(
-                        "labor",
-                        activity.idActivity,
-                        e.target.checked
-                      )
-                    }
-                  />
-                  {activity.title}
+              <div className="flex gap-6 pt-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" {...register("hse")} />
+                  SSMA
                 </label>
-              ))}
-            </div>
-          </div>
-        )}
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" {...register("labor")} />
+                  Trabalhista
+                </label>
+              </div>
 
-        {/* Descrição */}
-        <label className="space-y-1">
-          <span className="font-semibold">Descrição</span>
-          <textarea
-            rows={3}
-            className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-            {...register("description")}
-          />
-        </label>
+              {hseWatch && (
+                <div className="space-y-2">
+                  <label className="font-semibold">
+                    Tipo de atividade SSMA
+                  </label>
+                  <input
+                    type="text"
+                    value={searchSsmaActivityEdit}
+                    onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
+                    placeholder="Buscar atividade..."
+                    className="w-full rounded border px-3 py-2 text-sm bg-[#F2F3F5]"
+                  />
+                  <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
+                    {activities
+                      .filter((a) =>
+                        a.title
+                          .toLowerCase()
+                          .includes(searchSsmaActivityEdit.toLowerCase())
+                      )
+                      .map((activity: any) => (
+                        <label
+                          key={activity.idActivity}
+                          className="flex gap-2 py-1"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedSsmaActivitiesEdit.includes(
+                              activity.idActivity
+                            )}
+                            onChange={(e) =>
+                              handleCheckboxChangeEdit(
+                                "ssma",
+                                activity.idActivity,
+                                e.target.checked
+                              )
+                            }
+                          />
+                          {activity.title}
+                        </label>
+                      ))}
+                  </div>
+                </div>
+              )}
 
-        {/* Botões */}
-          <div className="flex justify-end gap-4 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsEditModalOpen(false)}
-              className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
-            >
-              Cancelar
-              </button>
+              {laborWatch && (
+                <div className="space-y-2">
+                  <label className="font-semibold">
+                    Tipo de atividade Trabalhista
+                  </label>
+                  <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
+                    {activities.map((activity: any) => (
+                      <label
+                        key={activity.idActivity}
+                        className="flex gap-2 py-1"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedLaborActivitiesEdit.includes(
+                            activity.idActivity
+                          )}
+                          onChange={(e) =>
+                            handleCheckboxChangeEdit(
+                              "labor",
+                              activity.idActivity,
+                              e.target.checked
+                            )
+                          }
+                        />
+                        {activity.title}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Descrição */}
+              <label className="space-y-1">
+                <span className="font-semibold">Descrição</span>
+                <textarea
+                  rows={3}
+                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  {...register("description")}
+                />
+              </label>
+
+              {/* Botões */}
+              <div className="flex justify-end gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
+                >
+                  Cancelar
+                </button>
                 <button
                   type="submit"
                   className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
                 >
-                Salvar alterações
+                  Salvar alterações
                 </button>
               </div>
             </form>
@@ -936,70 +973,70 @@ export function TableServiceProvider() {
           <div className="bg-white rounded-md w-[90vw] max-w-[520px] p-6 shadow-lg relative">
             <div className="flex items-start justify-between mb-4">
               <h2 className="text-[#2E3C4D] text-lg font-semibold flex items-center gap-2">
-              <X className="w-5 h-5 text-[#C9C9C9]" />
-              Finalizar contrato
+                <X className="w-5 h-5 text-[#C9C9C9]" />
+                Finalizar contrato
               </h2>
-            <button onClick={() => setIsFinalizeModalOpen(false)}>
-            <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-          </button>
-        </div>
+              <button onClick={() => setIsFinalizeModalOpen(false)}>
+                <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <img
-              src={likeImage} 
-              alt="Ilustração de confirmação"
-              className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
-            />
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <img
+                src={likeImage}
+                alt="Ilustração de confirmação"
+                className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
+              />
 
-          <div className="flex-1 text-sm text-gray-700 space-y-2">
-            <p className="font-semibold">
-              Deseja realmente finalizar este contrato?
-            </p>
-            <p>
-              Essa ação é <strong>permanente</strong> e <strong>não poderá ser desfeita</strong>.
-              O contrato será <strong>removido</strong> e não estará mais disponível.
-            </p>
+              <div className="flex-1 text-sm text-gray-700 space-y-2">
+                <p className="font-semibold">
+                  Deseja realmente finalizar este contrato?
+                </p>
+                <p>
+                  Essa ação é <strong>permanente</strong> e{" "}
+                  <strong>não poderá ser desfeita</strong>. O contrato será{" "}
+                  <strong>removido</strong> e não estará mais disponível.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={() => setIsFinalizeModalOpen(false)}
+                className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+              >
+                Voltar
+              </button>
+              <button
+                onClick={async () => {
+                  if (!selectedSupplierId) return;
+
+                  const token = localStorage.getItem("tokenClient");
+                  const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
+                  const payload = { status: "Contrato Cancelado" };
+
+                  try {
+                    await axios.post(endpoint, payload, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    toast.success("Contrato finalizado com sucesso");
+                    await getSupplier();
+                  } catch (err) {
+                    toast.error("Erro ao finalizar contrato");
+                    console.error(err);
+                  } finally {
+                    setIsFinalizeModalOpen(false);
+                    setSelectedSupplierId(null);
+                  }
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
+              >
+                Finalizar contrato
+              </button>
+            </div>
           </div>
         </div>
-
-      <div className="mt-6 flex justify-end gap-4">
-        <button
-          onClick={() => setIsFinalizeModalOpen(false)}
-          className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
-        >
-          Voltar
-        </button>
-        <button
-          onClick={async () => {
-            if (!selectedSupplierId) return;
-
-            const token = localStorage.getItem("tokenClient");
-            const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
-            const payload = { status: "Contrato Cancelado" };
-
-            try {
-               await axios.post(endpoint, payload, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              toast.success("Contrato finalizado com sucesso");
-              await getSupplier();
-            } catch (err) {
-              toast.error("Erro ao finalizar contrato");
-              console.error(err);
-            } finally {
-              setIsFinalizeModalOpen(false);
-              setSelectedSupplierId(null);
-            }
-          }}
-          className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
-        >
-          Finalizar contrato
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+      )}
 
       {isHistoryModalOpen && selectedSupplier && (
         <Modal
@@ -1010,10 +1047,21 @@ export function TableServiceProvider() {
             {contractHistory.length > 0 ? (
               contractHistory.map((log, index) => (
                 <div key={index} className="border-b border-gray-500 pb-2 mb-2">
-                  <p><strong>Ação:</strong> {traduzirAcao(log.action)}</p>
-                  <p><strong>Usuário:</strong> {log.userResponsibleFullName}</p>
-                  <p><strong>Data:</strong> {new Date(log.createdAt).toLocaleString("pt-BR")}</p>
-                  {log.message && <p><strong>Mensagem:</strong> {log.message}</p>}
+                  <p>
+                    <strong>Ação:</strong> {traduzirAcao(log.action)}
+                  </p>
+                  <p>
+                    <strong>Usuário:</strong> {log.userResponsibleFullName}
+                  </p>
+                  <p>
+                    <strong>Data:</strong>{" "}
+                    {new Date(log.createdAt).toLocaleString("pt-BR")}
+                  </p>
+                  {log.message && (
+                    <p>
+                      <strong>Mensagem:</strong> {log.message}
+                    </p>
+                  )}
                 </div>
               ))
             ) : (

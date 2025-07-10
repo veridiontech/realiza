@@ -11,7 +11,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 // Interface genérica para os dados, já que as chaves são dinâmicas
-interface ChartData {
+export interface ChartData {
   name: string;
   [key: string]: any; // Permite chaves como PENDENTE, APROVADO, etc.
 }
