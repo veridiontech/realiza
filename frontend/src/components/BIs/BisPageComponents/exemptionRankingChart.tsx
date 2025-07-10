@@ -10,12 +10,6 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 
-const mockData = [
-  { category: 'Geral', value: 8 },
-  { category: 'Segurança', value: 7 },
-  { category: 'Saúde', value: 1 },
-  { category: 'Trabalhista', value: 1 },
-]
 
 const COLORS = {
   barFill: '#60a5fa', // azul pastel moderno
