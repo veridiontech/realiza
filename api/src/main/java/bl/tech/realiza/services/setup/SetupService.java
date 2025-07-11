@@ -36,6 +36,8 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
+import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -72,19 +74,22 @@ public class SetupService {
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final ActivityDocumentRepoRepository activityDocumentRepoRepository;
     private final DocumentRepository documentRepository;
+    private final CrudServiceType crudServiceType;
+    private final CrudActivity crudActivity;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
         log.info("Finished setup client ✔️ {}", clientId);
-//        crudServiceType.transferFromRepoToClient(client.getIdClient());
+        crudServiceType.transferFromRepoToClient(client.getIdClient());
     }
 
     public void setupBranch(String branchId) {
         log.info("Started setup branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
+        crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (var documentMatrix : documentMatrixRepository.findAll()) {
@@ -105,6 +110,8 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
+        crudActivity.transferFromRepo(branch.getIdBranch());
+
         log.info("Finished setup branch ✔️ {}", branchId);
     }
 
