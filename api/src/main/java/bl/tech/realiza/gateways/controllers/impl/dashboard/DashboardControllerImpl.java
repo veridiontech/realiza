@@ -3,6 +3,7 @@ package bl.tech.realiza.gateways.controllers.impl.dashboard;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.gateways.controllers.interfaces.dashboard.DashboardController;
+import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
 import bl.tech.realiza.gateways.responses.dashboard.DashboardDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.dashboard.DashboardGeneralDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.dashboard.DashboardHomeResponseDto;
@@ -46,19 +47,8 @@ public class DashboardControllerImpl implements DashboardController {
     @Operation(description = "Busca informações do dashboard geral")
     @Override
     public ResponseEntity<DashboardGeneralDetailsResponseDto> getGeneralDetailsInfo(@PathVariable String clientId,
-                                                                                    @RequestParam(required = false) List<String> branchIds,
-                                                                                    @RequestParam(required = false) List<String> documentTypes,
-                                                                                    @RequestParam(required = false) List<String> responsibleIds,
-                                                                                    @RequestParam(required = false) List<Contract.IsActive> activeContract,
-                                                                                    @RequestParam(required = false) List<Document.Status> statuses,
-                                                                                    @RequestParam(required = false) List<String> documentTitles) {
-        return ResponseEntity.ok(dashboardService.getGeneralDetailsInfo(clientId,
-                branchIds,
-                documentTypes,
-                responsibleIds,
-                activeContract,
-                statuses,
-                documentTitles));
+                                                                                    @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        return ResponseEntity.ok(dashboardService.getGeneralDetailsInfo(clientId, dashboardFiltersRequestDto));
     }
 
     @GetMapping("/{clientId}/provider")
@@ -66,16 +56,7 @@ public class DashboardControllerImpl implements DashboardController {
     @Operation(description = "Busca informações do dashboard de fornecedores e subcontratados")
     @Override
     public ResponseEntity<List<DashboardProviderDetailsResponseDto>> getProviderDetailsInfo(@PathVariable String clientId,
-                                                                                            @RequestParam(required = false) List<String> branchIds,
-                                                                                            @RequestParam(required = false) List<String> documentTypes,
-                                                                                            @RequestParam(required = false) List<String> responsibleIds,
-                                                                                            @RequestParam(required = false) List<Document.Status> statuses,
-                                                                                            @RequestParam(required = false) List<String> documentTitles) {
-        return ResponseEntity.ok(dashboardService.getProviderDetailsInfo(clientId,
-                branchIds,
-                documentTypes,
-                responsibleIds,
-                statuses,
-                documentTitles));
+                                                                                            @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        return ResponseEntity.ok(dashboardService.getProviderDetailsInfo(clientId, dashboardFiltersRequestDto));
     }
 }

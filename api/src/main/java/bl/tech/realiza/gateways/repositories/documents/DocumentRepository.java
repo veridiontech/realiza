@@ -76,8 +76,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (cps.branch.idBranch IN :branchIds OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
-    AND (:responsible IS NULL OR cps.responsible.idUser IN :responsibleIds OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND d.type = :types
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
+    AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -95,8 +95,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (cps.branch.client.idClient = :clientId OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
-    AND (:responsible IS NULL OR cps.responsible.idUser IN :responsibleIds OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND d.type = :types
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
+    AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)

@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.providers;
 
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import org.springframework.data.domain.Page;
@@ -24,12 +25,13 @@ public interface ProviderSubcontractorRepository extends JpaRepository<ProviderS
     FROM ProviderSubcontractor ps
     LEFT JOIN ps.contractsSubcontractor cs
     WHERE ps.isActive = true
-    AND cs.isActive = Contract.IsActive.ATIVADO
+    AND cs.isActive = :contractStatus
     AND cs.contractProviderSupplier.branch.client.idClient = :clientId
     AND ps.isActive = true
 """)
     List<ProviderSubcontractor> findAllByContractSupplierClientIdAndContractIsActiveAndIsActiveIsTrue(
-            @Param("clientId") String clientId
+            @Param("clientId") String clientId,
+            @Param("contractStatus") Contract.IsActive contractStatus
     );
 
     @Query("""
@@ -37,13 +39,14 @@ public interface ProviderSubcontractorRepository extends JpaRepository<ProviderS
     FROM ProviderSubcontractor ps
     LEFT JOIN ps.contractsSubcontractor cs
     WHERE ps.isActive = true
-    AND cs.isActive = Contract.IsActive.ATIVADO
+    AND cs.isActive = :contractStatus
     AND ps.isActive = true
     AND (:branchIds IS NULL OR cs.contractProviderSupplier.branch.idBranch IN :branchIds)
     AND (:responsibleIds IS NULL OR cs.responsible.idUser IN :responsibleIds)
 """)
     List<ProviderSubcontractor> findAllByBranchIdsAndResponsibleIdsAndContractIsActiveAndIsActiveIsTrue(
             @Param("branchIds") List<String> branchIds,
-            @Param("responsibleIds") List<String> responsibleIds
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("contractStatus") Contract.IsActive contractStatus
     );
 }
