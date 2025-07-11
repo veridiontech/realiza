@@ -24,4 +24,51 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
     WHERE b.client.idClient = :clientId AND ps.isActive = true
 """)
     Long countByClientIdAndIsActive(@Param("clientId") String clientId);
+
+    @Query("""
+    SELECT ps
+    FROM ProviderSupplier ps
+    LEFT JOIN ps.contractsSupplier cs
+    WHERE ps.isActive = true
+    AND cs.isActive = Contract.IsActive.ATIVADO
+    AND cs.branch.client.idClient = :clientId
+    AND ps.isActive = true
+""")
+    List<ProviderSupplier> findAllByClientIdAndContractIsActiveAndIsActiveIsTrue(
+            @Param("clientId") String clientId
+    );
+
+    @Query("""
+    SELECT ps
+    FROM ProviderSupplier ps
+    LEFT JOIN ps.contractsSupplier cs
+    WHERE ps.isActive = true
+    AND cs.isActive = Contract.IsActive.ATIVADO
+    AND ps.isActive = true
+    AND (:branchIds IS NULL OR cs.branch.idBranch IN :branchIds)
+    AND (:responsibleIds IS NULL OR cs.responsible.idUser IN :responsibleIds)
+""")
+    List<ProviderSupplier> findAllByBranchIdsAndResponsibleIdsAndContractIsActiveAndIsActiveIsTrue(
+            @Param("branchIds") List<String> branchIds,
+            @Param("responsibleIds") List<String> responsibleIds
+    );
+
+    @Query("""
+    SELECT ps
+    FROM ProviderSupplier ps
+    LEFT JOIN ps.contractsSupplier cs
+    WHERE ps.isActive = true
+    AND cs.isActive = Contract.IsActive.ATIVADO
+    AND ps.isActive = true
+    AND (:branchIds IS NULL OR cs.branch.idBranch IN :branchIds)
+    AND (:responsibleIds IS NULL OR cs.responsible.idUser IN :responsibleIds)
+    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    List<ProviderSupplier> findAllByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+            @Param("branchIds") List<String> branchIds,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("documentTypes") List<String> documentTypes,
+            @Param("documentTitles") List<String> documentTitles
+    );
 }

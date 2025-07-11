@@ -413,13 +413,13 @@ public class SetupService {
             for (DocumentEmployee documentEmployee : documentEmployeeList) {
 
                 if (documentEmployee.getContracts().contains(contract) && documentEmployee.getContracts().size() == 1) {
-                    documentEmployee.getContracts().remove(contract);
+//                    documentEmployee.getContracts().remove(contract);
                     if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24) {
                         documentEmployeeRepository.deleteById(documentEmployee.getIdDocumentation());
                     }
-                } else if (documentEmployee.getContracts().contains(contract)) {
+                } /*else if (documentEmployee.getContracts().contains(contract)) {
                     documentEmployee.getContracts().remove(contract);
-                }
+                }*/
             }
             documentEmployeeRepository.saveAll(documentEmployeeList);
             employee.getContracts().remove(contract);
