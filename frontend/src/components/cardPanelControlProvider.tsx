@@ -1,5 +1,11 @@
 import axios from "axios";
-import { CalendarDays, ThumbsUp, User } from "lucide-react";
+import {
+  CalendarDays,
+  ThumbsUp,
+  User,
+  SquareCheckBig,
+  SquareX,
+} from "lucide-react";
 import { ip } from "@/utils/ip";
 import { toast } from "sonner";
 import { Oval } from "react-loader-spinner";
@@ -10,7 +16,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -132,7 +137,7 @@ export function CardPanelControlProvider({
               <span className="font-semibold text-[#2563EB]">
                 Solicitação está aceita
               </span>
-            </div> 
+            </div>
           )}
           <span className="text-[14px] text-neutral-600">{requesterEmail}</span>
         </div>
@@ -144,6 +149,7 @@ export function CardPanelControlProvider({
         />
       </div>
       <div className="flex flex-col gap-2">
+        <hr />
         <div className="flex items-center gap-1">
           <span className="text-[18px] font-semibold">Motivo: </span>
           {solicitationType === "CREATION" && (
@@ -171,37 +177,50 @@ export function CardPanelControlProvider({
             <span>{branchName}</span>
           </div>
         </div>
+        <hr />
       </div>
-      <div className="row flex w-full items-center justify-between">
-        <div className="flex flex-row items-center justify-center gap-2">
+      <div className="row flex-col w-full items-center">
+        <div className="flex flex-row items-center justify-start gap-2 mb-5">
           <CalendarDays color="#3F3F46" />
-          <span className="text-xs text-[#3F3F46]">
+          <span className="text-normal text-[#3F3F46]">
             {new Date(creationDate).toLocaleString()}
           </span>
         </div>
         {status === "APPROVED" || status === "DENIED" ? (
           <div></div>
         ) : (
-          <div className="flex flex-row items-center justify-center gap-2">
+          <div className="flex flex-row items-center justify-between gap-2">
             <AlertDialog>
-              <AlertDialogTrigger>
-                <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-xs text-red-500 hover:bg-stone-300" disabled={isButtonDisabled}>
+              <AlertDialogTrigger className="w-full justify-center">
+                <button
+                  className="flex flex-row items-center justify-center gap-2 rounded-sm bg-red-300 p-1 text-lg px-6 py-2 w-full text-red-500 hover:bg-stone-300"
+                  disabled={isButtonDisabled}
+                >
                   Dispensar <ThumbsUp size={15} />
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
+                <AlertDialogHeader className="flex flex-row items-center">
+                  <SquareX
+                    className="w-[40%] text-red-600"
+                    width={100}
+                    height={100}
+                  />
+                  <AlertDialogTitle className="w-[60%]">
                     Deseja mesmo dispensar a solicitação de acesso de{" "}
-                    {enterpriseName} ao sistema?
+                    <span className="text-red-500">{enterpriseName}</span> ao
+                    sistema?
+                    <div className="flex justify-between mt-5 ">
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeny}
+                        className="bg-red-600"
+                      >
+                        Dispensar
+                      </AlertDialogAction>
+                    </div>
                   </AlertDialogTitle>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeny}>
-                    Dispensar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
             {isLoading ? (
@@ -221,29 +240,35 @@ export function CardPanelControlProvider({
               </button>
             ) : (
               <AlertDialog>
-                <AlertDialogTrigger>
-                  <button className="flex flex-row items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-xs text-[#16A34A] hover:bg-stone-300" disabled={isButtonDisabled}>
+                <AlertDialogTrigger className="w-full flex justify-center">
+                  <button
+                    className="flex flex-row w-full items-center justify-center gap-2 rounded-sm bg-[#16A34A33] p-1 text-lg px-6 py-2 text-[#16A34A] hover:bg-stone-300"
+                    disabled={isButtonDisabled}
+                  >
                     Aceitar <ThumbsUp size={15} />
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
+                  <AlertDialogHeader className="flex flex-row items-center">
+                    <SquareCheckBig
+                      className="w-[40%] text-green-600"
+                      width={100}
+                      height={100}
+                    />
+                    <AlertDialogTitle className="w-[60%]">
                       Deseja mesmo confirmar o acesso de {enterpriseName} ao
                       sistema?
+                      <div className="flex justify-between mt-5 ">
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleApprove}
+                          className="bg-green-600 text-white"
+                        >
+                          Aceitar
+                        </AlertDialogAction>
+                      </div>
                     </AlertDialogTitle>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-red-300 hover:bg-red-400">
-                      Cancelar
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleApprove}
-                      className="bg-green-800 text-white"
-                    >
-                      Aceitar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             )}

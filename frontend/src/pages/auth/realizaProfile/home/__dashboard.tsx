@@ -134,10 +134,11 @@ export function Dashboard() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<{
-    adherence: number;
+    conformity: number;
     activeContractQuantity: number;
     activeEmployeeQuantity: number;
     activeSupplierQuantity: number;
+    allocatedEmployeeQuantity: number;
   } | null>(null);
 
   const {
@@ -281,10 +282,11 @@ export function Dashboard() {
       } catch (err) {
         console.error("Erro ao buscar conformidade:", err);
         setData({
-          adherence: 0,
+          conformity: 0,
           activeContractQuantity: 0,
           activeEmployeeQuantity: 0,
           activeSupplierQuantity: 0,
+          allocatedEmployeeQuantity: 0, 
         });
       } finally {
         setIsLoading(false);
@@ -311,7 +313,7 @@ export function Dashboard() {
 
               <div className="w-full flex justify-center">
                 <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
-                  <ConformityGaugeChart percentage={data?.adherence} />
+                  <ConformityGaugeChart percentage={data?.conformity} />
                 </div>
               </div>
             </div>
@@ -392,8 +394,8 @@ export function Dashboard() {
         <div className="container relative bottom-[6vw] mx-auto max-w-7xl">
           <div className="flex flex-col gap-10">
             <EnterpriseResume />
-            <div className="flex items-center gap-5">
-              <div className="h-[60vh] w-[95vw] rounded-lg border bg-white p-8 shadow-sm">
+            <div className="flex items-center gap-10">
+              <div className="h-[60vh] w-[70vw] rounded-lg border bg-white p-8 shadow-sm">
                 <div className="flex flex-col gap-4">
                   <div>
                     <nav className="flex items-center justify-between">
@@ -720,10 +722,10 @@ export function Dashboard() {
                   )}
                 </div>
               </div>
-              <div className="w-full flex justify-center">
+              <div className="w-[30vw] flex justify-center">
                 <div className="h-[60vh] w-[30vw] rounded-lg border bg-white p-5 shadow-sm">
                   <ConformityGaugeChart
-                    percentage={data?.adherence}
+                    percentage={data?.conformity}
                     loading={isLoading}
                   />
                 </div>
@@ -734,7 +736,7 @@ export function Dashboard() {
             <ActiveContracts count={data?.activeContractQuantity ?? 0} />
             <Employees count={data?.activeEmployeeQuantity ?? 0} />
             <Suppliers count={data?.activeSupplierQuantity ?? 0} />
-            <AllocatedEmployees />
+            <AllocatedEmployees count={data?.allocatedEmployeeQuantity ?? 0} />
           </div>
           <div className="mt-5 w-full text-right">
             <Link to={`/sistema/dashboard-details/${user?.idUser}`}>

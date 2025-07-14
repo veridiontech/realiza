@@ -20,34 +20,35 @@ import { ValidateSection } from "../validate-matrix/validate-section";
 
 export function TrabalhistaBox() {
   const { setDocuments, documents, setNonSelected, nonSelected } = useDocument();
-  const [notSelectedDocument, setNotSelectedDocument] = useState([]);
-  const [selectedDocument, setSelectedDocument] = useState<any>([]);
-  const { selectedBranch } = useBranch();
+  const [notSelectedDocument, setNotSelectedDocument] = useState<propsDocument[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<propsDocument[]>([]);
+  const { selectedBranch, branch } = useBranch();
   const [isLoading, setIsLoading] = useState(false);
-  const [replicate, setReplicate] = useState(false); // ✅ Novo estado
+  const [replicate, setReplicate] = useState(false);
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     setIsLoading(true);
+
     try {
       const resSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-          params: {
-            documentTypeName: "TRABALHISTA",
-            isSelected: true,
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
           },
+          params: { documentTypeName: "TRABALHISTA", isSelected: true },
         }
       );
+
       const resNonSelected = await axios.get(
         `${ip}/document/branch/document-matrix/${selectedBranch?.idBranch}`,
         {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-          params: {
-            documentTypeName: "TRABALHISTA",
-            isSelected: false,
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
           },
+          params: { documentTypeName: "TRABALHISTA", isSelected: false },
         }
       );
 
@@ -60,26 +61,41 @@ export function TrabalhistaBox() {
     }
   };
 
-  const sendDocuments = async (
-    isSelected: boolean,
-    idDocumentation: string[],
-    replicate: boolean
-  ) => {
-    const tokenFromStorage = localStorage.getItem("tokenClient");
-    try {
-      await axios.post(`${ip}/document/branch/document-matrix/update`, idDocumentation, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        params: { isSelected, replicate },
-      });
-      clearArray();
-      pullDatas();
-    } catch (err) {
-      console.log("erro ao enviar documento", err);
-    }
-  };
-
   const filterIdDocuments = nonSelected.map((document: propsDocument) => document.idDocument);
   const filterIdDocumentsSelected = documents.map((document: propsDocument) => document.idDocument);
+
+const sendDocuments = async (
+  isSelected: boolean,
+  idDocument: string[],  
+  replicate: boolean,
+  branches: string[]  
+) => {
+  const tokenFromStorage = localStorage.getItem("tokenClient");
+
+  try {
+    await axios.post(
+      `${ip}/document/branch/document-matrix/update`, 
+      {
+        documentIds: idDocument,
+        branchIds: branches,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`,
+        },
+        params: {  
+          isSelected: isSelected,
+          replicate: replicate,
+        }
+      }
+    );
+
+    clearArray();
+    pullDatas();
+  } catch (err) {
+    console.log("erro ao enviar documento", err);
+  }
+};
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -96,6 +112,14 @@ export function TrabalhistaBox() {
 
   const pullDatas = () => {
     getDocument();
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedBranches.length === branch.length) {
+      setSelectedBranches([]);
+    } else {
+      setSelectedBranches(branch.map((b) => b.idBranch));
+    }
   };
 
   return (
@@ -140,13 +164,57 @@ export function TrabalhistaBox() {
                       onChange={() => setReplicate(!replicate)}
                       className="h-4 w-4"
                     />
-                    Replicar alteração para outras filiais
+                    Deseja replicar essa alteração para outras filiais?
                   </label>
+
+                  {replicate && (
+                    <div className="mt-2">
+                      <label htmlFor="branches" className="block text-sm font-medium">
+                        Selecione as filiais para replicar:
+                      </label>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedBranches.length === branch.length}
+                          onChange={toggleSelectAll}
+                          className="h-4 w-4"
+                        />
+                        <span>Selecionar todas as filiais</span>
+                      </div>
+
+                      <div className="mt-2">
+                        {branch.map((branch: any) => (
+                          <div key={branch.idBranch} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              value={branch.idBranch}
+                              checked={selectedBranches.includes(branch.idBranch)}
+                              onChange={(e) => {
+                                const { value, checked } = e.target;
+                                if (checked) {
+                                  setSelectedBranches([...selectedBranches, value]);
+                                } else {
+                                  setSelectedBranches(
+                                    selectedBranches.filter((id) => id !== value)
+                                  );
+                                }
+                              }}
+                              className="h-4 w-4"
+                            />
+                            <span>{branch.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => sendDocuments(true, filterIdDocuments, replicate)}
+                    onClick={() =>
+                      sendDocuments(true, filterIdDocuments, replicate, selectedBranches)
+                    }
                   >
                     Confirmar
                   </AlertDialogAction>
@@ -154,6 +222,7 @@ export function TrabalhistaBox() {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+
           <div>
             <AlertDialog>
               <AlertDialogTrigger
@@ -173,7 +242,7 @@ export function TrabalhistaBox() {
                 <div>
                   <ul>
                     {documents.length > 0 ? (
-                      documents.map((doc) => (
+                      documents.map((doc: propsDocument) => (
                         <li key={doc.idDocument}>{doc.title}</li>
                       ))
                     ) : (
@@ -189,13 +258,57 @@ export function TrabalhistaBox() {
                       onChange={() => setReplicate(!replicate)}
                       className="h-4 w-4"
                     />
-                    Replicar alteração para outras filiais
+                    Deseja replicar essa alteração para outras filiais?
                   </label>
+
+                  {replicate && (
+                    <div className="mt-2">
+                      <label htmlFor="branches" className="block text-sm font-medium">
+                        Selecione as filiais para replicar:
+                      </label>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedBranches.length === branch.length}
+                          onChange={toggleSelectAll}
+                          className="h-4 w-4"
+                        />
+                        <span>Selecionar todas as filiais</span>
+                      </div>
+
+                      <div className="mt-2">
+                        {branch.map((branch: any) => (
+                          <div key={branch.idBranch} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              value={branch.idBranch}
+                              checked={selectedBranches.includes(branch.idBranch)}
+                              onChange={(e) => {
+                                const { value, checked } = e.target;
+                                if (checked) {
+                                  setSelectedBranches([...selectedBranches, value]);
+                                } else {
+                                  setSelectedBranches(
+                                    selectedBranches.filter((id) => id !== value)
+                                  );
+                                }
+                              }}
+                              className="h-4 w-4"
+                            />
+                            <span>{branch.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => sendDocuments(false, filterIdDocumentsSelected, replicate)}
+                    onClick={() =>
+                      sendDocuments(false, filterIdDocumentsSelected, replicate, selectedBranches)
+                    }
                   >
                     Confirmar
                   </AlertDialogAction>

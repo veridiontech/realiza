@@ -26,11 +26,9 @@ import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
-import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
-import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
@@ -39,6 +37,8 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
+import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
+import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -75,13 +75,15 @@ public class SetupService {
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final ProfileRepoRepository profileRepoRepository;
     private final ProfileRepository profileRepository;
+    private final CrudServiceType crudServiceType;
+    private final CrudActivity crudActivity;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
         log.info("Finished setup client ✔️ {}", clientId);
-//        crudServiceType.transferFromRepoToClient(client.getIdClient());
+        crudServiceType.transferFromRepoToClient(client.getIdClient());
     }
 
     public void setupNewClientProfiles(String clientId) {
@@ -127,6 +129,7 @@ public class SetupService {
         log.info("Started setup branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
+        crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
         List<DocumentBranch> batch = new ArrayList<>(50);
         for (var documentMatrix : documentMatrixRepository.findAll()) {
@@ -134,7 +137,7 @@ public class SetupService {
                     .title(documentMatrix.getName())
                     .type(documentMatrix.getType())
                     .status(Document.Status.PENDENTE)
-                    .isActive(true)
+                    .isActive(false)
                     .branch(branch)
                     .documentMatrix(documentMatrix)
                     .build());
@@ -147,6 +150,8 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
+        crudActivity.transferFromRepo(branch.getIdBranch());
+
         log.info("Finished setup branch ✔️ {}", branchId);
     }
 

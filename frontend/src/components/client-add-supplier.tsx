@@ -14,11 +14,11 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useEffect, useState } from "react";
-import { Oval } from "react-loader-spinner"; // 'Radio' removido
+import { Oval } from "react-loader-spinner";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { useBranch } from "@/context/Branch-provider";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import { fetchCompanyByCNPJ } from "@/hooks/gets/realiza/useCnpjApi";
 import { useUser } from "@/context/user-provider";
 import { useDataSendEmailContext } from "@/context/dataSendEmail-Provider";
@@ -60,9 +60,9 @@ export const modalSendEmailFormSchemaSubContractor = z.object({
 export const contractFormSchema = z.object({
   cnpj: z.string(),
   serviceName: z.string().nonempty("Nome do serviço é obrigatório"),
-  idServiceType: z.string().nonempty("Tipo de despesa é obrigatório"),
+  idServiceType: z.string().nonempty("Tipo de serviço é obrigatório"),
   description: z.string().optional(),
-  expenseType: z.string().nonempty("Tipo do serviço"),
+  expenseType: z.string().nonempty("Tipo do serviço é obrigatório"),
   labor: z.boolean(),
   hse: z.boolean(),
   dateStart: z.string().nonempty("Início efetivo é obrigatório"),
@@ -72,8 +72,8 @@ export const contractFormSchema = z.object({
     .nonempty("Referência do contrato é obrigatório"),
   subcontractPermission: z
     .enum(["true", "false"], {
-      required_error: "Selecione se permite subcontratação",
     })
+    .optional(), 
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -89,13 +89,13 @@ export function ModalTesteSendSupplier() {
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nextModal, setNextModal] = useState(false);
-  const [providerDatas, setProviderDatas] = useState({});
+  const [providerDatas, setProviderDatas] = useState<any>({});
   const { user } = useUser();
   const { selectedBranch } = useBranch();
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
-  const { setDatasSender } = useDataSendEmailContext(); // 'datasSender' removido, pois não é lido diretamente
+  const { setDatasSender } = useDataSendEmailContext();
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
@@ -141,7 +141,6 @@ export function ModalTesteSendSupplier() {
         return risco;
     }
   };
-
 
   const {
     register: registerContract,
@@ -271,7 +270,10 @@ export function ModalTesteSendSupplier() {
       if (isSubcontractor === "contratado") {
         payload = { ...data };
       } else {
-        payload = { ...data };
+        payload = {
+          ...data,
+          idContractSupplier: (data as ModalSendEmailFormSchemaSubContractor).providerSubcontractor
+        };
       }
 
       setProviderDatas(payload);
@@ -311,11 +313,10 @@ export function ModalTesteSendSupplier() {
     }
   }, [selectedBranch?.idBranch]);
 
-  useEffect(() => {
-    getActivities();
-  }, []);
-
   const createContract = async (data: ContractFormSchema) => {
+    console.log("createContract function called!");
+    console.log("Form data:", data);
+
     if (!providerDatas) {
       toast.error("Dados do prestador não encontrados. Reinicie o processo.");
       return;
@@ -324,18 +325,54 @@ export function ModalTesteSendSupplier() {
     setIsButtonDisabled(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const payload = {
+      let payload: any = {
         ...data,
         subcontractPermission: data.subcontractPermission === "true",
         idRequester: user?.idUser,
-        providerDatas,
         idBranch: selectedBranch?.idBranch,
         idActivities: selectedActivities,
       };
 
-      setDatasSender(payload);
+      let apiUrl = "";
 
-      await axios.post(`${ip}/contract/supplier`, payload, {
+      if (isSubcontractor === "contratado") {
+        apiUrl = `${ip}/contract/supplier`;
+        payload = {
+          ...payload,
+          providerDatas,
+        };
+      } else if (isSubcontractor === "subcontratado") {
+        apiUrl = `${ip}/contract/subcontractor`;
+        payload = {
+          ...payload,
+          serviceName: data.serviceName,
+          contractReference: data.contractReference,
+          description: data.description,
+          expenseType: data.expenseType,
+          labor: data.labor,
+          hse: data.hse,
+          dateStart: data.dateStart,
+          idRequester: user?.idUser,
+          idActivities: selectedActivities,
+          idContractSupplier: providerDatas.idContractSupplier,
+          providerDatas: {
+            corporateName: providerDatas?.corporateName || "",
+            email: providerDatas?.email || "",
+            cnpj: providerDatas?.cnpj || "",
+            telephone: providerDatas?.phone || "",
+          },
+        };
+      } else {
+        toast.error("Tipo de contratação não selecionado.");
+        setIsLoading(false);
+        setIsButtonDisabled(false);
+        return;
+      }
+
+      setDatasSender(payload);
+      console.log("payload: " , payload);
+    
+      await axios.post(apiUrl, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       toast.success("Contrato criado com sucesso!");
@@ -344,7 +381,7 @@ export function ModalTesteSendSupplier() {
     } catch (err: any) {
       if (err.response) {
         console.error("Erro no servidor:", err.response.data);
-        toast.error("Erro ao criar contrato: Erro desconhecido.");
+        toast.error(`Erro ao criar contrato: ${err.response.data.message || "Erro desconhecido."}`);
       } else if (err.request) {
         console.error("Erro na requisição:", err.request);
         toast.error("Erro na requisição ao servidor.");
@@ -374,11 +411,6 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  useEffect(() => {
-    getActivities();
-    getServicesType();
-  }, []);
-
   return (
     <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
       <DialogTrigger asChild>
@@ -391,13 +423,16 @@ export function ModalTesteSendSupplier() {
       </DialogTrigger>
       <DialogContent
         style={{
-          //backgroundImage: `url(${bgModalRealiza})`,
+          // backgroundImage: `url(${bgModalRealiza})`,
         }}
         className="max-w-[90vw] md:max-w-[45vw]"
       >
         <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 h-[60px] min-w-full">
-          <h2 className="text-white text-base font-semibold">Cadastrar novo prestador</h2>
-      </div>
+          <h2 className="text-white text-base font-semibold flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-[#C0B15B]" />
+            Cadastrar novo prestador
+          </h2>
+        </div>
 
 
 
@@ -415,7 +450,7 @@ export function ModalTesteSendSupplier() {
                   value="sim"
                   checked={isSubcontractor === "contratado"}
                   onChange={() => setIsSubContractor("contratado")}
-                  
+
                 />
                 Contratado direto
               </label>
@@ -449,7 +484,6 @@ export function ModalTesteSendSupplier() {
                     }}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
 
-                    // Removido {...register("cnpj")} aqui para evitar onChange duplicado
                   />
                   {isLoading ? (
                     <div
@@ -485,7 +519,7 @@ export function ModalTesteSendSupplier() {
               <div className="mb-1">
                 <Label className="text-black">Razão Social</Label>
                 <Input
-                  type="text" // Alterado para type="text"
+                  type="text"
                   placeholder="Digite a razão social do novo prestador"
                   {...register("corporateName")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
@@ -519,7 +553,6 @@ export function ModalTesteSendSupplier() {
                   maxLength={15}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
 
-                  // Removido {...register("phone")} aqui para evitar onChange duplicado
                 />
                 {errors.phone && (
                   <span className="text-red-600">{errors.phone.message}</span>
@@ -527,7 +560,9 @@ export function ModalTesteSendSupplier() {
               </div>
 
               <div className="flex justify-end">
-                <Button className="bg-realizaBlue">Próximo</Button>
+                <Button className="bg-realizaBlue" onClick={() => {
+                  getActivities(), getServicesType(), console.log("Clicado");
+                }}>Próximo</Button>
               </div>
             </form>
           )}
@@ -550,7 +585,6 @@ export function ModalTesteSendSupplier() {
                     }}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
 
-                    // Removido {...registerSubContract("cnpj")} aqui para evitar onChange duplicado
                   />
                   {isLoading ? (
                     <div
@@ -586,7 +620,7 @@ export function ModalTesteSendSupplier() {
               <div className="mb-1">
                 <Label className="text-black">Razão Social</Label>
                 <Input
-                  type="text" // Alterado para type="text"
+                  type="text"
                   placeholder="Digite a razão social do novo prestador"
                   {...registerSubContract("corporateName")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
@@ -627,7 +661,6 @@ export function ModalTesteSendSupplier() {
                   maxLength={15}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
 
-                  // Removido {...registerSubContract("phone")} aqui para evitar onChange duplicado
                 />
                 {errorsSubContract.phone && (
                   <span className="text-red-600">
@@ -675,7 +708,7 @@ export function ModalTesteSendSupplier() {
                     />
                   </Button>
                 ) : (
-                  <Button className="bg-realizaBlue" type="submit">
+                  <Button className="bg-realizaBlue" type="submit" onClick={() => { getActivities(), getServicesType() }}>
                     Próximo
                   </Button>
                 )}
@@ -692,7 +725,7 @@ export function ModalTesteSendSupplier() {
               <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
                 <DialogTitle className="text-white flex items-center gap-2 text-base font-semibold">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" className="w-5 h-5 stroke-yellow-400" viewBox="0 0 24 24">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7"/>
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
                   </svg>
                   Faça o contrato
                 </DialogTitle>
@@ -707,7 +740,10 @@ export function ModalTesteSendSupplier() {
                 <div className="w-full flex flex-col gap-4">
                   <form
                     className="flex flex-col gap-2"
-                    onSubmit={handleSubmitContract(createContract)}
+                    onSubmit={handleSubmitContract(createContract, (errors) => {
+                      console.error("Validation errors for contract form:", errors);
+                      toast.error("Por favor, preencha todos os campos obrigatórios do contrato.");
+                    })}
                   >
                     <div>
                       <Label className="text-black">
