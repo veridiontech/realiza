@@ -69,6 +69,11 @@ interface propsCep {
   state: string;
 }
 
+interface Position {
+  id: string;
+  title: string;
+}
+
 const createNewEmployeeFormSchema = z.object({
   contractType: z.string().nonempty("Tipo de contrato é obrigatório"),
   name: z.string().nonempty("Nome é obrigatório"),
@@ -122,7 +127,7 @@ const createNewEmployeeFormSchema = z.object({
     .refine((val) => !val || phoneRegex.test(val), {
       message: "Celular inválido",
     }),
-  position: z.string().nonempty("Cargo é obrigatório"),
+  positionId: z.string().nonempty("Cargo é obrigatório"),
   education: z.string().nonempty("Escolaridade é obrigatória"),
   cboId: z.string().optional(),
   admissionDate: z.string().optional(),
@@ -148,6 +153,7 @@ export function NewModalCreateEmployee({
   const [cbos, setCbos] = useState<
     { id: string; title: string; code: string }[]
   >([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [searchCbo, setSearchCbo] = useState("");
   const [isSelectTypeModalOpen, setIsSelectTypeModalOpen] = useState(false);
   const [isBrazilianEmployeeModalOpen, setIsBrazilianEmployeeModalOpen] =
@@ -161,8 +167,6 @@ export function NewModalCreateEmployee({
   const [phoneValue, setPhoneValue] = useState("");
   const [mobileValue, setMobileValue] = useState("");
   const [cpfValue, setCpfValue] = useState("");
-
-  console.log("Id Supplier: ", supplier);
 
   const {
     register,
@@ -205,7 +209,20 @@ export function NewModalCreateEmployee({
       }
     };
 
+    const fetchPositions = async () => {
+      try {
+        const tokenFromStorage = localStorage.getItem("tokenClient");
+        const response = await axios.get(`${ip}/position`, {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        });
+        setPositions(response.data);
+      } catch (error) {
+        toast.error("Erro ao buscar cargos");
+      }
+    };
+
     fetchCbos();
+    fetchPositions();
   }, []);
 
   const filteredCbos = cbos.filter(
@@ -231,9 +248,14 @@ export function NewModalCreateEmployee({
     } else if (digits.length <= 6) {
       return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     } else if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(
+        6
+      )}`;
     } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(
+        7,
+        11
+      )}`;
     }
   };
 
@@ -288,7 +310,7 @@ export function NewModalCreateEmployee({
 
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-
+      console.log("teste", payload);
       await axios.post(endpoint, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
@@ -304,7 +326,7 @@ export function NewModalCreateEmployee({
       setCpfValue("");
       setCepValue("");
       setPhoneValue("");
-      setMobileValue("");
+      setCpfValue("");
 
       setIsBrazilianEmployeeModalOpen(false);
       setIsForeignerEmployeeModalOpen(false);
@@ -321,14 +343,13 @@ export function NewModalCreateEmployee({
           toast.error("Já existe um colaborador com esse CPF cadastrado.");
         } else {
           toast.error(
-            `Erro ${err.response?.status}: ${errorMsg || "Erro ao cadastrar colaborador"}`
+            `Erro ${err.response?.status}: ${
+              errorMsg || "Erro ao cadastrar colaborador"
+            }`
           );
         }
-
-        console.error("Erro Axios:", err.response?.data);
       } else {
         toast.error("Erro inesperado. Tente novamente.");
-        console.error("Erro desconhecido:", err);
       }
     } finally {
       setIsLoading(false);
@@ -365,7 +386,6 @@ export function NewModalCreateEmployee({
       }
     } catch (err) {
       toast.error("Erro ao buscar o CEP");
-      console.error(err);
     }
   };
 
@@ -497,7 +517,6 @@ export function NewModalCreateEmployee({
         onOpenChange={setIsBrazilianEmployeeModalOpen}
       >
         <DialogContent
-          // style={{ backgroundImage: `url(${bgModalRealiza})` }}
           className="max-w-[90vw] sm:max-w-[45vw] md:max-w-[45vw] p-5"
         >
           <DialogHeader>
@@ -751,10 +770,22 @@ export function NewModalCreateEmployee({
 
                   <div>
                     <Label>Cargo</Label>
-                    <Input
-                      placeholder="Digite o cargo"
-                      {...register("position")}
-                    />
+                    <select
+                      {...register("positionId")}
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione o Cargo</option>
+                      {positions.map((position) => (
+                        <option key={position.id} value={position.id}>
+                          {position.title}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.positionId && (
+                      <span className="text-red-600">
+                        {errors.positionId.message}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <Label>CBO</Label>
@@ -1045,7 +1076,7 @@ export function NewModalCreateEmployee({
                       <option value="Feminino">Feminino</option>
                     </select>
                     {errors.gender && (
-                      <span className="text-red-600">
+                      <span className="text-sm text-red-600">
                         {errors.gender.message}
                       </span>
                     )}
@@ -1188,15 +1219,22 @@ export function NewModalCreateEmployee({
 
                   <div>
                     <Label className="text-white">Cargo</Label>
-                    <Input
-                      placeholder="Digite o cargo"
-                      {...register("position", {
+                    <select
+                      {...register("positionId", {
                         required: "Cargo é obrigatório",
                       })}
-                    />
-                    {errors.position && (
+                      className="flex flex-col rounded-md border p-2 w-full"
+                    >
+                      <option value="">Selecione o Cargo</option>
+                      {positions.map((position) => (
+                        <option key={position.id} value={position.id}>
+                          {position.title}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.positionId && (
                       <span className="text-sm text-red-600">
-                        {errors.position.message}
+                        {errors.positionId.message}
                       </span>
                     )}
                   </div>
