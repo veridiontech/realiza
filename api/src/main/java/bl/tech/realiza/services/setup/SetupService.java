@@ -137,7 +137,7 @@ public class SetupService {
                     .title(documentMatrix.getName())
                     .type(documentMatrix.getType())
                     .status(Document.Status.PENDENTE)
-                    .isActive(true)
+                    .isActive(false)
                     .branch(branch)
                     .documentMatrix(documentMatrix)
                     .build());
