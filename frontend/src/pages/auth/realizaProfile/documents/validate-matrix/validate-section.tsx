@@ -78,10 +78,11 @@ export function ValidateSection({
       return;
     }
 
-    if (amountEdit <= 0 || !["DAYS", "WEEKS", "MONTHS"].includes(unitEdit)) {
+    if (amountEdit < 0 || !["DAYS", "WEEKS", "MONTHS"].includes(unitEdit)) {
       console.warn("Valores inválidos:", amountEdit, unitEdit);
       return;
     }
+
 
     const payload = {
       expirationDateAmount: amountEdit,
@@ -148,9 +149,11 @@ export function ValidateSection({
                   <input
                     type="number"
                     value={amountEdit}
-                    onChange={(e) =>
-                      setAmountEdit(parseInt(e.target.value) || 0)
-                    }
+                    onChange={(e) => {
+                    const value = e.target.value;
+                    setAmountEdit(value === "" ? 0 : parseInt(value));
+                  }}
+
                     className="w-20 border px-1 py-0.5"
                   />
                 </td>

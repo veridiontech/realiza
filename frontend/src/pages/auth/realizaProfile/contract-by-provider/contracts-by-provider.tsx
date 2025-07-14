@@ -367,6 +367,24 @@ export function ContarctsByProvider() {
                           {doc.ownerName}
                         </span>
                       </div>
+                      <div className="flex flex-col">
+                        <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
+                          {doc.status}
+                        </span>
+                        <span className={`text-xs font-semibold ${
+                          doc.status === "REPROVADO" || doc.status === "REPROVADO_IA"
+                            ? "text-red-500"
+                            : doc.status === "EM_ANALISE"
+                            ? "text-yellow-500"
+                            : "text-green-600"
+                        }`}>
+                          {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA"
+                            ? "Impede entrada"
+                            : doc.status === "EM_ANALISE"
+                            ? "⚠️ Necessita análise humana"
+                            : "Entrada liberada"}
+                        </span>
+                      </div>
                       <div>
                         <span className="text-sm text-neutral-600">
                           {formatarData(doc.creationDate)}

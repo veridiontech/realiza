@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, String> {
     Page<DocumentBranch> findAllByBranch_IdBranchAndIsActiveIsTrue(String idSearch, Pageable pageable);
@@ -23,7 +24,6 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
     Long countByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, String groupName);
     Long countByBranch_IdBranchAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, String groupName);
     Long countByBranch_IdBranchAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(String idSearch, Document.Status status, String groupName);
-
     List<DocumentBranch> findAllByBranch_IdBranch(String id);
 
     @Query("""
@@ -82,4 +82,6 @@ public interface DocumentBranchRepository extends JpaRepository<DocumentBranch, 
 
     List<DocumentBranch> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
     List<DocumentBranch> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
+
+    List<DocumentBranch> findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(String branchId, String documentMatrixId);
 }

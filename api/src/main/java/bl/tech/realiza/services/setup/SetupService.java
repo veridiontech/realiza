@@ -29,6 +29,7 @@ import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
@@ -77,6 +78,7 @@ public class SetupService {
     private final ProfileRepository profileRepository;
     private final CrudServiceType crudServiceType;
     private final CrudActivity crudActivity;
+    private final DocumentRepository documentRepository;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
@@ -137,9 +139,11 @@ public class SetupService {
                     .title(documentMatrix.getName())
                     .type(documentMatrix.getType())
                     .status(Document.Status.PENDENTE)
-                    .isActive(true)
+                    .isActive(false)
                     .branch(branch)
                     .documentMatrix(documentMatrix)
+                    .expirationDateAmount(documentMatrix.getExpirationDateAmount())
+                    .expirationDateUnit(documentMatrix.getExpirationDateUnit())
                     .build());
 
             if (batch.size() == 50) {
@@ -202,16 +206,24 @@ public class SetupService {
                     .documentMatrix(document.getDocumentMatrix())
                     .providerSupplier(finalNewProviderSupplier)
                     .contracts(contracts)
+                    .expirationDateUnit(document.getExpirationDateUnit())
+                    .expirationDateAmount(document.getExpirationDateAmount())
                     .build());
 
             if (batch.size() == 50) {
                 documentProviderSupplierRepository.saveAll(batch);
+                List<Document> newDocuments = new ArrayList<>(batch);
+                contractProviderSupplier.getDocuments().addAll(newDocuments);
+                contractProviderSupplierRepository.save(contractProviderSupplier);
                 batch.clear();
             }
         }
 
         if (!batch.isEmpty()) {
             documentProviderSupplierRepository.saveAll(batch);
+            List<Document> newDocuments = new ArrayList<>(batch);
+            contractProviderSupplier.getDocuments().addAll(newDocuments);
+            contractProviderSupplierRepository.save(contractProviderSupplier);
         }
         log.info("Finished setup contract supplier ✔️ {}", contractProviderSupplierId);
     }
@@ -264,16 +276,24 @@ public class SetupService {
                     .documentMatrix(document.getDocumentMatrix())
                     .providerSubcontractor(finalNewProviderSubcontractor)
                     .contracts(contracts)
+                    .expirationDateUnit(document.getExpirationDateUnit())
+                    .expirationDateAmount(document.getExpirationDateAmount())
                     .build());
 
             if (batch.size() == 50) {
                 documentProviderSubcontractorRepository.saveAll(batch);
+                List<Document> newDocuments = new ArrayList<>(batch);
+                contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
                 batch.clear();
             }
         }
 
         if (!batch.isEmpty()) {
             documentProviderSubcontractorRepository.saveAll(batch);
+            List<Document> newDocuments = new ArrayList<>(batch);
+                contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
         }
         log.info("Finished setup contract subcontractor ✔️ {}", contractProviderSubcontractorId);
     }
@@ -320,15 +340,23 @@ public class SetupService {
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
                             .contracts(contracts)
+                            .expirationDateAmount(document.getExpirationDateAmount())
+                            .expirationDateUnit(document.getExpirationDateUnit())
                             .build());
                 }
                 if (batch.size() == 50) {
                     documentEmployeeRepository.saveAll(batch);
+                    List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSupplier.getDocuments().addAll(newDocuments);
+                    contractProviderSupplierRepository.save(contractProviderSupplier);
                     batch.clear();
                 }
             }
             if (existingDocumentCheck) {
                 documentEmployeeRepository.saveAll(documentEmployeeList);
+                List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSupplier.getDocuments().addAll(newDocuments);
+                    contractProviderSupplierRepository.save(contractProviderSupplier);
             }
         }
 
@@ -381,16 +409,24 @@ public class SetupService {
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
                             .contracts(contracts)
+                            .expirationDateAmount(document.getExpirationDateAmount())
+                            .expirationDateUnit(document.getExpirationDateUnit())
                             .build());
                 }
 
                 if (batch.size() == 50) {
                     documentEmployeeRepository.saveAll(batch);
+                    List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                    contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
                     batch.clear();
                 }
 
                 if (existingDocumentCheck) {
                     documentEmployeeRepository.saveAll(documentEmployeeList);
+                    List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                    contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
                 }
             }
         }
@@ -417,15 +453,18 @@ public class SetupService {
             List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
             for (DocumentEmployee documentEmployee : documentEmployeeList) {
 
-                if (documentEmployee.getContracts().contains(contract) && documentEmployee.getContracts().size() == 1) {
-                    documentEmployee.getContracts().remove(contract);
-                    if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24) {
+                if (documentEmployee.getContracts().contains(contract)) {
+//                    documentEmployee.getContracts().remove(contract);
+                    contract.getDocuments().remove(documentEmployee);
+                    if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24
+                            && documentEmployee.getContracts().isEmpty()) {
                         documentEmployeeRepository.deleteById(documentEmployee.getIdDocumentation());
                     }
-                } else if (documentEmployee.getContracts().contains(contract)) {
+                } /*else if (documentEmployee.getContracts().contains(contract)) {
                     documentEmployee.getContracts().remove(contract);
-                }
+                }*/
             }
+            contractRepository.save(contract);
             documentEmployeeRepository.saveAll(documentEmployeeList);
             employee.getContracts().remove(contract);
         }
@@ -471,6 +510,8 @@ public class SetupService {
                     .isActive(true)
                     .branch(branch)
                     .documentMatrix(document.getDocumentMatrix())
+                    .expirationDateUnit(document.getExpirationDateUnit())
+                    .expirationDateAmount(document.getExpirationDateAmount())
                     .build());
 
             if (batch.size() == 50) {
@@ -864,6 +905,28 @@ public class SetupService {
         }
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
+        }
+    }
+
+    public void setupReplicateDocumentMatrixFromSystem(String documentId) {
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document Matrix not found"));
+
+        List<Document> documentBranchList = documentRepository.findAllByDocumentMatrix_IdDocument(documentMatrix.getIdDocument());
+
+        List<Document> batch = new ArrayList<>(50);
+        for (Document document : documentBranchList) {
+            document.setExpirationDateAmount(documentMatrix.getExpirationDateAmount());
+            document.setExpirationDateUnit(documentMatrix.getExpirationDateUnit());
+            batch.add(document);
+
+            if (batch.size() == 50) {
+                documentRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentRepository.saveAll(batch);
         }
     }
 }

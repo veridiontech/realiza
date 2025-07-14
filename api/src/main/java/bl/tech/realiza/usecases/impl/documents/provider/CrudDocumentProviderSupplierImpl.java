@@ -263,6 +263,8 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
             }
             documentSupplier.setDocumentation(fileDocumentId);
             documentSupplier.setStatus(EM_ANALISE);
+            documentSupplier.setAdherent(true);
+            documentSupplier.setConforming(false);
         }
 
         documentProcessingService.processDocumentAsync(file,

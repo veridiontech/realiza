@@ -208,6 +208,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
             }
             documentBranch.setDocumentation(fileDocumentId);
             documentBranch.setStatus(EM_ANALISE);
+            documentBranch.setAdherent(true);
+            documentBranch.setConforming(false);
         }
 
         documentProcessingService.processDocumentAsync(file,
