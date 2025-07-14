@@ -59,6 +59,7 @@ public class CrudDocumentImpl implements CrudDocument {
                 if (document.getExpirationDate() != null &&
                         document.getExpirationDate().isBefore(LocalDate.now().atStartOfDay())) {
                     document.setStatus(VENCIDO);
+                    document.setConforming(false);
                     documentRepository.save(document);
                 }
             });
@@ -101,6 +102,11 @@ public class CrudDocumentImpl implements CrudDocument {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
         document.setStatus(documentStatusChangeRequestDto.getStatus());
+        if (document.getStatus() == APROVADO) {
+            document.setConforming(true);
+        } else {
+            document.setConforming(false);
+        }
         documentRepository.save(document);
 
         AuditLogActionsEnum action;

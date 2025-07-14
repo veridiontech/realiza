@@ -206,12 +206,18 @@ public class SetupService {
 
             if (batch.size() == 50) {
                 documentProviderSupplierRepository.saveAll(batch);
+                List<Document> newDocuments = new ArrayList<>(batch);
+                contractProviderSupplier.getDocuments().addAll(newDocuments);
+                contractProviderSupplierRepository.save(contractProviderSupplier);
                 batch.clear();
             }
         }
 
         if (!batch.isEmpty()) {
             documentProviderSupplierRepository.saveAll(batch);
+            List<Document> newDocuments = new ArrayList<>(batch);
+            contractProviderSupplier.getDocuments().addAll(newDocuments);
+            contractProviderSupplierRepository.save(contractProviderSupplier);
         }
         log.info("Finished setup contract supplier ✔️ {}", contractProviderSupplierId);
     }
@@ -268,12 +274,18 @@ public class SetupService {
 
             if (batch.size() == 50) {
                 documentProviderSubcontractorRepository.saveAll(batch);
+                List<Document> newDocuments = new ArrayList<>(batch);
+                contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
                 batch.clear();
             }
         }
 
         if (!batch.isEmpty()) {
             documentProviderSubcontractorRepository.saveAll(batch);
+            List<Document> newDocuments = new ArrayList<>(batch);
+                contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
         }
         log.info("Finished setup contract subcontractor ✔️ {}", contractProviderSubcontractorId);
     }
@@ -324,11 +336,17 @@ public class SetupService {
                 }
                 if (batch.size() == 50) {
                     documentEmployeeRepository.saveAll(batch);
+                    List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSupplier.getDocuments().addAll(newDocuments);
+                    contractProviderSupplierRepository.save(contractProviderSupplier);
                     batch.clear();
                 }
             }
             if (existingDocumentCheck) {
                 documentEmployeeRepository.saveAll(documentEmployeeList);
+                List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSupplier.getDocuments().addAll(newDocuments);
+                    contractProviderSupplierRepository.save(contractProviderSupplier);
             }
         }
 
@@ -386,11 +404,17 @@ public class SetupService {
 
                 if (batch.size() == 50) {
                     documentEmployeeRepository.saveAll(batch);
+                    List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                    contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
                     batch.clear();
                 }
 
                 if (existingDocumentCheck) {
                     documentEmployeeRepository.saveAll(documentEmployeeList);
+                    List<Document> newDocuments = new ArrayList<>(batch);
+                    contractProviderSubcontractor.getDocuments().addAll(newDocuments);
+                    contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
                 }
             }
         }
@@ -418,13 +442,13 @@ public class SetupService {
             for (DocumentEmployee documentEmployee : documentEmployeeList) {
 
                 if (documentEmployee.getContracts().contains(contract) && documentEmployee.getContracts().size() == 1) {
-                    documentEmployee.getContracts().remove(contract);
+//                    documentEmployee.getContracts().remove(contract);
                     if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24) {
                         documentEmployeeRepository.deleteById(documentEmployee.getIdDocumentation());
                     }
-                } else if (documentEmployee.getContracts().contains(contract)) {
+                } /*else if (documentEmployee.getContracts().contains(contract)) {
                     documentEmployee.getContracts().remove(contract);
-                }
+                }*/
             }
             documentEmployeeRepository.saveAll(documentEmployeeList);
             employee.getContracts().remove(contract);
