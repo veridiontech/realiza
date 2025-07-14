@@ -256,13 +256,37 @@ public class DashboardService {
     public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
-        List<String> branchIds = dashboardFiltersRequestDto != null ? dashboardFiltersRequestDto.getBranchIds() : new ArrayList<>();
-        List<String> documentTypes = dashboardFiltersRequestDto != null ? dashboardFiltersRequestDto.getDocumentTypes() : new ArrayList<>();
-        List<String> responsibleIds = dashboardFiltersRequestDto != null ? dashboardFiltersRequestDto.getResponsibleIds() : new ArrayList<>();
-        List<Contract.IsActive> activeContract = dashboardFiltersRequestDto != null ? dashboardFiltersRequestDto.getActiveContract() : new ArrayList<>();
-        List<Status> statuses = dashboardFiltersRequestDto != null ? dashboardFiltersRequestDto.getStatuses() : new ArrayList<>();
-        List<String> documentTitles = dashboardFiltersRequestDto != null ? dashboardFiltersRequestDto.getDocumentTitles() : new ArrayList<>();
-        if (activeContract == null || activeContract.isEmpty()) {
+        List<String> branchIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getBranchIds() != null
+                    ? dashboardFiltersRequestDto.getBranchIds()
+                    : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTypes = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTypes() != null
+                    ? dashboardFiltersRequestDto.getDocumentTypes()
+                    : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> responsibleIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getResponsibleIds() != null
+                    ? dashboardFiltersRequestDto.getResponsibleIds()
+                    : new ArrayList<>() )
+                : new ArrayList<>();
+        List<Contract.IsActive> activeContract = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getActiveContract() != null
+                    ? dashboardFiltersRequestDto.getActiveContract()
+                    : new ArrayList<>() )
+                : new ArrayList<>();
+        List<Status> statuses = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getStatuses() != null
+                    ? dashboardFiltersRequestDto.getStatuses()
+                    : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTitles = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTitles() != null
+                    ? dashboardFiltersRequestDto.getDocumentTitles()
+                    : new ArrayList<>() )
+                : new ArrayList<>();
+        if (activeContract.isEmpty()) {
             activeContract = new ArrayList<>();
             activeContract.add(ATIVADO);
         }
@@ -278,15 +302,6 @@ public class DashboardService {
         // conformidade
         Double conformity = null;
         Object[] conformityValues = null;
-        if (responsibleIds != null && responsibleIds.isEmpty()) {
-            responsibleIds = null;
-        }
-        if (documentTypes != null && documentTypes.isEmpty()) {
-            documentTypes = null;
-        }
-        if (documentTitles != null && documentTitles.isEmpty()) {
-            documentTitles = null;
-        }
         if (branchIds.isEmpty()) {
             conformityValues = documentRepository.countTotalAndConformityByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
                     responsibleIds,
@@ -308,30 +323,51 @@ public class DashboardService {
         List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
 
-        if (documentTypes == null || documentTypes.isEmpty()) {
+        if (documentTypes.isEmpty()) {
             documentTypes = documentRepository.findDistinctDocumentType();
         }
         for (String type : documentTypes) {
             List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
-            if (statuses == null || statuses.isEmpty()) {
+            if (statuses.isEmpty()) {
                 statuses = Arrays.asList(Status.values());
             }
             for (Status status : statuses) {
-                if (responsibleIds != null && responsibleIds.isEmpty()) {
-                    responsibleIds = null;
-                }
-                if (branchIds != null && branchIds.isEmpty()) {
-                    branchIds = null;
-                }
                 statusList.add(DashboardGeneralDetailsResponseDto.Status.builder()
                         .quantity(
-                                branchIds != null
+                                !branchIds.isEmpty()
                                         ? documentRepository.countByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,type,status,responsibleIds,documentTitles).intValue()
                                         : documentRepository.countByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,type,status,responsibleIds,documentTitles).intValue()
                         )
-                        .type(type)
+                        .status(status)
                         .build());
+
             }
+            long approvedIa = 0;
+            long reprovedIa = 0;
+            DashboardGeneralDetailsResponseDto.Status statusApprovedIA = statusList.stream()
+                    .filter(status -> status.getStatus() == APROVADO_IA)
+                    .findFirst()
+                    .orElse(null);
+            DashboardGeneralDetailsResponseDto.Status statusReprovedIA = statusList.stream()
+                    .filter(status -> status.getStatus() == REPROVADO_IA)
+                    .findFirst()
+                    .orElse(null);
+            DashboardGeneralDetailsResponseDto.Status statusUnderAnalysis = statusList.stream()
+                    .filter(status -> status.getStatus() == EM_ANALISE)
+                    .findFirst()
+                    .orElse(null);
+            if (statusApprovedIA != null) {
+                approvedIa = statusApprovedIA.getQuantity().longValue();
+            }
+            if (statusReprovedIA != null) {
+                reprovedIa = statusReprovedIA.getQuantity().longValue();
+            }
+            if (statusUnderAnalysis != null) {
+                long newQuantity = statusUnderAnalysis.getQuantity().longValue() + approvedIa + reprovedIa;
+                statusUnderAnalysis.setQuantity(Math.toIntExact(newQuantity));
+            }
+            statusList.removeIf(status -> status.getStatus() == APROVADO_IA || status.getStatus() == REPROVADO_IA);
+
             documentStatus.add(DashboardGeneralDetailsResponseDto.TypeStatus.builder()
                     .name(type)
                     .status(statusList)
@@ -349,7 +385,7 @@ public class DashboardService {
             Double conformityBranch = null;
             Object[] adherenceBranchValues = null;
             Object[] conformityBranchValues = null;
-            if (branchIds != null && branchIds.isEmpty()) {
+            if (branchIds.isEmpty()) {
                 adherenceBranchValues = documentRepository.countTotalAndAdherenceByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
                         responsibleIds,
                         documentTypes,
@@ -369,17 +405,19 @@ public class DashboardService {
                         documentTitles);
             }
 
-            Long totalAdherenceBranch = (Long) adherenceBranchValues[0];
-            Long adherenceBranchTrue = (Long) adherenceBranchValues[1];
-            Long totalConformityBranch = (Long) conformityBranchValues[0];
-            Long conformityBranchTrue = (Long) conformityBranchValues[1];
+            Long totalAdherenceBranch = getSafeLong(adherenceBranchValues, 0);
+            Long adherenceBranchTrue = getSafeLong(adherenceBranchValues, 1);
+            Long totalConformityBranch = getSafeLong(conformityBranchValues, 0);
+            Long conformityBranchTrue = getSafeLong(conformityBranchValues, 1);
             Long nonConformityBranchTrue = (totalConformityBranch - conformityBranchTrue);
 
             adherenceBranch = totalAdherenceBranch > 0
-                    ? new BigDecimal(adherenceBranchTrue * 100.0 / totalAdherenceBranch).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+                    ? new BigDecimal(adherenceBranchTrue * 100.0 / totalAdherenceBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
+                    : 100;
 
             conformityBranch = totalConformityBranch > 0
-                    ? new BigDecimal(conformityBranchTrue * 100.0 / totalConformityBranch).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+                    ? new BigDecimal(conformityBranchTrue * 100.0 / totalConformityBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
+                    : 100;
 
             DashboardGeneralDetailsResponseDto.Conformity level;
             if (conformityBranch < 60) {
@@ -414,10 +452,26 @@ public class DashboardService {
     }
 
     public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
-        List<String> branchIds = dashboardFiltersRequestDto.getBranchIds() != null ? dashboardFiltersRequestDto.getBranchIds() : new ArrayList<>();
-        List<String> documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null ? dashboardFiltersRequestDto.getDocumentTypes() : new ArrayList<>();
-        List<String> responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null ? dashboardFiltersRequestDto.getResponsibleIds() : new ArrayList<>();
-        List<String> documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null ? dashboardFiltersRequestDto.getDocumentTitles() : new ArrayList<>();
+        List<String> branchIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getBranchIds() != null
+                ? dashboardFiltersRequestDto.getBranchIds()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTypes = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTypes() != null
+                ? dashboardFiltersRequestDto.getDocumentTypes()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> responsibleIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getResponsibleIds() != null
+                ? dashboardFiltersRequestDto.getResponsibleIds()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTitles = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTitles() != null
+                ? dashboardFiltersRequestDto.getDocumentTitles()
+                : new ArrayList<>() )
+                : new ArrayList<>();
 
         List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
         List<ProviderSupplier> providerSuppliers = new ArrayList<>();
@@ -452,11 +506,11 @@ public class DashboardService {
                     documentTypes,
                     documentTitles);
 
-            Long totalAdherenceProvider = (Long) adherenceProviderValues[0];
-            Long adherenceProviderTrue = (Long) adherenceProviderValues[1];
+            Long totalAdherenceProvider = getSafeLong(adherenceProviderValues,0);
+            Long adherenceProviderTrue = getSafeLong(adherenceProviderValues,1);
             Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
-            Long totalConformityProvider = (Long) conformityProviderValues[0];
-            Long conformityProviderTrue = (Long) conformityProviderValues[1];
+            Long totalConformityProvider = getSafeLong(conformityProviderValues,0);
+            Long conformityProviderTrue = getSafeLong(conformityProviderValues,1);
             Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
             if (totalAdherenceProvider.equals(totalConformityProvider)) {
                 log.info("Values not match in provider supplier id {}",providerSupplier.getIdProvider());

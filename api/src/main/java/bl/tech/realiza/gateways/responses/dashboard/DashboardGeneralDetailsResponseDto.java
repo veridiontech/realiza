@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.responses.dashboard;
 
+import bl.tech.realiza.domains.documents.Document;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +31,7 @@ public class DashboardGeneralDetailsResponseDto {
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class Status {
-        private String type;
+        private Document.Status status;
         private Integer quantity;
     }
 
