@@ -41,6 +41,10 @@ public class SetupQueueConsumer {
                     setupService.setupReplicateBranch(message.getBranchId());
                     logService.logSuccess("REPLICATE_BRANCH", message.getBranchId(), start);
                 }
+                case "REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM" -> {
+                    setupService.setupReplicateDocumentMatrixFromSystem(message.getDocumentId());
+                    logService.logSuccess("REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM", message.getDocumentId(), start);
+                }
                 case "CREATE_ACTIVITY" -> {
                     setupService.replicateCreateActivity(message.getActivityId(), message.getBranchIds());
                     logService.logSuccess("CREATE_ACTIVITY", message.getActivityId(), start);
@@ -124,6 +128,7 @@ public class SetupQueueConsumer {
             case "NEW_BRANCH" -> msg.getBranchId();
             case "NEW_CONTRACT_SUPPLIER" -> msg.getContractSupplierId();
             case "NEW_CONTRACT_SUBCONTRACTOR" -> msg.getContractSubcontractorId();
+            case "REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM" -> msg.getDocumentId();
             default -> "SEM_ID";
         };
     }

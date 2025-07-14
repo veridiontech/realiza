@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.responses.documents;
 
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +12,8 @@ public class DocumentMatrixResponseDto {
     private String documentId;
     private String idDocumentMatrix;
     private String name;
-    private String risk;
-    private String expiration;
+    private DocumentMatrix.Unit expirationDateUnit;
+    private Integer expirationDateAmount;
     private String type;
     private Boolean doesBlock;
     private Boolean isDocumentUnique;
