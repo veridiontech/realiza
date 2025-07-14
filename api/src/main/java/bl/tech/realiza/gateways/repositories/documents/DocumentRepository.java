@@ -239,4 +239,6 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
             @Param("documentTypes") List<String> documentTypes,
             @Param("documentTitles") List<String> documentTitles
     );
+
+    List<Document> findAllByDocumentMatrix_IdDocument(String idDocument);
 }
