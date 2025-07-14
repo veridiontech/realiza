@@ -206,7 +206,8 @@ export function DetailsEmployee() {
     label: "Status",
     render: (value) => {
       let statusClass = "";
-      if (value === "PENDENTE" || value === "EM_ANALISE") statusClass = "text-yellow-500";
+      if (value === "PENDENTE") statusClass = "text-yellow-500";
+      else if (value === "EM_ANALISE") statusClass = "text-blue-600";
       else if (value === "APROVADO" || value === "APROVADO_IA") statusClass = "text-green-600";
       else if (value === "REPROVADO" || value === "REPROVADO_IA") statusClass = "text-red-600";
 

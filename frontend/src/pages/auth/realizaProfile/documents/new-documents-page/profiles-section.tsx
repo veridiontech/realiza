@@ -3,10 +3,34 @@ import axios from "axios";
 import { toast } from "sonner";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
+import { Eye } from "lucide-react";
 
 type Profile = {
   id: string;
   profileName: string;
+};
+
+type ProfileDetails = {
+  id: string;
+  name: string;
+  description: string;
+  admin: boolean;
+  viewer: boolean;
+  manager: boolean;
+  inspector: boolean;
+  documentViewer: boolean;
+  registrationUser: boolean;
+  registrationContract: boolean;
+  laboral: boolean;
+  workplaceSafety: boolean;
+  registrationAndCertificates: boolean;
+  general: boolean;
+  health: boolean;
+  environment: boolean;
+  concierge: boolean;
+  clientId: string;
+  branchIds?: string[];
+  contractIds?: string[];
 };
 
 export function ProfilesSection() {
@@ -15,6 +39,8 @@ export function ProfilesSection() {
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProfileDetails, setSelectedProfileDetails] = useState<ProfileDetails | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -22,6 +48,10 @@ export function ProfilesSection() {
   const [viewer, setViewer] = useState(false);
   const [manager, setManager] = useState(false);
   const [isInspector, setIsInspector] = useState(false);
+
+  const [documentViewer, setDocumentViewer] = useState(false);
+  const [registrationUser, setRegistrationUser] = useState(false);
+  const [registrationContract, setRegistrationContract] = useState(false);
 
   const [laboral, setLaboral] = useState(false);
   const [workplaceSafety, setWorkplaceSafety] = useState(false);
@@ -40,12 +70,30 @@ export function ProfilesSection() {
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
 
-      console.log("✅ Dados brutos dos perfis recebidos:", response.data);
+      console.log("Retorno:", response.data);
 
       const data = Array.isArray(response.data) ? response.data : [];
       setProfiles(data);
     } catch (err) {
-      console.error("❌ Erro ao buscar perfis:", err);
+      console.error("Erro ao buscar perfis:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProfileDetails = async (profileId: string) => {
+    setLoading(true);
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    try {
+      const response = await axios.get(`${ip}/profile/${profileId}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      });
+      console.log("Detalhes:", response.data);
+      setSelectedProfileDetails(response.data);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar detalhes do perfil:", err);
+      toast.error("Erro ao carregar detalhes do perfil.");
     } finally {
       setLoading(false);
     }
@@ -53,19 +101,20 @@ export function ProfilesSection() {
 
   useEffect(() => {
     if (clientId) {
-      console.log("📦 clientId do contexto:", clientId);
       fetchProfiles();
     }
   }, [clientId]);
 
   const handleCreateProfile = async () => {
     if (!clientId || !name.trim()) {
-      console.warn("⚠️ Validação: Nome do perfil ou ID do cliente ausente.");
       return;
     }
 
     let permissions = {
       inspector: false,
+      documentViewer: false,
+      registrationUser: false,
+      registrationContract: false,
       laboral: false,
       workplaceSafety: false,
       registrationAndCertificates: false,
@@ -78,6 +127,9 @@ export function ProfilesSection() {
     if (admin) {
       permissions = {
         inspector: true,
+        documentViewer: true,
+        registrationUser: true,
+        registrationContract: true,
         laboral: true,
         workplaceSafety: true,
         registrationAndCertificates: true,
@@ -86,9 +138,12 @@ export function ProfilesSection() {
         environment: true,
         concierge: true,
       };
-    } else if (manager || isInspector) {
+    } else if (manager) {
       permissions = {
-        inspector: isInspector,
+        inspector: false,
+        documentViewer: true,
+        registrationUser,
+        registrationContract,
         laboral,
         workplaceSafety,
         registrationAndCertificates,
@@ -97,6 +152,34 @@ export function ProfilesSection() {
         environment,
         concierge,
       };
+    } else if (isInspector) {
+      permissions = {
+        inspector: true,
+        documentViewer,
+        registrationUser: false,
+        registrationContract: false,
+        laboral,
+        workplaceSafety,
+        registrationAndCertificates,
+        general,
+        health,
+        environment,
+        concierge,
+      };
+    } else {
+        permissions = {
+            inspector: false,
+            documentViewer,
+            registrationUser,
+            registrationContract,
+            laboral,
+            workplaceSafety,
+            registrationAndCertificates,
+            general,
+            health,
+            environment,
+            concierge,
+        };
     }
 
     const newProfile = {
@@ -111,24 +194,25 @@ export function ProfilesSection() {
       contractIds: [],
     };
 
-    console.log("📤 Enviando perfil para criação:", newProfile);
+    console.log("PAYLOAD:", JSON.stringify(newProfile, null, 2));
     const tokenFromStorage = localStorage.getItem("tokenClient");
 
     try {
-      const result = await axios.post(`${ip}/profile`, newProfile, {
+        await axios.post(`${ip}/profile`, newProfile, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
 
-      console.log("✅ Resposta da criação de perfil:", result.data);
       toast.success("Perfil criado com sucesso!");
 
-      // Reset form
       setName("");
       setDescription("");
       setAdmin(false);
       setViewer(false);
       setManager(false);
       setIsInspector(false);
+      setDocumentViewer(false);
+      setRegistrationUser(false);
+      setRegistrationContract(false);
       setLaboral(false);
       setWorkplaceSafety(false);
       setRegistrationAndCertificates(false);
@@ -139,7 +223,7 @@ export function ProfilesSection() {
 
       fetchProfiles();
     } catch (err: any) {
-      console.error("❌ Erro ao criar perfil:", err.response || err);
+      console.error("Erro ao criar perfil:", err.response || err);
     }
   };
 
@@ -159,9 +243,16 @@ export function ProfilesSection() {
             {profiles.map((profile) => (
               <li
                 key={profile.id}
-                className="p-3 border border-gray-200 rounded bg-gray-50 hover:bg-gray-100 transition"
+                className="p-3 border border-gray-200 rounded bg-gray-50 hover:bg-gray-100 transition flex justify-between items-center"
               >
                 <span className="text-md text-gray-700">{profile.profileName}</span>
+                <button
+                  onClick={() => fetchProfileDetails(profile.id)}
+                  className="p-1 rounded-full hover:bg-gray-200"
+                  title="Ver detalhes do perfil"
+                >
+                  <Eye className="w-5 h-5 text-gray-600" />
+                </button>
               </li>
             ))}
           </ul>
@@ -197,6 +288,9 @@ export function ProfilesSection() {
                       setViewer(false);
                       setManager(false);
                       setIsInspector(false);
+                      setDocumentViewer(false);
+                      setRegistrationUser(false);
+                      setRegistrationContract(false);
                     }}
                   />
                   Admin
@@ -211,6 +305,9 @@ export function ProfilesSection() {
                       setViewer(true);
                       setManager(false);
                       setIsInspector(false);
+                      setDocumentViewer(false);
+                      setRegistrationUser(false);
+                      setRegistrationContract(false);
                     }}
                   />
                   Visitante
@@ -225,6 +322,9 @@ export function ProfilesSection() {
                       setViewer(false);
                       setManager(true);
                       setIsInspector(false);
+                      setDocumentViewer(true);
+                      setRegistrationUser(false);
+                      setRegistrationContract(false);
                     }}
                   />
                   Gestor
@@ -239,6 +339,9 @@ export function ProfilesSection() {
                       setViewer(false);
                       setManager(false);
                       setIsInspector(true);
+                      setDocumentViewer(false);
+                      setRegistrationUser(false);
+                      setRegistrationContract(false);
                     }}
                   />
                   Fiscal de contrato
@@ -250,6 +353,33 @@ export function ProfilesSection() {
               <div className="flex flex-col gap-2 mt-4">
                 <p className="font-medium">Permissões</p>
                 <div className="grid grid-cols-2 gap-2">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={documentViewer}
+                      onChange={(e) => setDocumentViewer(e.target.checked)}
+                      disabled={manager}
+                    />{" "}
+                    Visualizador de Documentos
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={registrationUser}
+                      onChange={(e) => setRegistrationUser(e.target.checked)}
+                      disabled={isInspector}
+                    />{" "}
+                    Cadastro de Usuários
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={registrationContract}
+                      onChange={(e) => setRegistrationContract(e.target.checked)}
+                      disabled={isInspector}
+                    />{" "}
+                    Cadastro de Contratos
+                  </label>
                   <label><input type="checkbox" checked={laboral} onChange={(e) => setLaboral(e.target.checked)} /> Trabalhista</label>
                   <label><input type="checkbox" checked={workplaceSafety} onChange={(e) => setWorkplaceSafety(e.target.checked)} /> Segurança do Trabalho</label>
                   <label><input type="checkbox" checked={registrationAndCertificates} onChange={(e) => setRegistrationAndCertificates(e.target.checked)} /> Cadastro e certidões</label>
@@ -270,6 +400,37 @@ export function ProfilesSection() {
           </div>
         </div>
       </div>
+
+      {isModalOpen && selectedProfileDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold mb-4">Detalhes do Perfil: {selectedProfileDetails.name}</h3>
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              <p><strong>Descrição:</strong> {selectedProfileDetails.description || "Nenhuma descrição informada"}</p>
+              <p><strong>Admin:</strong> {selectedProfileDetails.admin ? "Sim" : "Não"}</p>
+              <p><strong>Visitante:</strong> {selectedProfileDetails.viewer ? "Sim" : "Não"}</p>
+              <p><strong>Gestor:</strong> {selectedProfileDetails.manager ? "Sim" : "Não"}</p>
+              <p><strong>Fiscal:</strong> {selectedProfileDetails.inspector ? "Sim" : "Não"}</p>
+              <p><strong>Visualizador de Documentos:</strong> {selectedProfileDetails.documentViewer ? "Sim" : "Não"}</p>
+              <p><strong>Cadastro de Usuários:</strong> {selectedProfileDetails.registrationUser ? "Sim" : "Não"}</p>
+              <p><strong>Cadastro de Contratos:</strong> {selectedProfileDetails.registrationContract ? "Sim" : "Não"}</p>
+              <p><strong>Trabalhista:</strong> {selectedProfileDetails.laboral ? "Sim" : "Não"}</p>
+              <p><strong>Segurança do Trabalho:</strong> {selectedProfileDetails.workplaceSafety ? "Sim" : "Não"}</p>
+              <p><strong>Cadastro e Certidões:</strong> {selectedProfileDetails.registrationAndCertificates ? "Sim" : "Não"}</p>
+              <p><strong>Geral:</strong> {selectedProfileDetails.general ? "Sim" : "Não"}</p>
+              <p><strong>Saúde:</strong> {selectedProfileDetails.health ? "Sim" : "Não"}</p>
+              <p><strong>Meio Ambiente:</strong> {selectedProfileDetails.environment ? "Sim" : "Não"}</p>
+              <p><strong>Portaria:</strong> {selectedProfileDetails.concierge ? "Sim" : "Não"}</p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="mt-6 bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
