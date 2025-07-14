@@ -97,6 +97,9 @@ public class DocumentProcessingService {
             }
 
             document.setVersionDate(LocalDateTime.now());
+            if (result.getDocumentDate() != null) {
+                document.setDocumentDate(result.getDocumentDate());
+            }
             documentRepository.save(document);
             log.info("[{}] Documento ID={} salvo com novo status {}", threadName, document.getIdDocumentation(), document.getStatus());
             crudNotification.saveValidationNotificationForRealizaUsers(document.getIdDocumentation());
@@ -179,11 +182,11 @@ public class DocumentProcessingService {
             } else {
                 log.error("Erro de acesso à OpenAI: {}", e.getMessage());
             }
-            return new DocumentIAValidationResponse("Erro", "Timeout ou erro de rede ao acessar a IA", false, false);
+            return new DocumentIAValidationResponse("Erro", "Timeout ou erro de rede ao acessar a IA", false, false, null);
 
         } catch (Exception e) {
             log.error("Erro inesperado durante a requisição à OpenAI", e);
-            return new DocumentIAValidationResponse("Erro", "Erro interno ao processar a requisição", false, false);
+            return new DocumentIAValidationResponse("Erro", "Erro interno ao processar a requisição", false, false, null);
         }
     }
 
@@ -193,7 +196,7 @@ public class DocumentProcessingService {
 
         if (responseBody == null || !responseBody.containsKey("choices")) {
             log.warn("Resposta nula ou sem campo 'choices'.");
-            return new DocumentIAValidationResponse("Desconhecido", "Documento não identificado", false, false);
+            return new DocumentIAValidationResponse("Desconhecido", "Documento não identificado", false, false, null);
         }
 
         try {
@@ -201,13 +204,13 @@ public class DocumentProcessingService {
 
             if (choices.isEmpty()) {
                 log.warn("Lista de escolhas (choices) vazia.");
-                return new DocumentIAValidationResponse("Desconhecido", "Resposta vazia da IA", false, false);
+                return new DocumentIAValidationResponse("Desconhecido", "Resposta vazia da IA", false, false, null);
             }
 
             var message = (Map<String, Object>) choices.get(0).get("message");
             if (message == null || !message.containsKey("content")) {
                 log.warn("Campo 'message.content' ausente.");
-                return new DocumentIAValidationResponse("Desconhecido", "Mensagem da IA incompleta", false, false);
+                return new DocumentIAValidationResponse("Desconhecido", "Mensagem da IA incompleta", false, false, null);
             }
 
             String content = ((String) message.get("content"))
@@ -226,7 +229,7 @@ public class DocumentProcessingService {
 
         } catch (Exception e) {
             log.error("Erro ao interpretar a resposta JSON da IA", e);
-            return new DocumentIAValidationResponse("Erro", "Falha ao interpretar resposta da IA", false, false);
+            return new DocumentIAValidationResponse("Erro", "Falha ao interpretar resposta da IA", false, false, null);
         }
     }
 
@@ -246,6 +249,7 @@ public class DocumentProcessingService {
             - autoValidate: true se o documento possui todas as informações necessárias para julgamento automático de validade. Caso contrário, false.
             - isValid: true se o documento for considerado legítimo, válido e com dados compatíveis. Caso o conteúdo esteja ausente, ilegível, fora dos padrões ou inválido, defina como false.
             - reason: explique de forma clara e curta o motivo de o documento não ser válido ou não poder ser validado automaticamente.
+            - documentDate: se a data de criação do documento for identificada, adicione aqui. Caso contrário, deixe em branco ou nulo.
         
             🔁 Prioridade de resposta:
             1. Se o documento for de um tipo que **não possui estrutura padronizada ou dados estruturáveis o suficiente** para permitir validação automática, defina `autoValidate = false` e use como razão principal algo como:  
@@ -266,7 +270,8 @@ public class DocumentProcessingService {
               "documentType": "CPF",
               "autoValidate": true,
               "isValid": true,
-              "reason": "O documento pode ser validado e está de acordo."
+              "reason": "O documento pode ser validado e está de acordo.",
+              "documentDate": "2022-05-01T00:00:00" // Data extraída, se disponível.
             }
         
             🔍 Exemplo de resposta com autoValidate false (prioridade correta):
@@ -274,7 +279,8 @@ public class DocumentProcessingService {
               "documentType": "ASO",
               "autoValidate": false,
               "isValid": false,
-              "reason": "O documento não possui estrutura suficiente para validação automática"
+              "reason": "O documento não possui estrutura suficiente para validação automática",
+              "documentDate": null // Sem data encontrada
             }
         
             🔍 Exemplo de resposta com motivo composto:
@@ -282,7 +288,8 @@ public class DocumentProcessingService {
               "documentType": "Ficha de EPI",
               "autoValidate": false,
               "isValid": false,
-              "reason": "O documento não possui estrutura suficiente para validação automática e está em branco"
+              "reason": "O documento não possui estrutura suficiente para validação automática e está em branco",
+              "documentDate": null // Sem data encontrada
             }
             """.formatted(expectedType);
 
