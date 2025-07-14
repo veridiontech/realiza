@@ -332,6 +332,8 @@ public class SetupService {
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
                             .contracts(contracts)
+                            .expirationDateAmount(document.getExpirationDateAmount())
+                            .expirationDateUnit(document.getExpirationDateUnit())
                             .build());
                 }
                 if (batch.size() == 50) {
@@ -399,6 +401,8 @@ public class SetupService {
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
                             .contracts(contracts)
+                            .expirationDateAmount(document.getExpirationDateAmount())
+                            .expirationDateUnit(document.getExpirationDateUnit())
                             .build());
                 }
 
@@ -441,15 +445,18 @@ public class SetupService {
             List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
             for (DocumentEmployee documentEmployee : documentEmployeeList) {
 
-                if (documentEmployee.getContracts().contains(contract) && documentEmployee.getContracts().size() == 1) {
+                if (documentEmployee.getContracts().contains(contract)) {
 //                    documentEmployee.getContracts().remove(contract);
-                    if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24) {
+                    contract.getDocuments().remove(documentEmployee);
+                    if (ChronoUnit.HOURS.between(documentEmployee.getAssignmentDate(), LocalDateTime.now()) < 24
+                            && documentEmployee.getContracts().isEmpty()) {
                         documentEmployeeRepository.deleteById(documentEmployee.getIdDocumentation());
                     }
                 } /*else if (documentEmployee.getContracts().contains(contract)) {
                     documentEmployee.getContracts().remove(contract);
                 }*/
             }
+            contractRepository.save(contract);
             documentEmployeeRepository.saveAll(documentEmployeeList);
             employee.getContracts().remove(contract);
         }
