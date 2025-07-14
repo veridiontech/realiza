@@ -72,6 +72,11 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
       setStatusMessage("Arquivo enviado com sucesso!");
       setStatusType("success");
       setSelectedFile(null);
+
+      
+      setTimeout(() => {
+        onClose();
+      }, 1500); 
     } catch (error: any) {
       console.error("❌ Erro ao enviar:", error.response?.data || error.message);
       setStatusMessage("Erro ao enviar o arquivo. Tente novamente.");
