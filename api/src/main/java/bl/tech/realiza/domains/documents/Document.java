@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +37,8 @@ public abstract class Document {
     private Integer expirationDateAmount = 1;
     @Builder.Default
     private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
+    @Builder.Default
+    private LocalDateTime documentDate = LocalDateTime.now();
     @Builder.Default
     private Boolean isActive = true;
     @Builder.Default

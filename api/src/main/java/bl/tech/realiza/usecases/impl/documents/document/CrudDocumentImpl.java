@@ -113,28 +113,46 @@ public class CrudDocumentImpl implements CrudDocument {
             DocumentMatrix.Unit expirationUnit = null;
             Integer expirationAmount = 0;
             String documentMatrixId = document.getDocumentMatrix().getIdDocument();
+            String branchId = null;
             if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
-                List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(
-                        documentProviderSupplier.getProviderSupplier()
+                branchId = documentProviderSupplier.getProviderSupplier()
                                 .getBranches().get(documentProviderSupplier.getProviderSupplier().getBranches().size() - 1)
-                                .getIdBranch()
-                        ,documentMatrixId);
-                expirationUnit = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
-                expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
+                                .getIdBranch();
             } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
-
+                branchId = documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier()
+                        .getBranches().get(documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier().getBranches().size() - 1)
+                        .getIdBranch();
             } else if (document instanceof DocumentEmployee documentEmployee) {
-
+                if (documentEmployee.getEmployee().getSupplier() != null) {
+                    branchId = documentEmployee.getEmployee().getSupplier()
+                            .getBranches().get(documentEmployee.getEmployee().getSupplier().getBranches().size() - 1)
+                            .getIdBranch();
+                } else if (documentEmployee.getEmployee().getSubcontract() != null) {
+                    branchId = documentEmployee.getEmployee().getSubcontract().getProviderSupplier()
+                            .getBranches().get(documentEmployee.getEmployee().getSubcontract().getProviderSupplier().getBranches().size() - 1)
+                            .getIdBranch();
+                }
             }
-            switch (document.getExpirationDateUnit()) {
-                case DAYS -> document.setExpirationDate(LocalDateTime.now()
-                        .plusDays(document.getExpirationDateAmount()));
-                case WEEKS -> document.setExpirationDate(LocalDateTime.now()
-                        .plusWeeks(document.getExpirationDateAmount()));
-                case MONTHS -> document.setExpirationDate(LocalDateTime.now()
-                        .plusMonths(document.getExpirationDateAmount()));
-                case YEARS -> document.setExpirationDate(LocalDateTime.now()
-                        .plusYears(document.getExpirationDateAmount()));
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(branchId,documentMatrixId);
+            expirationUnit = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
+            expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
+            LocalDateTime documentDate = document.getDocumentDate() != null
+                    ? document.getDocumentDate()
+                    : LocalDateTime.now();
+            if (expirationAmount == 0) {
+                document.setExpirationDate(document.getDocumentDate()
+                        .plusYears(100));
+            } else {
+                switch (expirationUnit) {
+                    case DAYS -> document.setExpirationDate(documentDate
+                            .plusDays(expirationAmount));
+                    case WEEKS -> document.setExpirationDate(documentDate
+                            .plusWeeks(expirationAmount));
+                    case MONTHS -> document.setExpirationDate(documentDate
+                            .plusMonths(expirationAmount));
+                    case YEARS -> document.setExpirationDate(documentDate
+                            .plusYears(expirationAmount));
+                }
             }
         } else {
             document.setConforming(false);
