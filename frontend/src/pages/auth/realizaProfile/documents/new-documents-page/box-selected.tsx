@@ -60,19 +60,21 @@ export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
         <div>
           {Array.isArray(documents) && documents.length > 0 ? (
             documents.map((document: any) => (
-              <div
+              <label
                 key={document.idDocument}
-                className="rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
+                className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
               >
-                <input
-                  type="checkbox"
-                  checked={checkedDocs.includes(document.idDocument)}
-                  onChange={(e) =>
-                    toggleCheckbox(document.idDocument, document, e.target.checked)
-                  }
-                />
+              <input
+                type="checkbox"
+                className="cursor-pointer"
+                checked={checkedDocs.includes(document.idDocument)}
+                onChange={(e) =>
+                  toggleCheckbox(document.idDocument, document, e.target.checked)
+                }
+              />
                 <span>{document.title || "Documento"}</span>
-              </div>
+              </label>
+
             ))
           ) : (
             <p className="text-sm text-gray-500">Nenhum documento encontrado.</p>
