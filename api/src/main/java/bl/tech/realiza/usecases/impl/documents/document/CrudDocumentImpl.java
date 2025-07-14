@@ -3,7 +3,9 @@ package bl.tech.realiza.usecases.impl.documents.document;
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
@@ -13,6 +15,7 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.services.auth.JwtService;
@@ -25,6 +28,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
@@ -42,6 +47,7 @@ public class CrudDocumentImpl implements CrudDocument {
     private final UserRepository userRepository;
     private final ContractRepository contractRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final DocumentBranchRepository documentBranchRepository;
 
     @Override
     public void expirationChange() {
@@ -104,6 +110,32 @@ public class CrudDocumentImpl implements CrudDocument {
         document.setStatus(documentStatusChangeRequestDto.getStatus());
         if (document.getStatus() == APROVADO) {
             document.setConforming(true);
+            DocumentMatrix.Unit expirationUnit = null;
+            Integer expirationAmount = 0;
+            String documentMatrixId = document.getDocumentMatrix().getIdDocument();
+            if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(
+                        documentProviderSupplier.getProviderSupplier()
+                                .getBranches().get(documentProviderSupplier.getProviderSupplier().getBranches().size() - 1)
+                                .getIdBranch()
+                        ,documentMatrixId);
+                expirationUnit = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
+                expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
+            } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+
+            } else if (document instanceof DocumentEmployee documentEmployee) {
+
+            }
+            switch (document.getExpirationDateUnit()) {
+                case DAYS -> document.setExpirationDate(LocalDateTime.now()
+                        .plusDays(document.getExpirationDateAmount()));
+                case WEEKS -> document.setExpirationDate(LocalDateTime.now()
+                        .plusWeeks(document.getExpirationDateAmount()));
+                case MONTHS -> document.setExpirationDate(LocalDateTime.now()
+                        .plusMonths(document.getExpirationDateAmount()));
+                case YEARS -> document.setExpirationDate(LocalDateTime.now()
+                        .plusYears(document.getExpirationDateAmount()));
+            }
         } else {
             document.setConforming(false);
         }
