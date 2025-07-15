@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class DashboardFiltersRequestDto {
     private List<String> branchIds;
+    private List<String> providerIds;
     private List<String> documentTypes;
     private List<String> responsibleIds;
     private List<Contract.IsActive> activeContract;
