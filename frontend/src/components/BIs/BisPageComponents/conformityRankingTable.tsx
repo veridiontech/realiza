@@ -1,4 +1,6 @@
+import * as XLSX from "xlsx";
 import { Card, CardContent } from "@/components/ui/card";
+import { FileDown } from 'lucide-react';
 
 interface ChartData {
   name: string;
@@ -25,7 +27,7 @@ const getConformityColor = (level: "RISKY" | "ATTENTION" | "NORMAL" | "OK") => {
 };
 
 export function ConformityRankingTable({ data }: ConformityRankingTableProps) {
-  // Verifica se 'data' é um array válido
+  // Loading state: sem botão
   if (!Array.isArray(data) || data.length === 0) {
     return (
       <Card className="w-full max-w-full rounded-lg shadow-md border border-gray-200">
@@ -41,8 +43,32 @@ export function ConformityRankingTable({ data }: ConformityRankingTableProps) {
     );
   }
 
+  // Exporta somente quando há dados
+  const exportToExcel = () => {
+    const sheetData = data.map((row) => ({
+      "Razão Social": row.name,
+      CNPJ: row.cnpj,
+      "Aderência %": row.adherence,
+      "Conformidade %": row.conformity,
+      "Docs Não Conformes": row.nonConformDocs,
+      "Faixa de Conformidade": row.conformityLevel,
+    }));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    XLSX.utils.book_append_sheet(wb, ws, "ConformityRanking");
+    XLSX.writeFile(wb, "conformity_ranking.xlsx");
+  };
+
   return (
-    <Card className="w-full max-w-full rounded-lg shadow-md border border-gray-200">
+    <Card className="relative w-full max-w-full rounded-lg shadow-md border border-gray-200">
+      {/* Botão só aparece quando há dados */}
+      <button
+        onClick={exportToExcel}
+        className="absolute top-2 right-2 p-1 text-green-500 text-xs rounded-full"
+      >
+        <FileDown width={20}/>
+      </button>
+
       <CardContent className="pt-6 pb-4 px-6">
         <h2 className="text-gray-800 text-xl font-bold mb-6 select-none">
           Ranking Pendências
