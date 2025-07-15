@@ -10,6 +10,13 @@ import {
 } from 'recharts'
 import { Card, CardContent } from '@/components/ui/card'
 
+const COLORS = {
+  barFill: '#60a5fa', // azul pastel moderno
+  labelFill: '#1e293b', // cinza escuro para texto
+  axisTick: '#475569', // cinza médio para ticks
+  gridStroke: '#e2e8f0', // grid suave
+}
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null
 
