@@ -39,6 +39,7 @@ public abstract class Document {
     private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
     @Builder.Default
     private LocalDateTime documentDate = LocalDateTime.now();
+    private LocalDateTime lastCheck;
     @Builder.Default
     private Boolean isActive = true;
     @Builder.Default
