@@ -54,6 +54,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .ownerName(documentEmployee.getEmployee().getFullName())
                                 .hasDoc(documentEmployee.getIdDocumentation() != null
                                         && !documentEmployee.getIdDocumentation().isEmpty())
+                                .expirationDate(documentEmployee.getExpirationDate())
+                                .lastCheck(documentEmployee.getLastCheck())
                                 .enterprise(false)
                                 .build());
             }
@@ -78,6 +80,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                         : null)
                                 .hasDoc(documentProviderSupplier.getIdDocumentation() != null
                                         && !documentProviderSupplier.getIdDocumentation().isEmpty())
+                                .expirationDate(documentProviderSupplier.getExpirationDate())
+                                .lastCheck(documentProviderSupplier.getLastCheck())
                                 .enterprise(true)
                                 .build());
                     }
@@ -144,6 +148,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                         : null)
                                 .hasDoc(documentProviderSubcontractor.getIdDocumentation() != null
                                         && !documentProviderSubcontractor.getIdDocumentation().isEmpty())
+                                .expirationDate(documentProviderSubcontractor.getExpirationDate())
+                                .lastCheck(documentProviderSubcontractor.getLastCheck())
                                 .enterprise(true)
                                 .build());
                     }

@@ -18,22 +18,54 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
-        :clientId IS NULL OR
-        cps.branch.client.idClient = :clientId OR
-        cpsb.contractProviderSupplier.branch.client.idClient = :clientId
+            :clientId IS NULL OR
+            cps.branch.client.idClient = :clientId
+        )
+    AND (
+        :providerIds IS NULL OR
+        cps.providerSupplier.idProvider IN :providerIds
     )
     AND (
         :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds OR
+        cps.responsible.idUser IN :responsibleIds)
+    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Object[] countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+            @Param("clientId") String clientId,
+            @Param("providerIds") List<String> providerIds,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("documentTypes") List<String> documentTypes,
+            @Param("documentTitles") List<String> documentTitles
+
+    );
+
+    @Query("""
+    SELECT COUNT(DISTINCT d),
+           SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
+    FROM Document d
+    JOIN d.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
+    WHERE (
+        :clientId IS NULL OR
+        cpsb.contractProviderSupplier.branch.client.idClient = :clientId
+    )
+    AND (
+        :providerIds IS NULL OR
+        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
+        cpsb.providerSubcontractor.idProvider IN :providerIds
+    )
+    AND (
+        :responsibleIds IS NULL OR
         cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
     )
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
-    Object[] countTotalAndConformityByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+    Object[] countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("clientId") String clientId,
+            @Param("providerIds") List<String> providerIds,
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("documentTypes") List<String> documentTypes,
             @Param("documentTitles") List<String> documentTitles
@@ -47,22 +79,55 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
-        cps.branch.idBranch IN :branchIds OR
-        cpsb.contractProviderSupplier.branch.idBranch = :branchIds
+        cps.branch.idBranch IN :branchIds
+    )
+    AND (
+        :providerIds IS NULL OR
+        cps.providerSupplier.idProvider IN :providerIds
     )
     AND (
         :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds OR
+        cps.responsible.idUser IN :responsibleIds
+    )
+    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Object[] countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+            @Param("branchIds") List<String> branchIds,
+            @Param("providerIds") List<String> providerIds,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("documentTypes") List<String> documentTypes,
+            @Param("documentTitles") List<String> documentTitles
+
+    );
+
+    @Query("""
+    SELECT COUNT(DISTINCT d),
+           SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
+    FROM Document d
+    JOIN d.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
+    WHERE (
+        :clientId IS NULL OR
+        cpsb.contractProviderSupplier.branch.idBranch = :branchIds
+    )
+    AND (
+        :providerIds IS NULL OR
+        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
+        cpsb.providerSubcontractor.idProvider IN :providerIds
+    )
+    AND (
+        :responsibleIds IS NULL OR
         cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
     )
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
-    Object[] countTotalAndConformityByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+    Object[] countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
+            @Param("providerIds") List<String> providerIds,
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("documentTypes") List<String> documentTypes,
             @Param("documentTitles") List<String> documentTitles
@@ -74,14 +139,42 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (cps.branch.idBranch IN :branchIds OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
+    WHERE cps.branch.idBranch IN :branchIds
+    AND :responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds
+    AND (
+        :providerIds IS NULL OR
+        cps.providerSupplier.idProvider IN :providerIds
+    )
     AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
-    Long countByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("branchIds") List<String> branchIds,
+    Long countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("branchIds") List<String> branchIds,
+                                                                            @Param("providerIds") List<String> providerIds,
+                                                                            @Param("type") String type,
+                                                                            @Param("status") Document.Status status,
+                                                                            @Param("responsibleIds") List<String> responsibleIds,
+                                                                            @Param("documentTitles") List<String> documentTitles
+    );
+
+    @Query("""
+    SELECT COUNT(DISTINCT d)
+    FROM Document d
+    JOIN d.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
+    WHERE (cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
+    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
+    AND (
+        :providerIds IS NULL OR
+        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
+        cpsb.providerSubcontractor.idProvider IN :providerIds
+    )
+    AND d.type = :type
+    AND d.status = :status
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Long countSubcontractorByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("branchIds") List<String> branchIds,
+                                                                            @Param("providerIds") List<String> providerIds,
                                                                             @Param("type") String type,
                                                                             @Param("status") Document.Status status,
                                                                             @Param("responsibleIds") List<String> responsibleIds,
@@ -93,18 +186,46 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (cps.branch.client.idClient = :clientId OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
+    WHERE cps.branch.client.idClient = :clientId
+    AND :responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds
+    AND (
+        :providerIds IS NULL OR
+        cps.providerSupplier.idProvider IN :providerIds
+    )
     AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
-    Long countByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("clientId") String clientId,
+    Long countSupplierByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("clientId") String clientId,
+                                                                           @Param("providerIds") List<String> providerIds,
                                                                            @Param("type") String type,
                                                                            @Param("status") Document.Status status,
                                                                            @Param("responsibleIds") List<String> responsibleIds,
                                                                            @Param("documentTitles") List<String> documentTitles);
+
+    @Query("""
+    SELECT COUNT(DISTINCT d)
+    FROM Document d
+    JOIN d.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
+    WHERE cpsb.contractProviderSupplier.branch.client.idClient = :clientId
+    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
+    AND (
+        :providerIds IS NULL OR
+        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
+        cpsb.providerSubcontractor.idProvider IN :providerIds
+    )
+    AND d.type = :type
+    AND d.status = :status
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Long countSubcontractorByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("clientId") String clientId,
+                                                                           @Param("providerIds") List<String> providerIds,
+                                                                           @Param("type") String type,
+                                                                           @Param("status") Document.Status status,
+                                                                           @Param("responsibleIds") List<String> responsibleIds,
+                                                                           @Param("documentTitles") List<String> documentTitles);
+
     @Query("""
     SELECT d.type
     FROM Document d
@@ -118,22 +239,55 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
-        cps.branch.client.idClient = :clientId OR
-        cpsb.contractProviderSupplier.branch.client.idClient = :clientId
+        cps.branch.client.idClient = :clientId
+    )
+    AND (
+        :providerIds IS NULL OR
+        cps.providerSupplier.idProvider IN :providerIds
     )
     AND (
         :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds OR
+        cps.responsible.idUser IN :responsibleIds
+    )
+    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Object[] countTotalAndAdherenceSupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+            @Param("clientId") String clientId,
+            @Param("providerIds") List<String> providerIds,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("documentTypes") List<String> documentTypes,
+            @Param("documentTitles") List<String> documentTitles
+
+    );
+
+    @Query("""
+    SELECT COUNT(DISTINCT d),
+           SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
+    FROM Document d
+    JOIN d.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
+    WHERE (
+        :clientId IS NULL OR
+        cpsb.contractProviderSupplier.branch.client.idClient = :clientId
+    )
+    AND (
+        :providerIds IS NULL OR
+        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
+        cpsb.providerSubcontractor.idProvider IN :providerIds
+    )
+    AND (
+        :responsibleIds IS NULL OR
         cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
     )
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
-    Object[] countTotalAndAdherenceByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+    Object[] countTotalAndAdherenceSubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("clientId") String clientId,
+            @Param("providerIds") List<String> providerIds,
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("documentTypes") List<String> documentTypes,
             @Param("documentTitles") List<String> documentTitles
@@ -146,22 +300,55 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
-        cps.branch.idBranch IN :branchIds OR
-        cpsb.contractProviderSupplier.branch.idBranch = :branchIds
+        cps.branch.idBranch IN :branchIds
+    )
+    AND (
+        :providerIds IS NULL OR
+        cps.providerSupplier.idProvider IN :providerIds
     )
     AND (
         :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds OR
+        cps.responsible.idUser IN :responsibleIds
+    )
+    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Object[] countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+            @Param("branchIds") List<String> branchIds,
+            @Param("providerIds") List<String> providerIds,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("documentTypes") List<String> documentTypes,
+            @Param("documentTitles") List<String> documentTitles
+
+    );
+
+    @Query("""
+    SELECT COUNT(DISTINCT d),
+           SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
+    FROM Document d
+    JOIN d.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
+    WHERE (
+        :clientId IS NULL OR
+        cpsb.contractProviderSupplier.branch.idBranch = :branchIds
+    )
+    AND (
+        :providerIds IS NULL OR
+        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
+        cpsb.providerSubcontractor.idProvider IN :providerIds
+    )
+    AND (
+        :responsibleIds IS NULL OR
         cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
     )
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
-    Object[] countTotalAndAdherenceByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
+    Object[] countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
+            @Param("providerIds") List<String> providerIds,
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("documentTypes") List<String> documentTypes,
             @Param("documentTitles") List<String> documentTitles

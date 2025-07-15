@@ -36,11 +36,20 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     FROM Employee e
     JOIN e.contracts c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor ) cpsb
-    WHERE (cps.branch.client.idClient = :clientId
-            OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
+    WHERE cps.branch.client.idClient = :clientId
         AND e.situation = :situation
 """)
-    Long countByClientIdAndAllocated(@Param("clientId") String clientId,
-                                     @Param("situation") Employee.Situation situation);
+    Long countEmployeeSupplierByClientIdAndAllocated(@Param("clientId") String clientId,
+                                                     @Param("situation") Employee.Situation situation);
+
+    @Query("""
+    SELECT COUNT(e)
+    FROM Employee e
+    JOIN e.contracts c
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractor ) cpsb
+    WHERE cpsb.contractProviderSupplier.branch.client.idClient = :clientId
+        AND e.situation = :situation
+""")
+    Long countEmployeeSubcontractorByClientIdAndAllocated(@Param("clientId") String clientId,
+                                                     @Param("situation") Employee.Situation situation);
 }

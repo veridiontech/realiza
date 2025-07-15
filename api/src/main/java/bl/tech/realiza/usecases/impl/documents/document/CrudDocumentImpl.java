@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -157,6 +158,7 @@ public class CrudDocumentImpl implements CrudDocument {
         } else {
             document.setConforming(false);
         }
+        document.setLastCheck(LocalDateTime.now());
         documentRepository.save(document);
 
         AuditLogActionsEnum action;
@@ -176,7 +178,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         DOCUMENT,
                         user.getFullName() + " " + action.name()
                                 + " document " + document.getTitle(),
-                        null,
+                        ChronoUnit.DAYS.between(document.getVersionDate(), LocalDateTime.now()) + " dias entre o upload e a validação",
                         action,
                         userResponsible.getIdUser());
             }

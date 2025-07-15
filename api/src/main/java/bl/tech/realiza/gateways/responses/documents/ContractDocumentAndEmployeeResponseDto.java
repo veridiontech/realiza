@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -27,6 +28,8 @@ public class ContractDocumentAndEmployeeResponseDto {
         private String ownerName;
         private Boolean enterprise;
         private Boolean hasDoc;
+        private LocalDateTime expirationDate;
+        private LocalDateTime lastCheck;
     }
 
     @Data
