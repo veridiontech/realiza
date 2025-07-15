@@ -9,6 +9,9 @@ import {
   User,
   MoreVertical,
   FileX2,
+  Ban, 
+  CheckCircle, 
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -50,6 +53,10 @@ export function ContarctsByProvider() {
     null
   );
   const [viewOption, setViewOption] = useState<"documents" | "collaborators">("documents");
+
+  const profile = localStorage.getItem("profile"); 
+  const isRealiza = profile === "Realiza"; 
+
 
   const token = localStorage.getItem("tokenClient");
 
@@ -306,19 +313,25 @@ export function ContarctsByProvider() {
                         <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
                           {doc.status}
                         </span>
-                        <span className={`text-xs font-semibold ${
-                          doc.status === "REPROVADO" || doc.status === "REPROVADO_IA"
-                            ? "text-red-500"
-                            : doc.status === "EM_ANALISE"
-                            ? "text-yellow-500"
-                            : "text-green-600"
-                        }`}>
-                          {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA"
-                            ? "Impede entrada"
-                            : doc.status === "EM_ANALISE"
-                            ? "⚠️ Necessita análise humana"
-                            : "Entrada liberada"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA" ? (
+                          <>
+                            <Ban className="w-4 h-4 text-red-500" />
+                              <span className="text-xs font-semibold text-red-500">Impede entrada</span>
+                            </>
+                          ) : doc.status === "EM_ANALISE" ? (
+                          <>
+                            <AlertCircle className="w-4 h-4 text-yellow-500" />
+                              <span className="text-xs font-semibold text-yellow-500">⚠️ Necessita análise humana</span>
+                            </>
+                          ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                              <span className="text-xs font-semibold text-green-600">Entrada liberada</span>
+                            </>
+                          )}
+                        </div>
+
                       </div>
                       <div>
                         <span className="text-sm text-neutral-600">
@@ -332,7 +345,7 @@ export function ContarctsByProvider() {
                       </div>
 
                       {/* Ajuste no container das ações e do menu */}
-                      <div className="flex justify-center relative"> {/* Alinhado ao centro */}
+                      <div className="flex justify-center relative"> 
                         <button
                           onClick={() =>
                             setOpenMenuDocumentId(
@@ -345,38 +358,37 @@ export function ContarctsByProvider() {
                         </button>
                         {openMenuDocumentId === doc.id && (
                           <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                            {doc.hasDoc && (
-                              <button
-                                onClick={() => handleOpenViewerModal(doc.id)}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                              >
-                                <Eye className="w-5 h-5 text-base" />
-                                Visualizar
-                              </button>
-                            )}
+                          {doc.hasDoc && (
                             <button
-                              onClick={() =>
-                                handleOpenUploadModal(doc.id, doc.title)
-                              }
+                              onClick={() => handleOpenViewerModal(doc.id)}
                               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                             >
-                              <Upload className="w-5 h-5 text-base" />
-                              Reenviar
+                              <Eye className="w-5 h-5 text-base" />
+                              Visualizar
                             </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                exemptDocument(doc.id, doc.title)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <FileX2
-                                className="w-5 h-5 text-base"
-                                color="#b31933"
-                              />
-                              Isentar
-                            </button>
-                          </div>
+                          )}
+
+                    {isRealiza && (
+                      <>
+                        <button
+                          onClick={() => handleOpenUploadModal(doc.id, doc.title)}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                        <Upload className="w-5 h-5 text-base" />
+                          Reenviar
+                        </button>
+
+                          <button
+                            type="button"
+                            onClick={() => exemptDocument(doc.id, doc.title)}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                          >
+                            <FileX2 className="w-5 h-5 text-base" color="#b31933" />
+                            Isentar
+                          </button>
+                        </>
+                        )}
+                        </div>
                         )}
                       </div>
                     </div>
