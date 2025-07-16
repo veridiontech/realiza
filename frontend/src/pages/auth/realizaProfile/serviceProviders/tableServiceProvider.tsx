@@ -11,7 +11,6 @@ import {
   History,
   ScrollText,
 } from "lucide-react";
-//import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 import { z } from "zod";
@@ -48,11 +47,11 @@ function StatusBadge({
   let statusStyle = "";
 
   if (suspended) {
-    statusStyle = "bg-orange-400"; // Cor para status 'Suspenso'
+    statusStyle = "bg-orange-400";
   } else if (finished === true) {
-    statusStyle = "bg-red-600"; // Cor para status 'Finalizado'
+    statusStyle = "bg-red-600";
   } else {
-    statusStyle = "bg-green-600"; // Cor para status 'Ativo'
+    statusStyle = "bg-green-600";
   }
 
   return <span className={`${baseClass} ${statusStyle}`}></span>;
@@ -70,7 +69,6 @@ function Modal({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-md shadow-lg w-[90vw] md:w-[640px] relative">
-        {/* HEADER */}
         <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 rounded-t-md h-[60px]">
           <div className="flex items-center gap-2">
             <div className="bg-yellow-400 p-[6px] rounded-sm flex items-center justify-center">
@@ -87,7 +85,6 @@ function Modal({
           </button>
         </div>
 
-        {/* BODY */}
         <div className="p-4">{children}</div>
       </div>
     </div>
@@ -111,8 +108,8 @@ export function TableServiceProvider() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [contractHistory, setContractHistory] = useState<any[]>([]);
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Novo estado para o filtro de status
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Ativo" | "Finalizado" | "Suspenso"
   >("Todos");
@@ -191,6 +188,7 @@ export function TableServiceProvider() {
       toast.success("Contrato atualizado com sucesso");
       await getSupplier();
       setIsEditModalOpen(false);
+      setIsEditing(false);
     } catch (err) {
       console.error(err);
       toast.error("Erro ao atualizar contrato");
@@ -295,10 +293,10 @@ export function TableServiceProvider() {
     console.log("Supplier editando:", supplier);
     setSelectedSupplier(supplier);
     setEditFormData({ ...supplier });
+    setIsEditing(false);
     setIsEditModalOpen(true);
   };
 
-  // Lógica de filtragem aprimorada
   const filteredSuppliers = suppliers.filter((supplier) => {
     const term = searchTerm.toLowerCase();
     const matchesSearchTerm =
@@ -308,8 +306,6 @@ export function TableServiceProvider() {
       supplier.serviceName?.toLowerCase().includes(term);
 
     const isFinished = supplier.finished === true;
-    // Assumimos que 'suspended' é uma nova propriedade booleana no objeto supplier
-    // Você precisará garantir que essa propriedade seja retornada pela sua API quando a funcionalidade estiver pronta.
     const isSuspended = supplier.suspended === true;
     const isActive = !isFinished && !isSuspended;
 
@@ -355,7 +351,7 @@ export function TableServiceProvider() {
       <div className="block md:hidden space-y-4">
         {loading ? (
           <p className="text-center text-gray-600">Carregando...</p>
-        ) : filteredSuppliers.length > 0 ? ( // Usar filteredSuppliers aqui
+        ) : filteredSuppliers.length > 0 ? (
           filteredSuppliers.map((supplier: any) => (
             <div
               key={supplier.idProvider}
@@ -513,7 +509,7 @@ export function TableServiceProvider() {
             {loading ? (
               <tr>
                 <td
-                  colSpan={9} // Colspan ajustado
+                  colSpan={9}
                   className="border border-gray-300 p-2 text-center"
                 >
                   Carregando...
@@ -623,7 +619,7 @@ export function TableServiceProvider() {
             ) : (
               <tr>
                 <td
-                  colSpan={9} // Colspan ajustado
+                  colSpan={9}
                   className="border border-gray-300 p-2 text-center"
                 >
                   Nenhum fornecedor encontrado.
@@ -740,7 +736,10 @@ export function TableServiceProvider() {
       {isEditModalOpen && editFormData && (
         <Modal
           title="Editar contrato"
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setIsEditing(false);
+          }}
         >
           <div className="text-gray-800 space-y-4 max-h-[80vh] overflow-auto w-full p-1">
             <form
@@ -748,38 +747,30 @@ export function TableServiceProvider() {
               className="flex flex-col gap-4 text-sm"
             >
               <label className="space-y-1">
-                <span className="font-semibold">Referência do contrato*</span>
-                <input
-                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-                  {...register("contractReference")}
-                  disabled
-                />
-              </label>
-
-              <label className="space-y-1">
-                <span className="font-semibold">Nome do fornecedor*</span>
+                <span className="font-semibold">Nome do fornecedor</span>
                 <input
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("providerSupplierName")}
-                  disabled
+                  disabled={!isEditing}
                 />
               </label>
 
               <label className="space-y-1">
-                <span className="font-semibold">Nome do serviço*</span>
+                <span className="font-semibold">Nome do serviço</span>
                 <input
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("serviceName")}
-                  disabled
+                  disabled={!isEditing}
                 />
               </label>
 
               <label className="space-y-1">
-                <span className="font-semibold">Data de início*</span>
+                <span className="font-semibold">Data de início</span>
                 <input
                   type="date"
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("dateStart")}
+                  disabled={!isEditing}
                 />
               </label>
 
@@ -788,6 +779,7 @@ export function TableServiceProvider() {
                 <select
                   {...register("idResponsible")}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
                   {managers.map((m: any) => (
@@ -803,6 +795,7 @@ export function TableServiceProvider() {
                 <select
                   {...register("expenseType")}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
                   <option value="CAPEX">CAPEX</option>
@@ -816,6 +809,7 @@ export function TableServiceProvider() {
                 <select
                   {...register("idServiceType")}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
                   {servicesType.map((service: any) => (
@@ -837,6 +831,7 @@ export function TableServiceProvider() {
                       type="radio"
                       value="true"
                       {...register("subcontractPermission")}
+                      disabled={!isEditing}
                     />
                     Sim
                   </label>
@@ -845,21 +840,11 @@ export function TableServiceProvider() {
                       type="radio"
                       value="false"
                       {...register("subcontractPermission")}
+                      disabled={!isEditing}
                     />
                     Não
                   </label>
                 </div>
-              </div>
-
-              <div className="flex gap-6 pt-2">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" {...register("hse")} />
-                  SSMA
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" {...register("labor")} />
-                  Trabalhista
-                </label>
               </div>
 
               {hseWatch && (
@@ -873,6 +858,7 @@ export function TableServiceProvider() {
                     onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
                     placeholder="Buscar atividade..."
                     className="w-full rounded border px-3 py-2 text-sm bg-[#F2F3F5]"
+                    disabled={!isEditing}
                   />
                   <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
                     {activities
@@ -898,6 +884,7 @@ export function TableServiceProvider() {
                                 e.target.checked
                               )
                             }
+                            disabled={!isEditing}
                           />
                           {activity.title}
                         </label>
@@ -929,6 +916,7 @@ export function TableServiceProvider() {
                               e.target.checked
                             )
                           }
+                          disabled={!isEditing}
                         />
                         {activity.title}
                       </label>
@@ -937,31 +925,45 @@ export function TableServiceProvider() {
                 </div>
               )}
 
-              {/* Descrição */}
               <label className="space-y-1">
                 <span className="font-semibold">Descrição</span>
                 <textarea
                   rows={3}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("description")}
+                  disabled={!isEditing}
                 />
               </label>
 
-              {/* Botões */}
               <div className="flex justify-end gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
-                >
-                  Salvar alterações
-                </button>
+                {!isEditing ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                  >
+                    Editar
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditModalOpen(false);
+                        setIsEditing(false);
+                      }}
+                      className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
+                    >
+                      Salvar alterações
+                    </button>
+                  </>
+                )}
               </div>
             </form>
           </div>
@@ -994,8 +996,8 @@ export function TableServiceProvider() {
                 </p>
                 <p>
                   Essa ação é <strong>permanente</strong> e{" "}
-                  <strong>não poderá ser desfeita</strong>. O contrato será{" "}
-                  <strong>removido</strong> e não estará mais disponível.
+                  <strong>não poderá ser desfeita</strong>. O contrato ainda
+                  ficara visível mas não poderá ser reativado.
                 </p>
               </div>
             </div>
@@ -1043,7 +1045,7 @@ export function TableServiceProvider() {
           title="Histórico do contrato"
           onClose={() => setIsHistoryModalOpen(false)}
         >
-          <div className="text-white space-y-2 max-h-[400px] overflow-auto">
+          <div className="text-black space-y-2 max-h-[400px] overflow-auto">
             {contractHistory.length > 0 ? (
               contractHistory.map((log, index) => (
                 <div key={index} className="border-b border-gray-500 pb-2 mb-2">
@@ -1056,6 +1058,9 @@ export function TableServiceProvider() {
                   <p>
                     <strong>Data:</strong>{" "}
                     {new Date(log.createdAt).toLocaleString("pt-BR")}
+                  </p>
+                  <p>
+                    <strong>Descrição: </strong> {log.description}
                   </p>
                   {log.message && (
                     <p>
