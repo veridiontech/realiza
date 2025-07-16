@@ -3,7 +3,9 @@ package bl.tech.realiza.usecases.impl.documents.document;
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
@@ -13,6 +15,7 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.services.auth.JwtService;
@@ -25,6 +28,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
@@ -42,6 +48,7 @@ public class CrudDocumentImpl implements CrudDocument {
     private final UserRepository userRepository;
     private final ContractRepository contractRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final DocumentBranchRepository documentBranchRepository;
 
     @Override
     public void expirationChange() {
@@ -59,6 +66,7 @@ public class CrudDocumentImpl implements CrudDocument {
                 if (document.getExpirationDate() != null &&
                         document.getExpirationDate().isBefore(LocalDate.now().atStartOfDay())) {
                     document.setStatus(VENCIDO);
+                    document.setConforming(false);
                     documentRepository.save(document);
                 }
             });
@@ -101,6 +109,56 @@ public class CrudDocumentImpl implements CrudDocument {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
         document.setStatus(documentStatusChangeRequestDto.getStatus());
+        if (document.getStatus() == APROVADO) {
+            document.setConforming(true);
+            DocumentMatrix.Unit expirationUnit = null;
+            Integer expirationAmount = 0;
+            String documentMatrixId = document.getDocumentMatrix().getIdDocument();
+            String branchId = null;
+            if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                branchId = documentProviderSupplier.getProviderSupplier()
+                                .getBranches().get(documentProviderSupplier.getProviderSupplier().getBranches().size() - 1)
+                                .getIdBranch();
+            } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+                branchId = documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier()
+                        .getBranches().get(documentProviderSubcontractor.getProviderSubcontractor().getProviderSupplier().getBranches().size() - 1)
+                        .getIdBranch();
+            } else if (document instanceof DocumentEmployee documentEmployee) {
+                if (documentEmployee.getEmployee().getSupplier() != null) {
+                    branchId = documentEmployee.getEmployee().getSupplier()
+                            .getBranches().get(documentEmployee.getEmployee().getSupplier().getBranches().size() - 1)
+                            .getIdBranch();
+                } else if (documentEmployee.getEmployee().getSubcontract() != null) {
+                    branchId = documentEmployee.getEmployee().getSubcontract().getProviderSupplier()
+                            .getBranches().get(documentEmployee.getEmployee().getSubcontract().getProviderSupplier().getBranches().size() - 1)
+                            .getIdBranch();
+                }
+            }
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(branchId,documentMatrixId);
+            expirationUnit = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
+            expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
+            LocalDateTime documentDate = document.getDocumentDate() != null
+                    ? document.getDocumentDate()
+                    : LocalDateTime.now();
+            if (expirationAmount == 0) {
+                document.setExpirationDate(document.getDocumentDate()
+                        .plusYears(100));
+            } else {
+                switch (expirationUnit) {
+                    case DAYS -> document.setExpirationDate(documentDate
+                            .plusDays(expirationAmount));
+                    case WEEKS -> document.setExpirationDate(documentDate
+                            .plusWeeks(expirationAmount));
+                    case MONTHS -> document.setExpirationDate(documentDate
+                            .plusMonths(expirationAmount));
+                    case YEARS -> document.setExpirationDate(documentDate
+                            .plusYears(expirationAmount));
+                }
+            }
+        } else {
+            document.setConforming(false);
+        }
+        document.setLastCheck(LocalDateTime.now());
         documentRepository.save(document);
 
         AuditLogActionsEnum action;
@@ -120,7 +178,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         DOCUMENT,
                         user.getFullName() + " " + action.name()
                                 + " document " + document.getTitle(),
-                        null,
+                        ChronoUnit.DAYS.between(document.getVersionDate(), LocalDateTime.now()) + " dias entre o upload e a validação",
                         action,
                         userResponsible.getIdUser());
             }

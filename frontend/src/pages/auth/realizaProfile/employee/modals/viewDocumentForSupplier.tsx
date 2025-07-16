@@ -4,20 +4,18 @@ import { ip } from "@/utils/ip";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { toast } from "sonner";
 
-// Modifique esta interface para incluir 'isOpen'
 interface DocumentViewerSuppliersProps {
   documentId: string;
   onClose: () => void;
   onStatusChange?: (id: string, newStatus: string) => void;
-  isOpen: boolean; // <--- Adicione esta linha
+  isOpen: boolean;
 }
 
-// Modifique esta linha para desestruturar 'isOpen'
 export function DocumentViewer({
   documentId,
   onClose,
   onStatusChange,
-  isOpen, // <--- Adicione 'isOpen' aqui
+  isOpen,
 }: DocumentViewerSuppliersProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +34,7 @@ export function DocumentViewer({
         `${ip}/document/${documentId}/change-status`,
         {
           status,
-          notes
+          notes,
         },
         {
           headers: {
@@ -45,7 +43,11 @@ export function DocumentViewer({
         }
       );
       console.log("status:", response.data);
-      toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
+      toast(
+        `Documento ${
+          status === "APROVADO" ? "aprovado" : "reprovado"
+        } com sucesso!`
+      );
       if (onStatusChange) {
         onStatusChange(documentId, status);
       }
@@ -58,7 +60,9 @@ export function DocumentViewer({
 
   const handleReprovar = async (notes: string) => {
     if (justification.length > 1000) {
-      setJustificationError("A justificativa não pode ter mais de 1000 caracteres.");
+      setJustificationError(
+        "A justificativa não pode ter mais de 1000 caracteres."
+      );
       return;
     }
     try {
@@ -67,7 +71,7 @@ export function DocumentViewer({
         `${ip}/document/${documentId}/change-status`,
         {
           status: "REPROVADO",
-          notes
+          notes,
         },
         {
           headers: {
@@ -87,15 +91,13 @@ export function DocumentViewer({
     }
   };
 
-  // Adicione esta condição para não renderizar o modal se isOpen for falso
   if (!isOpen) {
     return null;
   }
 
   useEffect(() => {
-    // Só busca dados se o modal estiver aberto e houver um documentId
     if (!documentId) {
-      setPdfUrl(null); // Limpa o PDF anterior quando o modal fecha
+      setPdfUrl(null);
       setError(null);
       return;
     }
@@ -135,7 +137,7 @@ export function DocumentViewer({
     };
 
     fetchFileData();
-  }, [documentId, isOpen]); // Adicione isOpen como dependência para rebuscar quando o modal abre
+  }, [documentId, isOpen]);
 
   const columns: GridColDef[] = [
     { field: "usuario", headerName: "Usuário", flex: 1 },

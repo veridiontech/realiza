@@ -242,6 +242,8 @@ public class CrudDocumentClientImpl implements CrudDocumentClient {
             }
             documentClient.setDocumentation(fileDocumentId);
             documentClient.setStatus(EM_ANALISE);
+            documentClient.setAdherent(true);
+            documentClient.setConforming(false);
         }
 
         documentProcessingService.processDocumentAsync(file,
