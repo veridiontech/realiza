@@ -30,7 +30,7 @@ interface Document {
   hasDoc: boolean;
   status: string;
   expirationDate?: string;
-  creationDate: string;
+  creationDate: string; // Adicionado para garantir que creationDate está presente
 }
 
 export function ContarctsByProvider() {
@@ -56,8 +56,8 @@ export function ContarctsByProvider() {
     "documents"
   );
 
-  const profile = localStorage.getItem("profile");
-  const isRealiza = profile === "Realiza";
+  // const profile = localStorage.getItem("profile");
+  // const isRealiza = profile === "Realiza";
 
   const token = localStorage.getItem("tokenClient");
 
@@ -245,7 +245,7 @@ export function ContarctsByProvider() {
 
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
-    if (status === "EM_ANALISE") return "text-blue-500";
+    if (status === "EM_ANALISE") return "text-blue-500"; // Alterado para azul
     if (status === "APROVADO" || status === "APROVADO_IA")
       return "text-green-600";
     if (status === "REPROVADO" || status === "REPROVADO_IA")
@@ -344,7 +344,7 @@ export function ContarctsByProvider() {
               <div className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
                 <div>Status</div>
                 <div className="col-span-1">Documento</div>
-                <div>Envio</div>
+                <div>Envio</div> {/* Coluna de Envio */}
                 <div>Validade</div>
                 <div className="text-center">Ações</div>
               </div>
@@ -356,14 +356,34 @@ export function ContarctsByProvider() {
                       className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                       key={doc.id}
                     >
+                      {/* Coluna Status */}
                       <div>
-                        <span
-                          className={`text-sm font-medium ${getStatusClass(
-                            doc.status
-                          )}`}
-                        >
-                          {doc.status}
-                        </span>
+                        {doc.status === "EM_ANALISE" ? (
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-blue-500" /> {/* Ícone agora azul */}
+                            <span className="text-sm font-semibold text-blue-500"> {/* Texto agora azul */}
+                              Em Análise
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                             {/* Você já tem uma lógica similar para ícones, aqui é onde você pode estendê-la para outros status */}
+                            {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA" ? (
+                              <Ban className="w-4 h-4 text-red-500" />
+                            ) : doc.status === "APROVADO" || doc.status === "APROVADO_IA" ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : null} {/* Adicione outros ícones para outros status se desejar */}
+                            <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
+                              {doc.status.replace(/_/g, ' ')} {/* Substitui underscore por espaço para melhor leitura */}
+                            </span>
+                          </div>
+                        )}
+                         {doc.status === "EM_ANALISE" && (
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-blue-500" /> {/* Ícone agora azul */}
+                              <span className="text-xs font-semibold text-blue-500">⚠️ Necessita análise humana</span> {/* Texto agora azul */}
+                            </div>
+                         )}
                       </div>
                       <div className="col-span-1">
                         <h3 className="text-[16px] font-medium">{doc.title}</h3>
@@ -371,29 +391,7 @@ export function ContarctsByProvider() {
                           {doc.ownerName}
                         </span>
                       </div>
-                      <div className="flex flex-col">
-                        <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
-                          {doc.status}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA" ? (
-                            <>
-                              <Ban className="w-4 h-4 text-red-500" />
-                              <span className="text-xs font-semibold text-red-500">Impede entrada</span>
-                            </>
-                          ) : doc.status === "EM_ANALISE" ? (
-                            <>
-                              <AlertCircle className="w-4 h-4 text-yellow-500" />
-                              <span className="text-xs font-semibold text-yellow-500">⚠️ Necessita análise humana</span>
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                              <span className="text-xs font-semibold text-green-600">Entrada liberada</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                      {/* Coluna Envio - Exibe a creationDate */}
                       <div>
                         <span className="text-sm text-neutral-600">
                           {formatarData(doc.creationDate)}
@@ -418,7 +416,6 @@ export function ContarctsByProvider() {
                         </button>
                         {openMenuDocumentId === doc.id && (
                           <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                            {/* Botão Visualizar (da nathalia-15.07) */}
                             {doc.hasDoc && (
                               <button
                                 onClick={() => handleOpenViewerModal(doc.id)}
@@ -429,8 +426,7 @@ export function ContarctsByProvider() {
                               </button>
                             )}
 
-                            {/* Botões Reenviar e Isentar (da main, sob condição isRealiza) */}
-                            {isRealiza && (
+                            
                               <>
                                 <button
                                   onClick={() => handleOpenUploadModal(doc.id, doc.title)}
@@ -452,7 +448,6 @@ export function ContarctsByProvider() {
                                   Isentar
                                 </button>
                               </>
-                            )}
                           </div>
                         )}
                       </div>

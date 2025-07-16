@@ -132,7 +132,16 @@ export function TableServiceProvider() {
   const [searchSsmaActivityEdit, setSearchSsmaActivityEdit] = useState("");
 
   useEffect(() => {
-    if (editFormData) {
+    if (selectedBranch?.idBranch) {
+      getManager();
+      getServicesType();
+      getActivities();
+      getSupplier();
+    }
+  }, [selectedBranch]);
+
+  useEffect(() => {
+    if (editFormData && managers.length > 0 && servicesType.length > 0) {
       reset({
         ...editFormData,
         subcontractPermission: editFormData.subcontractPermission
@@ -140,9 +149,12 @@ export function TableServiceProvider() {
           : "false",
         hse: editFormData.hse ?? false,
         labor: editFormData.labor ?? false,
+        idResponsible: editFormData.idResponsible || "",
+        idServiceType: editFormData.idServiceType || "",
       });
     }
-  }, [editFormData]);
+  }, [editFormData, managers, servicesType, reset]);
+
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -151,14 +163,12 @@ export function TableServiceProvider() {
     setLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      console.log("Requisição ao finalizar");
       const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
         params: {
           idSearch: selectedBranch.idBranch,
         },
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-      console.log("Exemplo de item:", res.data.content);
       setSuppliers(res.data.content);
     } catch (err) {
       console.log("Erro ao buscar prestadores de serviço", err);
@@ -177,7 +187,6 @@ export function TableServiceProvider() {
           ...selectedLaborActivitiesEdit,
         ],
       };
-      console.log("Payload enviado para edição:", payload);
       await axios.put(
         `${ip}/contract/supplier/${editFormData.idContract}`,
         payload,
@@ -211,7 +220,6 @@ export function TableServiceProvider() {
   };
 
   const handleHistoryClick = (supplier: any) => {
-    console.log("Histórico do contrato:", supplier);
     setSelectedSupplier(supplier);
     setIsHistoryModalOpen(true);
     getContractHistory(supplier.idContract);
@@ -258,10 +266,9 @@ export function TableServiceProvider() {
         },
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("📜 Histórico:", res.data.content);
       setContractHistory(res.data.content || []);
     } catch (error) {
-      console.error("❌ Erro ao buscar histórico do contrato", error);
+      console.error("Erro ao buscar histórico do contrato", error);
       toast.error("Erro ao buscar histórico");
     }
   };
@@ -280,17 +287,7 @@ export function TableServiceProvider() {
     );
   };
 
-  useEffect(() => {
-    if (selectedBranch?.idBranch) {
-      getSupplier();
-      getManager();
-      getServicesType();
-      getActivities();
-    }
-  }, [selectedBranch]);
-
   const handleEditClick = (supplier: any) => {
-    console.log("Supplier editando:", supplier);
     setSelectedSupplier(supplier);
     setEditFormData({ ...supplier });
     setIsEditing(false);
