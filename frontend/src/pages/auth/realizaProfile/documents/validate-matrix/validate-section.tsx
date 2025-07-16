@@ -7,7 +7,7 @@ interface ExpirationItem {
   title: string;
   expirationDateAmount: number;
   expirationDateUnit: "DAYS" | "WEEKS" | "MONTHS";
-  impede: boolean;
+  doesBlock: boolean;
 }
 
 interface ValidateSectionProps {
@@ -25,7 +25,7 @@ export function ValidateSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amountEdit, setAmountEdit] = useState(0);
   const [unitEdit, setUnitEdit] = useState<"DAYS" | "WEEKS" | "MONTHS">("DAYS");
-  const [impedeEdit, setImpedeEdit] = useState(false);
+  const [doesBlockEdit, setImpedeEdit] = useState(false);
 
   useEffect(() => {
     if (!idBranch || !documentTypeName) return;
@@ -72,7 +72,7 @@ export function ValidateSection({
     setEditingId(doc.idDocument);
     setAmountEdit(doc.expirationDateAmount);
     setUnitEdit(doc.expirationDateUnit);
-    setImpedeEdit(doc.impede);
+    setImpedeEdit(doc.doesBlock);
   };
 
   const handleSave = async (id: string) => {
@@ -91,7 +91,7 @@ export function ValidateSection({
       const payload = {
         expirationDateAmount: amountEdit,
         expirationDateUnit: unitEdit,
-        impede: impedeEdit,
+        doesBlock: doesBlockEdit,
       };
 
       console.log("🔁 Enviando para API:", payload);
@@ -118,7 +118,7 @@ export function ValidateSection({
                 ...doc,
                 expirationDateAmount: amountEdit,
                 expirationDateUnit: unitEdit,
-                impede: impedeEdit,
+                doesBlock: doesBlockEdit,
               }
             : doc
         )
@@ -183,8 +183,8 @@ export function ValidateSection({
                 <td className="px-2 py-1 text-center">
                   <input
                     type="checkbox"
-                    checked={impedeEdit}
-                    onChange={() => setImpedeEdit(!impedeEdit)}
+                    checked={doesBlockEdit}
+                    onChange={() => setImpedeEdit(!doesBlockEdit)}
                   />
                 </td>
                 <td className="px-2 py-1">
@@ -203,7 +203,7 @@ export function ValidateSection({
                   {traduzUnidade(doc.expirationDateUnit)}
                 </td>
                 <td className="px-2 py-1 text-center">
-                  <input type="checkbox" checked={doc.impede} disabled />
+                  <input type="checkbox" checked={doc.doesBlock} disabled />
                 </td>
                 <td className="px-2 py-1">
                   <button

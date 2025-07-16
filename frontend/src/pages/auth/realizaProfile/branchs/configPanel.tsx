@@ -366,7 +366,7 @@ export function ConfigPanel() {
         <h1 className="text-2xl md:text-[25px]">Configurações gerais</h1>
         <div className="bg-[#7CA1F3] w-full h-[1px]" />
         <div className="flex items-center gap-5">
-          {["documents", "cbos", "positions", "services", "activities"].map((tab) => (
+          {["documents", "cbos", "positions", "services", "activities", "validate"].map((tab) => (
             <Button
               key={tab}
               className={`${
@@ -382,6 +382,7 @@ export function ConfigPanel() {
                 positions: "Cargos",
                 services: "Serviços",
                 activities: "Atividades",
+                validate: "Validade Padrão",
               }[tab]}
             </Button>
           ))}
