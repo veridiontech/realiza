@@ -1,3 +1,4 @@
+import * as XLSX from "xlsx";
 import {
   BarChart,
   Bar,
@@ -8,6 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
+import { FileDown } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 // Interface genérica para os dados, já que as chaves são dinâmicas
@@ -21,17 +23,17 @@ interface StatusDocumentChartProps {
 }
 
 // Mapeamento de cores para os status conhecidos.
-// O gráfico usará uma cor padrão se um status novo aparecer.
 const STATUS_COLORS: Record<string, string> = {
-  PENDENTE: '#fde68a',     // Amarelo
-  REPROVADO_IA: '#fca5a5', // Vermelho
-  VENCIDO: '#fbbf24',      // Laranja
-  ISENCAO: '#a5b4fc',      // Azul
-  APROVADO: '#86efac',      // Verde
-  APROVADO_IA: '#7dd3fc',  // Verde-água
+  PENDENTE: '#fde68a',
+  REPROVADO_IA: '#fca5a5',
+  VENCIDO: '#fbbf24',
+  ISENCAO: '#a5b4fc',
+  APROVADO: '#86efac',
+  APROVADO_IA: '#7dd3fc',
 };
 
 export function StatusDocumentChart({ data }: StatusDocumentChartProps) {
+  // Se não tiver dados, mostra o loading
   if (!data || data.length === 0) {
     return (
       <Card className="w-full h-[400px]">
@@ -45,22 +47,35 @@ export function StatusDocumentChart({ data }: StatusDocumentChartProps) {
     );
   }
 
-  // Calcula todas as chaves de status únicas dos dados (ex: PENDENTE, APROVADO, etc.)
-  // para criar as barras dinamicamente.
-  const statusKeys = data.reduce((acc, current) => {
-    Object.keys(current).forEach((key) => {
-      if (key !== 'name') {
-        acc.add(key);
-      }
+  // Função para exportar os dados do gráfico em Excel
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "StatusDocument");
+    XLSX.writeFile(wb, "status_document.xlsx");
+  };
+
+  // Descobre dinamicamente todas as chaves de status
+  const statusKeys = data.reduce((acc, cur) => {
+    Object.keys(cur).forEach((k) => {
+      if (k !== "name") acc.add(k);
     });
     return acc;
   }, new Set<string>());
 
   return (
-    <Card className="w-full h-[400px]">
+    <Card className="relative w-full h-[400px]">
       <CardHeader>
         <CardTitle className="text-base">Status de Documentos</CardTitle>
       </CardHeader>
+
+      <button
+        onClick={exportToExcel}
+        className="absolute top-2 right-2 p-1 text-green-500 text-xs rounded-full"
+      >
+        <FileDown width={20}/>
+      </button>
+
       <CardContent className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -88,15 +103,13 @@ export function StatusDocumentChart({ data }: StatusDocumentChartProps) {
               wrapperStyle={{ paddingTop: 30 }}
             />
 
-            {/* Gera uma <Bar> para cada tipo de status dinamicamente */}
             {Array.from(statusKeys).map((key) => (
               <Bar
                 key={key}
                 dataKey={key}
-                // A propriedade 'stackId' é o que faz as barras serem empilhadas
                 stackId="a"
-                name={key.replace('_', ' ').toLowerCase()} // Formata o nome para a legenda
-                fill={STATUS_COLORS[key] || '#cccccc'} // Usa a cor mapeada ou uma cor padrão
+                name={key.replace('_', ' ').toLowerCase()}
+                fill={STATUS_COLORS[key] || '#cccccc'}
               />
             ))}
           </BarChart>
