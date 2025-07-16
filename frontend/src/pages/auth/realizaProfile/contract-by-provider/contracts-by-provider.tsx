@@ -9,8 +9,11 @@ import {
   User,
   MoreVertical,
   FileX2,
+  Ban,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
@@ -49,7 +52,12 @@ export function ContarctsByProvider() {
   const [openMenuDocumentId, setOpenMenuDocumentId] = useState<string | null>(
     null
   );
-  const [viewOption, setViewOption] = useState<"documents" | "collaborators">("documents");
+  const [viewOption, setViewOption] = useState<"documents" | "collaborators">(
+    "documents"
+  );
+
+  const profile = localStorage.getItem("profile");
+  const isRealiza = profile === "Realiza";
 
   const token = localStorage.getItem("tokenClient");
 
@@ -66,6 +74,26 @@ export function ContarctsByProvider() {
       console.error("Error fetching contracts:", err);
     }
   };
+
+  const getAllDatas = useCallback(
+    async (idContract: string, serviceName: string) => {
+      try {
+        console.log("Fetching all data for contract ID:", idContract);
+        const res = await axios.get(`${ip}/document/contract/${idContract}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setDocuments(res.data.documentDtos || []);
+        setCollaborators(res.data.employeeDtos || []);
+        setSelectedContractName(serviceName);
+        setSearchTerm("");
+        console.log("Documents fetched:", res.data.documentDtos);
+        console.log("Collaborators fetched:", res.data.employeeDtos);
+      } catch (err) {
+        console.error("Error fetching all data for contract:", err);
+      }
+    },
+    [token]
+  );
 
   const getProvider = async () => {
     try {
@@ -85,22 +113,16 @@ export function ContarctsByProvider() {
     }
   }, [id]);
 
-  const getAllDatas = async (idContract: string, serviceName: string) => {
-    try {
-      console.log("Fetching all data for contract ID:", idContract);
-      const res = await axios.get(`${ip}/document/contract/${idContract}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setDocuments(res.data.documentDtos || []);
-      setCollaborators(res.data.employeeDtos || []);
-      setSelectedContractName(serviceName);
-      setSearchTerm("");
-      console.log("Documents fetched:", res.data.documentDtos);
-      console.log("Collaborators fetched:", res.data.employeeDtos);
-    } catch (err) {
-      console.error("Error fetching all data for contract:", err);
+  useEffect(() => {
+    if (selectedContractName) {
+      const currentContract = contracts.find(
+        (c) => c.serviceName === selectedContractName
+      );
+      if (currentContract) {
+        getAllDatas(currentContract.idContract, currentContract.serviceName);
+      }
     }
-  };
+  }, [selectedContractName, getAllDatas, contracts]);
 
   const filteredDocuments = documents.filter(
     (doc: Document) =>
@@ -109,7 +131,12 @@ export function ContarctsByProvider() {
   );
 
   const handleOpenUploadModal = (documentId: string, documentTitle: string) => {
-    console.log("Opening upload modal for document:", documentTitle, "ID:", documentId);
+    console.log(
+      "Opening upload modal for document:",
+      documentTitle,
+      "ID:",
+      documentId
+    );
     setSelectedDocumentId(documentId);
     setSelectedDocumentTitle(documentTitle);
     setIsUploadModalOpen(true);
@@ -121,7 +148,9 @@ export function ContarctsByProvider() {
     setSelectedDocumentId(null);
     setSelectedDocumentTitle(null);
     if (selectedContractName) {
-      const currentContract = contracts.find(c => c.serviceName === selectedContractName);
+      const currentContract = contracts.find(
+        (c) => c.serviceName === selectedContractName
+      );
       if (currentContract) {
         getAllDatas(currentContract.idContract, currentContract.serviceName);
       }
@@ -140,9 +169,29 @@ export function ContarctsByProvider() {
     setSelectedDocumentId(null);
   };
 
+  const handleStatusChangeForDocument = useCallback(
+    (documentIdChanged: string, newStatus: string) => {
+      console.log(`Documento ${documentIdChanged} mudou para status: ${newStatus}`);
+      if (selectedContractName) {
+        const currentContract = contracts.find(
+          (c) => c.serviceName === selectedContractName
+        );
+        if (currentContract) {
+          getAllDatas(currentContract.idContract, currentContract.serviceName);
+        }
+      }
+    },
+    [selectedContractName, contracts, getAllDatas]
+  );
+
   const exemptDocument = async (documentId: string, documentTitle: string) => {
     try {
-      console.log("Attempting to exempt document:", documentTitle, "ID:", documentId);
+      console.log(
+        "Attempting to exempt document:",
+        documentTitle,
+        "ID:",
+        documentId
+      );
       const selectedContract = contracts.find(
         (contract: any) => contract.serviceName === selectedContractName
       );
@@ -165,14 +214,20 @@ export function ContarctsByProvider() {
       );
 
       alert(`Documento "${documentTitle}" isento com sucesso!`);
-      setDocuments(prevDocs =>
-        prevDocs.map(doc =>
-          doc.id === documentId ? { ...doc, status: "ISENTO" } : doc
-        )
-      );
+      if (selectedContractName) {
+        const currentContract = contracts.find(
+          (c) => c.serviceName === selectedContractName
+        );
+        if (currentContract) {
+          getAllDatas(currentContract.idContract, currentContract.serviceName);
+        }
+      }
       console.log(`Document "${documentTitle}" exempted successfully.`);
     } catch (error: any) {
-      console.error("Error exempting document:", error.response?.data || error.message);
+      console.error(
+        "Error exempting document:",
+        error.response?.data || error.message
+      );
       alert("Erro ao isentar o documento.");
     }
   };
@@ -189,12 +244,15 @@ export function ContarctsByProvider() {
   };
 
   const getStatusClass = (status: string) => {
-    if (status === "PENDENTE" || status === "EM_ANALISE") return "text-yellow-500";
-    if (status === "APROVADO" || status === "APROVADO_IA") return "text-green-600";
-    if (status === "REPROVADO" || status === "REPROVADO_IA") return "text-red-600";
+    if (status === "PENDENTE") return "text-yellow-500";
+    if (status === "EM_ANALISE") return "text-blue-500";
+    if (status === "APROVADO" || status === "APROVADO_IA")
+      return "text-green-600";
+    if (status === "REPROVADO" || status === "REPROVADO_IA")
+      return "text-red-600";
+    if (status === "ISENTO") return "text-blue-500";
     return "";
   };
-
 
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
@@ -214,8 +272,9 @@ export function ContarctsByProvider() {
             {contracts.map((contract: any, index) => (
               <div
                 key={contract.idContract}
-                className={`w-full p-2 cursor-pointer ${index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
-                  }`}
+                className={`w-full p-2 cursor-pointer ${
+                  index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
+                }`}
                 onClick={() =>
                   getAllDatas(contract.idContract, contract.serviceName)
                 }
@@ -244,7 +303,9 @@ export function ContarctsByProvider() {
             <button
               onClick={() => setViewOption("documents")}
               className={`${
-                viewOption === "documents" ? "bg-realizaBlue text-white" : "bg-neutral-200 text-[#34495E]"
+                viewOption === "documents"
+                  ? "bg-realizaBlue text-white"
+                  : "bg-neutral-200 text-[#34495E]"
               } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Documentos
@@ -252,7 +313,9 @@ export function ContarctsByProvider() {
             <button
               onClick={() => setViewOption("collaborators")}
               className={`${
-                viewOption === "collaborators" ? "bg-realizaBlue text-white" : "bg-neutral-200 text-[#34495E]"
+                viewOption === "collaborators"
+                  ? "bg-realizaBlue text-white"
+                  : "bg-neutral-200 text-[#34495E]"
               } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Colaboradores
@@ -261,7 +324,6 @@ export function ContarctsByProvider() {
         </div>
 
         <div className="bg-white rounded-md p-5 border border-neutral-400 shadow-md flex gap-10 h-[50vh]">
-          
           {viewOption === "documents" && (
             <div className="border border-neutral-400 rounded-md shadow-md p-5 w-full flex flex-col gap-6">
               <div className="flex items-start justify-between">
@@ -279,33 +341,58 @@ export function ContarctsByProvider() {
                 className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
               />
 
-              {/* Ajuste no cabeçalho das colunas */}
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
-                <div className="col-span-1">Documento</div>
+              <div className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
                 <div>Status</div>
+                <div className="col-span-1">Documento</div>
                 <div>Envio</div>
                 <div>Validade</div>
                 <div className="text-center">Ações</div>
               </div>
 
-
               <div className="flex flex-col gap-4 overflow-y-auto max-h-[35vh] pr-2">
                 {filteredDocuments.length > 0 ? (
                   filteredDocuments.map((doc: Document) => (
                     <div
-                      className="grid grid-cols-[2fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
+                      className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                       key={doc.id}
                     >
+                      <div>
+                        <span
+                          className={`text-sm font-medium ${getStatusClass(
+                            doc.status
+                          )}`}
+                        >
+                          {doc.status}
+                        </span>
+                      </div>
                       <div className="col-span-1">
                         <h3 className="text-[16px] font-medium">{doc.title}</h3>
                         <span className="text-[12px] text-neutral-600">
                           {doc.ownerName}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex flex-col">
                         <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
                           {doc.status}
                         </span>
+                        <div className="flex items-center gap-2">
+                          {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA" ? (
+                            <>
+                              <Ban className="w-4 h-4 text-red-500" />
+                              <span className="text-xs font-semibold text-red-500">Impede entrada</span>
+                            </>
+                          ) : doc.status === "EM_ANALISE" ? (
+                            <>
+                              <AlertCircle className="w-4 h-4 text-yellow-500" />
+                              <span className="text-xs font-semibold text-yellow-500">⚠️ Necessita análise humana</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              <span className="text-xs font-semibold text-green-600">Entrada liberada</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <span className="text-sm text-neutral-600">
@@ -318,8 +405,7 @@ export function ContarctsByProvider() {
                         </span>
                       </div>
 
-                      {/* Ajuste no container das ações e do menu */}
-                      <div className="flex justify-center relative"> {/* Alinhado ao centro */}
+                      <div className="flex justify-center relative">
                         <button
                           onClick={() =>
                             setOpenMenuDocumentId(
@@ -332,6 +418,7 @@ export function ContarctsByProvider() {
                         </button>
                         {openMenuDocumentId === doc.id && (
                           <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                            {/* Botão Visualizar (da nathalia-15.07) */}
                             {doc.hasDoc && (
                               <button
                                 onClick={() => handleOpenViewerModal(doc.id)}
@@ -341,28 +428,31 @@ export function ContarctsByProvider() {
                                 Visualizar
                               </button>
                             )}
-                            <button
-                              onClick={() =>
-                                handleOpenUploadModal(doc.id, doc.title)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <Upload className="w-5 h-5 text-base" />
-                              Reenviar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                exemptDocument(doc.id, doc.title)
-                              }
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <FileX2
-                                className="w-5 h-5 text-base"
-                                color="#b31933"
-                              />
-                              Isentar
-                            </button>
+
+                            {/* Botões Reenviar e Isentar (da main, sob condição isRealiza) */}
+                            {isRealiza && (
+                              <>
+                                <button
+                                  onClick={() => handleOpenUploadModal(doc.id, doc.title)}
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <Upload className="w-5 h-5 text-base" />
+                                  Reenviar
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => exemptDocument(doc.id, doc.title)}
+                                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <FileX2
+                                    className="w-5 h-5 text-base"
+                                    color="#b31933"
+                                  />
+                                  Isentar
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -410,22 +500,23 @@ export function ContarctsByProvider() {
             </div>
           )}
         </div>
-      </div>
 
-      <AddDocument
-        isOpen={isUploadModalOpen}
-        onClose={handleCloseUploadModal}
-        documentId={selectedDocumentId}
-        preSelectedTitle={selectedDocumentTitle}
-      />
-
-      {selectedDocumentId && (
-        <DocumentViewer
-          isOpen={isViewerModalOpen}
-          onClose={handleCloseViewerModal}
+        <AddDocument
+          isOpen={isUploadModalOpen}
+          onClose={handleCloseUploadModal}
           documentId={selectedDocumentId}
+          preSelectedTitle={selectedDocumentTitle}
         />
-      )}
+
+        {selectedDocumentId && (
+          <DocumentViewer
+            isOpen={isViewerModalOpen}
+            onClose={handleCloseViewerModal}
+            documentId={selectedDocumentId}
+            onStatusChange={handleStatusChangeForDocument}
+          />
+        )}
+      </div>
     </div>
   );
 }

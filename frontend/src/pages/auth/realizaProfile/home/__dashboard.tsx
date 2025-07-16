@@ -1,12 +1,8 @@
 import {
-  // ArrowLeft,
-  // ArrowRight,
   Building2,
   ChevronRight,
   Files,
   MessageCircle,
-  // Search,
-  // Search,
   Settings2,
   University,
   Users,
@@ -16,8 +12,6 @@ import { Helmet } from "react-helmet-async";
 import { Link, NavLink } from "react-router-dom";
 
 import { EnterpriseResume } from "@/components/home/enterpriseResume";
-// import { GraphicHomeLeft } from "@/components/home/graphicHomeLeft";
-// import { GraphicHomeRight } from "@/components/home/graphicHomeRight";
 import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
 import { Button } from "@/components/ui/button";
 import { MainCard } from "@/components/quickActions/mainCard";
@@ -45,7 +39,6 @@ import { AddNewBranch } from "../branchs/modals/add-new-branch";
 import { UltraSection } from "../ultra/ultra-branchs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
-// import { StatusDocumentChart } from "@/components/BIs/BisPageComponents/statusDocumentChart";
 import { BranchesTable } from "./branchesTable";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Employees } from "@/components/BIs/BisPageComponents/employees";
@@ -61,7 +54,6 @@ function validarCPF(cpf: string): boolean {
 
   if (cpf.length !== 11) return false;
 
-  // Elimina CPFs com todos os dígitos iguais (ex: 111.111.111-11)
   if (/^(\d)\1{10}$/.test(cpf)) return false;
 
   let soma = 0;
@@ -87,9 +79,7 @@ function validarCPF(cpf: string): boolean {
 }
 
 function validarTelefoneRepetido(telefone: string) {
-  // Remove tudo que não for número
   const digits = telefone.replace(/\D/g, "");
-  // Verifica se todos os dígitos são iguais
   return !/^(\d)\1+$/.test(digits);
 }
 
@@ -117,15 +107,18 @@ const createUserClient = z.object({
     .email("Formato de email inválido")
     .nonempty("Email é obrigatório"),
   position: z.string().nonempty("Seu cargo é obrigatório"),
-  // password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   role: z.string().default("ROLE_CLIENT_MANAGER"),
+  branchAccessIds: z
+    .array(z.string())
+    .min(1, "Selecione pelo menos uma filial para o usuário"),
+  contractAccessIds: z.array(z.string()).optional(),
+  profileId: z.string().nonempty("Selecione um perfil para o usuário"),
 });
 
 type CreateUserClient = z.infer<typeof createUserClient>;
 export function Dashboard() {
   const [selectedTab, setSelectedTab] = useState("filiais");
   const [usersFromBranch, setUsersFromBranch] = useState([]);
-  // const [searchBranches, setSearchBranches] = useState([])
   const { client } = useClient();
   const { selectedBranch } = useBranch();
   const { user } = useUser();
@@ -141,10 +134,25 @@ export function Dashboard() {
     allocatedEmployeeQuantity: number;
   } | null>(null);
 
+  const [availableBranches, setAvailableBranches] = useState<
+    { idBranch: string; name: string }[]
+  >([]);
+  const [selectedBranchIds, setSelectedBranchIds] = useState<string[]>([]);
+
+  const [availableContracts, setAvailableContracts] = useState<
+    { id: string; contractReference: string; branchName: string }[]
+  >([]);
+  const [selectedContractIds, setSelectedContractIds] = useState<string[]>([]);
+
+  const [availableProfiles, setAvailableProfiles] = useState<
+    { id: string; profileName: string }[]
+  >([]);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+
   const {
     register,
     handleSubmit,
-    setValue, // <== Adicione aqui
+    setValue,
     formState: { errors },
     reset,
   } = useForm<CreateUserClient>({
@@ -168,9 +176,14 @@ export function Dashboard() {
     } else if (digits.length <= 6) {
       return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     } else if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(
+        6
+      )}`;
     } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(
+        2,
+        7
+      )}-${digits.slice(7, 11)}`;
     }
   };
 
@@ -199,6 +212,9 @@ export function Dashboard() {
       idEnterprise: selectedBranch?.idBranch,
       enterprise: "CLIENT",
       idUser: user?.idUser,
+      branchAccessIds: selectedBranchIds,
+      contractAccessIds: selectedContractIds,
+      profileId: selectedProfileId,
     };
     console.log("Enviando dados do novo usuário:", payload);
     setIsLoading(true);
@@ -213,6 +229,9 @@ export function Dashboard() {
       reset();
       setCpfValue("");
       setPhoneValue("");
+      setSelectedBranchIds([]);
+      setSelectedContractIds([]);
+      setSelectedProfileId("");
     } catch (err: any) {
       if (err.response && err.response.data) {
         const mensagemBackend =
@@ -220,8 +239,10 @@ export function Dashboard() {
           err.response.data.error ||
           "Erro inesperado no servidor";
         console.log(mensagemBackend);
+        toast.error(mensagemBackend);
+      } else {
+        toast.error("Erro ao criar usuário. Verifique os dados e tente novamente.");
       }
-      toast.error("E-mail já cadastrado");
       setIsOpen(false);
       console.log(err);
     } finally {
@@ -230,8 +251,6 @@ export function Dashboard() {
   };
 
   const getUsersFromBranch = async () => {
-    // setLoading(true);
-    // setError(null);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
@@ -243,14 +262,105 @@ export function Dashboard() {
       const { content } = res.data;
       console.log("usuários da branch:", content);
       setUsersFromBranch(content);
-      // setTotalPages(total);
     } catch (err) {
       console.error("erro ao buscar usuários:", err);
-      // setError("Erro ao buscar usuários.");
     }
   };
 
-  // const tokenFromStorage = localStorage.getItem("tokenClient");
+  const fetchAvailableBranches = async () => {
+    if (!client?.idClient) {
+      console.warn("ID do cliente não disponível para buscar filiais.");
+      return;
+    }
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const response = await axios.get(
+        `${ip}/branch/filtered-client?idSearch=${client.idClient}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      setAvailableBranches(response.data.content);
+    } catch (error) {
+      console.error("Erro ao buscar filiais disponíveis:", error);
+      toast.error("Erro ao carregar as filiais. Tente novamente.");
+    }
+  };
+
+  const fetchContractsByBranchIds = async (branchIds: string[]) => {
+    if (branchIds.length === 0) {
+      setAvailableContracts([]);
+      setSelectedContractIds([]);
+      setValue("contractAccessIds", [], { shouldValidate: true });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const queryParams = branchIds.map((id) => `branchIds=${id}`).join("&");
+      const response = await axios.get(
+        `${ip}/contract/find-by-branchIds?${queryParams}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      setAvailableContracts(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar contratos por filiais:", error);
+      toast.error("Erro ao carregar os contratos. Tente novamente.");
+      setAvailableContracts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchAvailableProfiles = async (clientId: string) => {
+    if (!clientId) {
+      console.warn("ID do cliente não disponível para buscar perfis.");
+      setAvailableProfiles([]);
+      return;
+    }
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const response = await axios.get(
+        `${ip}/profile/by-name/${clientId}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      setAvailableProfiles(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar perfis disponíveis:", error);
+      toast.error("Erro ao carregar os perfis. Tente novamente.");
+      setAvailableProfiles([]);
+    }
+  };
+
+  const handleBranchSelection = (branchId: string, isChecked: boolean) => {
+    setSelectedBranchIds((prevSelected) => {
+      const newSelected = isChecked
+        ? [...prevSelected, branchId]
+        : prevSelected.filter((id) => id !== branchId);
+      setValue("branchAccessIds", newSelected, { shouldValidate: true });
+      return newSelected;
+    });
+  };
+
+  const handleContractSelection = (contractId: string, isChecked: boolean) => {
+    setSelectedContractIds((prevSelected) => {
+      const newSelected = isChecked
+        ? [...prevSelected, contractId]
+        : prevSelected.filter((id) => id !== contractId);
+      setValue("contractAccessIds", newSelected, { shouldValidate: true });
+      return newSelected;
+    });
+  };
+
+  const handleProfileSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const profileId = e.target.value;
+    setSelectedProfileId(profileId);
+    setValue("profileId", profileId, { shouldValidate: true });
+  };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
@@ -263,8 +373,22 @@ export function Dashboard() {
       reset();
       setCpfValue("");
       setPhoneValue("");
+      setSelectedBranchIds([]);
+      setSelectedContractIds([]);
+      setSelectedProfileId("");
     }
   }, [isOpen, reset]);
+
+  useEffect(() => {
+    if (isOpen && client?.idClient) {
+      fetchAvailableBranches();
+      fetchAvailableProfiles(client.idClient);
+    }
+  }, [isOpen, client?.idClient]);
+
+  useEffect(() => {
+    fetchContractsByBranchIds(selectedBranchIds);
+  }, [selectedBranchIds]);
 
   useEffect(() => {
     const fetchConformity = async () => {
@@ -286,7 +410,7 @@ export function Dashboard() {
           activeContractQuantity: 0,
           activeEmployeeQuantity: 0,
           activeSupplierQuantity: 0,
-          allocatedEmployeeQuantity: 0, 
+          allocatedEmployeeQuantity: 0,
         });
       } finally {
         setIsLoading(false);
@@ -309,8 +433,6 @@ export function Dashboard() {
               {client?.isUltragaz && <UltraSection />}
             </div>
             <div className="mt-8 grid grid-cols-1 gap-8">
-              {/* <StatusDocumentChart data={data?.activeSupplierQuantity}/>' */}
-
               <div className="w-full flex justify-center">
                 <div className="w-full bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center border border-gray-300 h-[900px]">
                   <ConformityGaugeChart percentage={data?.conformity} />
@@ -568,19 +690,138 @@ export function Dashboard() {
                                   )}
                                 </div>
 
-                                {/* <div>
-                                  <Label className="text-white">Senha</Label>
-                                  <Input
-                                    type="password"
-                                    {...register("password")}
-                                    placeholder="Digite sua senha"
-                                  />
-                                  {errors.password && (
+                                <div className="flex flex-col gap-2">
+                                  <Label htmlFor="profile" className="text-white">
+                                    Perfil do Usuário
+                                  </Label>
+                                  {isLoading ? (
+                                    <p className="text-white">
+                                      Carregando perfis...
+                                    </p>
+                                  ) : (
+                                    <select
+                                      id="profile"
+                                      {...register("profileId")}
+                                      value={selectedProfileId}
+                                      onChange={handleProfileSelection}
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-black"
+                                    >
+                                      <option value="">Selecione um perfil</option>
+                                      {availableProfiles.map((profile) => (
+                                        <option key={profile.id} value={profile.id}>
+                                          {profile.profileName}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  )}
+                                  {errors.profileId && (
                                     <span className="text-sm text-red-600">
-                                      {errors.password.message}
+                                      {errors.profileId.message}
                                     </span>
                                   )}
-                                </div> */}
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                  <Label className="text-white">
+                                    Filiais de Acesso
+                                  </Label>
+                                  {isLoading ? (
+                                    <p className="text-white">
+                                      Carregando filiais...
+                                    </p>
+                                  ) : availableBranches.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                      {availableBranches.map((branch) => (
+                                        <div
+                                          key={branch.idBranch}
+                                          className="flex items-center space-x-2"
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            id={`branch-${branch.idBranch}`}
+                                            checked={selectedBranchIds.includes(
+                                              branch.idBranch
+                                            )}
+                                            onChange={(e) =>
+                                              handleBranchSelection(
+                                                branch.idBranch,
+                                                e.target.checked
+                                              )
+                                            }
+                                            className="form-checkbox h-4 w-4 text-realizaBlue border-gray-300 rounded focus:ring-realizaBlue"
+                                          />
+                                          <Label
+                                            htmlFor={`branch-${branch.idBranch}`}
+                                            className="text-white"
+                                          >
+                                            {branch.name}
+                                          </Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-white">
+                                      Nenhuma filial disponível.
+                                    </p>
+                                  )}
+                                  {errors.branchAccessIds && (
+                                    <span className="text-sm text-red-600">
+                                      {errors.branchAccessIds.message}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {selectedBranchIds.length > 0 && (
+                                  <div className="flex flex-col gap-2">
+                                    <Label className="text-white">
+                                      Contratos de Acesso
+                                    </Label>
+                                    {isLoading ? (
+                                      <p className="text-white">
+                                        Carregando contratos...
+                                      </p>
+                                    ) : availableContracts.length > 0 ? (
+                                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                        {availableContracts.map((contract) => (
+                                          <div
+                                            key={contract.id}
+                                            className="flex items-center space-x-2"
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              id={`contract-${contract.id}`}
+                                              checked={selectedContractIds.includes(
+                                                contract.id
+                                              )}
+                                              onChange={(e) =>
+                                                handleContractSelection(
+                                                  contract.id,
+                                                  e.target.checked
+                                                )
+                                              }
+                                              className="form-checkbox h-4 w-4 text-realizaBlue border-gray-300 rounded focus:ring-realizaBlue"
+                                            />
+                                            <Label
+                                              htmlFor={`contract-${contract.id}`}
+                                              className="text-white"
+                                            >
+                                              {contract.contractReference} ({contract.branchName})
+                                            </Label>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-white">
+                                        Nenhum contrato encontrado para as filiais selecionadas.
+                                      </p>
+                                    )}
+                                    {errors.contractAccessIds && (
+                                      <span className="text-sm text-red-600">
+                                        {errors.contractAccessIds.message}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
 
                                 <div className="flex justify-end">
                                   <div>
@@ -618,23 +859,21 @@ export function Dashboard() {
                   )}
                   {selectedTab === "usuarios" && (
                     <div>
-                      <div>
-                        <span>
-                          {selectedBranch ? (
-                            <div>
-                              <p>
-                                <strong>Filial:</strong> {selectedBranch.name}
-                              </p>
-                            </div>
-                          ) : (
-                            <div>
-                              <p>
-                                <strong>Filial:</strong> Filial não selecionada
-                              </p>
-                            </div>
-                          )}
-                        </span>
-                      </div>
+                      <span>
+                        {selectedBranch ? (
+                          <div>
+                            <p>
+                              <strong>Filial:</strong> {selectedBranch.name}
+                            </p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p>
+                              <strong>Filial:</strong> Filial não selecionada
+                            </p>
+                          </div>
+                        )}
+                      </span>
 
                       <div className="block space-y-4 md:hidden">
                         {usersFromBranch && usersFromBranch.length > 0 ? (

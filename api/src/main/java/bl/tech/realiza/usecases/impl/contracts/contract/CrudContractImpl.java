@@ -12,6 +12,7 @@ import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractByBranchIdsResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
@@ -320,5 +321,10 @@ public class CrudContractImpl implements CrudContract {
                         .contractReference(contract.getContractReference())
                         .build()
         );
+    }
+
+    @Override
+    public List<ContractByBranchIdsResponseDto> getContractByBranchIds(List<String> branchIds) {
+        return contractRepository.findAllByBranchIds(branchIds);
     }
 }

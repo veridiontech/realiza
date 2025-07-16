@@ -7,7 +7,7 @@ interface ExpirationItem {
   title: string;
   expirationDateAmount: number;
   expirationDateUnit: "DAYS" | "WEEKS" | "MONTHS";
-  impede: boolean;          // ← novo campo
+  impede: boolean;
 }
 
 interface ValidateSectionProps {
@@ -25,7 +25,6 @@ export function ValidateSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amountEdit, setAmountEdit] = useState(0);
   const [unitEdit, setUnitEdit] = useState<"DAYS" | "WEEKS" | "MONTHS">("DAYS");
-  // se precisar editar o impede em modo edição, você pode criar também:
   const [impedeEdit, setImpedeEdit] = useState(false);
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export function ValidateSection({
     setEditingId(doc.idDocument);
     setAmountEdit(doc.expirationDateAmount);
     setUnitEdit(doc.expirationDateUnit);
-    setImpedeEdit(doc.impede);   // inicializa o checkbox em edição
+    setImpedeEdit(doc.impede);
   };
 
   const handleSave = async (id: string) => {
@@ -84,15 +83,15 @@ export function ValidateSection({
         return;
       }
 
-      if (amountEdit <= 0) {
-        console.warn("Quantidade inválida:", amountEdit);
+      if (amountEdit <= 0 || !["DAYS", "WEEKS", "MONTHS"].includes(unitEdit)) {
+        console.warn("Valores inválidos para salvar:", amountEdit, unitEdit);
         return;
       }
 
       const payload = {
         expirationDateAmount: amountEdit,
         expirationDateUnit: unitEdit,
-        impede: impedeEdit,       // envia também o impede
+        impede: impedeEdit,
       };
 
       console.log("🔁 Enviando para API:", payload);
@@ -119,7 +118,7 @@ export function ValidateSection({
                 ...doc,
                 expirationDateAmount: amountEdit,
                 expirationDateUnit: unitEdit,
-                impede: impedeEdit,   // atualiza o state local também
+                impede: impedeEdit,
               }
             : doc
         )
@@ -159,9 +158,10 @@ export function ValidateSection({
                     type="number"
                     min={1}
                     value={amountEdit}
-                    onChange={(e) =>
-                      setAmountEdit(parseInt(e.target.value, 10) || 0)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setAmountEdit(value === "" ? 0 : parseInt(value, 10));
+                    }}
                     className="w-20 border px-1 py-0.5"
                   />
                 </td>

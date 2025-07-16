@@ -3,6 +3,8 @@ package bl.tech.realiza.gateways.responses.services;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -13,4 +15,5 @@ public class DocumentIAValidationResponse {
     private boolean autoValidate;
     @JsonProperty("isValid")
     private boolean valid;
+    private LocalDateTime documentDate;
 }

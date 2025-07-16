@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts.contract;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.ContractController;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
+import bl.tech.realiza.gateways.responses.contracts.contract.ContractByBranchIdsResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,6 +67,13 @@ public class ContractControllerImpl implements ContractController {
                                                                                       @PathVariable String idEmployee) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
         return ResponseEntity.ok(crudContractImpl.getContractByEmployee(pageable,idEmployee));
+    }
+
+    @GetMapping("/find-by-branchIds")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<ContractByBranchIdsResponseDto>> getContractsByBranchIds(@RequestBody List<String> branchIds) {
+        return ResponseEntity.ok(crudContractImpl.getContractByBranchIds(branchIds));
     }
 
 }

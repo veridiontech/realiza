@@ -257,6 +257,8 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
             }
             documentProviderSubcontractor.setDocumentation(fileDocumentId);
             documentProviderSubcontractor.setStatus(EM_ANALISE);
+            documentProviderSubcontractor.setAdherent(true);
+            documentProviderSubcontractor.setConforming(false);
         }
 
         documentProcessingService.processDocumentAsync(file,
