@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.documents.document;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
@@ -109,6 +110,10 @@ public class CrudDocumentImpl implements CrudDocument {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
         document.setStatus(documentStatusChangeRequestDto.getStatus());
+        for (ContractDocument contractDocument : document.getContractDocuments()) {
+            contractDocument.setStatus(contractDocument.getStatus());
+        }
+
         if (document.getStatus() == APROVADO) {
             document.setConforming(true);
             DocumentMatrix.Unit expirationUnit = null;
@@ -195,16 +200,14 @@ public class CrudDocumentImpl implements CrudDocument {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        if (document.getContracts().contains(contract)) {
-            document.getContracts().remove(contract);
-            contract.getDocuments().remove(document);
+        if (document.getContractDocuments().stream().anyMatch(contractDocument -> contractDocument.getContract().equals(contract))) {
+            document.getContractDocuments().removeIf(contractDocument -> contractDocument.getContract().equals(contract));
 
-            if (document.getContracts().isEmpty()) {
+            if (document.getContractDocuments().isEmpty()) {
                 documentRepository.delete(document);
             } else {
                 documentRepository.save(document);
             }
-
             contractRepository.save(contract);
         }
 

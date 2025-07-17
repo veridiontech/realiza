@@ -16,7 +16,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (
             :clientId IS NULL OR
@@ -45,7 +46,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
@@ -77,7 +79,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (
         :clientId IS NULL OR
@@ -107,7 +110,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
@@ -137,7 +141,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     @Query("""
     SELECT COUNT(DISTINCT d)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE cps.branch.idBranch IN :branchIds
     AND :responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds
@@ -160,7 +165,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     @Query("""
     SELECT COUNT(DISTINCT d)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
@@ -184,7 +190,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     @Query("""
     SELECT COUNT(DISTINCT d)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE cps.branch.client.idClient = :clientId
     AND :responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds
@@ -206,7 +213,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     @Query("""
     SELECT COUNT(DISTINCT d)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.branch.client.idClient = :clientId
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
@@ -237,7 +245,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (
         :clientId IS NULL OR
@@ -267,7 +276,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
@@ -298,7 +308,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (
         :clientId IS NULL OR
@@ -328,7 +339,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (
         :clientId IS NULL OR
@@ -359,7 +371,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (cps.providerSupplier.idProvider = :providerId)
     AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
@@ -377,7 +390,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (cps.providerSupplier.idProvider = :providerId)
     AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
@@ -395,7 +409,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.adherent = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.providerSupplier.idProvider = :providerId
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
@@ -413,7 +428,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
     FROM Document d
-    JOIN d.contracts c
+    JOIN d.contractDocuments cd
+    JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.providerSupplier.idProvider = :providerId
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
