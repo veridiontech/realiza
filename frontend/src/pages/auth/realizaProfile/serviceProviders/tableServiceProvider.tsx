@@ -10,6 +10,7 @@ import {
   MoreVertical,
   History,
   ScrollText,
+  Loader2,
 } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
@@ -98,6 +99,8 @@ export function TableServiceProvider() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
+  const [isFinalizingContract, setIsFinalizingContract] = useState(false);
+  const [isSuspendingContract, setIsSuspendingContract] = useState(false);
   const [editFormData, setEditFormData] = useState<any | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
@@ -109,6 +112,7 @@ export function TableServiceProvider() {
   const [contractHistory, setContractHistory] = useState<any[]>([]);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Ativo" | "Finalizado" | "Suspenso"
@@ -155,27 +159,37 @@ export function TableServiceProvider() {
     }
   }, [editFormData, managers, servicesType, reset]);
 
-
   const [searchTerm, setSearchTerm] = useState("");
 
-  const getSupplier = async () => {
-    if (!selectedBranch?.idBranch) return;
-    setLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
-        params: {
-          idSearch: selectedBranch.idBranch,
-        },
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      setSuppliers(res.data.content);
-    } catch (err) {
-      console.log("Erro ao buscar prestadores de serviço", err);
-    } finally {
-      setLoading(false);
+const getSupplier = async () => {
+  if (!selectedBranch?.idBranch) return;
+  setLoading(true);
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    
+    let isActive;
+    if (statusFilter === "Ativo") {
+      isActive = true;
+    } else if (statusFilter === "Suspenso") {
+      isActive = false;
     }
-  };
+  
+    const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
+      params: {
+        idSearch: selectedBranch.idBranch,
+        isActive: isActive,
+      },
+      headers: { Authorization: `Bearer ${tokenFromStorage}` },
+    });
+    
+    setSuppliers(res.data.content);
+    console.log("Contratos recebidos da API (getSupplier):", res.data.content);
+  } catch (err) {
+    console.log("Erro ao buscar prestadores de serviço", err);
+  } finally {
+    setLoading(false);
+  }
+};
   const onSubmitEdit = async (data: z.infer<typeof editContractSchema>) => {
     try {
       const token = localStorage.getItem("tokenClient");
@@ -294,6 +308,53 @@ export function TableServiceProvider() {
     setIsEditModalOpen(true);
   };
 
+  const handleSuspendClick = (supplier: any) => {
+    console.log("handleSuspendClick acionado para o contrato:", supplier.idContract);
+    setSelectedSupplier(supplier);
+    setSelectedSupplierId(supplier.idContract);
+    setIsSuspendModalOpen(true);
+  };
+
+  const handleSuspendContract = async () => {
+    console.log("handleSuspendContract iniciado.");
+    if (!selectedSupplierId) {
+      console.log("selectedSupplierId está nulo ou indefinido. Abortando requisição.");
+      return;
+    }
+
+    setIsSuspendingContract(true);
+    console.log("Estado isSuspendingContract definido para true.");
+    console.log("Tentando suspender contrato com ID:", selectedSupplierId);
+    const token = localStorage.getItem("tokenClient");
+    console.log("Token de autenticação:", token ? "Presente" : "Ausente");
+    const endpoint = `${ip}/contract/suspend/${selectedSupplierId}`;
+    console.log("Endpoint da requisição:", endpoint);
+
+    try {
+      const response = await axios.post(endpoint, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Resposta da requisição de suspensão:", response.data);
+      toast.success("Contrato suspenso com sucesso");
+      console.log("Contrato suspenso com sucesso.");
+      await getSupplier();
+      console.log("Lista de fornecedores atualizada.");
+      setIsSuspendModalOpen(false);
+      setSelectedSupplierId(null);
+      console.log("Modal de suspensão fechado e ID resetado.");
+    } catch (err) {
+      toast.error("Erro ao suspender contrato");
+      if (axios.isAxiosError(err)) {
+        console.error("Erro na requisição Axios:", err.response?.data || err.message);
+      } else {
+        console.error("Erro ao suspender contrato:", err);
+      }
+    } finally {
+      setIsSuspendingContract(false);
+      console.log("Finalizado processo de suspensão do contrato. isSuspendingContract definido para false.");
+    }
+  };
+
   const filteredSuppliers = suppliers.filter((supplier) => {
     const term = searchTerm.toLowerCase();
     const matchesSearchTerm =
@@ -306,22 +367,35 @@ export function TableServiceProvider() {
     const isSuspended = supplier.suspended === true;
     const isActive = !isFinished && !isSuspended;
 
-    switch (statusFilter) {
-      case "Todos":
-        return matchesSearchTerm;
-      case "Ativo":
-        return matchesSearchTerm && isActive;
-      case "Finalizado":
-        return matchesSearchTerm && isFinished;
-      case "Suspenso":
-        return matchesSearchTerm && isSuspended;
-      default:
-        return matchesSearchTerm;
-    }
+    const shouldShow = (() => {
+        switch (statusFilter) {
+            case "Todos":
+                return matchesSearchTerm;
+            case "Ativo":
+                return matchesSearchTerm && isActive;
+            case "Finalizado":
+                return matchesSearchTerm && isFinished;
+            case "Suspenso":
+                return matchesSearchTerm && isSuspended;
+            default:
+                return matchesSearchTerm;
+        }
+    })();
+
+    console.log(`Contrato: ${supplier.contractReference}, isFinished: ${isFinished}, isSuspended: ${isSuspended}, isActive: ${isActive}, Filter: ${statusFilter}, Matches Search: ${matchesSearchTerm}, Should Show: ${shouldShow}`);
+    return shouldShow;
   });
 
+  useEffect(() => {
+    console.log("Contratos exibidos após a filtragem:", filteredSuppliers); // Log para ver o resultado da filtragem
+    if (filteredSuppliers.length === 0 && !loading && suppliers.length > 0) {
+      console.log("Nenhum contrato encontrado após a filtragem. Verifique as condições de filtro.");
+    }
+  }, [filteredSuppliers, loading, suppliers]);
+
+
   function traduzirAcao(acao: string) {
-    const traducoes: Record<string, string> = {
+    const traducoes: { [key: string]: string } = {
       ALL: "Todas",
       CREATE: "Criado",
       UPDATE: "Atualizado",
@@ -349,7 +423,7 @@ export function TableServiceProvider() {
         {loading ? (
           <p className="text-center text-gray-600">Carregando...</p>
         ) : filteredSuppliers.length > 0 ? (
-          filteredSuppliers.map((supplier: any) => (
+          filteredSuppliers.map((supplier) => (
             <div
               key={supplier.idProvider}
               className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
@@ -513,7 +587,7 @@ export function TableServiceProvider() {
                 </td>
               </tr>
             ) : filteredSuppliers.length > 0 ? (
-              filteredSuppliers.map((supplier: any) => (
+              filteredSuppliers.map((supplier) => (
                 <tr key={supplier.idProvider}>
                   <td className="border border-gray-300 p-2">
                     {supplier.contractReference}
@@ -602,8 +676,11 @@ export function TableServiceProvider() {
                             <BadgeCheck className="w-4 h-4" /> Finalizar
                           </button>
                           <button
-                            disabled
-                            className="w-full text-left px-4 py-2 text-sm text-gray-400 flex items-center gap-2 cursor-not-allowed"
+                            onClick={() => {
+                              console.log("Botão Suspender clicado para o contrato:", supplier.idContract);
+                              handleSuspendClick(supplier);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
                             <X className="w-4 h-4" /> Suspender
                           </button>
@@ -779,7 +856,7 @@ export function TableServiceProvider() {
                   disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
-                  {managers.map((m: any) => (
+                  {managers.map((m) => (
                     <option key={m.idUser} value={m.idUser}>
                       {m.firstName} {m.surname}
                     </option>
@@ -809,7 +886,7 @@ export function TableServiceProvider() {
                   disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
-                  {servicesType.map((service: any) => (
+                  {servicesType.map((service) => (
                     <option
                       key={service.idServiceType}
                       value={service.idServiceType}
@@ -864,7 +941,7 @@ export function TableServiceProvider() {
                           .toLowerCase()
                           .includes(searchSsmaActivityEdit.toLowerCase())
                       )
-                      .map((activity: any) => (
+                      .map((activity) => (
                         <label
                           key={activity.idActivity}
                           className="flex gap-2 py-1"
@@ -896,7 +973,7 @@ export function TableServiceProvider() {
                     Tipo de atividade Trabalhista
                   </label>
                   <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
-                    {activities.map((activity: any) => (
+                    {activities.map((activity) => (
                       <label
                         key={activity.idActivity}
                         className="flex gap-2 py-1"
@@ -994,7 +1071,7 @@ export function TableServiceProvider() {
                 <p>
                   Essa ação é <strong>permanente</strong> e{" "}
                   <strong>não poderá ser desfeita</strong>. O contrato ainda
-                  ficara visível mas não poderá ser reativado.
+                  ficará visível, mas não poderá ser reativado.
                 </p>
               </div>
             </div>
@@ -1003,6 +1080,7 @@ export function TableServiceProvider() {
               <button
                 onClick={() => setIsFinalizeModalOpen(false)}
                 className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+                disabled={isFinalizingContract}
               >
                 Voltar
               </button>
@@ -1010,27 +1088,110 @@ export function TableServiceProvider() {
                 onClick={async () => {
                   if (!selectedSupplierId) return;
 
+                  setIsFinalizingContract(true);
+                  console.log("Iniciando finalização do contrato...");
                   const token = localStorage.getItem("tokenClient");
                   const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
                   const payload = { status: "Contrato Cancelado" };
 
                   try {
-                    await axios.post(endpoint, payload, {
+                    const response = await axios.post(endpoint, payload, {
                       headers: { Authorization: `Bearer ${token}` },
                     });
+                    console.log("Resposta da requisição de finalização:", response.data);
                     toast.success("Contrato finalizado com sucesso");
+                    console.log("Contrato finalizado com sucesso.");
                     await getSupplier();
-                  } catch (err) {
-                    toast.error("Erro ao finalizar contrato");
-                    console.error(err);
-                  } finally {
+                    console.log("Lista de fornecedores atualizada.");
                     setIsFinalizeModalOpen(false);
                     setSelectedSupplierId(null);
+                    console.log("Modal de finalização fechado e ID resetado.");
+                  } catch (err) {
+                    toast.error("Erro ao finalizar contrato");
+                    if (axios.isAxiosError(err)) {
+                      console.error("Erro na requisição Axios (finalizar):", err.response?.data || err.message);
+                    } else {
+                      console.error("Erro ao finalizar contrato:", err);
+                    }
+                  } finally {
+                    setIsFinalizingContract(false);
+                    console.log("Finalizado processo de finalização do contrato. isFinalizingContract definido para false.");
                   }
                 }}
-                className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
+                className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
+                disabled={isFinalizingContract}
               >
-                Finalizar contrato
+                {isFinalizingContract ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizando...
+                  </>
+                ) : (
+                  "Finalizar contrato"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSuspendModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-md w-[90vw] max-w-[520px] p-6 shadow-lg relative">
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="text-[#2E3C4D] text-lg font-semibold flex items-center gap-2">
+                <X className="w-5 h-5 text-[#C9C9C9]" />
+                Suspender contrato
+              </h2>
+              <button onClick={() => {
+                console.log("Botão 'X' para fechar modal de suspensão clicado.");
+                setIsSuspendModalOpen(false);
+              }}>
+                <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <img
+                src={likeImage}
+                alt="Ilustração de confirmação"
+                className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
+              />
+
+              <div className="flex-1 text-sm text-gray-700 space-y-2">
+                <p className="font-semibold">
+                  Deseja realmente suspender este contrato?
+                </p>
+                <p>
+                  Essa ação é <strong>permanente</strong> e{" "}
+                  <strong>não poderá ser desfeita</strong>. O contrato ainda
+                  ficará visível, mas não poderá ser reativado.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  console.log("Botão 'Voltar' no modal de suspensão clicado.");
+                  setIsSuspendModalOpen(false);
+                }}
+                className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+                disabled={isSuspendingContract}
+              >
+                Voltar
+              </button>
+              <button
+                onClick={handleSuspendContract}
+                className="bg-orange-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-orange-700 transition flex items-center justify-center gap-2"
+                disabled={isSuspendingContract}
+              >
+                {isSuspendingContract ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Suspendendo...
+                  </>
+                ) : (
+                  "Suspender contrato"
+                )}
               </button>
             </div>
           </div>
