@@ -30,7 +30,8 @@ interface Document {
   hasDoc: boolean;
   status: string;
   expirationDate?: string;
-  creationDate: string; // Adicionado para garantir que creationDate está presente
+  isUnique?: boolean;
+  lastCheck?: string;
 }
 
 export function ContarctsByProvider() {
@@ -38,6 +39,7 @@ export function ContarctsByProvider() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [collaborators, setCollaborators] = useState([]);
+  const [subcontractors, setSubcontractors] = useState([]);
   const [selectedContractName, setSelectedContractName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [provider, setProvider] = useState<any>(null);
@@ -52,12 +54,9 @@ export function ContarctsByProvider() {
   const [openMenuDocumentId, setOpenMenuDocumentId] = useState<string | null>(
     null
   );
-  const [viewOption, setViewOption] = useState<"documents" | "collaborators">(
-    "documents"
-  );
-
-  // const profile = localStorage.getItem("profile");
-  // const isRealiza = profile === "Realiza";
+  const [viewOption, setViewOption] = useState<
+    "documents" | "collaborators" | "subcontractors"
+  >("documents");
 
   const token = localStorage.getItem("tokenClient");
 
@@ -84,10 +83,12 @@ export function ContarctsByProvider() {
         });
         setDocuments(res.data.documentDtos || []);
         setCollaborators(res.data.employeeDtos || []);
+        setSubcontractors(res.data.subcontractorDtos || []);
         setSelectedContractName(serviceName);
         setSearchTerm("");
         console.log("Documents fetched:", res.data.documentDtos);
         console.log("Collaborators fetched:", res.data.employeeDtos);
+        console.log("Subcontractors fetched:", res.data.subcontractorDtos);
       } catch (err) {
         console.error("Error fetching all data for contract:", err);
       }
@@ -245,7 +246,7 @@ export function ContarctsByProvider() {
 
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
-    if (status === "EM_ANALISE") return "text-blue-500"; // Alterado para azul
+    if (status === "EM_ANALISE") return "text-blue-500";
     if (status === "APROVADO" || status === "APROVADO_IA")
       return "text-green-600";
     if (status === "REPROVADO" || status === "REPROVADO_IA")
@@ -320,6 +321,16 @@ export function ContarctsByProvider() {
             >
               Colaboradores
             </button>
+            <button
+              onClick={() => setViewOption("subcontractors")}
+              className={`${
+                viewOption === "subcontractors"
+                  ? "bg-realizaBlue text-white"
+                  : "bg-neutral-200 text-[#34495E]"
+              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+            >
+              Subcontratados
+            </button>
           </div>
         </div>
 
@@ -344,7 +355,7 @@ export function ContarctsByProvider() {
               <div className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
                 <div>Status</div>
                 <div className="col-span-1">Documento</div>
-                <div>Envio</div> {/* Coluna de Envio */}
+                <div>Checagem</div>
                 <div>Validade</div>
                 <div className="text-center">Ações</div>
               </div>
@@ -356,45 +367,56 @@ export function ContarctsByProvider() {
                       className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                       key={doc.id}
                     >
-                      {/* Coluna Status */}
                       <div>
                         {doc.status === "EM_ANALISE" ? (
                           <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-blue-500" /> {/* Ícone agora azul */}
-                            <span className="text-sm font-semibold text-blue-500"> {/* Texto agora azul */}
+                            <AlertCircle className="w-4 h-4 text-blue-500" />
+                            <span className="text-sm font-semibold text-blue-500">
                               Em Análise
                             </span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                             {/* Você já tem uma lógica similar para ícones, aqui é onde você pode estendê-la para outros status */}
-                            {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA" ? (
+                            {doc.status === "REPROVADO" ||
+                            doc.status === "REPROVADO_IA" ? (
                               <Ban className="w-4 h-4 text-red-500" />
-                            ) : doc.status === "APROVADO" || doc.status === "APROVADO_IA" ? (
+                            ) : doc.status === "APROVADO" ||
+                              doc.status === "APROVADO_IA" ? (
                               <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : null} {/* Adicione outros ícones para outros status se desejar */}
-                            <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
-                              {doc.status.replace(/_/g, ' ')} {/* Substitui underscore por espaço para melhor leitura */}
+                            ) : null}
+                            <span
+                              className={`text-sm font-medium ${getStatusClass(
+                                doc.status
+                              )}`}
+                            >
+                              {doc.status.replace(/_/g, " ")}
                             </span>
                           </div>
                         )}
-                         {doc.status === "EM_ANALISE" && (
-                            <div className="flex items-center gap-2">
-                              <AlertCircle className="w-4 h-4 text-blue-500" /> {/* Ícone agora azul */}
-                              <span className="text-xs font-semibold text-blue-500">⚠️ Necessita análise humana</span> {/* Texto agora azul */}
-                            </div>
-                         )}
+                        {doc.status === "EM_ANALISE" && (
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-blue-500" />
+                            <span className="text-xs font-semibold text-blue-500">
+                              ⚠️ Necessita análise humana
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="col-span-1">
                         <h3 className="text-[16px] font-medium">{doc.title}</h3>
                         <span className="text-[12px] text-neutral-600">
                           {doc.ownerName}
                         </span>
+                        {doc.isUnique !== undefined && (
+                            <span className="text-[12px] text-neutral-600">
+                                {' - '}
+                                {doc.isUnique ? 'Documento único para esse contrato' : 'Documento se espelha para outros contratos'}
+                            </span>
+                        )}
                       </div>
-                      {/* Coluna Envio - Exibe a creationDate */}
                       <div>
                         <span className="text-sm text-neutral-600">
-                          {formatarData(doc.creationDate)}
+                          {formatarData(doc.lastCheck)}
                         </span>
                       </div>
                       <div>
@@ -402,7 +424,6 @@ export function ContarctsByProvider() {
                           {formatarData(doc.expirationDate)}
                         </span>
                       </div>
-
                       <div className="flex justify-center relative">
                         <button
                           onClick={() =>
@@ -426,28 +447,29 @@ export function ContarctsByProvider() {
                               </button>
                             )}
 
-                            
-                              <>
-                                <button
-                                  onClick={() => handleOpenUploadModal(doc.id, doc.title)}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                                >
-                                  <Upload className="w-5 h-5 text-base" />
-                                  Reenviar
-                                </button>
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleOpenUploadModal(doc.id, doc.title)
+                                }
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                              >
+                                <Upload className="w-5 h-5 text-base" />
+                                Reenviar
+                              </button>
 
-                                <button
-                                  type="button"
-                                  onClick={() => exemptDocument(doc.id, doc.title)}
-                                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
-                                >
-                                  <FileX2
-                                    className="w-5 h-5 text-base"
-                                    color="#b31933"
-                                  />
-                                  Isentar
-                                </button>
-                              </>
+                              <button
+                                type="button"
+                                onClick={() => exemptDocument(doc.id, doc.title)}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                              >
+                                <FileX2
+                                  className="w-5 h-5 text-base"
+                                  color="#b31933"
+                                />
+                                Isentar
+                              </button>
+                            </>
                           </div>
                         )}
                       </div>
@@ -489,6 +511,39 @@ export function ContarctsByProvider() {
                 ) : (
                   <span className="text-neutral-400">
                     Nenhum colaborador encontrado
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {viewOption === "subcontractors" && (
+            <div className="flex flex-col items-start gap-10">
+              <div className="flex items-center gap-2 text-[#34495E]">
+                <User />
+                <h2 className="text-[20px]">Subcontratados</h2>
+              </div>
+              <div className="flex flex-col gap-8 overflow-y-auto max-h-[35vh] pr-2">
+                {subcontractors.length > 0 ? (
+                  subcontractors.map((sub: any) => (
+                    <div key={sub.id} className="flex flex-col gap-5">
+                      <div className="flex items-center gap-5">
+                        <div className="bg-neutral-400 p-2 rounded-full">
+                          <User />
+                        </div>
+                        <div>
+                          <p className="text-[18px]">{sub.corporateName}</p>
+                          <span className="text-[12px] text-realizaBlue font-semibold underline">
+                            {sub.cnpj}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="bg-neutral-400 h-[1px]" />
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-neutral-400">
+                    Nenhum subcontratado encontrado
                   </span>
                 )}
               </div>
