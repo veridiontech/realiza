@@ -64,20 +64,8 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
-    public ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypesByOwner(@RequestParam String idOwner, @RequestParam CrudServiceType.Owner owner) {
-        List<ServiceTypeFullResponseDto> serviceTypeResponseDtos = new ArrayList<>();
-        switch (owner) {
-            case CLIENT -> {
-                serviceTypeResponseDtos = crudServiceTypeImpl.getAllServiceType(idOwner, CrudServiceType.Owner.CLIENT);
-            }
-            case BRANCH -> {
-                serviceTypeResponseDtos = crudServiceTypeImpl.getAllServiceType(idOwner, CrudServiceType.Owner.BRANCH);
-            }
-            case REPO -> {
-                serviceTypeResponseDtos = crudServiceTypeImpl.getAllServiceType(idOwner, CrudServiceType.Owner.REPO);
-            }
-        }
-        return ResponseEntity.ok(serviceTypeResponseDtos);
+    public ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypesByOwner(@RequestParam(required = false) String idOwner, @RequestParam CrudServiceType.Owner owner) {
+        return ResponseEntity.ok(crudServiceTypeImpl.getAllServiceType(idOwner, owner));
     }
 
     @PutMapping("/repository/{idServiceType}")

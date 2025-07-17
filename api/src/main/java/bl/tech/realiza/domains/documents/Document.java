@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.documents;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,9 +64,8 @@ public abstract class Document {
     // Relacionamentos CONTRATUAIS
     // -------------------------------
 
-    @ManyToMany(mappedBy = "documents")
-    @JsonBackReference
-    private List<Contract> contracts;
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContractDocument> contractDocuments;
 
     @JsonIgnore
     @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
