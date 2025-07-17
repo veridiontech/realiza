@@ -6,6 +6,7 @@ import bl.tech.realiza.gateways.responses.contracts.contract.ContractSubcontract
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CrudContractProviderSubcontractor {
@@ -16,4 +17,5 @@ public interface CrudContractProviderSubcontractor {
     void delete(String id);
     Page<ContractSubcontractorResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);
     Page<ContractSubcontractorResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
+    List<ContractSubcontractorResponseDto> findAllByContractSupplier(String contractId);
 }
