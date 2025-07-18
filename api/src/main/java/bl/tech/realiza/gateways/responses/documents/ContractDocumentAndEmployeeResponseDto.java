@@ -27,6 +27,7 @@ public class ContractDocumentAndEmployeeResponseDto {
         private Status status;
         private String ownerName;
         private Boolean enterprise;
+        private Boolean isUnique;
         private Boolean hasDoc;
         private LocalDateTime expirationDate;
         private LocalDateTime lastCheck;

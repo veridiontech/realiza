@@ -115,6 +115,6 @@ export function StatusDocumentChart({ data }: StatusDocumentChartProps) {
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
-    </Card>
-  );
+    </Card>
+  );
 }

@@ -125,6 +125,45 @@ public class CrudContractImpl implements CrudContract {
     }
 
     @Override
+    public String reactivateContract(String contractId) {
+        UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+
+        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                || requester.getManager()) {
+            Contract contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+            if (requester.getContractAccess().contains(contract.getIdContract())
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+                contract.setIsActive(ATIVADO);
+                contract.setEndDate(null);
+
+                contract = contractRepository.save(contract);
+
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                            .orElse(null);
+                    if (userResponsible != null) {
+                        auditLogServiceImpl.createAuditLog(
+                                contract.getIdContract(),
+                                CONTRACT,
+                                userResponsible.getFullName() + " reativou contrato "
+                                        + contract.getContractReference(),
+                                null,
+                                UPDATE,
+                                userResponsible.getIdUser());
+                    }
+                }
+
+                return "Contract reactivated successfully";
+            }
+        }
+        throw new IllegalArgumentException("User don't have permission to suspend a contract");
+    }
+
+    @Override
     public String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         Contract contractProxy = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));

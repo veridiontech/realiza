@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ContractProviderSubcontractorControlller {
@@ -17,4 +18,5 @@ public interface ContractProviderSubcontractorControlller {
     ResponseEntity<Void> deleteContractProviderSubcontractor(String id);
     ResponseEntity<Page<ContractSubcontractorResponseDto>> getAllContractsProviderSubcontractorBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<Page<ContractSubcontractorResponseDto>> getAllBySupplier(int page, int size, String sort, Sort.Direction direction, String idSupplier);
+    ResponseEntity<List<ContractSubcontractorResponseDto>> getAllByContractSupplier(String contractId);
 }

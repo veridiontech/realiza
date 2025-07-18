@@ -74,14 +74,8 @@ public abstract class Contract {
     @JsonIgnore
     private List<Activity> activities;
 
-    @ManyToMany
-    @JoinTable(
-            name = "CONTRACT_DOCUMENT",
-            joinColumns = @JoinColumn(name = "idContract"),
-            inverseJoinColumns = @JoinColumn(name = "idDocumentation")
-    )
-    @JsonManagedReference
-    private List<Document> documents;
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContractDocument> contractDocuments;
 
     @ManyToMany(mappedBy = "contracts")
     private List<Employee> employees;

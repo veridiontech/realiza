@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -104,5 +105,12 @@ public class ContractProviderSubcontractorControllerImpl implements ContractProv
         Page<ContractSubcontractorResponseDto> pageContractSubcontractor = crudSubcontractor.findAllBySupplier(idSupplier, pageable);
 
         return ResponseEntity.ok(pageContractSubcontractor);
+    }
+
+    @GetMapping("/find-by-contract-supplier/{contractId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<ContractSubcontractorResponseDto>> getAllByContractSupplier(@PathVariable String contractId) {
+        return ResponseEntity.ok(crudSubcontractor.findAllByContractSupplier(contractId));
     }
 }

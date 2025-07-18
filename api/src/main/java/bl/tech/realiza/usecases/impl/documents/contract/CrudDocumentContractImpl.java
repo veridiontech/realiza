@@ -9,6 +9,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.responses.documents.ContractDocumentAndEmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class CrudDocumentContractImpl implements CrudDocumentContract {
     private final ContractRepository contractRepository;
     private final JwtService jwtService;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
 
     @Override
     public ContractDocumentAndEmployeeResponseDto getDocumentAndEmployeeByContractId(String id) {
@@ -42,16 +44,18 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                     .cboTitle(employee.getCbo() != null
                             ? employee.getCbo().getTitle() : null)
                     .build());
+            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository
+                    .findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(employee.getIdEmployee(),
+                            contract.getIdContract());
 
-            for (DocumentEmployee documentEmployee : employee.getDocumentEmployees().stream()
-                    .filter(doc -> doc.getContracts().contains(contract))
-                    .toList()) {
+            for (DocumentEmployee documentEmployee : documentEmployeeList) {
                 documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                                 .id(documentEmployee.getIdDocumentation())
                                 .title(documentEmployee.getTitle())
                                 .status(documentEmployee.getStatus())
                                 .type(documentEmployee.getType())
                                 .ownerName(documentEmployee.getEmployee().getFullName())
+                                .isUnique(documentEmployee.getDocumentMatrix().getIsDocumentUnique())
                                 .hasDoc(documentEmployee.getIdDocumentation() != null
                                         && !documentEmployee.getIdDocumentation().isEmpty())
                                 .expirationDate(documentEmployee.getExpirationDate())
@@ -78,6 +82,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .ownerName(documentProviderSupplier.getProviderSupplier() != null
                                         ? documentProviderSupplier.getProviderSupplier().getCorporateName()
                                         : null)
+                                .isUnique(documentProviderSupplier.getDocumentMatrix().getIsDocumentUnique())
                                 .hasDoc(documentProviderSupplier.getIdDocumentation() != null
                                         && !documentProviderSupplier.getIdDocumentation().isEmpty())
                                 .expirationDate(documentProviderSupplier.getExpirationDate())
@@ -146,6 +151,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .ownerName(documentProviderSubcontractor.getProviderSubcontractor() != null
                                         ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
                                         : null)
+                                .isUnique(documentProviderSubcontractor.getDocumentMatrix().getIsDocumentUnique())
                                 .hasDoc(documentProviderSubcontractor.getIdDocumentation() != null
                                         && !documentProviderSubcontractor.getIdDocumentation().isEmpty())
                                 .expirationDate(documentProviderSubcontractor.getExpirationDate())

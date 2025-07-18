@@ -1,0 +1,41 @@
+package bl.tech.realiza.domains.contract;
+
+import bl.tech.realiza.domains.documents.Document;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static bl.tech.realiza.domains.documents.Document.Status.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+public class ContractDocument {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // 🔗 Relacionamento com Contract
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idContract")
+    private Contract contract;
+
+    // 🔗 Relacionamento com Document
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idDocumentation")
+    private Document document;
+
+    @Builder.Default
+    private Document.Status status = PENDENTE;
+}

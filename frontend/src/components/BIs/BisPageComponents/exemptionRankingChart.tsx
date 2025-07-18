@@ -40,7 +40,7 @@ export function ExemptionPendingChart({ data }: any) {
   // Função para exportar os dados do gráfico em Excel
   const exportToExcel = () => {
     // Se quiser renomear colunas na planilha:
-    const sheetData = chartData.map((d: any) => ({
+    const sheetData = chartData.map((d: { category: string; value: number }) => ({
       Categoria: d.category,
       Pendências: d.value,
     }));
@@ -58,7 +58,7 @@ export function ExemptionPendingChart({ data }: any) {
         onClick={exportToExcel}
         className="absolute top-2 right-2 p-1 text-green-500 text-xs rounded-full"
       >
-        <FileDown width={20}/>
+        <FileDown width={20} />
       </button>
 
       <CardContent className="pt-6 pb-4 px-2">

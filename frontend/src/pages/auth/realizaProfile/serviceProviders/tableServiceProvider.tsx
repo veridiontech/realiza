@@ -10,8 +10,8 @@ import {
   MoreVertical,
   History,
   ScrollText,
+  Loader2,
 } from "lucide-react";
-//import bgModalRealiza from "@/assets/modalBG.jpeg";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 
 import { z } from "zod";
@@ -48,11 +48,11 @@ function StatusBadge({
   let statusStyle = "";
 
   if (suspended) {
-    statusStyle = "bg-orange-400"; // Cor para status 'Suspenso'
+    statusStyle = "bg-orange-400";
   } else if (finished === true) {
-    statusStyle = "bg-red-600"; // Cor para status 'Finalizado'
+    statusStyle = "bg-red-600";
   } else {
-    statusStyle = "bg-green-600"; // Cor para status 'Ativo'
+    statusStyle = "bg-green-600";
   }
 
   return <span className={`${baseClass} ${statusStyle}`}></span>;
@@ -70,7 +70,6 @@ function Modal({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-md shadow-lg w-[90vw] md:w-[640px] relative">
-        {/* HEADER */}
         <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 rounded-t-md h-[60px]">
           <div className="flex items-center gap-2">
             <div className="bg-yellow-400 p-[6px] rounded-sm flex items-center justify-center">
@@ -87,7 +86,6 @@ function Modal({
           </button>
         </div>
 
-        {/* BODY */}
         <div className="p-4">{children}</div>
       </div>
     </div>
@@ -101,6 +99,8 @@ export function TableServiceProvider() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
+  const [isFinalizingContract, setIsFinalizingContract] = useState(false);
+  const [isSuspendingContract, setIsSuspendingContract] = useState(false);
   const [editFormData, setEditFormData] = useState<any | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
@@ -111,8 +111,9 @@ export function TableServiceProvider() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [contractHistory, setContractHistory] = useState<any[]>([]);
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
 
-  // Novo estado para o filtro de status
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Ativo" | "Finalizado" | "Suspenso"
   >("Todos");
@@ -135,7 +136,16 @@ export function TableServiceProvider() {
   const [searchSsmaActivityEdit, setSearchSsmaActivityEdit] = useState("");
 
   useEffect(() => {
-    if (editFormData) {
+    if (selectedBranch?.idBranch) {
+      getManager();
+      getServicesType();
+      getActivities();
+      getSupplier();
+    }
+  }, [selectedBranch]);
+
+  useEffect(() => {
+    if (editFormData && managers.length > 0 && servicesType.length > 0) {
       reset({
         ...editFormData,
         subcontractPermission: editFormData.subcontractPermission
@@ -143,32 +153,43 @@ export function TableServiceProvider() {
           : "false",
         hse: editFormData.hse ?? false,
         labor: editFormData.labor ?? false,
+        idResponsible: editFormData.idResponsible || "",
+        idServiceType: editFormData.idServiceType || "",
       });
     }
-  }, [editFormData]);
+  }, [editFormData, managers, servicesType, reset]);
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const getSupplier = async () => {
-    if (!selectedBranch?.idBranch) return;
-    setLoading(true);
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
-      console.log("Requisição ao finalizar");
-      const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
-        params: {
-          idSearch: selectedBranch.idBranch,
-        },
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      console.log("Exemplo de item:", res.data.content);
-      setSuppliers(res.data.content);
-    } catch (err) {
-      console.log("Erro ao buscar prestadores de serviço", err);
-    } finally {
-      setLoading(false);
+const getSupplier = async () => {
+  if (!selectedBranch?.idBranch) return;
+  setLoading(true);
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    
+    let isActive;
+    if (statusFilter === "Ativo") {
+      isActive = true;
+    } else if (statusFilter === "Suspenso") {
+      isActive = false;
     }
-  };
+  
+    const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
+      params: {
+        idSearch: selectedBranch.idBranch,
+        isActive: isActive,
+      },
+      headers: { Authorization: `Bearer ${tokenFromStorage}` },
+    });
+    
+    setSuppliers(res.data.content);
+    console.log("Contratos recebidos da API (getSupplier):", res.data.content);
+  } catch (err) {
+    console.log("Erro ao buscar prestadores de serviço", err);
+  } finally {
+    setLoading(false);
+  }
+};
   const onSubmitEdit = async (data: z.infer<typeof editContractSchema>) => {
     try {
       const token = localStorage.getItem("tokenClient");
@@ -180,7 +201,6 @@ export function TableServiceProvider() {
           ...selectedLaborActivitiesEdit,
         ],
       };
-      console.log("Payload enviado para edição:", payload);
       await axios.put(
         `${ip}/contract/supplier/${editFormData.idContract}`,
         payload,
@@ -191,6 +211,7 @@ export function TableServiceProvider() {
       toast.success("Contrato atualizado com sucesso");
       await getSupplier();
       setIsEditModalOpen(false);
+      setIsEditing(false);
     } catch (err) {
       console.error(err);
       toast.error("Erro ao atualizar contrato");
@@ -213,7 +234,6 @@ export function TableServiceProvider() {
   };
 
   const handleHistoryClick = (supplier: any) => {
-    console.log("Histórico do contrato:", supplier);
     setSelectedSupplier(supplier);
     setIsHistoryModalOpen(true);
     getContractHistory(supplier.idContract);
@@ -260,10 +280,9 @@ export function TableServiceProvider() {
         },
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("📜 Histórico:", res.data.content);
       setContractHistory(res.data.content || []);
     } catch (error) {
-      console.error("❌ Erro ao buscar histórico do contrato", error);
+      console.error("Erro ao buscar histórico do contrato", error);
       toast.error("Erro ao buscar histórico");
     }
   };
@@ -282,23 +301,60 @@ export function TableServiceProvider() {
     );
   };
 
-  useEffect(() => {
-    if (selectedBranch?.idBranch) {
-      getSupplier();
-      getManager();
-      getServicesType();
-      getActivities();
-    }
-  }, [selectedBranch]);
-
   const handleEditClick = (supplier: any) => {
-    console.log("Supplier editando:", supplier);
     setSelectedSupplier(supplier);
     setEditFormData({ ...supplier });
+    setIsEditing(false);
     setIsEditModalOpen(true);
   };
 
-  // Lógica de filtragem aprimorada
+  const handleSuspendClick = (supplier: any) => {
+    console.log("handleSuspendClick acionado para o contrato:", supplier.idContract);
+    setSelectedSupplier(supplier);
+    setSelectedSupplierId(supplier.idContract);
+    setIsSuspendModalOpen(true);
+  };
+
+  const handleSuspendContract = async () => {
+    console.log("handleSuspendContract iniciado.");
+    if (!selectedSupplierId) {
+      console.log("selectedSupplierId está nulo ou indefinido. Abortando requisição.");
+      return;
+    }
+
+    setIsSuspendingContract(true);
+    console.log("Estado isSuspendingContract definido para true.");
+    console.log("Tentando suspender contrato com ID:", selectedSupplierId);
+    const token = localStorage.getItem("tokenClient");
+    console.log("Token de autenticação:", token ? "Presente" : "Ausente");
+    const endpoint = `${ip}/contract/suspend/${selectedSupplierId}`;
+    console.log("Endpoint da requisição:", endpoint);
+
+    try {
+      const response = await axios.post(endpoint, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Resposta da requisição de suspensão:", response.data);
+      toast.success("Contrato suspenso com sucesso");
+      console.log("Contrato suspenso com sucesso.");
+      await getSupplier();
+      console.log("Lista de fornecedores atualizada.");
+      setIsSuspendModalOpen(false);
+      setSelectedSupplierId(null);
+      console.log("Modal de suspensão fechado e ID resetado.");
+    } catch (err) {
+      toast.error("Erro ao suspender contrato");
+      if (axios.isAxiosError(err)) {
+        console.error("Erro na requisição Axios:", err.response?.data || err.message);
+      } else {
+        console.error("Erro ao suspender contrato:", err);
+      }
+    } finally {
+      setIsSuspendingContract(false);
+      console.log("Finalizado processo de suspensão do contrato. isSuspendingContract definido para false.");
+    }
+  };
+
   const filteredSuppliers = suppliers.filter((supplier) => {
     const term = searchTerm.toLowerCase();
     const matchesSearchTerm =
@@ -308,27 +364,38 @@ export function TableServiceProvider() {
       supplier.serviceName?.toLowerCase().includes(term);
 
     const isFinished = supplier.finished === true;
-    // Assumimos que 'suspended' é uma nova propriedade booleana no objeto supplier
-    // Você precisará garantir que essa propriedade seja retornada pela sua API quando a funcionalidade estiver pronta.
     const isSuspended = supplier.suspended === true;
     const isActive = !isFinished && !isSuspended;
 
-    switch (statusFilter) {
-      case "Todos":
-        return matchesSearchTerm;
-      case "Ativo":
-        return matchesSearchTerm && isActive;
-      case "Finalizado":
-        return matchesSearchTerm && isFinished;
-      case "Suspenso":
-        return matchesSearchTerm && isSuspended;
-      default:
-        return matchesSearchTerm;
-    }
+    const shouldShow = (() => {
+        switch (statusFilter) {
+            case "Todos":
+                return matchesSearchTerm;
+            case "Ativo":
+                return matchesSearchTerm && isActive;
+            case "Finalizado":
+                return matchesSearchTerm && isFinished;
+            case "Suspenso":
+                return matchesSearchTerm && isSuspended;
+            default:
+                return matchesSearchTerm;
+        }
+    })();
+
+    console.log(`Contrato: ${supplier.contractReference}, isFinished: ${isFinished}, isSuspended: ${isSuspended}, isActive: ${isActive}, Filter: ${statusFilter}, Matches Search: ${matchesSearchTerm}, Should Show: ${shouldShow}`);
+    return shouldShow;
   });
 
+  useEffect(() => {
+    console.log("Contratos exibidos após a filtragem:", filteredSuppliers); // Log para ver o resultado da filtragem
+    if (filteredSuppliers.length === 0 && !loading && suppliers.length > 0) {
+      console.log("Nenhum contrato encontrado após a filtragem. Verifique as condições de filtro.");
+    }
+  }, [filteredSuppliers, loading, suppliers]);
+
+
   function traduzirAcao(acao: string) {
-    const traducoes: Record<string, string> = {
+    const traducoes: { [key: string]: string } = {
       ALL: "Todas",
       CREATE: "Criado",
       UPDATE: "Atualizado",
@@ -355,8 +422,8 @@ export function TableServiceProvider() {
       <div className="block md:hidden space-y-4">
         {loading ? (
           <p className="text-center text-gray-600">Carregando...</p>
-        ) : filteredSuppliers.length > 0 ? ( // Usar filteredSuppliers aqui
-          filteredSuppliers.map((supplier: any) => (
+        ) : filteredSuppliers.length > 0 ? (
+          filteredSuppliers.map((supplier) => (
             <div
               key={supplier.idProvider}
               className="rounded-lg border border-gray-300 bg-white p-4 shadow-sm"
@@ -513,14 +580,14 @@ export function TableServiceProvider() {
             {loading ? (
               <tr>
                 <td
-                  colSpan={9} // Colspan ajustado
+                  colSpan={9}
                   className="border border-gray-300 p-2 text-center"
                 >
                   Carregando...
                 </td>
               </tr>
             ) : filteredSuppliers.length > 0 ? (
-              filteredSuppliers.map((supplier: any) => (
+              filteredSuppliers.map((supplier) => (
                 <tr key={supplier.idProvider}>
                   <td className="border border-gray-300 p-2">
                     {supplier.contractReference}
@@ -609,8 +676,11 @@ export function TableServiceProvider() {
                             <BadgeCheck className="w-4 h-4" /> Finalizar
                           </button>
                           <button
-                            disabled
-                            className="w-full text-left px-4 py-2 text-sm text-gray-400 flex items-center gap-2 cursor-not-allowed"
+                            onClick={() => {
+                              console.log("Botão Suspender clicado para o contrato:", supplier.idContract);
+                              handleSuspendClick(supplier);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
                             <X className="w-4 h-4" /> Suspender
                           </button>
@@ -623,7 +693,7 @@ export function TableServiceProvider() {
             ) : (
               <tr>
                 <td
-                  colSpan={9} // Colspan ajustado
+                  colSpan={9}
                   className="border border-gray-300 p-2 text-center"
                 >
                   Nenhum fornecedor encontrado.
@@ -740,7 +810,10 @@ export function TableServiceProvider() {
       {isEditModalOpen && editFormData && (
         <Modal
           title="Editar contrato"
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setIsEditing(false);
+          }}
         >
           <div className="text-gray-800 space-y-4 max-h-[80vh] overflow-auto w-full p-1">
             <form
@@ -748,38 +821,30 @@ export function TableServiceProvider() {
               className="flex flex-col gap-4 text-sm"
             >
               <label className="space-y-1">
-                <span className="font-semibold">Referência do contrato*</span>
-                <input
-                  className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
-                  {...register("contractReference")}
-                  disabled
-                />
-              </label>
-
-              <label className="space-y-1">
-                <span className="font-semibold">Nome do fornecedor*</span>
+                <span className="font-semibold">Nome do fornecedor</span>
                 <input
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("providerSupplierName")}
-                  disabled
+                  disabled={!isEditing}
                 />
               </label>
 
               <label className="space-y-1">
-                <span className="font-semibold">Nome do serviço*</span>
+                <span className="font-semibold">Nome do serviço</span>
                 <input
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("serviceName")}
-                  disabled
+                  disabled={!isEditing}
                 />
               </label>
 
               <label className="space-y-1">
-                <span className="font-semibold">Data de início*</span>
+                <span className="font-semibold">Data de início</span>
                 <input
                   type="date"
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("dateStart")}
+                  disabled={!isEditing}
                 />
               </label>
 
@@ -788,9 +853,10 @@ export function TableServiceProvider() {
                 <select
                   {...register("idResponsible")}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
-                  {managers.map((m: any) => (
+                  {managers.map((m) => (
                     <option key={m.idUser} value={m.idUser}>
                       {m.firstName} {m.surname}
                     </option>
@@ -803,6 +869,7 @@ export function TableServiceProvider() {
                 <select
                   {...register("expenseType")}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
                   <option value="CAPEX">CAPEX</option>
@@ -816,9 +883,10 @@ export function TableServiceProvider() {
                 <select
                   {...register("idServiceType")}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
+                  disabled={!isEditing}
                 >
                   <option value="">Selecione</option>
-                  {servicesType.map((service: any) => (
+                  {servicesType.map((service) => (
                     <option
                       key={service.idServiceType}
                       value={service.idServiceType}
@@ -837,6 +905,7 @@ export function TableServiceProvider() {
                       type="radio"
                       value="true"
                       {...register("subcontractPermission")}
+                      disabled={!isEditing}
                     />
                     Sim
                   </label>
@@ -845,21 +914,11 @@ export function TableServiceProvider() {
                       type="radio"
                       value="false"
                       {...register("subcontractPermission")}
+                      disabled={!isEditing}
                     />
                     Não
                   </label>
                 </div>
-              </div>
-
-              <div className="flex gap-6 pt-2">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" {...register("hse")} />
-                  SSMA
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" {...register("labor")} />
-                  Trabalhista
-                </label>
               </div>
 
               {hseWatch && (
@@ -873,6 +932,7 @@ export function TableServiceProvider() {
                     onChange={(e) => setSearchSsmaActivityEdit(e.target.value)}
                     placeholder="Buscar atividade..."
                     className="w-full rounded border px-3 py-2 text-sm bg-[#F2F3F5]"
+                    disabled={!isEditing}
                   />
                   <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
                     {activities
@@ -881,7 +941,7 @@ export function TableServiceProvider() {
                           .toLowerCase()
                           .includes(searchSsmaActivityEdit.toLowerCase())
                       )
-                      .map((activity: any) => (
+                      .map((activity) => (
                         <label
                           key={activity.idActivity}
                           className="flex gap-2 py-1"
@@ -898,6 +958,7 @@ export function TableServiceProvider() {
                                 e.target.checked
                               )
                             }
+                            disabled={!isEditing}
                           />
                           {activity.title}
                         </label>
@@ -912,7 +973,7 @@ export function TableServiceProvider() {
                     Tipo de atividade Trabalhista
                   </label>
                   <div className="bg-white text-gray-800 rounded p-2 max-h-[150px] overflow-y-auto border">
-                    {activities.map((activity: any) => (
+                    {activities.map((activity) => (
                       <label
                         key={activity.idActivity}
                         className="flex gap-2 py-1"
@@ -929,6 +990,7 @@ export function TableServiceProvider() {
                               e.target.checked
                             )
                           }
+                          disabled={!isEditing}
                         />
                         {activity.title}
                       </label>
@@ -937,31 +999,45 @@ export function TableServiceProvider() {
                 </div>
               )}
 
-              {/* Descrição */}
               <label className="space-y-1">
                 <span className="font-semibold">Descrição</span>
                 <textarea
                   rows={3}
                   className="w-full rounded border px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   {...register("description")}
+                  disabled={!isEditing}
                 />
               </label>
 
-              {/* Botões */}
               <div className="flex justify-end gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
-                >
-                  Salvar alterações
-                </button>
+                {!isEditing ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                  >
+                    Editar
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditModalOpen(false);
+                        setIsEditing(false);
+                      }}
+                      className="border border-red-600 text-red-600 px-4 py-2 rounded-md font-semibold hover:bg-red-100 transition"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
+                    >
+                      Salvar alterações
+                    </button>
+                  </>
+                )}
               </div>
             </form>
           </div>
@@ -994,8 +1070,8 @@ export function TableServiceProvider() {
                 </p>
                 <p>
                   Essa ação é <strong>permanente</strong> e{" "}
-                  <strong>não poderá ser desfeita</strong>. O contrato será{" "}
-                  <strong>removido</strong> e não estará mais disponível.
+                  <strong>não poderá ser desfeita</strong>. O contrato ainda
+                  ficará visível, mas não poderá ser reativado.
                 </p>
               </div>
             </div>
@@ -1004,6 +1080,7 @@ export function TableServiceProvider() {
               <button
                 onClick={() => setIsFinalizeModalOpen(false)}
                 className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+                disabled={isFinalizingContract}
               >
                 Voltar
               </button>
@@ -1011,27 +1088,110 @@ export function TableServiceProvider() {
                 onClick={async () => {
                   if (!selectedSupplierId) return;
 
+                  setIsFinalizingContract(true);
+                  console.log("Iniciando finalização do contrato...");
                   const token = localStorage.getItem("tokenClient");
                   const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
                   const payload = { status: "Contrato Cancelado" };
 
                   try {
-                    await axios.post(endpoint, payload, {
+                    const response = await axios.post(endpoint, payload, {
                       headers: { Authorization: `Bearer ${token}` },
                     });
+                    console.log("Resposta da requisição de finalização:", response.data);
                     toast.success("Contrato finalizado com sucesso");
+                    console.log("Contrato finalizado com sucesso.");
                     await getSupplier();
-                  } catch (err) {
-                    toast.error("Erro ao finalizar contrato");
-                    console.error(err);
-                  } finally {
+                    console.log("Lista de fornecedores atualizada.");
                     setIsFinalizeModalOpen(false);
                     setSelectedSupplierId(null);
+                    console.log("Modal de finalização fechado e ID resetado.");
+                  } catch (err) {
+                    toast.error("Erro ao finalizar contrato");
+                    if (axios.isAxiosError(err)) {
+                      console.error("Erro na requisição Axios (finalizar):", err.response?.data || err.message);
+                    } else {
+                      console.error("Erro ao finalizar contrato:", err);
+                    }
+                  } finally {
+                    setIsFinalizingContract(false);
+                    console.log("Finalizado processo de finalização do contrato. isFinalizingContract definido para false.");
                   }
                 }}
-                className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition"
+                className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
+                disabled={isFinalizingContract}
               >
-                Finalizar contrato
+                {isFinalizingContract ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizando...
+                  </>
+                ) : (
+                  "Finalizar contrato"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSuspendModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-md w-[90vw] max-w-[520px] p-6 shadow-lg relative">
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="text-[#2E3C4D] text-lg font-semibold flex items-center gap-2">
+                <X className="w-5 h-5 text-[#C9C9C9]" />
+                Suspender contrato
+              </h2>
+              <button onClick={() => {
+                console.log("Botão 'X' para fechar modal de suspensão clicado.");
+                setIsSuspendModalOpen(false);
+              }}>
+                <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <img
+                src={likeImage}
+                alt="Ilustração de confirmação"
+                className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
+              />
+
+              <div className="flex-1 text-sm text-gray-700 space-y-2">
+                <p className="font-semibold">
+                  Deseja realmente suspender este contrato?
+                </p>
+                <p>
+                  Essa ação é <strong>permanente</strong> e{" "}
+                  <strong>não poderá ser desfeita</strong>. O contrato ainda
+                  ficará visível, mas não poderá ser reativado.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={() => {
+                  console.log("Botão 'Voltar' no modal de suspensão clicado.");
+                  setIsSuspendModalOpen(false);
+                }}
+                className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
+                disabled={isSuspendingContract}
+              >
+                Voltar
+              </button>
+              <button
+                onClick={handleSuspendContract}
+                className="bg-orange-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-orange-700 transition flex items-center justify-center gap-2"
+                disabled={isSuspendingContract}
+              >
+                {isSuspendingContract ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Suspendendo...
+                  </>
+                ) : (
+                  "Suspender contrato"
+                )}
               </button>
             </div>
           </div>
@@ -1043,7 +1203,7 @@ export function TableServiceProvider() {
           title="Histórico do contrato"
           onClose={() => setIsHistoryModalOpen(false)}
         >
-          <div className="text-white space-y-2 max-h-[400px] overflow-auto">
+          <div className="text-black space-y-2 max-h-[400px] overflow-auto">
             {contractHistory.length > 0 ? (
               contractHistory.map((log, index) => (
                 <div key={index} className="border-b border-gray-500 pb-2 mb-2">
@@ -1056,6 +1216,9 @@ export function TableServiceProvider() {
                   <p>
                     <strong>Data:</strong>{" "}
                     {new Date(log.createdAt).toLocaleString("pt-BR")}
+                  </p>
+                  <p>
+                    <strong>Descrição: </strong> {log.description}
                   </p>
                   {log.message && (
                     <p>

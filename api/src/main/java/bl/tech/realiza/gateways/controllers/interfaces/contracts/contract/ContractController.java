@@ -11,7 +11,8 @@ import java.util.List;
 
 public interface ContractController {
     ResponseEntity<String> finishContract(String idContract);
-    ResponseEntity<String> suspendContract(String idContract);
+    ResponseEntity<String> suspendContract(String contractId);
+    ResponseEntity<String> reactivateContract(String contractId);
     ResponseEntity<String> addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
     ResponseEntity<String> removeEmployeeFromContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
     ResponseEntity<Page<ContractByEmployeeResponseDto>> getContractsByEmployee(int page, int size, String sort, Sort.Direction direction, String idEmployee);
