@@ -33,7 +33,7 @@ export function AuthLayout() {
           alt="imagem"
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#34495e]/100 to-transparent" />
+        <div className="absolute inset-0 z-1 bg-gradient-to-r from-[#34495e]/100 to-transparent" />
       </div>
     </div>
   );

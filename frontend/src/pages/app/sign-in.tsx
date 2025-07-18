@@ -127,7 +127,7 @@ export function SignIn() {
 
   if (showSplash) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#34495e]">
+      <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#34495e]">
         <SplashPage
           nome={`${user?.firstName}${user?.surname ? ' ' + user.surname : ''}`}
           onComplete={() => setShowSplash(false)}

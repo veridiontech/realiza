@@ -5,47 +5,61 @@ import {
 } from "@/components/BIs/BisPageComponents/statusDocumentChart";
 import { ExemptionPendingChart } from "@/components/BIs/BisPageComponents/exemptionRankingChart";
 import { ConformityRankingTable } from "@/components/BIs/BisPageComponents/conformityRankingTable";
+import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
+import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
+import { Suppliers } from "@/components/BIs/BisPageComponents/suppliersCard";
 import axios from "axios";
 import { ip } from "@/utils/ip";
-import { useBranch } from "@/context/Branch-provider";
+import { useClient } from "@/context/Client-Provider";
 import { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
 export const MonittoringBis = () => {
-  const { selectedBranch } = useBranch();
+  const { client } = useClient();
+  const clientId = client?.idClient;
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [tableData, setTableData] = useState<any[]>([]);
   const [documentExemptionData, setDocumentExemptionData] = useState<any[]>([]);
   const token = localStorage.getItem("tokenClient");
 
+  const [stats, setStats] = useState({
+    contractQuantity: 0,
+    supplierQuantity: 0,
+    allocatedEmployeeQuantity: 0,
+  });
+
   useEffect(() => {
-    if (!selectedBranch?.idBranch) return;
+    if (!clientId) return;
 
     const getData = async () => {
       try {
-        const { data } = await axios.get(
-          `${ip}/dashboard/${selectedBranch.idBranch}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        // console.log(data);
+        const url = `${ip}/dashboard/${clientId}/general`;
+        const { data } = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        setDocumentExemptionData(data.documentExemption);
+        const {
+          documentExemption = [],
+          documentStatus = [],
+          pendingRanking = [],
+          contractQuantity = 0,
+          supplierQuantity = 0,
+          allocatedEmployeeQuantity = 0,
+        } = data;
 
-        const formattedChart: ChartData[] = data.documentStatus.map(
-          (cat: any) => {
-            const row: any = { name: cat.name };
-            cat.status.forEach((s: any) => {
-              row[s.type] = s.quantity;
-            });
-            return row;
-          }
-        );
+        setDocumentExemptionData(documentExemption);
+
+        const formattedChart: ChartData[] = documentStatus.map((cat: any) => {
+          const row: any = { name: cat.name };
+          cat.status.forEach((s: any) => {
+            row[s.status] = s.quantity;
+          });
+          return row;
+        });
         setChartData(formattedChart);
 
-        const formattedTable = data.pendingRanking.map((r: any) => ({
+        const formattedTable = pendingRanking.map((r: any) => ({
           name: r.corporateName,
           cnpj: r.cnpj,
           adherence: r.adherence,
@@ -54,45 +68,38 @@ export const MonittoringBis = () => {
           conformityLevel: r.conformityLevel,
         }));
         setTableData(formattedTable);
+        setStats({
+          contractQuantity,
+          supplierQuantity,
+          allocatedEmployeeQuantity,
+        });
       } catch (err) {
         console.error(err);
       }
     };
 
     getData();
-  }, [selectedBranch?.idBranch, token]);
+  }, [clientId, token]);
 
   const generatePDF = () => {
-    // Seleciona a div que contém os gráficos e a tabela
     const content = document.getElementById("contentToCapture");
+    if (!content) return;
 
-    if (content) {
-      // Usando html2canvas para capturar a imagem da tela
-
-            console.log('Capturando o conteúdo...', content)
-
-      html2canvas(content).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        
-        console.log('Canvas gerado:', canvas)
-
-        // Criando o PDF a partir da captura da tela
-        const doc = new jsPDF();
-        doc.addImage(imgData, "PNG", 10, 10, 180, 160); // Adiciona a imagem capturada ao PDF
-        doc.save("graficos_completos.pdf"); // Salva o PDF
-                console.log('PDF gerado!')
-
-      });
-    } else {
-      console.log('Nenhum conteúdo encontrado para capturar.')
-    }
-
+    html2canvas(content).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const doc = new jsPDF();
+      doc.addImage(imgData, "PNG", 10, 10, 180, 160);
+      doc.save("graficos_completos.pdf");
+    });
   };
 
   return (
     <>
       <Helmet title="monitoring table" />
-      <section className="mx-5 md:mx-20 flex flex-col gap-12 pb-20" id="contentToCapture">
+      <section
+        className="mx-5 md:mx-20 flex flex-col gap-12 pb-20"
+        id="contentToCapture"
+      >
         <div className="overflow-x-auto mt-10 pb-10">
           <StatusDocumentChart data={chartData} />
         </div>
@@ -101,8 +108,16 @@ export const MonittoringBis = () => {
             <div className="flex-shrink-0 w-full md:w-[400px]">
               <ExemptionPendingChart data={documentExemptionData} />
             </div>
-            <div className="flex-grow min-w-[320px]">
+            <div className="flex-grow min-w-[320px] overflow-x-auto">
               <ConformityRankingTable data={tableData} />
+
+              <div className="mt-6 flex flex-grow min-w-[800px]">
+                <ActiveContracts count={stats.contractQuantity ?? 0} />
+                <Suppliers count={stats.supplierQuantity ?? 0} />
+                <AllocatedEmployees
+                  count={stats.allocatedEmployeeQuantity ?? 0}
+                />
+              </div>
             </div>
           </div>
         </div>
