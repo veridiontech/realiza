@@ -25,7 +25,7 @@ export function ValidateSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amountEdit, setAmountEdit] = useState(0);
   const [unitEdit, setUnitEdit] = useState<"DAYS" | "WEEKS" | "MONTHS">("DAYS");
-  const [doesBlockEdit, setImpedeEdit] = useState(false);
+  const [doesBlockEdit, setBlockEdit] = useState(false);
 
   useEffect(() => {
     if (!idBranch || !documentTypeName) return;
@@ -72,7 +72,7 @@ export function ValidateSection({
     setEditingId(doc.idDocument);
     setAmountEdit(doc.expirationDateAmount);
     setUnitEdit(doc.expirationDateUnit);
-    setImpedeEdit(doc.doesBlock);
+    setBlockEdit(doc.doesBlock);
   };
 
   const handleSave = async (id: string) => {
@@ -140,9 +140,9 @@ export function ValidateSection({
       <thead className="bg-gray-100">
         <tr>
           <th className="px-2 py-1 text-left">Título</th>
-          <th className="px-2 py-1 text-left">Número Unitário</th>
-          <th className="px-2 py-1 text-left">Unidade</th>
-          <th className="px-2 py-1 text-left">Impede</th>
+          <th className="px-2 py-1 text-left">Meses</th>
+          {/* <th className="px-2 py-1 text-left">Unidade</th> */}
+          <th className="px-2 py-1 text-left">Bloqueia</th>
           <th className="px-2 py-1 text-left">Ações</th>
         </tr>
       </thead>
@@ -153,7 +153,7 @@ export function ValidateSection({
 
             {editingId === doc.idDocument ? (
               <>
-                <td className="px-2 py-1">
+                <td className="px-2 py-1 text-center">
                   <input
                     type="number"
                     min={1}
@@ -165,7 +165,7 @@ export function ValidateSection({
                     className="w-20 border px-1 py-0.5"
                   />
                 </td>
-                <td className="px-2 py-1">
+                {/* <td className="px-2 py-1">
                   <select
                     value={unitEdit}
                     onChange={(e) =>
@@ -179,12 +179,12 @@ export function ValidateSection({
                     <option value="WEEKS">Semanas</option>
                     <option value="MONTHS">Meses</option>
                   </select>
-                </td>
+                </td> */}
                 <td className="px-2 py-1 text-center">
                   <input
                     type="checkbox"
                     checked={doesBlockEdit}
-                    onChange={() => setImpedeEdit(!doesBlockEdit)}
+                    onChange={() => setBlockEdit(!doesBlockEdit)}
                   />
                 </td>
                 <td className="px-2 py-1">
@@ -198,10 +198,10 @@ export function ValidateSection({
               </>
             ) : (
               <>
-                <td className="px-2 py-1">{doc.expirationDateAmount}</td>
-                <td className="px-2 py-1">
+                <td className="px-2 py-1 text-center">{doc.expirationDateAmount}</td>
+                {/* <td className="px-2 py-1">
                   {traduzUnidade(doc.expirationDateUnit)}
-                </td>
+                </td> */}
                 <td className="px-2 py-1 text-center">
                   <input type="checkbox" checked={doc.doesBlock} disabled />
                 </td>
