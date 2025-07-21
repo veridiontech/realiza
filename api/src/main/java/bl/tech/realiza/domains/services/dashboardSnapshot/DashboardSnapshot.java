@@ -1,45 +1,43 @@
-package bl.tech.realiza.domains.services;
+package bl.tech.realiza.domains.services.dashboardSnapshot;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.ConformityLevel;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class DashboardSnapshot {
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "type")
+public abstract class DashboardSnapshot {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToOne
-    @JoinColumn(name = "clientId")
-    @JsonBackReference
-    private Client client;
+    private String client;
 
-    @ManyToOne
-    @JoinColumn(name = "branchId")
-    @JsonBackReference
-    private Branch branch;
-
-    @ManyToOne
-    @JoinColumn(name = "providerId")
-    @JsonBackReference
-    private Provider provider;
-
+    // filtros
+    private String branch;
+    private String responsible;
     private String documentType;
+    private Contract.IsActive isActive;
     private Document.Status documentStatus;
+    private String documentTitle;
 }

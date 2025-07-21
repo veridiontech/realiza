@@ -2,6 +2,7 @@ package bl.tech.realiza.services.dashboard;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.ConformityLevel;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -494,15 +495,15 @@ public class DashboardService {
                     ? new BigDecimal(conformityBranchTrue * 100.0 / totalConformityBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
                     : 100;
 
-            DashboardGeneralDetailsResponseDto.Conformity level;
+            ConformityLevel level;
             if (conformityBranch < 60) {
-                level = DashboardGeneralDetailsResponseDto.Conformity.RISKY;
+                level = ConformityLevel.RISKY;
             } else if (conformityBranch < 75) {
-                level = DashboardGeneralDetailsResponseDto.Conformity.ATTENTION;
+                level = ConformityLevel.ATTENTION;
             } else if (conformityBranch < 90) {
-                level = DashboardGeneralDetailsResponseDto.Conformity.NORMAL;
+                level = ConformityLevel.NORMAL;
             } else {
-                level = DashboardGeneralDetailsResponseDto.Conformity.OK;
+                level = ConformityLevel.OK;
             }
 
             pendingRanking.add(DashboardGeneralDetailsResponseDto.Pending.builder()
@@ -555,16 +556,16 @@ public class DashboardService {
         Double conformityProvider = null;
         Object[] adherenceProviderValues = null;
         Object[] conformityProviderValues = null;
-        if (responsibleIds != null && responsibleIds.isEmpty()) {
+        if (responsibleIds.isEmpty()) {
             responsibleIds = null;
         }
-        if (documentTypes != null && documentTypes.isEmpty()) {
+        if (documentTypes.isEmpty()) {
             documentTypes = null;
         }
-        if (documentTitles != null && documentTitles.isEmpty()) {
+        if (documentTitles.isEmpty()) {
             documentTitles = null;
         }
-        if (branchIds == null || branchIds.isEmpty()) {
+        if (branchIds.isEmpty()) {
             providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractIsActiveAndIsActiveIsTrue(clientId, ATIVADO);
             providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractIsActiveAndIsActiveIsTrue(clientId, ATIVADO);
         } else {
@@ -597,15 +598,15 @@ public class DashboardService {
             conformityProvider = totalConformityProvider > 0
                     ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
-            DashboardProviderDetailsResponseDto.Conformity conformityRange;
+            ConformityLevel conformityRange;
             if (conformityProvider < 60) {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.RISKY;
+                conformityRange = ConformityLevel.RISKY;
             } else if (conformityProvider < 75) {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.ATTENTION;
+                conformityRange = ConformityLevel.ATTENTION;
             } else if (conformityProvider < 90) {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.NORMAL;
+                conformityRange = ConformityLevel.NORMAL;
             } else {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
+                conformityRange = ConformityLevel.OK;
             }
 
             responseDtos.add(
@@ -649,15 +650,15 @@ public class DashboardService {
             conformityProvider = totalConformityProvider > 0
                     ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
-            DashboardProviderDetailsResponseDto.Conformity conformityRange;
+            ConformityLevel conformityRange;
             if (conformityProvider < 60) {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.RISKY;
+                conformityRange = ConformityLevel.RISKY;
             } else if (conformityProvider < 75) {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.ATTENTION;
+                conformityRange = ConformityLevel.ATTENTION;
             } else if (conformityProvider < 90) {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.NORMAL;
+                conformityRange = ConformityLevel.NORMAL;
             } else {
-                conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
+                conformityRange = ConformityLevel.OK;
             }
 
             responseDtos.add(
