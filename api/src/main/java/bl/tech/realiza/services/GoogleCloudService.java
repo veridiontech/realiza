@@ -62,13 +62,15 @@ public class GoogleCloudService {
 
     @PostConstruct
     public void checkCredentials() {
-        Dotenv dotenv = Dotenv.configure()
-                .filename(".env") // opcional, por padrão é ".env"
-                .load();
+        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
-        String credentialsPath = dotenv.get("GOOGLE_APPLICATION_CREDENTIALS") != null
-                ? dotenv.get("GOOGLE_APPLICATION_CREDENTIALS")
-                : System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        if (credentialsPath == null) {
+            Dotenv dotenv = Dotenv.configure()
+                    .filename(".env") // opcional, por padrão é ".env"
+                    .load();
+
+            credentialsPath = dotenv.get("GOOGLE_APPLICATION_CREDENTIALS");
+        }
         System.out.println("Caminho da credencial: " + credentialsPath);
 
         try {
