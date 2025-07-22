@@ -1,43 +1,32 @@
 package bl.tech.realiza.domains.services;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.enums.OwnerEnum;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Document(collection = "documents")
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 public class FileDocument {
     @Id
-    private ObjectId _id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
     private String name;
 
     private String contentType;
-    private byte[] data;
-    private String title;
-    @Enumerated(EnumType.STRING)
-    private Owner owner;
-    private String ownerId;
+    private String url;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    public enum Owner {
-        BRANCH,
-        SUPPLIER,
-        SUBCONTRACTOR,
-        EMPLOYEE,
-        CONTRACT_SUPPLIER,
-        CONTRACT_SUBCONTRACTOR
-    }
-
-    // Retorna o ID como String para compatibilidade
-    public String getIdDocumentAsString() {
-        return _id != null ? _id.toHexString() : null;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idDocumentation")
+    private Document document;
 }

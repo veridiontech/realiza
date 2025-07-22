@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface CrudDocumentBranch {
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
-    Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException ;
+    Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto);
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable);
     DocumentResponseDto findAllSelectedDocuments (String id);

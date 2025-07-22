@@ -2,8 +2,6 @@ package bl.tech.realiza.usecases.impl.documents.provider;
 
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
@@ -17,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
@@ -49,83 +48,54 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     private final DocumentProcessingService documentProcessingService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final GoogleCloudService googleCloudService;
 
     @Override
-    public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Invalid file");
-        }
+    public DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto) {
         if (documentProviderSubcontractorRequestDto.getSubcontractor() == null || documentProviderSubcontractorRequestDto.getSubcontractor().isEmpty()) {
             throw new BadRequestException("Invalid subcontractor");
         }
 
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getSubcontractor())
+                .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(documentProviderSubcontractorRequestDto.getSubcontractor());
-
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
-
-        try {
-            fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        FileDocument savedFileDocument= null;
-        try {
-            savedFileDocument = fileRepository.save(fileDocument);
-            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        DocumentProviderSubcontractor newDocumentSubcontractor = DocumentProviderSubcontractor.builder()
+        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(DocumentProviderSubcontractor.builder()
                 .title(documentProviderSubcontractorRequestDto.getTitle())
                 .status(documentProviderSubcontractorRequestDto.getStatus())
-                .documentation(fileDocumentId)
                 .providerSubcontractor(providerSubcontractor)
-                .build();
+                .build());
 
-        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(newDocumentSubcontractor);
-
-        DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
+        return DocumentResponseDto.builder()
                 .idDocument(savedDocumentSubcontractor.getIdDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
-                .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
                 .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor() != null
                         ? savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider()
                         : null)
                 .build();
-
-        return documentSubcontractorResponse;
     }
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
-        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
+        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
-        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
-
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
+        String signedUrl = null;
+        FileDocument fileDocument = documentSubcontractor.getDocument().stream()
+                .max(Comparator.comparing(FileDocument::getCreationDate))
+                .orElse(null);
+        if (fileDocument != null) {
+            if (fileDocument.getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+            }
+        }
 
         DocumentResponseDto documentSubcontractorResponse = DocumentResponseDto.builder()
                 .idDocument(documentSubcontractor.getIdDocumentation())
                 .title(documentSubcontractor.getTitle())
                 .status(documentSubcontractor.getStatus())
-                .documentation(documentSubcontractor.getDocumentation())
-                .fileName(fileDocument.getName())
-                .fileContentType(fileDocument.getContentType())
-                .fileData(fileDocument.getData())
+                .signedUrl(signedUrl)
                 .creationDate(documentSubcontractor.getCreationDate())
                 .subcontractor(documentSubcontractor.getProviderSubcontractor() != null
                         ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
@@ -139,22 +109,23 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public Page<DocumentResponseDto> findAll(Pageable pageable) {
         Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAll(pageable);
 
-        Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
+        return documentSubcontractorPage.map(
                 documentSubcontractor -> {
-                    FileDocument fileDocument = null;
-                    if (documentSubcontractor.getDocumentation() != null && ObjectId.isValid(documentSubcontractor.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentSubcontractor.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentSubcontractor.getIdDocumentation())
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
-                            .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentSubcontractor.getCreationDate())
                             .subcontractor(documentSubcontractor.getProviderSubcontractor() != null
                                     ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
@@ -162,43 +133,16 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                             .build();
                 }
         );
-
-        return documentSubcontractorResponseDtoPage;
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+    public Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto) {
+        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
 
-        Optional<DocumentProviderSubcontractor> documentSubcontractorOptional = documentSubcontractorRepository.findById(id);
-
-        DocumentProviderSubcontractor documentSubcontractor = documentSubcontractorOptional.orElseThrow(() -> new EntityNotFoundException("Subcontractor not found"));
-
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentSubcontractor.setDocumentation(fileDocumentId);
-        }
-
-        documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null ? documentProviderSubcontractorRequestDto.getStatus() : documentSubcontractor.getStatus());
+        documentSubcontractor.setStatus(documentProviderSubcontractorRequestDto.getStatus() != null
+                ? documentProviderSubcontractorRequestDto.getStatus()
+                : documentSubcontractor.getStatus());
 
         DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentSubcontractor);
 
@@ -206,7 +150,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .idDocument(savedDocumentSubcontractor.getIdDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
-                .documentation(savedDocumentSubcontractor.getDocumentation())
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
                 .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor() != null
                         ? savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider()
@@ -223,48 +166,41 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
-        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
-            throw new BadRequestException("Arquivo muito grande.");
+        if (file != null) {
+            if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
         }
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+        FileDocument savedFileDocument = null;
+        String signedUrl = null;
 
-        DocumentProviderSubcontractor documentProviderSubcontractor = documentSubcontractorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
+        DocumentProviderSubcontractor documentProviderSubcontractor = documentSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
-                fileDocument = FileDocument.builder()
+                String gcsUrl = googleCloudService.uploadFile(file, "branch-documents");
+
+                savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
-                        .owner(FileDocument.Owner.SUBCONTRACTOR)
-                        .ownerId(documentProviderSubcontractor.getProviderSubcontractor() != null
-                                ? documentProviderSubcontractor.getProviderSubcontractor().getIdProvider()
-                                : null)
-                        .data(file.getBytes())
-                        .build();
+                        .url(gcsUrl)
+                        .document(documentProviderSubcontractor)
+                        .build());
+                signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 throw new EntityNotFoundException(e);
             }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentProviderSubcontractor.setDocumentation(fileDocumentId);
             documentProviderSubcontractor.setStatus(EM_ANALISE);
             documentProviderSubcontractor.setAdherent(true);
             documentProviderSubcontractor.setConforming(false);
         }
 
+        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentProviderSubcontractor);
+
         documentProcessingService.processDocumentAsync(file,
                 (DocumentProviderSubcontractor) Hibernate.unproxy(documentProviderSubcontractor));
-
-        DocumentProviderSubcontractor savedDocumentSubcontractor = documentSubcontractorRepository.save(documentProviderSubcontractor);
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -288,7 +224,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                 .idDocument(savedDocumentSubcontractor.getIdDocumentation())
                 .title(savedDocumentSubcontractor.getTitle())
                 .status(savedDocumentSubcontractor.getStatus())
-                .documentation(savedDocumentSubcontractor.getDocumentation())
+                .signedUrl(signedUrl)
                 .creationDate(savedDocumentSubcontractor.getCreationDate())
                 .subcontractor(savedDocumentSubcontractor.getProviderSubcontractor() != null
                         ? savedDocumentSubcontractor.getProviderSubcontractor().getIdProvider()
@@ -302,22 +238,23 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
     public Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
         Page<DocumentProviderSubcontractor> documentSubcontractorPage = documentSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndIsActiveIsTrue(idSearch, pageable);
 
-        Page<DocumentResponseDto> documentSubcontractorResponseDtoPage = documentSubcontractorPage.map(
+        return documentSubcontractorPage.map(
                 documentSubcontractor -> {
-                    FileDocument fileDocument = null;
-                    if (documentSubcontractor.getDocumentation() != null && ObjectId.isValid(documentSubcontractor.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSubcontractor.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentSubcontractor.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentSubcontractor.getIdDocumentation())
                             .title(documentSubcontractor.getTitle())
                             .status(documentSubcontractor.getStatus())
-                            .documentation(documentSubcontractor.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentSubcontractor.getCreationDate())
                             .subcontractor(documentSubcontractor.getProviderSubcontractor() != null
                                     ? documentSubcontractor.getProviderSubcontractor().getIdProvider()
@@ -325,8 +262,6 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                             .build();
                 }
         );
-
-        return documentSubcontractorResponseDtoPage;
     }
 
     @Override

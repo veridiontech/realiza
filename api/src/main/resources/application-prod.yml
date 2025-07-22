@@ -13,20 +13,22 @@ spring:
       connection-timeout: 30000
       validation-timeout: 5000
       connection-test-query: SELECT 1
-
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
-  data:
-    mongodb:
-      database: ${SPRING_MONGODB_DATABASE}
-      username: ${SPRING_MONGODB_USERNAME}
-      password: ${SPRING_MONGODB_PASSWORD}
-      host: ${SPRING_MONGODB_HOST}
-      port: ${SPRING_MONGODB_PORT}
-      authentication-database: admin
+#  data:
+#    mongodb:
+#      database: ${SPRING_MONGODB_DATABASE}
+#      username: ${SPRING_MONGODB_USERNAME}
+#      password: ${SPRING_MONGODB_PASSWORD}
+#      host: ${SPRING_MONGODB_HOST}
+#      port: ${SPRING_MONGODB_PORT}
+#      authentication-database: admin
+gcp:
+  storage:
+    bucket: realiza-archives
 logging:
   level:
     root: info

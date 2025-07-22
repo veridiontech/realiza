@@ -3,18 +3,18 @@ package bl.tech.realiza.usecases.impl.users;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
-import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springdoc.core.parsers.ReturnTypeParser;
@@ -36,6 +36,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final ReturnTypeParser genericReturnTypeParser;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public UserResponseDto save(UserProviderSupplierRequestDto userProviderSupplierRequestDto) {
@@ -49,8 +50,8 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
         if (userProviderSupplierRequestDto.getSupplier() == null || userProviderSupplierRequestDto.getSupplier().isEmpty()) {
             throw new BadRequestException("Invalid supplier");
         }
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier());
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(userProviderSupplierRequestDto.getSupplier())
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSupplierRequestDto.getPassword());
 
@@ -63,7 +64,6 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .firstName(userProviderSupplierRequestDto.getFirstName())
                 .surname(userProviderSupplierRequestDto.getSurname())
                 .email(userProviderSupplierRequestDto.getEmail())
-                .profilePicture(userProviderSupplierRequestDto.getProfilePicture())
                 .telephone(userProviderSupplierRequestDto.getTelephone())
                 .cellphone(userProviderSupplierRequestDto.getCellphone())
                 .providerSupplier(providerSupplier)
@@ -71,7 +71,7 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         UserProviderSupplier savedUserSupplier = userSupplierRepository.save(newUserSupplier);
 
-        UserResponseDto userSupplierResponse = UserResponseDto.builder()
+        return UserResponseDto.builder()
                 .cpf(savedUserSupplier.getCpf())
                 .description(savedUserSupplier.getDescription())
                 .position(savedUserSupplier.getPosition())
@@ -79,25 +79,22 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .firstName(savedUserSupplier.getFirstName())
                 .surname(savedUserSupplier.getSurname())
                 .email(savedUserSupplier.getEmail())
-                .profilePicture(savedUserSupplier.getProfilePicture())
                 .telephone(savedUserSupplier.getTelephone())
                 .cellphone(savedUserSupplier.getCellphone())
                 .supplier(savedUserSupplier.getProviderSupplier().getIdProvider())
                 .build();
-
-        return userSupplierResponse;
     }
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        UserProviderSupplier userProvider = userSupplierRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        Optional<UserProviderSupplier> userProviderOptional = userSupplierRepository.findById(id);
-        UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (userProvider.getProfilePicture() != null && !userProvider.getProfilePicture().isEmpty()) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
+        String signedUrl = null;
+        if (userProvider.getProfilePicture() != null) {
+            if (userProvider.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(userProvider.getProfilePicture().getUrl(), 15);
+            }
         }
 
         UserResponseDto userSupplierResponse = UserResponseDto.builder()
@@ -107,9 +104,8 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .role(userProvider.getRole())
                 .firstName(userProvider.getFirstName())
                 .surname(userProvider.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .email(userProvider.getEmail())
-                .profilePicture(userProvider.getProfilePicture())
                 .telephone(userProvider.getTelephone())
                 .cellphone(userProvider.getCellphone())
                 .supplier(userProvider.getProviderSupplier().getIdProvider())
@@ -122,12 +118,13 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public Page<UserResponseDto> findAll(Pageable pageable) {
         Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAll(pageable);
 
-        Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
+        return userProviderPage.map(
                 userProvider -> {
-                    FileDocument fileDocument = null;
-                    if (userProvider.getProfilePicture() != null && !userProvider.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userProvider.getProfilePicture() != null) {
+                        if (userProvider.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userProvider.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return UserResponseDto.builder()
                             .cpf(userProvider.getCpf())
@@ -137,15 +134,13 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                             .firstName(userProvider.getFirstName())
                             .surname(userProvider.getSurname())
                             .email(userProvider.getEmail())
-                            .profilePicture(userProvider.getProfilePicture())
+                            .profilePictureSignedUrl(signedUrl)
                             .telephone(userProvider.getTelephone())
                             .cellphone(userProvider.getCellphone())
                             .supplier(userProvider.getProviderSupplier().getIdProvider())
                             .build();
                 }
         );
-
-        return userSupplierResponseDtoPage;
     }
 
     @Override
@@ -154,20 +149,37 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
         UserProviderSupplier userProvider = userProviderOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null ? userProviderSupplierRequestDto.getCpf() : userProvider.getCpf());
-        userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null ? userProviderSupplierRequestDto.getDescription() : userProvider.getDescription());
-        userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null ? userProviderSupplierRequestDto.getPosition() : userProvider.getPosition());
-        userProvider.setRole(userProviderSupplierRequestDto.getRole() != null ? userProviderSupplierRequestDto.getRole() : userProvider.getRole());
-        userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null ? userProviderSupplierRequestDto.getFirstName() : userProvider.getFirstName());
-        userProvider.setSurname(userProviderSupplierRequestDto.getSurname() != null ? userProviderSupplierRequestDto.getSurname() : userProvider.getSurname());
-        userProvider.setEmail(userProviderSupplierRequestDto.getEmail() != null ? userProviderSupplierRequestDto.getEmail() : userProvider.getEmail());
-        userProvider.setProfilePicture(userProviderSupplierRequestDto.getProfilePicture() != null ? userProviderSupplierRequestDto.getProfilePicture() : userProvider.getProfilePicture());
-        userProvider.setTelephone(userProviderSupplierRequestDto.getTelephone() != null ? userProviderSupplierRequestDto.getTelephone() : userProvider.getTelephone());
-        userProvider.setCellphone(userProviderSupplierRequestDto.getCellphone() != null ? userProviderSupplierRequestDto.getCellphone() : userProvider.getCellphone());
+        userProvider.setCpf(userProviderSupplierRequestDto.getCpf() != null
+                ? userProviderSupplierRequestDto.getCpf()
+                : userProvider.getCpf());
+        userProvider.setDescription(userProviderSupplierRequestDto.getDescription() != null
+                ? userProviderSupplierRequestDto.getDescription()
+                : userProvider.getDescription());
+        userProvider.setPosition(userProviderSupplierRequestDto.getPosition() != null
+                ? userProviderSupplierRequestDto.getPosition()
+                : userProvider.getPosition());
+        userProvider.setRole(userProviderSupplierRequestDto.getRole() != null
+                ? userProviderSupplierRequestDto.getRole()
+                : userProvider.getRole());
+        userProvider.setFirstName(userProviderSupplierRequestDto.getFirstName() != null
+                ? userProviderSupplierRequestDto.getFirstName()
+                : userProvider.getFirstName());
+        userProvider.setSurname(userProviderSupplierRequestDto.getSurname() != null
+                ? userProviderSupplierRequestDto.getSurname()
+                : userProvider.getSurname());
+        userProvider.setEmail(userProviderSupplierRequestDto.getEmail() != null
+                ? userProviderSupplierRequestDto.getEmail()
+                : userProvider.getEmail());
+        userProvider.setTelephone(userProviderSupplierRequestDto.getTelephone() != null
+                ? userProviderSupplierRequestDto.getTelephone()
+                : userProvider.getTelephone());
+        userProvider.setCellphone(userProviderSupplierRequestDto.getCellphone() != null
+                ? userProviderSupplierRequestDto.getCellphone()
+                : userProvider.getCellphone());
 
         UserProviderSupplier savedUserSupplier = userSupplierRepository.save(userProvider);
 
-        UserResponseDto userSupplierResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .cpf(savedUserSupplier.getCpf())
                 .description(savedUserSupplier.getDescription())
                 .position(savedUserSupplier.getPosition())
@@ -175,13 +187,10 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                 .firstName(savedUserSupplier.getFirstName())
                 .surname(savedUserSupplier.getSurname())
                 .email(savedUserSupplier.getEmail())
-                .profilePicture(savedUserSupplier.getProfilePicture())
                 .telephone(savedUserSupplier.getTelephone())
                 .cellphone(savedUserSupplier.getCellphone())
                 .supplier(savedUserSupplier.getProviderSupplier().getIdProvider())
-                .build();
-
-        return Optional.of(userSupplierResponse);
+                .build());
     }
 
     @Override
@@ -193,12 +202,13 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
     public Page<UserResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
         Page<UserProviderSupplier> userProviderPage = userSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrueAndRole(idSearch, User.Role.ROLE_SUPPLIER_MANAGER, pageable);
 
-        Page<UserResponseDto> userSupplierResponseDtoPage = userProviderPage.map(
+        return userProviderPage.map(
                 userProvider -> {
-                    FileDocument fileDocument = null;
-                    if (userProvider.getProfilePicture() != null && !userProvider.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userProvider.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userProvider.getProfilePicture() != null) {
+                        if (userProvider.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userProvider.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return UserResponseDto.builder()
                             .cpf(userProvider.getCpf())
@@ -208,15 +218,13 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
                             .firstName(userProvider.getFirstName())
                             .surname(userProvider.getSurname())
                             .email(userProvider.getEmail())
-                            .profilePicture(userProvider.getProfilePicture())
+                            .profilePictureSignedUrl(signedUrl)
                             .telephone(userProvider.getTelephone())
                             .cellphone(userProvider.getCellphone())
                             .supplier(userProvider.getProviderSupplier().getIdProvider())
                             .build();
                 }
         );
-
-        return userSupplierResponseDtoPage;
     }
 
     @Override
@@ -238,22 +246,32 @@ public class CrudUserProviderSupplierImpl implements CrudUserProviderSupplier {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        Optional<UserProviderSupplier> userProviderSupplierOptional = userSupplierRepository.findById(id);
-        UserProviderSupplier userProviderSupplier = userProviderSupplierOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+        UserProviderSupplier userProviderSupplier = userSupplierRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "user-pfp");
 
-            if (userProviderSupplier.getProfilePicture() != null) {
-                fileRepository.deleteById(new ObjectId(userProviderSupplier.getProfilePicture()));
+                if (userProviderSupplier.getProfilePicture() != null) {
+                    googleCloudService.deleteFile(userProviderSupplier.getProfilePicture().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            userProviderSupplier.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+            userProviderSupplier.setProfilePicture(savedFileDocument);
         }
 
         userSupplierRepository.save(userProviderSupplier);

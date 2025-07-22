@@ -2,8 +2,6 @@ package bl.tech.realiza.usecases.impl.documents.provider;
 
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
@@ -17,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.provider.DocumentProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
@@ -49,83 +48,54 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     private final DocumentProcessingService documentProcessingService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
+    private final GoogleCloudService googleCloudService;
 
     @Override
-    public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Invalid file");
-        }
+    public DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto) {
         if (documentProviderSupplierRequestDto.getSupplier() == null || documentProviderSupplierRequestDto.getSupplier().isEmpty()) {
             throw new BadRequestException("Invalid supplier");
         }
 
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument = null;
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(documentProviderSupplierRequestDto.getSupplier())
+                .orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
 
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(documentProviderSupplierRequestDto.getSupplier());
-
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Provider supplier not found"));
-
-        try {
-            fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        try {
-            savedFileDocument = fileRepository.save(fileDocument);
-            fileDocumentId = savedFileDocument.getIdDocumentAsString();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        DocumentProviderSupplier newDocumentSupplier = DocumentProviderSupplier.builder()
+        DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(DocumentProviderSupplier.builder()
                 .title(documentProviderSupplierRequestDto.getTitle())
                 .status(documentProviderSupplierRequestDto.getStatus())
-                .documentation(fileDocumentId)
                 .providerSupplier(providerSupplier)
-                .build();
+                .build());
 
-        DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(newDocumentSupplier);
-
-        DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
+        return DocumentResponseDto.builder()
                 .idDocument(savedDocumentSupplier.getIdDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .status(savedDocumentSupplier.getStatus())
-                .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
                 .supplier(savedDocumentSupplier.getProviderSupplier() != null
                         ? savedDocumentSupplier.getProviderSupplier().getIdProvider()
                         : null)
                 .build();
-
-        return documentSupplierResponse;
     }
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
-        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
+        DocumentProviderSupplier documentSupplier = documentSupplierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
-        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
-
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
+        String signedUrl = null;
+        FileDocument fileDocument = documentSupplier.getDocument().stream()
+                .max(Comparator.comparing(FileDocument::getCreationDate))
+                .orElse(null);
+        if (fileDocument != null) {
+            if (fileDocument.getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+            }
+        }
 
         DocumentResponseDto documentSupplierResponse = DocumentResponseDto.builder()
                 .idDocument(documentSupplier.getIdDocumentation())
                 .title(documentSupplier.getTitle())
                 .status(documentSupplier.getStatus())
-                .documentation(documentSupplier.getDocumentation())
-                .fileName(fileDocument.getName())
-                .fileContentType(fileDocument.getContentType())
-                .fileData(fileDocument.getData())
+                .signedUrl(signedUrl)
                 .creationDate(documentSupplier.getCreationDate())
                 .supplier(documentSupplier.getProviderSupplier() != null
                         ? documentSupplier.getProviderSupplier().getIdProvider()
@@ -139,28 +109,23 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     public Page<DocumentResponseDto> findAll(Pageable pageable) {
         Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAll(pageable);
 
-        Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
+        return documentSupplierPage.map(
                 documentSupplier -> {
-                    FileDocument fileDocument = null;
-                    if (documentSupplier.getDocumentation() != null && ObjectId.isValid(documentSupplier.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentSupplier.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentSupplier.getIdDocumentation())
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
-                            .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument != null
-                                    ? fileDocument.getName()
-                                    : null)
-                            .fileContentType(fileDocument != null
-                                    ? fileDocument.getContentType()
-                                    : null)
-                            .fileData(fileDocument != null
-                                    ? fileDocument.getData()
-                                    : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentSupplier.getCreationDate())
                             .supplier(documentSupplier.getProviderSupplier() != null
                                     ? documentSupplier.getProviderSupplier().getIdProvider()
@@ -168,43 +133,16 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                             .build();
                 }
         );
-
-        return documentSupplierResponseDtoPage;
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+    public Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto) {
+        DocumentProviderSupplier documentSupplier = documentSupplierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
-        Optional<DocumentProviderSupplier> documentSupplierOptional = documentSupplierRepository.findById(id);
-
-        DocumentProviderSupplier documentSupplier = documentSupplierOptional.orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
-
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentSupplier.setDocumentation(fileDocumentId);
-        }
-
-        documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null ? documentProviderSupplierRequestDto.getStatus() : documentSupplier.getStatus());
+        documentSupplier.setStatus(documentProviderSupplierRequestDto.getStatus() != null
+                ? documentProviderSupplierRequestDto.getStatus()
+                : documentSupplier.getStatus());
 
         DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
@@ -212,7 +150,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .idDocument(savedDocumentSupplier.getIdDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .status(savedDocumentSupplier.getStatus())
-                .documentation(savedDocumentSupplier.getDocumentation())
                 .creationDate(savedDocumentSupplier.getCreationDate())
                 .supplier(savedDocumentSupplier.getProviderSupplier() != null
                         ? savedDocumentSupplier.getProviderSupplier().getIdProvider()
@@ -229,48 +166,41 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
-        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
-            throw new BadRequestException("Arquivo muito grande.");
+        if (file != null) {
+            if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
         }
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+        FileDocument savedFileDocument = null;
+        String signedUrl = null;
 
-        DocumentProviderSupplier documentSupplier = documentSupplierRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
+        DocumentProviderSupplier documentSupplier = documentSupplierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Document supplier not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
-                fileDocument = FileDocument.builder()
+                String gcsUrl = googleCloudService.uploadFile(file, "branch-documents");
+
+                savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
-                        .owner(FileDocument.Owner.SUPPLIER)
-                        .ownerId(documentSupplier.getProviderSupplier() != null
-                                ? documentSupplier.getProviderSupplier().getIdProvider()
-                                : null)
-                        .data(file.getBytes())
-                        .build();
+                        .url(gcsUrl)
+                        .document(documentSupplier)
+                        .build());
+                signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 throw new EntityNotFoundException(e);
             }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentSupplier.setDocumentation(fileDocumentId);
             documentSupplier.setStatus(EM_ANALISE);
             documentSupplier.setAdherent(true);
             documentSupplier.setConforming(false);
         }
 
+        DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
+
         documentProcessingService.processDocumentAsync(file,
                 (DocumentProviderSupplier) Hibernate.unproxy(documentSupplier));
-
-        DocumentProviderSupplier savedDocumentSupplier = documentSupplierRepository.save(documentSupplier);
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -294,7 +224,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                 .idDocument(savedDocumentSupplier.getIdDocumentation())
                 .title(savedDocumentSupplier.getTitle())
                 .status(savedDocumentSupplier.getStatus())
-                .documentation(savedDocumentSupplier.getDocumentation())
+                .signedUrl(signedUrl)
                 .creationDate(savedDocumentSupplier.getCreationDate())
                 .supplier(savedDocumentSupplier.getProviderSupplier() != null
                         ? savedDocumentSupplier.getProviderSupplier().getIdProvider()
@@ -310,26 +240,21 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
 
         Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
                 documentSupplier -> {
-                    FileDocument fileDocument = null;
-                    if (documentSupplier.getDocumentation() != null && ObjectId.isValid(documentSupplier.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentSupplier.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentSupplier.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentSupplier.getIdDocumentation())
                             .title(documentSupplier.getTitle())
                             .status(documentSupplier.getStatus())
-                            .documentation(documentSupplier.getDocumentation())
-                            .fileName(fileDocument != null
-                                    ? fileDocument.getName()
-                                    : null)
-                            .fileContentType(fileDocument != null
-                                    ? fileDocument.getContentType()
-                                    : null)
-                            .fileData(fileDocument != null
-                                    ? fileDocument.getData()
-                                    : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentSupplier.getCreationDate())
                             .supplier(documentSupplier.getProviderSupplier() != null
                                     ? documentSupplier.getProviderSupplier().getIdProvider()

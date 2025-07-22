@@ -15,8 +15,7 @@ public class ProviderResponseDto {
     private String cnpj;
     private String tradeName;
     private String corporateName;
-    private String logoId;
-    private byte[] logoData;
+    private String logoSignedUrl;
     private String email;
     private String cep;
     private String state;

@@ -33,16 +33,8 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(
-            @RequestPart("documentSubcontractorRequestDto") @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
-            @RequestParam("file") MultipartFile file) {
-        DocumentResponseDto documentSubcontractor = null;
-        try {
-            documentSubcontractor = crudDocumentSubcontractor.save(documentSubcontractorRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentSubcontractor));
+            @RequestPart("documentSubcontractorRequestDto") @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentSubcontractor.save(documentSubcontractorRequestDto)));
     }
 
     @GetMapping("/{id}")
@@ -74,16 +66,8 @@ public class DocumentProviderSubcontractorControllerImpl implements DocumentProv
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(
             @PathVariable String id,
             @RequestPart("documentSubcontractorRequestDto")
-            @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-        Optional<DocumentResponseDto> documentSubcontractor = null;
-        try {
-            documentSubcontractor = crudDocumentSubcontractor.update(id, documentSubcontractorRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentSubcontractor));
+            @Valid DocumentProviderSubcontractorRequestDto documentSubcontractorRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentSubcontractor.update(id, documentSubcontractorRequestDto)));
     }
 
     @DeleteMapping("/{id}")

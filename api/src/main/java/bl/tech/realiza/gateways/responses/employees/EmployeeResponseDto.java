@@ -21,8 +21,7 @@ public class EmployeeResponseDto {
     private String cep;
     private String name;
     private String surname;
-    private String profilePictureId;
-    private byte[] profilePictureData;
+    private String profilePictureSignedUrl;
     private String address;
     private String addressLine2;
     private String country;

@@ -17,8 +17,10 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSubcontractor;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -37,11 +39,10 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
-    private final EmailSender emailSender;
     private final FileRepository fileRepository;
-    private final DocumentBranchRepository documentBranchRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public ProviderResponseDto save(ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
@@ -102,14 +103,14 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
 
     @Override
     public Optional<ProviderResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Provider subcontractor not found"));
 
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Provider subcontractor not found"));
-
+        String signedUrl = null;
         if (providerSubcontractor.getLogo() != null) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
+            if (providerSubcontractor.getLogo().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(providerSubcontractor.getLogo().getUrl(), 15);
+            }
         }
 
         ProviderResponseDto providerSubcontractorResponse = ProviderResponseDto.builder()
@@ -117,7 +118,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                 .cnpj(providerSubcontractor.getCnpj())
                 .tradeName(providerSubcontractor.getTradeName())
                 .corporateName(providerSubcontractor.getCorporateName())
-                .logoData(fileDocument != null ? fileDocument.getData() : null)
+                .logoSignedUrl(signedUrl)
                 .email(providerSubcontractor.getEmail())
                 .cep(providerSubcontractor.getCep())
                 .state(providerSubcontractor.getState())
@@ -134,12 +135,13 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     public Page<ProviderResponseDto> findAll(Pageable pageable) {
         Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
+        return providerSubcontractorPage.map(
                 providerSubcontractor -> {
-                    FileDocument fileDocument = null;
-                    if (providerSubcontractor.getLogo() != null && !providerSubcontractor.getLogo().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (providerSubcontractor.getLogo() != null) {
+                        if (providerSubcontractor.getLogo().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(providerSubcontractor.getLogo().getUrl(), 15);
+                        }
                     }
 
                     return ProviderResponseDto.builder()
@@ -147,7 +149,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                             .cnpj(providerSubcontractor.getCnpj())
                             .tradeName(providerSubcontractor.getTradeName())
                             .corporateName(providerSubcontractor.getCorporateName())
-                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .logoSignedUrl(signedUrl)
                             .email(providerSubcontractor.getEmail())
                             .cep(providerSubcontractor.getCep())
                             .state(providerSubcontractor.getState())
@@ -158,25 +160,40 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                             .build();
                 }
         );
-
-        return providerSubcontractorResponseDtoPage;
     }
 
     @Override
     public Optional<ProviderResponseDto> update(String id, ProviderSubcontractorRequestDto providerSubcontractorRequestDto) {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Provider subcontractor not found"));
 
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Provider subcontractor not found"));
-
-        providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null ? providerSubcontractorRequestDto.getCnpj() : providerSubcontractor.getCnpj());
-        providerSubcontractor.setTradeName(providerSubcontractorRequestDto.getTradeName() != null ? providerSubcontractorRequestDto.getTradeName() : providerSubcontractor.getTradeName());
-        providerSubcontractor.setCorporateName(providerSubcontractorRequestDto.getCorporateName() != null ? providerSubcontractorRequestDto.getCorporateName() : providerSubcontractor.getCorporateName());
-        providerSubcontractor.setEmail(providerSubcontractorRequestDto.getEmail() != null ? providerSubcontractorRequestDto.getEmail() : providerSubcontractor.getEmail());
-        providerSubcontractor.setCep(providerSubcontractorRequestDto.getCep() != null ? providerSubcontractorRequestDto.getCep() : providerSubcontractor.getCep());
-        providerSubcontractor.setState(providerSubcontractorRequestDto.getState() != null ? providerSubcontractorRequestDto.getState() : providerSubcontractor.getState());
-        providerSubcontractor.setCity(providerSubcontractorRequestDto.getCity() != null ? providerSubcontractorRequestDto.getCity() : providerSubcontractor.getCity());
-        providerSubcontractor.setAddress(providerSubcontractorRequestDto.getAddress() != null ? providerSubcontractorRequestDto.getAddress() : providerSubcontractor.getAddress());
-        providerSubcontractor.setNumber(providerSubcontractorRequestDto.getNumber() != null ? providerSubcontractorRequestDto.getNumber() : providerSubcontractor.getNumber());
+        providerSubcontractor.setCnpj(providerSubcontractorRequestDto.getCnpj() != null
+                ? providerSubcontractorRequestDto.getCnpj()
+                : providerSubcontractor.getCnpj());
+        providerSubcontractor.setTradeName(providerSubcontractorRequestDto.getTradeName() != null
+                ? providerSubcontractorRequestDto.getTradeName()
+                : providerSubcontractor.getTradeName());
+        providerSubcontractor.setCorporateName(providerSubcontractorRequestDto.getCorporateName() != null
+                ? providerSubcontractorRequestDto.getCorporateName()
+                : providerSubcontractor.getCorporateName());
+        providerSubcontractor.setEmail(providerSubcontractorRequestDto.getEmail() != null
+                ? providerSubcontractorRequestDto.getEmail()
+                : providerSubcontractor.getEmail());
+        providerSubcontractor.setCep(providerSubcontractorRequestDto.getCep() != null
+                ? providerSubcontractorRequestDto.getCep()
+                : providerSubcontractor.getCep());
+        providerSubcontractor.setState(providerSubcontractorRequestDto.getState() != null
+                ? providerSubcontractorRequestDto.getState()
+                : providerSubcontractor.getState());
+        providerSubcontractor.setCity(providerSubcontractorRequestDto.getCity() != null
+                ? providerSubcontractorRequestDto.getCity()
+                : providerSubcontractor.getCity());
+        providerSubcontractor.setAddress(providerSubcontractorRequestDto.getAddress() != null
+                ? providerSubcontractorRequestDto.getAddress()
+                : providerSubcontractor.getAddress());
+        providerSubcontractor.setNumber(providerSubcontractorRequestDto.getNumber() != null
+                ? providerSubcontractorRequestDto.getNumber()
+                : providerSubcontractor.getNumber());
 
         ProviderSubcontractor savedProviderSubcontractor = providerSubcontractorRepository.save(providerSubcontractor);
 
@@ -206,12 +223,13 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
     public Page<ProviderResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
         Page<ProviderSubcontractor> providerSubcontractorPage = providerSubcontractorRepository.findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(idSearch, pageable);
 
-        Page<ProviderResponseDto> providerSubcontractorResponseDtoPage = providerSubcontractorPage.map(
+        return providerSubcontractorPage.map(
                 providerSubcontractor -> {
-                    FileDocument fileDocument = null;
-                    if (providerSubcontractor.getLogo() != null && !providerSubcontractor.getLogo().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSubcontractor.getLogo()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (providerSubcontractor.getLogo() != null) {
+                        if (providerSubcontractor.getLogo().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(providerSubcontractor.getLogo().getUrl(), 15);
+                        }
                     }
 
                     return ProviderResponseDto.builder()
@@ -219,7 +237,7 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                             .cnpj(providerSubcontractor.getCnpj())
                             .tradeName(providerSubcontractor.getTradeName())
                             .corporateName(providerSubcontractor.getCorporateName())
-                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .logoSignedUrl(signedUrl)
                             .email(providerSubcontractor.getEmail())
                             .cep(providerSubcontractor.getCep())
                             .state(providerSubcontractor.getState())
@@ -230,27 +248,36 @@ public class CrudProviderSubcontractorImpl implements CrudProviderSubcontractor 
                             .build();
                 }
         );
-
-        return providerSubcontractorResponseDtoPage;
     }
 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(id);
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "enterprise-logos");
 
-            if (providerSubcontractor.getLogo() != null) {
-                fileRepository.deleteById(new ObjectId(providerSubcontractor.getLogo()));
+                if (providerSubcontractor.getLogo() != null) {
+                    googleCloudService.deleteFile(providerSubcontractor.getLogo().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            providerSubcontractor.setLogo(savedFileDocument.getIdDocumentAsString());
+            providerSubcontractor.setLogo(savedFileDocument);
         }
 
         providerSubcontractorRepository.save(providerSubcontractor);

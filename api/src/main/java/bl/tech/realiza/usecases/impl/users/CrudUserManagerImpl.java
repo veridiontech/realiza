@@ -23,10 +23,12 @@ import bl.tech.realiza.gateways.requests.services.email.EmailNewUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserCreateRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.services.auth.RandomPasswordService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -58,9 +60,15 @@ public class CrudUserManagerImpl implements CrudUserManager {
     private final RandomPasswordService randomPasswordService;
     private final ProfileRepository profileRepository;
     private final ContractRepository contractRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public UserResponseDto save(UserManagerRequestDto userManagerRequestDto, MultipartFile file) {
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
         if (userManagerRequestDto.getRole() == null) {
             throw new BadRequestException("Role is required");
         }
@@ -75,25 +83,22 @@ public class CrudUserManagerImpl implements CrudUserManager {
         FileDocument fileDocument = null;
         String fileDocumentId = null;
         FileDocument savedFileDocument= null;
+        String signedUrl = null;
 
         if (file != null && !file.isEmpty()) {
             try {
-                fileDocument = FileDocument.builder()
+                String gcsUrl = googleCloudService.uploadFile(file, "user-pfp");
+
+                savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
+                        .url(gcsUrl)
+                        .build());
+
+                signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                throw new NotFoundException("Could not build logo file");
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new NotFoundException("Could not save logo file");
+                throw new EntityNotFoundException(e);
             }
         }
 
@@ -106,10 +111,9 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .position(userManagerRequestDto.getPosition())
                 .role(userManagerRequestDto.getRole())
                 .firstName(userManagerRequestDto.getFirstName())
-                .profilePicture(fileDocumentId)
+                .profilePicture(savedFileDocument)
                 .surname(userManagerRequestDto.getSurname())
                 .email(userManagerRequestDto.getEmail())
-                .profilePicture(userManagerRequestDto.getProfilePicture())
                 .telephone(userManagerRequestDto.getTelephone())
                 .cellphone(userManagerRequestDto.getCellphone())
                 .isActive(true)
@@ -124,10 +128,9 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .position(savedUserManager.getPosition())
                 .role(savedUserManager.getRole())
                 .firstName(savedUserManager.getFirstName())
-                .profilePictureId(savedUserManager.getProfilePicture())
                 .surname(savedUserManager.getSurname())
                 .email(savedUserManager.getEmail())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .telephone(savedUserManager.getTelephone())
                 .cellphone(savedUserManager.getCellphone())
                 .build();
@@ -135,17 +138,18 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        String signedUrl = null;
 
-        Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
-        UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        UserManager userManager = userManagerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (userManager.getProfilePicture() != null && !userManager.getProfilePicture().isEmpty()) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
+        if (userManager.getProfilePicture() != null) {
+            if (userManager.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(userManager.getProfilePicture().getUrl(), 15);
+            }
         }
 
-        UserResponseDto userManagerResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .idUser(userManager.getIdUser())
                 .cpf(userManager.getCpf())
                 .description(userManager.getDescription())
@@ -153,13 +157,11 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .role(userManager.getRole())
                 .firstName(userManager.getFirstName())
                 .surname(userManager.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .email(userManager.getEmail())
                 .telephone(userManager.getTelephone())
                 .cellphone(userManager.getCellphone())
-                .build();
-
-        return Optional.of(userManagerResponse);
+                .build());
     }
 
     @Override
@@ -168,10 +170,11 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
         return userManagerPage.map(
                 userManager -> {
-                    FileDocument fileDocument = null;
-                    if (userManager.getProfilePicture() != null && !userManager.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userManager.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userManager.getProfilePicture() != null) {
+                        if (userManager.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userManager.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return UserResponseDto.builder()
                             .idUser(userManager.getIdUser())
@@ -181,7 +184,7 @@ public class CrudUserManagerImpl implements CrudUserManager {
                             .role(userManager.getRole())
                             .firstName(userManager.getFirstName())
                             .surname(userManager.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .email(userManager.getEmail())
                             .telephone(userManager.getTelephone())
                             .cellphone(userManager.getCellphone())
@@ -196,20 +199,37 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
         UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        userManager.setCpf(userManagerRequestDto.getCpf() != null ? userManagerRequestDto.getCpf() : userManager.getCpf());
-        userManager.setDescription(userManagerRequestDto.getDescription() != null ? userManagerRequestDto.getDescription() : userManager.getDescription());
-        userManager.setPosition(userManagerRequestDto.getPosition() != null ? userManagerRequestDto.getPosition() : userManager.getPosition());
-        userManager.setRole(userManagerRequestDto.getRole() != null ? userManagerRequestDto.getRole() : userManager.getRole());
-        userManager.setFirstName(userManagerRequestDto.getFirstName() != null ? userManagerRequestDto.getFirstName() : userManager.getFirstName());
-        userManager.setSurname(userManagerRequestDto.getSurname() != null ? userManagerRequestDto.getSurname() : userManager.getSurname());
-        userManager.setEmail(userManagerRequestDto.getEmail() != null ? userManagerRequestDto.getEmail() : userManager.getEmail());
-        userManager.setProfilePicture(userManagerRequestDto.getProfilePicture() != null ? userManagerRequestDto.getProfilePicture() : userManager.getProfilePicture());
-        userManager.setTelephone(userManagerRequestDto.getTelephone() != null ? userManagerRequestDto.getTelephone() : userManager.getTelephone());
-        userManager.setCellphone(userManagerRequestDto.getCellphone() != null ? userManagerRequestDto.getCellphone() : userManager.getCellphone());
+        userManager.setCpf(userManagerRequestDto.getCpf() != null
+                ? userManagerRequestDto.getCpf()
+                : userManager.getCpf());
+        userManager.setDescription(userManagerRequestDto.getDescription() != null
+                ? userManagerRequestDto.getDescription()
+                : userManager.getDescription());
+        userManager.setPosition(userManagerRequestDto.getPosition() != null
+                ? userManagerRequestDto.getPosition()
+                : userManager.getPosition());
+        userManager.setRole(userManagerRequestDto.getRole() != null
+                ? userManagerRequestDto.getRole()
+                : userManager.getRole());
+        userManager.setFirstName(userManagerRequestDto.getFirstName() != null
+                ? userManagerRequestDto.getFirstName()
+                : userManager.getFirstName());
+        userManager.setSurname(userManagerRequestDto.getSurname() != null
+                ? userManagerRequestDto.getSurname()
+                : userManager.getSurname());
+        userManager.setEmail(userManagerRequestDto.getEmail() != null
+                ? userManagerRequestDto.getEmail()
+                : userManager.getEmail());
+        userManager.setTelephone(userManagerRequestDto.getTelephone() != null
+                ? userManagerRequestDto.getTelephone()
+                : userManager.getTelephone());
+        userManager.setCellphone(userManagerRequestDto.getCellphone() != null
+                ? userManagerRequestDto.getCellphone()
+                : userManager.getCellphone());
 
         UserManager savedUserManager = userManagerRepository.save(userManager);
 
-        UserResponseDto userManagerResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .idUser(savedUserManager.getIdUser())
                 .cpf(savedUserManager.getCpf())
                 .description(savedUserManager.getDescription())
@@ -218,12 +238,9 @@ public class CrudUserManagerImpl implements CrudUserManager {
                 .firstName(savedUserManager.getFirstName())
                 .surname(savedUserManager.getSurname())
                 .email(savedUserManager.getEmail())
-                .profilePicture(savedUserManager.getProfilePicture())
                 .telephone(savedUserManager.getTelephone())
                 .cellphone(savedUserManager.getCellphone())
-                .build();
-
-        return Optional.of(userManagerResponse);
+                .build());
     }
 
     @Override
@@ -250,21 +267,32 @@ public class CrudUserManagerImpl implements CrudUserManager {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        Optional<UserManager> userManagerOptional = userManagerRepository.findById(id);
-        UserManager userManager = userManagerOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        UserManager userManager = userManagerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        FileDocument savedFileDocument = null;
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "user-pfp");
 
-            if (userManager.getProfilePicture() != null) {
-                fileRepository.deleteById(new ObjectId(userManager.getProfilePicture()));
+                if (userManager.getProfilePicture() != null) {
+                    googleCloudService.deleteFile(userManager.getProfilePicture().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            userManager.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+            userManager.setProfilePicture(savedFileDocument);
         }
 
         userManagerRepository.save(userManager);

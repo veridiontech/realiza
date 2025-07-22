@@ -3,6 +3,7 @@ package bl.tech.realiza.domains.clients;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.services.DashboardSnapshot;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.ultragaz.Board;
 import bl.tech.realiza.domains.user.profile.Profile;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -27,7 +28,6 @@ public class Client {
     private String cnpj;
     private String tradeName; // nome fantasia
     private String corporateName; // razão social
-    private String logo;
     private String email;
     private String telephone;
     private String cep;
@@ -70,4 +70,7 @@ public class Client {
     @JsonIgnore
     @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
     private List<AuditLogClient> auditLogClients;
+
+    @OneToOne
+    private FileDocument logo;
 }

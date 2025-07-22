@@ -15,9 +15,9 @@ import bl.tech.realiza.domains.employees.Position;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
-import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
@@ -31,7 +31,9 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeForeignerRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeForeigner;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -51,7 +53,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final EmployeeForeignerRepository employeeForeignerRepository;
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
-    private final ClientRepository clientRepository;
     private final ContractRepository contractRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
@@ -61,6 +62,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final CboRepository cboRepository;
     private final PositionRepository positionRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
@@ -79,8 +81,8 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         }
         
         if (employeeForeignerRequestDto.getBranch() != null) {
-            Optional<Branch> branchOptional = branchRepository.findById(employeeForeignerRequestDto.getBranch());
-            branch = branchOptional.orElseThrow(() -> new NotFoundException("Branch not found"));
+            branch = branchRepository.findById(employeeForeignerRequestDto.getBranch())
+                    .orElseThrow(() -> new NotFoundException("Branch not found"));
 
             List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getBranch(), "Documento pessoa", true);
 
@@ -88,8 +90,8 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                     .map(DocumentBranch::getDocumentMatrix)
                     .toList();
         } else if (employeeForeignerRequestDto.getSupplier() != null) {
-            Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier());
-            providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+            providerSupplier = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier())
+                    .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
             List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSupplier(), "Documento pessoa", true);
 
@@ -98,8 +100,8 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                     .toList();
 
         } else if(employeeForeignerRequestDto.getSubcontract() != null) {
-            Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract());
-            providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+            providerSubcontractor = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract())
+                    .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
             List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSubcontract(), "Documento pessoa", true);
 
@@ -162,7 +164,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
         documentEmployeeRepository.saveAll(documentEmployeeList);
 
-        EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
+        return EmployeeResponseDto.builder()
                 .idEmployee(savedEmployeeForeigner.getIdEmployee())
                 .pis(savedEmployeeForeigner.getPis())
                 .maritalStatus(savedEmployeeForeigner.getMaritalStatus())
@@ -207,20 +209,19 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                                         .build())
                         .collect(Collectors.toList()))
                 .build();
-
-        return employeeForeignerResponse;
     }
 
     @Override
     public Optional<EmployeeResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        String signedUrl = null;
 
-        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
-        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new NotFoundException("Employee Foreigner not found"));
+        EmployeeForeigner employeeForeigner = employeeForeignerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Employee Foreigner not found"));
 
         if (employeeForeigner.getProfilePicture() != null) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
+            if (employeeForeigner.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(employeeForeigner.getProfilePicture().getUrl(), 15);
+            }
         }
 
         EmployeeResponseDto employeeForeignerResponse = EmployeeResponseDto.builder()
@@ -231,7 +232,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .cep(employeeForeigner.getCep())
                 .name(employeeForeigner.getName())
                 .surname(employeeForeigner.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .address(employeeForeigner.getAddress())
                 .addressLine2(employeeForeigner.getAddressLine2())
                 .country(employeeForeigner.getCountry())
@@ -259,9 +260,15 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                 .passport(employeeForeigner.getPassport())
-                .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
-                .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
-                .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
+                .branch(employeeForeigner.getBranch() != null
+                        ? employeeForeigner.getBranch().getIdBranch()
+                        : null)
+                .supplier(employeeForeigner.getSupplier() != null
+                        ? employeeForeigner.getSupplier().getIdProvider()
+                        : null)
+                .subcontract(employeeForeigner.getSubcontract() != null
+                        ? employeeForeigner.getSubcontract().getIdProvider()
+                        : null)
                 .contracts(employeeForeigner.getContracts().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
                                         .idContract(contract.getIdContract())
@@ -277,12 +284,13 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     public Page<EmployeeResponseDto> findAll(Pageable pageable) {
         Page<EmployeeForeigner> employeeForeignerPage = employeeForeignerRepository.findAll(pageable);
 
-        Page<EmployeeResponseDto> employeeForeignerResponseDtoPage = employeeForeignerPage.map(
+        return employeeForeignerPage.map(
                 employeeForeigner -> {
-                    FileDocument fileDocument = null;
-                    if (employeeForeigner.getProfilePicture() != null && !employeeForeigner.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (employeeForeigner.getProfilePicture() != null) {
+                        if (employeeForeigner.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(employeeForeigner.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return EmployeeResponseDto.builder()
                             .idEmployee(employeeForeigner.getIdEmployee())
@@ -292,7 +300,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .cep(employeeForeigner.getCep())
                             .name(employeeForeigner.getName())
                             .surname(employeeForeigner.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .address(employeeForeigner.getAddress())
                             .addressLine2(employeeForeigner.getAddressLine2())
                             .country(employeeForeigner.getCountry())
@@ -332,8 +340,6 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .build();
                 }
         );
-
-        return employeeForeignerResponseDtoPage;
     }
 
     @Override
@@ -453,21 +459,32 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        Optional<EmployeeForeigner> employeeForeignerOptional = employeeForeignerRepository.findById(id);
-        EmployeeForeigner employeeForeigner = employeeForeignerOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+        EmployeeForeigner employeeForeigner = employeeForeignerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "employee-pfp");
 
-            if (employeeForeigner.getProfilePicture() != null) {
-                fileRepository.deleteById(new ObjectId(employeeForeigner.getProfilePicture()));
+                if (employeeForeigner.getProfilePicture() != null) {
+                    googleCloudService.deleteFile(employeeForeigner.getProfilePicture().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            employeeForeigner.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+            employeeForeigner.setProfilePicture(savedFileDocument);
         }
 
         employeeForeignerRepository.save(employeeForeigner);

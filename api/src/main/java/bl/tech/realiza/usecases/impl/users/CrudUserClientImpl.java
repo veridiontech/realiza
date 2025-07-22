@@ -16,9 +16,11 @@ import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserClient;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final CrudItemManagement crudItemManagementImpl;
     private final ProfileRepository profileRepository;
     private final ContractRepository contractRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public UserResponseDto save(UserClientRequestDto userClientRequestDto) {
@@ -79,7 +82,6 @@ public class CrudUserClientImpl implements CrudUserClient {
             contractAccessList = contractRepository.findAllById(userClientRequestDto.getContractAccessIds());
         }
 
-
         UserClient newUserClient = UserClient.builder()
                 .cpf(userClientRequestDto.getCpf())
                 .description(userClientRequestDto.getDescription())
@@ -89,7 +91,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .firstName(userClientRequestDto.getFirstName())
                 .surname(userClientRequestDto.getSurname())
                 .email(userClientRequestDto.getEmail())
-                .profilePicture(userClientRequestDto.getProfilePicture())
                 .telephone(userClientRequestDto.getTelephone())
                 .cellphone(userClientRequestDto.getCellphone())
                 .branch(branch)
@@ -118,7 +119,6 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .firstName(savedUserClient.getFirstName())
                 .surname(savedUserClient.getSurname())
                 .email(savedUserClient.getEmail())
-                .profilePicture(savedUserClient.getProfilePicture())
                 .telephone(savedUserClient.getTelephone())
                 .cellphone(savedUserClient.getCellphone())
                 .branch(savedUserClient.getBranch() != null
@@ -129,17 +129,18 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
 
-        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
-        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        UserClient userClient = userClientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
+        String signedUrl = null;
+        if (userClient.getProfilePicture() != null) {
+            if (userClient.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(userClient.getProfilePicture().getUrl(), 15);
+            }
         }
 
-        UserResponseDto userClientResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .idUser(userClient.getIdUser())
                 .cpf(userClient.getCpf())
                 .description(userClient.getDescription())
@@ -147,27 +148,25 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .role(userClient.getRole())
                 .firstName(userClient.getFirstName())
                 .surname(userClient.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .email(userClient.getEmail())
-                .profilePicture(userClient.getProfilePicture())
                 .telephone(userClient.getTelephone())
                 .cellphone(userClient.getCellphone())
                 .branch(userClient.getBranch().getIdBranch())
-                .build();
-
-        return Optional.of(userClientResponse);
+                .build());
     }
 
     @Override
     public Page<UserResponseDto> findAll(Pageable pageable) {
         Page<UserClient> userClientPage = userClientRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
+        return userClientPage.map(
                 userClient -> {
-                    FileDocument fileDocument = null;
-                    if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userClient.getProfilePicture() != null) {
+                        if (userClient.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userClient.getProfilePicture().getUrl(), 15);
+                        }
                     }
 
                     return UserResponseDto.builder()
@@ -178,17 +177,14 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
                             .surname(userClient.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .email(userClient.getEmail())
-                            .profilePicture(userClient.getProfilePicture())
                             .telephone(userClient.getTelephone())
                             .cellphone(userClient.getCellphone())
                             .branch(userClient.getBranch().getIdBranch())
                             .build();
                 }
         );
-
-        return userClientResponseDtoPage;
     }
 
     @Override
@@ -197,20 +193,37 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        userClient.setCpf(userClientRequestDto.getCpf() != null ? userClientRequestDto.getCpf() : userClient.getCpf());
-        userClient.setDescription(userClientRequestDto.getDescription() != null ? userClientRequestDto.getDescription() : userClient.getDescription());
-        userClient.setPosition(userClientRequestDto.getPosition() != null ? userClientRequestDto.getPosition() : userClient.getPosition());
-        userClient.setRole(userClientRequestDto.getRole() != null ? userClientRequestDto.getRole() : userClient.getRole());
-        userClient.setFirstName(userClientRequestDto.getFirstName() != null ? userClientRequestDto.getFirstName() : userClient.getFirstName());
-        userClient.setSurname(userClientRequestDto.getSurname() != null ? userClientRequestDto.getSurname() : userClient.getSurname());
-        userClient.setEmail(userClientRequestDto.getEmail() != null ? userClientRequestDto.getEmail() : userClient.getEmail());
-        userClient.setProfilePicture(userClientRequestDto.getProfilePicture() != null ? userClientRequestDto.getProfilePicture() : userClient.getProfilePicture());
-        userClient.setTelephone(userClientRequestDto.getTelephone() != null ? userClientRequestDto.getTelephone() : userClient.getTelephone());
-        userClient.setCellphone(userClientRequestDto.getCellphone() != null ? userClientRequestDto.getCellphone() : userClient.getCellphone());
+        userClient.setCpf(userClientRequestDto.getCpf() != null
+                ? userClientRequestDto.getCpf()
+                : userClient.getCpf());
+        userClient.setDescription(userClientRequestDto.getDescription() != null
+                ? userClientRequestDto.getDescription()
+                : userClient.getDescription());
+        userClient.setPosition(userClientRequestDto.getPosition() != null
+                ? userClientRequestDto.getPosition()
+                : userClient.getPosition());
+        userClient.setRole(userClientRequestDto.getRole() != null
+                ? userClientRequestDto.getRole()
+                : userClient.getRole());
+        userClient.setFirstName(userClientRequestDto.getFirstName() != null
+                ? userClientRequestDto.getFirstName()
+                : userClient.getFirstName());
+        userClient.setSurname(userClientRequestDto.getSurname() != null
+                ? userClientRequestDto.getSurname()
+                : userClient.getSurname());
+        userClient.setEmail(userClientRequestDto.getEmail() != null
+                ? userClientRequestDto.getEmail()
+                : userClient.getEmail());
+        userClient.setTelephone(userClientRequestDto.getTelephone() != null
+                ? userClientRequestDto.getTelephone()
+                : userClient.getTelephone());
+        userClient.setCellphone(userClientRequestDto.getCellphone() != null
+                ? userClientRequestDto.getCellphone()
+                : userClient.getCellphone());
 
         UserClient savedUserClient = userClientRepository.save(userClient);
 
-        UserResponseDto userClientResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .idUser(savedUserClient.getIdUser())
                 .cpf(savedUserClient.getCpf())
                 .description(savedUserClient.getDescription())
@@ -219,13 +232,10 @@ public class CrudUserClientImpl implements CrudUserClient {
                 .firstName(savedUserClient.getFirstName())
                 .surname(savedUserClient.getSurname())
                 .email(savedUserClient.getEmail())
-                .profilePicture(savedUserClient.getProfilePicture())
                 .telephone(savedUserClient.getTelephone())
                 .cellphone(savedUserClient.getCellphone())
                 .branch(savedUserClient.getBranch().getIdBranch())
-                .build();
-
-        return Optional.of(userClientResponse);
+                .build());
     }
 
     @Override
@@ -239,10 +249,11 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
                 userClient -> {
-                    FileDocument fileDocument = null;
-                    if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userClient.getProfilePicture() != null) {
+                        if (userClient.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userClient.getProfilePicture().getUrl(), 15);
+                        }
                     }
 
                     return UserResponseDto.builder()
@@ -253,9 +264,8 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
                             .surname(userClient.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .email(userClient.getEmail())
-                            .profilePicture(userClient.getProfilePicture())
                             .telephone(userClient.getTelephone())
                             .cellphone(userClient.getCellphone())
                             .branch(userClient.getBranch().getIdBranch())
@@ -270,12 +280,13 @@ public class CrudUserClientImpl implements CrudUserClient {
     public Page<UserResponseDto> findAllInnactiveAndActiveByClient(String idSearch, Pageable pageable) {
         Page<UserClient> userClientPage = userClientRepository.findAllByBranch_IdBranchAndRole(idSearch, ROLE_CLIENT_MANAGER, pageable);
 
-        Page<UserResponseDto> userClientResponseDtoPage = userClientPage.map(
+        return userClientPage.map(
                 userClient -> {
-                    FileDocument fileDocument = null;
-                    if (userClient.getProfilePicture() != null && !userClient.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userClient.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userClient.getProfilePicture() != null) {
+                        if (userClient.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userClient.getProfilePicture().getUrl(), 15);
+                        }
                     }
 
                     return UserResponseDto.builder()
@@ -286,17 +297,14 @@ public class CrudUserClientImpl implements CrudUserClient {
                             .role(userClient.getRole())
                             .firstName(userClient.getFirstName())
                             .surname(userClient.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .email(userClient.getEmail())
-                            .profilePicture(userClient.getProfilePicture())
                             .telephone(userClient.getTelephone())
                             .cellphone(userClient.getCellphone())
                             .branch(userClient.getBranch().getIdBranch())
                             .build();
                 }
         );
-
-        return userClientResponseDtoPage;
     }
 
     @Override
@@ -318,22 +326,32 @@ public class CrudUserClientImpl implements CrudUserClient {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        Optional<UserClient> userClientOptional = userClientRepository.findById(id);
-        UserClient userClient = userClientOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+        UserClient userClient = userClientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "user-pfp");
 
-
-            if (userClient.getProfilePicture() != null) {
-                fileRepository.deleteById(new ObjectId(userClient.getProfilePicture()));
+                if (userClient.getProfilePicture() != null) {
+                    googleCloudService.deleteFile(userClient.getProfilePicture().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            userClient.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+            userClient.setProfilePicture(savedFileDocument);
         }
 
         userClientRepository.save(userClient);
