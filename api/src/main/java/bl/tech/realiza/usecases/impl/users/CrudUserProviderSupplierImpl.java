@@ -16,7 +16,6 @@ import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSupplier;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springdoc.core.parsers.ReturnTypeParser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

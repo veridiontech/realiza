@@ -6,6 +6,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GoogleCloudService {
@@ -71,8 +73,7 @@ public class GoogleCloudService {
 
         try {
             GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialsPath));
-            System.out.println(credentials.toString());
-            System.out.println("Credencial carregada com sucesso");
+            GoogleCloudService.log.info("Credencial Storage carregada com sucesso");
         } catch (IOException e) {
             System.err.println("Erro ao carregar credencial: " + e.getMessage());
         }
