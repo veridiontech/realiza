@@ -62,4 +62,5 @@ public interface DocumentProviderSubcontractorRepository extends JpaRepository<D
 """)
     Long countByBranchId(@Param("branchId") String branchId);
 
+    List<DocumentProviderSubcontractor> findAllByProviderSubcontractor_IdProviderAndConformingIsFalse(String idProvider);
 }

@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.repositories.documents.provider;
 
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,8 @@ public interface DocumentProviderSupplierRepository extends JpaRepository<Docume
     Page<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActive(String idSearch, Pageable pageable, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActive(String idSearch, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(String idSearch, String groupName, Boolean isActive);
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndConformingIsFalse(String idProvider);
+
 
     @Query("""
     SELECT
@@ -57,5 +60,4 @@ public interface DocumentProviderSupplierRepository extends JpaRepository<Docume
     WHERE b.idBranch = :branchId
 """)
     Long countByBranchId(@Param("branchId") String branchId);
-
 }

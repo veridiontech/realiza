@@ -11,14 +11,24 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
+import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
+import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
+import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
@@ -31,6 +41,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,6 +62,11 @@ public class CrudDocumentImpl implements CrudDocument {
     private final ContractRepository contractRepository;
     private final AuditLogService auditLogServiceImpl;
     private final DocumentBranchRepository documentBranchRepository;
+    private final ProviderRepository providerRepository;
+    private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
+    private final GoogleCloudService googleCloudService;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
 
     @Override
     public void expirationChange() {
@@ -251,5 +268,97 @@ public class CrudDocumentImpl implements CrudDocument {
         }
 
         return "Document " + document.getTitle() + " exempted from contract " + contract.getContractReference();
+    }
+
+    @Override
+    public List<DocumentPendingResponseDto> findNonConformingDocumentByEnterpriseId(String enterpriseId) {
+        List<DocumentPendingResponseDto> responseDto = new ArrayList<>();
+        Provider provider = providerRepository.findById(enterpriseId)
+                .orElseThrow(() -> new NotFoundException("Provider not found"));
+
+        if (provider instanceof ProviderSupplier) {
+            List<DocumentProviderSupplier> enterpriseDocuments = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndConformingIsFalse(provider.getIdProvider());
+            for (DocumentProviderSupplier documentProviderSupplier : enterpriseDocuments) {
+                String signedUrl = null;
+                FileDocument fileDocument = documentProviderSupplier.getDocument().stream()
+                        .max(Comparator.comparing(FileDocument::getCreationDate))
+                        .orElse(null);
+                if (fileDocument != null) {
+                    if (fileDocument.getUrl() != null) {
+                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                    }
+                }
+
+                responseDto.add(DocumentPendingResponseDto.builder()
+                        .id(documentProviderSupplier.getIdDocumentation())
+                        .status(documentProviderSupplier.getStatus())
+                        .title(documentProviderSupplier.getTitle())
+                        .owner(documentProviderSupplier.getProviderSupplier().getCorporateName())
+                        .signedUrl(signedUrl)
+                        .build());
+            }
+            List<DocumentEmployee> employeeDocuments = documentEmployeeRepository.findAllByEmployee_Supplier_IdProvider(provider.getIdProvider());
+            for (DocumentEmployee documentEmployee : employeeDocuments) {
+                String signedUrl = null;
+                FileDocument fileDocument = documentEmployee.getDocument().stream()
+                        .max(Comparator.comparing(FileDocument::getCreationDate))
+                        .orElse(null);
+                if (fileDocument != null) {
+                    if (fileDocument.getUrl() != null) {
+                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                    }
+                }
+
+                responseDto.add(DocumentPendingResponseDto.builder()
+                        .id(documentEmployee.getIdDocumentation())
+                        .status(documentEmployee.getStatus())
+                        .title(documentEmployee.getTitle())
+                        .owner(documentEmployee.getEmployee().getFullName())
+                        .signedUrl(signedUrl)
+                        .build());
+            }
+        } else if (provider instanceof ProviderSubcontractor) {
+            List<DocumentProviderSubcontractor> enterpriseDocuments = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndConformingIsFalse(provider.getIdProvider());
+            for (DocumentProviderSubcontractor documentProviderSubcontractor : enterpriseDocuments) {
+                String signedUrl = null;
+                FileDocument fileDocument = documentProviderSubcontractor.getDocument().stream()
+                        .max(Comparator.comparing(FileDocument::getCreationDate))
+                        .orElse(null);
+                if (fileDocument != null) {
+                    if (fileDocument.getUrl() != null) {
+                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                    }
+                }
+
+                responseDto.add(DocumentPendingResponseDto.builder()
+                        .id(documentProviderSubcontractor.getIdDocumentation())
+                        .status(documentProviderSubcontractor.getStatus())
+                        .title(documentProviderSubcontractor.getTitle())
+                        .owner(documentProviderSubcontractor.getProviderSubcontractor().getCorporateName())
+                        .signedUrl(signedUrl)
+                        .build());
+            }
+            List<DocumentEmployee> employeeDocuments = documentEmployeeRepository.findAllByEmployee_Subcontract_IdProvider(provider.getIdProvider());
+            for (DocumentEmployee documentEmployee : employeeDocuments) {
+                String signedUrl = null;
+                FileDocument fileDocument = documentEmployee.getDocument().stream()
+                        .max(Comparator.comparing(FileDocument::getCreationDate))
+                        .orElse(null);
+                if (fileDocument != null) {
+                    if (fileDocument.getUrl() != null) {
+                        signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                    }
+                }
+
+                responseDto.add(DocumentPendingResponseDto.builder()
+                        .id(documentEmployee.getIdDocumentation())
+                        .status(documentEmployee.getStatus())
+                        .title(documentEmployee.getTitle())
+                        .owner(documentEmployee.getEmployee().getFullName())
+                        .signedUrl(signedUrl)
+                        .build());
+            }
+        }
+        return responseDto;
     }
 }

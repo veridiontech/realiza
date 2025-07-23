@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.documents;
 
 import bl.tech.realiza.gateways.controllers.interfaces.documents.DocumentController;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
+import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import static bl.tech.realiza.domains.documents.Document.*;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,5 +35,12 @@ public class DocumentControllerImpl implements DocumentController {
     @Override
     public ResponseEntity<String> documentExemption(@PathVariable String documentId, @RequestParam String contractId) {
         return ResponseEntity.ok(crudDocument.documentExemption(documentId, contractId));
+    }
+
+    @GetMapping("/non-conforming/{enterpriseId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<DocumentPendingResponseDto>> nonConformingDocumentsByEnterpriseId(@PathVariable String enterpriseId) {
+        return ResponseEntity.ok(crudDocument.findNonConformingDocumentByEnterpriseId(enterpriseId));
     }
 }
