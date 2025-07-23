@@ -18,25 +18,102 @@ import html2canvas from "html2canvas";
 export const MonittoringBis = () => {
   const { client } = useClient();
   const clientId = client?.idClient;
+  const token = localStorage.getItem("tokenClient");
+
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [tableData, setTableData] = useState<any[]>([]);
   const [documentExemptionData, setDocumentExemptionData] = useState<any[]>([]);
-  const token = localStorage.getItem("tokenClient");
-
   const [stats, setStats] = useState({
     contractQuantity: 0,
     supplierQuantity: 0,
     allocatedEmployeeQuantity: 0,
   });
 
+  const [filters, setFilters] = useState({
+    branchIds: [],
+    providerIds: [],
+    documentTypes: [],
+    responsibleIds: [],
+    activeContract: [],
+    statuses: [],
+    documentTitles: [],
+  });
+
+  const [selectedFilters, setSelectedFilters] = useState({
+    branchId: "",
+    providerId: "",
+    documentType: "",
+    responsibleId: "",
+    activeContract: "",
+    status: "",
+    documentTitle: "",
+  });
+
   useEffect(() => {
     if (!clientId) return;
 
-    const getData = async () => {
+    const fetchFilterData = async () => {
       try {
         const url = `${ip}/dashboard/${clientId}/general`;
         const { data } = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log("Filtros recebidos:", data);
+        setFilters({
+          branchIds: data.branchIds || [],
+          providerIds: data.providerIds || [],
+          documentTypes: data.documentTypes || [],
+          responsibleIds: data.responsibleIds || [],
+          activeContract: data.activeContract || [],
+          statuses: data.statuses || [],
+          documentTitles: data.documentTitles || [],
+        });
+      } catch (err) {
+        console.error("Error fetching filter data:", err);
+      }
+    };
+
+    fetchFilterData();
+  }, [clientId, token]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      [name]: value,
+    }));
+  };
+
+  useEffect(() => {
+    if (!clientId) return;
+
+    const fetchFilteredData = async () => {
+      try {
+        const url = `${ip}/dashboard/${clientId}/general`;
+        const { data } = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            branchIds: selectedFilters.branchId
+              ? [selectedFilters.branchId]
+              : [],
+            providerIds: selectedFilters.providerId
+              ? [selectedFilters.providerId]
+              : [],
+            documentTypes: selectedFilters.documentType
+              ? [selectedFilters.documentType]
+              : [],
+            responsibleIds: selectedFilters.responsibleId
+              ? [selectedFilters.responsibleId]
+              : [],
+            activeContract: selectedFilters.activeContract
+              ? [selectedFilters.activeContract]
+              : [],
+            statuses: selectedFilters.status ? [selectedFilters.status] : [],
+            documentTitles: selectedFilters.documentTitle
+              ? [selectedFilters.documentTitle]
+              : [],
+          },
         });
 
         const {
@@ -48,6 +125,7 @@ export const MonittoringBis = () => {
           allocatedEmployeeQuantity = 0,
         } = data;
 
+        // Atualizando os estados com os novos dados
         setDocumentExemptionData(documentExemption);
 
         const formattedChart: ChartData[] = documentStatus.map((cat: any) => {
@@ -68,18 +146,19 @@ export const MonittoringBis = () => {
           conformityLevel: r.conformityLevel,
         }));
         setTableData(formattedTable);
+
         setStats({
           contractQuantity,
           supplierQuantity,
           allocatedEmployeeQuantity,
         });
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching filtered data:", err);
       }
     };
 
-    getData();
-  }, [clientId, token]);
+    fetchFilteredData();
+  }, [clientId, token, selectedFilters]);
 
   const generatePDF = () => {
     const content = document.getElementById("contentToCapture");
@@ -100,6 +179,121 @@ export const MonittoringBis = () => {
         className="mx-5 md:mx-20 flex flex-col gap-12 pb-20"
         id="contentToCapture"
       >
+        <div className="flex flex-wrap gap-2">
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="branchId"
+              value={selectedFilters.branchId}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Unidade</option>
+              {filters.branchIds.map((branch) => (
+                <option key={branch} value={branch}>
+                  {branch}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="providerId"
+              value={selectedFilters.providerId}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Fornecedor</option>
+              {filters.providerIds.map((provider) => (
+                <option key={provider} value={provider}>
+                  {provider}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="documentType"
+              value={selectedFilters.documentType}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Tipo de Documento</option>
+              {filters.documentTypes.map((documentType) => (
+                <option key={documentType} value={documentType}>
+                  {documentType}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="responsibleId"
+              value={selectedFilters.responsibleId}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Responsável</option>
+              {filters.responsibleIds.map((responsible) => (
+                <option key={responsible} value={responsible}>
+                  {responsible}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="activeContract"
+              value={selectedFilters.activeContract}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Contrato Ativo</option>
+              {filters.activeContract.map((contract) => (
+                <option key={contract} value={contract}>
+                  {contract}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="status"
+              value={selectedFilters.status}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Status</option>
+              {filters.statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full md:w-1/2 lg:w-1/4">
+            <select
+              name="documentTitle"
+              value={selectedFilters.documentTitle}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Selecione Título de Documento</option>
+              {filters.documentTitles.map((title) => (
+                <option key={title} value={title}>
+                  {title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Gráficos e Tabelas */}
         <div className="overflow-x-auto mt-10 pb-10">
           <StatusDocumentChart data={chartData} />
         </div>
