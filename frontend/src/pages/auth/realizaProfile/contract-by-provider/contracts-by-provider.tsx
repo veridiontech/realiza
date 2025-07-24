@@ -74,6 +74,23 @@ export function ContarctsByProvider() {
     }
   };
 
+  const [isLoadingSubs, setIsLoadingSubs] = useState(false);
+
+  const getAllSubcontractors = useCallback(async () => {
+    try {
+      setIsLoadingSubs(true);
+      const res = await axios.get(`${ip}/contract/subcontractor`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // alguns backends retornam .content, outros não — trata os dois
+      setSubcontractors(res.data?.content || res.data || []);
+    } catch (err) {
+      console.error("Erro ao buscar subcontratados:", err);
+    } finally {
+      setIsLoadingSubs(false);
+    }
+  }, [token]);
+
   const getAllDatas = useCallback(
     async (idContract: string, serviceName: string) => {
       try {
@@ -172,7 +189,9 @@ export function ContarctsByProvider() {
 
   const handleStatusChangeForDocument = useCallback(
     (documentIdChanged: string, newStatus: string) => {
-      console.log(`Documento ${documentIdChanged} mudou para status: ${newStatus}`);
+      console.log(
+        `Documento ${documentIdChanged} mudou para status: ${newStatus}`
+      );
       if (selectedContractName) {
         const currentContract = contracts.find(
           (c) => c.serviceName === selectedContractName
@@ -322,7 +341,10 @@ export function ContarctsByProvider() {
               Colaboradores
             </button>
             <button
-              onClick={() => setViewOption("subcontractors")}
+              onClick={() => {
+                setViewOption("subcontractors");
+                getAllSubcontractors(); // <-- aqui
+              }}
               className={`${
                 viewOption === "subcontractors"
                   ? "bg-realizaBlue text-white"
@@ -408,10 +430,12 @@ export function ContarctsByProvider() {
                           {doc.ownerName}
                         </span>
                         {doc.isUnique !== undefined && (
-                            <span className="text-[12px] text-neutral-600">
-                                {' - '}
-                                {doc.isUnique ? 'Documento único para esse contrato' : 'Documento se espelha para outros contratos'}
-                            </span>
+                          <span className="text-[12px] text-neutral-600">
+                            {" - "}
+                            {doc.isUnique
+                              ? "Documento único para esse contrato"
+                              : "Documento se espelha para outros contratos"}
+                          </span>
                         )}
                       </div>
                       <div>
@@ -460,7 +484,9 @@ export function ContarctsByProvider() {
 
                               <button
                                 type="button"
-                                onClick={() => exemptDocument(doc.id, doc.title)}
+                                onClick={() =>
+                                  exemptDocument(doc.id, doc.title)
+                                }
                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
                               >
                                 <FileX2
@@ -523,8 +549,20 @@ export function ContarctsByProvider() {
                 <User />
                 <h2 className="text-[20px]">Subcontratados</h2>
               </div>
+
+              {/* campo de busca opcional */}
+              <input
+                type="text"
+                placeholder="Buscar por nome ou CNPJ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full max-w-md"
+              />
+
               <div className="flex flex-col gap-8 overflow-y-auto max-h-[35vh] pr-2">
-                {subcontractors.length > 0 ? (
+                {isLoadingSubs ? (
+                  <span className="text-neutral-400">Carregando...</span>
+                ) : subcontractors.length > 0 ? (
                   subcontractors.map((sub: any) => (
                     <div key={sub.id} className="flex flex-col gap-5">
                       <div className="flex items-center gap-5">
@@ -532,9 +570,10 @@ export function ContarctsByProvider() {
                           <User />
                         </div>
                         <div>
-                          <p className="text-[18px]">{sub.corporateName}</p>
+                        <h1>{sub.responsible}</h1>
+                          <p className="text-[18px]">{sub.contractReference}</p>
                           <span className="text-[12px] text-realizaBlue font-semibold underline">
-                            {sub.cnpj}
+                            {sub.nameSubcontractor}
                           </span>
                         </div>
                       </div>

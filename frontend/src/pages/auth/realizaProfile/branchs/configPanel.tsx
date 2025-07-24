@@ -4,6 +4,9 @@ import { ip } from "@/utils/ip";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+//
+// Interfaces principais
+//
 interface Document {
   id: string;
   description: string;
@@ -34,8 +37,33 @@ interface Activity {
   risk: string;
 }
 
+//
+// Tipo para a matriz de documentos
+//
+export interface DocumentMatrixEntry {
+  documentId: string;
+  idDocumentMatrix: string;
+  name: string;
+  type: string;
+  doesBlock: boolean;
+  isDocumentUnique: boolean;
+  expirationDateUnit: string;
+  expirationDateAmount: number;
+  idDocumentSubgroup: string;
+  subgroupName: string;
+  idDocumentGroup: string;
+  groupName: string;
+}
+
 export function ConfigPanel() {
-  const [selectTab, setSelectedTab] = useState("documents");
+  // aba ativa
+  const [selectTab, setSelectedTab] = useState<
+    "documents" | "cbos" | "positions" | "services" | "activities" | "validate"
+  >("documents");
+
+  //
+  // Estados para cada aba
+  //
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
@@ -48,9 +76,7 @@ export function ConfigPanel() {
   const [cboTitle, setCboTitle] = useState("");
 
   const [positions, setPositions] = useState<Position[]>([]);
-  const [selectedPosition, setSelectedPosition] = useState<Position | null>(
-    null
-  );
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [positionName, setPositionName] = useState("");
 
   const [services, setServices] = useState<Service[]>([]);
@@ -63,415 +89,400 @@ export function ConfigPanel() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(false);
   const [activitySearchTerm, setActivitySearchTerm] = useState("");
-
-  // Novos estados para criação de atividade
   const [newActivityTitle, setNewActivityTitle] = useState("");
   const [newActivityRisk, setNewActivityRisk] = useState("LOW");
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
 
-  const tokenFromStorage = localStorage.getItem("tokenClient");
+  // aba Validate
+  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
+  const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
+  const [searchMatrixTerm, setSearchMatrixTerm] = useState("");
 
-  const riskTranslations: { [key: string]: string } = {
+  // auth
+  const token = localStorage.getItem("tokenClient");
+  const authHeader = { headers: { Authorization: `Bearer ${token}` } };
+
+  // traduções e unidades
+  const riskTranslations: Record<string, string> = {
     LOW: "Baixo",
     MEDIUM: "Médio",
     HIGH: "Alto",
     VERY_HIGH: "Muito Alto",
   };
+  const expirationUnits = [
 
-  const getDocuments = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${ip}/prompt`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      setDocuments(response.data);
-    } catch (err) {
-      console.error("Erro ao buscar documentos:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    { value: "MONTHS", label: "Meses" },
 
-  const handleSelect = (doc: Document) => {
-    setSelectedDoc(doc);
-    setDescription(doc.description || "");
-  };
+  ];
 
-  const handleSave = async () => {
-    if (!selectedDoc) return;
-    try {
-      await axios.put(
-        `${ip}/prompt/${selectedDoc.id}`,
-        {
-          documentId: selectedDoc.documentId,
-          description,
-        },
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-
-      setDocuments((prev) =>
-        prev.map((d) => (d.id === selectedDoc.id ? { ...d, description } : d))
-      );
-      setSelectedDoc(null);
-    } catch (err) {
-      console.error("Erro ao salvar descrição:", err);
-    }
-  };
-
-  const getCbos = async () => {
-    try {
-      const res = await axios.get(`${ip}/cbo`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      setCbos(res.data || []);
-    } catch (err) {
-      console.error("Erro ao buscar CBOs:", err);
-    }
-  };
-
-  const handleSaveCBO = async () => {
-    try {
-      if (selectedCBO) {
-        await axios.put(
-          `${ip}/cbo/${selectedCBO.id}`,
-          { code: cboCode, title: cboTitle },
-          { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
-        );
-      } else {
-        await axios.post(
-          `${ip}/cbo`,
-          { code: cboCode, title: cboTitle },
-          { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
-        );
-      }
-      setCboCode("");
-      setCboTitle("");
-      setSelectedCBO(null);
-      getCbos();
-    } catch (err) {
-      console.error("Erro ao salvar CBO:", err);
-    }
-  };
-
-  const handleDeleteCBO = async (id: string) => {
-    try {
-      await axios.delete(`${ip}/cbo/${id}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      getCbos();
-    } catch (err) {
-      console.error("Erro ao deletar CBO:", err);
-    }
-  };
-
-  const getPositions = async () => {
-    try {
-      const res = await axios.get(`${ip}/position`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      setPositions(res.data || []);
-    } catch (err) {
-      console.error("Erro ao buscar cargos:", err);
-    }
-  };
-
-  const handleSavePosition = async () => {
-    try {
-      if (selectedPosition) {
-        await axios.put(
-          `${ip}/position/${selectedPosition.id}`,
-          { title: positionName },
-          { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
-        );
-      } else {
-        await axios.post(
-          `${ip}/position`,
-          { title: positionName },
-          { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
-        );
-      }
-      setPositionName("");
-      setSelectedPosition(null);
-      getPositions();
-    } catch (err) {
-      console.error("Erro ao salvar cargo:", err);
-    }
-  };
-
-  const handleDeletePosition = async (id: string) => {
-    try {
-      await axios.delete(`${ip}/position/${id}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      getPositions();
-    } catch (err) {
-      console.error("Erro ao deletar cargo:", err);
-    }
-  };
-
-  const getServices = async () => {
-    setIsLoadingServices(true);
-    try {
-      const response = await axios.get(`${ip}/contract/service-type`, {
-        params: {
-          owner: "REPO",
-          idOwner: "",
-        },
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      console.log("Dados da requisição de serviços:", response.data);
-      setServices(response.data);
-    } catch (err) {
-      console.error("Erro ao buscar serviços:", err);
-    } finally {
-      setIsLoadingServices(false);
-    }
-  };
-
-  const handleCreateService = async () => {
-    if (!newServiceTitle || !newServiceRisk) {
-      toast("Por favor, preencha o título e selecione o risco para o novo serviço.");
-      return;
-    }
-
-    setIsCreatingService(true);
-    try {
-      await axios.post(
-        `${ip}/contract/service-type/repository`,
-        {
-          title: newServiceTitle,
-          risk: newServiceRisk,
-        },
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      toast.success("Serviço criado com sucesso!");
-      setNewServiceTitle("");
-      setNewServiceRisk("LOW");
-      getServices();
-    } catch (err) {
-      console.error("Erro ao criar serviço:", err);
-      toast.error("Erro ao criar serviço. Tente novamente.");
-    } finally {
-      setIsCreatingService(false);
-    }
-  };
-
-  const getActivities = async () => {
-    setIsLoadingActivities(true);
-    try {
-      const response = await axios.get(`${ip}/contract/activity-repo`, {
-        params: {
-          page: 0,
-          size: 100,
-          sort: "title",
-          direction: "ASC",
-        },
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      console.log("Dados da requisição de atividades:", response.data);
-      setActivities(response.data.content || response.data);
-    } catch (err) {
-      console.error("Erro ao buscar atividades:", err);
-    } finally {
-      setIsLoadingActivities(false);
-    }
-  };
-
-  // Nova função para criar atividade
-  const handleCreateActivity = async () => {
-    if (!newActivityTitle || !newActivityRisk) {
-      toast("Por favor, preencha o título e selecione o risco para a nova atividade.");
-      return;
-    }
-
-    setIsCreatingActivity(true);
-    try {
-      await axios.post(
-        `${ip}/contract/activity-repo`,
-        {
-          title: newActivityTitle,
-          risk: newActivityRisk,
-        },
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
-      );
-      toast.success("Atividade criada com sucesso!");
-      setNewActivityTitle("");
-      setNewActivityRisk("LOW");
-      getActivities(); // Atualiza a lista de atividades após a criação
-    } catch (err) {
-      console.error("Erro ao criar atividade:", err);
-      toast.error("Erro ao criar atividade. Tente novamente.");
-    } finally {
-      setIsCreatingActivity(false);
-    }
-  };
-
-
+  // carregamento inicial
   useEffect(() => {
     getDocuments();
     getCbos();
     getPositions();
     getServices();
     getActivities();
+    getMatrixEntries();
   }, []);
 
-  const filteredDocuments = useMemo(() => {
-    return documents
-      .filter((doc) =>
-        doc.documentTitle.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) =>
-        a.documentTitle.localeCompare(b.documentTitle, "pt-BR", {
-          sensitivity: "base",
-        })
-      );
-  }, [documents, searchTerm]);
+  //
+  // ——— CRUD das outras abas ———
+  //
 
-  const filteredServices = useMemo(() => {
-    return services
-      .filter((service) =>
-        service.title.toLowerCase().includes(serviceSearchTerm.toLowerCase()) ||
-        riskTranslations[service.risk.toUpperCase()]?.toLowerCase().includes(serviceSearchTerm.toLowerCase())
-      )
-      .sort((a, b) =>
-        a.title.localeCompare(b.title, "pt-BR", {
-          sensitivity: "base",
-        })
+  async function getDocuments() {
+    setIsLoading(true);
+    try {
+      const { data } = await axios.get<Document[]>(
+        `${ip}/prompt`,
+        authHeader
       );
-  }, [services, serviceSearchTerm, riskTranslations]);
+      setDocuments(data);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-  const filteredActivities = useMemo(() => {
-    return activities
-      .filter((activity) =>
-        activity.title.toLowerCase().includes(activitySearchTerm.toLowerCase()) ||
-        (activity.risk && riskTranslations[activity.risk.toUpperCase()]?.toLowerCase().includes(activitySearchTerm.toLowerCase()))
+  function handleSelect(doc: Document) {
+    setSelectedDoc(doc);
+    setDescription(doc.description || "");
+  }
+
+  async function handleSave() {
+    if (!selectedDoc) return;
+    await axios.put(
+      `${ip}/prompt/${selectedDoc.id}`,
+      { documentId: selectedDoc.documentId, description },
+      authHeader
+    );
+    setDocuments((prev) =>
+      prev.map((d) =>
+        d.id === selectedDoc.id ? { ...d, description } : d
       )
-      .sort((a, b) =>
-        a.title.localeCompare(b.title, "pt-BR", {
-          sensitivity: "base",
-        })
-      );
-  }, [activities, activitySearchTerm, riskTranslations]);
+    );
+    setSelectedDoc(null);
+  }
 
+  async function getCbos() {
+    const { data } = await axios.get<CBO[]>(`${ip}/cbo`, authHeader);
+    setCbos(data || []);
+  }
+
+  async function handleSaveCBO() {
+    if (selectedCBO) {
+      await axios.put(
+        `${ip}/cbo/${selectedCBO.id}`,
+        { code: cboCode, title: cboTitle },
+        authHeader
+      );
+    } else {
+      await axios.post(
+        `${ip}/cbo`,
+        { code: cboCode, title: cboTitle },
+        authHeader
+      );
+    }
+    setCboCode("");
+    setCboTitle("");
+    setSelectedCBO(null);
+    getCbos();
+  }
+
+  async function handleDeleteCBO(id: string) {
+    await axios.delete(`${ip}/cbo/${id}`, authHeader);
+    getCbos();
+  }
+
+  async function getPositions() {
+    const { data } = await axios.get<Position[]>(
+      `${ip}/position`,
+      authHeader
+    );
+    setPositions(data || []);
+  }
+
+  async function handleSavePosition() {
+    if (selectedPosition) {
+      await axios.put(
+        `${ip}/position/${selectedPosition.id}`,
+        { title: positionName },
+        authHeader
+      );
+    } else {
+      await axios.post(
+        `${ip}/position`,
+        { title: positionName },
+        authHeader
+      );
+    }
+    setPositionName("");
+    setSelectedPosition(null);
+    getPositions();
+  }
+
+  async function handleDeletePosition(id: string) {
+    await axios.delete(`${ip}/position/${id}`, authHeader);
+    getPositions();
+  }
+
+  async function getServices() {
+    setIsLoadingServices(true);
+    try {
+      const { data } = await axios.get<Service[]>(
+        `${ip}/contract/service-type`,
+        { params: { owner: "REPO", idOwner: "" }, ...authHeader }
+      );
+      setServices(data || []);
+    } finally {
+      setIsLoadingServices(false);
+    }
+  }
+
+  async function handleCreateService() {
+    if (!newServiceTitle) return toast("Preencha o título");
+    setIsCreatingService(true);
+    await axios.post(
+      `${ip}/contract/service-type/repository`,
+      { title: newServiceTitle, risk: newServiceRisk },
+      authHeader
+    );
+    setNewServiceTitle("");
+    setNewServiceRisk("LOW");
+    getServices();
+    setIsCreatingService(false);
+  }
+
+  async function getActivities() {
+    setIsLoadingActivities(true);
+    try {
+      const res = await axios.get<{ content?: Activity[] }>(
+        `${ip}/contract/activity-repo`,
+        {
+          params: { page: 0, size: 100, sort: "title", direction: "ASC" },
+          ...authHeader,
+        }
+      );
+      setActivities(res.data.content || []);
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  }
+
+  async function handleCreateActivity() {
+    if (!newActivityTitle) return toast("Preencha o título");
+    setIsCreatingActivity(true);
+    await axios.post(
+      `${ip}/contract/activity-repo`,
+      { title: newActivityTitle, risk: newActivityRisk },
+      authHeader
+    );
+    setNewActivityTitle("");
+    setNewActivityRisk("LOW");
+    getActivities();
+    setIsCreatingActivity(false);
+  }
+
+  //
+  // ——— ABA VALIDATE ———
+  //
+
+  async function getMatrixEntries() {
+    setIsLoadingMatrix(true);
+    try {
+      const { data } = await axios.get<DocumentMatrixEntry[]>(
+        `${ip}/document/matrix`,
+        {
+          ...authHeader,
+          params: { page: 0, size: 1000 },
+        }
+      );
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray((data as any).content)
+        ? (data as any).content
+        : [];
+      setMatrixEntries(list);
+    } catch {
+      toast.error("Não foi possível carregar documentos");
+    } finally {
+      setIsLoadingMatrix(false);
+    }
+  }
+
+  async function handleUpdateEntry(id: string) {
+    const entry = matrixEntries.find((e) => e.idDocumentMatrix === id);
+    if (!entry) return;
+    await axios.put(
+      `${ip}/document/matrix/${id}`,
+      {
+        expirationDateUnit: entry.expirationDateUnit,
+        expirationDateAmount: entry.expirationDateAmount,
+      },
+      authHeader
+    );
+    toast.success("Validade atualizada");
+  }
+
+  //
+  // ——— Filtragens ———
+  //
+  const filteredDocuments = useMemo(
+    () =>
+      documents
+        .filter((d) =>
+          d.documentTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) =>
+          a.documentTitle.localeCompare(b.documentTitle, "pt-BR")
+        ),
+    [documents, searchTerm]
+  );
+
+  const filteredServices = useMemo(
+    () =>
+      services
+        .filter(
+          (s) =>
+            s.title.toLowerCase().includes(serviceSearchTerm.toLowerCase()) ||
+            riskTranslations[s.risk]
+              .toLowerCase()
+              .includes(serviceSearchTerm.toLowerCase())
+        )
+        .sort((a, b) => a.title.localeCompare(b.title, "pt-BR")),
+    [services, serviceSearchTerm]
+  );
+
+  const filteredActivities = useMemo(
+    () =>
+      activities
+        .filter(
+          (a) =>
+            a.title.toLowerCase().includes(activitySearchTerm.toLowerCase()) ||
+            riskTranslations[a.risk]
+              .toLowerCase()
+              .includes(activitySearchTerm.toLowerCase())
+        )
+        .sort((a, b) => a.title.localeCompare(b.title, "pt-BR")),
+    [activities, activitySearchTerm]
+  );
+
+  const filteredMatrixEntries = useMemo(
+    () =>
+      matrixEntries.filter((e) =>
+        e.name.toLowerCase().includes(searchMatrixTerm.toLowerCase())
+      ),
+    [matrixEntries, searchMatrixTerm]
+  );
 
   return (
-    <div className="p-6 md:p-10 flex flex-col gap-0 md:gap-0">
-      <div className="shadow-lg rounded-lg bg-white p-6 md:p-8 flex flex-col gap-6 md:gap-10 relative bottom-[8vw]">
-        <h1 className="text-2xl md:text-[25px]">Configurações gerais</h1>
-        <div className="bg-[#7CA1F3] w-full h-[1px]" />
-        <div className="flex items-center gap-5">
-          {["documents", "cbos", "positions", "services", "activities", "validate"].map((tab) => (
-            <Button
-              key={tab}
-              className={`${
-                selectTab === tab
-                  ? "bg-realizaBlue text-white"
-                  : "bg-transparent border text-black border-black hover:bg-neutral-300"
-              }`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {{
-                documents: "Documentos",
-                cbos: "CBOs",
-                positions: "Cargos",
-                services: "Serviços",
-                activities: "Atividades",
-                validate: "Validade Padrão",
-              }[tab]}
-            </Button>
-          ))}
-        </div>
+    <div className="p-6 md:p-10 flex flex-col gap-6">
+      {/* Header de abas */}
+      <div className="shadow-lg rounded-lg bg-white p-6 flex gap-2">
+        {[
+          "documents",
+          "cbos",
+          "positions",
+          "services",
+          "activities",
+          "validate",
+        ].map((tab) => (
+          <Button
+            key={tab}
+            className={
+              selectTab === tab
+                ? "bg-realizaBlue text-white"
+                : "bg-transparent border text-black border-black hover:bg-neutral-300"
+            }
+            onClick={() => setSelectedTab(tab as any)}
+          >
+            {{
+              documents: "Documentos",
+              cbos: "CBOs",
+              positions: "Cargos",
+              services: "Serviços",
+              activities: "Atividades",
+              validate: "Validade Padrão",
+            }[tab]}
+          </Button>
+        ))}
       </div>
 
-      <div className="shadow-lg rounded-lg bg-white p-6 md:p-8 flex flex-col gap-6 md:gap-10">
+      {/* Conteúdo das abas */}
+      <div className="shadow-lg rounded-lg bg-white p-6 flex flex-col gap-6">
+        {/* Documentos */}
         {selectTab === "documents" && (
-          <div className="flex items-start justify-center gap-10 w-full">
-            <div className="w-[45%] space-y-4">
-              <h1 className="text-2xl font-bold mb-2">Lista de documentos</h1>
+          <div className="flex gap-10">
+            <div className="w-1/2 space-y-4">
+              <h2 className="text-xl font-bold">Documentos</h2>
               <input
                 type="text"
                 placeholder="Buscar por título..."
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               {isLoading ? (
-                <p className="text-gray-500">Carregando documentos...</p>
-              ) : (
-                <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
-                  {filteredDocuments.length > 0 ? (
-                    filteredDocuments.map((doc) => (
-                      <li
-                        key={doc.id}
-                        onClick={() => handleSelect(doc)}
-                        className="cursor-pointer p-4 border rounded-md hover:bg-gray-100 transition-all"
-                      >
-                        <h2 className="font-semibold">{doc.documentTitle}</h2>
-                        <p className="text-sm text-gray-700 line-clamp-1">
-                          {doc.description || "Sem descrição definida"}
-                        </p>
-                      </li>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">Nenhum documento encontrado.</p>
-                  )}
+                <p>Carregando...</p>
+              ) : filteredDocuments.length > 0 ? (
+                <ul className="max-h-[60vh] overflow-auto space-y-2">
+                  {filteredDocuments.map((doc) => (
+                    <li
+                      key={doc.id}
+                      onClick={() => handleSelect(doc)}
+                      className="p-3 border rounded hover:bg-gray-100 cursor-pointer"
+                    >
+                      <strong>{doc.documentTitle}</strong>
+                      <p className="text-sm text-gray-600 line-clamp-1">
+                        {doc.description || "Sem descrição"}
+                      </p>
+                    </li>
+                  ))}
                 </ul>
+              ) : (
+                <p>Nenhum documento.</p>
               )}
             </div>
-
             {selectedDoc && (
-              <div className="w-[45%] border-l pl-6 space-y-4">
+              <div className="w-1/2 border-l pl-6 space-y-4">
                 <h2 className="text-xl font-bold">
-                  Editar descrição: {selectedDoc.documentTitle}
+                  Editar: {selectedDoc.documentTitle}
                 </h2>
                 <textarea
-                  className="w-full h-40 p-3 border rounded-md resize-none"
+                  className="w-full h-40 p-2 border rounded"
+                  maxLength={1000}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  maxLength={1000}
-                  placeholder="Descreva como o documento deve ser avaliado..."
                 />
-                <div className="text-sm text-gray-500 text-right">
-                  {description.length} / 1000 caracteres
+                <div className="text-right text-sm text-gray-500">
+                  {description.length} / 1000
                 </div>
-                <div className="flex gap-4 pt-2">
-                  <button
-                    onClick={handleSave}
-                    className="bg-realizaBlue text-white px-6 py-2 rounded-md transition-all hover:opacity-90"
-                  >
-                    Salvar
-                  </button>
-                  <button
+                <div className="flex gap-2">
+                  <Button onClick={handleSave}>Salvar</Button>
+                  <Button
                     onClick={() => setSelectedDoc(null)}
-                    className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md"
+                    className="bg-gray-300 text-black"
                   >
                     Cancelar
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
           </div>
         )}
 
+        {/* CBOs */}
         {selectTab === "cbos" && (
-          <div className="flex items-start justify-center gap-10 w-full">
-            <div className="w-[45%] space-y-4">
-              <h1 className="text-2xl font-bold mb-2">Lista de CBOs</h1>
-              <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
+          <div className="flex gap-10">
+            <div className="w-1/2 space-y-4">
+              <h2 className="text-xl font-bold">CBOs</h2>
+              <ul className="max-h-[60vh] overflow-auto space-y-2">
                 {cbos.map((cbo) => (
                   <li
                     key={cbo.id}
-                    className="p-3 border rounded-md flex justify-between items-center"
+                    className="p-3 border rounded flex justify-between"
                   >
-                    <div>
-                      <strong>{cbo.code}</strong> - {cbo.title}
-                    </div>
+                    <span>
+                      <strong>{cbo.code}</strong> — {cbo.title}
+                    </span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
@@ -494,57 +505,55 @@ export function ConfigPanel() {
                 ))}
               </ul>
             </div>
-            <div className="w-[45%] border-l pl-6 space-y-4">
+            <div className="w-1/2 border-l pl-6 space-y-4">
               <h2 className="text-xl font-bold">
                 {selectedCBO ? "Editar CBO" : "Novo CBO"}
               </h2>
               <input
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 placeholder="Código"
                 value={cboCode}
                 onChange={(e) => setCboCode(e.target.value)}
               />
               <input
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 placeholder="Título"
                 value={cboTitle}
                 onChange={(e) => setCboTitle(e.target.value)}
               />
               <div className="flex gap-2">
-                <button
-                  onClick={handleSaveCBO}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
-                >
-                  {selectedCBO ? "Salvar alterações" : "Criar CBO"}
-                </button>
+                <Button onClick={handleSaveCBO}>
+                  {selectedCBO ? "Salvar" : "Criar CBO"}
+                </Button>
                 {selectedCBO && (
-                  <button
+                  <Button
                     onClick={() => {
                       setSelectedCBO(null);
                       setCboCode("");
                       setCboTitle("");
                     }}
-                    className="bg-gray-400 text-white px-4 py-2 rounded-md"
+                    className="bg-gray-300 text-black"
                   >
                     Cancelar
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
           </div>
         )}
 
+        {/* Cargos */}
         {selectTab === "positions" && (
-          <div className="flex items-start justify-center gap-10 w-full">
-            <div className="w-[45%] space-y-4">
-              <h1 className="text-2xl font-bold mb-2">Lista de Cargos</h1>
-              <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
+          <div className="flex gap-10">
+            <div className="w-1/2 space-y-4">
+              <h2 className="text-xl font-bold">Cargos</h2>
+              <ul className="max-h-[60vh] overflow-auto space-y-2">
                 {positions.map((pos) => (
                   <li
                     key={pos.id}
-                    className="p-3 border rounded-md flex justify-between items-center"
+                    className="p-3 border rounded flex justify-between"
                   >
-                    <div>{pos.title}</div>
+                    <span>{pos.title}</span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
@@ -566,188 +575,236 @@ export function ConfigPanel() {
                 ))}
               </ul>
             </div>
-            <div className="w-[45%] border-l pl-6 space-y-4">
+            <div className="w-1/2 border-l pl-6 space-y-4">
               <h2 className="text-xl font-bold">
                 {selectedPosition ? "Editar Cargo" : "Novo Cargo"}
               </h2>
               <input
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 placeholder="Nome do cargo"
                 value={positionName}
                 onChange={(e) => setPositionName(e.target.value)}
               />
               <div className="flex gap-2">
-                <button
-                  onClick={handleSavePosition}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
-                >
-                  {selectedPosition ? "Salvar alterações" : "Criar Cargo"}
-                </button>
+                <Button onClick={handleSavePosition}>
+                  {selectedPosition ? "Salvar" : "Criar Cargo"}
+                </Button>
                 {selectedPosition && (
-                  <button
+                  <Button
                     onClick={() => {
                       setSelectedPosition(null);
                       setPositionName("");
                     }}
-                    className="bg-gray-400 text-white px-4 py-2 rounded-md"
+                    className="bg-gray-300 text-black"
                   >
                     Cancelar
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
           </div>
         )}
 
+        {/* Serviços */}
         {selectTab === "services" && (
-          <div className="flex items-start justify-center gap-10 w-full">
-            <div className="w-[45%] space-y-4">
-              <h1 className="text-2xl font-bold mb-2">Lista de Serviços</h1>
+          <div className="flex gap-10">
+            <div className="w-1/2 space-y-4">
+              <h2 className="text-xl font-bold">Serviços</h2>
               <input
                 type="text"
                 placeholder="Buscar por título ou risco..."
-                className="w-full p-2 border rounded-md mb-4"
+                className="w-full p-2 border rounded"
                 value={serviceSearchTerm}
                 onChange={(e) => setServiceSearchTerm(e.target.value)}
               />
               {isLoadingServices ? (
-                <p className="text-gray-500">Carregando serviços...</p>
-              ) : (
-                <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
-                  {filteredServices.length > 0 ? (
-                    filteredServices.map((service) => (
-                      <li
-                        key={service.id}
-                        className="p-3 border rounded-md flex justify-between items-center"
-                      >
-                        <div>
-                          <strong>{service.title}</strong> (Risco: {riskTranslations[service.risk.toUpperCase()] || service.risk})
-                        </div>
-                      </li>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">Nenhum serviço encontrado.</p>
-                  )}
+                <p>Carregando serviços...</p>
+              ) : filteredServices.length > 0 ? (
+                <ul className="max-h-[60vh] overflow-auto space-y-2">
+                  {filteredServices.map((s) => (
+                    <li key={s.id} className="p-3 border rounded">
+                      <strong>{s.title}</strong> — Risco:{" "}
+                      {riskTranslations[s.risk]}
+                    </li>
+                  ))}
                 </ul>
+              ) : (
+                <p>Nenhum serviço.</p>
               )}
             </div>
-            <div className="w-[45%] border-l pl-6 space-y-4">
+            <div className="w-1/2 border-l pl-6 space-y-4">
               <h2 className="text-xl font-bold">Novo Serviço</h2>
               <input
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 placeholder="Título do Serviço"
                 value={newServiceTitle}
                 onChange={(e) => setNewServiceTitle(e.target.value)}
                 disabled={isCreatingService}
               />
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 value={newServiceRisk}
                 onChange={(e) => setNewServiceRisk(e.target.value)}
                 disabled={isCreatingService}
               >
-                {Object.keys(riskTranslations).map((key) => (
-                  <option key={key} value={key}>
-                    {riskTranslations[key]}
+                {expirationUnits.map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {u.label}
                   </option>
                 ))}
               </select>
               <div className="flex gap-2">
-                <button
-                  onClick={handleCreateService}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
-                  disabled={isCreatingService}
-                >
+                <Button onClick={handleCreateService} disabled={isCreatingService}>
                   {isCreatingService ? "Criando..." : "Criar Serviço"}
-                </button>
-                <button
-                  onClick={() => {
-                    setNewServiceTitle("");
-                    setNewServiceRisk("LOW");
-                  }}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-md"
+                </Button>
+                <Button
+                  onClick={() => setNewServiceTitle("")}
+                  className="bg-gray-300 text-black"
                   disabled={isCreatingService}
                 >
-                  Limpar Campos
-                </button>
+                  Limpar
+                </Button>
               </div>
             </div>
           </div>
         )}
 
+        {/* Atividades */}
         {selectTab === "activities" && (
-          <div className="flex items-start justify-center gap-10 w-full">
-            <div className="w-[45%] space-y-4">
-              <h1 className="text-2xl font-bold mb-2">Lista de Atividades</h1>
+          <div className="flex gap-10">
+            <div className="w-1/2 space-y-4">
+              <h2 className="text-xl font-bold">Atividades</h2>
               <input
                 type="text"
                 placeholder="Buscar por título ou risco..."
-                className="w-full p-2 border rounded-md mb-4"
+                className="w-full p-2 border rounded"
                 value={activitySearchTerm}
                 onChange={(e) => setActivitySearchTerm(e.target.value)}
               />
               {isLoadingActivities ? (
-                <p className="text-gray-500">Carregando atividades...</p>
-              ) : (
-                <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
-                  {filteredActivities.length > 0 ? (
-                    filteredActivities.map((activity) => (
-                      <li
-                        key={activity.id}
-                        className="p-3 border rounded-md flex justify-between items-center"
-                      >
-                        <div>
-                          <strong>{activity.title}</strong> (Risco: {riskTranslations[activity.risk.toUpperCase()] || activity.risk})
-                        </div>
-                      </li>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">Nenhuma atividade encontrada.</p>
-                  )}
+                <p>Carregando atividades...</p>
+              ) : filteredActivities.length > 0 ? (
+                <ul className="max-h-[60vh] overflow-auto space-y-2">
+                  {filteredActivities.map((a) => (
+                    <li key={a.id} className="p-3 border rounded">
+                      <strong>{a.title}</strong> — Risco:{" "}
+                      {riskTranslations[a.risk]}
+                    </li>
+                  ))}
                 </ul>
+              ) : (
+                <p>Nenhuma atividade.</p>
               )}
             </div>
-            <div className="w-[45%] border-l pl-6 space-y-4">
+            <div className="w-1/2 border-l pl-6 space-y-4">
               <h2 className="text-xl font-bold">Nova Atividade</h2>
               <input
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 placeholder="Título da Atividade"
                 value={newActivityTitle}
                 onChange={(e) => setNewActivityTitle(e.target.value)}
                 disabled={isCreatingActivity}
               />
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border rounded"
                 value={newActivityRisk}
                 onChange={(e) => setNewActivityRisk(e.target.value)}
                 disabled={isCreatingActivity}
               >
-                {Object.keys(riskTranslations).map((key) => (
+                {Object.entries(riskTranslations).map(([key, label]) => (
                   <option key={key} value={key}>
-                    {riskTranslations[key]}
+                    {label}
                   </option>
                 ))}
               </select>
               <div className="flex gap-2">
-                <button
-                  onClick={handleCreateActivity}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
-                  disabled={isCreatingActivity}
-                >
+                <Button onClick={handleCreateActivity} disabled={isCreatingActivity}>
                   {isCreatingActivity ? "Criando..." : "Criar Atividade"}
-                </button>
-                <button
-                  onClick={() => {
-                    setNewActivityTitle("");
-                    setNewActivityRisk("LOW");
-                  }}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-md"
+                </Button>
+                <Button
+                  onClick={() => setNewActivityTitle("")}
+                  className="bg-gray-300 text-black"
                   disabled={isCreatingActivity}
                 >
-                  Limpar Campos
-                </button>
+                  Limpar
+                </Button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Validate */}
+        {selectTab === "validate" && (
+          <div className="flex flex-col gap-4">
+            <h2 className="text-xl font-bold">Validação de Documentos</h2>
+            <input
+              type="text"
+              placeholder="Buscar documento..."
+              className="w-full p-2 border rounded"
+              value={searchMatrixTerm}
+              onChange={(e) => setSearchMatrixTerm(e.target.value)}
+            />
+            {isLoadingMatrix ? (
+              <p>Carregando documentos...</p>
+            ) : filteredMatrixEntries.length === 0 ? (
+              <p className="text-gray-500">
+                Nenhum documento corresponde à busca.
+              </p>
+            ) : (
+              <ul className="max-h-[70vh] overflow-auto space-y-3">
+                {filteredMatrixEntries.map((entry) => (
+                  <li
+                    key={entry.idDocumentMatrix}
+                    className="p-4 border rounded flex flex-col gap-2"
+                  >
+                    <strong>{entry.name}</strong>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        className="w-20 p-1 border rounded"
+                        value={entry.expirationDateAmount}
+                        onChange={(e) => {
+                          const amt = Number(e.target.value);
+                          setMatrixEntries((list) =>
+                            list.map((i) =>
+                              i.idDocumentMatrix === entry.idDocumentMatrix
+                                ? { ...i, expirationDateAmount: amt }
+                                : i
+                            )
+                          );
+                        }}
+                      />
+                      <select
+                        className="p-1 border rounded"
+                        value={entry.expirationDateUnit}
+                        onChange={(e) => {
+                          const unit = e.target.value;
+                          setMatrixEntries((list) =>
+                            list.map((i) =>
+                              i.idDocumentMatrix === entry.idDocumentMatrix
+                                ? { ...i, expirationDateUnit: unit }
+                                : i
+                            )
+                          );
+                        }}
+                      >
+                        {expirationUnits.map((u) => (
+                          <option key={u.value} value={u.value}>
+                            {u.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        onClick={() => handleUpdateEntry(entry.idDocumentMatrix)}
+                      >
+                        Salvar
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>
