@@ -293,6 +293,12 @@ export const MonittoringBis = () => {
           </div>
         </div>
 
+        <div className="mt-6 flex flex-grow min-w-[800px]">
+          <ActiveContracts count={stats.contractQuantity ?? 0} />
+          <Suppliers count={stats.supplierQuantity ?? 0} />
+          <AllocatedEmployees count={stats.allocatedEmployeeQuantity ?? 0} />
+        </div>
+
         {/* Gráficos e Tabelas */}
         <div className="overflow-x-auto mt-10 pb-10">
           <StatusDocumentChart data={chartData} />
@@ -304,14 +310,6 @@ export const MonittoringBis = () => {
             </div>
             <div className="flex-grow min-w-[320px] overflow-x-auto">
               <ConformityRankingTable data={tableData} />
-
-              <div className="mt-6 flex flex-grow min-w-[800px]">
-                <ActiveContracts count={stats.contractQuantity ?? 0} />
-                <Suppliers count={stats.supplierQuantity ?? 0} />
-                <AllocatedEmployees
-                  count={stats.allocatedEmployeeQuantity ?? 0}
-                />
-              </div>
             </div>
           </div>
         </div>
