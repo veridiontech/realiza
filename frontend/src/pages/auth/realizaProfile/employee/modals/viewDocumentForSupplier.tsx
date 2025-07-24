@@ -26,68 +26,51 @@ export function DocumentViewer({
   const [justificationError, setJustificationError] = useState<string | null>(
     null
   );
+  const [loadingStatus, setLoadingStatus] = useState(false);
 
   const handleChangeStatus = async (status: string, notes: string) => {
+    setLoadingStatus(true);
     try {
       const token = localStorage.getItem("tokenClient");
       const response = await axios.post(
         `${ip}/document/${documentId}/change-status`,
-        {
-          status,
-          notes,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { status, notes },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("status:", response.data);
-      toast(
-        `Documento ${
-          status === "APROVADO" ? "aprovado" : "reprovado"
-        } com sucesso!`
-      );
-      if (onStatusChange) {
-        onStatusChange(documentId, status);
-      }
+      toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
+      if (onStatusChange) onStatusChange(documentId, status);
       onClose();
     } catch (err) {
       console.error(err);
       toast("Erro ao atualizar o status do documento.");
+    } finally {
+      setLoadingStatus(false);
     }
   };
 
   const handleReprovar = async (notes: string) => {
     if (justification.length > 1000) {
-      setJustificationError(
-        "A justificativa não pode ter mais de 1000 caracteres."
-      );
+      setJustificationError("A justificativa não pode ter mais de 1000 caracteres.");
       return;
     }
+    setLoadingStatus(true);
     try {
       const token = localStorage.getItem("tokenClient");
       const response = await axios.post(
         `${ip}/document/${documentId}/change-status`,
-        {
-          status: "REPROVADO",
-          notes,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { status: "REPROVADO", notes },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("status:", response.data);
       toast("Documento reprovado com sucesso!");
-      if (onStatusChange) {
-        onStatusChange(documentId, "REPROVADO");
-      }
+      if (onStatusChange) onStatusChange(documentId, "REPROVADO");
       onClose();
     } catch (err) {
       console.error(err);
       toast("Erro ao atualizar o status do documento.");
+    } finally {
+      setLoadingStatus(false);
     }
   };
 
@@ -112,19 +95,10 @@ export function DocumentViewer({
             headers: { Authorization: `Bearer ${tokenFromStorage}` },
           }
         );
-        const fileData = res.data.fileData;
-
-        if (fileData) {
-          const binaryString = atob(fileData);
-          const len = binaryString.length;
-          const bytes = new Uint8Array(len);
-          for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-
-          const pdfBlob = new Blob([bytes], { type: "application/pdf" });
-          const pdfUrl = URL.createObjectURL(pdfBlob);
-          setPdfUrl(pdfUrl);
+        console.log("view: ", res.data);
+        const pdfUrlFromApi = res.data.signedUrl;
+        if (pdfUrlFromApi) {
+          setPdfUrl(pdfUrlFromApi);
         } else {
           setError("Nenhum dado de arquivo encontrado.");
         }
@@ -205,9 +179,11 @@ export function DocumentViewer({
           <div className="flex flex-row gap-6">
             <button
               onClick={() => handleChangeStatus("APROVADO", "")}
-              className="h-12 w-[10rem] rounded-full bg-green-400 font-bold text-white hover:bg-green-300"
+              disabled={loadingStatus}
+              className={`h-12 w-[10rem] rounded-full font-bold text-white transition-all ${loadingStatus ? "bg-green-300 cursor-not-allowed" : "bg-green-400 hover:bg-green-300"
+                }`}
             >
-              Aprovar
+              {loadingStatus ? "Processando..." : "Aprovar"}
             </button>
             <button
               onClick={() => setShowJustification(true)}
@@ -231,9 +207,11 @@ export function DocumentViewer({
                 <div className="mt-4 flex gap-4">
                   <button
                     onClick={() => handleReprovar(justification)}
-                    className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
+                    disabled={loadingStatus}
+                    className={`h-12 w-[10rem] rounded-full font-bold text-white transition-all ${loadingStatus ? "bg-red-300 cursor-not-allowed" : "bg-red-400 hover:bg-yellow-300"
+                      }`}
                   >
-                    Confirmar Reprovação
+                    {loadingStatus ? "Processando..." : "Confirmar Reprovação"}
                   </button>
                   <button
                     onClick={() => setShowJustification(false)}

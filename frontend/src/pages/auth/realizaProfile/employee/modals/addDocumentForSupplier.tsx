@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Modal } from "@/components/modal";
 import { ip } from "@/utils/ip";
+import { toast } from "sonner";
 
 interface AddDocumentSuppliersProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     console.log("documentID:", documentId);
@@ -26,7 +28,6 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (!file) return;
 
     if (file.type !== "application/pdf") {
@@ -41,8 +42,6 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
   };
 
   const handleSubmit = async () => {
-    console.log("📦 Submetendo upload para documentId:", documentId);
-
     if (!selectedFile) {
       setStatusMessage("Por favor, selecione um arquivo antes de enviar.");
       setStatusType("error");
@@ -52,9 +51,10 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
     if (!documentId) {
       setStatusMessage("ID do documento não encontrado.");
       setStatusType("error");
-      console.warn("⚠️ documentId está indefinido no submit.");
       return;
     }
+
+    setIsLoading(true);
 
     const formData = new FormData();
     formData.append("file", selectedFile);
@@ -69,18 +69,19 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
         },
       });
 
-      setStatusMessage("Arquivo enviado com sucesso!");
-      setStatusType("success");
+      toast.success("Documento enviado com sucesso!");
+      setStatusMessage(null);
+      setStatusType(null);
       setSelectedFile(null);
 
-      
-      setTimeout(() => {
-        onClose();
-      }, 1500); 
+      onClose();
     } catch (error: any) {
       console.error("❌ Erro ao enviar:", error.response?.data || error.message);
+      toast.error("Erro ao enviar o documento.");
       setStatusMessage("Erro ao enviar o arquivo. Tente novamente.");
       setStatusType("error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,6 +90,7 @@ export const AddDocument: React.FC<AddDocumentSuppliersProps> = ({
       title="Upload de Documento"
       onClose={onClose}
       onSubmit={handleSubmit}
+      loading={isLoading}
       fields={[
         {
           name: "title",

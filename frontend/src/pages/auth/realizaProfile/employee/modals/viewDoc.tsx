@@ -18,6 +18,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
   const [showJustification, setShowJustification] = useState(false);
   const [justification, setJustification] = useState("");
   const [justificationError, setJustificationError] = useState<string | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState(false);
 
   const fetchFileData = async () => {
     setLoading(true);
@@ -27,19 +28,10 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const fileData = res.data.fileData;
+      const pdfUrlFromApi = res.data.signedUrl;
 
-      if (fileData) {
-        const binaryString = atob(fileData);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-
-        const pdfBlob = new Blob([bytes], { type: "application/pdf" });
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        setPdfUrl(pdfUrl);
+      if (pdfUrlFromApi) {
+        setPdfUrl(pdfUrlFromApi);
       } else {
         setError("Nenhum dado de arquivo encontrado.");
       }
@@ -57,13 +49,13 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
       const res = await axios.get(`${ip}/audit-log`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
-          id: documentId, 
-          auditLogTypeEnum: "DOCUMENT", 
+          id: documentId,
+          auditLogTypeEnum: "DOCUMENT",
         },
       });
 
-      console.log("Logs Retornados:", res.data); 
-      setLogs(res.data.content || []); 
+      console.log("Logs Retornados:", res.data);
+      setLogs(res.data.content || []);
     } catch (err) {
       console.error("Erro ao buscar logs:", err);
     }
@@ -77,6 +69,7 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
   }, [documentId]);
 
   const handleChangeStatus = async (status: string, notes: string) => {
+    setLoadingStatus(true);
     try {
       const token = localStorage.getItem("tokenClient");
       await axios.post(
@@ -96,6 +89,8 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
     } catch (err) {
       console.error(err);
       toast("Erro ao atualizar o status do documento.");
+    } finally {
+      setLoadingStatus(false);
     }
   };
 
@@ -139,10 +134,10 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
   const columns: GridColDef[] = [
     { field: "userResponsibleFullName", headerName: "Usuário", flex: 1 },
     { field: "action", headerName: "Ação", flex: 1 },
-    { 
-      field: "createdAt", 
-      headerName: "Data", 
-      flex: 1, 
+    {
+      field: "createdAt",
+      headerName: "Data",
+      flex: 1,
       renderCell: (params) => formatDate(params.value)  // Formatar a data antes de exibi-la
     },
   ];
@@ -210,9 +205,11 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
         <div className="mt-6 flex justify-center gap-6">
           <button
             onClick={() => handleChangeStatus("APROVADO", "")}
-            className="h-12 w-[12rem] rounded-full bg-green-500 text-white hover:bg-green-400 transition-all"
+            disabled={loadingStatus}
+            className={`h-12 w-[12rem] rounded-full text-white transition-all ${loadingStatus ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-400"
+              }`}
           >
-            Aprovar
+            {loadingStatus ? "Processando..." : "Aprovar"}
           </button>
           <button
             onClick={() => setShowJustification(true)}
@@ -241,9 +238,11 @@ export function DocumentViewer({ documentId, onClose, onStatusChange }: Document
             <div className="mt-4 flex gap-4">
               <button
                 onClick={() => handleReprovar(justification)}
-                className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-red-300"
+                disabled={loadingStatus}
+                className={`h-12 w-[10rem] rounded-full font-bold text-white transition-all ${loadingStatus ? "bg-red-300 cursor-not-allowed" : "bg-red-400 hover:bg-red-300"
+                  }`}
               >
-                Confirmar Reprovação
+                {loadingStatus ? "Processando..." : "Confirmar Reprovação"}
               </button>
               <button
                 onClick={() => setShowJustification(false)}
