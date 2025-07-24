@@ -32,6 +32,7 @@ interface Document {
   expirationDate?: string;
   isUnique?: boolean;
   lastCheck?: string;
+  uploadDate?: string;
 }
 
 export function ContarctsByProvider() {
@@ -352,9 +353,10 @@ export function ContarctsByProvider() {
                 className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
               />
 
-              <div className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
+              <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
                 <div>Status</div>
                 <div className="col-span-1">Documento</div>
+                <div>Envio</div>
                 <div>Checagem</div>
                 <div>Validade</div>
                 <div className="text-center">Ações</div>
@@ -364,7 +366,7 @@ export function ContarctsByProvider() {
                 {filteredDocuments.length > 0 ? (
                   filteredDocuments.map((doc: Document) => (
                     <div
-                      className="grid grid-cols-[1fr_2fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
+                      className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                       key={doc.id}
                     >
                       <div>
@@ -413,6 +415,11 @@ export function ContarctsByProvider() {
                                 {doc.isUnique ? 'Documento único para esse contrato' : 'Documento se espelha para outros contratos'}
                             </span>
                         )}
+                      </div>
+                      <div>
+                        <span className="text-sm text-neutral-600">
+                          {formatarData(doc.uploadDate)}
+                        </span>
                       </div>
                       <div>
                         <span className="text-sm text-neutral-600">
