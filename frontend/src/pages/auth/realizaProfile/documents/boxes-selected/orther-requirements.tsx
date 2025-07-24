@@ -29,7 +29,6 @@ export function OrtherRequirements() {
 
   const getDocument = async () => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
-    setIsLoading(true);
 
     try {
       const resSelected = await axios.get(
@@ -56,50 +55,52 @@ export function OrtherRequirements() {
       setSelectedDocument(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar documentos:", err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const filterIdDocuments = nonSelected.map((document: propsDocument) => document.idDocument);
   const filterIdDocumentsSelected = documents.map((document: propsDocument) => document.idDocument);
 
-const sendDocuments = async (
-  isSelected: boolean,
-  idDocument: string[],  
-  replicate: boolean,
-  branches: string[]  
-) => {
-  const tokenFromStorage = localStorage.getItem("tokenClient");
+  const sendDocuments = async (
+    isSelected: boolean,
+    idDocument: string[],
+    replicate: boolean,
+    branches: string[]
+  ) => {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    setIsLoading(true);
 
-  try {
-    await axios.post(
-      `${ip}/document/branch/document-matrix/update`, 
-      {
-        documentIds: idDocument,
-        branchIds: branches,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${tokenFromStorage}`,
+    try {
+      await axios.post(
+        `${ip}/document/branch/document-matrix/update`,
+        {
+          documentIds: idDocument,
+          branchIds: branches,
         },
-        params: {  
-          isSelected: isSelected,
-          replicate: replicate,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenFromStorage}`,
+          },
+          params: {
+            isSelected: isSelected,
+            replicate: replicate,
+          },
         }
-      }
-    );
+      );
 
-    clearArray();
-    pullDatas();
-  } catch (err) {
-    console.log("erro ao enviar documento", err);
-  }
-};
+      clearArray();
+      await pullDatas();
+    } catch (err) {
+      console.log("erro ao enviar documento", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (selectedBranch?.idBranch) {
-      getDocument();
+      setIsLoading(true);
+      getDocument().finally(() => setIsLoading(false));
     }
   }, [selectedBranch?.idBranch]);
 
@@ -110,8 +111,10 @@ const sendDocuments = async (
     setSelectedDocument([]);
   };
 
-  const pullDatas = () => {
-    getDocument();
+  const pullDatas = async () => {
+    setIsLoading(true);
+    await getDocument();
+    setIsLoading(false);
   };
 
   const toggleSelectAll = () => {
@@ -137,9 +140,9 @@ const sendDocuments = async (
                     ? "cursor-not-allowed bg-gray-300 text-gray-500"
                     : "bg-realizaBlue text-white"
                 }`}
-                disabled={nonSelected.length === 0}
+                disabled={nonSelected.length === 0 || isLoading}
               >
-                Alocar novos documentos
+                {isLoading ? "Alocando..." : "Alocar novos documentos"}
               </AlertDialogTrigger>
               <AlertDialogContent className="max-h-[400px] overflow-y-auto">
                 <AlertDialogHeader>
@@ -210,13 +213,14 @@ const sendDocuments = async (
                   )}
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
                       sendDocuments(true, filterIdDocuments, replicate, selectedBranches)
                     }
+                    disabled={isLoading}
                   >
-                    Confirmar
+                    {isLoading ? "Confirmando..." : "Confirmar"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -231,9 +235,9 @@ const sendDocuments = async (
                     ? "cursor-not-allowed bg-red-300 text-red-500"
                     : "bg-red-600 text-white"
                 }`}
-                disabled={documents.length === 0}
+                disabled={documents.length === 0 || isLoading}
               >
-                Desalocar documentos
+                {isLoading ? "Desalocando..." : "Desalocar documentos"}
               </AlertDialogTrigger>
               <AlertDialogContent className="max-h-[400px] overflow-y-auto">
                 <AlertDialogHeader>
@@ -304,13 +308,14 @@ const sendDocuments = async (
                   )}
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
                       sendDocuments(false, filterIdDocumentsSelected, replicate, selectedBranches)
                     }
+                    disabled={isLoading}
                   >
-                    Confirmar
+                    {isLoading ? "Confirmando..." : "Confirmar"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
