@@ -26,12 +26,14 @@ public class DocumentMatrix {
     @Builder.Default
     private Integer expirationDateAmount = 1;
     @Builder.Default
-    private Unit expirationDateUnit = Unit.DAYS;
+    private Unit expirationDateUnit = Unit.MONTHS;
     private String type;
     @Builder.Default
     private Boolean doesBlock = true;
+    // se um documento é unico entre todos os contratos = true, caso seja por contrato = false
     @Builder.Default
     private Boolean isDocumentUnique = true;
+    // TODO documento tem competencia (surge semanalmente? mensalmente? anualmente?)
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 

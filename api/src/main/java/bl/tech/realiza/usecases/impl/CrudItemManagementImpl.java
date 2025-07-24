@@ -1,8 +1,15 @@
 package bl.tech.realiza.usecases.impl;
 
+import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -20,6 +27,8 @@ import bl.tech.realiza.gateways.requests.services.email.EmailEnterpriseInviteReq
 import bl.tech.realiza.gateways.requests.services.email.EmailRegistrationDeniedRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
@@ -34,7 +43,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import static bl.tech.realiza.domains.contract.Contract.*;
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 
 @Service
@@ -136,10 +144,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
     @Override
     public ItemManagementProviderDetailsResponseDto findProviderSolicitationDetails(String idSolicitation) {
-        ItemManagement itemManagement = itemManagementRepository.findById(idSolicitation)
-                .orElseThrow(() -> new NotFoundException("Solicitation not found"));
-
-        return toItemManagementProviderDetailsResponseDto(itemManagement);
+        return toItemManagementProviderDetailsResponseDto(itemManagementRepository.findById(idSolicitation)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found")));
     }
 
     @Override
@@ -261,6 +267,18 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         itemManagementRepository.deleteById(idSolicitation);
     }
 
+    @Override
+    public Page<ItemManagementDocumentResponseDto> findAllDocumentSolicitation(Pageable pageable) {
+        Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByContractDocumentIsNotNull(pageable);
+        return itemManagementPage.map(this::toItemManagementDocumentResponseDto);
+    }
+
+    @Override
+    public ItemManagementDocumentDetailsResponseDto findDocumentSolicitationDetails(String idSolicitation) {
+        return toItemManagementDocumentDetailsResponseDto(itemManagementRepository.findById(idSolicitation)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found")));
+    }
+
     private ItemManagementUserResponseDto toItemManagementUserResponseDto(ItemManagement itemManagement, User requester, User newUser) {
         User actualUser = (User) Hibernate.unproxy(newUser);
 
@@ -316,6 +334,65 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                     .creationDate(itemManagement.getCreationDate())
                     .build();
         }
+    }
+
+    private ItemManagementDocumentResponseDto toItemManagementDocumentResponseDto(ItemManagement itemManagement) {
+        Document document = itemManagement.getContractDocument().getDocument();
+        Contract contract = itemManagement.getContractDocument().getContract();
+        User requester = itemManagement.getRequester();
+        Client client = null;
+        Branch branch = null;
+        String ownerName = null;
+        String enterpriseName = null;
+        String clientName = null;
+        String clientCnpj = null;
+        String branchName = null;
+
+        if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+            branch = contractProviderSupplier.getBranch();
+            branchName = branch.getName();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
+            branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
+            branchName = branch.getName();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        }
+        if (document instanceof DocumentEmployee documentEmployee) {
+            Employee employee = documentEmployee.getEmployee();
+            ownerName = documentEmployee.getEmployee().getFullName();
+            if (employee.getSupplier() != null) {
+               enterpriseName = employee.getSupplier().getCorporateName();
+            } else if(employee.getSubcontract() != null) {
+               enterpriseName = employee.getSubcontract().getCorporateName();
+            }
+        } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+            Provider provider = documentProviderSupplier.getProviderSupplier();
+            ownerName = provider.getCorporateName();
+            enterpriseName = provider.getCorporateName();
+        } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+            Provider provider = documentProviderSubcontractor.getProviderSubcontractor();
+            ownerName = provider.getCorporateName();
+            enterpriseName = provider.getCorporateName();
+        }
+
+        return ItemManagementDocumentResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .title(document.getTitle())
+                .ownerName(ownerName)
+                .enterpriseName(enterpriseName)
+                .solicitationType(itemManagement.getSolicitationType())
+                .clientName(clientName)
+                .clientCnpj(clientCnpj)
+                .branchName(branchName)
+                .requesterName(requester.getFullName())
+                .requesterEmail(requester.getEmail())
+                .status(itemManagement.getStatus())
+                .creationDate(itemManagement.getCreationDate())
+                .build();
     }
 
     private ItemManagementUserDetailsResponseDto toItemManagementUserDetailsResponseDto(ItemManagement itemManagement) {
@@ -375,4 +452,65 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .build();
     }
 
+    private ItemManagementDocumentDetailsResponseDto toItemManagementDocumentDetailsResponseDto(ItemManagement itemManagement) {
+        Document document = itemManagement.getContractDocument().getDocument();
+        Contract contract = itemManagement.getContractDocument().getContract();
+        Client client = null;
+        Branch branch = null;
+        String clientName = null;
+        String clientCnpj = null;
+        String enterpriseName = null;
+        String enterpriseCnpj = null;
+        String ownerName = null;
+
+        if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+            branch = contractProviderSupplier.getBranch();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
+            branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        }
+        if (document instanceof DocumentEmployee documentEmployee) {
+            Employee employee = documentEmployee.getEmployee();
+            ownerName = documentEmployee.getEmployee().getFullName();
+            if (employee.getSupplier() != null) {
+                enterpriseName = employee.getSupplier().getCorporateName();
+            } else if(employee.getSubcontract() != null) {
+                enterpriseName = employee.getSubcontract().getCorporateName();
+            }
+        } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+            Provider provider = documentProviderSupplier.getProviderSupplier();
+            ownerName = provider.getCorporateName();
+            enterpriseName = provider.getCorporateName();
+        } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+            Provider provider = documentProviderSubcontractor.getProviderSubcontractor();
+            ownerName = provider.getCorporateName();
+            enterpriseName = provider.getCorporateName();
+        }
+
+        return ItemManagementDocumentDetailsResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .solicitationType(itemManagement.getSolicitationType())
+                .creationDate(itemManagement.getCreationDate())
+                .client(ItemManagementDocumentDetailsResponseDto.Client.builder()
+                        .corporateName(clientName)
+                        .cnpj(clientCnpj)
+                        .build())
+                .enterprise(ItemManagementDocumentDetailsResponseDto.Enterprise.builder()
+                        .corporateName(enterpriseName)
+                        .build())
+                .requester(ItemManagementDocumentDetailsResponseDto.Requester.builder()
+                        .fullName(itemManagement.getRequester().getFullName())
+                        .email(itemManagement.getRequester().getEmail())
+                        .build())
+                .document(ItemManagementDocumentDetailsResponseDto.Document.builder()
+                        .title(itemManagement.getContractDocument().getDocument().getTitle())
+                        .ownerName(ownerName)
+                        .build())
+                .build();
+    }
 }

@@ -29,6 +29,7 @@ public class ContractDocumentAndEmployeeResponseDto {
         private Boolean enterprise;
         private Boolean isUnique;
         private Boolean hasDoc;
+        private LocalDateTime uploadDate;
         private LocalDateTime expirationDate;
         private LocalDateTime lastCheck;
     }

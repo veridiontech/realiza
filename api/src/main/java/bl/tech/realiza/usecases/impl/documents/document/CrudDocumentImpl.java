@@ -15,9 +15,11 @@ import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
@@ -25,6 +27,7 @@ import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployee
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
+import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
@@ -67,6 +70,8 @@ public class CrudDocumentImpl implements CrudDocument {
     private final GoogleCloudService googleCloudService;
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
+    private final ContractDocumentRepository contractDocumentRepository;
+    private final ItemManagementRepository itemManagementRepository;
 
     @Override
     public void expirationChange() {
@@ -157,8 +162,14 @@ public class CrudDocumentImpl implements CrudDocument {
                 }
             }
             List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_IdDocument(branchId,documentMatrixId);
+            if (documentBranches.isEmpty()) {
+                throw new NotFoundException("Document branch not found");
+            }
             expirationUnit = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
             expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
+            if (expirationAmount == null) {
+                expirationAmount = document.getDocumentMatrix().getExpirationDateAmount();
+            }
             LocalDateTime documentDate = document.getDocumentDate() != null
                     ? document.getDocumentDate()
                     : LocalDateTime.now();
@@ -166,6 +177,7 @@ public class CrudDocumentImpl implements CrudDocument {
                 document.setExpirationDate(document.getDocumentDate()
                         .plusYears(100));
             } else {
+
                 switch (expirationUnit) {
                     case DAYS -> document.setExpirationDate(documentDate
                             .plusDays(expirationAmount));
@@ -235,9 +247,7 @@ public class CrudDocumentImpl implements CrudDocument {
             if (userResponsible != null) {
                 if (document instanceof DocumentEmployee documentEmployee) {
                     owner = documentEmployee.getEmployee() != null
-                            ? documentEmployee.getEmployee().getName()
-                            + (documentEmployee.getEmployee().getSurname() != null ?
-                            " " + documentEmployee.getEmployee().getSurname() : "")
+                            ? documentEmployee.getEmployee().getFullName()
                             : "Not Identified";
                 } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
                     owner = documentProviderSupplier.getProviderSupplier() != null
@@ -268,6 +278,67 @@ public class CrudDocumentImpl implements CrudDocument {
         }
 
         return "Document " + document.getTitle() + " exempted from contract " + contract.getContractReference();
+    }
+
+    @Override
+    public String documentExemptionRequest(String documentId, String contractId) {
+
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        ContractDocument contractDocument = document.getContractDocuments().stream()
+                .filter(cd -> cd.getContract().equals(contract))
+                .toList().get(0);
+
+        contractDocument.setStatus(ISENCAO_PENDENTE);
+        contractDocumentRepository.save(contractDocument);
+
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            itemManagementRepository.save(ItemManagement.builder()
+                    .solicitationType(ItemManagement.SolicitationType.EXEMPTION)
+                    .contractDocument(contractDocument)
+                            .requester(userResponsible)
+                    .build());
+            if (userResponsible != null) {
+                String owner = "";
+                if (document instanceof DocumentEmployee documentEmployee) {
+                    owner = documentEmployee.getEmployee() != null
+                            ? documentEmployee.getEmployee().getFullName()
+                            : "Not Identified";
+                } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                    owner = documentProviderSupplier.getProviderSupplier() != null
+                            ? (documentProviderSupplier.getProviderSupplier().getCorporateName() != null
+                            ? documentProviderSupplier.getProviderSupplier().getCorporateName()
+                            : (documentProviderSupplier.getProviderSupplier().getTradeName() != null
+                            ? documentProviderSupplier.getProviderSupplier().getTradeName()
+                            : "Not Identified"))
+                            : "Not Identified";
+                } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+                    owner = documentProviderSubcontractor.getProviderSubcontractor() != null
+                            ? (documentProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
+                            ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                            : (documentProviderSubcontractor.getProviderSubcontractor().getTradeName() != null
+                            ? documentProviderSubcontractor.getProviderSubcontractor().getTradeName()
+                            : "Not Identified"))
+                            : "Not Identified";
+                }
+                auditLogServiceImpl.createAuditLog(
+                        document.getIdDocumentation(),
+                        DOCUMENT,
+                        userResponsible.getFullName() + " solicitou isenção do documento "
+                                + document.getTitle() + " de " + owner,
+                        null,
+                        EXEMPT,
+                        userResponsible.getIdUser());
+            }
+        }
+
+        return "Solicitation created";
     }
 
     @Override

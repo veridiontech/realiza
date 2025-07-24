@@ -9,5 +9,6 @@ import java.util.List;
 public interface DocumentController {
     ResponseEntity<String> changeDocumentStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto);
     ResponseEntity<String> documentExemption(String documentId, String contractId);
+    ResponseEntity<String> documentExemptionRequest(String documentId, String contractId);
     ResponseEntity<List<DocumentPendingResponseDto>> nonConformingDocumentsByEnterpriseId(String enterpriseId);
 }

@@ -4,7 +4,9 @@ import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -77,7 +79,8 @@ public abstract class Document {
         APROVADO,
         REPROVADO_IA,
         APROVADO_IA,
-        VENCIDO
+        VENCIDO,
+        ISENCAO_PENDENTE
     }
 
     public enum Request {

@@ -37,6 +37,13 @@ public class DocumentControllerImpl implements DocumentController {
         return ResponseEntity.ok(crudDocument.documentExemption(documentId, contractId));
     }
 
+    @PostMapping("/{documentId}/exempt-request")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> documentExemptionRequest(@PathVariable String documentId, @RequestParam String contractId) {
+        return ResponseEntity.ok(crudDocument.documentExemptionRequest(documentId, contractId));
+    }
+
     @GetMapping("/non-conforming/{enterpriseId}")
     @ResponseStatus(HttpStatus.OK)
     @Override
