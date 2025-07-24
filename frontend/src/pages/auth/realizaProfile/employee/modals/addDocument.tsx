@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Modal } from "@/components/modal";
 import { ip } from "@/utils/ip";
+import { toast } from "sonner";
 
 interface AddDocumentProps {
   isOpen: boolean;
   onClose: () => void;
   documentId: string | null;
   preSelectedTitle?: string | null;
-  onStatusChange: (id: string, newStatus: string) => void;  // Função recebida via props
+  onStatusChange: (id: string, newStatus: string) => void; 
 }
 
 export const AddDocument: React.FC<AddDocumentProps> = ({
@@ -16,11 +17,12 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
   onClose,
   documentId,
   preSelectedTitle,
-  onStatusChange,  // Função recebida via props
+  onStatusChange, 
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     console.log("documentID:", documentId);
@@ -42,56 +44,59 @@ export const AddDocument: React.FC<AddDocumentProps> = ({
     setStatusType(null);
   };
 
-  const handleSubmit = async () => {
-    console.log("📦 Submetendo upload para documentId:", documentId);
+const handleSubmit = async () => {
+  if (!selectedFile) {
+    setStatusMessage("Por favor, selecione um arquivo antes de enviar.");
+    setStatusType("error");
+    return;
+  }
 
-    if (!selectedFile) {
-      setStatusMessage("Por favor, selecione um arquivo antes de enviar.");
-      setStatusType("error");
-      return;
-    }
+  if (!documentId) {
+    setStatusMessage("ID do documento não encontrado.");
+    setStatusType("error");
+    console.warn("⚠️ documentId está indefinido no submit.");
+    return;
+  }
 
-    if (!documentId) {
-      setStatusMessage("ID do documento não encontrado.");
-      setStatusType("error");
-      console.warn("⚠️ documentId está indefinido no submit.");
-      return;
-    }
+  setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
+  const formData = new FormData();
+  formData.append("file", selectedFile);
 
-    try {
-      const tokenFromStorage = localStorage.getItem("tokenClient");
+  try {
+    const tokenFromStorage = localStorage.getItem("tokenClient");
 
-      await axios.post(`${ip}/document/employee/${documentId}/upload`, formData, {
-        headers: {
-          Authorization: `Bearer ${tokenFromStorage}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    await axios.post(`${ip}/document/employee/${documentId}/upload`, formData, {
+      headers: {
+        Authorization: `Bearer ${tokenFromStorage}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      setStatusMessage("Arquivo enviado com sucesso!");
-      setStatusType("success");
+    toast.success("Documento enviado com sucesso!");
+    setStatusMessage(null);
+    setStatusType(null);
 
-      // Atualizando o status do documento para "EM_ANALISE" após o upload
-      if (documentId) {
-        onStatusChange(documentId, "EM_ANALISE");  // Aqui a função é chamada para alterar o status
-      }
+    onStatusChange(documentId, "EM_ANALISE");
 
-      setSelectedFile(null);
-    } catch (error: any) {
-      console.error("❌ Erro ao enviar:", error.response?.data || error.message);
-      setStatusMessage("Erro ao enviar o arquivo. Tente novamente.");
-      setStatusType("error");
-    }
-  };
+    setSelectedFile(null);
+    onClose(); // Fecha o modal automaticamente
+  } catch (error: any) {
+    console.error("❌ Erro ao enviar:", error.response?.data || error.message);
+    setStatusMessage("Erro ao enviar o arquivo. Tente novamente.");
+    setStatusType("error");
+    toast.error("Erro ao enviar o documento.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return isOpen ? (
     <Modal
       title="Upload de Documento"
       onClose={onClose}
       onSubmit={handleSubmit}
+      loading={isLoading}
       fields={[
         {
           name: "title",
