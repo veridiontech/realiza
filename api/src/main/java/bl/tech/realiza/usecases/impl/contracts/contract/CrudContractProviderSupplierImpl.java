@@ -69,7 +69,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final DocumentBranchRepository documentBranchRepository;
     private final DocumentContractRepository documentContractRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
-    private final CrudItemManagement crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagement;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
@@ -172,7 +172,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         }
 
         // criar solicitação
-        crudItemManagementImpl.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
+        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
                         .solicitationType(ItemManagement.SolicitationType.CREATION)
                         .idRequester(requester.getIdUser())
                         .idNewProvider(newProviderSupplier.getIdProvider())

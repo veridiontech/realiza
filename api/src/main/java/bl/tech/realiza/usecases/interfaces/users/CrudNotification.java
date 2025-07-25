@@ -35,4 +35,8 @@ public interface CrudNotification {
     void markOneNotificationAsRead(String notificationId);
     @Async
     void saveValidationNotificationForRealizaUsers(String idDocumentation);
+    @Async
+    void saveDocumentNotificationForRealizaUsers(ItemManagement solicitation);
+    @Async
+    void saveContractNotificationForRealizaUsers(ItemManagement solicitation);
 }

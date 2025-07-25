@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.services;
 
+import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
@@ -46,6 +47,11 @@ public class ItemManagement {
     @JsonBackReference
     private ContractDocument contractDocument;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contractId")
+    @JsonBackReference
+    private Contract contract;
+
     public enum Status {
         APPROVED,
         DENIED,
@@ -55,6 +61,9 @@ public class ItemManagement {
     public enum SolicitationType {
         CREATION,
         INACTIVATION,
-        EXEMPTION
+        EXEMPTION,
+        FINISH,
+        SUSPEND,
+        REACTIVATION
     }
 }

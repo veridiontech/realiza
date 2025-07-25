@@ -3,6 +3,8 @@ package bl.tech.realiza.gateways.controllers.impl.services;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.contract.ItemManagementContractDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.contract.ItemManagementContractResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
@@ -122,6 +124,27 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Override
     public ResponseEntity<ItemManagementDocumentDetailsResponseDto> getDocumentSolicitationDetails(@PathVariable String idSolicitation) {
         return ResponseEntity.ok(crudItemManagement.findDocumentSolicitationDetails(idSolicitation));
+    }
+
+    @GetMapping("/contract")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca todas as solicitações para alterar status contrato")
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    public ResponseEntity<Page<ItemManagementContractResponseDto>> getContractSolicitations(@RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "10") int size,
+                                                                                            @RequestParam(defaultValue = "creationDate") String sort,
+                                                                                            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        return ResponseEntity.ok(crudItemManagement.findAllContractSolicitation(pageable));
+    }
+
+    @GetMapping("/contract/details/{idSolicitation}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca detalhes da solicitação de alterar status contrato")
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    public ResponseEntity<ItemManagementContractDetailsResponseDto> getContractSolicitationDetails(@PathVariable String idSolicitation) {
+        return ResponseEntity.ok(crudItemManagement.findContractSolicitationDetails(idSolicitation));
     }
 
     @PatchMapping("/{idSolicitation}/approve")

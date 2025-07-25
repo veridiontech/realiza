@@ -99,6 +99,8 @@ public class DocumentProcessingService {
             document.setVersionDate(LocalDateTime.now());
             if (result.getDocumentDate() != null) {
                 document.setDocumentDate(result.getDocumentDate());
+            } else {
+                document.setDocumentDate(LocalDateTime.now());
             }
             documentRepository.save(document);
             log.info("[{}] Documento ID={} salvo com novo status {}", threadName, document.getIdDocumentation(), document.getStatus());

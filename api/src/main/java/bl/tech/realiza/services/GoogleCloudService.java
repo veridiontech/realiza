@@ -58,26 +58,4 @@ public class GoogleCloudService {
 
         return "File deleted";
     }
-
-
-    @PostConstruct
-    public void checkCredentials() {
-        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-
-        if (credentialsPath == null) {
-            Dotenv dotenv = Dotenv.configure()
-                    .filename(".env") // opcional, por padrão é ".env"
-                    .load();
-
-            credentialsPath = dotenv.get("GOOGLE_APPLICATION_CREDENTIALS");
-        }
-        System.out.println("Caminho da credencial: " + credentialsPath);
-
-        try {
-            GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialsPath));
-            GoogleCloudService.log.info("Credencial Storage carregada com sucesso");
-        } catch (IOException e) {
-            System.err.println("Erro ao carregar credencial: " + e.getMessage());
-        }
-    }
 }

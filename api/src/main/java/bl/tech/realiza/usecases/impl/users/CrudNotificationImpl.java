@@ -1,5 +1,8 @@
 package bl.tech.realiza.usecases.impl.users;
 
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
@@ -437,5 +440,98 @@ public class CrudNotificationImpl implements CrudNotification {
         if (!notifications.isEmpty()) {
             notificationRepository.saveAll(notifications);
         }
+    }
+
+    @Override
+    public void saveDocumentNotificationForRealizaUsers(ItemManagement solicitation) {
+        List<Notification> notifications = new ArrayList<>();
+        String title = null;
+        String description = null;
+        String documentTitle = null;
+        String ownerName = null;
+
+        Document document = solicitation.getContractDocument().getDocument();
+        documentTitle = document.getTitle();
+        title = "Isenção de documento solicitada";
+
+        if (document instanceof DocumentEmployee documentEmployee) {
+            description = "Solicitação de isenção do documento " + documentTitle + " do colaborador " + documentEmployee.getEmployee().getFullName();
+        } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+            description = "Solicitação de isenção do documento " + documentTitle + " da empresa " + documentProviderSupplier.getProviderSupplier().getCorporateName();
+        } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+            description = "Solicitação de isenção do documento " + documentTitle + " da empresa " + documentProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+        }
+
+        String finalTitle = title;
+        String finalDescription = description;
+
+        List<UserManager> users = userManagerRepository.findAll();
+
+        for (UserManager user : users) {
+            notifications.add(
+                    Notification.builder()
+                            .user(user)
+                            .title(finalTitle)
+                            .description(finalDescription)
+                            .build()
+            );
+        }
+
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public void saveContractNotificationForRealizaUsers(ItemManagement solicitation) {
+        List<Notification> notifications = new ArrayList<>();
+        String title = null;
+        String description = null;
+        String contractReference = null;
+        String requesterEnterpriseName = null;
+        String providerEnterpriseName = null;
+
+        Contract contract = solicitation.getContract();
+        contractReference = contract.getContractReference();
+        if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+            requesterEnterpriseName = contractProviderSupplier.getBranch().getClient().getCorporateName();
+            providerEnterpriseName = contractProviderSupplier.getProviderSupplier().getCorporateName();
+        } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
+            requesterEnterpriseName = contractProviderSubcontractor.getProviderSupplier().getCorporateName();
+            providerEnterpriseName = contractProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+        }
+
+        switch (solicitation.getSolicitationType()) {
+            case FINISH -> {
+                title = "Finalização de contrato solicitada";
+                description = "Solicitação de finalização do contrato " + contractReference + " da empresa " + providerEnterpriseName
+                + " com a empresa " + requesterEnterpriseName;
+            }
+            case SUSPEND -> {
+                title = "Suspensão de contrato solicitada";
+                description = "Solicitação de Suspensão do contrato " + contractReference + " da empresa " + providerEnterpriseName
+                + " com a empresa " + requesterEnterpriseName;
+            }
+            case REACTIVATION -> {
+                title = "Reativação de contrato solicitada";
+                description = "Solicitação de Reativação do contrato " + contractReference + " da empresa " + providerEnterpriseName
+                + " com a empresa " + requesterEnterpriseName;
+            }
+        }
+
+        String finalTitle = title;
+        String finalDescription = description;
+
+        List<UserManager> users = userManagerRepository.findAll();
+
+        for (UserManager user : users) {
+            notifications.add(
+                    Notification.builder()
+                            .user(user)
+                            .title(finalTitle)
+                            .description(finalDescription)
+                            .build()
+            );
+        }
+
+        notificationRepository.saveAll(notifications);
     }
 }

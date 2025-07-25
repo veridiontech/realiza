@@ -1,7 +1,11 @@
 package bl.tech.realiza.usecases.interfaces;
 
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementContractRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementDocumentRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.contract.ItemManagementContractDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.contract.ItemManagementContractResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
@@ -29,6 +33,12 @@ public interface CrudItemManagement {
     void deleteSolicitation(String id);
 
     // document
+    ItemManagementDocumentResponseDto saveDocumentSolicitation(ItemManagementDocumentRequestDto requestDto);
     Page<ItemManagementDocumentResponseDto> findAllDocumentSolicitation(Pageable pageable);
     ItemManagementDocumentDetailsResponseDto findDocumentSolicitationDetails(String idSolicitation);
+
+    // contract
+    ItemManagementContractResponseDto saveContractSolicitation(ItemManagementContractRequestDto requestDto);
+    Page<ItemManagementContractResponseDto> findAllContractSolicitation(Pageable pageable);
+    ItemManagementContractDetailsResponseDto findContractSolicitationDetails(String idSolicitation);
 }

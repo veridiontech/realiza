@@ -28,29 +28,25 @@ public class ContractControllerImpl implements ContractController {
 
     @PostMapping("/finish/{idContract}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
     @Override
     public ResponseEntity<String> finishContract(@PathVariable String idContract) {
-        return ResponseEntity.ok(crudContractImpl.finishContract(idContract));
+        return ResponseEntity.ok(crudContractImpl.finishContractRequest(idContract));
     }
 
     @PostMapping("/suspend/{contractId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
     public ResponseEntity<String> suspendContract(@PathVariable String contractId) {
-        return ResponseEntity.ok(crudContractImpl.suspendContract(contractId));
+        return ResponseEntity.ok(crudContractImpl.suspendContractRequest(contractId));
     }
 
     @PostMapping("/reactivate/{contractId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
     public ResponseEntity<String> reactivateContract(@PathVariable String contractId) {
-        return ResponseEntity.ok(crudContractImpl.reactivateContract(contractId));
+        return ResponseEntity.ok(crudContractImpl.reactivateContractRequest(contractId));
     }
 
     @PostMapping("/add-employee/{idContract}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
     @Override
     public ResponseEntity<String> addEmployeeToContract(@PathVariable String idContract, @RequestBody EmployeeToContractRequestDto employeeToContractRequestDto) {
         return ResponseEntity.ok(crudContractImpl.addEmployeeToContract(idContract, employeeToContractRequestDto));
@@ -58,7 +54,6 @@ public class ContractControllerImpl implements ContractController {
 
     @PostMapping("/remove-employee/{idContract}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_CLIENT_MANAGER')")
     @Override
     public ResponseEntity<String> removeEmployeeFromContract(@PathVariable String idContract, @RequestBody EmployeeToContractRequestDto employeeToContractRequestDto) {
         return ResponseEntity.ok(crudContractImpl.removeEmployeeToContract(idContract, employeeToContractRequestDto));

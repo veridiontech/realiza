@@ -40,7 +40,7 @@ public class CrudUserClientImpl implements CrudUserClient {
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
-    private final CrudItemManagement crudItemManagementImpl;
+    private final CrudItemManagement crudItemManagement;
     private final ProfileRepository profileRepository;
     private final ContractRepository contractRepository;
     private final GoogleCloudService googleCloudService;
@@ -103,7 +103,7 @@ public class CrudUserClientImpl implements CrudUserClient {
 
         UserClient savedUserClient = userClientRepository.save(newUserClient);
 
-        crudItemManagementImpl.saveUserSolicitation(ItemManagementUserRequestDto.builder()
+        crudItemManagement.saveUserSolicitation(ItemManagementUserRequestDto.builder()
                 .solicitationType(ItemManagement.SolicitationType.CREATION)
                 .idRequester(savedUserClient.getIdUser())
                 .idNewUser(userClient.getIdUser())
