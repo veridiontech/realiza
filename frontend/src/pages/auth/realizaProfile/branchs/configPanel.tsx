@@ -613,7 +613,7 @@ export function ConfigPanel() {
         <div className="bg-[#7CA1F3] w-full h-[1px]" />
         <div className="flex items-center gap-5">
           {[
-            "documents_ai",
+            "documents",
             "cbos",
             "positions",
             "services",
@@ -631,7 +631,7 @@ export function ConfigPanel() {
               onClick={() => setSelectedTab(tab as any)}
             >
               {{
-                documents_ai: "Avaliação IA",
+                documents: "Avaliação IA",
                 cbos: "CBOs",
                 positions: "Cargos",
                 services: "Serviços",
@@ -644,10 +644,10 @@ export function ConfigPanel() {
         </div>
       </div>
       <div className="shadow-lg rounded-lg bg-white p-6 flex flex-col gap-6">
-        {selectTab === "documents_ai" && (
+        {selectTab === "documents" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
-              <h2 className="text-xl font-bold">Avaliação IA</h2>
+              <h2 className="text-xl font-bold">Descrição de documentos para IA</h2>
               <input
                 type="text"
                 placeholder="Buscar por título..."
