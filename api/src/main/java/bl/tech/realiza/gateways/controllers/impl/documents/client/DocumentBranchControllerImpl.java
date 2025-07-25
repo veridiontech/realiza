@@ -63,16 +63,9 @@ public class DocumentBranchControllerImpl implements DocumentBranchControlller {
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(
             @PathVariable String id,
             @RequestPart("documentBranchRequestDto")
-            @Valid DocumentBranchRequestDto documentBranchRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-        Optional<DocumentResponseDto> documentBranch = null;
-        try {
-            documentBranch = crudDocumentBranch.update(id, documentBranchRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            @Valid DocumentBranchRequestDto documentBranchRequestDto) {
 
-        return ResponseEntity.of(Optional.of(documentBranch));
+        return ResponseEntity.of(Optional.of(crudDocumentBranch.update(id, documentBranchRequestDto)));
     }
 
     @PostMapping("/{id}/upload")

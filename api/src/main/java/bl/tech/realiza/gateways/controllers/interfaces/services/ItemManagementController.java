@@ -2,6 +2,8 @@ package bl.tech.realiza.gateways.controllers.interfaces.services;
 
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
@@ -20,6 +22,10 @@ public interface ItemManagementController {
     ResponseEntity<ItemManagementProviderResponseDto> createProviderSolicitation(ItemManagementProviderRequestDto itemManagementProviderRequestDto);
     ResponseEntity<Page<ItemManagementProviderResponseDto>> getProviderSolicitations(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(String idSolicitation);
+
+    // document exempt
+    ResponseEntity<Page<ItemManagementDocumentResponseDto>> getDocumentSolicitations(int page, int size, String sort, Sort.Direction direction);
+    ResponseEntity<ItemManagementDocumentDetailsResponseDto> getDocumentSolicitationDetails(String idSolicitation);
 
     ResponseEntity<String> approveSolicitation(String idSolicitation);
     ResponseEntity<String> denySolicitation(String idSolicitation);

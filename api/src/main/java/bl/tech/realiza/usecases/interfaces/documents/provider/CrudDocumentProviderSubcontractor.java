@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrudDocumentProviderSubcontractor {
-    DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException;
+    DocumentResponseDto save(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto);
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
-    Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file) throws IOException;
+    Optional<DocumentResponseDto> update(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto);
     void delete(String id);
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable);

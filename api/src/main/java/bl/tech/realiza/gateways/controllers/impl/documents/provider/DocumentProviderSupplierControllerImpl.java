@@ -33,16 +33,8 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(
-            @RequestPart("documentSupplierRequestDto") @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto,
-            @RequestParam("file") MultipartFile file) {
-        DocumentResponseDto documentSupplier = null;
-        try {
-            documentSupplier = crudDocumentSupplier.save(documentSupplierRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentSupplier));
+            @RequestPart("documentSupplierRequestDto") @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentSupplier.save(documentSupplierRequestDto)));
     }
 
     @GetMapping("/{id}")
@@ -74,16 +66,8 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(
             @PathVariable String id,
             @RequestPart("documentSupplierRequestDto")
-            @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-        Optional<DocumentResponseDto> documentSupplier = null;
-        try {
-            documentSupplier = crudDocumentSupplier.update(id, documentSupplierRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentSupplier));
+            @Valid DocumentProviderSupplierRequestDto documentSupplierRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentSupplier.update(id, documentSupplierRequestDto)));
     }
 
     @DeleteMapping("/{id}")

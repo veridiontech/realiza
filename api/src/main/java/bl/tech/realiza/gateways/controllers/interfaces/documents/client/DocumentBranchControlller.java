@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface DocumentBranchControlller {
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentBranch(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranch(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentBranch(String id, DocumentBranchRequestDto documentBranchRequestDto);
     ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentBranch(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsBranchByBranch(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<DocumentResponseDto> getBranchDocuments(String id);

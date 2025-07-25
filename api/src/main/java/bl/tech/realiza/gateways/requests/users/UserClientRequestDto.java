@@ -16,7 +16,6 @@ public class UserClientRequestDto {
     private String firstName;
     private String surname;
     private String email;
-    private String profilePicture;
     private String telephone;
     private String cellphone;
     private String branch;

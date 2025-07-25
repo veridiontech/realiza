@@ -1,12 +1,9 @@
 package bl.tech.realiza.domains.services;
 
-import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.domains.user.UserClient;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +41,11 @@ public class ItemManagement {
     @JoinColumn(name = "idNewProvider")
     private Provider newProvider;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "documentId")
+    @JsonBackReference
+    private ContractDocument contractDocument;
+
     public enum Status {
         APPROVED,
         DENIED,
@@ -52,6 +54,7 @@ public class ItemManagement {
 
     public enum SolicitationType {
         CREATION,
-        INACTIVATION
+        INACTIVATION,
+        EXEMPTION
     }
 }

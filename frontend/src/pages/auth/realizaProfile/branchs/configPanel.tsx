@@ -5,9 +5,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Eye } from "lucide-react";
 
-//
-// Interfaces principais
-//
 interface Document {
   id: string;
   description: string;
@@ -38,7 +35,6 @@ interface Activity {
   risk: string;
 }
 
-// Interfaces da branch victorvalim-23-07 para DocumentMatrixEntry
 export interface DocumentMatrixEntry {
   documentId: string;
   idDocumentMatrix: string;
@@ -54,7 +50,6 @@ export interface DocumentMatrixEntry {
   groupName: string;
 }
 
-// Interfaces da branch main para Perfis
 interface SingleProfileItem {
   id: string;
   name: string;
@@ -122,54 +117,49 @@ interface NewProfilePayload {
 }
 
 export function ConfigPanel() {
-  // aba ativa
   const [selectTab, setSelectedTab] = useState<
     "documents" | "cbos" | "positions" | "services" | "activities" | "validate" | "profiles"
   >("documents");
-
-  //
-  // Estados para cada aba
-  //
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const [cbos, setCbos] = useState<CBO[]>([]);
   const [selectedCBO, setSelectedCBO] = useState<CBO | null>(null);
   const [cboCode, setCboCode] = useState("");
   const [cboTitle, setCboTitle] = useState("");
-
   const [positions, setPositions] = useState<Position[]>([]);
-  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(
+    null
+  );
   const [positionName, setPositionName] = useState("");
-
   const [services, setServices] = useState<Service[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [newServiceTitle, setNewServiceTitle] = useState("");
   const [newServiceRisk, setNewServiceRisk] = useState("LOW");
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [serviceSearchTerm, setServiceSearchTerm] = useState("");
-
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(false);
   const [activitySearchTerm, setActivitySearchTerm] = useState("");
   const [newActivityTitle, setNewActivityTitle] = useState("");
   const [newActivityRisk, setNewActivityRisk] = useState("LOW");
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
-
-  // Estados da aba "Validate" (adicionados da branch victorvalim-23-07)
-  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
+  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>(
+    []
+  );
   const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
   const [searchMatrixTerm, setSearchMatrixTerm] = useState("");
-
-  // Estados da aba "Perfis do Repositório" (adicionados da branch main)
-  const [profilesRepoItems, setProfilesRepoItems] = useState<SingleProfileItem[]>([]);
+  const [profilesRepoItems, setProfilesRepoItems] = useState<
+    SingleProfileItem[]
+  >([]);
   const [isLoadingProfilesRepo, setIsLoadingProfilesRepo] = useState(false);
   const [profileSearchTerm, setProfileSearchTerm] = useState("");
-  const [isProfileDetailsModalOpen, setIsProfileDetailsModalOpen] = useState(false);
-  const [selectedProfileDetails, setSelectedProfileDetails] = useState<ProfileDetails | null>(null);
+  const [isProfileDetailsModalOpen, setIsProfileDetailsModalOpen] =
+    useState(false);
+  const [selectedProfileDetails, setSelectedProfileDetails] =
+    useState<ProfileDetails | null>(null);
   const [name, setName] = useState("");
   const [newProfileDescription, setNewProfileDescription] = useState("");
   const [admin, setAdmin] = useState(false);
@@ -181,45 +171,32 @@ export function ConfigPanel() {
   const [registrationContract, setRegistrationContract] = useState(false);
   const [laboral, setLaboral] = useState(false);
   const [workplaceSafety, setWorkplaceSafety] = useState(false);
-  const [registrationAndCertificates, setRegistrationAndCertificates] = useState(false);
+  const [registrationAndCertificates, setRegistrationAndCertificates] =
+    useState(false);
   const [general, setGeneral] = useState(false);
   const [health, setHealth] = useState(false);
   const [environment, setEnvironment] = useState(false);
   const [concierge, setConcierge] = useState(false);
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
-
-  // auth
   const token = localStorage.getItem("tokenClient");
-  // O tokenFromStorage da branch main é redundante se já temos 'token'. Vamos usar 'token' apenas.
-  // const tokenFromStorage = localStorage.getItem("tokenClient");
   const authHeader = { headers: { Authorization: `Bearer ${token}` } };
-
-  // traduções e unidades
   const riskTranslations: Record<string, string> = {
     LOW: "Baixo",
     MEDIUM: "Médio",
     HIGH: "Alto",
     VERY_HIGH: "Muito Alto",
   };
-  const expirationUnits = [
-    { value: "MONTHS", label: "Meses" },
-  ];
+  const expirationUnits = [{ value: "MONTHS", label: "Meses" }];
 
-  // carregamento inicial
-  // Combinamos os useEffects de ambas as branches.
   useEffect(() => {
     getDocuments();
     getCbos();
     getPositions();
     getServices();
     getActivities();
-    getMatrixEntries(); // Chamada da branch victorvalim-23-07
-    getProfilesRepo(); // Chamada da branch main
+    getMatrixEntries();
+    getProfilesRepo(); 
   }, []);
-
-  //
-  // ——— CRUD das outras abas ———
-  //
 
   async function getDocuments() {
     setIsLoading(true);
@@ -316,7 +293,6 @@ export function ConfigPanel() {
     getPositions();
   }
 
-  // Função getServices - Mesclada
   async function getServices() {
     setIsLoadingServices(true);
     try {
@@ -325,33 +301,32 @@ export function ConfigPanel() {
         { params: { owner: "REPO", idOwner: "" }, ...authHeader }
       );
       setServices(data || []);
-    } catch (err) { // Adicionado o tratamento de erro da branch main
+    } catch (err) {
       console.error("Erro ao buscar serviços:", err);
     } finally {
       setIsLoadingServices(false);
     }
   }
 
-  // Função handleCreateService - Mesclada
   async function handleCreateService() {
-    if (!newServiceTitle || !newServiceRisk) { // Condição de validação da branch main
-      toast.error( // Alterado para toast.error para consistência
+    if (!newServiceTitle || !newServiceRisk) {
+      toast.error(
         "Por favor, preencha o título e selecione o risco para o novo serviço."
       );
       return;
     }
     setIsCreatingService(true);
-    try { // Adicionado try/catch da branch main
+    try {
       await axios.post(
         `${ip}/contract/service-type/repository`,
         { title: newServiceTitle, risk: newServiceRisk },
         authHeader
       );
-      toast.success("Serviço criado com sucesso!"); // Toast de sucesso da branch main
+      toast.success("Serviço criado com sucesso!"); 
       setNewServiceTitle("");
       setNewServiceRisk("LOW");
       getServices();
-    } catch (err) { // Tratamento de erro da branch main
+    } catch (err) {
       console.error("Erro ao criar serviço:", err);
       toast.error("Erro ao criar serviço. Tente novamente.");
     } finally {
@@ -359,45 +334,51 @@ export function ConfigPanel() {
     }
   }
 
-  // Função getActivities - Mesclada
   async function getActivities() {
     setIsLoadingActivities(true);
     try {
-      const res = await axios.get<{ content?: Activity[] }>(
+      const res = await axios.get<{ content?: Activity[] | Activity[] }>(
         `${ip}/contract/activity-repo`,
         {
           params: { page: 0, size: 100, sort: "title", direction: "ASC" },
           ...authHeader,
         }
       );
-      setActivities(res.data.content || res.data); // Combinado a lógica de acesso a `content` e `data` diretamente
-    } catch (err) { // Adicionado tratamento de erro da branch main
+      if (Array.isArray(res.data)) {
+        setActivities(res.data);
+      } else if (res.data && Array.isArray(res.data.content)) {
+        setActivities(res.data.content);
+      } else {
+        console.warn("Formato inesperado da resposta da API de atividades:", res.data);
+        setActivities([]);
+      }
+    } catch (err) {
       console.error("Erro ao buscar atividades:", err);
+      toast.error("Erro ao carregar atividades.");
     } finally {
       setIsLoadingActivities(false);
     }
   }
 
-  // Função handleCreateActivity - Mesclada
   async function handleCreateActivity() {
-    if (!newActivityTitle || !newActivityRisk) { // Condição de validação da branch main
-      toast.error( // Alterado para toast.error para consistência
+    if (!newActivityTitle || !newActivityRisk) {
+      toast.error(
         "Por favor, preencha o título e selecione o risco para a nova atividade."
       );
       return;
     }
     setIsCreatingActivity(true);
-    try { // Adicionado try/catch da branch main
+    try {
       await axios.post(
         `${ip}/contract/activity-repo`,
         { title: newActivityTitle, risk: newActivityRisk },
         authHeader
       );
-      toast.success("Atividade criada com sucesso!"); // Toast de sucesso da branch main
+      toast.success("Atividade criada com sucesso!"); 
       setNewActivityTitle("");
       setNewActivityRisk("LOW");
       getActivities();
-    } catch (err) { // Tratamento de erro da branch main
+    } catch (err) {
       console.error("Erro ao criar atividade:", err);
       toast.error("Erro ao criar atividade. Tente novamente.");
     } finally {
@@ -405,9 +386,6 @@ export function ConfigPanel() {
     }
   }
 
-  //
-  // ——— ABA VALIDATE (da branch victorvalim-23-07) ———
-  //
   async function getMatrixEntries() {
     setIsLoadingMatrix(true);
     try {
@@ -421,11 +399,11 @@ export function ConfigPanel() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-          ? (data as any).content
-          : [];
+        ? (data as any).content
+        : [];
       setMatrixEntries(list);
     } catch {
-      toast.error("Não foi possível carregar documentos de matriz."); // Mensagem mais específica
+      toast.error("Não foi possível carregar documentos de matriz.");
     } finally {
       setIsLoadingMatrix(false);
     }
@@ -445,17 +423,16 @@ export function ConfigPanel() {
     toast.success("Validade atualizada");
   }
 
-  //
-  // ——— ABA PROFILES (da branch main) ———
-  //
   const fetchProfileDetails = (profileId: string) => {
-    const profile = profilesRepoItems.find(p => p.id === profileId);
+    const profile = profilesRepoItems.find((p) => p.id === profileId);
 
     if (profile) {
       setSelectedProfileDetails(profile);
       setIsProfileDetailsModalOpen(true);
     } else {
-      toast.error("Detalhes do perfil não encontrados localmente. Recarregue a página se persistir.");
+      toast.error(
+        "Detalhes do perfil não encontrados localmente. Recarregue a página se persistir."
+      );
       console.error("Perfil com ID", profileId, "não encontrado em profilesRepoItems.");
     }
   };
@@ -463,9 +440,12 @@ export function ConfigPanel() {
   const getProfilesRepo = async () => {
     setIsLoadingProfilesRepo(true);
     try {
-      const response = await axios.get<SingleProfileItem[]>(`${ip}/profile/repo`, {
-        headers: { Authorization: `Bearer ${token}` }, // Usando 'token' consistente
-      });
+      const response = await axios.get<SingleProfileItem[]>(
+        `${ip}/profile/repo`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       console.log("Dados da requisição de perfis do repositório:", response.data);
 
       const sortedProfiles = response.data.sort((a, b) =>
@@ -488,7 +468,9 @@ export function ConfigPanel() {
     }
 
     if (!admin && !viewer && !manager && !isInspector) {
-      toast.error("Por favor, selecione um tipo de perfil (Admin, Visitante, Gestor ou Fiscal de contrato).");
+      toast.error(
+        "Por favor, selecione um tipo de perfil (Admin, Visitante, Gestor ou Fiscal de contrato)."
+      );
       return;
     }
 
@@ -513,12 +495,16 @@ export function ConfigPanel() {
         concierge: concierge,
       };
 
-      const response = await axios.post<SingleProfileItem>(`${ip}/profile/repo`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Usando 'token' consistente
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post<SingleProfileItem>(
+        `${ip}/profile/repo`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       toast.success("Perfil criado com sucesso!");
       console.log("Perfil criado:", response.data);
@@ -544,7 +530,11 @@ export function ConfigPanel() {
     } catch (err) {
       console.error("Erro ao criar perfil:", err);
       if (axios.isAxiosError(err) && err.response) {
-        toast.error(`Erro ao criar perfil: ${err.response.data.message || "Verifique os dados."}`);
+        toast.error(
+          `Erro ao criar perfil: ${
+            err.response.data.message || "Verifique os dados."
+          }`
+        );
       } else {
         toast.error("Erro ao criar perfil. Tente novamente.");
       }
@@ -553,9 +543,6 @@ export function ConfigPanel() {
     }
   };
 
-  //
-  // ——— Filtragens (Mescladas) ———
-  //
   const filteredDocuments = useMemo(
     () =>
       documents
@@ -563,7 +550,9 @@ export function ConfigPanel() {
           d.documentTitle.toLowerCase().includes(searchTerm.toLowerCase())
         )
         .sort((a, b) =>
-          a.documentTitle.localeCompare(b.documentTitle, "pt-BR", { sensitivity: "base" })
+          a.documentTitle.localeCompare(b.documentTitle, "pt-BR", {
+            sensitivity: "base",
+          })
         ),
     [documents, searchTerm]
   );
@@ -574,7 +563,7 @@ export function ConfigPanel() {
         .filter(
           (s) =>
             s.title.toLowerCase().includes(serviceSearchTerm.toLowerCase()) ||
-            riskTranslations[s.risk.toUpperCase()] // Usar .toUpperCase() para consistência
+            riskTranslations[s.risk.toUpperCase()]
               ?.toLowerCase()
               .includes(serviceSearchTerm.toLowerCase())
         )
@@ -589,7 +578,7 @@ export function ConfigPanel() {
           (a) =>
             a.title.toLowerCase().includes(activitySearchTerm.toLowerCase()) ||
             (a.risk &&
-              riskTranslations[a.risk.toUpperCase()] // Usar .toUpperCase() para consistência
+              riskTranslations[a.risk.toUpperCase()]
                 ?.toLowerCase()
                 .includes(activitySearchTerm.toLowerCase()))
         )
@@ -597,7 +586,6 @@ export function ConfigPanel() {
     [activities, activitySearchTerm, riskTranslations]
   );
 
-  // Filtro para matriz de documentos (da branch victorvalim-23-07)
   const filteredMatrixEntries = useMemo(
     () =>
       matrixEntries.filter((e) =>
@@ -606,7 +594,6 @@ export function ConfigPanel() {
     [matrixEntries, searchMatrixTerm]
   );
 
-  // Filtro para perfis do repositório (da branch main)
   const filteredProfilesRepo = useMemo(() => {
     return profilesRepoItems
       .filter((profile) =>
@@ -621,7 +608,6 @@ export function ConfigPanel() {
 
   return (
     <div className="p-6 md:p-10 flex flex-col gap-0 md:gap-0">
-      {/* Header de abas */}
       <div className="shadow-lg rounded-lg bg-white p-6 md:p-8 flex flex-col gap-6 md:gap-10 relative bottom-[8vw]">
         <h1 className="text-2xl md:text-[25px]">Configurações gerais</h1>
         <div className="bg-[#7CA1F3] w-full h-[1px]" />
@@ -632,8 +618,8 @@ export function ConfigPanel() {
             "positions",
             "services",
             "activities",
-            "profiles", // Adicionado da branch main
-            "validate", // Adicionado da branch victorvalim-23-07
+            "profiles",
+            "validate",
           ].map((tab) => (
             <Button
               key={tab}
@@ -642,7 +628,7 @@ export function ConfigPanel() {
                   ? "bg-realizaBlue text-white"
                   : "bg-transparent border text-black border-black hover:bg-neutral-300"
               }`}
-              onClick={() => setSelectedTab(tab as any)} // `as any` para permitir a nova string 'profiles'
+              onClick={() => setSelectedTab(tab as any)}
             >
               {{
                 documents_ai: "Avaliação IA",
@@ -650,17 +636,14 @@ export function ConfigPanel() {
                 positions: "Cargos",
                 services: "Serviços",
                 activities: "Atividades",
-                profiles: "Perfis do Repositório", // Texto para a nova aba
-                validate: "Validade Padrão", // Texto para a nova aba
+                profiles: "Perfis e Permissões",
+                validate: "Validade Padrão",
               }[tab]}
             </Button>
           ))}
         </div>
       </div>
-
-      {/* Conteúdo das abas */}
       <div className="shadow-lg rounded-lg bg-white p-6 flex flex-col gap-6">
-        {/* Documentos */}
         {selectTab === "documents_ai" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
@@ -720,8 +703,6 @@ export function ConfigPanel() {
             )}
           </div>
         )}
-
-        {/* CBOs */}
         {selectTab === "cbos" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
@@ -793,8 +774,6 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
-
-        {/* Cargos */}
         {selectTab === "positions" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
@@ -856,8 +835,6 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
-
-        {/* Serviços */}
         {selectTab === "services" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
@@ -908,7 +885,7 @@ export function ConfigPanel() {
                 onChange={(e) => setNewServiceRisk(e.target.value)}
                 disabled={isCreatingService}
               >
-                {Object.entries(riskTranslations).map(([key, label]) => ( // Usar Object.entries para iterar sobre riskTranslations
+                {Object.entries(riskTranslations).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}
                   </option>
@@ -929,8 +906,6 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
-
-        {/* Atividades */}
         {selectTab === "activities" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
@@ -1002,8 +977,6 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
-
-        {/* Validate (da branch victorvalim-23-07) */}
         {selectTab === "validate" && (
           <div className="flex flex-col gap-4">
             <h2 className="text-xl font-bold">Validação de Documentos</h2>
@@ -1077,12 +1050,10 @@ export function ConfigPanel() {
             )}
           </div>
         )}
-
-        {/* Perfis (da branch main) */}
         {selectTab === "profiles" && (
           <div className="flex items-start justify-center gap-10 w-full">
             <div className="w-[45%] space-y-4">
-              <h1 className="text-2xl font-bold mb-2">Lista de Perfis do Repositório</h1>
+              <h1 className="text-2xl font-bold mb-2">Perfis e Permissões</h1>
               <input
                 type="text"
                 placeholder="Buscar por nome do perfil..."
@@ -1122,7 +1093,6 @@ export function ConfigPanel() {
               <h2 className="text-xl font-bold">Gerenciar Perfis</h2>
               <div className="border-t pt-4">
                 <h3 className="text-lg font-medium mb-2">Criar novo perfil</h3>
-
                 <div className="flex flex-col gap-4">
                   <input
                     className="border border-gray-300 rounded px-3 py-2"
@@ -1138,7 +1108,6 @@ export function ConfigPanel() {
                     onChange={(e) => setNewProfileDescription(e.target.value)}
                     disabled={isCreatingProfile}
                   />
-
                   <div className="flex flex-col gap-2">
                     <p className="font-medium">Tipo do perfil</p>
                     <div className="flex gap-6 flex-wrap">
@@ -1254,7 +1223,7 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={documentViewer}
                             onChange={(e) => setDocumentViewer(e.target.checked)}
-                            disabled={manager || isCreatingProfile} // Desabilitar se for 'manager' ou criando perfil
+                            disabled={manager || isCreatingProfile}
                           />{" "}
                           Visualizador de Documentos
                         </label>
@@ -1263,7 +1232,7 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={registrationUser}
                             onChange={(e) => setRegistrationUser(e.target.checked)}
-                            disabled={isInspector || isCreatingProfile} // Desabilitar se for 'inspector' ou criando perfil
+                            disabled={isInspector || isCreatingProfile}
                           />{" "}
                           Cadastro de Usuários
                         </label>
@@ -1272,7 +1241,7 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={registrationContract}
                             onChange={(e) => setRegistrationContract(e.target.checked)}
-                            disabled={isInspector || isCreatingProfile} // Desabilitar se for 'inspector' ou criando perfil
+                            disabled={isInspector || isCreatingProfile}
                           />{" "}
                           Cadastro de Contratos
                         </label>
@@ -1323,7 +1292,6 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
-
         {isProfileDetailsModalOpen && selectedProfileDetails && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">

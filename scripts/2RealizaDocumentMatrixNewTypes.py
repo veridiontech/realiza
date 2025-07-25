@@ -4,11 +4,11 @@ import os
 
 # Conexão DB
 DB_CONFIG = {
-    "host": "177.170.30.9",
-    "port": 8004,
-    "user": "root",
-    "password": "08Valente$$",
-    "database": "dbrealiza"
+    "host": "35.184.183.88",
+    "port": 3306,
+    "user": "veridion-admin-user",
+    "password": "uMsgC-x+uAA]yRG1",
+    "database": "realiza_mysql_development"
 }
 
 # Mapeamento de cor RGB para tipo

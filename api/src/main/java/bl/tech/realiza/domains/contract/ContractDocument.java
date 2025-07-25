@@ -1,7 +1,9 @@
 package bl.tech.realiza.domains.contract;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,4 +40,8 @@ public class ContractDocument {
 
     @Builder.Default
     private Document.Status status = PENDENTE;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "contractDocument", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ItemManagement> itemManagementList;
 }

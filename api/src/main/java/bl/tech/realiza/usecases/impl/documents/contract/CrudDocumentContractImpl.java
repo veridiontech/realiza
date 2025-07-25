@@ -9,7 +9,6 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
-import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.responses.documents.ContractDocumentAndEmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
@@ -19,14 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CrudDocumentContractImpl implements CrudDocumentContract {
     private final ContractRepository contractRepository;
     private final JwtService jwtService;
-    private final DocumentEmployeeRepository documentEmployeeRepository;
 
     @Override
     public ContractDocumentAndEmployeeResponseDto getDocumentAndEmployeeByContractId(String id) {
@@ -44,9 +41,13 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                     .cboTitle(employee.getCbo() != null
                             ? employee.getCbo().getTitle() : null)
                     .build());
-            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository
-                    .findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(employee.getIdEmployee(),
-                            contract.getIdContract());
+            List<DocumentEmployee> documentEmployeeList = employee.getDocumentEmployees().stream()
+                    .filter(documentEmployee -> documentEmployee.getContractDocuments().stream()
+                            .anyMatch(contractDocument -> contractDocument.getContract().equals(contract)))
+                    .toList();
+//            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository
+//                    .findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(employee.getIdEmployee(),
+//                            contract.getIdContract());
 
             for (DocumentEmployee documentEmployee : documentEmployeeList) {
                 documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
@@ -59,6 +60,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .hasDoc(documentEmployee.getIdDocumentation() != null
                                         && !documentEmployee.getIdDocumentation().isEmpty())
                                 .expirationDate(documentEmployee.getExpirationDate())
+                                .uploadDate(documentEmployee.getVersionDate())
                                 .lastCheck(documentEmployee.getLastCheck())
                                 .enterprise(false)
                                 .build());
@@ -86,6 +88,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .hasDoc(documentProviderSupplier.getIdDocumentation() != null
                                         && !documentProviderSupplier.getIdDocumentation().isEmpty())
                                 .expirationDate(documentProviderSupplier.getExpirationDate())
+                                .uploadDate(documentProviderSupplier.getVersionDate())
                                 .lastCheck(documentProviderSupplier.getLastCheck())
                                 .enterprise(true)
                                 .build());
@@ -155,6 +158,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                                 .hasDoc(documentProviderSubcontractor.getIdDocumentation() != null
                                         && !documentProviderSubcontractor.getIdDocumentation().isEmpty())
                                 .expirationDate(documentProviderSubcontractor.getExpirationDate())
+                                .uploadDate(documentProviderSubcontractor.getVersionDate())
                                 .lastCheck(documentProviderSubcontractor.getLastCheck())
                                 .enterprise(true)
                                 .build());

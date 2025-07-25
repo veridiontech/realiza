@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.util.Optional;
 
 public interface CrudDocumentClient {
-    DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException;
+    DocumentResponseDto save(DocumentClientRequestDto documentClientRequestDto);
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
-    Optional<DocumentResponseDto> update(String id, DocumentClientRequestDto documentClientRequestDto, MultipartFile file) throws IOException;
+    Optional<DocumentResponseDto> update(String id, DocumentClientRequestDto documentClientRequestDto);
     void delete(String id);
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllByClient(String idSearch, Pageable pageable);

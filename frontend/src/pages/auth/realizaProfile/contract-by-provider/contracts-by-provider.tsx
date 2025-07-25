@@ -329,7 +329,7 @@ export function ContarctsByProvider() {
                   : "bg-neutral-200 text-[#34495E]"
               } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
-              Documentos
+              Documentos Empresa
             </button>
             <button
               onClick={() => setViewOption("collaborators")}
@@ -396,7 +396,7 @@ export function ContarctsByProvider() {
                           <div className="flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-blue-500" />
                             <span className="text-sm font-semibold text-blue-500">
-                              Em Análise
+                              EM ANÁLISE
                             </span>
                           </div>
                         ) : (
@@ -428,15 +428,11 @@ export function ContarctsByProvider() {
                       </div>
                       <div className="col-span-1">
                         <h3 className="text-[16px] font-medium">{doc.title}</h3>
-                        <span className="text-[12px] text-neutral-600">
-                          {doc.ownerName}
-                        </span>
                         {doc.isUnique !== undefined && (
                           <span className="text-[12px] text-neutral-600">
-                            {" - "}
                             {doc.isUnique
-                              ? "Documento único para esse contrato"
-                              : "Documento se espelha para outros contratos"}
+                              ? "Documento exclusivo para este contrato"
+                              : "Documento válido para outros contratos"}
                           </span>
                         )}
                       </div>
@@ -486,7 +482,7 @@ export function ContarctsByProvider() {
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                               >
                                 <Upload className="w-5 h-5 text-base" />
-                                Reenviar
+                                Enviar
                               </button>
 
                               <button

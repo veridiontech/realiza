@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DocumentProviderSubcontractorControlller {
-    ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file);
+    ResponseEntity<DocumentResponseDto> createDocumentProviderSubcontractor(DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderSubcontractor(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractor(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto, MultipartFile file);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSubcontractor(String id, DocumentProviderSubcontractorRequestDto documentProviderSubcontractorRequestDto);
     ResponseEntity<Void> deleteDocumentProviderSubcontractor(String id);
     ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentProviderSubcontractor(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSubcontractorBySubContractor(int page, int size, String sort, Sort.Direction direction, String idSearch);
