@@ -13,6 +13,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
@@ -23,6 +24,7 @@ import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierR
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
@@ -59,6 +61,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
@@ -83,6 +86,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
+    private final ProviderSubcontractorRepository providerSubcontractorRepository;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -138,18 +142,24 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                     .orElseThrow(() -> new NotFoundException("Requester not found"));
         }
 
-        Provider newProviderSupplier = providerSupplierRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
-                .orElseThrow(() -> new NotFoundException("New Provider not found"));
+        Provider newProvider = providerSupplierRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
+                .orElse(null);
+
+        if (newProvider == null) {
+            newProvider = providerSubcontractorRepository.findById(itemManagementProviderRequestDto.getIdNewProvider())
+                    .orElseThrow(() -> new NotFoundException("Provider not found"));
+        }
+
 
         ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
                 .solicitationType(itemManagementProviderRequestDto.getSolicitationType())
                 .requester(requester)
-                .newProvider(newProviderSupplier)
+                .newProvider(newProvider)
                 .build());
 
         crudNotification.saveProviderNotificationForRealizaUsers(solicitation);
 
-        return toItemManagementProviderResponseDto(solicitation, requester, newProviderSupplier);
+        return toItemManagementProviderResponseDto(solicitation, requester, newProvider);
     }
 
     @Override
@@ -424,10 +434,18 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
             providerRepository.save(provider);
 
-            Contract contract = contractRepository.findById(
-                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderAndIsActiveOrderByCreationDateDesc(provider.getIdProvider(), PENDENTE).getIdContract())
-                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+            Contract contract = null;
+            if (provider instanceof ProviderSupplier providerSupplier) {
+                contract = providerSupplier.getContractsSupplier().stream()
+                        .max(Comparator.comparing(Contract::getCreationDate))
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
+            } else if (provider instanceof ProviderSubcontractor providerSubcontractor) {
+                contract = providerSubcontractor.getContractsSubcontractor().stream()
+                        .max(Comparator.comparing(Contract::getCreationDate))
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
+            }
 
+            assert contract != null;
             contract.setIsActive(NEGADO);
             contractRepository.save(contract);
 
@@ -437,7 +455,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             if (provider.getEmail() != null) {
                 emailSender.sendNewProviderDeniedEmail(EmailRegistrationDeniedRequestDto.builder()
                         .email(provider.getEmail())
-                        .responsibleName(contract.getResponsible().getFirstName() + " " + contract.getResponsible().getSurname())
+                        .responsibleName(contract.getResponsible().getFullName())
                         .enterpriseName(provider.getCorporateName())
                         // adicionar motivos ao sistema
                         .reason(null)
@@ -589,32 +607,51 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     private ItemManagementProviderResponseDto toItemManagementProviderResponseDto(ItemManagement itemManagement, User requester, Provider newProvider) {
-        Provider actualProvider = (Provider) Hibernate.unproxy(newProvider);
+        String enterpriseName = null;
+        String clientName = null;
+        String clientCnpj = null;
+        String branchName = null;
 
-        if (!(actualProvider instanceof ProviderSupplier providerSupplier)) {
-            throw new IllegalArgumentException("Not a valid provider");
-        } else {
-            return ItemManagementProviderResponseDto.builder()
-                    .idSolicitation(itemManagement.getIdSolicitation())
-                    .enterpriseName(providerSupplier.getCorporateName())
-                    .solicitationType(itemManagement.getSolicitationType())
-                    .clientName(!providerSupplier.getBranches().isEmpty()
-                            ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
-                            : null)
-                    .clientCnpj(!providerSupplier.getBranches().isEmpty()
-                            ? providerSupplier.getBranches().get(0).getClient().getCnpj()
-                            : null)
-                    .requesterName(requester.getFirstName() + " " + requester.getSurname())
-                    .requesterEmail(requester.getEmail())
-                    .status(itemManagement.getStatus())
-                    .branchName((providerSupplier.getBranches() != null && !providerSupplier.getBranches().isEmpty())
-                            ? (providerSupplier.getBranches().get(0) != null
-                                ? providerSupplier.getBranches().get(0).getName()
-                                : null)
-                            : null)
-                    .creationDate(itemManagement.getCreationDate())
-                    .build();
+        if (newProvider instanceof ProviderSupplier providerSupplier) {
+            enterpriseName = providerSupplier.getCorporateName();
+            clientName = !providerSupplier.getBranches().isEmpty()
+                    ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
+                    : null;
+            clientCnpj = !providerSupplier.getBranches().isEmpty()
+                    ? providerSupplier.getBranches().get(0).getClient().getCnpj()
+                    : null;
+            branchName = !providerSupplier.getBranches().isEmpty()
+                    ? providerSupplier.getBranches().get(0) != null
+                    ? providerSupplier.getBranches().get(0).getName()
+                    : null
+                    : null;
+        } else if (newProvider instanceof ProviderSubcontractor providerSubcontractor) {
+            enterpriseName = providerSubcontractor.getCorporateName();
+            clientName = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getClient().getCorporateName()
+                    : null;
+            clientCnpj = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getClient().getCnpj()
+                    : null;
+            branchName = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0) != null
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getName()
+                    : null
+                    : null;
         }
+
+        return ItemManagementProviderResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .enterpriseName(enterpriseName)
+                .solicitationType(itemManagement.getSolicitationType())
+                .clientName(clientName)
+                .clientCnpj(clientCnpj)
+                .requesterName(requester.getFullName())
+                .requesterEmail(requester.getEmail())
+                .status(itemManagement.getStatus())
+                .branchName(branchName)
+                .creationDate(itemManagement.getCreationDate())
+                .build();
     }
 
     private ItemManagementDocumentResponseDto toItemManagementDocumentResponseDto(ItemManagement itemManagement) {
@@ -748,10 +785,29 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     private ItemManagementProviderDetailsResponseDto toItemManagementProviderDetailsResponseDto(ItemManagement itemManagement) {
-        Provider actualProvider = (Provider) Hibernate.unproxy(itemManagement.getNewProvider());
+        String clientCnpj = null;
+        String clientTradeName = null;
+        String providerCnpj = null;
+        String providerCorporateName = null;
 
-        if (!(actualProvider instanceof ProviderSupplier providerSupplier)) {
-            throw new IllegalArgumentException("Not a valid provider");
+        if (itemManagement.getNewProvider() instanceof ProviderSupplier providerSupplier) {
+            clientCnpj = !providerSupplier.getBranches().isEmpty()
+                    ? providerSupplier.getBranches().get(0).getClient().getCnpj()
+                    : null;
+            clientTradeName = !providerSupplier.getBranches().isEmpty()
+                    ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
+                    : null;
+            providerCnpj = providerSupplier.getCnpj();
+            providerCorporateName = providerSupplier.getCorporateName();
+        } else if (itemManagement.getNewProvider() instanceof ProviderSubcontractor providerSubcontractor) {
+            clientCnpj = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getClient().getCnpj()
+                    : null;
+            clientTradeName = !providerSubcontractor.getProviderSupplier().getBranches().isEmpty()
+                    ? providerSubcontractor.getProviderSupplier().getBranches().get(0).getClient().getCorporateName()
+                    : null;
+            providerCnpj = providerSubcontractor.getProviderSupplier().getCnpj();
+            providerCorporateName = providerSubcontractor.getProviderSupplier().getCorporateName();
         }
 
         return ItemManagementProviderDetailsResponseDto.builder()
@@ -759,19 +815,15 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .solicitationType(itemManagement.getSolicitationType())
                 .creationDate(itemManagement.getCreationDate())
                 .client(ItemManagementProviderDetailsResponseDto.Client.builder()
-                        .cnpj(!providerSupplier.getBranches().isEmpty()
-                                ? providerSupplier.getBranches().get(0).getClient().getCnpj()
-                                : null)
-                        .tradeName(!providerSupplier.getBranches().isEmpty()
-                                ? providerSupplier.getBranches().get(0).getClient().getCorporateName()
-                                : null)
+                        .cnpj(clientCnpj)
+                        .tradeName(clientTradeName)
                         .build())
                 .newProvider(ItemManagementProviderDetailsResponseDto.NewProvider.builder()
-                        .cnpj(providerSupplier.getCnpj())
-                        .corporateName(providerSupplier.getCorporateName())
+                        .cnpj(providerCnpj)
+                        .corporateName(providerCorporateName)
                         .build())
                 .requester(ItemManagementProviderDetailsResponseDto.Requester.builder()
-                        .fullName(itemManagement.getRequester().getFirstName() + " " + itemManagement.getRequester().getSurname())
+                        .fullName(itemManagement.getRequester().getFullName())
                         .email(itemManagement.getRequester().getEmail())
                         .build())
                 .build();

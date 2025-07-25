@@ -7,6 +7,7 @@ import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -21,10 +22,13 @@ import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSubcontractorResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +56,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
     private final SetupAsyncQueueProducer setupQueueProducer;
+    private final CrudItemManagement crudItemManagement;
 
     @Override
     public ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractProviderSubcontractorRequestDto) {
@@ -119,15 +124,26 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> auditLogServiceImpl.createAuditLog(
-                        savedContractSubcontractor.getIdContract(),
-                        CONTRACT,
-                        userResponsible.getFullName() + " criou contrato "
-                                + savedContractSubcontractor.getContractReference(),
-                        null,
-                        CREATE,
-                        userResponsible.getIdUser()));
+                    userResponsible -> {
+                        auditLogServiceImpl.createAuditLog(
+                                savedContractSubcontractor.getIdContract(),
+                                CONTRACT,
+                                userResponsible.getFullName() + " criou contrato "
+                                        + savedContractSubcontractor.getContractReference(),
+                                null,
+                                CREATE,
+                                userResponsible.getIdUser());
+
+                        // criar solicitação
+                        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
+                                .solicitationType(ItemManagement.SolicitationType.CREATION)
+                                .idRequester(userResponsible.getIdUser())
+                                .idNewProvider(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
+                                .build());
+                    }
+            );
         }
+
 
         return toContractSubcontractorResponseDto(savedContractSubcontractor);
     }
