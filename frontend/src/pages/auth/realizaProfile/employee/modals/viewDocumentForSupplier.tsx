@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { toast } from "sonner";
 
-interface DocumentViewerSuppliersProps {
+interface DocumentViewerProps {
   documentId: string;
   onClose: () => void;
   onStatusChange?: (id: string, newStatus: string) => void;
@@ -16,214 +16,183 @@ export function DocumentViewer({
   onClose,
   onStatusChange,
   isOpen,
-}: DocumentViewerSuppliersProps) {
+}: DocumentViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [logs] = useState([]);
+  const [loadingPdf, setLoadingPdf] = useState(false);
+  const [logs, setLogs] = useState<any[]>([]);
   const [showJustification, setShowJustification] = useState(false);
   const [justification, setJustification] = useState("");
-  const [justificationError, setJustificationError] = useState<string | null>(
-    null
-  );
+  const [justificationError, setJustificationError] = useState<string | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
 
-  const handleChangeStatus = async (status: string, notes: string) => {
-    setLoadingStatus(true);
-    try {
-      const token = localStorage.getItem("tokenClient");
-      const response = await axios.post(
-        `${ip}/document/${documentId}/change-status`,
-        { status, notes },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log("status:", response.data);
-      toast(`Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`);
-      if (onStatusChange) onStatusChange(documentId, status);
-      onClose();
-    } catch (err) {
-      console.error(err);
-      toast("Erro ao atualizar o status do documento.");
-    } finally {
-      setLoadingStatus(false);
-    }
-  };
-
-  const handleReprovar = async (notes: string) => {
-    if (justification.length > 1000) {
-      setJustificationError("A justificativa não pode ter mais de 1000 caracteres.");
-      return;
-    }
-    setLoadingStatus(true);
-    try {
-      const token = localStorage.getItem("tokenClient");
-      const response = await axios.post(
-        `${ip}/document/${documentId}/change-status`,
-        { status: "REPROVADO", notes },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log("status:", response.data);
-      toast("Documento reprovado com sucesso!");
-      if (onStatusChange) onStatusChange(documentId, "REPROVADO");
-      onClose();
-    } catch (err) {
-      console.error(err);
-      toast("Erro ao atualizar o status do documento.");
-    } finally {
-      setLoadingStatus(false);
-    }
-  };
-
-  if (!isOpen) {
-    return null;
-  }
-
-  useEffect(() => {
-    if (!documentId) {
-      setPdfUrl(null);
-      setError(null);
-      return;
-    }
-
-    const fetchFileData = async () => {
-      setLoading(true);
-      try {
-        const tokenFromStorage = localStorage.getItem("tokenClient");
-        const res = await axios.get(
-          `${ip}/document/supplier/${documentId}`,
-          {
-            headers: { Authorization: `Bearer ${tokenFromStorage}` },
-          }
-        );
-        console.log("view: ", res.data);
-        const pdfUrlFromApi = res.data.signedUrl;
-        if (pdfUrlFromApi) {
-          setPdfUrl(pdfUrlFromApi);
-        } else {
-          setError("Nenhum dado de arquivo encontrado.");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Erro ao buscar o documento.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFileData();
-  }, [documentId, isOpen]);
-
   const columns: GridColDef[] = [
-    { field: "usuario", headerName: "Usuário", flex: 1 },
-    { field: "acao", headerName: "Ação", flex: 1 },
-    { field: "data", headerName: "Data", flex: 1 },
-    { field: "historico", headerName: "Histórico", flex: 2 },
+    { field: "user", headerName: "Usuário", flex: 1 },
+    { field: "action", headerName: "Ação", flex: 1 },
+    { field: "date", headerName: "Data", flex: 1 },
+    { field: "notes", headerName: "Histórico", flex: 2 },
   ];
 
+  const changeStatus = useCallback(
+    async (status: "APROVADO" | "REPROVADO", notes = "") => {
+      if (status === "REPROVADO" && justification.length > 1000) {
+        setJustificationError("Máximo de 1000 caracteres na justificativa.");
+        return;
+      }
+      setJustificationError(null);
+      setLoadingStatus(true);
+      try {
+        const token = localStorage.getItem("tokenClient");
+        await axios.post(
+          `${ip}/document/${documentId}/change-status`,
+          { status, notes },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success(
+          `Documento ${status === "APROVADO" ? "aprovado" : "reprovado"} com sucesso!`
+        );
+        onStatusChange?.(documentId, status);
+        onClose();
+      } catch {
+        toast.error("Erro ao atualizar o status do documento.");
+      } finally {
+        setLoadingStatus(false);
+      }
+    },
+    [documentId, justification, onClose, onStatusChange]
+  );
+
+  useEffect(() => {
+    if (!isOpen || !documentId) return;
+    setLoadingPdf(true);
+    setError(null);
+
+    axios
+      .get(`${ip}/document/supplier/${documentId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
+      })
+      .then((res) => {
+        const url = res.data.signedUrl;
+        if (url) setPdfUrl(url);
+        else setError("Nenhum arquivo encontrado.");
+      })
+      .catch(() => setError("Erro ao buscar o documento."))
+      .finally(() => setLoadingPdf(false));
+  }, [documentId, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !documentId) return;
+    axios
+      .get(`${ip}/document/${documentId}/logs`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("tokenClient")}` },
+      })
+      .then((res) => setLogs(res.data || []))
+      .catch(() => {});
+  }, [documentId, isOpen]);
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center gap-8 bg-black bg-opacity-50">
-      <div className="relative w-[50rem] bg-white p-4 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div
+        className="relative max-w-4xl w-full h-[98vh] bg-white p-6 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
-          className="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
           onClick={onClose}
         >
           ✖
         </button>
+        <h2 className="mb-4 text-center text-xl font-bold">Visualizar Documento</h2>
 
-        <h2 className="mb-4 text-center text-lg font-bold">
-          Visualizar Documento
-        </h2>
+        {(loadingPdf || loadingStatus) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+            <div className="loader">Carregando...</div>
+          </div>
+        )}
 
-        {loading && <p>Carregando...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {error && <p className="mb-4 text-red-500">{error}</p>}
 
         {pdfUrl ? (
-          <iframe src={pdfUrl} width="100%" height="500px" />
+          <iframe src={pdfUrl} width="100%" height="750px" className="mb-6" />
         ) : (
-          !loading && <p>Nenhum documento carregado.</p>
+          !loadingPdf && <p className="mb-6">Nenhum documento carregado.</p>
         )}
-      </div>
 
-      <div className="relative flex w-[50rem] flex-col bg-white p-4 shadow-lg">
-        <button
-          className="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
-          onClick={onClose}
-        >
-          ✖
-        </button>
-
-        <div className="mb-6 flex flex-col items-center">
-          <h2 className="text-lg font-bold">Verificação do documento</h2>
+        <div className="flex gap-4 mb-6 justify-center">
+          <button
+            onClick={() => changeStatus("APROVADO")}
+            disabled={loadingStatus}
+            className={`flex-1 py-3 rounded-full font-bold text-white ${
+              loadingStatus ? "bg-green-300" : "bg-green-500 hover:bg-green-400"
+            }`}
+          >
+            Aprovar
+          </button>
+          <button
+            onClick={() => setShowJustification(true)}
+            disabled={loadingStatus}
+            className="flex-1 py-3 rounded-full bg-red-500 font-bold text-white hover:bg-red-400"
+          >
+            Reprovar
+          </button>
+          <button
+            className="flex-1 py-3 rounded-full border font-bold text-black hover:text-gray-600 "
+          >
+            Histórico
+          </button>
         </div>
 
-        <div className="flex h-[350px] w-full flex-col items-start">
-          <div className="h-full w-full overflow-auto">
+        {logs.length > 0 && (
+          <div style={{ height: 300, width: "100%" }}>
             <DataGrid
-              rows={logs}
+              rows={logs.map((l, i) => ({ id: i, ...l }))}
               columns={columns}
-              pageSizeOptions={[5, 10]}
-              autoHeight
-              disableRowSelectionOnClick
-              className="border border-gray-300"
-              sx={{
-                "& .MuiDataGrid-root": {
-                  minWidth: "100%",
-                  maxHeight: "100%",
-                },
-              }}
+           
             />
           </div>
-        </div>
+        )}
 
-        <div className="mt-6 flex justify-center">
-          <div className="flex flex-row gap-6">
-            <button
-              onClick={() => handleChangeStatus("APROVADO", "")}
-              disabled={loadingStatus}
-              className={`h-12 w-[10rem] rounded-full font-bold text-white transition-all ${loadingStatus ? "bg-green-300 cursor-not-allowed" : "bg-green-400 hover:bg-green-300"
-                }`}
-            >
-              {loadingStatus ? "Processando..." : "Aprovar"}
-            </button>
-            <button
-              onClick={() => setShowJustification(true)}
-              className="h-12 w-[10rem] rounded-full bg-red-400 font-bold text-white hover:bg-yellow-300"
-            >
-              Reprovar
-            </button>
-            {showJustification && (
-              <div className="mt-4">
-                <textarea
-                  value={justification}
-                  onChange={(e) => setJustification(e.target.value)}
-                  maxLength={1000}
-                  rows={4}
-                  className="w-full border border-gray-300 p-2 rounded-md"
-                  placeholder="Informe a justificativa para a reprovação"
-                />
-                {justificationError && (
-                  <p className="text-red-500 text-sm">{justificationError}</p>
-                )}
-                <div className="mt-4 flex gap-4">
-                  <button
-                    onClick={() => handleReprovar(justification)}
-                    disabled={loadingStatus}
-                    className={`h-12 w-[10rem] rounded-full font-bold text-white transition-all ${loadingStatus ? "bg-red-300 cursor-not-allowed" : "bg-red-400 hover:bg-yellow-300"
-                      }`}
-                  >
-                    {loadingStatus ? "Processando..." : "Confirmar Reprovação"}
-                  </button>
-                  <button
-                    onClick={() => setShowJustification(false)}
-                    className="h-12 w-[10rem] rounded-full bg-gray-400 font-bold text-white hover:bg-gray-300"
-                  >
-                    Cancelar
-                  </button>
-                </div>
+        {showJustification && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="relative w-[30rem] bg-white p-6 rounded-lg shadow-lg">
+              <h3 className="mb-4 text-lg font-bold">Justificativa para Reprovação</h3>
+              <textarea
+                value={justification}
+                onChange={(e) => setJustification(e.target.value)}
+                maxLength={1000}
+                rows={4}
+                className="w-full border border-gray-300 p-2 rounded-md"
+                placeholder="Informe a justificativa (até 1000 caracteres)"
+              />
+              {justificationError && (
+                <p className="mt-1 text-sm text-red-500">{justificationError}</p>
+              )}
+              <div className="mt-4 flex justify-end gap-4">
+                <button
+                  onClick={() => changeStatus("REPROVADO", justification)}
+                  disabled={loadingStatus}
+                  className={`py-2 px-4 rounded-full font-bold text-white ${
+                    loadingStatus ? "bg-red-300" : "bg-red-500 hover:bg-red-400"
+                  }`}
+                >
+                  {loadingStatus ? "Processando..." : "Confirmar"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowJustification(false);
+                    setJustification("");
+                    setJustificationError(null);
+                  }}
+                  className="py-2 px-4 rounded-full bg-gray-400 font-bold text-white hover:bg-gray-300"
+                >
+                  Cancelar
+                </button>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
