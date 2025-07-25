@@ -140,7 +140,7 @@ export function ValidateSection({
       <thead className="bg-gray-100">
         <tr>
           <th className="px-2 py-1 text-left">Título</th>
-          <th className="px-2 py-1 text-left">Meses</th>
+          <th className="px-2 py-1 text-left">Validade</th>
           {/* <th className="px-2 py-1 text-left">Unidade</th> */}
           <th className="px-2 py-1 text-left">Bloqueia</th>
           <th className="px-2 py-1 text-left">Ações</th>
