@@ -1,6 +1,5 @@
 package bl.tech.realiza.usecases.impl.documents.document;
 
-import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.Document;
@@ -10,7 +9,6 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -18,7 +16,6 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
@@ -27,12 +24,13 @@ import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployee
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
-import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementDocumentRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
@@ -71,7 +69,7 @@ public class CrudDocumentImpl implements CrudDocument {
     private final DocumentEmployeeRepository documentEmployeeRepository;
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final ContractDocumentRepository contractDocumentRepository;
-    private final ItemManagementRepository itemManagementRepository;
+    private final CrudItemManagementImpl crudItemManagementImpl;
 
     @Override
     public void expirationChange() {
@@ -222,65 +220,6 @@ public class CrudDocumentImpl implements CrudDocument {
     }
 
     @Override
-    public String documentExemption(String documentId, String contractId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new NotFoundException("Document not found"));
-
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new NotFoundException("Contract not found"));
-
-        if (document.getContractDocuments().stream().anyMatch(contractDocument -> contractDocument.getContract().equals(contract))) {
-            document.getContractDocuments().removeIf(contractDocument -> contractDocument.getContract().equals(contract));
-
-            if (document.getContractDocuments().isEmpty()) {
-                documentRepository.delete(document);
-            } else {
-                documentRepository.save(document);
-            }
-            contractRepository.save(contract);
-        }
-
-        if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            String owner = "";
-            if (userResponsible != null) {
-                if (document instanceof DocumentEmployee documentEmployee) {
-                    owner = documentEmployee.getEmployee() != null
-                            ? documentEmployee.getEmployee().getFullName()
-                            : "Not Identified";
-                } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
-                    owner = documentProviderSupplier.getProviderSupplier() != null
-                            ? (documentProviderSupplier.getProviderSupplier().getCorporateName() != null
-                                ? documentProviderSupplier.getProviderSupplier().getCorporateName()
-                                : (documentProviderSupplier.getProviderSupplier().getTradeName() != null
-                                    ? documentProviderSupplier.getProviderSupplier().getTradeName()
-                                    : "Not Identified"))
-                            : "Not Identified";
-                } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
-                    owner = documentProviderSubcontractor.getProviderSubcontractor() != null
-                            ? (documentProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
-                            ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
-                            : (documentProviderSubcontractor.getProviderSubcontractor().getTradeName() != null
-                            ? documentProviderSubcontractor.getProviderSubcontractor().getTradeName()
-                            : "Not Identified"))
-                            : "Not Identified";
-                }
-                auditLogServiceImpl.createAuditLog(
-                        document.getIdDocumentation(),
-                        DOCUMENT,
-                        userResponsible.getFullName() + " isentou documento "
-                                + document.getTitle() + " de " + owner,
-                        null,
-                        EXEMPT,
-                        userResponsible.getIdUser());
-            }
-        }
-
-        return "Document " + document.getTitle() + " exempted from contract " + contract.getContractReference();
-    }
-
-    @Override
     public String documentExemptionRequest(String documentId, String contractId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
@@ -298,10 +237,11 @@ public class CrudDocumentImpl implements CrudDocument {
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
-            itemManagementRepository.save(ItemManagement.builder()
+            crudItemManagementImpl.saveDocumentSolicitation(ItemManagementDocumentRequestDto.builder()
+                            .idRequester(userResponsible != null ? userResponsible.getIdUser() : null)
                     .solicitationType(ItemManagement.SolicitationType.EXEMPTION)
-                    .contractDocument(contractDocument)
-                            .requester(userResponsible)
+                            .documentId(contractDocument.getDocument().getIdDocumentation())
+                            .contractId(contractDocument.getContract().getIdContract())
                     .build());
             if (userResponsible != null) {
                 String owner = "";

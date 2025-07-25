@@ -46,6 +46,7 @@ import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
+import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
@@ -60,9 +61,9 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
-import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.FINISH;
-import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.UPDATE;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.CONTRACT;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.DOCUMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +79,6 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final TokenManagerService tokenManagerService;
     private final CrudNotification crudNotification;
     private final DocumentRepository documentRepository;
-    private final CrudDocument crudDocument;
     private final ContractDocumentRepository contractDocumentRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -223,8 +223,62 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .build(), token);
             }
         } else if (solicitation.getContractDocument() != null) {
-            ContractDocument contractDocument = solicitation.getContractDocument();
-            crudDocument.documentExemption(contractDocument.getDocument().getIdDocumentation(), contractDocument.getContract().getIdContract());
+            ContractDocument contractDoc = solicitation.getContractDocument();
+            Document document = documentRepository.findById(contractDoc.getDocument().getIdDocumentation())
+                    .orElseThrow(() -> new NotFoundException("Document not found"));
+
+            Contract contract = contractRepository.findById(contractDoc.getContract().getIdContract())
+                    .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+            if (document.getContractDocuments().stream().anyMatch(contractDocument -> contractDocument.getContract().equals(contract))) {
+                document.getContractDocuments().removeIf(contractDocument -> contractDocument.getContract().equals(contract));
+
+                if (document.getContractDocuments().isEmpty()) {
+                    documentRepository.delete(document);
+                } else {
+                    documentRepository.save(document);
+                }
+                contractRepository.save(contract);
+            }
+
+            if (JwtService.getAuthenticatedUserId() != null) {
+                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                        .orElse(null);
+                String owner = "";
+                if (userResponsible != null) {
+                    if (document instanceof DocumentEmployee documentEmployee) {
+                        owner = documentEmployee.getEmployee() != null
+                                ? documentEmployee.getEmployee().getFullName()
+                                : "Not Identified";
+                    } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                        owner = documentProviderSupplier.getProviderSupplier() != null
+                                ? (documentProviderSupplier.getProviderSupplier().getCorporateName() != null
+                                ? documentProviderSupplier.getProviderSupplier().getCorporateName()
+                                : (documentProviderSupplier.getProviderSupplier().getTradeName() != null
+                                ? documentProviderSupplier.getProviderSupplier().getTradeName()
+                                : "Not Identified"))
+                                : "Not Identified";
+                    } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+                        owner = documentProviderSubcontractor.getProviderSubcontractor() != null
+                                ? (documentProviderSubcontractor.getProviderSubcontractor().getCorporateName() != null
+                                ? documentProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                                : (documentProviderSubcontractor.getProviderSubcontractor().getTradeName() != null
+                                ? documentProviderSubcontractor.getProviderSubcontractor().getTradeName()
+                                : "Not Identified"))
+                                : "Not Identified";
+                    }
+                    auditLogService.createAuditLog(
+                            document.getIdDocumentation(),
+                            DOCUMENT,
+                            userResponsible.getFullName() + " isentou documento "
+                                    + document.getTitle() + " de " + owner,
+                            null,
+                            EXEMPT,
+                            userResponsible.getIdUser());
+                }
+            }
+
+            return "Document " + document.getTitle() + " exempted from contract " + contract.getContractReference();
         } else if (solicitation.getContract() != null) {
             String contractId = solicitation.getContract().getIdContract();
             switch (solicitation.getSolicitationType()) {

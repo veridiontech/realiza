@@ -9,7 +9,6 @@ public interface CrudDocument {
     void expirationChange();
     void expirationCheck();
     String changeStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto);
-    String documentExemption(String documentId, String contractId);
     String documentExemptionRequest(String documentId, String contractId);
     List<DocumentPendingResponseDto> findNonConformingDocumentByEnterpriseId(String enterpriseId);
 }
