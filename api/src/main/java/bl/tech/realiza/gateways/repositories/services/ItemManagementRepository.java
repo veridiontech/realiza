@@ -10,4 +10,5 @@ public interface ItemManagementRepository extends JpaRepository<ItemManagement, 
     Page<ItemManagement> findAllByNewUserIsNotNull(Pageable pageable);
     Page<ItemManagement> findAllByNewProviderIsNotNull(Pageable pageable);
     Page<ItemManagement> findAllByContractDocumentIsNotNull(Pageable pageable);
+    Page<ItemManagement> findAllByContractIsNotNull(Pageable pageable);
 }

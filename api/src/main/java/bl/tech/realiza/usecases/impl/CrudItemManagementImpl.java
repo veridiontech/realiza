@@ -3,6 +3,7 @@ package bl.tech.realiza.usecases.impl;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
@@ -10,32 +11,44 @@ import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.ItemManagementRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserManagerRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.services.email.EmailEnterpriseInviteRequestDto;
 import bl.tech.realiza.gateways.requests.services.email.EmailRegistrationDeniedRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementContractRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementDocumentRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.contract.ItemManagementContractDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.contract.ItemManagementContractResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserResponseDto;
+import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
+import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
+import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -43,7 +56,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.FINISH;
+import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.UPDATE;
+import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.CONTRACT;
 
 @Service
 @RequiredArgsConstructor
@@ -58,10 +77,15 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final ContractRepository contractRepository;
     private final TokenManagerService tokenManagerService;
     private final CrudNotification crudNotification;
+    private final DocumentRepository documentRepository;
+    private final CrudDocument crudDocument;
+    private final ContractDocumentRepository contractDocumentRepository;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
-
         User requester = userClientRepository.findById(itemManagementUserRequestDto.getIdRequester())
                 .orElse(null);
 
@@ -198,6 +222,124 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .idSupplier(contract instanceof ContractProviderSubcontractor ? ((ContractProviderSubcontractor) contract).getContractProviderSupplier().getProviderSupplier().getIdProvider() : null)
                         .build(), token);
             }
+        } else if (solicitation.getContractDocument() != null) {
+            ContractDocument contractDocument = solicitation.getContractDocument();
+            crudDocument.documentExemption(contractDocument.getDocument().getIdDocumentation(), contractDocument.getContract().getIdContract());
+        } else if (solicitation.getContract() != null) {
+            String contractId = solicitation.getContract().getIdContract();
+            switch (solicitation.getSolicitationType()) {
+                case FINISH -> {
+                    UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+
+                    if ((requester.getAdmin() != null ? requester.getAdmin() : false)
+                            || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                            || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                            || requester.getManager()) {
+
+                        Contract contract = contractRepository.findById(contractId)
+                                .orElseThrow(() -> new NotFoundException("Contract not found"));
+                        if (requester.getContractAccess().contains(contract.getIdContract())
+                                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+                            contract.setFinished(true);
+                            contract.setEndDate(Date.valueOf(LocalDate.now()));
+
+                            contract = contractRepository.save(contract);
+
+                            if (JwtService.getAuthenticatedUserId() != null) {
+                                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                                        .orElse(null);
+                                if (userResponsible != null) {
+                                    auditLogService.createAuditLog(
+                                            contract.getIdContract(),
+                                            CONTRACT,
+                                            userResponsible.getFullName() + " finalizou contrato "
+                                                    + contract.getContractReference(),
+                                            null,
+                                            FINISH,
+                                            userResponsible.getIdUser());
+                                }
+                            }
+                            return "Contract finished successfully";
+                        }
+                    }
+                    throw new IllegalArgumentException("User don't have permission to finish a contract");
+                }
+                case SUSPEND -> {
+                    UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+
+                    if ((requester.getAdmin() != null ? requester.getAdmin() : false)
+                            || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                            || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                            || requester.getManager()) {
+                        Contract contract = contractRepository.findById(contractId)
+                                .orElseThrow(() -> new NotFoundException("Contract not found"));
+                        if (requester.getContractAccess().contains(contract.getIdContract())
+                                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+                            contract.setIsActive(SUSPENSO);
+                            contract.setEndDate(Date.valueOf(LocalDate.now()));
+
+                            contract = contractRepository.save(contract);
+
+                            if (JwtService.getAuthenticatedUserId() != null) {
+                                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                                        .orElse(null);
+                                if (userResponsible != null) {
+                                    auditLogService.createAuditLog(
+                                            contract.getIdContract(),
+                                            CONTRACT,
+                                            userResponsible.getFullName() + " suspendeu contrato "
+                                                    + contract.getContractReference(),
+                                            null,
+                                            UPDATE,
+                                            userResponsible.getIdUser());
+                                }
+                            }
+
+                            return "Contract suspended successfully";
+                        }
+                    }
+                    throw new IllegalArgumentException("User don't have permission to suspend a contract");
+                }
+                case REACTIVATION -> {
+                    UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
+
+                    if ((requester.getAdmin() != null ? requester.getAdmin() : false)
+                            || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                            || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                            || requester.getManager()) {
+                        Contract contract = contractRepository.findById(contractId)
+                                .orElseThrow(() -> new NotFoundException("Contract not found"));
+                        if (requester.getContractAccess().contains(contract.getIdContract())
+                                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
+                                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
+                            contract.setIsActive(ATIVADO);
+                            contract.setEndDate(null);
+
+                            contract = contractRepository.save(contract);
+
+                            if (JwtService.getAuthenticatedUserId() != null) {
+                                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                                        .orElse(null);
+                                if (userResponsible != null) {
+                                    auditLogService.createAuditLog(
+                                            contract.getIdContract(),
+                                            CONTRACT,
+                                            userResponsible.getFullName() + " reativou contrato "
+                                                    + contract.getContractReference(),
+                                            null,
+                                            UPDATE,
+                                            userResponsible.getIdUser());
+                                }
+                            }
+
+                            return "Contract reactivated successfully";
+                        }
+                    }
+                    throw new IllegalArgumentException("User don't have permission to suspend a contract");
+                }
+            }
         }
 
         solicitation.setStatus(ItemManagement.Status.APPROVED);
@@ -247,6 +389,23 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                         .reason(null)
                         .build());
             }
+        } else if (solicitation.getContractDocument() != null) {
+            ContractDocument contractDocument = solicitation.getContractDocument();
+            contractDocument.setStatus(Document.Status.PENDENTE);
+            contractDocumentRepository.save(contractDocument);
+        } else if (solicitation.getContract() != null) {
+            Contract contract = solicitation.getContract();
+            switch (solicitation.getSolicitationType()) {
+                case FINISH -> {
+                    if(contract.getIsActive() == SUSPENSO) {
+                        contract.setStatus(ContractStatusEnum.SUSPENDED);
+                    } else {
+                        contract.setStatus(ContractStatusEnum.ACTIVE);
+                    }
+                }
+                case SUSPEND -> contract.setStatus(ContractStatusEnum.ACTIVE);
+                case REACTIVATION -> contract.setStatus(ContractStatusEnum.SUSPENDED);
+            }
         }
 
         solicitation.setStatus(ItemManagement.Status.DENIED);
@@ -268,6 +427,38 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     }
 
     @Override
+    public ItemManagementDocumentResponseDto saveDocumentSolicitation(ItemManagementDocumentRequestDto requestDto) {
+        User requester = userClientRepository.findById(requestDto.getIdRequester())
+                .orElse(null);
+
+        if (requester == null) {
+            requester = userManagerRepository.findById(requestDto.getIdRequester())
+                    .orElseThrow(() -> new NotFoundException("Requester not found"));
+        }
+
+        Document document = documentRepository.findById(requestDto.getDocumentId())
+                .orElseThrow(() -> new NotFoundException("Document not found"));
+
+        Contract contract = contractRepository.findById(requestDto.getContractId())
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        ContractDocument contractDocument = document.getContractDocuments().stream()
+                .findFirst()
+                .filter(contractDoc -> contractDoc.getContract().getIdContract().equals(contract.getIdContract()))
+                .orElseThrow(() -> new IllegalArgumentException("Contract and Document dont have a link"));
+
+        ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
+                .solicitationType(requestDto.getSolicitationType())
+                .requester(requester)
+                .contractDocument(contractDocument)
+                .build());
+
+        crudNotification.saveDocumentNotificationForRealizaUsers(solicitation);
+
+        return toItemManagementDocumentResponseDto(solicitation);
+    }
+
+    @Override
     public Page<ItemManagementDocumentResponseDto> findAllDocumentSolicitation(Pageable pageable) {
         Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByContractDocumentIsNotNull(pageable);
         return itemManagementPage.map(this::toItemManagementDocumentResponseDto);
@@ -276,6 +467,42 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     @Override
     public ItemManagementDocumentDetailsResponseDto findDocumentSolicitationDetails(String idSolicitation) {
         return toItemManagementDocumentDetailsResponseDto(itemManagementRepository.findById(idSolicitation)
+                .orElseThrow(() -> new NotFoundException("Solicitation not found")));
+    }
+
+    @Override
+    public ItemManagementContractResponseDto saveContractSolicitation(ItemManagementContractRequestDto requestDto) {
+        User requester = userClientRepository.findById(requestDto.getIdRequester())
+                .orElse(null);
+
+        if (requester == null) {
+            requester = userManagerRepository.findById(requestDto.getIdRequester())
+                    .orElseThrow(() -> new NotFoundException("Requester not found"));
+        }
+
+        Contract contract = contractRepository.findById(requestDto.getContractId())
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
+
+        ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
+                .solicitationType(requestDto.getSolicitationType())
+                .requester(requester)
+                .contract(contract)
+                .build());
+
+        crudNotification.saveContractNotificationForRealizaUsers(solicitation);
+
+        return toItemManagementContractResponseDto(solicitation);
+    }
+
+    @Override
+    public Page<ItemManagementContractResponseDto> findAllContractSolicitation(Pageable pageable) {
+        Page<ItemManagement> itemManagementPage = itemManagementRepository.findAllByContractIsNotNull(pageable);
+        return itemManagementPage.map(this::toItemManagementContractResponseDto);
+    }
+
+    @Override
+    public ItemManagementContractDetailsResponseDto findContractSolicitationDetails(String idSolicitation) {
+        return toItemManagementContractDetailsResponseDto(itemManagementRepository.findById(idSolicitation)
                 .orElseThrow(() -> new NotFoundException("Solicitation not found")));
     }
 
@@ -383,6 +610,50 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .idSolicitation(itemManagement.getIdSolicitation())
                 .title(document.getTitle())
                 .ownerName(ownerName)
+                .enterpriseName(enterpriseName)
+                .solicitationType(itemManagement.getSolicitationType())
+                .clientName(clientName)
+                .clientCnpj(clientCnpj)
+                .branchName(branchName)
+                .requesterName(requester.getFullName())
+                .requesterEmail(requester.getEmail())
+                .status(itemManagement.getStatus())
+                .creationDate(itemManagement.getCreationDate())
+                .build();
+    }
+
+    private ItemManagementContractResponseDto toItemManagementContractResponseDto(ItemManagement itemManagement) {
+        Contract contract = itemManagement.getContract();
+        User requester = itemManagement.getRequester();
+        Client client = null;
+        Branch branch = null;
+        String enterpriseName = null;
+        String contractReference = null;
+        String clientName = null;
+        String clientCnpj = null;
+        String branchName = null;
+
+        contractReference = contract.getContractReference();
+
+        if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+            enterpriseName = contractProviderSupplier.getProviderSupplier().getCorporateName();
+            branch = contractProviderSupplier.getBranch();
+            branchName = branch.getName();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
+            enterpriseName = contractProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+            branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
+            branchName = branch.getName();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        }
+
+        return ItemManagementContractResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .contractReference(contractReference)
                 .enterpriseName(enterpriseName)
                 .solicitationType(itemManagement.getSolicitationType())
                 .clientName(clientName)
@@ -510,6 +781,52 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .document(ItemManagementDocumentDetailsResponseDto.Document.builder()
                         .title(itemManagement.getContractDocument().getDocument().getTitle())
                         .ownerName(ownerName)
+                        .build())
+                .build();
+    }
+
+    private ItemManagementContractDetailsResponseDto toItemManagementContractDetailsResponseDto(ItemManagement itemManagement) {
+        Document document = itemManagement.getContractDocument().getDocument();
+        Contract contract = itemManagement.getContractDocument().getContract();
+        Client client = null;
+        Branch branch = null;
+        String clientName = null;
+        String clientCnpj = null;
+        String enterpriseName = null;
+        String contractReference = null;
+
+        contractReference = contract.getContractReference();
+        if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+            enterpriseName = contractProviderSupplier.getProviderSupplier().getCorporateName();
+            branch = contractProviderSupplier.getBranch();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
+            enterpriseName = contractProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+            branch = contractProviderSubcontractor.getContractProviderSupplier().getBranch();
+            client = branch.getClient();
+            clientName = client.getCorporateName();
+            clientCnpj = client.getCnpj();
+        }
+
+        return ItemManagementContractDetailsResponseDto.builder()
+                .idSolicitation(itemManagement.getIdSolicitation())
+                .solicitationType(itemManagement.getSolicitationType())
+                .creationDate(itemManagement.getCreationDate())
+                .client(ItemManagementContractDetailsResponseDto.Client.builder()
+                        .corporateName(clientName)
+                        .cnpj(clientCnpj)
+                        .build())
+                .enterprise(ItemManagementContractDetailsResponseDto.Enterprise.builder()
+                        .corporateName(enterpriseName)
+                        .build())
+                .requester(ItemManagementContractDetailsResponseDto.Requester.builder()
+                        .fullName(itemManagement.getRequester().getFullName())
+                        .email(itemManagement.getRequester().getEmail())
+                        .build())
+                .contract(ItemManagementContractDetailsResponseDto.Contract.builder()
+                        .contractReference(contractReference)
                         .build())
                 .build();
     }

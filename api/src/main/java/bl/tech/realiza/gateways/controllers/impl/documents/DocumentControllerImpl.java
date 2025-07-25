@@ -34,13 +34,6 @@ public class DocumentControllerImpl implements DocumentController {
     @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override
     public ResponseEntity<String> documentExemption(@PathVariable String documentId, @RequestParam String contractId) {
-        return ResponseEntity.ok(crudDocument.documentExemption(documentId, contractId));
-    }
-
-    @PostMapping("/{documentId}/exempt-request")
-    @ResponseStatus(HttpStatus.OK)
-    @Override
-    public ResponseEntity<String> documentExemptionRequest(@PathVariable String documentId, @RequestParam String contractId) {
         return ResponseEntity.ok(crudDocument.documentExemptionRequest(documentId, contractId));
     }
 

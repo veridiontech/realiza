@@ -6,22 +6,27 @@ import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByBranchIdsResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,126 +46,67 @@ public class CrudContractImpl implements CrudContract {
     private final ContractRepository contractRepository;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
-    private final AuditLogService auditLogServiceImpl;
+    private final AuditLogService auditLogService;
     private final SetupAsyncQueueProducer setupAsyncQueueProducer;
     private final JwtService jwtService;
+    private final CrudItemManagement crudItemManagement;
 
     @Override
-    public String finishContract(String idContract) {
+    public String finishContractRequest(String idContract) {
 
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
-                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
-                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
-                || requester.getManager()) {
+        Contract contract = contractRepository.findById(idContract)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-            Contract contract = contractRepository.findById(idContract)
-                    .orElseThrow(() -> new NotFoundException("Contract not found"));
-            if (requester.getContractAccess().contains(contract.getIdContract())
-                    || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
-                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
-                contract.setFinished(true);
-                contract.setEndDate(Date.valueOf(LocalDate.now()));
+        crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
+                .solicitationType(ItemManagement.SolicitationType.FINISH)
+                .idRequester(requester.getIdUser())
+                .contractId(idContract)
+                .build());
 
-                contract = contractRepository.save(contract);
+        contract.setStatus(ContractStatusEnum.FINISH_REQUESTED);
+        contractRepository.save(contract);
 
-                if (JwtService.getAuthenticatedUserId() != null) {
-                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                            .orElse(null);
-                    if (userResponsible != null) {
-                        auditLogServiceImpl.createAuditLog(
-                                contract.getIdContract(),
-                                CONTRACT,
-                                userResponsible.getFullName() + " finalizou contrato "
-                                        + contract.getContractReference(),
-                                null,
-                                FINISH,
-                                userResponsible.getIdUser());
-                    }
-                }
-                return "Contract finished successfully";
-            }
-        }
-        throw new IllegalArgumentException("User don't have permission to finish a contract");
+        return "Contract finish requested";
     }
 
     @Override
-    public String suspendContract(String contractId) {
+    public String suspendContractRequest(String contractId) {
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
-                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
-                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
-                || requester.getManager()) {
-            Contract contract = contractRepository.findById(contractId)
-                    .orElseThrow(() -> new NotFoundException("Contract not found"));
-            if (requester.getContractAccess().contains(contract.getIdContract())
-                    || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
-                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
-                contract.setIsActive(SUSPENSO);
-                contract.setEndDate(Date.valueOf(LocalDate.now()));
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-                contract = contractRepository.save(contract);
+        crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
+                .solicitationType(ItemManagement.SolicitationType.SUSPEND)
+                .idRequester(requester.getIdUser())
+                .contractId(contractId)
+                .build());
 
-                if (JwtService.getAuthenticatedUserId() != null) {
-                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                            .orElse(null);
-                    if (userResponsible != null) {
-                        auditLogServiceImpl.createAuditLog(
-                                contract.getIdContract(),
-                                CONTRACT,
-                                userResponsible.getFullName() + " suspendeu contrato "
-                                        + contract.getContractReference(),
-                                null,
-                                UPDATE,
-                                userResponsible.getIdUser());
-                    }
-                }
+        contract.setStatus(ContractStatusEnum.SUSPEND_REQUESTED);
+        contractRepository.save(contract);
 
-                return "Contract suspended successfully";
-            }
-        }
-        throw new IllegalArgumentException("User don't have permission to suspend a contract");
+        return "Contract suspension requested";
     }
 
     @Override
-    public String reactivateContract(String contractId) {
+    public String reactivateContractRequest(String contractId) {
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        if ((requester.getAdmin() != null ? requester.getAdmin() : false)
-                || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
-                || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
-                || requester.getManager()) {
-            Contract contract = contractRepository.findById(contractId)
-                    .orElseThrow(() -> new NotFoundException("Contract not found"));
-            if (requester.getContractAccess().contains(contract.getIdContract())
-                    || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
-                    || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
-                contract.setIsActive(ATIVADO);
-                contract.setEndDate(null);
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-                contract = contractRepository.save(contract);
+        crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
+                .solicitationType(ItemManagement.SolicitationType.REACTIVATION)
+                .idRequester(requester.getIdUser())
+                .contractId(contractId)
+                .build());
 
-                if (JwtService.getAuthenticatedUserId() != null) {
-                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                            .orElse(null);
-                    if (userResponsible != null) {
-                        auditLogServiceImpl.createAuditLog(
-                                contract.getIdContract(),
-                                CONTRACT,
-                                userResponsible.getFullName() + " reativou contrato "
-                                        + contract.getContractReference(),
-                                null,
-                                UPDATE,
-                                userResponsible.getIdUser());
-                    }
-                }
+        contract.setStatus(ContractStatusEnum.REACTIVATION_REQUESTED);
+        contractRepository.save(contract);
 
-                return "Contract reactivated successfully";
-            }
-        }
-        throw new IllegalArgumentException("User don't have permission to suspend a contract");
+        return "Contract reactivation requested";
     }
 
     @Override
@@ -247,7 +193,7 @@ public class CrudContractImpl implements CrudContract {
                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                         .orElse(null);
                 if (userResponsible != null) {
-                    auditLogServiceImpl.createAuditLog(
+                    auditLogService.createAuditLog(
                             employee.getIdEmployee(),
                             CONTRACT,
                             userResponsible.getFullName() + " alocou colaborador "
@@ -257,7 +203,7 @@ public class CrudContractImpl implements CrudContract {
                             ALLOCATE,
                             userResponsible.getIdUser());
 
-                    auditLogServiceImpl.createAuditLog(
+                    auditLogService.createAuditLog(
                             employee.getIdEmployee(),
                             EMPLOYEE,
                             userResponsible.getFullName() + " alocou colaborador "
@@ -324,7 +270,7 @@ public class CrudContractImpl implements CrudContract {
                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                         .orElse(null);
                 if (userResponsible != null) {
-                    auditLogServiceImpl.createAuditLog(
+                    auditLogService.createAuditLog(
                             employee.getIdEmployee(),
                             CONTRACT,
                             userResponsible.getFullName() + " desalocou colaborador "
@@ -334,7 +280,7 @@ public class CrudContractImpl implements CrudContract {
                             DEALLOCATE,
                             userResponsible.getIdUser());
 
-                    auditLogServiceImpl.createAuditLog(
+                    auditLogService.createAuditLog(
                             employee.getIdEmployee(),
                             EMPLOYEE,
                             userResponsible.getFullName() + " desalocou colaborador "

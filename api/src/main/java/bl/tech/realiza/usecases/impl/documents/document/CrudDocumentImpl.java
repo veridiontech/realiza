@@ -282,7 +282,6 @@ public class CrudDocumentImpl implements CrudDocument {
 
     @Override
     public String documentExemptionRequest(String documentId, String contractId) {
-
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
@@ -360,11 +359,24 @@ public class CrudDocumentImpl implements CrudDocument {
                     }
                 }
 
+                List<Contract> contracts = documentProviderSupplier.getContractDocuments().stream()
+                        .filter(contractDocument ->
+                                        contractDocument.getStatus().equals(PENDENTE)
+                                || contractDocument.getStatus().equals(REPROVADO)
+                                || contractDocument.getStatus().equals(VENCIDO))
+                        .map(ContractDocument::getContract)
+                        .filter(contract -> contract.getIsActive().equals(Contract.IsActive.ATIVADO))
+                        .toList();
+
+                List<String> contractReferences = contracts.stream()
+                        .map(Contract::getContractReference)
+                        .toList();
+
                 responseDto.add(DocumentPendingResponseDto.builder()
                         .id(documentProviderSupplier.getIdDocumentation())
                         .status(documentProviderSupplier.getStatus())
                         .title(documentProviderSupplier.getTitle())
-                        .owner(documentProviderSupplier.getProviderSupplier().getCorporateName())
+                        .contractReferences(contractReferences)
                         .signedUrl(signedUrl)
                         .build());
             }
@@ -380,11 +392,25 @@ public class CrudDocumentImpl implements CrudDocument {
                     }
                 }
 
+                List<Contract> contracts = documentEmployee.getContractDocuments().stream()
+                        .filter(contractDocument ->
+                                contractDocument.getStatus().equals(PENDENTE)
+                                        || contractDocument.getStatus().equals(REPROVADO)
+                                        || contractDocument.getStatus().equals(VENCIDO))
+                        .map(ContractDocument::getContract)
+                        .filter(contract -> contract.getIsActive().equals(Contract.IsActive.ATIVADO))
+                        .toList();
+
+                List<String> contractReferences = contracts.stream()
+                        .map(Contract::getContractReference)
+                        .toList();
+
                 responseDto.add(DocumentPendingResponseDto.builder()
                         .id(documentEmployee.getIdDocumentation())
                         .status(documentEmployee.getStatus())
                         .title(documentEmployee.getTitle())
                         .owner(documentEmployee.getEmployee().getFullName())
+                        .contractReferences(contractReferences)
                         .signedUrl(signedUrl)
                         .build());
             }

@@ -6,6 +6,8 @@ import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -36,6 +38,8 @@ public abstract class Contract {
     private String contractReference;
     private String description;
     private String allocatedLimit;
+    @Builder.Default
+    private ContractStatusEnum status = ContractStatusEnum.PENDING;
     @Builder.Default
     private Boolean finished = false;
     @Builder.Default
@@ -95,6 +99,10 @@ public abstract class Contract {
     @JsonIgnore
     @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
     private List<AuditLogContract> auditLogContracts;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ItemManagement> itemManagementList;
 
     public enum ExpenseType {
         CAPEX,
