@@ -142,7 +142,9 @@ export function ConfigPanel() {
   const [cboTitle, setCboTitle] = useState("");
 
   const [positions, setPositions] = useState<Position[]>([]);
-  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(
+    null
+  );
   const [positionName, setPositionName] = useState("");
 
   const [services, setServices] = useState<Service[]>([]);
@@ -160,16 +162,22 @@ export function ConfigPanel() {
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
 
   // Estados da aba "Validate" (adicionados da branch victorvalim-23-07)
-  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
+  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>(
+    []
+  );
   const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
   const [searchMatrixTerm, setSearchMatrixTerm] = useState("");
 
   // Estados da aba "Perfis do Repositório" (adicionados da branch main)
-  const [profilesRepoItems, setProfilesRepoItems] = useState<SingleProfileItem[]>([]);
+  const [profilesRepoItems, setProfilesRepoItems] = useState<
+    SingleProfileItem[]
+  >([]);
   const [isLoadingProfilesRepo, setIsLoadingProfilesRepo] = useState(false);
   const [profileSearchTerm, setProfileSearchTerm] = useState("");
-  const [isProfileDetailsModalOpen, setIsProfileDetailsModalOpen] = useState(false);
-  const [selectedProfileDetails, setSelectedProfileDetails] = useState<ProfileDetails | null>(null);
+  const [isProfileDetailsModalOpen, setIsProfileDetailsModalOpen] =
+    useState(false);
+  const [selectedProfileDetails, setSelectedProfileDetails] =
+    useState<ProfileDetails | null>(null);
   const [name, setName] = useState("");
   const [newProfileDescription, setNewProfileDescription] = useState("");
   const [admin, setAdmin] = useState(false);
@@ -181,7 +189,8 @@ export function ConfigPanel() {
   const [registrationContract, setRegistrationContract] = useState(false);
   const [laboral, setLaboral] = useState(false);
   const [workplaceSafety, setWorkplaceSafety] = useState(false);
-  const [registrationAndCertificates, setRegistrationAndCertificates] = useState(false);
+  const [registrationAndCertificates, setRegistrationAndCertificates] =
+    useState(false);
   const [general, setGeneral] = useState(false);
   const [health, setHealth] = useState(false);
   const [environment, setEnvironment] = useState(false);
@@ -201,9 +210,7 @@ export function ConfigPanel() {
     HIGH: "Alto",
     VERY_HIGH: "Muito Alto",
   };
-  const expirationUnits = [
-    { value: "MONTHS", label: "Meses" },
-  ];
+  const expirationUnits = [{ value: "MONTHS", label: "Meses" }];
 
   // carregamento inicial
   // Combinamos os useEffects de ambas as branches.
@@ -325,7 +332,8 @@ export function ConfigPanel() {
         { params: { owner: "REPO", idOwner: "" }, ...authHeader }
       );
       setServices(data || []);
-    } catch (err) { // Adicionado o tratamento de erro da branch main
+    } catch (err) {
+      // Adicionado o tratamento de erro da branch main
       console.error("Erro ao buscar serviços:", err);
     } finally {
       setIsLoadingServices(false);
@@ -334,14 +342,17 @@ export function ConfigPanel() {
 
   // Função handleCreateService - Mesclada
   async function handleCreateService() {
-    if (!newServiceTitle || !newServiceRisk) { // Condição de validação da branch main
-      toast.error( // Alterado para toast.error para consistência
+    if (!newServiceTitle || !newServiceRisk) {
+      // Condição de validação da branch main
+      toast.error(
+        // Alterado para toast.error para consistência
         "Por favor, preencha o título e selecione o risco para o novo serviço."
       );
       return;
     }
     setIsCreatingService(true);
-    try { // Adicionado try/catch da branch main
+    try {
+      // Adicionado try/catch da branch main
       await axios.post(
         `${ip}/contract/service-type/repository`,
         { title: newServiceTitle, risk: newServiceRisk },
@@ -351,7 +362,8 @@ export function ConfigPanel() {
       setNewServiceTitle("");
       setNewServiceRisk("LOW");
       getServices();
-    } catch (err) { // Tratamento de erro da branch main
+    } catch (err) {
+      // Tratamento de erro da branch main
       console.error("Erro ao criar serviço:", err);
       toast.error("Erro ao criar serviço. Tente novamente.");
     } finally {
@@ -359,20 +371,32 @@ export function ConfigPanel() {
     }
   }
 
-  // Função getActivities - Mesclada
+  // Função getActivities - Mesclada e corrigida
   async function getActivities() {
     setIsLoadingActivities(true);
     try {
-      const res = await axios.get<{ content?: Activity[] }>(
+      const res = await axios.get<{ content?: Activity[] | Activity[] }>( // Ajuste no tipo de retorno para incluir as duas possibilidades
         `${ip}/contract/activity-repo`,
         {
           params: { page: 0, size: 100, sort: "title", direction: "ASC" },
           ...authHeader,
         }
       );
-      setActivities(res.data.content || res.data); // Combinado a lógica de acesso a `content` e `data` diretamente
-    } catch (err) { // Adicionado tratamento de erro da branch main
+
+      // Verificação para determinar se a resposta é um array direto ou um objeto com 'content'
+      if (Array.isArray(res.data)) {
+        setActivities(res.data);
+      } else if (res.data && Array.isArray(res.data.content)) {
+        setActivities(res.data.content);
+      } else {
+        // Se o formato não for o esperado, defina como um array vazio e/ou logue um erro
+        console.warn("Formato inesperado da resposta da API de atividades:", res.data);
+        setActivities([]);
+      }
+    } catch (err) {
+      // Adicionado tratamento de erro da branch main
       console.error("Erro ao buscar atividades:", err);
+      toast.error("Erro ao carregar atividades."); // Adicionei um toast para o erro de carregamento
     } finally {
       setIsLoadingActivities(false);
     }
@@ -380,14 +404,17 @@ export function ConfigPanel() {
 
   // Função handleCreateActivity - Mesclada
   async function handleCreateActivity() {
-    if (!newActivityTitle || !newActivityRisk) { // Condição de validação da branch main
-      toast.error( // Alterado para toast.error para consistência
+    if (!newActivityTitle || !newActivityRisk) {
+      // Condição de validação da branch main
+      toast.error(
+        // Alterado para toast.error para consistência
         "Por favor, preencha o título e selecione o risco para a nova atividade."
       );
       return;
     }
     setIsCreatingActivity(true);
-    try { // Adicionado try/catch da branch main
+    try {
+      // Adicionado try/catch da branch main
       await axios.post(
         `${ip}/contract/activity-repo`,
         { title: newActivityTitle, risk: newActivityRisk },
@@ -397,7 +424,8 @@ export function ConfigPanel() {
       setNewActivityTitle("");
       setNewActivityRisk("LOW");
       getActivities();
-    } catch (err) { // Tratamento de erro da branch main
+    } catch (err) {
+      // Tratamento de erro da branch main
       console.error("Erro ao criar atividade:", err);
       toast.error("Erro ao criar atividade. Tente novamente.");
     } finally {
@@ -421,8 +449,8 @@ export function ConfigPanel() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-          ? (data as any).content
-          : [];
+        ? (data as any).content
+        : [];
       setMatrixEntries(list);
     } catch {
       toast.error("Não foi possível carregar documentos de matriz."); // Mensagem mais específica
@@ -449,13 +477,15 @@ export function ConfigPanel() {
   // ——— ABA PROFILES (da branch main) ———
   //
   const fetchProfileDetails = (profileId: string) => {
-    const profile = profilesRepoItems.find(p => p.id === profileId);
+    const profile = profilesRepoItems.find((p) => p.id === profileId);
 
     if (profile) {
       setSelectedProfileDetails(profile);
       setIsProfileDetailsModalOpen(true);
     } else {
-      toast.error("Detalhes do perfil não encontrados localmente. Recarregue a página se persistir.");
+      toast.error(
+        "Detalhes do perfil não encontrados localmente. Recarregue a página se persistir."
+      );
       console.error("Perfil com ID", profileId, "não encontrado em profilesRepoItems.");
     }
   };
@@ -463,9 +493,12 @@ export function ConfigPanel() {
   const getProfilesRepo = async () => {
     setIsLoadingProfilesRepo(true);
     try {
-      const response = await axios.get<SingleProfileItem[]>(`${ip}/profile/repo`, {
-        headers: { Authorization: `Bearer ${token}` }, // Usando 'token' consistente
-      });
+      const response = await axios.get<SingleProfileItem[]>(
+        `${ip}/profile/repo`,
+        {
+          headers: { Authorization: `Bearer ${token}` }, // Usando 'token' consistente
+        }
+      );
       console.log("Dados da requisição de perfis do repositório:", response.data);
 
       const sortedProfiles = response.data.sort((a, b) =>
@@ -488,7 +521,9 @@ export function ConfigPanel() {
     }
 
     if (!admin && !viewer && !manager && !isInspector) {
-      toast.error("Por favor, selecione um tipo de perfil (Admin, Visitante, Gestor ou Fiscal de contrato).");
+      toast.error(
+        "Por favor, selecione um tipo de perfil (Admin, Visitante, Gestor ou Fiscal de contrato)."
+      );
       return;
     }
 
@@ -513,12 +548,16 @@ export function ConfigPanel() {
         concierge: concierge,
       };
 
-      const response = await axios.post<SingleProfileItem>(`${ip}/profile/repo`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Usando 'token' consistente
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post<SingleProfileItem>(
+        `${ip}/profile/repo`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Usando 'token' consistente
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       toast.success("Perfil criado com sucesso!");
       console.log("Perfil criado:", response.data);
@@ -544,7 +583,11 @@ export function ConfigPanel() {
     } catch (err) {
       console.error("Erro ao criar perfil:", err);
       if (axios.isAxiosError(err) && err.response) {
-        toast.error(`Erro ao criar perfil: ${err.response.data.message || "Verifique os dados."}`);
+        toast.error(
+          `Erro ao criar perfil: ${
+            err.response.data.message || "Verifique os dados."
+          }`
+        );
       } else {
         toast.error("Erro ao criar perfil. Tente novamente.");
       }
@@ -563,7 +606,9 @@ export function ConfigPanel() {
           d.documentTitle.toLowerCase().includes(searchTerm.toLowerCase())
         )
         .sort((a, b) =>
-          a.documentTitle.localeCompare(b.documentTitle, "pt-BR", { sensitivity: "base" })
+          a.documentTitle.localeCompare(b.documentTitle, "pt-BR", {
+            sensitivity: "base",
+          })
         ),
     [documents, searchTerm]
   );
@@ -908,7 +953,8 @@ export function ConfigPanel() {
                 onChange={(e) => setNewServiceRisk(e.target.value)}
                 disabled={isCreatingService}
               >
-                {Object.entries(riskTranslations).map(([key, label]) => ( // Usar Object.entries para iterar sobre riskTranslations
+                {Object.entries(riskTranslations).map(([key, label]) => (
+                  // Usar Object.entries para iterar sobre riskTranslations
                   <option key={key} value={key}>
                     {label}
                   </option>
