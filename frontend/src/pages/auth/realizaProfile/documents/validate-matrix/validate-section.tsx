@@ -55,18 +55,18 @@ export function ValidateSection({
       );
   }, [idBranch, documentTypeName, isSelected]);
 
-  const traduzUnidade = (unit: ExpirationItem["expirationDateUnit"]) => {
-    switch (unit) {
-      case "DAYS":
-        return "dias";
-      case "WEEKS":
-        return "semanas";
-      case "MONTHS":
-        return "meses";
-      default:
-        return unit;
-    }
-  };
+  // const traduzUnidade = (unit: ExpirationItem["expirationDateUnit"]) => {
+  //   switch (unit) {
+  //     case "DAYS":
+  //       return "dias";
+  //     case "WEEKS":
+  //       return "semanas";
+  //     case "MONTHS":
+  //       return "meses";
+  //     default:
+  //       return unit;
+  //   }
+  // };
 
   const handleEditClick = (doc: ExpirationItem) => {
     setEditingId(doc.idDocument);
