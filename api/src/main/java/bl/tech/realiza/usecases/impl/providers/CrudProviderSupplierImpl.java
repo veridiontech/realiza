@@ -16,9 +16,10 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.providers.ProviderSupplierRequestDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.providers.CrudProviderSupplier;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     private final FileRepository fileRepository;
     private final DocumentBranchRepository documentBranchRepository;
     private final DocumentProviderSupplierRepository documentProviderSupplierRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public ProviderResponseDto save(ProviderSupplierRequestDto providerSupplierRequestDto) {
@@ -81,7 +83,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
 
         documentProviderSupplierRepository.saveAll(documentProviderSuppliers);
 
-        ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
+        return ProviderResponseDto.builder()
                 .idProvider(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
                 .tradeName(savedProviderSupplier.getTradeName())
@@ -99,21 +101,28 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
-
-        return providerSupplierResponse;
     }
 
     @Override
     public Optional<ProviderResponseDto> findOne(String id) {
         Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
 
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Provider not found"));
+        ProviderSupplier providerSupplier = providerSupplierOptional
+                .orElseThrow(() -> new NotFoundException("Provider not found"));
+
+        String signedUrl = null;
+        if (providerSupplier.getLogo() != null) {
+            if (providerSupplier.getLogo().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(providerSupplier.getLogo().getUrl(), 15);
+            }
+        }
 
         ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
                 .idProvider(providerSupplier.getIdProvider())
                 .cnpj(providerSupplier.getCnpj())
                 .tradeName(providerSupplier.getTradeName())
                 .corporateName(providerSupplier.getCorporateName())
+                .logoSignedUrl(signedUrl)
                 .email(providerSupplier.getEmail())
                 .cep(providerSupplier.getCep())
                 .state(providerSupplier.getState())
@@ -135,12 +144,13 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     public Page<ProviderResponseDto> findAll(Pageable pageable) {
         Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
+        return providerSupplierPage.map(
                 providerSupplier -> {
-                    FileDocument fileDocument = null;
-                    if (providerSupplier.getLogo() != null && !providerSupplier.getLogo().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSupplier.getLogo()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (providerSupplier.getLogo() != null) {
+                        if (providerSupplier.getLogo().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(providerSupplier.getLogo().getUrl(), 15);
+                        }
                     }
 
                     return ProviderResponseDto.builder()
@@ -148,7 +158,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                             .cnpj(providerSupplier.getCnpj())
                             .tradeName(providerSupplier.getTradeName())
                             .corporateName(providerSupplier.getCorporateName())
-                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .logoSignedUrl(signedUrl)
                             .email(providerSupplier.getEmail())
                             .cep(providerSupplier.getCep())
                             .state(providerSupplier.getState())
@@ -164,7 +174,6 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                             .build();
                 }
         );
-        return providerSupplierResponseDtoPage;
     }
 
     @Override
@@ -178,20 +187,40 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
             throw new NotFoundException("Branches not found");
         }
 
-        providerSupplier.setCnpj(providerSupplierRequestDto.getCnpj() != null ? providerSupplierRequestDto.getCnpj() : providerSupplier.getCnpj());
-        providerSupplier.setTradeName(providerSupplierRequestDto.getTradeName() != null ? providerSupplierRequestDto.getTradeName() : providerSupplier.getTradeName());
-        providerSupplier.setCorporateName(providerSupplierRequestDto.getCorporateName() != null ? providerSupplierRequestDto.getCorporateName() : providerSupplier.getCorporateName());
-        providerSupplier.setEmail(providerSupplierRequestDto.getEmail() != null ? providerSupplierRequestDto.getEmail() : providerSupplier.getEmail());
-        providerSupplier.setCep(providerSupplierRequestDto.getCep() != null ? providerSupplierRequestDto.getCep() : providerSupplier.getCep());
-        providerSupplier.setState(providerSupplierRequestDto.getState() != null ? providerSupplierRequestDto.getState() : providerSupplier.getState());
-        providerSupplier.setCity(providerSupplierRequestDto.getCity() != null ? providerSupplierRequestDto.getCity() : providerSupplier.getCity());
-        providerSupplier.setAddress(providerSupplierRequestDto.getAddress() != null ? providerSupplierRequestDto.getAddress() : providerSupplier.getAddress());
-        providerSupplier.setNumber(providerSupplierRequestDto.getNumber() != null ? providerSupplierRequestDto.getNumber() : providerSupplier.getNumber());
-        providerSupplier.setBranches(providerSupplierRequestDto.getBranches() != null ? branches : providerSupplier.getBranches());
+        providerSupplier.setCnpj(providerSupplierRequestDto.getCnpj() != null
+                ? providerSupplierRequestDto.getCnpj()
+                : providerSupplier.getCnpj());
+        providerSupplier.setTradeName(providerSupplierRequestDto.getTradeName() != null
+                ? providerSupplierRequestDto.getTradeName()
+                : providerSupplier.getTradeName());
+        providerSupplier.setCorporateName(providerSupplierRequestDto.getCorporateName() != null
+                ? providerSupplierRequestDto.getCorporateName()
+                : providerSupplier.getCorporateName());
+        providerSupplier.setEmail(providerSupplierRequestDto.getEmail() != null
+                ? providerSupplierRequestDto.getEmail()
+                : providerSupplier.getEmail());
+        providerSupplier.setCep(providerSupplierRequestDto.getCep() != null
+                ? providerSupplierRequestDto.getCep()
+                : providerSupplier.getCep());
+        providerSupplier.setState(providerSupplierRequestDto.getState() != null
+                ? providerSupplierRequestDto.getState()
+                : providerSupplier.getState());
+        providerSupplier.setCity(providerSupplierRequestDto.getCity() != null
+                ? providerSupplierRequestDto.getCity()
+                : providerSupplier.getCity());
+        providerSupplier.setAddress(providerSupplierRequestDto.getAddress() != null
+                ? providerSupplierRequestDto.getAddress()
+                : providerSupplier.getAddress());
+        providerSupplier.setNumber(providerSupplierRequestDto.getNumber() != null
+                ? providerSupplierRequestDto.getNumber()
+                : providerSupplier.getNumber());
+        providerSupplier.setBranches(providerSupplierRequestDto.getBranches() != null
+                ? branches
+                : providerSupplier.getBranches());
 
         ProviderSupplier savedProviderSupplier = providerSupplierRepository.save(providerSupplier);
 
-        ProviderResponseDto providerSupplierResponse = ProviderResponseDto.builder()
+        return Optional.of(ProviderResponseDto.builder()
                 .idProvider(savedProviderSupplier.getIdProvider())
                 .cnpj(savedProviderSupplier.getCnpj())
                 .tradeName(savedProviderSupplier.getTradeName())
@@ -202,9 +231,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                 .city(savedProviderSupplier.getCity())
                 .address(savedProviderSupplier.getAddress())
                 .number(savedProviderSupplier.getNumber())
-                .build();
-
-        return Optional.of(providerSupplierResponse);
+                .build());
     }
 
     @Override
@@ -216,12 +243,13 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
     public Page<ProviderResponseDto> findAllByClient(String idSearch, Pageable pageable) {
         Page<ProviderSupplier> providerSupplierPage = providerSupplierRepository.findAllByBranches_IdBranchAndIsActiveIsTrue(idSearch, pageable);
 
-        Page<ProviderResponseDto> providerSupplierResponseDtoPage = providerSupplierPage.map(
+        return providerSupplierPage.map(
                 providerSupplier -> {
-                    FileDocument fileDocument = null;
-                    if (providerSupplier.getLogo() != null && !providerSupplier.getLogo().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(providerSupplier.getLogo()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (providerSupplier.getLogo() != null) {
+                        if (providerSupplier.getLogo().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(providerSupplier.getLogo().getUrl(), 15);
+                        }
                     }
 
                     return ProviderResponseDto.builder()
@@ -229,7 +257,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                             .cnpj(providerSupplier.getCnpj())
                             .tradeName(providerSupplier.getTradeName())
                             .corporateName(providerSupplier.getCorporateName())
-                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .logoSignedUrl(signedUrl)
                             .email(providerSupplier.getEmail())
                             .cep(providerSupplier.getCep())
                             .state(providerSupplier.getState())
@@ -245,26 +273,37 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
                             .build();
                 }
         );
-        return providerSupplierResponseDtoPage;
     }
 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
-        Optional<ProviderSupplier> providerSupplierOptional = providerSupplierRepository.findById(id);
-        ProviderSupplier providerSupplier = providerSupplierOptional.orElseThrow(() -> new NotFoundException("Supplier not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+
+        ProviderSupplier providerSupplier = providerSupplierRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "enterprise-logos");
 
-            if (providerSupplier.getLogo() != null) {
-                fileRepository.deleteById(new ObjectId(providerSupplier.getLogo()));
+                if (providerSupplier.getLogo() != null) {
+                    googleCloudService.deleteFile(providerSupplier.getLogo().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            providerSupplier.setLogo(savedFileDocument.getIdDocumentAsString());
+            providerSupplier.setLogo(savedFileDocument);
         }
 
         providerSupplierRepository.save(providerSupplier);

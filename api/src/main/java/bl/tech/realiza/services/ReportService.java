@@ -57,44 +57,4 @@ public class ReportService {
             }
         }
     }
-
-    public Long countAdherenceByEnterprise(String enterpriseId, Provider.Company companyDegree) {
-        switch (companyDegree) {
-            case CLIENT -> {
-                return documentBranchRepository.countByBranch_IdBranchAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa")
-                        / documentBranchRepository.countByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa");
-            }
-            case SUPPLIER -> {
-                return documentProviderSupplierRepository.countByProviderSupplier_IdProviderAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa")
-                        / documentProviderSupplierRepository.countByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa");
-            }
-            case SUBCONTRACTOR -> {
-                return documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentationIsNotNullAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa")
-                        / documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(enterpriseId, "Documento empresa", true);
-            }
-            default -> {
-                throw new BadRequestException("Invalid company degree");
-            }
-        }
-    }
-
-    public Long countAccordanceByEnterprise(String enterpriseId, Provider.Company companyDegree) {
-        switch (companyDegree) {
-            case CLIENT -> {
-                return documentBranchRepository.countByBranch_IdBranchAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, Document.Status.APROVADO, "Documento empresa")
-                        / documentBranchRepository.countByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa");
-            }
-            case SUPPLIER -> {
-                return documentProviderSupplierRepository.countByProviderSupplier_IdProviderAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, Document.Status.APROVADO, "Documento empresa")
-                        / documentProviderSupplierRepository.countByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, "Documento empresa");
-            }
-            case SUBCONTRACTOR -> {
-                return documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndStatusAndDocumentMatrix_SubGroup_Group_GroupName(enterpriseId, Document.Status.APROVADO, "Documento empresa")
-                        / documentProviderSubcontractorRepository.countByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(enterpriseId, "Documento empresa", true);
-            }
-            default -> {
-                throw new BadRequestException("Invalid company degree");
-            }
-        }
-    }
 }

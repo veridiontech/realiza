@@ -3,24 +3,22 @@ package bl.tech.realiza.usecases.impl.users;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.domains.user.UserManager;
 import bl.tech.realiza.domains.user.UserProviderSubcontractor;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.requests.users.UserManagerRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserProviderSubcontractorRequestDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
 import bl.tech.realiza.services.email.EmailSender;
 import bl.tech.realiza.usecases.interfaces.users.CrudUserProviderSubcontractor;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +35,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     private final EmailSender emailSender;
     private final PasswordEncryptionService passwordEncryptionService;
     private final FileRepository fileRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public UserResponseDto save(UserProviderSubcontractorRequestDto userProviderSubcontractorRequestDto) {
@@ -51,8 +50,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
             throw new BadRequestException("Invalid subcontractor");
         }
 
-        Optional<ProviderSubcontractor> providerSubcontractorOptional = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor());
-        ProviderSubcontractor providerSubcontractor = providerSubcontractorOptional.orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+        ProviderSubcontractor providerSubcontractor = providerSubcontractorRepository.findById(userProviderSubcontractorRequestDto.getSubcontractor())
+                .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(userProviderSubcontractorRequestDto.getPassword());
 
@@ -65,7 +64,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .firstName(userProviderSubcontractorRequestDto.getFirstName())
                 .surname(userProviderSubcontractorRequestDto.getSurname())
                 .email(userProviderSubcontractorRequestDto.getEmail())
-                .profilePicture(userProviderSubcontractorRequestDto.getProfilePicture())
                 .telephone(userProviderSubcontractorRequestDto.getTelephone())
                 .cellphone(userProviderSubcontractorRequestDto.getCellphone())
                 .providerSubcontractor(providerSubcontractor)
@@ -73,7 +71,7 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
         UserProviderSubcontractor savedUserSubcontractor = userSubcontractorRepository.save(newUserSubcontractor);
 
-        UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
+        return UserResponseDto.builder()
                 .cpf(savedUserSubcontractor.getCpf())
                 .description(savedUserSubcontractor.getDescription())
                 .position(savedUserSubcontractor.getPosition())
@@ -81,55 +79,50 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .firstName(savedUserSubcontractor.getFirstName())
                 .surname(savedUserSubcontractor.getSurname())
                 .email(savedUserSubcontractor.getEmail())
-                .profilePicture(savedUserSubcontractor.getProfilePicture())
                 .telephone(savedUserSubcontractor.getTelephone())
                 .cellphone(savedUserSubcontractor.getCellphone())
                 .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getIdProvider())
                 .build();
-
-        return userSubcontractorResponse;
     }
 
     @Override
     public Optional<UserResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        UserProviderSubcontractor userSubcontractor = userSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        Optional<UserProviderSubcontractor> userSubcontractorOptional = userSubcontractorRepository.findById(id);
-        UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (userSubcontractor.getProfilePicture() != null && !userSubcontractor.getProfilePicture().isEmpty()) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
+        String signedUrl = null;
+        if (userSubcontractor.getProfilePicture() != null) {
+            if (userSubcontractor.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(userSubcontractor.getProfilePicture().getUrl(), 15);
+            }
         }
 
-        UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .cpf(userSubcontractor.getCpf())
                 .description(userSubcontractor.getDescription())
                 .position(userSubcontractor.getPosition())
                 .role(userSubcontractor.getRole())
                 .firstName(userSubcontractor.getFirstName())
                 .surname(userSubcontractor.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .email(userSubcontractor.getEmail())
-                .profilePicture(userSubcontractor.getProfilePicture())
                 .telephone(userSubcontractor.getTelephone())
                 .cellphone(userSubcontractor.getCellphone())
                 .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
-                .build();
-
-        return Optional.of(userSubcontractorResponse);
+                .build());
     }
 
     @Override
     public Page<UserResponseDto> findAll(Pageable pageable) {
         Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
+        return userSubcontractorPage.map(
                 userSubcontractor -> {
-                    FileDocument fileDocument = null;
-                    if (userSubcontractor.getProfilePicture() != null && !userSubcontractor.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userSubcontractor.getProfilePicture() != null) {
+                        if (userSubcontractor.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userSubcontractor.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return UserResponseDto.builder()
                             .cpf(userSubcontractor.getCpf())
@@ -138,9 +131,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                             .role(userSubcontractor.getRole())
                             .firstName(userSubcontractor.getFirstName())
                             .surname(userSubcontractor.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .email(userSubcontractor.getEmail())
-                            .profilePicture(userSubcontractor.getProfilePicture())
                             .telephone(userSubcontractor.getTelephone())
                             .cellphone(userSubcontractor.getCellphone())
                             .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
@@ -148,8 +140,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 }
 
         );
-
-        return userSubcontractorResponseDtoPage;
     }
 
     @Override
@@ -158,20 +148,37 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
         UserProviderSubcontractor userSubcontractor = userSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
 
-        userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null ? userProviderSubcontractorRequestDto.getCpf() : userSubcontractor.getCpf());
-        userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null ? userProviderSubcontractorRequestDto.getDescription() : userSubcontractor.getDescription());
-        userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null ? userProviderSubcontractorRequestDto.getPosition() : userSubcontractor.getPosition());
-        userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null ? userProviderSubcontractorRequestDto.getRole() : userSubcontractor.getRole());
-        userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null ? userProviderSubcontractorRequestDto.getFirstName() : userSubcontractor.getFirstName());
-        userSubcontractor.setSurname(userProviderSubcontractorRequestDto.getSurname() != null ? userProviderSubcontractorRequestDto.getSurname() : userSubcontractor.getSurname());
-        userSubcontractor.setEmail(userProviderSubcontractorRequestDto.getEmail() != null ? userProviderSubcontractorRequestDto.getEmail() : userSubcontractor.getEmail());
-        userSubcontractor.setProfilePicture(userProviderSubcontractorRequestDto.getProfilePicture() != null ? userProviderSubcontractorRequestDto.getProfilePicture() : userSubcontractor.getProfilePicture());
-        userSubcontractor.setTelephone(userProviderSubcontractorRequestDto.getTelephone() != null ? userProviderSubcontractorRequestDto.getTelephone() : userSubcontractor.getTelephone());
-        userSubcontractor.setCellphone(userProviderSubcontractorRequestDto.getCellphone() != null ? userProviderSubcontractorRequestDto.getCellphone() : userSubcontractor.getCellphone());
+        userSubcontractor.setCpf(userProviderSubcontractorRequestDto.getCpf() != null
+                ? userProviderSubcontractorRequestDto.getCpf()
+                : userSubcontractor.getCpf());
+        userSubcontractor.setDescription(userProviderSubcontractorRequestDto.getDescription() != null
+                ? userProviderSubcontractorRequestDto.getDescription()
+                : userSubcontractor.getDescription());
+        userSubcontractor.setPosition(userProviderSubcontractorRequestDto.getPosition() != null
+                ? userProviderSubcontractorRequestDto.getPosition()
+                : userSubcontractor.getPosition());
+        userSubcontractor.setRole(userProviderSubcontractorRequestDto.getRole() != null
+                ? userProviderSubcontractorRequestDto.getRole()
+                : userSubcontractor.getRole());
+        userSubcontractor.setFirstName(userProviderSubcontractorRequestDto.getFirstName() != null
+                ? userProviderSubcontractorRequestDto.getFirstName()
+                : userSubcontractor.getFirstName());
+        userSubcontractor.setSurname(userProviderSubcontractorRequestDto.getSurname() != null
+                ? userProviderSubcontractorRequestDto.getSurname()
+                : userSubcontractor.getSurname());
+        userSubcontractor.setEmail(userProviderSubcontractorRequestDto.getEmail() != null
+                ? userProviderSubcontractorRequestDto.getEmail()
+                : userSubcontractor.getEmail());
+        userSubcontractor.setTelephone(userProviderSubcontractorRequestDto.getTelephone() != null
+                ? userProviderSubcontractorRequestDto.getTelephone()
+                : userSubcontractor.getTelephone());
+        userSubcontractor.setCellphone(userProviderSubcontractorRequestDto.getCellphone() != null
+                ? userProviderSubcontractorRequestDto.getCellphone()
+                : userSubcontractor.getCellphone());
 
         UserProviderSubcontractor savedUserSubcontractor = userSubcontractorRepository.save(userSubcontractor);
 
-        UserResponseDto userSubcontractorResponse = UserResponseDto.builder()
+        return Optional.of(UserResponseDto.builder()
                 .cpf(savedUserSubcontractor.getCpf())
                 .description(savedUserSubcontractor.getDescription())
                 .position(savedUserSubcontractor.getPosition())
@@ -179,13 +186,10 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 .firstName(savedUserSubcontractor.getFirstName())
                 .surname(savedUserSubcontractor.getSurname())
                 .email(savedUserSubcontractor.getEmail())
-                .profilePicture(savedUserSubcontractor.getProfilePicture())
                 .telephone(savedUserSubcontractor.getTelephone())
                 .cellphone(savedUserSubcontractor.getCellphone())
                 .subcontractor(savedUserSubcontractor.getProviderSubcontractor().getIdProvider())
-                .build();
-
-        return Optional.of(userSubcontractorResponse);
+                .build());
     }
 
     @Override
@@ -197,12 +201,13 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
     public Page<UserResponseDto> findAllBySubcontractor(String idSearch, Pageable pageable) {
         Page<UserProviderSubcontractor> userSubcontractorPage = userSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndRoleAndIsActiveIsTrue(idSearch, User.Role.ROLE_SUBCONTRACTOR_MANAGER, pageable);
 
-        Page<UserResponseDto> userSubcontractorResponseDtoPage = userSubcontractorPage.map(
+        return userSubcontractorPage.map(
                 userSubcontractor -> {
-                    FileDocument fileDocument = null;
-                    if (userSubcontractor.getProfilePicture() != null && !userSubcontractor.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(userSubcontractor.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (userSubcontractor.getProfilePicture() != null) {
+                        if (userSubcontractor.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(userSubcontractor.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return UserResponseDto.builder()
                             .cpf(userSubcontractor.getCpf())
@@ -211,9 +216,8 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                             .role(userSubcontractor.getRole())
                             .firstName(userSubcontractor.getFirstName())
                             .surname(userSubcontractor.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .email(userSubcontractor.getEmail())
-                            .profilePicture(userSubcontractor.getProfilePicture())
                             .telephone(userSubcontractor.getTelephone())
                             .cellphone(userSubcontractor.getCellphone())
                             .subcontractor(userSubcontractor.getProviderSubcontractor().getIdProvider())
@@ -221,8 +225,6 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
                 }
 
         );
-
-        return userSubcontractorResponseDtoPage;
     }
 
     @Override
@@ -244,21 +246,32 @@ public class CrudUserProviderSubcontractorImpl implements CrudUserProviderSubcon
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        Optional<UserProviderSubcontractor> userProviderSubcontractorOptional = userSubcontractorRepository.findById(id);
-        UserProviderSubcontractor userProviderSubcontractor = userProviderSubcontractorOptional.orElseThrow(() -> new NotFoundException("User not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+        UserProviderSubcontractor userProviderSubcontractor = userSubcontractorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "user-pfp");
 
-            if (userProviderSubcontractor.getProfilePicture() != null) {
-                fileRepository.deleteById(new ObjectId(userProviderSubcontractor.getProfilePicture()));
+                if (userProviderSubcontractor.getProfilePicture() != null) {
+                    googleCloudService.deleteFile(userProviderSubcontractor.getProfilePicture().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            userProviderSubcontractor.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+            userProviderSubcontractor.setProfilePicture(savedFileDocument);
         }
 
         userSubcontractorRepository.save(userProviderSubcontractor);

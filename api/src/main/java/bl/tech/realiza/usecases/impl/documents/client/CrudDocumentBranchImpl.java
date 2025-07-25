@@ -6,7 +6,6 @@ import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
@@ -24,6 +23,7 @@ import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
@@ -31,8 +31,8 @@ import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 import static bl.tech.realiza.domains.documents.Document.Status.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
-import static bl.tech.realiza.domains.services.FileDocument.Owner.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,110 +58,86 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final GoogleCloudService googleCloudService;
+
+    @Value("${gcp.storage.bucket}")
+    private String bucketName;
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
         DocumentBranch documentBranch = documentBranchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
+        String signedUrl = null;
+        FileDocument fileDocument = documentBranch.getDocument().stream()
+                .max(Comparator.comparing(FileDocument::getCreationDate))
+                .orElse(null);
+        if (fileDocument != null) {
+            if (fileDocument.getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+            }
+        }
 
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
-
-        DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
+        return Optional.of(DocumentResponseDto.builder()
                 .idDocument(documentBranch.getIdDocumentation())
                 .title(documentBranch.getTitle())
                 .status(documentBranch.getStatus())
-                .documentation(documentBranch.getDocumentation())
-                .fileName(fileDocument.getName())
-                .fileContentType(fileDocument.getContentType())
-                .fileData(fileDocument.getData())
+                .signedUrl(signedUrl)
                 .creationDate(documentBranch.getCreationDate())
                 .branch(documentBranch.getBranch() != null
                         ? documentBranch.getBranch().getIdBranch()
                         : null)
-                .build();
-
-        return Optional.of(documentBranchResponse);
+                .build());
     }
 
     @Override
     public Page<DocumentResponseDto> findAll(Pageable pageable) {
         Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAll(pageable);
 
-        Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
+        return documentBranchPage.map(
                 documentBranch -> {
-                    FileDocument fileDocument = null;
-                    if (documentBranch.getDocumentation() != null && ObjectId.isValid(documentBranch.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentBranch.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentBranch.getIdDocumentation())
                             .title(documentBranch.getTitle())
                             .status(documentBranch.getStatus())
-                            .documentation(documentBranch.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentBranch.getCreationDate())
                             .branch(documentBranch.getBranch() != null
                                     ? documentBranch.getBranch().getIdBranch()
                                     : null)
                             .build();
                 }
-
         );
-
-        return documentBranchResponseDtoPage;
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
-
+    public Optional<DocumentResponseDto> update(String id, DocumentBranchRequestDto documentBranchRequestDto) {
         DocumentBranch documentBranch = documentBranchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
-
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentBranch.setDocumentation(fileDocumentId);
-        }
 
         documentBranch.setStatus(documentBranchRequestDto.getStatus() != null
                 ? documentBranchRequestDto.getStatus()
                 : documentBranch.getStatus());
 
-        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
+        DocumentBranch updatedDocumentBranch = documentBranchRepository.save(documentBranch);
 
         DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
-                .idDocument(savedDocumentBranch.getIdDocumentation())
-                .title(savedDocumentBranch.getTitle())
-                .status(savedDocumentBranch.getStatus())
-                .documentation(savedDocumentBranch.getDocumentation())
-                .creationDate(savedDocumentBranch.getCreationDate())
-                .branch(savedDocumentBranch.getBranch() != null
-                        ? savedDocumentBranch.getBranch().getIdBranch()
+                .idDocument(updatedDocumentBranch.getIdDocumentation())
+                .title(updatedDocumentBranch.getTitle())
+                .status(updatedDocumentBranch.getStatus())
+                .creationDate(updatedDocumentBranch.getCreationDate())
+                .branch(updatedDocumentBranch.getBranch() != null
+                        ? updatedDocumentBranch.getBranch().getIdBranch()
                         : null)
                 .build();
 
@@ -171,92 +146,76 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
-        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
-            throw new BadRequestException("Arquivo muito grande.");
+        if (file != null) {
+            if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
         }
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
         FileDocument savedFileDocument= null;
-
+        String signedUrl = null;
 
         DocumentBranch documentBranch = documentBranchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("DocumentBranch not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
-                fileDocument = FileDocument.builder()
+                String gcsUrl = googleCloudService.uploadFile(file, "branch-documents");
+
+                savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
-                        .title(documentBranch.getTitle())
-                        .owner(FileDocument.Owner.BRANCH)
-                        .ownerId(documentBranch.getBranch() != null
-                                ? documentBranch.getBranch().getIdBranch()
-                                : null)
-                        .data(file.getBytes())
-                        .build();
+                        .url(gcsUrl)
+                        .document(documentBranch)
+                        .build());
+                signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
+                throw new IOException(e);
             }
 
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentBranch.setDocumentation(fileDocumentId);
             documentBranch.setStatus(EM_ANALISE);
             documentBranch.setAdherent(true);
             documentBranch.setConforming(false);
         }
 
+        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
+
         documentProcessingService.processDocumentAsync(file,
                 (DocumentBranch) Hibernate.unproxy(documentBranch));
 
-        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
-
-        DocumentResponseDto documentBranchResponse = DocumentResponseDto.builder()
+        return Optional.of(DocumentResponseDto.builder()
                 .idDocument(savedDocumentBranch.getIdDocumentation())
                 .title(savedDocumentBranch.getTitle())
                 .status(savedDocumentBranch.getStatus())
-                .documentation(savedDocumentBranch.getDocumentation())
+                .signedUrl(signedUrl)
                 .creationDate(savedDocumentBranch.getCreationDate())
                 .branch(savedDocumentBranch.getBranch() != null
                         ? savedDocumentBranch.getBranch().getIdBranch()
                         : null)
-                .build();
-
-        return Optional.of(documentBranchResponse);
+                .build());
     }
 
     @Override
     public Page<DocumentResponseDto> findAllByBranch(String idSearch, Pageable pageable) {
         Page<DocumentBranch> documentBranchPage = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(idSearch, pageable);
 
-        Page<DocumentResponseDto> documentBranchResponseDtoPage = documentBranchPage.map(
+        return documentBranchPage.map(
                 documentBranch -> {
-                    FileDocument fileDocument = null;
-                    if (documentBranch.getDocumentation() != null && ObjectId.isValid(documentBranch.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentBranch.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentBranch.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentBranch.getIdDocumentation())
                             .title(documentBranch.getTitle())
                             .status(documentBranch.getStatus())
-                            .documentation(documentBranch.getDocumentation())
-                            .fileName(fileDocument != null
-                                    ? fileDocument.getName()
-                                    : null)
-                            .fileContentType(fileDocument != null
-                                    ? fileDocument.getContentType()
-                                    : null)
-                            .fileData(fileDocument != null
-                                    ? fileDocument.getData()
-                                    : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentBranch.getCreationDate())
                             .branch(documentBranch.getBranch() != null
                                     ? documentBranch.getBranch().getIdBranch()
@@ -265,8 +224,6 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 }
 
         );
-
-        return documentBranchResponseDtoPage;
     }
 
     @Override

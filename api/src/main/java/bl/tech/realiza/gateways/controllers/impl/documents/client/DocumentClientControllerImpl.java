@@ -39,18 +39,8 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
     @Override
     public ResponseEntity<DocumentResponseDto> createDocumentClient(
             @RequestPart("documentClientRequestDto")
-            @Valid DocumentClientRequestDto documentClientRequestDto,
-            @RequestPart(value = "file")
-            MultipartFile file) {
-        DocumentResponseDto documentClient = null;
-
-        try {
-            documentClient = crudDocumentClient.save(documentClientRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException("Error saving document client", e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentClient));
+            @Valid DocumentClientRequestDto documentClientRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentClient.save(documentClientRequestDto)));
     }
 
     @GetMapping("/{id}")
@@ -83,17 +73,8 @@ public class DocumentClientControllerImpl implements DocumentClientControlller {
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(
             @PathVariable String id,
             @RequestPart("documentClientRequestDto")
-            @Valid DocumentClientRequestDto documentClientRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-
-        Optional<DocumentResponseDto> documentClient = null;
-        try {
-            documentClient = crudDocumentClient.update(id, documentClientRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentClient));
+            @Valid DocumentClientRequestDto documentClientRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentClient.update(id, documentClientRequestDto)));
     }
 
     @DeleteMapping("/{id}")

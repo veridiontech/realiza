@@ -31,9 +31,10 @@ import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepositor
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.requests.employees.EmployeeBrazilianRequestDto;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployeeBrazilian;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final CboRepository cboRepository;
     private final PositionRepository positionRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
@@ -217,14 +219,15 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public Optional<EmployeeResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        String signedUrl = null;
 
-        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (employeeBrazilian.getProfilePicture() != null) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Profile Picture not found"));
+            if (employeeBrazilian.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(employeeBrazilian.getProfilePicture().getUrl(), 15);
+            }
         }
 
         EmployeeResponseDto employeeBrazilianResponse = EmployeeResponseDto.builder()
@@ -235,7 +238,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .cep(employeeBrazilian.getCep())
                 .name(employeeBrazilian.getName())
                 .surname(employeeBrazilian.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .address(employeeBrazilian.getAddress())
                 .addressLine2(employeeBrazilian.getAddressLine2())
                 .country(employeeBrazilian.getCountry())
@@ -262,9 +265,15 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .situation(employeeBrazilian.getSituation())
                 .admissionDate(employeeBrazilian.getAdmissionDate())
                 .cpf(employeeBrazilian.getCpf())
-                .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
-                .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
-                .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
+                .branch(employeeBrazilian.getBranch() != null
+                        ? employeeBrazilian.getBranch().getIdBranch()
+                        : null)
+                .supplier(employeeBrazilian.getSupplier() != null
+                        ? employeeBrazilian.getSupplier().getIdProvider()
+                        : null)
+                .subcontract(employeeBrazilian.getSubcontract() != null
+                        ? employeeBrazilian.getSubcontract().getIdProvider()
+                        : null)
                 .contracts(employeeBrazilian.getContracts().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
                                         .idContract(contract.getIdContract())
@@ -282,10 +291,11 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
         return employeeBrazilianPage.map(
                 employeeBrazilian -> {
-                    FileDocument fileDocument = null;
-                    if (employeeBrazilian.getProfilePicture() != null && !employeeBrazilian.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (employeeBrazilian.getProfilePicture() != null) {
+                        if (employeeBrazilian.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(employeeBrazilian.getProfilePicture().getUrl(), 15);
+                        }
                     }
 
                     return EmployeeResponseDto.builder()
@@ -296,7 +306,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .cep(employeeBrazilian.getCep())
                             .name(employeeBrazilian.getName())
                             .surname(employeeBrazilian.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .address(employeeBrazilian.getAddress())
                             .country(employeeBrazilian.getCountry())
                             .acronym(employeeBrazilian.getAcronym())
@@ -506,21 +516,32 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
 
     @Override
     public String changeProfilePicture(String id, MultipartFile file) throws IOException {
-        Optional<EmployeeBrazilian> employeeBrazilianOptional = employeeBrazilianRepository.findById(id);
-        EmployeeBrazilian employeeBrazilian = employeeBrazilianOptional.orElseThrow(() -> new NotFoundException("Employee not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+        EmployeeBrazilian employeeBrazilian = employeeBrazilianRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "employee-pfp");
 
-            if (employeeBrazilian.getProfilePicture() != null) {
-                fileRepository.deleteById(new ObjectId(employeeBrazilian.getProfilePicture()));
+                if (employeeBrazilian.getProfilePicture() != null) {
+                    googleCloudService.deleteFile(employeeBrazilian.getProfilePicture().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            employeeBrazilian.setProfilePicture(savedFileDocument.getIdDocumentAsString());
+            employeeBrazilian.setProfilePicture(savedFileDocument);
         }
 
         employeeBrazilianRepository.save(employeeBrazilian);

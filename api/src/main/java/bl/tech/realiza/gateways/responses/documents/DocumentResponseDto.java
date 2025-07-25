@@ -18,10 +18,7 @@ public class DocumentResponseDto {
     private String idDocument;
     private String title;
     private Document.Status status;
-    private String documentation;
-    private String fileName;
-    private String fileContentType;
-    private byte[] fileData;
+    private String signedUrl;
     private LocalDateTime creationDate;
     private Date versionDate;
     private Date expirationDate;

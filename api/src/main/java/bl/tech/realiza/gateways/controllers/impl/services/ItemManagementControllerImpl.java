@@ -3,6 +3,8 @@ package bl.tech.realiza.gateways.controllers.impl.services;
 import bl.tech.realiza.gateways.controllers.interfaces.services.ItemManagementController;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
@@ -87,9 +89,7 @@ public class ItemManagementControllerImpl implements ItemManagementController {
                                                                                     @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ItemManagementProviderResponseDto> itemManagementResponse = crudItemManagement.findAllProviderSolicitation(pageable);
-
-        return ResponseEntity.ok(itemManagementResponse);
+        return ResponseEntity.ok(crudItemManagement.findAllProviderSolicitation(pageable));
     }
 
     @GetMapping("/new-provider/details/{idSolicitation}")
@@ -99,6 +99,29 @@ public class ItemManagementControllerImpl implements ItemManagementController {
     @Override
     public ResponseEntity<ItemManagementProviderDetailsResponseDto> getProviderSolicitationDetails(@PathVariable String idSolicitation) {
         return ResponseEntity.ok(crudItemManagement.findProviderSolicitationDetails(idSolicitation));
+    }
+
+    @GetMapping("/document")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca todas as solicitações para isentar documento")
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<Page<ItemManagementDocumentResponseDto>> getDocumentSolicitations(@RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "10") int size,
+                                                                                            @RequestParam(defaultValue = "creationDate") String sort,
+                                                                                            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+
+        return ResponseEntity.ok(crudItemManagement.findAllDocumentSolicitation(pageable));
+    }
+
+    @GetMapping("/document/details/{idSolicitation}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Busca detalhes da solicitação de isentar documento")
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<ItemManagementDocumentDetailsResponseDto> getDocumentSolicitationDetails(@PathVariable String idSolicitation) {
+        return ResponseEntity.ok(crudItemManagement.findDocumentSolicitationDetails(idSolicitation));
     }
 
     @PatchMapping("/{idSolicitation}/approve")

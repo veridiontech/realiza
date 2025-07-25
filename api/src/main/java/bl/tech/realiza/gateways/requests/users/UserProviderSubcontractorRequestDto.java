@@ -14,7 +14,6 @@ public class UserProviderSubcontractorRequestDto {
     private String firstName;
     private String surname;
     private String email;
-    private String profilePicture;
     private String telephone;
     private String cellphone;
     private String subcontractor;

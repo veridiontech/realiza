@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.providers;
 
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,7 +26,6 @@ public abstract class Provider {
     private String cnpj;
     private String tradeName; // nome fantasia
     private String corporateName; // razão social
-    private String logo;
     private String email;
     private String telephone;
     private String cep;
@@ -52,6 +52,9 @@ public abstract class Provider {
     @JsonIgnore
     @OneToMany(mappedBy = "idRecord", cascade = CascadeType.REMOVE)
     private List<AuditLogProvider> auditLogProviders;
+
+    @OneToOne
+    private FileDocument logo;
 
     public enum Company {
         CLIENT,

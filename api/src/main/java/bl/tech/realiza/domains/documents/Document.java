@@ -1,16 +1,16 @@
 package bl.tech.realiza.domains.documents;
 
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
-import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import bl.tech.realiza.domains.services.FileDocument;
+import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,7 +29,6 @@ public abstract class Document {
     @Enumerated(EnumType.STRING)
     private Status status;
     private String type;
-    private String documentation;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
     private LocalDateTime versionDate;
@@ -60,6 +59,8 @@ public abstract class Document {
     @JoinColumn(name = "idDocument")
     private DocumentMatrix documentMatrix;
 
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileDocument> document;
     // -------------------------------
     // Relacionamentos CONTRATUAIS
     // -------------------------------
@@ -78,7 +79,8 @@ public abstract class Document {
         APROVADO,
         REPROVADO_IA,
         APROVADO_IA,
-        VENCIDO
+        VENCIDO,
+        ISENCAO_PENDENTE
     }
 
     public enum Request {

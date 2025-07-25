@@ -3,7 +3,6 @@ package bl.tech.realiza.gateways.controllers.impl.documents.employee;
 import bl.tech.realiza.gateways.controllers.interfaces.documents.employee.DocumentEmployeeControlller;
 import bl.tech.realiza.gateways.requests.documents.employee.DocumentEmployeeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
-import bl.tech.realiza.usecases.impl.documents.employee.CrudDocumentEmployeeImpl;
 import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,16 +32,8 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<DocumentResponseDto> createDocumentEmployee(
-            @RequestPart("documentEmployeeRequestDto") @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto,
-            @RequestParam("file") MultipartFile file) {
-        DocumentResponseDto documentEmployee = null;
-        try {
-            documentEmployee = crudDocumentEmployeeImpl.save(documentEmployeeRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentEmployee));
+            @RequestPart("documentEmployeeRequestDto") @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentEmployeeImpl.save(documentEmployeeRequestDto)));
     }
 
     @GetMapping("/{id}")
@@ -74,16 +65,8 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     public ResponseEntity<Optional<DocumentResponseDto>> updateDocumentEmployee(
             @PathVariable String id,
             @RequestPart("documentEmployeeRequestDto")
-            @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-        Optional<DocumentResponseDto> documentEmployee = null;
-        try {
-            documentEmployee = crudDocumentEmployeeImpl.update(id, documentEmployeeRequestDto, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.of(Optional.of(documentEmployee));
+            @Valid DocumentEmployeeRequestDto documentEmployeeRequestDto) {
+        return ResponseEntity.of(Optional.of(crudDocumentEmployeeImpl.update(id, documentEmployeeRequestDto)));
     }
 
     @DeleteMapping("/{id}")
@@ -146,7 +129,7 @@ public class DocumentEmployeeControllerImpl implements DocumentEmployeeControlll
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> solicitateNewRequiredDocument(@PathVariable String idEmployee, @RequestParam String idDocument) {
-        String response = crudDocumentEmployeeImpl.solicitateNewRequiredDocument(idEmployee, idDocument);
+        String response = crudDocumentEmployeeImpl.solicitNewRequiredDocument(idEmployee, idDocument);
         return ResponseEntity.ok(response);
     }
 

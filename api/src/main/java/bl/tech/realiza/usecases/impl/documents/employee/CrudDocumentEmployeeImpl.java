@@ -4,8 +4,6 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -20,13 +18,13 @@ import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.employee.CrudDocumentEmployee;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -54,82 +52,54 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final JwtService jwtService;
+    private final GoogleCloudService googleCloudService;
 
     @Override
-    public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Invalid file");
-        }
+    public DocumentResponseDto save(DocumentEmployeeRequestDto documentEmployeeRequestDto) {
         if (documentEmployeeRequestDto.getEmployee() == null || documentEmployeeRequestDto.getEmployee().isEmpty()) {
             throw new BadRequestException("Invalid employee");
         }
 
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
+        Employee employee = employeeRepository.findById(documentEmployeeRequestDto.getEmployee())
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
 
-        Optional<Employee> employeeOptional = employeeRepository.findById(documentEmployeeRequestDto.getEmployee());
-
-        Employee employee = employeeOptional.orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-
-        try {
-            fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        FileDocument savedFileDocument= null;
-        try {
-            savedFileDocument = fileRepository.save(fileDocument);
-            fileDocumentId = savedFileDocument.getIdDocumentAsString(); // Garante que seja uma String válida
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new EntityNotFoundException(e);
-        }
-
-        DocumentEmployee newDocumentEmployee = DocumentEmployee.builder()
+        DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(DocumentEmployee.builder()
                 .title(documentEmployeeRequestDto.getTitle())
                 .status(documentEmployeeRequestDto.getStatus())
-                .documentation(fileDocumentId)
                 .employee(employee)
-                .build();
+                .build());
 
-        DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(newDocumentEmployee);
-
-        DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
+        return DocumentResponseDto.builder()
                 .idDocument(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .status(savedDocumentEmployee.getStatus())
-                .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
                 .employee(savedDocumentEmployee.getEmployee() != null
                         ? savedDocumentEmployee.getEmployee().getIdEmployee()
                         : null)
                 .build();
-
-        return documentEmployeeResponseDto;
     }
 
     @Override
     public Optional<DocumentResponseDto> findOne(String id) {
-        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
-        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
+        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
 
-        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
-        FileDocument fileDocument = fileDocumentOptional.orElseThrow(() -> new EntityNotFoundException("FileDocument not found"));
+        String signedUrl = null;
+        FileDocument fileDocument = documentEmployee.getDocument().stream()
+                .max(Comparator.comparing(FileDocument::getCreationDate))
+                .orElse(null);
+        if (fileDocument != null) {
+            if (fileDocument.getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+            }
+        }
 
         DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
                 .idDocument(documentEmployee.getIdDocumentation())
                 .title(documentEmployee.getTitle())
                 .status(documentEmployee.getStatus())
-                .documentation(documentEmployee.getDocumentation())
-                .fileName(fileDocument.getName())
-                .fileContentType(fileDocument.getContentType())
-                .fileData(fileDocument.getData())
+                .signedUrl(signedUrl)
                 .creationDate(documentEmployee.getCreationDate())
                 .employee(documentEmployee.getEmployee() != null
                         ? documentEmployee.getEmployee().getIdEmployee()
@@ -143,22 +113,23 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     public Page<DocumentResponseDto> findAll(Pageable pageable) {
         Page<DocumentEmployee> documentEmployeePage = documentEmployeeRepository.findAll(pageable);
 
-        Page<DocumentResponseDto> documentEmployeeResponseDtoPage = documentEmployeePage.map(
+        return documentEmployeePage.map(
                 documentEmployee -> {
-                    FileDocument fileDocument = null;
-                    if (documentEmployee.getDocumentation() != null && ObjectId.isValid(documentEmployee.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentEmployee.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
                             .status(documentEmployee.getStatus())
-                            .documentation(documentEmployee.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
+                            .signedUrl(signedUrl)
                             .creationDate(documentEmployee.getCreationDate())
                             .employee(documentEmployee.getEmployee() != null
                                     ? documentEmployee.getEmployee().getIdEmployee()
@@ -166,58 +137,28 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                             .build();
                 }
         );
-
-        return documentEmployeeResponseDtoPage;
     }
 
     @Override
-    public Optional<DocumentResponseDto> update(String id, DocumentEmployeeRequestDto documentEmployeeRequestDto, MultipartFile file) throws IOException {
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
-        FileDocument savedFileDocument= null;
+    public Optional<DocumentResponseDto> update(String id, DocumentEmployeeRequestDto documentEmployeeRequestDto) {
+        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
 
-        Optional<DocumentEmployee> documentEmployeeOptional = documentEmployeeRepository.findById(id);
-
-        DocumentEmployee documentEmployee = documentEmployeeOptional.orElseThrow(() -> new EntityNotFoundException("DocumentEmployee not found"));
-
-        if (file != null && !file.isEmpty()) {
-            try {
-                fileDocument = FileDocument.builder()
-                        .name(file.getOriginalFilename())
-                        .contentType(file.getContentType())
-                        .data(file.getBytes())
-                        .build();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentEmployee.setDocumentation(fileDocumentId);
-        }
-
-        documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null ? documentEmployeeRequestDto.getStatus() : documentEmployee.getStatus());
+        documentEmployee.setStatus(documentEmployeeRequestDto.getStatus() != null
+                ? documentEmployeeRequestDto.getStatus()
+                : documentEmployee.getStatus());
 
         DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
-        DocumentResponseDto documentEmployeeResponseDto = DocumentResponseDto.builder()
+        return Optional.of(DocumentResponseDto.builder()
                 .idDocument(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .status(savedDocumentEmployee.getStatus())
-                .documentation(savedDocumentEmployee.getDocumentation())
                 .creationDate(savedDocumentEmployee.getCreationDate())
                 .employee(savedDocumentEmployee.getEmployee() != null
                         ? savedDocumentEmployee.getEmployee().getIdEmployee()
                         : null)
-                .build();
-
-        return Optional.of(documentEmployeeResponseDto);
+                .build());
     }
 
     @Override
@@ -227,46 +168,41 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
 
     @Override
     public Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException {
-        if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
-            throw new BadRequestException("Arquivo muito grande.");
+        if (file != null) {
+            if (file.getSize() > 5 * 1024 * 1024) { // 5 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
         }
-        FileDocument fileDocument = null;
-        String fileDocumentId = null;
         FileDocument savedFileDocument = null;
+        String signedUrl = null;
 
-        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Document employee not found"));
+        DocumentEmployee documentEmployee = documentEmployeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Document employee not found"));
 
         if (file != null && !file.isEmpty()) {
             try {
-                fileDocument = FileDocument.builder()
+                String gcsUrl = googleCloudService.uploadFile(file, "branch-documents");
+
+                savedFileDocument = fileRepository.save(FileDocument.builder()
                         .name(file.getOriginalFilename())
                         .contentType(file.getContentType())
-                        .owner(FileDocument.Owner.EMPLOYEE)
-                        .ownerId(documentEmployee.getEmployee().getIdEmployee())
-                        .data(file.getBytes())
-                        .build();
+                        .url(gcsUrl)
+                        .document(documentEmployee)
+                        .build());
+                signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 throw new EntityNotFoundException(e);
             }
-
-            try {
-                savedFileDocument = fileRepository.save(fileDocument);
-                fileDocumentId = savedFileDocument.getIdDocumentAsString();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new EntityNotFoundException(e);
-            }
-            documentEmployee.setDocumentation(fileDocumentId);
             documentEmployee.setStatus(EM_ANALISE);
             documentEmployee.setAdherent(true);
             documentEmployee.setConforming(false);
         }
 
+        DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
+
         documentProcessingService.processDocumentAsync(file,
                 (DocumentEmployee) Hibernate.unproxy(documentEmployee));
-
-        DocumentEmployee savedDocumentEmployee = documentEmployeeRepository.save(documentEmployee);
 
         if (JwtService.getAuthenticatedUserId() != null) {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -288,7 +224,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .idDocument(savedDocumentEmployee.getIdDocumentation())
                 .title(savedDocumentEmployee.getTitle())
                 .status(savedDocumentEmployee.getStatus())
-                .documentation(savedDocumentEmployee.getDocumentation())
+                .signedUrl(signedUrl)
                 .creationDate(savedDocumentEmployee.getCreationDate())
                 .employee(savedDocumentEmployee.getEmployee() != null
                         ? savedDocumentEmployee.getEmployee().getIdEmployee()
@@ -334,21 +270,22 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .limit(pageable.getPageSize())
                 .map(
                 documentEmployee -> {
-                    FileDocument fileDocument = null;
-                    if (documentEmployee.getDocumentation() != null && ObjectId.isValid(documentEmployee.getDocumentation())) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(documentEmployee.getDocumentation()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    FileDocument fileDocument = documentEmployee.getDocument().stream()
+                            .max(Comparator.comparing(FileDocument::getCreationDate))
+                            .orElse(null);
+                    if (fileDocument != null) {
+                        if (fileDocument.getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+                        }
                     }
 
                     return DocumentResponseDto.builder()
                             .idDocument(documentEmployee.getIdDocumentation())
                             .title(documentEmployee.getTitle())
                             .status(documentEmployee.getStatus())
-                            .documentation(documentEmployee.getDocumentation())
-                            .fileName(fileDocument != null ? fileDocument.getName() : null)
-                            .fileContentType(fileDocument != null ? fileDocument.getContentType() : null)
-                            .fileData(fileDocument != null ? fileDocument.getData() : null)
                             .creationDate(documentEmployee.getCreationDate())
+                            .signedUrl(signedUrl)
                             .employee(documentEmployee.getEmployee() != null
                                     ? documentEmployee.getEmployee().getIdEmployee()
                                     : null)
@@ -418,12 +355,11 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                 .toList();
         List<DocumentMatrixResponseDto> nonSelectedDocuments = new ArrayList<>(allDocuments);
         nonSelectedDocuments.removeAll(selectedDocuments);
-        DocumentResponseDto employeeResponse = DocumentResponseDto.builder()
+
+        return DocumentResponseDto.builder()
                 .selectedDocumentsEnterprise(selectedDocuments)
                 .nonSelectedDocumentsEnterprise(nonSelectedDocuments)
                 .build();
-
-        return employeeResponse;
     }
 
     @Override
@@ -471,7 +407,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
     }
 
     @Override
-    public String solicitateNewRequiredDocument(String id, String documentId) {
+    public String solicitNewRequiredDocument(String id, String documentId) {
         if (documentId == null || documentId.isEmpty()) {
             throw new NotFoundException("Invalid documents");
         }

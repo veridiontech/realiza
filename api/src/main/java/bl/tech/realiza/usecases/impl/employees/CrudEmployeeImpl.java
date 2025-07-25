@@ -5,18 +5,16 @@ import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
 import bl.tech.realiza.domains.providers.Provider;
-import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeForeignerRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
-import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.responses.employees.EmployeeResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.employees.CrudEmployee;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,10 +31,10 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
     private final EmployeeBrazilianRepository employeeBrazilianRepository;
     private final EmployeeForeignerRepository employeeForeignerRepository;
-    private final FileRepository fileRepository;
     private final ContractRepository contractRepository;
     private final EmployeeRepository employeeRepository;
     private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public Page<EmployeeResponseDto> findAllByEnterprise(String idSearch, Provider.Company company, Pageable pageable) {
@@ -62,10 +59,11 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
         combinedResults.addAll(employeeBrazilianPage.map(
                 employeeBrazilian -> {
-                    FileDocument fileDocument = null;
-                    if (employeeBrazilian.getProfilePicture() != null && !employeeBrazilian.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (employeeBrazilian.getProfilePicture() != null) {
+                        if (employeeBrazilian.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(employeeBrazilian.getProfilePicture().getUrl(), 15);
+                        }
                     }
 
                     return EmployeeResponseDto.builder()
@@ -76,7 +74,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .cep(employeeBrazilian.getCep())
                             .name(employeeBrazilian.getName())
                             .surname(employeeBrazilian.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .address(employeeBrazilian.getAddress())
                             .addressLine2(employeeBrazilian.getAddressLine2())
                             .country(employeeBrazilian.getCountry())
@@ -119,10 +117,11 @@ public class CrudEmployeeImpl implements CrudEmployee {
 
         combinedResults.addAll(employeeForeignerPage.map(
                 employeeForeigner -> {
-                    FileDocument fileDocument = null;
-                    if (employeeForeigner.getProfilePicture() != null && !employeeForeigner.getProfilePicture().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (employeeForeigner.getProfilePicture() != null) {
+                        if (employeeForeigner.getProfilePicture().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(employeeForeigner.getProfilePicture().getUrl(), 15);
+                        }
                     }
                     return EmployeeResponseDto.builder()
                             .idEmployee(employeeForeigner.getIdEmployee())
@@ -132,7 +131,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .cep(employeeForeigner.getCep())
                             .name(employeeForeigner.getName())
                             .surname(employeeForeigner.getSurname())
-                            .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                            .profilePictureSignedUrl(signedUrl)
                             .address(employeeForeigner.getAddress())
                             .addressLine2(employeeForeigner.getAddressLine2())
                             .country(employeeForeigner.getCountry())
@@ -262,10 +261,11 @@ public class CrudEmployeeImpl implements CrudEmployee {
     }
 
     private EmployeeResponseDto convertBrazilianToDto(EmployeeBrazilian employeeBrazilian) {
-        FileDocument fileDocument = null;
-        if (employeeBrazilian.getProfilePicture() != null && !employeeBrazilian.getProfilePicture().isEmpty()) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeBrazilian.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElse(null);
+        String signedUrl = null;
+        if (employeeBrazilian.getProfilePicture() != null) {
+            if (employeeBrazilian.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(employeeBrazilian.getProfilePicture().getUrl(), 15);
+            }
         }
 
         return EmployeeResponseDto.builder()
@@ -276,7 +276,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .cep(employeeBrazilian.getCep())
                 .name(employeeBrazilian.getName())
                 .surname(employeeBrazilian.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .address(employeeBrazilian.getAddress())
                 .addressLine2(employeeBrazilian.getAddressLine2())
                 .country(employeeBrazilian.getCountry())
@@ -317,10 +317,11 @@ public class CrudEmployeeImpl implements CrudEmployee {
     }
 
     private EmployeeResponseDto convertForeignerToDto(EmployeeForeigner employeeForeigner) {
-        FileDocument fileDocument = null;
-        if (employeeForeigner.getProfilePicture() != null && !employeeForeigner.getProfilePicture().isEmpty()) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(employeeForeigner.getProfilePicture()));
-            fileDocument = fileDocumentOptional.orElse(null);
+        String signedUrl = null;
+        if (employeeForeigner.getProfilePicture() != null) {
+            if (employeeForeigner.getProfilePicture().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(employeeForeigner.getProfilePicture().getUrl(), 15);
+            }
         }
 
         return EmployeeResponseDto.builder()
@@ -331,7 +332,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .cep(employeeForeigner.getCep())
                 .name(employeeForeigner.getName())
                 .surname(employeeForeigner.getSurname())
-                .profilePictureData(fileDocument != null ? fileDocument.getData() : null)
+                .profilePictureSignedUrl(signedUrl)
                 .address(employeeForeigner.getAddress())
                 .addressLine2(employeeForeigner.getAddressLine2())
                 .country(employeeForeigner.getCountry())
@@ -355,15 +356,25 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .directory(employeeForeigner.getDirectory())
                 .levelOfEducation(employeeForeigner.getLevelOfEducation())
                 .cboId(employeeForeigner.getCbo().getId())
-                .cboTitle(employeeForeigner.getCbo() != null ? employeeForeigner.getCbo().getTitle() : null)
-                .cboCode(employeeForeigner.getCbo() != null ? employeeForeigner.getCbo().getCode() : null)
+                .cboTitle(employeeForeigner.getCbo() != null
+                        ? employeeForeigner.getCbo().getTitle()
+                        : null)
+                .cboCode(employeeForeigner.getCbo() != null
+                        ? employeeForeigner.getCbo().getCode()
+                        : null)
                 .situation(employeeForeigner.getSituation())
                 .rneRnmFederalPoliceProtocol(employeeForeigner.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeigner.getBrazilEntryDate())
                 .passport(employeeForeigner.getPassport())
-                .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
-                .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
-                .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
+                .branch(employeeForeigner.getBranch() != null
+                        ? employeeForeigner.getBranch().getIdBranch()
+                        : null)
+                .supplier(employeeForeigner.getSupplier() != null
+                        ? employeeForeigner.getSupplier().getIdProvider()
+                        : null)
+                .subcontract(employeeForeigner.getSubcontract() != null
+                        ? employeeForeigner.getSubcontract().getIdProvider()
+                        : null)
                 .contracts(employeeForeigner.getContracts().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
                                         .idContract(contract.getIdContract())

@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.user;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.profile.Profile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,7 +44,6 @@ public abstract class User {
     private String firstName;
     private String surname;
     private String email;
-    private String profilePicture;
     private String telephone;
     private String cellphone;
     @Builder.Default
@@ -97,6 +97,9 @@ public abstract class User {
     @ManyToOne
     @JoinColumn(name = "profileId")
     private Profile profile;
+
+    @OneToOne
+    private FileDocument profilePicture;
 
     public enum Role {
         ROLE_ADMIN,

@@ -8,6 +8,7 @@ import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.FileDocument;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
@@ -38,7 +39,6 @@ public abstract class Employee {
     private String cep;
     private String name;
     private String surname;
-    private String profilePicture;
     private String acronym;
     private Date birthDate;
     private String postalCode;
@@ -85,6 +85,9 @@ public abstract class Employee {
     @ManyToOne
     @JoinColumn(name = "idProviderSubcontractor")
     private ProviderSubcontractor subcontract;
+
+    @OneToOne
+    private FileDocument profilePicture;
 
     @ManyToMany
     @JoinTable(

@@ -2,6 +2,8 @@ package bl.tech.realiza.usecases.interfaces;
 
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.services.itemManagement.document.ItemManagementDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderDetailsResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.provider.ItemManagementProviderResponseDto;
 import bl.tech.realiza.gateways.responses.services.itemManagement.user.ItemManagementUserDetailsResponseDto;
@@ -25,4 +27,8 @@ public interface CrudItemManagement {
     String denySolicitation(String id);
 
     void deleteSolicitation(String id);
+
+    // document
+    Page<ItemManagementDocumentResponseDto> findAllDocumentSolicitation(Pageable pageable);
+    ItemManagementDocumentDetailsResponseDto findDocumentSolicitationDetails(String idSolicitation);
 }

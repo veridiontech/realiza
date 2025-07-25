@@ -4,10 +4,9 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
-import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
-import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
@@ -18,13 +17,13 @@ import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
 import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
-import bl.tech.realiza.services.setup.SetupService;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,11 +42,11 @@ public class CrudClientImpl implements CrudClient {
     private final ClientRepository clientRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
-    private final SetupService setupService;
     private final SetupAsyncQueueProducer setupQueueProducer;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final CrudBranchImpl crudBranchImpl;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto, Boolean profilesFromRepo) {
@@ -162,22 +161,22 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public Optional<ClientResponseDto> findOne(String id) {
-        FileDocument fileDocument = null;
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
 
-        Optional<Client> clientOptional = clientRepository.findById(id);
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
-
+        String signedUrl = null;
         if (client.getLogo() != null) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
+            if (client.getLogo().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(client.getLogo().getUrl(), 15);
+            }
         }
 
-        ClientResponseDto clientResponse = ClientResponseDto.builder()
+        return Optional.of(ClientResponseDto.builder()
                 .idClient(client.getIdClient())
                 .cnpj(client.getCnpj())
                 .tradeName(client.getTradeName())
                 .corporateName(client.getCorporateName())
-                .logoData(fileDocument != null ? fileDocument.getData() : null)
+                .logoSignedUrl(signedUrl)
                 .email(client.getEmail())
                 .telephone(client.getTelephone())
                 .cep(client.getCep())
@@ -186,21 +185,20 @@ public class CrudClientImpl implements CrudClient {
                 .address(client.getAddress())
                 .number(client.getNumber())
                 .isUltragaz(client.getIsUltragaz())
-                .build();
-
-        return Optional.of(clientResponse);
+                .build());
     }
 
     @Override
     public Page<ClientResponseDto> findAll(Pageable pageable) {
         Page<Client> clientPage = clientRepository.findAllByIsActiveIsTrue(pageable);
 
-        Page<ClientResponseDto> clientResponseDtoPage = clientPage.map(
+        return clientPage.map(
                 client -> {
-                    FileDocument fileDocument = null;
-                    if (client.getLogo() != null && !client.getLogo().isEmpty()) {
-                        Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
-                        fileDocument = fileDocumentOptional.orElse(null);
+                    String signedUrl = null;
+                    if (client.getLogo() != null) {
+                        if (client.getLogo().getUrl() != null) {
+                            signedUrl = googleCloudService.generateSignedUrl(client.getLogo().getUrl(), 15);
+                        }
                     }
 
                     return ClientResponseDto.builder()
@@ -209,7 +207,7 @@ public class CrudClientImpl implements CrudClient {
                             .tradeName(client.getTradeName())
                             .corporateName(client.getCorporateName())
                             .email(client.getEmail())
-                            .logoData(fileDocument != null ? fileDocument.getData() : null)
+                            .logoSignedUrl(signedUrl)
                             .telephone(client.getTelephone())
                             .cep(client.getCep())
                             .state(client.getState())
@@ -220,25 +218,43 @@ public class CrudClientImpl implements CrudClient {
                             .build();
                 }
         );
-
-        return clientResponseDtoPage;
     }
 
     @Override
     public Optional<ClientResponseDto> update(String id, ClientRequestDto clientRequestDto) {
-        Optional<Client> clientOptional = clientRepository.findById(id);
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
 
-        client.setCnpj(clientRequestDto.getCnpj() != null ? clientRequestDto.getCnpj() : client.getCnpj());
-        client.setTradeName(clientRequestDto.getTradeName() != null ? clientRequestDto.getTradeName() : client.getTradeName());
-        client.setCorporateName(clientRequestDto.getCorporateName() != null ? clientRequestDto.getCorporateName() : client.getCorporateName());
-        client.setEmail(clientRequestDto.getEmail() != null ? clientRequestDto.getEmail() : client.getEmail());
-        client.setTelephone(clientRequestDto.getTelephone() != null ? clientRequestDto.getTelephone() : client.getTelephone());
-        client.setCep(clientRequestDto.getCep() != null ? clientRequestDto.getCep() : client.getCep());
-        client.setState(client.getState() != null ? clientRequestDto.getState() : client.getState());
-        client.setCity(client.getCity() != null ? clientRequestDto.getCity() : client.getCity());
-        client.setAddress(client.getAddress() != null ? clientRequestDto.getAddress() : client.getAddress());
-        client.setNumber(client.getNumber() != null ? clientRequestDto.getNumber() : client.getNumber());
+        client.setCnpj(clientRequestDto.getCnpj() != null
+                ? clientRequestDto.getCnpj()
+                : client.getCnpj());
+        client.setTradeName(clientRequestDto.getTradeName() != null
+                ? clientRequestDto.getTradeName()
+                : client.getTradeName());
+        client.setCorporateName(clientRequestDto.getCorporateName() != null
+                ? clientRequestDto.getCorporateName()
+                : client.getCorporateName());
+        client.setEmail(clientRequestDto.getEmail() != null
+                ? clientRequestDto.getEmail()
+                : client.getEmail());
+        client.setTelephone(clientRequestDto.getTelephone() != null
+                ? clientRequestDto.getTelephone()
+                : client.getTelephone());
+        client.setCep(clientRequestDto.getCep() != null
+                ? clientRequestDto.getCep()
+                : client.getCep());
+        client.setState(clientRequestDto.getState() != null
+                ? clientRequestDto.getState()
+                : client.getState());
+        client.setCity(clientRequestDto.getCity() != null
+                ? clientRequestDto.getCity()
+                : client.getCity());
+        client.setAddress(clientRequestDto.getAddress() != null
+                ? clientRequestDto.getAddress()
+                : client.getAddress());
+        client.setNumber(clientRequestDto.getNumber() != null
+                ? clientRequestDto.getNumber()
+                : client.getNumber());
 
         Client savedClient = clientRepository.save(client);
 
@@ -299,21 +315,33 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public String changeLogo(String id, MultipartFile file) throws IOException {
-        Optional<Client> clientOptional = clientRepository.findById(id);
-        Client client = clientOptional.orElseThrow(() -> new NotFoundException("Client not found"));
+        if (file != null) {
+            if (file.getSize() > 1024 * 1024) { // 1 MB
+                throw new BadRequestException("Arquivo muito grande.");
+            }
+        }
+        FileDocument savedFileDocument = null;
+
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
 
         if (file != null && !file.isEmpty()) {
-            FileDocument fileDocument = FileDocument.builder()
-                    .name(file.getOriginalFilename())
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
+            try {
+                String gcsUrl = googleCloudService.uploadFile(file, "enterprise-logos");
 
-            if (client.getLogo() != null) {
-                fileRepository.deleteById(new ObjectId(client.getLogo()));
+                if (client.getLogo() != null) {
+                    googleCloudService.deleteFile(client.getLogo().getUrl());
+                }
+                savedFileDocument = fileRepository.save(FileDocument.builder()
+                        .name(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .url(gcsUrl)
+                        .build());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                throw new EntityNotFoundException(e);
             }
-            FileDocument savedFileDocument = fileRepository.save(fileDocument);
-            client.setLogo(savedFileDocument.getIdDocumentAsString());
+            client.setLogo(savedFileDocument);
         }
 
         clientRepository.save(client);
@@ -323,15 +351,16 @@ public class CrudClientImpl implements CrudClient {
 
     @Override
     public Optional<ClientResponseDto> findClientbyBranch(String idBranch) {
-        Branch branch = branchRepository.findById(idBranch).orElseThrow(() -> new NotFoundException("Branch not found"));
+        Branch branch = branchRepository.findById(idBranch)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        FileDocument fileDocument = null;
+        Client client = branch.getClient();
 
-        Client client = clientRepository.findById(branch.getClient().getIdClient()).orElseThrow(() -> new NotFoundException("Client not found"));
-
+        String signedUrl = null;
         if (client.getLogo() != null) {
-            Optional<FileDocument> fileDocumentOptional = fileRepository.findById(new ObjectId(client.getLogo()));
-            fileDocument = fileDocumentOptional.orElseThrow(() -> new NotFoundException("Logo not found"));
+            if (client.getLogo().getUrl() != null) {
+                signedUrl = googleCloudService.generateSignedUrl(client.getLogo().getUrl(), 15);
+            }
         }
 
         ClientResponseDto clientResponse = ClientResponseDto.builder()
@@ -339,7 +368,7 @@ public class CrudClientImpl implements CrudClient {
                 .cnpj(client.getCnpj())
                 .tradeName(client.getTradeName())
                 .corporateName(client.getCorporateName())
-                .logoData(fileDocument != null ? fileDocument.getData() : null)
+                .logoSignedUrl(signedUrl)
                 .email(client.getEmail())
                 .telephone(client.getTelephone())
                 .cep(client.getCep())

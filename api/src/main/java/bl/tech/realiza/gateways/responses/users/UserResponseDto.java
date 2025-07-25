@@ -22,10 +22,8 @@ public class UserResponseDto {
     private User.Role role;
     private String firstName;
     private String surname;
-    private String profilePictureId;
-    private byte[] profilePictureData;
+    private String profilePictureSignedUrl;
     private String email;
-    private String profilePicture;
     private String telephone;
     private String cellphone;
     private List<String> branches;

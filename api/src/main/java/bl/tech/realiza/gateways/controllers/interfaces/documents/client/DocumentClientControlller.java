@@ -10,10 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 public interface DocumentClientControlller {
-    ResponseEntity<DocumentResponseDto> createDocumentClient(DocumentClientRequestDto documentClientRequestDto, MultipartFile file);
+    ResponseEntity<DocumentResponseDto> createDocumentClient(DocumentClientRequestDto documentClientRequestDto);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentClient(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsClient(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(String id, DocumentClientRequestDto documentClientRequestDto, MultipartFile file);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentClient(String id, DocumentClientRequestDto documentClientRequestDto);
     ResponseEntity<Void> deleteDocumentClient(String id);
     ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentClient(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsClientByClient(int page, int size, String sort, Sort.Direction direction, String idSearch);

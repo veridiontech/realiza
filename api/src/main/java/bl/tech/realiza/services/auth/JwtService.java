@@ -61,7 +61,6 @@ public class JwtService {
         claims.put("firstName", user.getFirstName());
         claims.put("surname", user.getSurname());
         claims.put("email", user.getEmail());
-        claims.put("profilePicture", user.getProfilePicture());
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
 
@@ -85,7 +84,9 @@ public class JwtService {
         claims.put("firstName", user.getFirstName());
         claims.put("surname", user.getSurname());
         claims.put("email", user.getEmail());
-        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("profilePicture", user.getProfilePicture() != null
+                ? user.getProfilePicture().getUrl()
+                : null);
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
         claims.put("idClient", user.getBranch().getClient().getIdClient());
@@ -165,7 +166,9 @@ public class JwtService {
         claims.put("firstName", user.getFirstName());
         claims.put("surname", user.getSurname());
         claims.put("email", user.getEmail());
-        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("profilePicture", user.getProfilePicture() != null
+                ? user.getProfilePicture().getUrl()
+                : null);
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
         claims.put("branches", branchesIds);
@@ -191,7 +194,9 @@ public class JwtService {
         claims.put("firstName", user.getFirstName());
         claims.put("surname", user.getSurname());
         claims.put("email", user.getEmail());
-        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("profilePicture", user.getProfilePicture() != null
+                ? user.getProfilePicture().getUrl()
+                : null);
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
 
@@ -214,7 +219,9 @@ public class JwtService {
         claims.put("firstName", user.getFirstName());
         claims.put("surname", user.getSurname());
         claims.put("email", user.getEmail());
-        claims.put("profilePicture", user.getProfilePicture());
+        claims.put("profilePicture", user.getProfilePicture() != null
+                ? user.getProfilePicture().getUrl()
+                : null);
         claims.put("telephone", user.getTelephone());
         claims.put("cellphone", user.getCellphone());
 

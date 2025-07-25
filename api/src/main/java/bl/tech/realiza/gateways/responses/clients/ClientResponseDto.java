@@ -12,8 +12,7 @@ public class ClientResponseDto {
     private String cnpj;
     private String tradeName;
     private String corporateName;
-    private String logoId;
-    private byte[] logoData;
+    private String logoSignedUrl;
     private String telephone;
     private String email;
     private String cep;

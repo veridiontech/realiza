@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DocumentProviderSupplierControlller {
-    ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
+    ResponseEntity<DocumentResponseDto> createDocumentProviderSupplier(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto);
     ResponseEntity<Optional<DocumentResponseDto>> getOneDocumentProviderSupplier(String id);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplier(int page, int size, String sort, Sort.Direction direction);
-    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file);
+    ResponseEntity<Optional<DocumentResponseDto>> updateDocumentProviderSupplier(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto);
     ResponseEntity<Void> deleteDocumentProviderSupplier(String id);
     ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentProviderSupplier(String id, MultipartFile file);
     ResponseEntity<Page<DocumentResponseDto>> getAllDocumentsProviderSupplierBySupplier(int page, int size, String sort, Sort.Direction direction, String idSearch);

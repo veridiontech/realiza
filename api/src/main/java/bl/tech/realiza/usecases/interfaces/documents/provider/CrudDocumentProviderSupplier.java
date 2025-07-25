@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrudDocumentProviderSupplier {
-    DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
+    DocumentResponseDto save(DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto);
     Optional<DocumentResponseDto> findOne(String id);
     Page<DocumentResponseDto> findAll(Pageable pageable);
-    Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto, MultipartFile file) throws IOException;
+    Optional<DocumentResponseDto> update(String id, DocumentProviderSupplierRequestDto documentProviderSupplierRequestDto);
     void delete(String id);
     Optional<DocumentResponseDto> upload(String id, MultipartFile file) throws IOException ;
     Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable);
