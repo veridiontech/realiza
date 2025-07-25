@@ -256,7 +256,7 @@ export function DetailsEmployee() {
                 className="block w-full px-4 py-2 text-left hover:bg-gray-100"
               >
                 <Upload size={14} className="inline mr-2" />
-                Reenviar
+                Enviar
               </button>
               <button
                 onClick={() => exemptDocument(row.idDocument, row.title)}
