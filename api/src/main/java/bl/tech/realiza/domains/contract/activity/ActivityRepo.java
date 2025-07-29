@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contract.activity;
 
+import bl.tech.realiza.domains.enums.RiskEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +22,7 @@ public class ActivityRepo {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idActivity;
     private String title;
-    private Activity.Risk risk;
+    private RiskEnum risk;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 }

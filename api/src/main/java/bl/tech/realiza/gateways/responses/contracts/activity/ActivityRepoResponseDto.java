@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.responses.contracts.activity;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -11,5 +12,5 @@ import lombok.Data;
 public class ActivityRepoResponseDto {
     private String idActivity;
     private String title;
-    private Activity.Risk risk;
+    private RiskEnum risk;
 }

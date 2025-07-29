@@ -17,26 +17,22 @@ import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementContractRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByBranchIdsResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
@@ -47,7 +43,7 @@ public class CrudContractImpl implements CrudContract {
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
-    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final JwtService jwtService;
     private final CrudItemManagement crudItemManagement;
 
@@ -137,21 +133,14 @@ public class CrudContractImpl implements CrudContract {
                 }
             }
 
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUPPLIER",
-                    null,
+            setupQueueProducer.send(new SetupMessage("EMPLOYEE_CONTRACT_SUPPLIER",
                     null,
                     null,
                     contractProviderSupplier.getIdContract(),
                     null,
                     null,
                     null,
-                    employees.stream().map(Employee::getIdEmployee).toList(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    employees.stream().map(Employee::getIdEmployee).toList()));
 
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
@@ -166,21 +155,14 @@ public class CrudContractImpl implements CrudContract {
                 }
             }
 
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("EMPLOYEE_CONTRACT_SUBCONTRACT",
-                    null,
+            setupQueueProducer.send(new SetupMessage("EMPLOYEE_CONTRACT_SUBCONTRACT",
                     null,
                     null,
                     null,
                     contractProviderSubcontractor.getIdContract(),
                     null,
                     null,
-                    employees.stream().map(Employee::getIdEmployee).toList(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    employees.stream().map(Employee::getIdEmployee).toList()));
 
         } else {
             throw new NotFoundException("Invalid contract type");
@@ -249,21 +231,14 @@ public class CrudContractImpl implements CrudContract {
             throw new NotFoundException("Invalid contract type");
         }
 
-        setupAsyncQueueProducer.sendSetup(new SetupMessage("REMOVE_EMPLOYEE_CONTRACT",
-                null,
+        setupQueueProducer.send(new SetupMessage("REMOVE_EMPLOYEE_CONTRACT",
                 null,
                 null,
                 null,
                 null,
                 contract.getIdContract(),
                 null,
-                employees.stream().map(Employee::getIdEmployee).toList(),
-                null,
-                null,
-                null,
-                null,
-                Activity.Risk.LOW,
-                ServiceType.Risk.LOW));
+                employees.stream().map(Employee::getIdEmployee).toList()));
 
         for (Employee employee : employees) {
             if (JwtService.getAuthenticatedUserId() != null) {

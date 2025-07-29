@@ -7,6 +7,7 @@ import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeClient;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeRepo;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -19,9 +20,11 @@ import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeRe
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.serviceType.ServiceTypeRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.serviceType.*;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import com.google.common.collect.Lists;
@@ -49,7 +52,8 @@ public class CrudServiceTypeImpl implements CrudServiceType {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
-    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
+    private final ReplicationQueueProducer replicationQueueProducer;
 
     @Override
     public ServiceTypeRepoResponseDto saveServiceTypeRepo(ServiceTypeRequestDto serviceTypeRequestDto) {
@@ -108,21 +112,14 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
 
         if (replicate && serviceType instanceof ServiceTypeBranch serviceTypeBranch) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("DELETE_SERVICE_TYPE",
-                    serviceTypeBranch.getBranch().getClient().getIdClient(),
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("DELETE_SERVICE_TYPE",
                     branchIds,
                     null,
                     null,
                     null,
-                    null,
-                    null,
-                    null,
-                    serviceTypeBranch.getIdServiceType(),
-                    null,
                     serviceTypeBranch.getTitle(),
-                    Activity.Risk.LOW,
-                    serviceTypeBranch.getRisk()));
+                    serviceTypeBranch.getRisk(),
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -177,21 +174,14 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("CREATE_SERVICE_TYPE",
-                    serviceTypeBranch.getBranch().getClient().getIdClient(),
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("CREATE_SERVICE_TYPE",
                     branchIds,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
                     null,
                     serviceTypeBranch.getIdServiceType(),
                     null,
                     serviceTypeBranch.getTitle(),
-                    Activity.Risk.LOW,
-                    serviceTypeBranch.getRisk()));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -226,20 +216,13 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("UPDATE_SERVICE_TYPE",
-                    serviceTypeBranch.getBranch().getClient().getIdClient(),
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("UPDATE_SERVICE_TYPE",
                     branchIds,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
                     null,
                     serviceTypeBranch.getIdServiceType(),
                     null,
                     serviceTypeBranch.getTitle(),
-                    Activity.Risk.LOW,
+                    RiskEnum.LOW,
                     serviceTypeBranch.getRisk()));
         }
 

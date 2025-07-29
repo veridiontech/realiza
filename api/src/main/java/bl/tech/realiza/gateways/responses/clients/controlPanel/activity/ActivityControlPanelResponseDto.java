@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.responses.clients.controlPanel.activity;
 
+import bl.tech.realiza.domains.enums.RiskEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,5 +15,5 @@ import static bl.tech.realiza.domains.contract.activity.Activity.*;
 public class ActivityControlPanelResponseDto {
     private String id;
     private String title;
-    private Risk risk;
+    private RiskEnum risk;
 }

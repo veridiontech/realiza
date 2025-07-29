@@ -529,23 +529,23 @@ public class DashboardService {
     public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         List<String> branchIds = dashboardFiltersRequestDto != null
                 ? (dashboardFiltersRequestDto.getBranchIds() != null
-                ? dashboardFiltersRequestDto.getBranchIds()
-                : new ArrayList<>() )
+                    ? dashboardFiltersRequestDto.getBranchIds()
+                    : new ArrayList<>() )
                 : new ArrayList<>();
         List<String> documentTypes = dashboardFiltersRequestDto != null
                 ? (dashboardFiltersRequestDto.getDocumentTypes() != null
-                ? dashboardFiltersRequestDto.getDocumentTypes()
-                : new ArrayList<>() )
+                    ? dashboardFiltersRequestDto.getDocumentTypes()
+                    : new ArrayList<>() )
                 : new ArrayList<>();
         List<String> responsibleIds = dashboardFiltersRequestDto != null
                 ? (dashboardFiltersRequestDto.getResponsibleIds() != null
-                ? dashboardFiltersRequestDto.getResponsibleIds()
-                : new ArrayList<>() )
+                    ? dashboardFiltersRequestDto.getResponsibleIds()
+                    : new ArrayList<>() )
                 : new ArrayList<>();
         List<String> documentTitles = dashboardFiltersRequestDto != null
                 ? (dashboardFiltersRequestDto.getDocumentTitles() != null
-                ? dashboardFiltersRequestDto.getDocumentTitles()
-                : new ArrayList<>() )
+                    ? dashboardFiltersRequestDto.getDocumentTitles()
+                    : new ArrayList<>() )
                 : new ArrayList<>();
 
         List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
@@ -555,16 +555,16 @@ public class DashboardService {
         Double conformityProvider = null;
         Object[] adherenceProviderValues = null;
         Object[] conformityProviderValues = null;
-        if (responsibleIds != null && responsibleIds.isEmpty()) {
+        if (responsibleIds.isEmpty()) {
             responsibleIds = null;
         }
-        if (documentTypes != null && documentTypes.isEmpty()) {
+        if (documentTypes.isEmpty()) {
             documentTypes = null;
         }
-        if (documentTitles != null && documentTitles.isEmpty()) {
+        if (documentTitles.isEmpty()) {
             documentTitles = null;
         }
-        if (branchIds == null || branchIds.isEmpty()) {
+        if (branchIds.isEmpty()) {
             providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractIsActiveAndIsActiveIsTrue(clientId, ATIVADO);
             providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractIsActiveAndIsActiveIsTrue(clientId, ATIVADO);
         } else {

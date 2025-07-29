@@ -1,5 +1,6 @@
 package bl.tech.realiza.domains.contract.serviceType;
 
+import bl.tech.realiza.domains.enums.RiskEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,14 +22,7 @@ public abstract class ServiceType {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idServiceType;
     private String title;
-    private Risk risk;
+    private RiskEnum risk;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-
-    public enum Risk {
-        LOW,
-        MEDIUM,
-        HIGH,
-        VERY_HIGH
-    }
 }

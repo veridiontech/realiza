@@ -5,7 +5,6 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.Contract.IsActive;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
@@ -35,10 +34,10 @@ import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDt
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.*;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
@@ -74,7 +73,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
-    private final SetupAsyncQueueProducer setupQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final JwtService jwtService;
 
     @Override
@@ -143,21 +142,14 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         userClient.getContractsAccess().add(savedContractProviderSupplier);
         userClientRepository.save(userClient);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER",
-                null,
+        setupQueueProducer.send(new SetupMessage("NEW_CONTRACT_SUPPLIER",
                 null,
                 null,
                 savedContractProviderSupplier.getIdContract(),
                 null,
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                Activity.Risk.LOW,
-                ServiceType.Risk.LOW));
+                null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

@@ -16,10 +16,10 @@ import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
 import bl.tech.realiza.gateways.requests.clients.client.ClientRequestDto;
 import bl.tech.realiza.gateways.responses.clients.ClientResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,7 +42,7 @@ public class CrudClientImpl implements CrudClient {
     private final ClientRepository clientRepository;
     private final FileRepository fileRepository;
     private final BranchRepository branchRepository;
-    private final SetupAsyncQueueProducer setupQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final CrudBranchImpl crudBranchImpl;
@@ -74,42 +74,28 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT",
+        setupQueueProducer.send(new SetupMessage("NEW_CLIENT",
                 savedClient.getIdClient(),
                 null,
                 null,
                 null,
                 null,
                 null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                Activity.Risk.LOW,
-                ServiceType.Risk.LOW));
+                null));
 
         if (profilesFromRepo == null) {
             profilesFromRepo = false;
         }
 
         if (profilesFromRepo) {
-            setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT_PROFILES",
+            setupQueueProducer.send(new SetupMessage("NEW_CLIENT_PROFILES",
                     savedClient.getIdClient(),
                     null,
                     null,
                     null,
                     null,
                     null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    null));
         }
 
         crudBranchImpl.save(BranchCreateRequestDto.builder()
