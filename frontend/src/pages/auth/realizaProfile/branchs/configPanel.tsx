@@ -402,7 +402,8 @@ export function ConfigPanel() {
         ? (data as any).content
         : [];
       setMatrixEntries(list);
-    } catch {
+    } catch (error) {
+      console.error("Erro ao carregar documentos de matriz:", error);
       toast.error("Não foi possível carregar documentos de matriz.");
     } finally {
       setIsLoadingMatrix(false);
@@ -411,16 +412,37 @@ export function ConfigPanel() {
 
   async function handleUpdateEntry(id: string) {
     const entry = matrixEntries.find((e) => e.idDocumentMatrix === id);
-    if (!entry) return;
-    await axios.put(
-      `${ip}/document/matrix/${id}`,
-      {
-        expirationDateUnit: entry.expirationDateUnit,
-        expirationDateAmount: entry.expirationDateAmount,
-      },
-      authHeader
-    );
-    toast.success("Validade atualizada");
+    if (!entry) {
+      console.warn("Entrada da matriz de documento não encontrada para o ID:", id);
+      toast.error("Documento não encontrado para atualização.");
+      return;
+    }
+    const payload = {
+      ...entry,
+      expirationDateUnit: entry.expirationDateUnit,
+      expirationDateAmount: entry.expirationDateAmount,
+    };
+    console.log("Payload:", payload);
+    try {
+      const response = await axios.put(
+        `${ip}/document/matrix/${id}`,
+        payload,
+        authHeader
+      );
+      console.log("ID ", id);
+      console.log("Resposta da API (sucesso):", response.data);
+      toast.success("Validade atualizada com sucesso!");
+      getMatrixEntries();
+    } catch (error) {
+      console.error("Erro ao atualizar validade do documento:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Detalhes do erro da API:", error.response.data);
+        console.error("Status do erro:", error.response.status);
+        toast.error(`Erro ao atualizar validade: ${error.response.data.message || "Verifique o console para mais detalhes."}`);
+      } else {
+        toast.error("Erro ao atualizar validade. Verifique sua conexão ou tente novamente.");
+      }
+    }
   }
 
   const fetchProfileDetails = (profileId: string) => {
@@ -979,7 +1001,7 @@ export function ConfigPanel() {
         )}
         {selectTab === "validate" && (
           <div className="flex flex-col gap-4">
-            <h2 className="text-xl font-bold">Validação de Documentos</h2>
+            <h2 className="text-xl font-bold">Validade de Documentos</h2>
             <input
               type="text"
               placeholder="Buscar documento..."
