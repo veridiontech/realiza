@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.interfaces.contracts.contract;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDto;
@@ -17,8 +18,8 @@ public interface CrudContractProviderSupplier {
     Page<ContractResponseDto> findAll(Pageable pageable);
     Optional<ContractResponseDto> update(String id, ContractRequestDto contractProviderSupplierRequestDto);
     void delete(String id);
-    Page<ContractResponseDto> findAllBySupplier(String idSearch, List<Contract.IsActive> isActive, Pageable pageable);
-    Page<ContractResponseDto> findAllByClient(String idSearch, List<Contract.IsActive> isActive, Pageable pageable);
+    Page<ContractResponseDto> findAllBySupplier(String idSearch, List<ContractStatusEnum> status, Pageable pageable);
+    Page<ContractResponseDto> findAllByClient(String idSearch, List<ContractStatusEnum> status, Pageable pageable);
     Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable);
     ContractAndSupplierCreateResponseDto saveContractAndSupplier(ContractAndSupplierCreateRequestDto contractAndSupplierCreateRequestDto);
     List<ContractSupplierPermissionResponseDto> findAllByBranchAndSubcontractPermission(String idBranch);

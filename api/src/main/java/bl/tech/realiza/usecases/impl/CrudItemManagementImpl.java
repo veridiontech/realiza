@@ -211,6 +211,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
 
             contract.setIsActive(ATIVADO);
+            contract.setStatus(ContractStatusEnum.ACTIVE);
             contractRepository.save(contract);
 
             String token = tokenManagerService.generateToken();
@@ -342,6 +343,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                 || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                             contract.setIsActive(SUSPENSO);
+                            contract.setStatus(ContractStatusEnum.SUSPENDED);
                             contract.setEndDate(Date.valueOf(LocalDate.now()));
 
                             contract = contractRepository.save(contract);
@@ -379,6 +381,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                 || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                             contract.setIsActive(ATIVADO);
+                            contract.setStatus(ContractStatusEnum.ACTIVE);
                             contract.setEndDate(null);
 
                             contract = contractRepository.save(contract);
@@ -469,7 +472,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
             Contract contract = solicitation.getContract();
             switch (solicitation.getSolicitationType()) {
                 case FINISH -> {
-                    if(contract.getIsActive() == SUSPENSO) {
+                    if(contract.getStatus() == ContractStatusEnum.SUSPENDED) {
                         contract.setStatus(ContractStatusEnum.SUSPENDED);
                     } else {
                         contract.setStatus(ContractStatusEnum.ACTIVE);

@@ -1,7 +1,7 @@
 package bl.tech.realiza.gateways.repositories.contracts;
 
-import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,22 +19,22 @@ public interface ContractProviderSupplierRepository extends JpaRepository<Contra
     Page<ContractProviderSupplier> findAllByIsActive(IsActive isActive, Pageable pageable);
     Page<ContractProviderSupplier> findAllByIsActiveIn(List<IsActive> isActive, Pageable pageable);
     Page<ContractProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActive(String idSearch, IsActive isActive, Pageable pageable);
-    Page<ContractProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActiveIn(String idSearch, List<IsActive> isActive, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByProviderSupplier_IdProviderAndStatusIn(String idSearch, List<ContractStatusEnum> status, Pageable pageable);
     Page<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActive(String idSearch, IsActive isActive, Pageable pageable);
     Page<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActiveAndProviderSupplier_IsActive(String idBranch, IsActive contractStatus, Boolean providerIsActive, Pageable pageable);
-    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(String idBranch, List<IsActive> contractStatus, Boolean providerIsActive, Pageable pageable);
-    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIn(String idBranch, String idSupplier, List<IsActive> isActive, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndStatusInAndProviderSupplier_IsActive(String idBranch, List<ContractStatusEnum> status, Boolean providerIsActive, Pageable pageable);
+    Page<ContractProviderSupplier> findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndStatusIn(String idBranch, String idSupplier, List<ContractStatusEnum> status, Pageable pageable);
     ContractProviderSupplier findTopByProviderSupplier_IdProviderAndIsActiveOrderByCreationDateDesc(String idCompany, IsActive isActive);
-    List<ContractProviderSupplier> findAllByBranch_IdBranchAndIsActiveAndSubcontractPermissionIsTrue(String idBranch, IsActive isActive);
-    Long countByBranch_IdBranchAndIsActiveAndFinishedIsFalse(String idBranch, IsActive isActive);
+    List<ContractProviderSupplier> findAllByBranch_IdBranchAndStatusAndSubcontractPermissionIsTrue(String idBranch, ContractStatusEnum status);
+    Long countByBranch_IdBranchAndStatusAndFinishedIsFalse(String idBranch, ContractStatusEnum status);
     List<ContractProviderSupplier> findAllByResponsible_IdUser(String responsibleId);
 
     @Query("""
     SELECT COUNT(cps)
     FROM ContractProviderSupplier cps
     WHERE cps.branch.client.idClient = :idClient
-        AND cps.isActive IN :activeContract
+        AND cps.status IN :status
 """)
     Long countByClientIdAndIsActive(@Param("idClient") String clientId,
-                                    @Param("activeContract") List<IsActive> activeContract);
+                                    @Param("status") List<ContractStatusEnum> status);
 }

@@ -1,8 +1,8 @@
 package bl.tech.realiza.gateways.repositories.providers;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
-import bl.tech.realiza.domains.providers.ProviderSupplier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,13 +25,13 @@ public interface ProviderSubcontractorRepository extends JpaRepository<ProviderS
     FROM ProviderSubcontractor ps
     LEFT JOIN ps.contractsSubcontractor cs
     WHERE ps.isActive = true
-    AND cs.isActive = :contractStatus
+    AND cs.status = :contractStatus
     AND cs.contractProviderSupplier.branch.client.idClient = :clientId
     AND ps.isActive = true
 """)
-    List<ProviderSubcontractor> findAllByContractSupplierClientIdAndContractIsActiveAndIsActiveIsTrue(
+    List<ProviderSubcontractor> findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrue(
             @Param("clientId") String clientId,
-            @Param("contractStatus") Contract.IsActive contractStatus
+            @Param("contractStatus") ContractStatusEnum contractStatus
     );
 
     @Query("""
@@ -39,14 +39,14 @@ public interface ProviderSubcontractorRepository extends JpaRepository<ProviderS
     FROM ProviderSubcontractor ps
     LEFT JOIN ps.contractsSubcontractor cs
     WHERE ps.isActive = true
-    AND cs.isActive = :contractStatus
+    AND cs.status = :contractStatus
     AND ps.isActive = true
     AND (:branchIds IS NULL OR cs.contractProviderSupplier.branch.idBranch IN :branchIds)
     AND (:responsibleIds IS NULL OR cs.responsible.idUser IN :responsibleIds)
 """)
-    List<ProviderSubcontractor> findAllByBranchIdsAndResponsibleIdsAndContractIsActiveAndIsActiveIsTrue(
+    List<ProviderSubcontractor> findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(
             @Param("branchIds") List<String> branchIds,
             @Param("responsibleIds") List<String> responsibleIds,
-            @Param("contractStatus") Contract.IsActive contractStatus
+            @Param("contractStatus") ContractStatusEnum contractStatus
     );
 }
