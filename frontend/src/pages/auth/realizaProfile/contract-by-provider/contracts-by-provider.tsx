@@ -206,52 +206,52 @@ export function ContarctsByProvider() {
   );
 
   const exemptDocument = async (documentId: string, documentTitle: string) => {
-    try {
-      console.log(
-        "Attempting to exempt document:",
-        documentTitle,
-        "ID:",
-        documentId
-      );
-      const selectedContract = contracts.find(
-        (contract: any) => contract.serviceName === selectedContractName
-      );
-
-      if (!selectedContract) {
-        console.warn("Selected contract not found for exemption.");
-        alert("Contrato selecionado não encontrado.");
-        return;
-      }
-
-      await axios.post(
-        `${ip}/document/${documentId}/exempt`,
-        {},
-        {
-          params: { contractId: selectedContract.idContract },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      alert(`Documento "${documentTitle}" isento com sucesso!`);
-      if (selectedContractName) {
-        const currentContract = contracts.find(
-          (c) => c.serviceName === selectedContractName
-        );
-        if (currentContract) {
-          getAllDatas(currentContract.idContract, currentContract.serviceName);
-        }
-      }
-      console.log(`Document "${documentTitle}" exempted successfully.`);
-    } catch (error: any) {
-      console.error(
-        "Error exempting document:",
-        error.response?.data || error.message
-      );
-      alert("Erro ao isentar o documento.");
+  try {
+    const doc = documents.find((d) => d.id === documentId);
+    if (!doc) {
+      alert("Documento não encontrado.");
+      return;
     }
-  };
+
+    if (doc.status === "ISENTO") {
+      alert(`O documento "${documentTitle}" já está isento.`);
+      return;
+    }
+
+    const motivo = prompt("Informe o motivo da isenção:");
+    if (!motivo || motivo.trim() === "") {
+      alert("Motivo da isenção é obrigatório.");
+      return;
+    }
+
+    const selectedContract = contracts.find(
+      (contract: any) => contract.serviceName === selectedContractName
+    );
+
+    if (!selectedContract) {
+      alert("Contrato selecionado não encontrado.");
+      return;
+    }
+
+    await axios.post(
+      `${ip}/document/${documentId}/exempt`,
+      { motivo },
+      {
+        params: { contractId: selectedContract.idContract },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert(`Documento "${documentTitle}" isento com sucesso!`);
+
+    getAllDatas(selectedContract.idContract, selectedContract.serviceName);
+  } catch (error: any) {
+    console.error("Erro ao isentar documento:", error.response?.data || error.message);
+    alert("Erro ao isentar o documento.");
+  }
+};
 
   const formatarData = (dataString?: string) => {
     if (!dataString) return "-";
@@ -266,6 +266,7 @@ export function ContarctsByProvider() {
 
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
+    if (status === "PENDENTE_ISENCAO") return "text-yellow-500";
     if (status === "EM_ANALISE") return "text-blue-500";
     if (status === "APROVADO" || status === "APROVADO_IA")
       return "text-green-600";
@@ -393,39 +394,49 @@ export function ContarctsByProvider() {
                     >
                       <div>
                         {doc.status === "EM_ANALISE" ? (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-blue-500" />
-                            <span className="text-sm font-semibold text-blue-500">
-                              EM ANÁLISE
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            {doc.status === "REPROVADO" ||
-                            doc.status === "REPROVADO_IA" ? (
-                              <Ban className="w-4 h-4 text-red-500" />
-                            ) : doc.status === "APROVADO" ||
-                              doc.status === "APROVADO_IA" ? (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : null}
-                            <span
-                              className={`text-sm font-medium ${getStatusClass(
-                                doc.status
-                              )}`}
-                            >
-                              {doc.status.replace(/_/g, " ")}
-                            </span>
-                          </div>
-                        )}
-                        {doc.status === "EM_ANALISE" && (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-blue-500" />
-                            <span className="text-xs font-semibold text-blue-500">
-                              ⚠️ Necessita análise humana
-                            </span>
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-semibold text-blue-500">
+                        EM ANÁLISE
+                      </span>
                       </div>
+                  ) : (
+                <div className="flex items-center gap-2">
+                  {doc.status === "REPROVADO" || doc.status === "REPROVADO_IA" ? (
+                      <Ban className="w-4 h-4 text-red-500" />
+                    ) : doc.status === "APROVADO" || doc.status === "APROVADO_IA" ? (
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    ) : doc.status === "ISENTO" ? (
+                      <FileX2 className="w-4 h-4 text-blue-500" />
+                    ) : doc.status === "PENDENTE_ISENCAO" ? ( // 👈 AQUI
+                      <AlertCircle className="w-4 h-4 text-yellow-500" />
+                    ) : null}
+
+                        <span className={`text-sm font-medium ${getStatusClass(doc.status)}`}>
+                          {doc.status.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                    )}
+
+                    {doc.status === "EM_ANALISE" && (
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-blue-500" />
+                          <span className="text-xs font-semibold text-blue-500">
+                            ⚠️ Necessita análise humana
+                          </span>
+                        </div>
+                      )}
+                      {doc.status === "PENDENTE_ISENCAO" && (
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-yellow-500" />
+                          <span className="text-xs font-semibold text-yellow-500">
+                            ⚠️ Aguardando aprovação de isenção
+                          </span>
+                        </div>
+                      )}
+
+                    </div>
+
                       <div className="col-span-1">
                         <h3 className="text-[16px] font-medium">{doc.title}</h3>
                         {doc.isUnique !== undefined && (
