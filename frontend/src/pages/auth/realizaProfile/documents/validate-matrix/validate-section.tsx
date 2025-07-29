@@ -24,7 +24,6 @@ export function ValidateSection({
   const [expirationList, setExpirationList] = useState<ExpirationItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amountEdit, setAmountEdit] = useState(0);
-  const [unitEdit, setUnitEdit] = useState<"DAYS" | "WEEKS" | "MONTHS">("DAYS");
   const [doesBlockEdit, setBlockEdit] = useState(false);
 
   useEffect(() => {
@@ -55,23 +54,9 @@ export function ValidateSection({
       );
   }, [idBranch, documentTypeName, isSelected]);
 
-  // const traduzUnidade = (unit: ExpirationItem["expirationDateUnit"]) => {
-  //   switch (unit) {
-  //     case "DAYS":
-  //       return "dias";
-  //     case "WEEKS":
-  //       return "semanas";
-  //     case "MONTHS":
-  //       return "meses";
-  //     default:
-  //       return unit;
-  //   }
-  // };
-
   const handleEditClick = (doc: ExpirationItem) => {
     setEditingId(doc.idDocument);
     setAmountEdit(doc.expirationDateAmount);
-    setUnitEdit(doc.expirationDateUnit);
     setBlockEdit(doc.doesBlock);
   };
 
@@ -83,14 +68,9 @@ export function ValidateSection({
         return;
       }
 
-      if (amountEdit <= 0 || !["DAYS", "WEEKS", "MONTHS"].includes(unitEdit)) {
-        console.warn("Valores inválidos para salvar:", amountEdit, unitEdit);
-        return;
-      }
-
       const payload = {
         expirationDateAmount: amountEdit,
-        expirationDateUnit: unitEdit,
+        expirationDateUnit: "MONTHS",
         doesBlock: doesBlockEdit,
       };
 
@@ -117,7 +97,7 @@ export function ValidateSection({
             ? {
                 ...doc,
                 expirationDateAmount: amountEdit,
-                expirationDateUnit: unitEdit,
+                expirationDateUnit: "MONTHS",
                 doesBlock: doesBlockEdit,
               }
             : doc
@@ -140,8 +120,7 @@ export function ValidateSection({
       <thead className="bg-gray-100">
         <tr>
           <th className="px-2 py-1 text-left">Título</th>
-          <th className="px-2 py-1 text-left">Validade</th>
-          {/* <th className="px-2 py-1 text-left">Unidade</th> */}
+          <th className="px-2 py-1 text-left">Validade (meses)</th>
           <th className="px-2 py-1 text-left">Bloqueia</th>
           <th className="px-2 py-1 text-left">Ações</th>
         </tr>
@@ -156,7 +135,7 @@ export function ValidateSection({
                 <td className="px-2 py-1 text-center">
                   <input
                     type="number"
-                    min={1}
+                    min={0}
                     value={amountEdit}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -165,21 +144,6 @@ export function ValidateSection({
                     className="w-20 border px-1 py-0.5"
                   />
                 </td>
-                {/* <td className="px-2 py-1">
-                  <select
-                    value={unitEdit}
-                    onChange={(e) =>
-                      setUnitEdit(
-                        e.target.value as ExpirationItem["expirationDateUnit"]
-                      )
-                    }
-                    className="border px-1 py-0.5"
-                  >
-                    <option value="DAYS">Dias</option>
-                    <option value="WEEKS">Semanas</option>
-                    <option value="MONTHS">Meses</option>
-                  </select>
-                </td> */}
                 <td className="px-2 py-1 text-center">
                   <input
                     type="checkbox"
@@ -198,10 +162,9 @@ export function ValidateSection({
               </>
             ) : (
               <>
-                <td className="px-2 py-1 text-center">{doc.expirationDateAmount}</td>
-                {/* <td className="px-2 py-1">
-                  {traduzUnidade(doc.expirationDateUnit)}
-                </td> */}
+                <td className="px-2 py-1 text-center">
+                  {doc.expirationDateAmount}
+                </td>
                 <td className="px-2 py-1 text-center">
                   <input type="checkbox" checked={doc.doesBlock} disabled />
                 </td>
