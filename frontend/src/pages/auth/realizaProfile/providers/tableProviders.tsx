@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Eye, User, AlertCircle } from "lucide-react";
+import { User, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ip } from "@/utils/ip";
