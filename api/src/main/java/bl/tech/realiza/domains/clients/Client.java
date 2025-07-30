@@ -6,7 +6,6 @@ import bl.tech.realiza.domains.services.DashboardSnapshot;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.ultragaz.Board;
 import bl.tech.realiza.domains.user.profile.Profile;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

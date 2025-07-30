@@ -48,10 +48,8 @@ import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.auth.TokenManagerService;
 import bl.tech.realiza.services.email.EmailSender;
-import bl.tech.realiza.usecases.impl.auditLogs.AuditLogServiceImpl;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
-import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -207,7 +205,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
 
             Contract contract = contractRepository.findById(
-                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderAndIsActiveOrderByCreationDateDesc(provider.getIdProvider(), PENDENTE).getIdContract())
+                            contractProviderSupplierRepository.findTopByProviderSupplier_IdProviderAndStatusOrderByCreationDateDesc(provider.getIdProvider(), ContractStatusEnum.PENDING).getIdContract())
                     .orElseThrow(() -> new NotFoundException("Contract not found"));
 
             contract.setIsActive(ATIVADO);

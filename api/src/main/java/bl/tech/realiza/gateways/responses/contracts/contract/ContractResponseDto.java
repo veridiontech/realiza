@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.responses.contracts.contract;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class ContractResponseDto {
     private Date dateStart;
     private Date endDate;
     private Contract.IsActive isActive;
+    private ContractStatusEnum status;
     private Boolean subcontractPermission;
     private String contractSupplierId;
     private List<String> activities;

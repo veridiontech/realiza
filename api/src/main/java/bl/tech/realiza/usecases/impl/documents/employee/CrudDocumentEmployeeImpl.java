@@ -1,6 +1,5 @@
 package bl.tech.realiza.usecases.impl.documents.employee;
 
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;
@@ -419,7 +418,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentEmployee documentEmployee = DocumentEmployee.builder()
                 .employee(employee)
                 .documentMatrix(documentMatrix)
-                .request(Document.Request.ADD)
                 .title(documentMatrix.getName())
                 .build();
 

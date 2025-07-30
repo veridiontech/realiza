@@ -16,10 +16,7 @@ import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardDetailsResponseDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardGeneralDetailsResponseDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardHomeResponseDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardProviderDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.dashboard.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -675,16 +672,6 @@ public class DashboardService {
                             .build()
             );
         }
-//        corporateName
-//        cnpj
-//        totalDocumentQuantity
-//        adherenceQuantity
-//        nonAdherenceQuantity
-//        conformityQuantity
-//        nonConformityQuantity
-//        adherence
-//        conformity
-//        conformityRange
         return responseDtos;
     }
 
@@ -693,5 +680,15 @@ public class DashboardService {
             return number.longValue();
         }
         return 0L;
+    }
+
+    public DashboardDocumentResponseDto getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        DashboardDocumentResponseDto responseDto = null;
+
+        // find all documents by filters
+        // find all adherent documents by filters
+        // find all conforming documents by filters
+        // find all status and infos by filters
+        return responseDto;
     }
 }

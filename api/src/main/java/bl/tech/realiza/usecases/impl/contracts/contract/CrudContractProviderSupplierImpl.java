@@ -413,6 +413,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
                         .finished(contractProviderSupplier.getFinished())
                         .subcontractPermission(contractProviderSupplier.getSubcontractPermission())
                         .isActive(contractProviderSupplier.getIsActive())
+                        .status(contractProviderSupplier.getStatus())
                         .responsible(contractProviderSupplier.getResponsible() != null
                                 ? (contractProviderSupplier.getResponsible().getFirstName() + (contractProviderSupplier.getResponsible().getSurname() != null
                                     ? (" " + contractProviderSupplier.getResponsible().getSurname())

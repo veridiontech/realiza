@@ -4,9 +4,7 @@ import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.services.FileDocument;
-import bl.tech.realiza.domains.services.ItemManagement;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -27,7 +25,8 @@ public abstract class Document {
     private String idDocumentation;
     private String title;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    @Builder.Default
+    private Status status = Status.PENDENTE;
     private String type;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
@@ -48,9 +47,6 @@ public abstract class Document {
     private Boolean conforming = false;
     @Builder.Default
     private Boolean doesBlock = true;
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private Request request = Request.NONE;
 
     // -------------------------------
     // Relacionamentos INERENTES
@@ -80,12 +76,7 @@ public abstract class Document {
         REPROVADO_IA,
         APROVADO_IA,
         VENCIDO,
-        ISENCAO_PENDENTE
-    }
-
-    public enum Request {
-        NONE,
-        DELETE,
-        ADD
+        ISENCAO_PENDENTE,
+        ISENTO
     }
 }

@@ -3,7 +3,6 @@ package bl.tech.realiza.domains.providers;
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogProvider;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
