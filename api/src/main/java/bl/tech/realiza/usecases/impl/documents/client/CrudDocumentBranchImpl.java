@@ -1,8 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.client;
 
 import bl.tech.realiza.domains.clients.Branch;
-import bl.tech.realiza.domains.contract.activity.Activity;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -25,7 +23,6 @@ import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
 import bl.tech.realiza.services.queue.replication.ReplicationMessage;
 import bl.tech.realiza.services.queue.replication.ReplicationQueueProducer;
-import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;

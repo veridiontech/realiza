@@ -1,6 +1,5 @@
 package bl.tech.realiza.usecases.impl.documents.employee;
 
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.employees.Employee;

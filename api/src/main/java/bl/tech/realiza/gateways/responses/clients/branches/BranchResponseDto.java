@@ -1,4 +1,4 @@
-package bl.tech.realiza.gateways.responses.clients;
+package bl.tech.realiza.gateways.responses.clients.branches;
 
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;

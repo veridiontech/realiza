@@ -2,8 +2,6 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.activity.Activity;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
@@ -16,7 +14,8 @@ import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepo
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.clients.branches.BranchNameResponseDto;
+import bl.tech.realiza.gateways.responses.clients.branches.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.activity.ActivityControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.activity.ActivityRiskControlPanelResponseDto;
@@ -382,5 +381,10 @@ public class CrudBranchImpl implements CrudBranch {
         });
 
         return response;
+    }
+
+    @Override
+    public List<BranchNameResponseDto> findAllNameByBranchAccess(List<String> branchIds) {
+        return branchRepository.findAllNameByAccess(branchIds);
     }
 }

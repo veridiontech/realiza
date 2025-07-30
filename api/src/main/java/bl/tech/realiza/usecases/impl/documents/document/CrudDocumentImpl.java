@@ -193,6 +193,8 @@ public class CrudDocumentImpl implements CrudDocument {
         }
         document.setLastCheck(LocalDateTime.now());
         documentRepository.save(document);
+        // TODO criar tabela relacionando contratoDocumento e arquivo
+        // TODO apagar documentos antigos reprovados
 
         AuditLogActionsEnum action;
         switch (documentStatusChangeRequestDto.getStatus()) {

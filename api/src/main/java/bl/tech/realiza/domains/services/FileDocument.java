@@ -1,7 +1,7 @@
 package bl.tech.realiza.domains.services;
 
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.enums.OwnerEnum;
+import bl.tech.realiza.domains.enums.DocumentStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +25,8 @@ public class FileDocument {
     private String url;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Builder.Default
+    private DocumentStatusEnum status = DocumentStatusEnum.EM_ANALISE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idDocumentation")

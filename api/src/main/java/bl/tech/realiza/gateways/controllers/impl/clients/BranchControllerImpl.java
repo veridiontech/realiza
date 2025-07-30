@@ -2,7 +2,8 @@ package bl.tech.realiza.gateways.controllers.impl.clients;
 
 import bl.tech.realiza.gateways.controllers.interfaces.clients.BranchControlller;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.clients.branches.BranchNameResponseDto;
+import bl.tech.realiza.gateways.responses.clients.branches.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -123,5 +125,12 @@ public class BranchControllerImpl implements BranchControlller {
     @Override
     public ResponseEntity<ControlPanelResponseDto> getControlPanelSummarizedByBranch(@PathVariable String branchId) {
         return ResponseEntity.ok(crudBranch.findControlPanelSummary(branchId));
+    }
+
+    @GetMapping("/find-by-access")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<List<BranchNameResponseDto>> getAllBranchesByAccess(@RequestBody List<String> branchIds) {
+        return ResponseEntity.ok(crudBranch.findAllNameByBranchAccess(branchIds));
     }
 }

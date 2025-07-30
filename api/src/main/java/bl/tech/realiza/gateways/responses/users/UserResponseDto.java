@@ -1,7 +1,7 @@
 package bl.tech.realiza.gateways.responses.users;
 
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.gateways.responses.clients.BranchResponseDto;
+import bl.tech.realiza.gateways.responses.clients.branches.BranchResponseDto;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
