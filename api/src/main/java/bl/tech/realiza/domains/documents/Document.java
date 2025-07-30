@@ -27,7 +27,8 @@ public abstract class Document {
     private String idDocumentation;
     private String title;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    @Builder.Default
+    private Status status = Status.PENDENTE;
     private String type;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
@@ -48,9 +49,6 @@ public abstract class Document {
     private Boolean conforming = false;
     @Builder.Default
     private Boolean doesBlock = true;
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private Request request = Request.NONE;
 
     // -------------------------------
     // Relacionamentos INERENTES
@@ -80,12 +78,7 @@ public abstract class Document {
         REPROVADO_IA,
         APROVADO_IA,
         VENCIDO,
-        ISENCAO_PENDENTE
-    }
-
-    public enum Request {
-        NONE,
-        DELETE,
-        ADD
+        ISENCAO_PENDENTE,
+        ISENTO
     }
 }

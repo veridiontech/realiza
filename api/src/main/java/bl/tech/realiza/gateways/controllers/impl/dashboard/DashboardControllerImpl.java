@@ -4,10 +4,7 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.gateways.controllers.interfaces.dashboard.DashboardController;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardDetailsResponseDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardGeneralDetailsResponseDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardHomeResponseDto;
-import bl.tech.realiza.gateways.responses.dashboard.DashboardProviderDetailsResponseDto;
+import bl.tech.realiza.gateways.responses.dashboard.*;
 import bl.tech.realiza.services.dashboard.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,6 +37,15 @@ public class DashboardControllerImpl implements DashboardController {
     @Override
     public ResponseEntity<DashboardDetailsResponseDto> getDashboardDetails(@PathVariable String branchId) {
         return ResponseEntity.ok(dashboardService.getDetailsInfo(branchId));
+    }
+
+    @GetMapping("/{clientId}/document")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Busca informações da do dashboard detalhado")
+    @Override
+    public ResponseEntity<DashboardDocumentResponseDto> getDocumentDetails(@PathVariable String clientId,
+                                                                           @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        return ResponseEntity.ok(dashboardService.getDocumentDetailsInfo(clientId, dashboardFiltersRequestDto));
     }
 
     @GetMapping("/{clientId}/general")

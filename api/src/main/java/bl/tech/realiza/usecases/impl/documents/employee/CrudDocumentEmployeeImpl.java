@@ -419,7 +419,6 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
         DocumentEmployee documentEmployee = DocumentEmployee.builder()
                 .employee(employee)
                 .documentMatrix(documentMatrix)
-                .request(Document.Request.ADD)
                 .title(documentMatrix.getName())
                 .build();
 
