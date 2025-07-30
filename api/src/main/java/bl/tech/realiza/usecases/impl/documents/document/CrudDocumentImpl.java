@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.impl.documents.document;
 
+import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.Document;
@@ -17,6 +18,7 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.auditLogs.document.AuditLogDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
@@ -25,6 +27,7 @@ import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployee
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementDocumentRequestDto;
@@ -71,6 +74,8 @@ public class CrudDocumentImpl implements CrudDocument {
     private final DocumentProviderSubcontractorRepository documentProviderSubcontractorRepository;
     private final ContractDocumentRepository contractDocumentRepository;
     private final CrudItemManagementImpl crudItemManagementImpl;
+    private final AuditLogDocumentRepository auditLogDocumentRepository;
+    private final FileRepository fileRepository;
 
     @Override
     public void expirationChange() {
@@ -193,8 +198,11 @@ public class CrudDocumentImpl implements CrudDocument {
         }
         document.setLastCheck(LocalDateTime.now());
         documentRepository.save(document);
-        // TODO criar tabela relacionando contratoDocumento e arquivo
-        // TODO apagar documentos antigos reprovados
+        if (document.getStatus() == APROVADO) {
+            List<AuditLogDocument> auditLogDocuments = auditLogDocumentRepository.findAllByDocumentId(document.getIdDocumentation());
+            auditLogDocuments.forEach(auditLogDocument -> auditLogDocument.setHasDoc(false));
+            auditLogDocumentRepository.saveAll(auditLogDocuments);
+        }
 
         AuditLogActionsEnum action;
         switch (documentStatusChangeRequestDto.getStatus()) {
@@ -400,5 +408,16 @@ public class CrudDocumentImpl implements CrudDocument {
             }
         }
         return responseDto;
+    }
+
+    @Override
+    public String findVersionByAuditLog(String auditLogId) {
+        AuditLogDocument auditLog = auditLogDocumentRepository.findById(auditLogId)
+                .orElseThrow(() -> new NotFoundException("Audit Log not found"));
+
+        FileDocument fileDocument = fileRepository.findById(auditLog.getFileId())
+                .orElseThrow(() -> new NotFoundException("File not found"));
+
+        return googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
     }
 }

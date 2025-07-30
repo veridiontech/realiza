@@ -6,8 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface AuditLogDocumentRepository extends JpaRepository<AuditLogDocument, String> {
     Page<AuditLogDocument> findAllByDocumentId(String id, Pageable pageable);
+    List<AuditLogDocument> findAllByDocumentId(String id);
     Page<AuditLogDocument> findAllByDocumentIdAndAction(String id, AuditLogActionsEnum action, Pageable pageable);
 
     Page<AuditLogDocument> findAllByDocumentIdAndUserResponsibleId(String id, String idUser, Pageable pageable);

@@ -11,4 +11,5 @@ public interface CrudDocument {
     String changeStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto);
     String documentExemptionRequest(String documentId, String contractId);
     List<DocumentPendingResponseDto> findNonConformingDocumentByEnterpriseId(String enterpriseId);
+    String findVersionByAuditLog(String auditLogId);
 }

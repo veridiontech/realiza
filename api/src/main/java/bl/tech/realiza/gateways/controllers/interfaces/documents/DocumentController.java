@@ -10,4 +10,5 @@ public interface DocumentController {
     ResponseEntity<String> changeDocumentStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto);
     ResponseEntity<String> documentExemption(String documentId, String contractId);
     ResponseEntity<List<DocumentPendingResponseDto>> nonConformingDocumentsByEnterpriseId(String enterpriseId);
+    ResponseEntity<String> getVersionByAuditLogId(String auditLogId);
 }
