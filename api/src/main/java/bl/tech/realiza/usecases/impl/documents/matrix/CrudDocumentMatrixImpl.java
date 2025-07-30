@@ -1,16 +1,15 @@
 package bl.tech.realiza.usecases.impl.documents.matrix;
 
-import bl.tech.realiza.domains.contract.activity.Activity;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubgroupRepository;
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.replication.ReplicationMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationQueueProducer;
 import bl.tech.realiza.usecases.interfaces.documents.matrix.CrudDocumentMatrix;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,55 +26,55 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
-    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final ReplicationQueueProducer replicationQueueProducer;
 
     @Override
     public DocumentMatrixResponseDto save(DocumentMatrixRequestDto documentMatrixRequestDto) {
         if (documentMatrixRequestDto.getSubgroup() == null || documentMatrixRequestDto.getSubgroup().isEmpty()) {
             throw new BadRequestException("Invalid subgroup");
         }
-        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup());
+        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup())
+                .orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
-
-        DocumentMatrix newDocumentMatrix = DocumentMatrix.builder()
+        DocumentMatrix savedDocumentMatrix = documentMatrixRepository.save(DocumentMatrix.builder()
                 .name(documentMatrixRequestDto.getName())
                 .type(documentMatrixRequestDto.getType())
                 .doesBlock(documentMatrixRequestDto.getDoesBlock())
                 .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
                 .subGroup(documentMatrixSubgroup)
-                .build();
+                .build());
 
-        DocumentMatrix savedDocumentMatrix = documentMatrixRepository.save(newDocumentMatrix);
+        replicationQueueProducer.send(new ReplicationMessage("CREATE_DOCUMENT_MATRIX",
+                null,
+                null,
+                null,
+                savedDocumentMatrix.getIdDocument(),
+                null,
+                RiskEnum.LOW,
+                RiskEnum.LOW));
 
         return toDto(savedDocumentMatrix);
     }
 
     @Override
     public Optional<DocumentMatrixResponseDto> findOne(String id) {
-        Optional<DocumentMatrix> documentMatrixOptional = documentMatrixRepository.findById(id);
-
-        DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
 
         return Optional.of(toDto(documentMatrix));
     }
 
     @Override
     public Page<DocumentMatrixResponseDto> findAll(Pageable pageable) {
-        Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAll(pageable);
-
-        return toDto(documentMatrixPage);
+        return toDto(documentMatrixRepository.findAll(pageable));
     }
 
     @Override
     public Optional<DocumentMatrixResponseDto> update(String id, Boolean replicate, DocumentMatrixRequestDto documentMatrixRequestDto) {
-        Optional<DocumentMatrix> documentMatrixOptional = documentMatrixRepository.findById(id);
+        DocumentMatrix documentMatrix = documentMatrixRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
 
-        DocumentMatrix documentMatrix = documentMatrixOptional.orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
-
-        Optional<DocumentMatrixSubgroup> documentMatrixSubgroupOptional = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup());
-
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupOptional.orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
+        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrix.getSubGroup();
 
         documentMatrix.setName(documentMatrixRequestDto.getName() != null
                 ? documentMatrixRequestDto.getName()
@@ -98,22 +97,16 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrix.setExpirationDateAmount(documentMatrixRequestDto.getExpirationDateAmount() != null
                 ? documentMatrixRequestDto.getExpirationDateAmount()
                 : documentMatrix.getExpirationDateAmount());
+
         if (replicate != null && replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM",
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM",
                     null,
                     null,
                     null,
                     documentMatrix.getIdDocument(),
                     null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         return Optional.of(toDto(documentMatrix));
@@ -126,16 +119,12 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
     @Override
     public Page<DocumentMatrixResponseDto> findAllBySubgroup(String idSearch, Pageable pageable) {
-        Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable);
-
-        return toDto(documentMatrixPage);
+        return toDto(documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable));
     }
 
     @Override
     public Page<DocumentMatrixResponseDto> findAllByGroup(String idSearch, Pageable pageable) {
-        Page<DocumentMatrix> documentMatrixPage = documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable);
-
-        return toDto(documentMatrixPage);
+        return toDto(documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable));
     }
 
     private DocumentMatrixResponseDto toDto(DocumentMatrix documentMatrix) {

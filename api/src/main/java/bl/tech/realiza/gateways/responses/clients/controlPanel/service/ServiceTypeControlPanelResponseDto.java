@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.responses.clients.controlPanel.service;
 
+import bl.tech.realiza.domains.enums.RiskEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,5 +15,5 @@ import static bl.tech.realiza.domains.contract.serviceType.ServiceType.*;
 public class ServiceTypeControlPanelResponseDto {
     private String id;
     private String title;
-    private Risk risk;
+    private RiskEnum risk;
 }

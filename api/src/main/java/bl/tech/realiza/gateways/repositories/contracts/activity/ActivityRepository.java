@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.repositories.contracts.activity;
 
 import bl.tech.realiza.domains.contract.activity.Activity;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.ControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.activity.ActivityControlPanelResponseDto;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,6 +41,6 @@ public interface ActivityRepository extends JpaRepository<Activity, String > {
 
     List<Activity> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
 
-    List<Activity> findAllByBranch_Client_IdClientAndTitleAndRisk(String idClient, String title, Activity.Risk risk);
-    List<Activity> findAllByBranch_IdBranchAndTitleAndRisk(String idBranch, String title, Activity.Risk risk);
+    List<Activity> findAllByBranch_Client_IdClientAndTitleAndRisk(String idClient, String title, RiskEnum risk);
+    List<Activity> findAllByBranch_IdBranchAndTitleAndRisk(String idBranch, String title, RiskEnum risk);
 }

@@ -24,10 +24,9 @@ import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractSubcontractorPostRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractSubcontractorResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
-import bl.tech.realiza.usecases.impl.CrudItemManagementImpl;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
@@ -55,7 +54,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
-    private final SetupAsyncQueueProducer setupQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final CrudItemManagement crudItemManagement;
 
     @Override
@@ -106,21 +105,14 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUBCONTRACT",
-                null,
+        setupQueueProducer.send(new SetupMessage("NEW_CONTRACT_SUBCONTRACTOR",
                 null,
                 null,
                 null,
                 savedContractSubcontractor.getIdContract(),
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                Activity.Risk.LOW,
-                ServiceType.Risk.LOW));
+                null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

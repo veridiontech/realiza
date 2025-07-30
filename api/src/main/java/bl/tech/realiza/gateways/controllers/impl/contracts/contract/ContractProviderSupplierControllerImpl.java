@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.contracts.contract;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.contract.ContractProviderSupplierControlller;
 import bl.tech.realiza.gateways.requests.contracts.ContractAndSupplierCreateRequestDto;
 import bl.tech.realiza.gateways.requests.contracts.ContractRequestDto;
@@ -88,10 +89,10 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                                @RequestParam(defaultValue = "contractReference") String sort,
                                                                                                @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                                @RequestParam String idSearch,
-                                                                                               @RequestParam(required = false) List<Contract.IsActive> isActive) {
+                                                                                               @RequestParam(required = false) List<ContractStatusEnum> status) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllBySupplier(idSearch, isActive, pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllBySupplier(idSearch, status, pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }
@@ -104,10 +105,10 @@ public class ContractProviderSupplierControllerImpl implements ContractProviderS
                                                                                              @RequestParam(defaultValue = "contractReference") String sort,
                                                                                              @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                              @RequestParam String idSearch,
-                                                                                             @RequestParam(required = false) List<Contract.IsActive> isActive) {
+                                                                                             @RequestParam(required = false) List<ContractStatusEnum> status) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllByClient(idSearch, isActive, pageable);
+        Page<ContractResponseDto> pageContractSupplier = crudContractSupplier.findAllByClient(idSearch, status, pageable);
 
         return ResponseEntity.ok(pageContractSupplier);
     }

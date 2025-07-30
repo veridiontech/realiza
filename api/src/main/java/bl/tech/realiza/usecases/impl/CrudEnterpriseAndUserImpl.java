@@ -18,10 +18,10 @@ import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.users.UserProviderSupplierRepository;
 import bl.tech.realiza.gateways.requests.enterprises.EnterpriseAndUserRequestDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.gateways.responses.services.EnterpriseAndUserResponseDto;
 import bl.tech.realiza.services.auth.PasswordEncryptionService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudEnterpriseAndUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final PasswordEncryptionService passwordEncryptionService;
-    private final SetupAsyncQueueProducer setupQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
 
     @Override
     public EnterpriseAndUserResponseDto saveBothClient(EnterpriseAndUserRequestDto enterpriseAndUserRequestDto) {
@@ -66,21 +66,14 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
 
         Client savedClient = clientRepository.save(client);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CLIENT",
+        setupQueueProducer.send(new SetupMessage("NEW_CLIENT",
                 savedClient.getIdClient(),
                 null,
                 null,
                 null,
                 null,
                 null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                Activity.Risk.LOW,
-                ServiceType.Risk.LOW));
+                null));
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 

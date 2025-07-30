@@ -3,6 +3,7 @@ package bl.tech.realiza.domains.contract.activity;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,18 +26,11 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idActivity;
     private String title;
-    private Risk risk;
+    private RiskEnum risk;
     @Builder.Default
     private Boolean deleteRequest = false;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-
-    public enum Risk {
-        LOW,
-        MEDIUM,
-        HIGH,
-        VERY_HIGH
-    }
 
     // -------------------------------
     // Relacionamentos INERENTES

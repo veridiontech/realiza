@@ -7,6 +7,7 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -22,11 +23,13 @@ import bl.tech.realiza.gateways.responses.documents.DocumentExpirationResponseDt
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentSummarizedResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.documentProcessing.DocumentProcessingService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.documents.client.CrudDocumentBranch;
 import jakarta.persistence.EntityNotFoundException;
@@ -57,8 +60,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
     private final DocumentProcessingService documentProcessingService;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
-    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final GoogleCloudService googleCloudService;
+    private final ReplicationQueueProducer replicationQueueProducer;
 
     @Value("${gcp.storage.bucket}")
     private String bucketName;
@@ -587,37 +591,23 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
             if (replicate) {
                 if (isSelected) {
-                    setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT_FROM_BRANCH",
-                            null,
-                            null,
+                    replicationQueueProducer.send(new ReplicationMessage("ALLOCATE_DOCUMENT_FROM_BRANCH",
                             branchIds,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
                             null,
                             null,
                             document.getIdDocumentation(),
                             document.getTitle(),
-                            Activity.Risk.LOW,
-                            ServiceType.Risk.LOW));
+                            RiskEnum.LOW,
+                            RiskEnum.LOW));
                 } else {
-                    setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT_FROM_BRANCH",
-                            null,
-                            null,
+                    replicationQueueProducer.send(new ReplicationMessage("DEALLOCATE_DOCUMENT_FROM_BRANCH",
                             branchIds,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
                             null,
                             null,
                             document.getIdDocumentation(),
                             document.getTitle(),
-                            Activity.Risk.LOW,
-                            ServiceType.Risk.LOW));
+                            RiskEnum.LOW,
+                            RiskEnum.LOW));
                 }
             }
         }
@@ -678,24 +668,17 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 ? documentExpirationUpdateRequestDto.getExpirationDateUnit()
                 : documentBranch.getExpirationDateUnit());
 
-        documentBranchRepository.save(documentBranch);
+        DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("EXPIRATION_DATE_DOCUMENT_UPDATE",
-                    null,
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("EXPIRATION_DATE_DOCUMENT_UPDATE",
                     branchIds,
                     null,
                     null,
+                    savedDocumentBranch.getIdDocumentation(),
                     null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {

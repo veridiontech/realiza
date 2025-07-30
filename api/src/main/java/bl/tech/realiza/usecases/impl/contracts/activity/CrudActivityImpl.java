@@ -8,7 +8,7 @@ import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepoRepository;
@@ -21,9 +21,11 @@ import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentForActivityResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationMessage;
+import bl.tech.realiza.services.queue.replication.ReplicationQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +35,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +54,8 @@ public class CrudActivityImpl implements CrudActivity {
     private final ActivityDocumentRepoRepository activityDocumentRepoRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
-    private final SetupAsyncQueueProducer setupAsyncQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
+    private final ReplicationQueueProducer replicationQueueProducer;
 
     @Override
     public ActivityResponseDto save(ActivityRequestDto activityRequestDto, Boolean replicate, List<String> branchIds) {
@@ -73,21 +74,14 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("CREATE_ACTIVITY",
-                    null,
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("CREATE_ACTIVITY",
                     branchIds,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
                     savedActivity.getIdActivity(),
                     null,
                     null,
                     null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -215,21 +209,14 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("ALLOCATE_DOCUMENT_FROM_ACTIVITY",
-                    null,
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("ALLOCATE_DOCUMENT_FROM_ACTIVITY",
                     branchIds,
-                    null,
-                    null,
-                    null,
-                    null,
                     null,
                     savedActivityDocuments.getActivity().getIdActivity(),
                     null,
                     savedActivityDocuments.getDocumentBranch().getIdDocumentation(),
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -262,21 +249,14 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("DEALLOCATE_DOCUMENT_FROM_ACTIVITY",
-                    null,
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("DEALLOCATE_DOCUMENT_FROM_ACTIVITY",
                     branchIds,
-                    null,
-                    null,
-                    null,
-                    null,
                     null,
                     savedActivityDocuments.getActivity().getIdActivity(),
                     null,
                     savedActivityDocuments.getDocumentBranch().getIdDocumentation(),
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -304,7 +284,7 @@ public class CrudActivityImpl implements CrudActivity {
 
         Activity activity = activityOptional.orElseThrow(() -> new NotFoundException("Activity not found"));
         String oldTitle = activity.getTitle();
-        Activity.Risk oldRisk = activity.getRisk();
+        RiskEnum oldRisk = activity.getRisk();
 
         activity.setTitle(activityRequestDto.getTitle() != null
                 ? activityRequestDto.getTitle()
@@ -320,21 +300,14 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("UPDATE_ACTIVITY",
-                    null,
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("UPDATE_ACTIVITY",
                     branchIds,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
                     savedActivity.getIdActivity(),
                     null,
                     null,
                     oldTitle,
                     oldRisk,
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW));
         }
 
         ActivityResponseDto activityResponse = ActivityResponseDto.builder()
@@ -367,21 +340,14 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            setupAsyncQueueProducer.sendSetup(new SetupMessage("DELETE_ACTIVITY",
-                    activity.getBranch().getClient().getIdClient(),
-                    null,
+            replicationQueueProducer.send(new ReplicationMessage("DELETE_ACTIVITY",
                     branchIds,
                     null,
                     null,
                     null,
-                    null,
-                    null,
-                    activity.getIdActivity(),
-                    null,
-                    null,
                     activity.getTitle(),
-                    activity.getRisk(),
-                    ServiceType.Risk.LOW));
+                    RiskEnum.LOW,
+                    RiskEnum.LOW));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {

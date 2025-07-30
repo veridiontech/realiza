@@ -9,6 +9,7 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -305,7 +306,7 @@ public class CrudDocumentImpl implements CrudDocument {
                                 || contractDocument.getStatus().equals(REPROVADO)
                                 || contractDocument.getStatus().equals(VENCIDO))
                         .map(ContractDocument::getContract)
-                        .filter(contract -> contract.getIsActive().equals(Contract.IsActive.ATIVADO))
+                        .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
                         .toList();
 
                 List<String> contractReferences = contracts.stream()
@@ -338,7 +339,7 @@ public class CrudDocumentImpl implements CrudDocument {
                                         || contractDocument.getStatus().equals(REPROVADO)
                                         || contractDocument.getStatus().equals(VENCIDO))
                         .map(ContractDocument::getContract)
-                        .filter(contract -> contract.getIsActive().equals(Contract.IsActive.ATIVADO))
+                        .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
                         .toList();
 
                 List<String> contractReferences = contracts.stream()

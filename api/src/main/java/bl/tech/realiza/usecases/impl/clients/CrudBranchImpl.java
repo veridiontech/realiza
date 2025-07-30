@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
+import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -23,11 +24,11 @@ import bl.tech.realiza.gateways.responses.clients.controlPanel.document.Document
 import bl.tech.realiza.gateways.responses.clients.controlPanel.document.DocumentTypeControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeControlPanelResponseDto;
 import bl.tech.realiza.gateways.responses.clients.controlPanel.service.ServiceTypeRiskControlPanelResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,7 @@ public class CrudBranchImpl implements CrudBranch {
     private final CenterRepository centerRepository;
     private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
-    private final SetupAsyncQueueProducer setupQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final DocumentBranchRepository documentBranchRepository;
     private final ActivityRepository activityRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
@@ -94,37 +95,23 @@ public class CrudBranchImpl implements CrudBranch {
         }
 
         if (branchCreateRequestDto.getReplicateFromBase()) {
-            setupQueueProducer.sendSetup(new SetupMessage("REPLICATE_BRANCH",
+            setupQueueProducer.send(new SetupMessage("REPLICATE_BRANCH",
                     null,
                     savedBranch.getIdBranch(),
                     null,
                     null,
                     null,
                     null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    null));
         } else {
-            setupQueueProducer.sendSetup(new SetupMessage("NEW_BRANCH",
+            setupQueueProducer.send(new SetupMessage("NEW_BRANCH",
                     null,
                     savedBranch.getIdBranch(),
                     null,
                     null,
                     null,
                     null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    Activity.Risk.LOW,
-                    ServiceType.Risk.LOW));
+                    null));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -364,7 +351,7 @@ public class CrudBranchImpl implements CrudBranch {
 
         // activities
         List<ActivityControlPanelResponseDto> activities = activityRepository.findAllControlPanelActivityResponseDtoByBranch_IdBranch(branchId);
-        Map<Activity.Risk, List<ActivityControlPanelResponseDto>> activitiesByRisk = activities.stream()
+        Map<RiskEnum, List<ActivityControlPanelResponseDto>> activitiesByRisk = activities.stream()
                 .collect(Collectors.groupingBy(ActivityControlPanelResponseDto::getRisk));
 
         activitiesByRisk.forEach((risk, activityList) -> {
@@ -380,7 +367,7 @@ public class CrudBranchImpl implements CrudBranch {
 
         // service types
         List<ServiceTypeControlPanelResponseDto> services = serviceTypeBranchRepository.findAllControlPanelActivityResponseDtoByBranch_IdBranch(branchId);
-        Map<ServiceType.Risk, List<ServiceTypeControlPanelResponseDto>> servicesByRisk = services.stream()
+        Map<RiskEnum, List<ServiceTypeControlPanelResponseDto>> servicesByRisk = services.stream()
                 .collect(Collectors.groupingBy(ServiceTypeControlPanelResponseDto::getRisk));
 
         servicesByRisk.forEach((risk, serviceList) -> {

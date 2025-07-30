@@ -2,16 +2,15 @@ package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.Contract.IsActive;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
@@ -35,10 +34,10 @@ import bl.tech.realiza.gateways.requests.contracts.ContractSupplierPostRequestDt
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.*;
 import bl.tech.realiza.gateways.responses.providers.ProviderResponseDto;
-import bl.tech.realiza.gateways.responses.queue.SetupMessage;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
-import bl.tech.realiza.services.queue.SetupAsyncQueueProducer;
+import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
@@ -74,7 +73,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
     private final ContractRepository contractRepository;
-    private final SetupAsyncQueueProducer setupQueueProducer;
+    private final SetupQueueProducer setupQueueProducer;
     private final JwtService jwtService;
 
     @Override
@@ -143,21 +142,14 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         userClient.getContractsAccess().add(savedContractProviderSupplier);
         userClientRepository.save(userClient);
 
-        setupQueueProducer.sendSetup(new SetupMessage("NEW_CONTRACT_SUPPLIER",
-                null,
+        setupQueueProducer.send(new SetupMessage("NEW_CONTRACT_SUPPLIER",
                 null,
                 null,
                 savedContractProviderSupplier.getIdContract(),
                 null,
                 null,
                 activities.stream().map(Activity::getIdActivity).toList(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                Activity.Risk.LOW,
-                ServiceType.Risk.LOW));
+                null));
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
@@ -223,7 +215,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAll(Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByIsActiveIn(List.of(ATIVADO, SUSPENSO), pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAll(pageable);
 
         return contractProviderSupplierPage.map(
                 contractProviderSupplier -> ContractResponseDto.builder()
@@ -359,26 +351,26 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     }
 
     @Override
-    public Page<ContractResponseDto> findAllBySupplier(String idSearch, List<IsActive> isActive, Pageable pageable) {
-        if (isActive == null || isActive.isEmpty()) {
-            isActive = List.of(ATIVADO);
+    public Page<ContractResponseDto> findAllBySupplier(String idSearch, List<ContractStatusEnum> status, Pageable pageable) {
+        if (status == null || status.isEmpty()) {
+            status = List.of(ContractStatusEnum.ACTIVE);
         }
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActiveIn(idSearch, isActive, pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndStatusIn(idSearch, status, pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
 
     @Override
-    public Page<ContractResponseDto> findAllByClient(String idSearch, List<IsActive> isActive, Pageable pageable) {
-        if (isActive == null || isActive.isEmpty()) {
-            isActive = List.of(ATIVADO);
+    public Page<ContractResponseDto> findAllByClient(String idSearch, List<ContractStatusEnum> status, Pageable pageable) {
+        if (status == null || status.isEmpty()) {
+            status = List.of(ContractStatusEnum.ACTIVE);
         }
         Page<ContractProviderSupplier> contractProviderSupplierPage = null;
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
         if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                 || requester.getRole().equals(ROLE_REALIZA_BASIC)
                 || requester.getRole().equals(ROLE_REALIZA_PLUS)) {
-            contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveInAndProviderSupplier_IsActive(idSearch, isActive, true, pageable);
+            contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndStatusInAndProviderSupplier_IsActive(idSearch, status, true, pageable);
         } else {
             if (!requester.getBranchAccess().contains(idSearch)) {
                 return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -398,7 +390,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public Page<ContractResponseDto> findAllBySupplierAndBranch(String idSupplier, String idBranch, Pageable pageable) {
-        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndIsActiveIn(idBranch,idSupplier, List.of(ATIVADO,SUSPENSO), pageable);
+        Page<ContractProviderSupplier> contractProviderSupplierPage = contractProviderSupplierRepository.findAllByBranch_IdBranchAndProviderSupplier_IdProviderAndStatusIn(idBranch,idSupplier, List.of(ContractStatusEnum.ACTIVE,ContractStatusEnum.SUSPENDED), pageable);
 
         return getContractResponseDtos(contractProviderSupplierPage);
     }
@@ -563,7 +555,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
 
     @Override
     public List<ContractSupplierPermissionResponseDto> findAllByBranchAndSubcontractPermission(String idBranch) {
-        List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllByBranch_IdBranchAndIsActiveAndSubcontractPermissionIsTrue(idBranch, ATIVADO);
+        List<ContractProviderSupplier> contractProviderSuppliers = contractProviderSupplierRepository.findAllByBranch_IdBranchAndStatusAndSubcontractPermissionIsTrue(idBranch, ContractStatusEnum.ACTIVE);
         return contractProviderSuppliers.stream().map(
                 contractProviderSupplier -> ContractSupplierPermissionResponseDto.builder()
                         .idContract(contractProviderSupplier.getIdContract())

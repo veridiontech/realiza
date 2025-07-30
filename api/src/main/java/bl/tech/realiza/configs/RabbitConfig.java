@@ -17,17 +17,32 @@ public class RabbitConfig {
 
     public static final String SETUP_QUEUE = "setup-queue";
     public static final String SETUP_DLQ = "setup-queue-dlq";
+    public static final String REPLICATION_QUEUE = "replication-queue";
+    public static final String REPLICATION_DLQ = "replication-queue-dlq";
 
     @Bean
     public Queue setupDlq() {
-        return new Queue("setup-queue-dlq", true);
+        return new Queue(SETUP_DLQ, true);
+    }
+
+    @Bean
+    public Queue replicationDlq() {
+        return new Queue(REPLICATION_DLQ, true);
     }
 
     @Bean
     public Queue setupQueue() {
-        return QueueBuilder.durable("setup-queue")
+        return QueueBuilder.durable(SETUP_QUEUE)
                 .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", "setup-queue-dlq")
+                .withArgument("x-dead-letter-routing-key", SETUP_DLQ)
+                .build();
+    }
+
+    @Bean
+    public Queue replicationQueue() {
+        return QueueBuilder.durable(REPLICATION_QUEUE)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", REPLICATION_DLQ)
                 .build();
     }
 
