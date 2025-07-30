@@ -12,4 +12,5 @@ public interface CrudDocument {
     String documentExemptionRequest(String documentId, String contractId);
     List<DocumentPendingResponseDto> findNonConformingDocumentByEnterpriseId(String enterpriseId);
     String findVersionByAuditLog(String auditLogId);
+    void deleteOldReprovedDocuments();
 }

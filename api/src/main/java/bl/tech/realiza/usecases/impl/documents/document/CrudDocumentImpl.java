@@ -11,6 +11,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentStatusEnum;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -43,6 +44,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -415,9 +417,38 @@ public class CrudDocumentImpl implements CrudDocument {
         AuditLogDocument auditLog = auditLogDocumentRepository.findById(auditLogId)
                 .orElseThrow(() -> new NotFoundException("Audit Log not found"));
 
-        FileDocument fileDocument = fileRepository.findById(auditLog.getFileId())
-                .orElseThrow(() -> new NotFoundException("File not found"));
+        if (auditLog.getHasDoc()) {
+            FileDocument fileDocument = fileRepository.findById(auditLog.getFileId())
+                    .orElseThrow(() -> new NotFoundException("File not found"));
+            return googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+        } else {
+            return "Document doesn't has an old file attached to it!";
+        }
+    }
 
-        return googleCloudService.generateSignedUrl(fileDocument.getUrl(), 15);
+    @Override
+    public void deleteOldReprovedDocuments() {
+        List<String> fileIds = new ArrayList<>();
+        List<AuditLogDocument> updateAuditLogs = new ArrayList<>();
+        List<AuditLogDocument> auditLogs = auditLogDocumentRepository.findAllByDocumentIdIsNotNull();
+        for (AuditLogDocument auditLog : auditLogs) {
+            fileIds.add(auditLog.getFileId());
+            updateAuditLogs.add(auditLog);
+        }
+        List<FileDocument> fileDocuments = fileRepository.findAllById(fileIds);
+        for (FileDocument fileDocument : fileDocuments) {
+            if (ChronoUnit.MONTHS.between(fileDocument.getCreationDate(), LocalDate.now()) >= 1
+                && fileDocument.getStatus().equals(DocumentStatusEnum.REPROVADO)) {
+                if (fileDocument.getUrl() != null) try {
+                    googleCloudService.deleteFile(fileDocument.getUrl());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    updateAuditLogs.forEach(auditLogDocument -> auditLogDocument.setFileId(null));
+                    auditLogDocumentRepository.saveAll(updateAuditLogs);
+                    fileRepository.delete(fileDocument);
+                }
+            }
+        }
     }
 }
