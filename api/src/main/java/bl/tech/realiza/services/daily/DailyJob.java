@@ -25,5 +25,6 @@ public class DailyJob {
         crudDocument.expirationChange();
         crudDocument.expirationCheck();
         crudUser.fourDigitCodeCheck();
+        // TODO apagar documentos antigos reprovados do último mês
     }
 }

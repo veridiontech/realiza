@@ -23,6 +23,8 @@ import lombok.experimental.SuperBuilder;
 public class AuditLogDocument extends AuditLog {
     private String documentId;
     private String documentTitle;
+    private String fileId;
+    private Boolean hasDoc;
     private String ownerId;
     private OwnerEnum owner;
 }

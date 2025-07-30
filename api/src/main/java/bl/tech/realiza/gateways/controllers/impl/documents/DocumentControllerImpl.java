@@ -43,4 +43,11 @@ public class DocumentControllerImpl implements DocumentController {
     public ResponseEntity<List<DocumentPendingResponseDto>> nonConformingDocumentsByEnterpriseId(@PathVariable String enterpriseId) {
         return ResponseEntity.ok(crudDocument.findNonConformingDocumentByEnterpriseId(enterpriseId));
     }
+
+    @GetMapping("/find-by-audit-log/{auditLogId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> getVersionByAuditLogId(@PathVariable String auditLogId) {
+        return ResponseEntity.ok(crudDocument.findVersionByAuditLog(auditLogId));
+    }
 }

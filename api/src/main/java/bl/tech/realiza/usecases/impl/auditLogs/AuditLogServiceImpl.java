@@ -25,6 +25,7 @@ import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import bl.tech.realiza.domains.enums.AuditLogTypeEnum;
 import bl.tech.realiza.domains.enums.OwnerEnum;
 import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.auditLogs.activity.AuditLogActivityRepository;
@@ -52,6 +53,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
@@ -227,6 +229,10 @@ public class AuditLogServiceImpl implements AuditLogService {
                                     .owner(OwnerEnum.SUPPLIER)
                                     .documentId(documentSupplier.getIdDocumentation())
                                     .documentTitle(documentSupplier.getTitle())
+                                    .fileId(!documentSupplier.getDocument().isEmpty()
+                                            ? documentSupplier.getDocument().stream().max(Comparator.comparing(FileDocument::getCreationDate)).get().getId()
+                                            : null)
+                                    .hasDoc(true)
                                     .build()
                     );
                 } else if (document instanceof DocumentProviderSubcontractor documentSubcontractor) {
@@ -245,6 +251,10 @@ public class AuditLogServiceImpl implements AuditLogService {
                                     .owner(OwnerEnum.SUBCONTRACTOR)
                                     .documentId(documentSubcontractor.getIdDocumentation())
                                     .documentTitle(documentSubcontractor.getTitle())
+                                    .fileId(!documentSubcontractor.getDocument().isEmpty()
+                                            ? documentSubcontractor.getDocument().stream().max(Comparator.comparing(FileDocument::getCreationDate)).get().getId()
+                                            : null)
+                                    .hasDoc(true)
                                     .build()
                     );
                 } else if (document instanceof DocumentEmployee documentEmployee) {
@@ -263,6 +273,10 @@ public class AuditLogServiceImpl implements AuditLogService {
                                     .owner(OwnerEnum.EMPLOYEE)
                                     .documentId(documentEmployee.getIdDocumentation())
                                     .documentTitle(documentEmployee.getTitle())
+                                    .fileId(!documentEmployee.getDocument().isEmpty()
+                                            ? documentEmployee.getDocument().stream().max(Comparator.comparing(FileDocument::getCreationDate)).get().getId()
+                                            : null)
+                                    .hasDoc(true)
                                     .build()
                     );
                 }
