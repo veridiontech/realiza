@@ -1,5 +1,6 @@
 package bl.tech.realiza.usecases.interfaces.documents.document;
 
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import bl.tech.realiza.gateways.requests.documents.DocumentStatusChangeRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
 
@@ -13,4 +14,5 @@ public interface CrudDocument {
     List<DocumentPendingResponseDto> findNonConformingDocumentByEnterpriseId(String enterpriseId);
     String findVersionByAuditLog(String auditLogId);
     void deleteOldReprovedDocuments();
+    void documentValidityCheck(DocumentValidityEnum documentValidityEnum);
 }

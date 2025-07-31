@@ -14,6 +14,6 @@ public class DocumentControlPanelResponseDto {
     private String id;
     private String title;
     private Integer expirationQuantity;
-    private DocumentMatrix.Unit expirationUnit;
+    private DocumentMatrix.DayUnitEnum expirationDateUnit;
     private String type;
 }

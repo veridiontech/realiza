@@ -540,7 +540,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())
                         .expirationDateAmount(document.getExpirationDateAmount())
-                        .expirationDateUnit(document.getExpirationDateUnit())
+                        .expirationDateDayUnitEnum(document.getExpirationDateUnit())
                         .build()).toList();
     }
 
@@ -656,13 +656,13 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch documentBranch = documentBranchRepository.findById(idDocumentation)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
         Integer oldAmount = documentBranch.getExpirationDateAmount();
-        DocumentMatrix.Unit oldUnit = documentBranch.getExpirationDateUnit();
+        DocumentMatrix.DayUnitEnum oldDayUnitEnum = documentBranch.getExpirationDateUnit();
 
         documentBranch.setExpirationDateAmount(documentExpirationUpdateRequestDto.getExpirationDateAmount() != null
                 ? documentExpirationUpdateRequestDto.getExpirationDateAmount()
                 : documentBranch.getExpirationDateAmount());
-        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateUnit() != null
-                ? documentExpirationUpdateRequestDto.getExpirationDateUnit()
+        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateDayUnitEnum() != null
+                ? documentExpirationUpdateRequestDto.getExpirationDateDayUnitEnum()
                 : documentBranch.getExpirationDateUnit());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
@@ -686,7 +686,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         documentBranch.getIdDocumentation(),
                         DOCUMENT,
                         userResponsible.getFullName() + " mudou " + documentBranch.getTitle()
-                                + " validade de " + oldAmount + " " + oldUnit
+                                + " validade de " + oldAmount + " " + oldDayUnitEnum
                                 + " para " + documentBranch.getExpirationDateAmount() + " " + documentBranch.getExpirationDateUnit(),
                         null,
                         UPDATE,
@@ -698,7 +698,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .idDocument(documentBranch.getIdDocumentation())
                 .title(documentBranch.getTitle())
                 .expirationDateAmount(documentBranch.getExpirationDateAmount())
-                .expirationDateUnit(documentBranch.getExpirationDateUnit())
+                .expirationDateDayUnitEnum(documentBranch.getExpirationDateUnit())
                 .build();
     }
 }

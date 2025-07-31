@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.documents.matrix;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,18 +27,19 @@ public class DocumentMatrix {
     @Builder.Default
     private Integer expirationDateAmount = 1;
     @Builder.Default
-    private Unit expirationDateUnit = Unit.MONTHS;
+    private DayUnitEnum expirationDateDayUnitEnum = DayUnitEnum.MONTHS;
     private String type;
     @Builder.Default
     private Boolean doesBlock = true;
-    // se um documento é unico entre todos os contratos = true, caso seja por contrato = false
+    // se um documento é unico entre todos os contratos isDocumentUnique = true, caso seja por contrato = false
     @Builder.Default
     private Boolean isDocumentUnique = true;
-    // TODO documento tem competencia (surge semanalmente? mensalmente? anualmente?)
+    @Builder.Default
+    private DocumentValidityEnum validity = DocumentValidityEnum.INDEFINITE;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    public enum Unit {
+    public enum DayUnitEnum {
         DAYS,
         WEEKS,
         MONTHS,

@@ -1,7 +1,9 @@
 package bl.tech.realiza.gateways.repositories.documents;
 
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.gateways.responses.documents.DocumentPendingResponseDto;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -445,4 +447,14 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     );
 
     List<Document> findAllByDocumentMatrix_IdDocument(String idDocument);
+
+    @Query("""
+    SELECT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    WHERE d.validity = :validity
+        AND cd.contract.status = :status
+""")
+    List<Document> findAllByValidityAndContractStatus(@Param("validity") DocumentValidityEnum validity,
+                                                      @Param("status") ContractStatusEnum status);
 }

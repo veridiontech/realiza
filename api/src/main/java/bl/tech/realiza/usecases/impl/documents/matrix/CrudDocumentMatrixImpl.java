@@ -91,9 +91,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrix.setIsDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique() != null
                 ? documentMatrixRequestDto.getIsDocumentUnique()
                 : documentMatrix.getIsDocumentUnique());
-        documentMatrix.setExpirationDateUnit(documentMatrixRequestDto.getExpirationDateUnit() != null
-                ? documentMatrixRequestDto.getExpirationDateUnit()
-                : documentMatrix.getExpirationDateUnit());
+        documentMatrix.setExpirationDateDayUnitEnum(documentMatrixRequestDto.getExpirationDateDayUnitEnum() != null
+                ? documentMatrixRequestDto.getExpirationDateDayUnitEnum()
+                : documentMatrix.getExpirationDateDayUnitEnum());
         documentMatrix.setExpirationDateAmount(documentMatrixRequestDto.getExpirationDateAmount() != null
                 ? documentMatrixRequestDto.getExpirationDateAmount()
                 : documentMatrix.getExpirationDateAmount());
@@ -131,7 +131,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         return DocumentMatrixResponseDto.builder()
                 .idDocumentMatrix(documentMatrix.getIdDocument())
                 .name(documentMatrix.getName())
-                .expirationDateUnit(documentMatrix.getExpirationDateUnit())
+                .expirationDateDayUnitEnum(documentMatrix.getExpirationDateDayUnitEnum())
                 .expirationDateAmount(documentMatrix.getExpirationDateAmount())
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())

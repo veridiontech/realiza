@@ -3,14 +3,19 @@ package bl.tech.realiza.domains.documents;
 import bl.tech.realiza.domains.auditLogs.document.AuditLogDocument;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import bl.tech.realiza.domains.services.FileDocument;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.TextStyle;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 
 @Data
 @SuperBuilder
@@ -35,10 +40,12 @@ public abstract class Document {
     @Builder.Default
     private Integer expirationDateAmount = 1;
     @Builder.Default
-    private DocumentMatrix.Unit expirationDateUnit = DocumentMatrix.Unit.MONTHS;
+    private DocumentMatrix.DayUnitEnum expirationDateUnit = DocumentMatrix.DayUnitEnum.MONTHS;
     @Builder.Default
     private LocalDateTime documentDate = LocalDateTime.now();
     private LocalDateTime lastCheck;
+    @Builder.Default
+    private DocumentValidityEnum validity = DocumentValidityEnum.INDEFINITE;
     @Builder.Default
     private Boolean isActive = true;
     @Builder.Default
@@ -78,5 +85,24 @@ public abstract class Document {
         VENCIDO,
         ISENCAO_PENDENTE,
         ISENTO
+    }
+
+    public String getWeeklyTitle() {
+        LocalDate date = LocalDate.now();
+        int week = date.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
+        String month = date.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
+        return String.format("%s - Semana %s de %s", this.title != null ? this.title : "", week, month).trim();
+    }
+
+    public String getMonthlyTitle() {
+        LocalDate date = LocalDate.now();
+        String month = date.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
+        return String.format("%s - %s", this.title != null ? this.title : "", month).trim();
+    }
+
+    public String getAnnualTitle() {
+        LocalDate date = LocalDate.now();
+        int year = date.getYear();
+        return String.format("%s - %s", this.title != null ? this.title : "", year).trim();
     }
 }

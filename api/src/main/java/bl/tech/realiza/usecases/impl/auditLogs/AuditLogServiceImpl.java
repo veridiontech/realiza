@@ -530,6 +530,8 @@ public class AuditLogServiceImpl implements AuditLogService {
                         .documentTitle(auditLog.getDocumentTitle())
                         .owner(auditLog.getOwner())
                         .ownerId(auditLog.getOwnerId())
+                        .fileId(auditLog.getFileId())
+                        .hasDoc(auditLog.getHasDoc())
                         .build());
             }
             case USER -> {

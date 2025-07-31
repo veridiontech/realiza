@@ -44,6 +44,8 @@ public class AuditLogResponseDto {
     private String documentTitle;
     private String ownerId;
     private OwnerEnum owner;
+    private String fileId;
+    private Boolean hasDoc;
 
     private String employeeId;
     private String employeeName;
