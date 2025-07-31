@@ -683,11 +683,36 @@ public class DashboardService {
     }
 
     public DashboardDocumentResponseDto getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+//        DashboardDocumentResponseDto responseDto = new DashboardDocumentResponseDto();
         DashboardDocumentResponseDto responseDto = null;
+        List<String> branchIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getBranchIds() != null
+                ? dashboardFiltersRequestDto.getBranchIds()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTypes = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTypes() != null
+                ? dashboardFiltersRequestDto.getDocumentTypes()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> responsibleIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getResponsibleIds() != null
+                ? dashboardFiltersRequestDto.getResponsibleIds()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTitles = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTitles() != null
+                ? dashboardFiltersRequestDto.getDocumentTitles()
+                : new ArrayList<>() )
+                : new ArrayList<>();
 
         // find all documents by filters
+
+
         // find all adherent documents by filters
         // find all conforming documents by filters
+        // show all adherent and non-adherent
+        // show all conforming and non-conforming
         // find all status and infos by filters
         return responseDto;
     }

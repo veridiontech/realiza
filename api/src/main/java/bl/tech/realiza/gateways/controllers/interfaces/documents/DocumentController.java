@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DocumentController {
     ResponseEntity<String> changeDocumentStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto);
-    ResponseEntity<String> documentExemption(String documentId, String contractId);
+    ResponseEntity<String> documentExemption(String documentId, String contractId, String description);
     ResponseEntity<List<DocumentPendingResponseDto>> nonConformingDocumentsByEnterpriseId(String enterpriseId);
     ResponseEntity<String> getVersionByAuditLogId(String auditLogId);
 }

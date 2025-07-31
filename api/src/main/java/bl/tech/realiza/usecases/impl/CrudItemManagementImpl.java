@@ -523,6 +523,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
         ItemManagement solicitation = itemManagementRepository.save(ItemManagement.builder()
                 .solicitationType(requestDto.getSolicitationType())
                 .requester(requester)
+                .description(requestDto.getDescription())
                 .contractDocument(contractDocument)
                 .build());
 
@@ -658,6 +659,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private ItemManagementDocumentResponseDto toItemManagementDocumentResponseDto(ItemManagement itemManagement) {
         Document document = itemManagement.getContractDocument().getDocument();
         Contract contract = itemManagement.getContractDocument().getContract();
+        String description = itemManagement.getDescription();
         User requester = itemManagement.getRequester();
         Client client = null;
         Branch branch = null;
@@ -704,6 +706,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                 .ownerName(ownerName)
                 .enterpriseName(enterpriseName)
                 .solicitationType(itemManagement.getSolicitationType())
+                .description(itemManagement.getDescription())
                 .clientName(clientName)
                 .clientCnpj(clientCnpj)
                 .branchName(branchName)

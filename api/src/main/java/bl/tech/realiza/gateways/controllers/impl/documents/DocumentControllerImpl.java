@@ -31,10 +31,9 @@ public class DocumentControllerImpl implements DocumentController {
 
     @PostMapping("/{documentId}/exempt")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
     @Override
-    public ResponseEntity<String> documentExemption(@PathVariable String documentId, @RequestParam String contractId) {
-        return ResponseEntity.ok(crudDocument.documentExemptionRequest(documentId, contractId));
+    public ResponseEntity<String> documentExemption(@PathVariable String documentId, @RequestParam String contractId, @RequestParam String description) {
+        return ResponseEntity.ok(crudDocument.documentExemptionRequest(documentId, contractId, description));
     }
 
     @GetMapping("/non-conforming/{enterpriseId}")

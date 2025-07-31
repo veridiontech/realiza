@@ -15,6 +15,7 @@ public class ItemManagementDocumentResponseDto {
     private String title; // nome do documento
     private String ownerName; // nome do dono do documento
     private String enterpriseName; // nome da empresado dono do documento
+    private String description;
 
     private ItemManagement.SolicitationType solicitationType; // ação
     private String clientName; // nome do cliente na qual essa empresa pertence
