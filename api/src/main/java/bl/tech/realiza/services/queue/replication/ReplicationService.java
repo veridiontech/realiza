@@ -401,6 +401,7 @@ public class ReplicationService {
                     .isActive(false)
                     .branch(branch)
                     .documentMatrix(documentMatrix)
+                    .validity(documentMatrix.getValidity())
                     .expirationDateAmount(documentMatrix.getExpirationDateAmount())
                     .expirationDateUnit(documentMatrix.getExpirationDateDayUnitEnum())
                     .build());

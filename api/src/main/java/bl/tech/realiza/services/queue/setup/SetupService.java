@@ -84,8 +84,8 @@ public class SetupService {
         log.info("Started setup client ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
-        log.info("Finished setup client ✔️ {}", clientId);
         crudServiceType.transferFromRepoToClient(client.getIdClient());
+        log.info("Finished setup client ✔️ {}", clientId);
     }
 
     public void setupNewClientProfiles(String clientId) {
@@ -142,6 +142,7 @@ public class SetupService {
                     .isActive(false)
                     .branch(branch)
                     .documentMatrix(documentMatrix)
+                    .validity(documentMatrix.getValidity())
                     .expirationDateAmount(documentMatrix.getExpirationDateAmount())
                     .expirationDateUnit(documentMatrix.getExpirationDateDayUnitEnum())
                     .build());
@@ -213,6 +214,7 @@ public class SetupService {
                     .isActive(true)
                     .documentMatrix(document.getDocumentMatrix())
                     .providerSupplier(finalNewProviderSupplier)
+                    .validity(document.getValidity())
                     .expirationDateUnit(document.getExpirationDateUnit())
                     .expirationDateAmount(document.getExpirationDateAmount())
                     .build();
@@ -294,6 +296,7 @@ public class SetupService {
                     .type(document.getType())
                     .isActive(true)
                     .documentMatrix(document.getDocumentMatrix())
+                    .validity(document.getValidity())
                     .providerSubcontractor(finalNewProviderSubcontractor)
                     .expirationDateUnit(document.getExpirationDateUnit())
                     .expirationDateAmount(document.getExpirationDateAmount())
@@ -361,6 +364,7 @@ public class SetupService {
                             .isActive(true)
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
+                            .validity(document.getValidity())
                             .expirationDateAmount(document.getExpirationDateAmount())
                             .expirationDateUnit(document.getExpirationDateUnit())
                             .build();
@@ -438,6 +442,7 @@ public class SetupService {
                             .isActive(true)
                             .documentMatrix(document.getDocumentMatrix())
                             .employee(employee)
+                            .validity(document.getValidity())
                             .expirationDateAmount(document.getExpirationDateAmount())
                             .expirationDateUnit(document.getExpirationDateUnit())
                             .build();
@@ -552,6 +557,7 @@ public class SetupService {
                     .isActive(true)
                     .branch(branch)
                     .documentMatrix(document.getDocumentMatrix())
+                    .validity(document.getValidity())
                     .expirationDateUnit(document.getExpirationDateUnit())
                     .expirationDateAmount(document.getExpirationDateAmount())
                     .build());
