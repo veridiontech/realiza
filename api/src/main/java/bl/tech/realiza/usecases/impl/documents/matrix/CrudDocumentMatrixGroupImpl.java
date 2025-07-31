@@ -55,32 +55,29 @@ public class CrudDocumentMatrixGroupImpl implements CrudDocumentMatrixGroup {
     public Page<DocumentMatrixResponseDto> findAll(Pageable pageable) {
         Page<DocumentMatrixGroup> documentMatrixGroupPage = documentMatrixGroupRepository.findAll(pageable);
 
-        Page<DocumentMatrixResponseDto> documentMatrixResponseDtoPage = documentMatrixGroupPage.map(
+        return documentMatrixGroupPage.map(
                 documentMatrix -> DocumentMatrixResponseDto.builder()
-                        .idDocumentMatrix(documentMatrix.getIdDocumentGroup())
+                        .idDocumentGroup(documentMatrix.getIdDocumentGroup())
                         .groupName(documentMatrix.getGroupName())
                         .build()
         );
-
-        return documentMatrixResponseDtoPage;
     }
 
     @Override
     public Optional<DocumentMatrixResponseDto> update(String id, DocumentMatrixGroupRequestDto documentMatrixGroupRequestDto) {
-        Optional<DocumentMatrixGroup> documentMatrixGroupOptional = documentMatrixGroupRepository.findById(id);
+        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Group not found"));
 
-        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupOptional.orElseThrow(() -> new EntityNotFoundException("Group not found"));
-
-        documentMatrixGroup.setGroupName(documentMatrixGroupRequestDto.getGroupName() != null ? documentMatrixGroupRequestDto.getGroupName() : documentMatrixGroup.getGroupName());
+        documentMatrixGroup.setGroupName(documentMatrixGroupRequestDto.getGroupName() != null
+                ? documentMatrixGroupRequestDto.getGroupName()
+                : documentMatrixGroup.getGroupName());
 
         DocumentMatrixGroup savedDocumentMatrixGroup = documentMatrixGroupRepository.save(documentMatrixGroup);
 
-        DocumentMatrixResponseDto documentMatrixResponse = DocumentMatrixResponseDto.builder()
+        return Optional.of(DocumentMatrixResponseDto.builder()
                 .idDocumentGroup(savedDocumentMatrixGroup.getIdDocumentGroup())
                 .groupName(savedDocumentMatrixGroup.getGroupName())
-                .build();
-
-        return Optional.of(documentMatrixResponse);
+                .build());
     }
 
     @Override

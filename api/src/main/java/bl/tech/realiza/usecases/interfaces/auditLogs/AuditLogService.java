@@ -6,8 +6,10 @@ import bl.tech.realiza.gateways.responses.auditLog.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface AuditLogService {
+    @Transactional
     @Async
     void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String notes, AuditLogActionsEnum action, String userResponsibleId);
 

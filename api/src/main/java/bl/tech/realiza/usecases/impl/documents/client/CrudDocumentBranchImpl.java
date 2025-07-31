@@ -540,7 +540,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())
                         .expirationDateAmount(document.getExpirationDateAmount())
-                        .expirationDateDayUnitEnum(document.getExpirationDateUnit())
+                        .expirationDateUnit(document.getExpirationDateUnit())
                         .build()).toList();
     }
 
@@ -661,8 +661,8 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         documentBranch.setExpirationDateAmount(documentExpirationUpdateRequestDto.getExpirationDateAmount() != null
                 ? documentExpirationUpdateRequestDto.getExpirationDateAmount()
                 : documentBranch.getExpirationDateAmount());
-        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateDayUnitEnum() != null
-                ? documentExpirationUpdateRequestDto.getExpirationDateDayUnitEnum()
+        documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateUnit() != null
+                ? documentExpirationUpdateRequestDto.getExpirationDateUnit()
                 : documentBranch.getExpirationDateUnit());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
@@ -698,7 +698,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .idDocument(documentBranch.getIdDocumentation())
                 .title(documentBranch.getTitle())
                 .expirationDateAmount(documentBranch.getExpirationDateAmount())
-                .expirationDateDayUnitEnum(documentBranch.getExpirationDateUnit())
+                .expirationDateUnit(documentBranch.getExpirationDateUnit())
                 .build();
     }
 }

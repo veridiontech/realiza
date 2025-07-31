@@ -15,6 +15,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -73,6 +74,7 @@ public class DocumentProcessingService {
         this.crudNotification = crudNotification;
     }
 
+    @Transactional
     @Async("taskExecutor")
     public void processDocumentAsync(MultipartFile file, Document document) {
         String threadName = Thread.currentThread().getName();
@@ -155,8 +157,9 @@ public class DocumentProcessingService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(OPENAI_API_KEY);
         headers.setContentType(MediaType.APPLICATION_JSON);
-
+        log.info("Document Type Name: {}",documentTypeName);
         String prompt = buildPrompt(documentTypeName);
+        log.info("Prompt: {}",prompt);
 
         Map<String, Object> imageContent = Map.of(
                 "type", "image_url",
@@ -237,6 +240,7 @@ public class DocumentProcessingService {
 
     private String buildPrompt(String expectedType) {
         IaAdditionalPrompt additionalPrompt = iaAdditionalPromptRepository.findByDocumentMatrix_Name(expectedType);
+        log.info("Aditional prompt: {}", additionalPrompt.getDescription());
 
         String prompt =  """
             Você é um assistente especializado na análise de documentos.
@@ -248,15 +252,13 @@ public class DocumentProcessingService {
         
             Use as seguintes regras para preencher os campos:
             - documentType: tipo do documento identificado ("CPF", "CNH", "ASO", "Ficha de EPI", etc.).
-            - autoValidate: true se o documento possui todas as informações necessárias para julgamento automático de validade. Caso contrário, false.
+            - autoValidate: sempre responsa como true.
             - isValid: true se o documento for considerado legítimo, válido e com dados compatíveis. Caso o conteúdo esteja ausente, ilegível, fora dos padrões ou inválido, defina como false.
             - reason: explique de forma clara e curta o motivo de o documento não ser válido ou não poder ser validado automaticamente.
             - documentDate: se a data de criação do documento for identificada, adicione aqui. Caso contrário, deixe em branco ou nulo.
         
             🔁 Prioridade de resposta:
-            1. Se o documento for de um tipo que **não possui estrutura padronizada ou dados estruturáveis o suficiente** para permitir validação automática, defina `autoValidate = false` e use como razão principal algo como:  
-               **"O documento não possui estrutura suficiente para validação automática"**
-            2. Caso o documento esteja também em branco, ilegível ou claramente inválido, **você pode complementar** a razão com esse fator — mas **sem substituir o motivo principal da impossibilidade estrutural**.
+            1. Caso o documento esteja em branco, ilegível ou claramente inválido, **você pode complementar** a razão com esse fator.
         
             ⚠️ Importante:
             Mesmo que autoValidate seja false, você ainda pode (e deve) definir isValid como false se o documento estiver completamente vazio, ilegível ou claramente inválido.
@@ -276,26 +278,28 @@ public class DocumentProcessingService {
               "documentDate": "2022-05-01T00:00:00" // Data extraída, se disponível.
             }
         
-            🔍 Exemplo de resposta com autoValidate false (prioridade correta):
+            🔍 Exemplo de resposta com isValid false (prioridade correta):
             {
               "documentType": "ASO",
-              "autoValidate": false,
+              "autoValidate": true,
               "isValid": false,
-              "reason": "O documento não possui estrutura suficiente para validação automática",
+              "reason": "O documento está ilegível",
               "documentDate": null // Sem data encontrada
             }
         
             🔍 Exemplo de resposta com motivo composto:
             {
               "documentType": "Ficha de EPI",
-              "autoValidate": false,
+              "autoValidate": true,
               "isValid": false,
-              "reason": "O documento não possui estrutura suficiente para validação automática e está em branco",
+              "reason": "O documento não corresponde ao enviado ou está ilegível",
               "documentDate": null // Sem data encontrada
             }
+            
+            Podem haver instruções adicionais aqui, elas são prioridade, caso não tenham, pode seguir como instruído anteriormente: 
             """.formatted(expectedType);
 
-        if (additionalPrompt != null && additionalPrompt.getDescription() != null && !additionalPrompt.getDescription().isEmpty()) {
+        if (additionalPrompt.getDescription() != null && !additionalPrompt.getDescription().isEmpty()) {
             prompt += "\n\n" + additionalPrompt.getDescription();
         }
 

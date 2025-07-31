@@ -48,7 +48,7 @@ public class DocumentMatrixGroupControllerImpl implements DocumentMatrixGroupCon
     @Override
     public ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixGroup(@RequestParam(defaultValue = "0") int page,
                                                                                       @RequestParam(defaultValue = "5") int size,
-                                                                                      @RequestParam(defaultValue = "name") String sort,
+                                                                                      @RequestParam(defaultValue = "groupName") String sort,
                                                                                       @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
