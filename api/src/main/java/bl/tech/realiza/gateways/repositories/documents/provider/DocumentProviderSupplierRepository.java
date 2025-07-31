@@ -16,7 +16,7 @@ public interface DocumentProviderSupplierRepository extends JpaRepository<Docume
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActive(String idSearch, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(String idSearch, String groupName, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndConformingIsFalse(String idProvider);
-
+    List<DocumentProviderSupplier> findAllByProviderSupplier_IdProvider(String idProvider);
 
     @Query("""
     SELECT
