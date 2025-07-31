@@ -12,7 +12,7 @@ public class DocumentMatrixResponseDto {
     private String documentId;
     private String idDocumentMatrix;
     private String name;
-    private DocumentMatrix.Unit expirationDateUnit;
+    private DocumentMatrix.DayUnitEnum expirationDateDayUnitEnum;
     private Integer expirationDateAmount;
     private String type;
     private Boolean doesBlock;

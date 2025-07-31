@@ -12,6 +12,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.AuditLogActionsEnum;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.enums.DocumentStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
@@ -144,7 +146,7 @@ public class CrudDocumentImpl implements CrudDocument {
 
         if (document.getStatus() == APROVADO) {
             document.setConforming(true);
-            DocumentMatrix.Unit expirationUnit = null;
+            DocumentMatrix.DayUnitEnum expirationDayUnitEnum = null;
             Integer expirationAmount = 0;
             String documentMatrixId = document.getDocumentMatrix().getIdDocument();
             String branchId = null;
@@ -171,7 +173,7 @@ public class CrudDocumentImpl implements CrudDocument {
             if (documentBranches.isEmpty()) {
                 throw new NotFoundException("Document branch not found");
             }
-            expirationUnit = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
+            expirationDayUnitEnum = documentBranches.get(documentBranches.size() - 1).getExpirationDateUnit();
             expirationAmount = documentBranches.get(documentBranches.size() - 1).getExpirationDateAmount();
             if (expirationAmount == null) {
                 expirationAmount = document.getDocumentMatrix().getExpirationDateAmount();
@@ -184,7 +186,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         .plusYears(100));
             } else {
 
-                switch (expirationUnit) {
+                switch (expirationDayUnitEnum) {
                     case DAYS -> document.setExpirationDate(documentDate
                             .plusDays(expirationAmount));
                     case WEEKS -> document.setExpirationDate(documentDate
@@ -441,12 +443,44 @@ public class CrudDocumentImpl implements CrudDocument {
                 && fileDocument.getStatus().equals(DocumentStatusEnum.REPROVADO)) {
                 if (fileDocument.getUrl() != null) try {
                     googleCloudService.deleteFile(fileDocument.getUrl());
+                    List<AuditLogDocument> logs = updateAuditLogs.stream()
+                            .filter(auditLogDocument ->
+                                    auditLogDocument.getFileId().equals(fileDocument.getId()))
+                            .collect(Collectors.toList());
+                    logs.forEach(auditLogDocument -> auditLogDocument.setFileId(null));
+                    auditLogDocumentRepository.saveAll(logs);
+                    fileRepository.delete(fileDocument);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                } finally {
-                    updateAuditLogs.forEach(auditLogDocument -> auditLogDocument.setFileId(null));
-                    auditLogDocumentRepository.saveAll(updateAuditLogs);
-                    fileRepository.delete(fileDocument);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void documentValidityCheck(DocumentValidityEnum documentValidityEnum) {
+        List<Document> documents = documentRepository.findAllByValidityAndContractStatus(documentValidityEnum, ContractStatusEnum.ACTIVE);
+
+        for (Document document : documents) {
+            Document newDocument = null;
+            if (document instanceof DocumentEmployee documentEmployee) {
+                DocumentEmployee.builder()
+                        .employee(documentEmployee.getEmployee())
+                        .build();
+            } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+
+            } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+
+            }
+            switch (documentValidityEnum) {
+                case WEEKLY -> {
+//                    document.setTitle();
+                }
+                case MONTHLY -> {
+
+                }
+                case ANNUAL -> {
+
                 }
             }
         }

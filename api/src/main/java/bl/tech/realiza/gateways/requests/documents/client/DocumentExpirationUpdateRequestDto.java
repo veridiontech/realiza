@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class DocumentExpirationUpdateRequestDto {
     private Integer expirationDateAmount;
-    private DocumentMatrix.Unit expirationDateUnit;
+    private DocumentMatrix.DayUnitEnum expirationDateDayUnitEnum;
 }

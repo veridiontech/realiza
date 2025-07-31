@@ -143,7 +143,7 @@ public class SetupService {
                     .branch(branch)
                     .documentMatrix(documentMatrix)
                     .expirationDateAmount(documentMatrix.getExpirationDateAmount())
-                    .expirationDateUnit(documentMatrix.getExpirationDateUnit())
+                    .expirationDateUnit(documentMatrix.getExpirationDateDayUnitEnum())
                     .build());
 
             if (batch.size() == 50) {

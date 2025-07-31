@@ -10,6 +10,6 @@ public class DocumentMatrixRequestDto {
     private Boolean doesBlock;
     private Boolean isDocumentUnique;
     private String subgroup;
-    private DocumentMatrix.Unit expirationDateUnit;
+    private DocumentMatrix.DayUnitEnum expirationDateDayUnitEnum;
     private Integer expirationDateAmount;
 }
