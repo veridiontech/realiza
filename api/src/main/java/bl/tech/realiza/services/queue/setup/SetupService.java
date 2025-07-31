@@ -144,7 +144,7 @@ public class SetupService {
                     .documentMatrix(documentMatrix)
                     .validity(documentMatrix.getValidity())
                     .expirationDateAmount(documentMatrix.getExpirationDateAmount())
-                    .expirationDateUnit(documentMatrix.getExpirationDateDayUnitEnum())
+                    .expirationDateUnit(documentMatrix.getExpirationDateUnit())
                     .build());
 
             if (batch.size() == 50) {

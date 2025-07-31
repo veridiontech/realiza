@@ -374,7 +374,7 @@ public class ReplicationService {
         List<Document> batch = new ArrayList<>(50);
         for (Document document : documentBranchList) {
             document.setExpirationDateAmount(documentMatrix.getExpirationDateAmount());
-            document.setExpirationDateUnit(documentMatrix.getExpirationDateDayUnitEnum());
+            document.setExpirationDateUnit(documentMatrix.getExpirationDateUnit());
             batch.add(document);
 
             if (batch.size() == 50) {
@@ -403,7 +403,7 @@ public class ReplicationService {
                     .documentMatrix(documentMatrix)
                     .validity(documentMatrix.getValidity())
                     .expirationDateAmount(documentMatrix.getExpirationDateAmount())
-                    .expirationDateUnit(documentMatrix.getExpirationDateDayUnitEnum())
+                    .expirationDateUnit(documentMatrix.getExpirationDateUnit())
                     .build());
 
             if (batch.size() == 50) {

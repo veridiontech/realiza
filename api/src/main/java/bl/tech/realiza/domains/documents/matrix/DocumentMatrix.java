@@ -27,7 +27,7 @@ public class DocumentMatrix {
     @Builder.Default
     private Integer expirationDateAmount = 1;
     @Builder.Default
-    private DayUnitEnum expirationDateDayUnitEnum = DayUnitEnum.MONTHS;
+    private DayUnitEnum expirationDateUnit = DayUnitEnum.MONTHS;
     private String type;
     @Builder.Default
     private Boolean doesBlock = true;
