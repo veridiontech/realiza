@@ -54,6 +54,8 @@ public abstract class Document {
     private Boolean conforming = false;
     @Builder.Default
     private Boolean doesBlock = true;
+    @Builder.Default
+    private Boolean isValidityDone = false;
 
     // -------------------------------
     // Relacionamentos INERENTES
@@ -91,18 +93,18 @@ public abstract class Document {
         LocalDate date = LocalDate.now();
         int week = date.get(WeekFields.of(Locale.getDefault()).weekOfMonth());
         String month = date.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-        return String.format("%s - Semana %s de %s", this.title != null ? this.title : "", week, month).trim();
+        return String.format("%s - Semana %s de %s", this.documentMatrix != null ? this.documentMatrix.getName() : "", week, month).trim();
     }
 
     public String getMonthlyTitle() {
         LocalDate date = LocalDate.now();
         String month = date.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
-        return String.format("%s - %s", this.title != null ? this.title : "", month).trim();
+        return String.format("%s - %s", this.documentMatrix != null ? this.documentMatrix.getName() : "", month).trim();
     }
 
     public String getAnnualTitle() {
         LocalDate date = LocalDate.now();
         int year = date.getYear();
-        return String.format("%s - %s", this.title != null ? this.title : "", year).trim();
+        return String.format("%s - %s", this.documentMatrix != null ? this.documentMatrix.getName() : "", year).trim();
     }
 }
