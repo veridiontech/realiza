@@ -11,6 +11,7 @@ import java.util.List;
 public interface AuditLogDocumentRepository extends JpaRepository<AuditLogDocument, String> {
     Page<AuditLogDocument> findAllByDocumentId(String id, Pageable pageable);
     List<AuditLogDocument> findAllByDocumentId(String id);
+    List<AuditLogDocument> findAllByDocumentIdIsNotNull();
     Page<AuditLogDocument> findAllByDocumentIdAndAction(String id, AuditLogActionsEnum action, Pageable pageable);
 
     Page<AuditLogDocument> findAllByDocumentIdAndUserResponsibleId(String id, String idUser, Pageable pageable);

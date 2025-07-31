@@ -14,17 +14,22 @@ public class DailyJob {
     private final CrudDocument crudDocument;
     private final CrudUser crudUser;
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 3 * * *", zone = "America/Sao_Paulo")
     public void runDailyTask() {
-        log.info("Executando tarefa diária de verificação de documentos...");
+        log.info("Executando tarefas diárias de verificação de documentos...");
         dailyDocumentCheck();
+        log.info("Executando tarefas diárias de verificação de usuários...");
+        dailyUserCheck();
         log.info("Tarefa diária concluída.");
     }
 
     public void dailyDocumentCheck() {
         crudDocument.expirationChange();
         crudDocument.expirationCheck();
+        crudDocument.deleteOldReprovedDocuments();
+    }
+
+    public void dailyUserCheck() {
         crudUser.fourDigitCodeCheck();
-        // TODO apagar documentos antigos reprovados do último mês
     }
 }
