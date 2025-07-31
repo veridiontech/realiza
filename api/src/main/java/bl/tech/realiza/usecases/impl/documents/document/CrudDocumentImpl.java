@@ -460,13 +460,15 @@ public class CrudDocumentImpl implements CrudDocument {
     @Override
     public void documentValidityCheck(DocumentValidityEnum documentValidityEnum) {
         List<Document> documents = documentRepository.findAllByValidityAndContractStatus(documentValidityEnum, ContractStatusEnum.ACTIVE);
-        documents.stream()
-                .filter(document -> document.getIsValidityDone())
-                .sorted(Comparator.comparing(Document::getCreationDate));
+        List<Document> filteredAndSortedDocuments = documents.stream()
+                .filter(document -> !document.getIsValidityDone())
+                .sorted(Comparator.comparing(Document::getCreationDate))
+                .toList();
         String newTitle = null;
         List<Document> documentBatch = new ArrayList<>(50);
+        List<Document> updateDocumentValidityDoneBatch = new ArrayList<>(50);
         List<ContractDocument> contractDocumentBatch = new ArrayList<>(50);
-        for (Document document : documents) {
+        for (Document document : filteredAndSortedDocuments) {
             switch (documentValidityEnum) {
                 case WEEKLY -> newTitle = document.getWeeklyTitle();
                 case MONTHLY -> newTitle = document.getMonthlyTitle();
@@ -510,6 +512,8 @@ public class CrudDocumentImpl implements CrudDocument {
                         .providerSubcontractor(documentProviderSubcontractor.getProviderSubcontractor())
                         .build();
             }
+            document.setIsValidityDone(true);
+            updateDocumentValidityDoneBatch.add(document);
             documentBatch.add(newDocument);
             List<Contract> contracts = document.getContractDocuments().stream()
                     .map(ContractDocument::getContract)
@@ -522,6 +526,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         .build());
             }
             if (documentBatch.size() >= 50 || contractDocumentBatch.size() >= 50) {
+                documentRepository.saveAll(updateDocumentValidityDoneBatch);
                 documentRepository.saveAll(documentBatch);
                 contractDocumentRepository.saveAll(contractDocumentBatch);
                 documentBatch.clear();
@@ -529,6 +534,7 @@ public class CrudDocumentImpl implements CrudDocument {
             }
         }
         if (!documentBatch.isEmpty() || !contractDocumentBatch.isEmpty()) {
+            documentRepository.saveAll(updateDocumentValidityDoneBatch);
             documentRepository.saveAll(documentBatch);
             contractDocumentRepository.saveAll(contractDocumentBatch);
             documentBatch.clear();

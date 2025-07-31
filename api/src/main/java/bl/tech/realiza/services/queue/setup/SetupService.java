@@ -205,25 +205,69 @@ public class SetupService {
 
         List<DocumentProviderSupplier> batch = new ArrayList<>(50);
         List<ContractDocument> auxiliarBatch = new ArrayList<>(50);
+        List<DocumentProviderSupplier> existingDocuments = documentProviderSupplierRepository.findAllByProviderSupplier_IdProvider(finalNewProviderSupplier.getIdProvider());
 
         for (DocumentBranch document : documentBranch) {
-            DocumentProviderSupplier newDocument = DocumentProviderSupplier.builder()
-                    .title(document.getTitle())
-                    .status(Document.Status.PENDENTE)
-                    .type(document.getType())
-                    .isActive(true)
-                    .documentMatrix(document.getDocumentMatrix())
-                    .providerSupplier(finalNewProviderSupplier)
-                    .validity(document.getValidity())
-                    .expirationDateUnit(document.getExpirationDateUnit())
-                    .expirationDateAmount(document.getExpirationDateAmount())
-                    .build();
+            String newTitle = null;
+            switch (document.getValidity()) {
+                case INDEFINITE -> newTitle = document.getTitle();
+                case WEEKLY -> newTitle = document.getWeeklyTitle();
+                case MONTHLY -> newTitle = document.getMonthlyTitle();
+                case ANNUAL -> newTitle = document.getAnnualTitle();
+            }
+            String finalNewTitle = newTitle;
+            if (existingDocuments.stream()
+                    .anyMatch(documentProviderSupplier -> documentProviderSupplier.getTitle().equals(finalNewTitle))) {
+                if (document.getDocumentMatrix().getIsDocumentUnique()) {
+                    // add contract to doc
+                    Document existingDocument = (Document) existingDocuments.stream()
+                            .findFirst()
+                            .stream().filter(documentProviderSupplier -> documentProviderSupplier.getTitle().equals(finalNewTitle));
 
-            batch.add(newDocument);
-            auxiliarBatch.add(ContractDocument.builder()
-                    .document(newDocument)
-                    .contract(contractProviderSupplier)
-                    .build());
+                    auxiliarBatch.add(ContractDocument.builder()
+                            .document(existingDocument)
+                            .contract(contractProviderSupplier)
+                            .build());
+                } else {
+                    // cria doc
+                    DocumentProviderSupplier newDocument = DocumentProviderSupplier.builder()
+                        .title(newTitle)
+                        .status(Document.Status.PENDENTE)
+                        .type(document.getType())
+                        .isActive(true)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .providerSupplier(finalNewProviderSupplier)
+                        .validity(document.getValidity())
+                        .expirationDateUnit(document.getExpirationDateUnit())
+                        .expirationDateAmount(document.getExpirationDateAmount())
+                        .build();
+
+                batch.add(newDocument);
+                auxiliarBatch.add(ContractDocument.builder()
+                        .document(newDocument)
+                        .contract(contractProviderSupplier)
+                        .build());
+                }
+            } else {
+                // cria doc
+                DocumentProviderSupplier newDocument = DocumentProviderSupplier.builder()
+                        .title(newTitle)
+                        .status(Document.Status.PENDENTE)
+                        .type(document.getType())
+                        .isActive(true)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .providerSupplier(finalNewProviderSupplier)
+                        .validity(document.getValidity())
+                        .expirationDateUnit(document.getExpirationDateUnit())
+                        .expirationDateAmount(document.getExpirationDateAmount())
+                        .build();
+
+                batch.add(newDocument);
+                auxiliarBatch.add(ContractDocument.builder()
+                        .document(newDocument)
+                        .contract(contractProviderSupplier)
+                        .build());
+            }
 
             if (batch.size() == 50 || auxiliarBatch.size() == 50) {
                 documentProviderSupplierRepository.saveAll(batch);
@@ -287,25 +331,70 @@ public class SetupService {
 
         ProviderSubcontractor finalNewProviderSubcontractor = contractProviderSubcontractor.getProviderSubcontractor();
         List<DocumentProviderSubcontractor> batch = new ArrayList<>(50);
+        List<DocumentProviderSubcontractor> existingDocuments = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProvider(finalNewProviderSubcontractor.getIdProvider());
         List<ContractDocument> auxiliarBatch = new ArrayList<>(50);
 
         for (DocumentProviderSupplier document : documentSupplier) {
-            DocumentProviderSubcontractor newDocument = DocumentProviderSubcontractor.builder()
-                    .title(document.getTitle())
-                    .status(Document.Status.PENDENTE)
-                    .type(document.getType())
-                    .isActive(true)
-                    .documentMatrix(document.getDocumentMatrix())
-                    .validity(document.getValidity())
-                    .providerSubcontractor(finalNewProviderSubcontractor)
-                    .expirationDateUnit(document.getExpirationDateUnit())
-                    .expirationDateAmount(document.getExpirationDateAmount())
-                    .build();
-            batch.add(newDocument);
-            auxiliarBatch.add(ContractDocument.builder()
-                    .document(newDocument)
-                    .contract(contractProviderSubcontractor)
-                    .build());
+            String newTitle = null;
+            switch (document.getValidity()) {
+                case INDEFINITE -> newTitle = document.getTitle();
+                case WEEKLY -> newTitle = document.getWeeklyTitle();
+                case MONTHLY -> newTitle = document.getMonthlyTitle();
+                case ANNUAL -> newTitle = document.getAnnualTitle();
+            }
+            String finalNewTitle = newTitle;
+            if (existingDocuments.stream()
+                    .anyMatch(documentProviderSubcontractor -> documentProviderSubcontractor.getTitle().equals(finalNewTitle))) {
+                if (document.getDocumentMatrix().getIsDocumentUnique()) {
+                    // add contract to doc
+                    Document existingDocument = (Document) existingDocuments.stream()
+                            .findFirst()
+                            .stream().filter(documentProviderSubcontractor -> documentProviderSubcontractor.getTitle().equals(finalNewTitle));
+
+                    auxiliarBatch.add(ContractDocument.builder()
+                            .document(existingDocument)
+                            .contract(contractProviderSubcontractor)
+                            .build());
+                } else {
+                    // cria doc
+                    DocumentProviderSubcontractor newDocument = DocumentProviderSubcontractor.builder()
+                        .title(newTitle)
+                        .status(Document.Status.PENDENTE)
+                        .type(document.getType())
+                        .isActive(true)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .validity(document.getValidity())
+                        .providerSubcontractor(finalNewProviderSubcontractor)
+                        .expirationDateUnit(document.getExpirationDateUnit())
+                        .expirationDateAmount(document.getExpirationDateAmount())
+                        .build();
+
+                batch.add(newDocument);
+                auxiliarBatch.add(ContractDocument.builder()
+                        .document(newDocument)
+                        .contract(contractProviderSubcontractor)
+                        .build());
+                }
+            } else {
+                // cria doc
+                DocumentProviderSubcontractor newDocument = DocumentProviderSubcontractor.builder()
+                        .title(newTitle)
+                        .status(Document.Status.PENDENTE)
+                        .type(document.getType())
+                        .isActive(true)
+                        .documentMatrix(document.getDocumentMatrix())
+                        .validity(document.getValidity())
+                        .providerSubcontractor(finalNewProviderSubcontractor)
+                        .expirationDateUnit(document.getExpirationDateUnit())
+                        .expirationDateAmount(document.getExpirationDateAmount())
+                        .build();
+
+                batch.add(newDocument);
+                auxiliarBatch.add(ContractDocument.builder()
+                        .document(newDocument)
+                        .contract(contractProviderSubcontractor)
+                        .build());
+            }
 
             if (batch.size() == 50 || auxiliarBatch.size() == 50) {
                 documentProviderSubcontractorRepository.saveAll(batch);
@@ -347,8 +436,16 @@ public class SetupService {
             List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
 
             for (DocumentProviderSupplier document : documentSupplier) {
+                String newTitle = null;
+                switch (document.getValidity()) {
+                    case INDEFINITE -> newTitle = document.getTitle();
+                    case WEEKLY -> newTitle = document.getWeeklyTitle();
+                    case MONTHLY -> newTitle = document.getMonthlyTitle();
+                    case ANNUAL -> newTitle = document.getAnnualTitle();
+                }
+                String finalNewTitle = newTitle;
                 DocumentEmployee existingDocument = documentEmployeeList.stream()
-                        .filter(de -> de.getTitle().equals(document.getTitle()))
+                        .filter(de -> de.getTitle().equals(finalNewTitle))
                         .findFirst()
                         .orElse(null);
                 if (existingDocument != null && document.getDocumentMatrix().getIsDocumentUnique()) {
@@ -358,7 +455,7 @@ public class SetupService {
                             .build());
                 } else if (existingDocument == null) {
                     DocumentEmployee newDocument = DocumentEmployee.builder()
-                            .title(document.getTitle())
+                            .title(newTitle)
                             .status(Document.Status.PENDENTE)
                             .type(document.getType())
                             .isActive(true)
@@ -425,8 +522,16 @@ public class SetupService {
             List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
 
             for (DocumentProviderSubcontractor document : documentSubcontractor) {
+                String newTitle = null;
+                switch (document.getValidity()) {
+                    case INDEFINITE -> newTitle = document.getTitle();
+                    case WEEKLY -> newTitle = document.getWeeklyTitle();
+                    case MONTHLY -> newTitle = document.getMonthlyTitle();
+                    case ANNUAL -> newTitle = document.getAnnualTitle();
+                }
+                String finalNewTitle = newTitle;
                 DocumentEmployee existingDocument = documentEmployeeList.stream()
-                        .filter(de -> de.getTitle().equals(document.getTitle()))
+                        .filter(de -> de.getTitle().equals(finalNewTitle))
                         .findFirst()
                         .orElse(null);
                 if (existingDocument != null && document.getDocumentMatrix().getIsDocumentUnique()) {
@@ -436,7 +541,7 @@ public class SetupService {
                             .build());
                 } else if (existingDocument == null) {
                     DocumentEmployee newDocument = DocumentEmployee.builder()
-                            .title(document.getTitle())
+                            .title(newTitle)
                             .status(Document.Status.PENDENTE)
                             .type(document.getType())
                             .isActive(true)
