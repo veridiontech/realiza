@@ -36,26 +36,24 @@ type ProfileDetails = {
 export function ProfilesSection() {
   const { client } = useClient();
   const clientId = client?.idClient;
-
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProfileDetails, setSelectedProfileDetails] = useState<ProfileDetails | null>(null);
-
+  const [selectedProfileDetails, setSelectedProfileDetails] =
+    useState<ProfileDetails | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [admin, setAdmin] = useState(false);
   const [viewer, setViewer] = useState(false);
   const [manager, setManager] = useState(false);
   const [isInspector, setIsInspector] = useState(false);
-
   const [documentViewer, setDocumentViewer] = useState(false);
   const [registrationUser, setRegistrationUser] = useState(false);
   const [registrationContract, setRegistrationContract] = useState(false);
-
   const [laboral, setLaboral] = useState(false);
   const [workplaceSafety, setWorkplaceSafety] = useState(false);
-  const [registrationAndCertificates, setRegistrationAndCertificates] = useState(false);
+  const [registrationAndCertificates, setRegistrationAndCertificates] =
+    useState(false);
   const [general, setGeneral] = useState(false);
   const [health, setHealth] = useState(false);
   const [environment, setEnvironment] = useState(false);
@@ -67,13 +65,14 @@ export function ProfilesSection() {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const response = await axios.get(`${ip}/profile/by-name/${clientId}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-
       console.log("Retorno:", response.data);
-
       const data = Array.isArray(response.data) ? response.data : [];
-      setProfiles(data);
+      const sortedProfiles = data.sort((a, b) =>
+        a.profileName.localeCompare(b.profileName)
+      );
+      setProfiles(sortedProfiles);
     } catch (err) {
       console.error("Erro ao buscar perfis:", err);
     } finally {
@@ -86,7 +85,7 @@ export function ProfilesSection() {
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       const response = await axios.get(`${ip}/profile/${profileId}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       console.log("Detalhes:", response.data);
       setSelectedProfileDetails(response.data);
@@ -167,19 +166,19 @@ export function ProfilesSection() {
         concierge,
       };
     } else {
-        permissions = {
-            inspector: false,
-            documentViewer,
-            registrationUser,
-            registrationContract,
-            laboral,
-            workplaceSafety,
-            registrationAndCertificates,
-            general,
-            health,
-            environment,
-            concierge,
-        };
+      permissions = {
+        inspector: false,
+        documentViewer,
+        registrationUser,
+        registrationContract,
+        laboral,
+        workplaceSafety,
+        registrationAndCertificates,
+        general,
+        health,
+        environment,
+        concierge,
+      };
     }
 
     const newProfile = {
@@ -193,17 +192,15 @@ export function ProfilesSection() {
       branchIds: [],
       contractIds: [],
     };
-
+    
     console.log("PAYLOAD:", JSON.stringify(newProfile, null, 2));
     const tokenFromStorage = localStorage.getItem("tokenClient");
 
     try {
-        await axios.post(`${ip}/profile`, newProfile, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` }
+      await axios.post(`${ip}/profile`, newProfile, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
-
       toast.success("Perfil criado com sucesso!");
-
       setName("");
       setDescription("");
       setAdmin(false);
@@ -220,7 +217,6 @@ export function ProfilesSection() {
       setHealth(false);
       setEnvironment(false);
       setConcierge(false);
-
       fetchProfiles();
     } catch (err: any) {
       console.error("Erro ao criar perfil:", err.response || err);
@@ -229,38 +225,42 @@ export function ProfilesSection() {
 
   return (
     <div className="flex justify-center w-full mt-[-1.5rem]">
-      <div className="bg-white shadow-md rounded p-6 w-full max-w-2xl">
-        <h2 className="text-xl font-semibold mb-4">Perfis vinculados ao cliente</h2>
-
-        {loading && <p className="text-gray-500">Carregando perfis...</p>}
-
-        {!loading && profiles.length === 0 && (
-          <p className="text-gray-500">Nenhum perfil encontrado para este cliente.</p>
-        )}
-
-        {!loading && profiles.length > 0 && (
-          <ul className="space-y-3 mb-6">
-            {profiles.map((profile) => (
-              <li
-                key={profile.id}
-                className="p-3 border border-gray-200 rounded bg-gray-50 hover:bg-gray-100 transition flex justify-between items-center"
-              >
-                <span className="text-md text-gray-700">{profile.profileName}</span>
-                <button
-                  onClick={() => fetchProfileDetails(profile.id)}
-                  className="p-1 rounded-full hover:bg-gray-200"
-                  title="Ver detalhes do perfil"
+      <div className="flex flex-col md:flex-row w-full max-w-6xl gap-6 items-start">
+        <div className="bg-white shadow-md rounded p-6 md:w-1/2">
+          <h2 className="text-xl font-semibold mb-4">
+            Perfis vinculados ao cliente
+          </h2>
+          {loading && <p className="text-gray-500">Carregando perfis...</p>}
+          {!loading && profiles.length === 0 && (
+            <p className="text-gray-500">
+              Nenhum perfil encontrado para este cliente.
+            </p>
+          )}
+          {!loading && profiles.length > 0 && (
+            <ul className="space-y-3 mb-6">
+              {profiles.map((profile) => (
+                <li
+                  key={profile.id}
+                  className="p-3 border border-gray-200 rounded bg-gray-50 hover:bg-gray-100 transition flex justify-between items-center"
                 >
-                  <Eye className="w-5 h-5 text-gray-600" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                  <span className="text-md text-gray-700">
+                    {profile.profileName}
+                  </span>
+                  <button
+                    onClick={() => fetchProfileDetails(profile.id)}
+                    className="p-1 rounded-full hover:bg-gray-200"
+                    title="Ver detalhes do perfil"
+                  >
+                    <Eye className="w-5 h-5 text-gray-600" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-        <div className="border-t pt-4">
+        <div className="bg-white shadow-md rounded p-6 md:w-1/2">
           <h3 className="text-lg font-medium mb-2">Criar novo perfil</h3>
-
           <div className="flex flex-col gap-4">
             <input
               className="border border-gray-300 rounded px-3 py-2"
@@ -375,18 +375,71 @@ export function ProfilesSection() {
                     <input
                       type="checkbox"
                       checked={registrationContract}
-                      onChange={(e) => setRegistrationContract(e.target.checked)}
+                      onChange={(e) =>
+                        setRegistrationContract(e.target.checked)
+                      }
                       disabled={isInspector}
                     />{" "}
                     Cadastro de Contratos
                   </label>
-                  <label><input type="checkbox" checked={laboral} onChange={(e) => setLaboral(e.target.checked)} /> Trabalhista</label>
-                  <label><input type="checkbox" checked={workplaceSafety} onChange={(e) => setWorkplaceSafety(e.target.checked)} /> Segurança do Trabalho</label>
-                  <label><input type="checkbox" checked={registrationAndCertificates} onChange={(e) => setRegistrationAndCertificates(e.target.checked)} /> Cadastro e certidões</label>
-                  <label><input type="checkbox" checked={general} onChange={(e) => setGeneral(e.target.checked)} /> Geral</label>
-                  <label><input type="checkbox" checked={health} onChange={(e) => setHealth(e.target.checked)} /> Saúde</label>
-                  <label><input type="checkbox" checked={environment} onChange={(e) => setEnvironment(e.target.checked)} /> Meio Ambiente</label>
-                  <label><input type="checkbox" checked={concierge} onChange={(e) => setConcierge(e.target.checked)} /> Portaria</label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={laboral}
+                      onChange={(e) => setLaboral(e.target.checked)}
+                    />{" "}
+                    Trabalhista
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={workplaceSafety}
+                      onChange={(e) => setWorkplaceSafety(e.target.checked)}
+                    />{" "}
+                    Segurança do Trabalho
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={registrationAndCertificates}
+                      onChange={(e) =>
+                        setRegistrationAndCertificates(e.target.checked)
+                      }
+                    />{" "}
+                    Cadastro e certidões
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={general}
+                      onChange={(e) => setGeneral(e.target.checked)}
+                    />{" "}
+                    Geral
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={health}
+                      onChange={(e) => setHealth(e.target.checked)}
+                    />{" "}
+                    Saúde
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={environment}
+                      onChange={(e) => setEnvironment(e.target.checked)}
+                    />{" "}
+                    Meio Ambiente
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={concierge}
+                      onChange={(e) => setConcierge(e.target.checked)}
+                    />{" "}
+                    Portaria
+                  </label>
                 </div>
               </div>
             )}
@@ -404,23 +457,73 @@ export function ProfilesSection() {
       {isModalOpen && selectedProfileDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold mb-4">Detalhes do Perfil: {selectedProfileDetails.name}</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              Detalhes do Perfil: {selectedProfileDetails.name}
+            </h3>
             <div className="grid grid-cols-1 gap-2 text-sm">
-              <p><strong>Descrição:</strong> {selectedProfileDetails.description || "Nenhuma descrição informada"}</p>
-              <p><strong>Admin:</strong> {selectedProfileDetails.admin ? "Sim" : "Não"}</p>
-              <p><strong>Visitante:</strong> {selectedProfileDetails.viewer ? "Sim" : "Não"}</p>
-              <p><strong>Gestor:</strong> {selectedProfileDetails.manager ? "Sim" : "Não"}</p>
-              <p><strong>Fiscal:</strong> {selectedProfileDetails.inspector ? "Sim" : "Não"}</p>
-              <p><strong>Visualizador de Documentos:</strong> {selectedProfileDetails.documentViewer ? "Sim" : "Não"}</p>
-              <p><strong>Cadastro de Usuários:</strong> {selectedProfileDetails.registrationUser ? "Sim" : "Não"}</p>
-              <p><strong>Cadastro de Contratos:</strong> {selectedProfileDetails.registrationContract ? "Sim" : "Não"}</p>
-              <p><strong>Trabalhista:</strong> {selectedProfileDetails.laboral ? "Sim" : "Não"}</p>
-              <p><strong>Segurança do Trabalho:</strong> {selectedProfileDetails.workplaceSafety ? "Sim" : "Não"}</p>
-              <p><strong>Cadastro e Certidões:</strong> {selectedProfileDetails.registrationAndCertificates ? "Sim" : "Não"}</p>
-              <p><strong>Geral:</strong> {selectedProfileDetails.general ? "Sim" : "Não"}</p>
-              <p><strong>Saúde:</strong> {selectedProfileDetails.health ? "Sim" : "Não"}</p>
-              <p><strong>Meio Ambiente:</strong> {selectedProfileDetails.environment ? "Sim" : "Não"}</p>
-              <p><strong>Portaria:</strong> {selectedProfileDetails.concierge ? "Sim" : "Não"}</p>
+              <p>
+                <strong>Descrição:</strong>{" "}
+                {selectedProfileDetails.description ||
+                  "Nenhuma descrição informada"}
+              </p>
+              <p>
+                <strong>Admin:</strong>{" "}
+                {selectedProfileDetails.admin ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Visitante:</strong>{" "}
+                {selectedProfileDetails.viewer ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Gestor:</strong>{" "}
+                {selectedProfileDetails.manager ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Fiscal:</strong>{" "}
+                {selectedProfileDetails.inspector ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Visualizador de Documentos:</strong>{" "}
+                {selectedProfileDetails.documentViewer ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Cadastro de Usuários:</strong>{" "}
+                {selectedProfileDetails.registrationUser ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Cadastro de Contratos:</strong>{" "}
+                {selectedProfileDetails.registrationContract ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Trabalhista:</strong>{" "}
+                {selectedProfileDetails.laboral ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Segurança do Trabalho:</strong>{" "}
+                {selectedProfileDetails.workplaceSafety ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Cadastro e Certidões:</strong>{" "}
+                {selectedProfileDetails.registrationAndCertificates
+                  ? "Sim"
+                  : "Não"}
+              </p>
+              <p>
+                <strong>Geral:</strong>{" "}
+                {selectedProfileDetails.general ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Saúde:</strong>{" "}
+                {selectedProfileDetails.health ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Meio Ambiente:</strong>{" "}
+                {selectedProfileDetails.environment ? "Sim" : "Não"}
+              </p>
+              <p>
+                <strong>Portaria:</strong>{" "}
+                {selectedProfileDetails.concierge ? "Sim" : "Não"}
+              </p>
             </div>
             <button
               onClick={() => setIsModalOpen(false)}
