@@ -40,7 +40,6 @@ function validarNumerosRepetidos(valor: string) {
 }
 
 const cepRegex = /^\d{5}-\d{3}$/;
-// Aceita CNPJ formatado ou apenas números puros com 14 dígitos
 const cnpjRegex = /^(\d{14}|\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2})$/;
 const phoneRegex = /^\(\d{2}\)\s?\d{4,5}-\d{4}$/;
 
@@ -53,10 +52,10 @@ const createClienteFormSchema = z.object({
   corporateName: z.string().nonempty("Razão social é obrigatória"),
   email: z.string(),
   telephone: z.string()
-          .optional()
-          .refine((val) => !val || phoneRegex.test(val), {
-            message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
-          }),
+      .optional()
+      .refine((val) => !val || phoneRegex.test(val), {
+        message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+      }),
   cep: z
     .string()
     .nonempty("CEP é obrigatório")
@@ -69,8 +68,9 @@ const createClienteFormSchema = z.object({
   address: z.string().nonempty("Endereço é obrigatório"),
   number: z.string().nonempty("Número é obrigatório"),
 });
-
-type CreateClientFormSchema = z.infer<typeof createClienteFormSchema>;
+type CreateClientFormSchema = z.infer<typeof createClienteFormSchema> & {
+    profilesFromRepo: boolean;
+};
 
 export function ModalCreateCliente() {
   const [showFirstModal, setShowFirstModal] = useState(false);
@@ -81,7 +81,6 @@ export function ModalCreateCliente() {
   const [phoneValue, setPhoneValue] = useState("");
   const [cnpjValue, setCnpjValue] = useState("");
   const { addClient, setClient } = useClient();
-
   const {
     register,
     handleSubmit,
@@ -92,9 +91,11 @@ export function ModalCreateCliente() {
   } = useForm<CreateClientFormSchema>({
     resolver: zodResolver(createClienteFormSchema),
     mode: "onSubmit",
+    defaultValues: {
+      profilesFromRepo: false,
+    }
   });
 
-  // Formatar CEP e telefone sempre que o formulário mudar
   useEffect(() => {
     const rawCEP = getValues("cep") || "";
     const rawPhone = getValues("telephone") || "";
@@ -103,7 +104,6 @@ export function ModalCreateCliente() {
     setPhoneValue(formatPhone(rawPhone));
   }, [getValues]);
 
-  // Formatar e sincronizar o valor do CNPJ no input e form
   useEffect(() => {
     const rawCNPJ = getValues("cnpj") || "";
     const formatted = formatCNPJ(rawCNPJ);
@@ -111,10 +111,8 @@ export function ModalCreateCliente() {
     setValue("cnpj", formatted, { shouldValidate: true });
   }, [getValues, setValue]);
 
-  // Sanitiza o CNPJ removendo caracteres não numéricos
   const sanitizedCnpj = cnpjValue.replace(/\D/g, "");
 
-  // Busca dados do CNPJ na API
   const handleCnpj = async () => {
     if (sanitizedCnpj.length !== 14) {
       toast.error("CNPJ inválido, deve conter 14 dígitos.");
@@ -133,13 +131,20 @@ export function ModalCreateCliente() {
     }
   };
 
-  // Envio do formulário para criar cliente
   const createCliente = async (data: CreateClientFormSchema) => {
     const tokenFromStorage = localStorage.getItem("tokenClient");
-
+    const profilesFromRepo = getValues("profilesFromRepo");
     const payload = {
-      ...data,
-      cnpj: cnpjValue,
+        cnpj: cnpjValue,
+        corporateName: data.corporateName,
+        tradeName: data.tradeName,
+        email: data.email,
+        telephone: data.telephone,
+        cep: data.cep,
+        state: data.state,
+        city: data.city,
+        address: data.address,
+        number: data.number,
     };
     setIsLoading(true);
     try {
@@ -147,6 +152,9 @@ export function ModalCreateCliente() {
         headers: {
           Authorization: `Bearer ${tokenFromStorage}`,
         },
+        params: {
+          profilesFromRepo: profilesFromRepo,
+        }
       });
       addClient(response.data);
       setClient(response.data);
@@ -169,8 +177,6 @@ export function ModalCreateCliente() {
     }
   };
 
-
-  // Funções de formatação
   const formatCEP = (value: string) =>
     value.replace(/\D/g, "").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
 
@@ -269,7 +275,6 @@ export function ModalCreateCliente() {
           <DialogHeader>
             <DialogTitle className="text-white">{cnpjData?.company.name || "Detalhes do cliente"}</DialogTitle>
           </DialogHeader>
-          {/* Adicione o DialogClose aqui para garantir o "X" */}
           <DialogClose />
           <form onSubmit={handleSubmit(createCliente)} className="flex flex-col gap-2">
             <div>
@@ -277,13 +282,11 @@ export function ModalCreateCliente() {
               <Input {...register("corporateName")} placeholder="Insira a razão social" />
               {errors.corporateName && <span className="text-sm text-red-600">{errors.corporateName.message}</span>}
             </div>
-
             <div>
               <Label className="text-white">Nome fantasia</Label>
               <Input {...register("tradeName")} placeholder="Insira o nome fantasia" />
               {errors.tradeName && <span className="text-sm text-red-600">{errors.tradeName.message}</span>}
             </div>
-
             <div>
               <Label className="text-white">Email</Label>
               <Input {...register("email")} placeholder="Insira o email" />
@@ -340,6 +343,18 @@ export function ModalCreateCliente() {
               <Input {...register("number")} placeholder="Insira o número" />
               {errors.number && <span className="text-sm text-red-600">{errors.number.message}</span>}
             </div>
+            <div className="flex items-center gap-2 mt-4">
+              <input
+                type="checkbox"
+                id="profilesFromRepo"
+                {...register("profilesFromRepo")}
+                className="h-4 w-4 text-realizaBlue rounded border-gray-300 focus:ring-realizaBlue"
+              />
+              <Label htmlFor="profilesFromRepo" className="text-white cursor-pointer">
+                Acessar perfis do repositório?
+              </Label>
+            </div>
+
             <div>
               {isLoading ? (
                 <Button className="bg-realizaBlue w-full">
