@@ -12,5 +12,5 @@ public class DocumentStatusChangeRequestDto {
     @NotNull
     private Status status;
     @Size(max = 1000, message = "O motivo da reprovação não pode exceder 1000 caracteres.")
-    private String notes;
+    private String justification;
 }

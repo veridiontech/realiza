@@ -214,6 +214,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                                 + savedDocumentEmployee.getTitle() + " para o colaborador "
                                 + savedDocumentEmployee.getEmployee().getFullName(),
                         null,
+                        null,
                         UPLOAD,
                         userResponsible.getIdUser());
             }

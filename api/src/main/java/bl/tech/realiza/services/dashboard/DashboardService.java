@@ -718,29 +718,93 @@ public class DashboardService {
                     ? dashboardFiltersRequestDto.getDocumentTitles()
                     : null;
         }
-        List<Document> documents = new ArrayList<>();
+        List<Document> documentsSupplier = new ArrayList<>();
+        List<Document> documentsSubcontractor = new ArrayList<>();
         // find all documents by filters
         if (branchIds != null && !branchIds.isEmpty()) {
-            /*documents = documentRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrue(clientId,
+            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
                     providerIds,
                     documentTypes,
                     responsibleIds,
                     activeContract,
                     statuses,
-                    documentTitles);*/
+                    documentTitles);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles);
         } else {
-            /*documents = documentRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,
+            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
                     providerIds,
                     documentTypes,
                     responsibleIds,
                     activeContract,
                     statuses,
-                    documentTitles);*/
+                    documentTitles);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles);
         }
 
         // find all adherent documents by filters
+        long total = documentsSupplier.size() + documentsSubcontractor.size();
+        long adherentSupplier = documentsSupplier.stream()
+                .filter(Document::getAdherent)
+                .toList()
+                .size();
+        long adherentSubcontractor = documentsSubcontractor.stream()
+                .filter(Document::getAdherent)
+                .toList()
+                .size();
+        responseDto.setAdherentDocumentsQuantity(adherentSupplier + adherentSubcontractor);
+        responseDto.setNonAdherentDocumentsQuantity(total - responseDto.getAdherentDocumentsQuantity());
+
         // find all conforming documents by filters
+        long conformingSupplier = documentsSupplier.stream()
+                .filter(Document::getConforming)
+                .toList()
+                .size();
+        long conformingSubcontractor = documentsSubcontractor.stream()
+                .filter(Document::getConforming)
+                .toList()
+                .size();
+        responseDto.setConformingDocumentsQuantity(conformingSupplier + conformingSubcontractor);
+        responseDto.setNonConformingDocumentsQuantity(total - responseDto.getConformingDocumentsQuantity());
+
+        // list infos by status
+        responseDto.setDocumentStatus(new ArrayList<>());
+        for (Document.Status status : Document.Status.values()) {
+            List<Document> documentSupplierStatus = documentsSupplier.stream()
+                    .filter(document -> document.getStatus().equals(status))
+                    .toList();
+            List<Document> documentSubcontractorStatus = documentsSubcontractor.stream()
+                    .filter(document -> document.getStatus().equals(status))
+                    .toList();
+            long totalStatus = documentSupplierStatus.size() + documentSubcontractorStatus.size();
+
+            Double percentage = total > 0
+                    ? new BigDecimal(totalStatus * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+            DashboardDocumentResponseDto.Status statusResponse = DashboardDocumentResponseDto.Status.builder()
+                    .status(status)
+                    .adherent(status != PENDENTE && status != VENCIDO)
+                    .conforming(status == APROVADO)
+                    .quantity(totalStatus)
+                    .percentage(percentage)
+                    .build();
+            responseDto.getDocumentStatus().add(statusResponse);
+        }
         // show all adherent and non-adherent
+
         // show all conforming and non-conforming
         // find all status and infos by filters
         return responseDto;

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class AuditLogResponseDto {
     private String id;
     private String description;
+    private String justification;
     private String notes;
     private AuditLogActionsEnum action;
     private LocalDateTime createdAt;

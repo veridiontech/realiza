@@ -123,6 +123,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                                 userResponsible.getFullName() + " criou contrato "
                                         + savedContractSubcontractor.getContractReference(),
                                 null,
+                                null,
                                 CREATE,
                                 userResponsible.getIdUser());
 
@@ -190,6 +191,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                         userResponsible.getFullName() + " atualizou contrato "
                                 + savedContractSubcontractor.getContractReference(),
                         null,
+                        null,
                         UPDATE,
                         userResponsible.getIdUser());
             }
@@ -212,6 +214,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                         CONTRACT,
                         userResponsible.getFullName() + " deletou contrato "
                                 + contract.getContractReference(),
+                        null,
                         null,
                         DELETE,
                         userResponsible.getIdUser());
