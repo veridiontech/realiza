@@ -1,6 +1,5 @@
 package bl.tech.realiza.gateways.requests.dashboard;
 
-import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import lombok.Data;

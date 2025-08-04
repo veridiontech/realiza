@@ -44,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -235,16 +236,19 @@ public class CrudDocumentImpl implements CrudDocument {
     }
 
     @Override
-    public String documentExemptionRequest(String documentId, String contractId) {
+    public String documentExemptionRequest(String documentId, String contractId, String description) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
 
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        ContractDocument contractDocument = document.getContractDocuments().stream()
+        ContractDocument contractDocumentInList = document.getContractDocuments().stream()
                 .filter(cd -> cd.getContract().equals(contract))
-                .toList().get(0);
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Contract and Document link not found"));
+        ContractDocument contractDocument = contractDocumentRepository.findById(contractDocumentInList.getId())
+                .orElseThrow(() -> new NotFoundException("Contract and Document link not found"));
 
         contractDocument.setStatus(ISENCAO_PENDENTE);
         contractDocumentRepository.save(contractDocument);
@@ -253,10 +257,11 @@ public class CrudDocumentImpl implements CrudDocument {
             User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElse(null);
             crudItemManagementImpl.saveDocumentSolicitation(ItemManagementDocumentRequestDto.builder()
-                            .idRequester(userResponsible != null ? userResponsible.getIdUser() : null)
+                    .idRequester(userResponsible != null ? userResponsible.getIdUser() : null)
                     .solicitationType(ItemManagement.SolicitationType.EXEMPTION)
-                            .documentId(contractDocument.getDocument().getIdDocumentation())
-                            .contractId(contractDocument.getContract().getIdContract())
+                    .description(description)
+                    .documentId(contractDocument.getDocument().getIdDocumentation())
+                    .contractId(contractDocument.getContract().getIdContract())
                     .build());
             if (userResponsible != null) {
                 String owner = "";

@@ -24,6 +24,8 @@ public class ItemManagement {
     private Status status = Status.PENDING;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
+    @Column(length = 1000)
+    private String description;
     private String invitationToken;
 
     // -------------------------------

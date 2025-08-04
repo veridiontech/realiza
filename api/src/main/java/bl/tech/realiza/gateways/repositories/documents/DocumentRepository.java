@@ -22,17 +22,9 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (
-            :clientId IS NULL OR
-            cps.branch.client.idClient = :clientId
-        )
-    AND (
-        :providerIds IS NULL OR
-        cps.providerSupplier.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds)
+    WHERE (:clientId IS NULL OR cps.branch.client.idClient = :clientId)
+    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -52,19 +44,10 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (
-        :clientId IS NULL OR
-        cpsb.contractProviderSupplier.branch.client.idClient = :clientId
-    )
-    AND (
-        :providerIds IS NULL OR
-        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
-        cpsb.providerSubcontractor.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
+    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds 
+        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -85,18 +68,9 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (
-        :clientId IS NULL OR
-        cps.branch.idBranch IN :branchIds
-    )
-    AND (
-        :providerIds IS NULL OR
-        cps.providerSupplier.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cps.branch.idBranch IN :branchIds)
+    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -116,19 +90,10 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (
-        :clientId IS NULL OR
-        cpsb.contractProviderSupplier.branch.idBranch = :branchIds
-    )
-    AND (
-        :providerIds IS NULL OR
-        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
-        cpsb.providerSubcontractor.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
+    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -142,27 +107,25 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     );
 
     @Query("""
-    SELECT COUNT(DISTINCT d)
-    FROM Document d
-    JOIN d.contractDocuments cd
-    JOIN cd.contract c
-    LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE cps.branch.idBranch IN :branchIds
-    AND :responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds
-    AND (
-        :providerIds IS NULL OR
-        cps.providerSupplier.idProvider IN :providerIds
-    )
-    AND d.type = :type
-    AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+SELECT COUNT(DISTINCT d)
+FROM Document d
+JOIN d.contractDocuments cd
+JOIN cd.contract c
+LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
+WHERE cps.branch.idBranch IN :branchIds
+AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
+AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+AND d.type = :type
+AND d.status = :status
+AND (:documentTitles IS null OR d.title IN :documentTitles)
 """)
-    Long countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("branchIds") List<String> branchIds,
-                                                                            @Param("providerIds") List<String> providerIds,
-                                                                            @Param("type") String type,
-                                                                            @Param("status") Document.Status status,
-                                                                            @Param("responsibleIds") List<String> responsibleIds,
-                                                                            @Param("documentTitles") List<String> documentTitles
+    Long countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(
+            @Param("branchIds") List<String> branchIds,
+            @Param("providerIds") List<String> providerIds,
+            @Param("type") String type,
+            @Param("status") Document.Status status,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("documentTitles") List<String> documentTitles
     );
 
     @Query("""
@@ -173,11 +136,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (
-        :providerIds IS NULL OR
-        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
-        cpsb.providerSubcontractor.idProvider IN :providerIds
-    )
+    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds 
+        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
     AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
@@ -197,11 +157,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE cps.branch.client.idClient = :clientId
-    AND :responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds
-    AND (
-        :providerIds IS NULL OR
-        cps.providerSupplier.idProvider IN :providerIds
-    )
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
+    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
     AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
@@ -221,11 +178,8 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.branch.client.idClient = :clientId
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (
-        :providerIds IS NULL OR
-        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
-        cpsb.providerSubcontractor.idProvider IN :providerIds
-    )
+    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds 
+        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
     AND d.type = :type
     AND d.status = :status
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
@@ -251,18 +205,9 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (
-        :clientId IS NULL OR
-        cps.branch.client.idClient = :clientId
-    )
-    AND (
-        :providerIds IS NULL OR
-        cps.providerSupplier.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cps.branch.client.idClient = :clientId)
+    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -282,19 +227,10 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (
-        :clientId IS NULL OR
-        cpsb.contractProviderSupplier.branch.client.idClient = :clientId
-    )
-    AND (
-        :providerIds IS NULL OR
-        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
-        cpsb.providerSubcontractor.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
+    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -314,18 +250,9 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (
-        :clientId IS NULL OR
-        cps.branch.idBranch IN :branchIds
-    )
-    AND (
-        :providerIds IS NULL OR
-        cps.providerSupplier.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cps.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cps.branch.idBranch IN :branchIds)
+    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
@@ -345,19 +272,10 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (
-        :clientId IS NULL OR
-        cpsb.contractProviderSupplier.branch.idBranch = :branchIds
-    )
-    AND (
-        :providerIds IS NULL OR
-        cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds OR
-        cpsb.providerSubcontractor.idProvider IN :providerIds
-    )
-    AND (
-        :responsibleIds IS NULL OR
-        cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds
-    )
+    WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
+    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
     AND (:documentTitles IS NULL OR d.title IN :documentTitles)
 """)
