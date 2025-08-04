@@ -94,7 +94,6 @@ export function DocumentViewer({
           auditLogTypeEnum: "DOCUMENT",
         },
       });
-      console.log("Logs Retornados (fetchLogs):", res.data);
       setLogs(res.data.content || []);
     } catch (err) {
       console.error("Erro ao buscar logs:", err);
@@ -102,47 +101,39 @@ export function DocumentViewer({
   }, [documentId]);
 
   const fetchDocumentByAuditLogId = async (auditLogId: string) => {
-    console.log("Iniciando fetchDocumentByAuditLogId para ID:", auditLogId);
     setLoadingOldPdf(true);
     setOldPdfError(null);
     try {
       const token = localStorage.getItem("tokenClient");
       if (!token) {
-        console.error("Token de autenticação não encontrado.");
         setOldPdfError("Autenticação necessária. Por favor, faça login novamente.");
         return;
       }
 
       const requestUrl = `${ip}/document/find-by-audit-log/${auditLogId}`;
-      console.log("Fazendo requisição para:", requestUrl);
 
       const res = await axios.get(requestUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const url = res.data;
-      console.log("Resposta da API (URL do documento reprovado):", url);
 
       if (url) {
         setOldPdfUrl(url);
         setShowOldDocumentViewer(true);
-        console.log("Modal de documento antigo aberto com URL:", url);
       } else {
         setOldPdfError("Nenhum documento encontrado para este log de auditoria. Resposta da API vazia.");
-        console.warn("Resposta da API para auditLogId vazio:", auditLogId);
       }
     } catch (err) {
+      console.log("id: " , auditLogId);
       console.error("Erro completo ao buscar documento por auditLogId:", err);
       if (axios.isAxiosError(err)) {
-        console.error("Status do erro:", err.response?.status);
-        console.error("Dados do erro:", err.response?.data);
         setOldPdfError(`Erro ao carregar a versão do documento: ${err.response?.data?.message || err.message}.`);
       } else {
         setOldPdfError("Erro desconhecido ao carregar a versão do documento. Tente novamente.");
       }
     } finally {
       setLoadingOldPdf(false);
-      console.log("Finalizado fetchDocumentByAuditLogId.");
     }
   };
 
@@ -154,17 +145,15 @@ export function DocumentViewer({
       flex: 1,
       renderCell: (params) => {
         const row = params.row;
-        const isRejected = params.value === "REJECT"; 
+        const isRejected = params.value === "REJECT";
 
-        if (isRejected && row.id) { 
-          console.log(`ID do log: ${row.id}`);
+        if (isRejected && row.id) {
           return (
             <button
               onClick={() => {
-                console.log(`Botão 'Reprovado' clicado para auditLogId: ${row.id}`);
                 fetchDocumentByAuditLogId(row.id);
-              }} 
-              className="font-bold text-red-600 hover:underline cursor-pointer text-left" 
+              }}
+              className="font-bold text-red-600 hover:underline cursor-pointer text-left"
               title="Clique para visualizar a versão do documento reprovado"
             >
               {traduzirAcao(params.value)}
@@ -184,11 +173,21 @@ export function DocumentViewer({
       flex: 1,
       renderCell: (params) => formatDate(params.value),
     },
-    { field: "description", headerName: "Histórico", flex: 2 },
+    {
+      field: "justification",
+      headerName: "Motivo",
+      flex: 2,
+      renderCell: (params) => {
+        if (params.row.action === "REJECT") {
+          return params.row.justification;
+        }
+        return "";
+      },
+    },
   ];
 
   const changeStatus = useCallback(
-    async (status: "APROVADO" | "REPROVADO", notes = "") => {
+    async (status: "APROVADO" | "REPROVADO", justification = "") => {
       if (status === "REPROVADO" && justification.length > 1000) {
         setJustificationError("Máximo de 1000 caracteres na justificativa.");
         return;
@@ -196,13 +195,17 @@ export function DocumentViewer({
       setJustificationError(null);
       setLoadingStatus(true);
       setShowApprovalConfirmation(false);
+
       try {
         const token = localStorage.getItem("tokenClient");
+        const requestBody = { status, justification };
+        
         await axios.post(
           `${ip}/document/${documentId}/change-status`,
-          { status, notes },
+          requestBody,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        
         toast.success(
           `Documento ${
             status === "APROVADO" ? "aprovado" : "reprovado"
@@ -212,13 +215,13 @@ export function DocumentViewer({
         await fetchLogs();
         onClose();
       } catch (error) {
-        console.log("aprove: " , error);
+        console.error("Erro na requisição changeStatus:", error);
         toast.error("Erro ao atualizar o status do documento.");
       } finally {
         setLoadingStatus(false);
       }
     },
-    [documentId, justification, onClose, onStatusChange, fetchLogs]
+    [documentId, onClose, onStatusChange, fetchLogs]
   );
 
   useEffect(() => {
@@ -323,7 +326,9 @@ export function DocumentViewer({
             </h3>
             <textarea
               value={justification}
-              onChange={(e) => setJustification(e.target.value)}
+              onChange={(e) => {
+                setJustification(e.target.value);
+              }}
               maxLength={1000}
               rows={8}
               className="w-full border border-gray-300 p-2 rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -336,7 +341,9 @@ export function DocumentViewer({
             )}
             <div className="mt-4 flex justify-end gap-4">
               <button
-                onClick={() => changeStatus("REPROVADO", justification)}
+                onClick={() => {
+                  changeStatus("REPROVADO", justification);
+                }}
                 disabled={loadingStatus}
                 className={`py-2 px-4 rounded-full font-bold text-white ${
                   loadingStatus ? "bg-red-300" : "bg-red-500 hover:bg-red-400"
@@ -369,7 +376,9 @@ export function DocumentViewer({
             >
               <button
                 className="absolute right-5 top-5 text-gray-500 hover:text-gray-800 text-2xl"
-                onClick={() => setShowHistory(false)}
+                onClick={() => {
+                  setShowHistory(false);
+                }}
               >
                 ✖
               </button>
@@ -506,7 +515,9 @@ export function DocumentViewer({
               </p>
               <div className="mt-4 flex justify-center gap-4">
                 <button
-                  onClick={() => changeStatus("APROVADO")}
+                  onClick={() => {
+                    changeStatus("APROVADO");
+                  }}
                   disabled={loadingStatus}
                   className={`py-2 px-4 rounded-full font-bold text-white ${
                     loadingStatus
@@ -517,7 +528,9 @@ export function DocumentViewer({
                   {loadingStatus ? "Processando..." : "Sim"}
                 </button>
                 <button
-                  onClick={() => setShowApprovalConfirmation(false)}
+                  onClick={() => {
+                    setShowApprovalConfirmation(false);
+                  }}
                   disabled={loadingStatus}
                   className="py-2 px-4 rounded-full bg-gray-400 font-bold text-white hover:bg-gray-300"
                 >
