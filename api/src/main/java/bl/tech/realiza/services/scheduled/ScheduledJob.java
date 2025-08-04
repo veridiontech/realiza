@@ -48,6 +48,7 @@ public class ScheduledJob {
     public void dailyDocumentCheck() {
         crudDocument.expirationChange();
         crudDocument.expirationCheck();
+        crudDocument.deleteReprovedCheck();
         crudDocument.deleteOldReprovedDocuments();
     }
 
