@@ -1,7 +1,5 @@
 package bl.tech.realiza.gateways.controllers.impl.dashboard;
 
-import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.gateways.controllers.interfaces.dashboard.DashboardController;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
 import bl.tech.realiza.gateways.responses.dashboard.*;
@@ -9,6 +7,10 @@ import bl.tech.realiza.services.dashboard.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,11 +43,24 @@ public class DashboardControllerImpl implements DashboardController {
 
     @GetMapping("/{clientId}/document")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(description = "Busca informações da do dashboard detalhado")
+    @Operation(description = "Busca informações dos documentos por status")
     @Override
-    public ResponseEntity<DashboardDocumentResponseDto> getDocumentDetails(@PathVariable String clientId,
-                                                                           @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto) {
-        return ResponseEntity.ok(dashboardService.getDocumentDetailsInfo(clientId, dashboardFiltersRequestDto));
+    public ResponseEntity<DashboardDocumentStatusResponseDto> getDocumentStatusInfo(@PathVariable String clientId,
+                                                                                    @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        return ResponseEntity.ok(dashboardService.getDocumentStatusInfo(clientId, dashboardFiltersRequestDto));
+    }
+
+    @GetMapping("/{clientId}/document/details")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Busca informações detalhadas dos documentos")
+    public ResponseEntity<Page<DashboardDocumentDetailsResponseDto>> getDocumentDetailsInfo(@PathVariable String clientId,
+                                                                                            @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto,
+                                                                                            @RequestParam(defaultValue = "0") int page,
+                                                                                            @RequestParam(defaultValue = "50") int size,
+                                                                                            @RequestParam(defaultValue = "branchName") String sort,
+                                                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
+        return ResponseEntity.ok(dashboardService.getDocumentDetailsInfo(clientId, dashboardFiltersRequestDto, pageable));
     }
 
     @GetMapping("/{clientId}/general")

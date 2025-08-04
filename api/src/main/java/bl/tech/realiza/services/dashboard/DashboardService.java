@@ -1,8 +1,16 @@
 package bl.tech.realiza.services.dashboard;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
+import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.ContractTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -20,11 +28,16 @@ import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
 import bl.tech.realiza.gateways.responses.dashboard.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.documents.Document.*;
 import static bl.tech.realiza.domains.documents.Document.Status.*;
@@ -686,8 +699,8 @@ public class DashboardService {
         return 0L;
     }
 
-    public DashboardDocumentResponseDto getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
-        DashboardDocumentResponseDto responseDto = DashboardDocumentResponseDto.builder().build();
+    public DashboardDocumentStatusResponseDto getDocumentStatusInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        DashboardDocumentStatusResponseDto responseDto = DashboardDocumentStatusResponseDto.builder().build();
         List<String> branchIds = null;
         List<String> providerIds = null;
         List<String> documentTypes = null;
@@ -794,7 +807,7 @@ public class DashboardService {
             Double percentage = total > 0
                     ? new BigDecimal(totalStatus * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
-            DashboardDocumentResponseDto.Status statusResponse = DashboardDocumentResponseDto.Status.builder()
+            DashboardDocumentStatusResponseDto.Status statusResponse = DashboardDocumentStatusResponseDto.Status.builder()
                     .status(status)
                     .adherent(status != PENDENTE && status != VENCIDO)
                     .conforming(status == APROVADO)
@@ -808,5 +821,192 @@ public class DashboardService {
         // show all conforming and non-conforming
         // find all status and infos by filters
         return responseDto;
+    }
+
+    public Page<DashboardDocumentDetailsResponseDto> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto, Pageable pageable) {
+        DashboardDocumentDetailsResponseDto responseDto = DashboardDocumentDetailsResponseDto.builder().build();
+        List<String> branchIds = null;
+        List<String> providerIds = null;
+        List<String> documentTypes = null;
+        List<String> responsibleIds = null;
+        List<ContractStatusEnum> activeContract = null;
+        List<Status> statuses = null;
+        List<String> documentTitles = null;
+        if (dashboardFiltersRequestDto != null) {
+            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
+                    ? dashboardFiltersRequestDto.getBranchIds()
+                    : null;
+            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
+                    ? dashboardFiltersRequestDto.getProviderIds()
+                    : null;
+            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
+                    ? dashboardFiltersRequestDto.getDocumentTypes()
+                    : null;
+            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
+                    ? dashboardFiltersRequestDto.getResponsibleIds()
+                    : null;
+            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
+                    ? dashboardFiltersRequestDto.getActiveContract()
+                    : null;
+            statuses = dashboardFiltersRequestDto.getStatuses() != null
+                    ? dashboardFiltersRequestDto.getStatuses()
+                    : null;
+            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
+                    ? dashboardFiltersRequestDto.getDocumentTitles()
+                    : null;
+        }
+        Page<Document> documentsSupplier = null;
+        Page<Document> documentsSubcontractor = null;
+        // find all documents by filters
+        if (branchIds != null && !branchIds.isEmpty()) {
+            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles,
+                    pageable);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles,
+                    pageable);
+        } else {
+            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles,
+                    pageable);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles,
+                    pageable);
+        }
+        List<Document> combinedDocuments = new ArrayList<>();
+        combinedDocuments.addAll(documentsSupplier.getContent());
+        combinedDocuments.addAll(documentsSubcontractor.getContent());
+        combinedDocuments.sort(Comparator.comparing(Document::getTitle));
+        List<Document> limitedDocuments = combinedDocuments.stream()
+                .limit(pageable.getPageSize())
+                .collect(Collectors.toList());
+
+        Page<Document> paginatedDocuments = new PageImpl<>(limitedDocuments, pageable, combinedDocuments.size());
+
+        return toDetailsPageDto(paginatedDocuments);
+    }
+
+    private DashboardDocumentDetailsResponseDto toDetailsDto(Document document) {
+        String branchName = null;
+        String branchCnpj = null;
+        String supplierName = null;
+        String supplierCnpj = null;
+        ContractTypeEnum contractType = null;
+        String subcontractorName = null;
+        String subcontractorCnpj = null;
+        String employeeFullName = null;
+        String employeePosition = null;
+        String employeeCbo = null;
+
+        Date contractStart = null;
+        Date contractFinish = null;
+        String serviceTypeName = null;
+        String responsibleFullName = null;
+        String responsibleEmail = null;
+        ContractStatusEnum contractStatus = null;
+
+        ContractDocument lastContractDocument = document.getContractDocuments().stream()
+                .max(Comparator.comparing(ContractDocument::getCreatedAt))
+                .orElse(null);
+        if (lastContractDocument != null) {
+            Contract contract = lastContractDocument.getContract();
+
+            contractStart = contract.getDateStart();
+            contractFinish = contract.getEndDate();
+            contractStatus = contract.getStatus();
+            serviceTypeName = contract.getServiceTypeBranch().getTitle();
+            responsibleFullName = contract.getResponsible().getFullName();
+            responsibleEmail = contract.getResponsible().getEmail();
+
+            if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+                branchName = contractProviderSupplier.getBranch().getName();
+                branchCnpj = contractProviderSupplier.getBranch().getCnpj();
+                supplierName = contractProviderSupplier.getProviderSupplier().getCorporateName();
+                supplierCnpj = contractProviderSupplier.getProviderSupplier().getCnpj();
+                contractType = ContractTypeEnum.CONTRACT;
+            } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
+                branchName = contractProviderSubcontractor.getContractProviderSupplier().getBranch().getName();
+                branchCnpj = contractProviderSubcontractor.getContractProviderSupplier().getBranch().getCnpj();
+                supplierName = contractProviderSubcontractor.getContractProviderSupplier().getProviderSupplier().getCorporateName();
+                supplierCnpj = contractProviderSubcontractor.getContractProviderSupplier().getProviderSupplier().getCnpj();
+                subcontractorName = contractProviderSubcontractor.getProviderSubcontractor().getCorporateName();
+                subcontractorCnpj = contractProviderSubcontractor.getProviderSubcontractor().getCnpj();
+                contractType = ContractTypeEnum.SUBCONTRACT;
+
+            }
+        }
+
+        if (document instanceof DocumentEmployee documentEmployee) {
+            employeeFullName = documentEmployee.getEmployee().getFullName();
+            employeePosition = documentEmployee.getEmployee().getPosition().getTitle();
+            employeeCbo = documentEmployee.getEmployee().getCbo().getTitle();
+        }
+
+
+        return DashboardDocumentDetailsResponseDto.builder()
+                .branchName(branchName)
+                .branchCnpj(branchCnpj)
+                .supplierName(supplierName)
+                .supplierCnpj(supplierCnpj)
+                .contractType(contractType)
+                .subcontractorName(subcontractorName)
+                .subcontractorCnpj(subcontractorCnpj)
+                .employeeFullName(employeeFullName)
+                .employeePosition(employeePosition)
+                .employeeCbo(employeeCbo)
+                .contractStart(contractStart)
+                .contractFinish(contractFinish)
+                .serviceTypeName(serviceTypeName)
+                .responsibleFullName(responsibleFullName)
+                .responsibleEmail(responsibleEmail)
+                .contractStatus(contractStatus)
+                .documentTitle(document.getTitle())
+                .documentSubgroupName(document.getDocumentMatrix() != null
+                        ? (document.getDocumentMatrix().getSubGroup() != null
+                            ? document.getDocumentMatrix().getSubGroup().getSubgroupName()
+                            : null)
+                        : null)
+                .documentGroupName(document.getDocumentMatrix() != null
+                        ? (document.getDocumentMatrix().getSubGroup() != null
+                            ? document.getDocumentMatrix().getSubGroup().getGroup() != null
+                                ? document.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
+                                : null
+                            : null)
+                        : null)
+                .documentType(document.getType())
+                .doesBlock(document.getDoesBlock())
+                .adherent(document.getAdherent())
+                .conforming(document.getConforming())
+                .status(document.getStatus())
+                .versionDate(document.getVersionDate())
+                .lastCheck(document.getLastCheck())
+                .expirationDate(document.getExpirationDate())
+                .build();
+    }
+
+    private Page<DashboardDocumentDetailsResponseDto> toDetailsPageDto(Page<Document> documents) {
+        return documents.map(this::toDetailsDto);
     }
 }

@@ -402,6 +402,28 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     FROM Document d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
+    WHERE cps.branch.client.idClient = :clientId
+        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
+        AND (:activeContract IS NULL OR cps.status IN :activeContract)
+        AND (:statuses IS NULL OR d.status IN :statuses)
+        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Page<Document> findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("clientId") String clientId,
+                                                                                                                       @Param("providerIds") List<String> providerIds,
+                                                                                                                       @Param("documentTypes") List<String> documentTypes,
+                                                                                                                       @Param("responsibleIds") List<String> responsibleIds,
+                                                                                                                       @Param("activeContract") List<ContractStatusEnum> activeContract,
+                                                                                                                       @Param("statuses") List<Document.Status> statuses,
+                                                                                                                       @Param("documentTitles") List<String> documentTitles,
+                                                                                                                       Pageable pageable);
+
+    @Query("""
+    SELECT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
     WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
         AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
         AND (:documentTypes IS NULL OR d.type IN :documentTypes)
@@ -417,6 +439,28 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
                                                                                                                        @Param("activeContract") List<ContractStatusEnum> activeContract,
                                                                                                                        @Param("statuses") List<Document.Status> statuses,
                                                                                                                        @Param("documentTitles") List<String> documentTitles);
+
+    @Query("""
+    SELECT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
+    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
+        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
+        AND (:activeContract IS NULL OR cps.status IN :activeContract)
+        AND (:statuses IS NULL OR d.status IN :statuses)
+        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Page<Document> findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("branchIds") List<String> branchIds,
+                                                                                                                        @Param("providerIds") List<String> providerIds,
+                                                                                                                        @Param("documentTypes") List<String> documentTypes,
+                                                                                                                        @Param("responsibleIds") List<String> responsibleIds,
+                                                                                                                        @Param("activeContract") List<ContractStatusEnum> activeContract,
+                                                                                                                        @Param("statuses") List<Document.Status> statuses,
+                                                                                                                        @Param("documentTitles") List<String> documentTitles,
+                                                                                                                        Pageable pageable);
 
     @Query("""
     SELECT d
@@ -444,6 +488,28 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     FROM Document d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
+    WHERE cps.contractProviderSupplier.branch.client.idClient = :clientId
+        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
+        AND (:activeContract IS NULL OR cps.status IN :activeContract)
+        AND (:statuses IS NULL OR d.status IN :statuses)
+        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Page<Document> findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("clientId") String clientId,
+                                                                                                                            @Param("providerIds") List<String> providerIds,
+                                                                                                                            @Param("documentTypes") List<String> documentTypes,
+                                                                                                                            @Param("responsibleIds") List<String> responsibleIds,
+                                                                                                                            @Param("activeContract") List<ContractStatusEnum> activeContract,
+                                                                                                                            @Param("statuses") List<Document.Status> statuses,
+                                                                                                                            @Param("documentTitles") List<String> documentTitles,
+                                                                                                                            Pageable pageable);
+
+    @Query("""
+    SELECT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
     WHERE (:branchIds IS NULL OR cps.contractProviderSupplier.branch.idBranch IN :branchIds)
         AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
         AND (:documentTypes IS NULL OR d.type IN :documentTypes)
@@ -459,4 +525,26 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
                                                                                                                         @Param("activeContract") List<ContractStatusEnum> activeContract,
                                                                                                                         @Param("statuses") List<Document.Status> statuses,
                                                                                                                         @Param("documentTitles") List<String> documentTitles);
+
+    @Query("""
+    SELECT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
+    WHERE (:branchIds IS NULL OR cps.contractProviderSupplier.branch.idBranch IN :branchIds)
+        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
+        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
+        AND (:activeContract IS NULL OR cps.status IN :activeContract)
+        AND (:statuses IS NULL OR d.status IN :statuses)
+        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+""")
+    Page<Document> findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("branchIds") List<String> branchIds,
+                                                                                                                             @Param("providerIds") List<String> providerIds,
+                                                                                                                             @Param("documentTypes") List<String> documentTypes,
+                                                                                                                             @Param("responsibleIds") List<String> responsibleIds,
+                                                                                                                             @Param("activeContract") List<ContractStatusEnum> activeContract,
+                                                                                                                             @Param("statuses") List<Document.Status> statuses,
+                                                                                                                             @Param("documentTitles") List<String> documentTitles,
+                                                                                                                             Pageable pageable);
 }
