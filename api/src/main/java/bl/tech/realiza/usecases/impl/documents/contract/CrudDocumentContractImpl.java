@@ -32,6 +32,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
 
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
         List<ContractDocumentAndEmployeeResponseDto.DocumentDto> documentDtos = new ArrayList<>();
+        List<ContractDocumentAndEmployeeResponseDto.DocumentDto> employeeDocuments = new ArrayList<>();
         List<ContractDocumentAndEmployeeResponseDto.EmployeeDto> employeeDtos = new ArrayList<>();
 
         for (Employee employee : contract.getEmployees()) {
@@ -50,7 +51,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
 //                            contract.getIdContract());
 
             for (DocumentEmployee documentEmployee : documentEmployeeList) {
-                documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
+                employeeDocuments.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                                 .id(documentEmployee.getIdDocumentation())
                                 .title(documentEmployee.getTitle())
                                 .status(documentEmployee.getStatus())
@@ -100,45 +101,49 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
                     .comparing(ContractDocumentAndEmployeeResponseDto.DocumentDto::getEnterprise).reversed()
                     .thenComparing(ContractDocumentAndEmployeeResponseDto.DocumentDto::getTitle, String.CASE_INSENSITIVE_ORDER));
 
+            employeeDocuments.sort(Comparator
+                    .comparing(ContractDocumentAndEmployeeResponseDto.DocumentDto::getEnterprise).reversed()
+                    .thenComparing(ContractDocumentAndEmployeeResponseDto.DocumentDto::getTitle, String.CASE_INSENSITIVE_ORDER));
+
 
             if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
-                return ContractDocumentAndEmployeeResponseDto.builder()
-                        .enterpriseName(contractProviderSupplier.getProviderSupplier() != null
-                                ? contractProviderSupplier.getProviderSupplier().getCorporateName()
-                                : null)
-                        .documentDtos(documentDtos)
-                        .employeeDtos(employeeDtos)
-                        .build();
+
             } else {
                 if (!requester.getLaboral()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("trabalhista"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("trabalhista"));
                 }
                 if (!requester.getWorkplaceSafety()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("segurança do trabalho"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("segurança do trabalho"));
                 }
                 if (!requester.getRegistrationAndCertificates()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("cadastro e certidões"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("cadastro e certidões"));
                 }
                 if (!requester.getGeneral()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("geral"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("geral"));
                 }
                 if (!requester.getHealth()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("saude"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("saude"));
                 }
                 if (!requester.getEnvironment()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("meio ambiente"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("meio ambiente"));
                 }
-
-                return ContractDocumentAndEmployeeResponseDto.builder()
-                        .enterpriseName(contractProviderSupplier.getProviderSupplier() != null
-                                ? contractProviderSupplier.getProviderSupplier().getCorporateName()
-                                : null)
-                        .documentDtos(documentDtos)
-                        .employeeDtos(employeeDtos)
-                        .build();
             }
+            return ContractDocumentAndEmployeeResponseDto.builder()
+                    .enterpriseName(contractProviderSupplier.getProviderSupplier() != null
+                            ? contractProviderSupplier.getProviderSupplier().getCorporateName()
+                            : null)
+                    .documentDtos(documentDtos)
+                    .employeeDocuments(employeeDocuments)
+                    .employeeDtos(employeeDtos)
+                    .build();
 
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             if (contractProviderSubcontractor.getProviderSubcontractor() != null) {
@@ -169,42 +174,41 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
             if ((requester.getAdmin() != null ? requester.getAdmin() : false)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_BASIC)
                     || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
-                return ContractDocumentAndEmployeeResponseDto.builder()
-                        .enterpriseName(contractProviderSubcontractor.getProviderSubcontractor() != null
-                                ? contractProviderSubcontractor.getProviderSubcontractor().getCorporateName()
-                                : null)
-                        .documentDtos(documentDtos)
-                        .employeeDtos(employeeDtos)
-                        .build();
+
             } else {
                 if (!requester.getLaboral()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("trabalhista"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("trabalhista"));
                 }
                 if (!requester.getWorkplaceSafety()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("segurança do trabalho"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("segurança do trabalho"));
                 }
                 if (!requester.getRegistrationAndCertificates()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("cadastro e certidões"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("cadastro e certidões"));
                 }
                 if (!requester.getGeneral()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("geral"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("geral"));
                 }
                 if (!requester.getHealth()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("saude"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("saude"));
                 }
                 if (!requester.getEnvironment()) {
                     documentDtos.removeIf(documentDto -> documentDto.getType().equals("meio ambiente"));
+                    employeeDocuments.removeIf(documentDto -> documentDto.getType().equals("meio ambiente"));
                 }
-
-                return ContractDocumentAndEmployeeResponseDto.builder()
-                        .enterpriseName(contractProviderSubcontractor.getProviderSubcontractor() != null
-                                ? contractProviderSubcontractor.getProviderSubcontractor().getCorporateName()
-                                : null)
-                        .documentDtos(documentDtos)
-                        .employeeDtos(employeeDtos)
-                        .build();
             }
-
+            return ContractDocumentAndEmployeeResponseDto.builder()
+                    .enterpriseName(contractProviderSubcontractor.getProviderSubcontractor() != null
+                            ? contractProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                            : null)
+                    .documentDtos(documentDtos)
+                    .employeeDocuments(employeeDocuments)
+                    .employeeDtos(employeeDtos)
+                    .build();
         } else {
             throw new EntityNotFoundException("Contract not found");
         }

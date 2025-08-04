@@ -43,8 +43,8 @@ import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -137,6 +137,28 @@ public class CrudDocumentImpl implements CrudDocument {
     }
 
     @Override
+    public void deleteReprovedCheck() {
+        Pageable pageable = PageRequest.of(0, 50);
+        Page<Document> documents = documentRepository.findAllByStatusAndLastCheckAfter(APROVADO, LocalDateTime.now().minusHours(27), pageable);
+        while (documents.hasContent()) {
+            for (Document document : documents) {
+                List<AuditLogDocument> auditLogDocuments = auditLogDocumentRepository.findAllByDocumentId(document.getIdDocumentation());
+                for (AuditLogDocument auditLogDocument : auditLogDocuments) {
+                    if (ChronoUnit.MONTHS.between(auditLogDocument.getCreatedAt(),LocalDateTime.now()) >= 1) {
+                        auditLogDocument.setHasDoc(false);
+                    }
+                }
+                auditLogDocumentRepository.saveAll(auditLogDocuments);
+            }
+            if (documents.hasNext()) {
+                documents = documentRepository.findAllByStatusAndLastCheckAfter(APROVADO, LocalDateTime.now().minusDays(1), documents.nextPageable());
+            } else {
+                break;
+            }
+        }
+    }
+
+    @Override
     public String changeStatus(String documentId, DocumentStatusChangeRequestDto documentStatusChangeRequestDto) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new NotFoundException("Document not found"));
@@ -203,11 +225,6 @@ public class CrudDocumentImpl implements CrudDocument {
         }
         document.setLastCheck(LocalDateTime.now());
         documentRepository.save(document);
-        if (document.getStatus() == APROVADO) {
-            List<AuditLogDocument> auditLogDocuments = auditLogDocumentRepository.findAllByDocumentId(document.getIdDocumentation());
-            auditLogDocuments.forEach(auditLogDocument -> auditLogDocument.setHasDoc(false));
-            auditLogDocumentRepository.saveAll(auditLogDocuments);
-        }
 
         AuditLogActionsEnum action;
         switch (documentStatusChangeRequestDto.getStatus()) {

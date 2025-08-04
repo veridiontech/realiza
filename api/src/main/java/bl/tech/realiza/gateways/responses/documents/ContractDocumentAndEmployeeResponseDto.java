@@ -15,6 +15,7 @@ import java.util.List;
 public class ContractDocumentAndEmployeeResponseDto {
     private String enterpriseName;
     private List<DocumentDto> documentDtos;
+    private List<DocumentDto> employeeDocuments;
     private List<EmployeeDto> employeeDtos;
 
     @Data

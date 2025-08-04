@@ -20,9 +20,11 @@ import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
@@ -59,7 +61,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
@@ -85,6 +89,8 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
+    private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -307,8 +313,56 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                 || requester.getRole().equals(User.Role.ROLE_REALIZA_PLUS)) {
                             contract.setFinished(true);
                             contract.setEndDate(Date.valueOf(LocalDate.now()));
+                            List<Employee> employeesToSave = new ArrayList<>();
+                            List<Employee> employeesToRemove = new ArrayList<>();
+                            for (Employee employee : contract.getEmployees()) {
+                                employee.getContracts().remove(contract);
+                                if (employee.getContracts().isEmpty()) {
+                                    employee.setSituation(Employee.Situation.DESALOCADO);
+                                }
+                                employeesToSave.add(employee);
+                                employeesToRemove.add(employee);
+                                if (employeesToSave.size() >= 50) {
+                                    employeeRepository.saveAll(employeesToSave);
+                                    employeesToSave.clear();
+                                }
+                            }
+                            if (!employeesToSave.isEmpty()) {
+                                employeeRepository.saveAll(employeesToSave);
+                            }
+                            contract.getEmployees().removeAll(employeesToRemove);
 
                             contract = contractRepository.save(contract);
+
+                            if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+                                List<ContractProviderSubcontractor> subcontracts = contractProviderSubcontractorRepository
+                                        .findAllByContractProviderSupplier_IdContract(contractProviderSupplier.getIdContract());
+                                for (ContractProviderSubcontractor subcontract : subcontracts) {
+                                    subcontract.setFinished(true);
+                                    subcontract.setEndDate(Date.valueOf(LocalDate.now()));
+                                    List<Employee> subEmployeesToSave = new ArrayList<>();
+                                    List<Employee> subEmployeesToRemove = new ArrayList<>();
+                                    for (Employee employee : subcontract.getEmployees()) {
+                                        employee.getContracts().remove(subcontract);
+                                        if (employee.getContracts().isEmpty()) {
+                                            employee.setSituation(Employee.Situation.DESALOCADO);
+                                        }
+                                        subEmployeesToSave.add(employee);
+                                        subEmployeesToRemove.add(employee);
+                                        if (subEmployeesToSave.size() >= 50) {
+                                            employeeRepository.saveAll(subEmployeesToSave);
+                                            subEmployeesToSave.clear();
+                                        }
+                                    }
+                                    if (!subEmployeesToSave.isEmpty()) {
+                                        employeeRepository.saveAll(subEmployeesToSave);
+                                    }
+                                    subcontract.getEmployees().removeAll(subEmployeesToRemove);
+
+                                    subcontract = contractRepository.save(subcontract);
+                                    contractProviderSubcontractorRepository.save(subcontract);
+                                }
+                            }
 
                             if (JwtService.getAuthenticatedUserId() != null) {
                                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -348,6 +402,17 @@ public class CrudItemManagementImpl implements CrudItemManagement {
 
                             contract = contractRepository.save(contract);
 
+                            if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+                                List<ContractProviderSubcontractor> subcontracts = contractProviderSubcontractorRepository
+                                        .findAllByContractProviderSupplier_IdContract(contractProviderSupplier.getIdContract());
+                                for (ContractProviderSubcontractor subcontract : subcontracts) {
+                                    subcontract.setIsActive(SUSPENSO);
+                                    subcontract.setStatus(ContractStatusEnum.SUSPENDED);
+                                    subcontract.setEndDate(Date.valueOf(LocalDate.now()));
+                                    contractProviderSubcontractorRepository.save(subcontract);
+                                }
+                            }
+
                             if (JwtService.getAuthenticatedUserId() != null) {
                                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
                                         .orElse(null);
@@ -386,6 +451,17 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             contract.setEndDate(null);
 
                             contract = contractRepository.save(contract);
+
+                            if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+                                List<ContractProviderSubcontractor> subcontracts = contractProviderSubcontractorRepository
+                                        .findAllByContractProviderSupplier_IdContract(contractProviderSupplier.getIdContract());
+                                for (ContractProviderSubcontractor subcontract : subcontracts) {
+                                    subcontract.setIsActive(ATIVADO);
+                                    subcontract.setStatus(ContractStatusEnum.ACTIVE);
+                                    subcontract.setEndDate(null);
+                                    contractProviderSubcontractorRepository.save(subcontract);
+                                }
+                            }
 
                             if (JwtService.getAuthenticatedUserId() != null) {
                                 User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())

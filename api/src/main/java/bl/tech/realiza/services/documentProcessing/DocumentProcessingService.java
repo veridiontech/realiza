@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +89,10 @@ public class DocumentProcessingService {
             }
 
             DocumentIAValidationResponse result = identifyDocumentType(imageBase64,document.getDocumentMatrix().getName());
-
+            if (ChronoUnit.DAYS.between(document.getLastCheck(), LocalDateTime.now()) < 1
+                && document.getStatus() != EM_ANALISE) {
+                return;
+            }
             if (result.isAutoValidate()) {
                 document.setStatus(result.isValid() ? APROVADO_IA : REPROVADO_IA);
                 document.setAdherent(true);
