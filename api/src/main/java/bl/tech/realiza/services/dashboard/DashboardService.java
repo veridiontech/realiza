@@ -452,54 +452,35 @@ public class DashboardService {
                     .orElseThrow(() -> new NotFoundException("Branch not found"));
             Double adherenceBranch = null;
             Double conformityBranch = null;
-            Object[] adherenceBranchSupplierValues = null;
-            Object[] adherenceBranchSubcontractorValues = null;
-            Object[] conformityBranchSupplierValues = null;
-            Object[] conformityBranchSubcontractorValues = null;
-            if (branchIds == null) {
-                adherenceBranchSupplierValues = documentRepository.countTotalAndAdherenceSupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-                adherenceBranchSubcontractorValues = documentRepository.countTotalAndAdherenceSubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-                conformityBranchSupplierValues = documentRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-                conformityBranchSubcontractorValues = documentRepository.countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-            } else {
-                adherenceBranchSupplierValues = documentRepository.countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-                adherenceBranchSubcontractorValues = documentRepository.countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-                conformityBranchSupplierValues = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-                conformityBranchSubcontractorValues = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
-                        providerIds,
-                        responsibleIds,
-                        documentTypes,
-                        documentTitles);
-            }
-            System.out.println(adherenceBranchSupplierValues[0]);
+            List<String> newBranchIds = new ArrayList<>();
+            newBranchIds.add(branchId);
+
+            Object[] adherenceBranchSupplierValuesRaw = documentRepository.countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+            Object[] adherenceBranchSubcontractorValuesRaw = documentRepository.countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+            Object[] conformityBranchSupplierValuesRaw = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+            Object[] conformityBranchSubcontractorValuesRaw = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+
+            Object[] adherenceBranchSupplierValues = (Object[]) adherenceBranchSupplierValuesRaw[0];
+            Object[] adherenceBranchSubcontractorValues = (Object[]) adherenceBranchSubcontractorValuesRaw[0];
+            Object[] conformityBranchSupplierValues = (Object[]) conformityBranchSupplierValuesRaw[0];
+            Object[] conformityBranchSubcontractorValues = (Object[]) conformityBranchSubcontractorValuesRaw[0];
+
             Long totalAdherenceBranch = getSafeLong(adherenceBranchSupplierValues, 0) + getSafeLong(adherenceBranchSubcontractorValues, 0);
             Long adherenceBranchTrue = getSafeLong(adherenceBranchSupplierValues, 1) + getSafeLong(adherenceBranchSubcontractorValues, 1);
             Long totalConformityBranch = getSafeLong(conformityBranchSupplierValues, 0) + getSafeLong(conformityBranchSubcontractorValues, 0);

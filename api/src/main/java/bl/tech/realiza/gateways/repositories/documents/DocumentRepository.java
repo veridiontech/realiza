@@ -68,7 +68,7 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (:clientId IS NULL OR cps.branch.idBranch IN :branchIds)
+    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
     AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
     AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
@@ -90,7 +90,7 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
+    WHERE (:branchIds IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
     AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
         OR cpsb.providerSubcontractor.idProvider IN :providerIds)
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
@@ -250,7 +250,7 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (:clientId IS NULL OR cps.branch.idBranch IN :branchIds)
+    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
     AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
     AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
     AND (:documentTypes IS NULL OR d.type IN :documentTypes)
@@ -272,7 +272,7 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
+    WHERE (:branchIds IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
     AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
         OR cpsb.providerSubcontractor.idProvider IN :providerIds)
     AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
