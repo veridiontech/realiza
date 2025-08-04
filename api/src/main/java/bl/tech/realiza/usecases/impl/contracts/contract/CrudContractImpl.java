@@ -182,6 +182,7 @@ public class CrudContractImpl implements CrudContract {
                                     + employee.getFullName()
                                     + " ao contrato " + contract.getContractReference(),
                             null,
+                            null,
                             ALLOCATE,
                             userResponsible.getIdUser());
 
@@ -191,6 +192,7 @@ public class CrudContractImpl implements CrudContract {
                             userResponsible.getFullName() + " alocou colaborador "
                                     + employee.getFullName()
                                     + " ao contrato " + contract.getContractReference(),
+                            null,
                             null,
                             ALLOCATE,
                             userResponsible.getIdUser());
@@ -252,6 +254,7 @@ public class CrudContractImpl implements CrudContract {
                                     + employee.getFullName()
                                     + " do contrato " + contract.getContractReference(),
                             null,
+                            null,
                             DEALLOCATE,
                             userResponsible.getIdUser());
 
@@ -261,6 +264,7 @@ public class CrudContractImpl implements CrudContract {
                             userResponsible.getFullName() + " desalocou colaborador "
                                     + employee.getFullName()
                                     + " do contrato " + contract.getContractReference(),
+                            null,
                             null,
                             DEALLOCATE,
                             userResponsible.getIdUser());

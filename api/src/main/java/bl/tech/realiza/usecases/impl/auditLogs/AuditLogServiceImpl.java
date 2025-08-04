@@ -54,7 +54,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
-import java.util.Objects;
 
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 
@@ -82,7 +81,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final ActivityRepository activityRepository;
 
     @Override
-    public void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String notes, AuditLogActionsEnum action, String userResponsibleId) {
+    public void createAuditLog(String id, AuditLogTypeEnum typeEnum, String description, String justification, String notes, AuditLogActionsEnum action, String userResponsibleId) {
         User userResponsible = userRepository.findById(userResponsibleId)
                 .orElseThrow(() ->  new NotFoundException("User not found"));
         switch (typeEnum) {
@@ -92,6 +91,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogServiceTypeRepository.save(
                         AuditLogServiceType.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -109,6 +109,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogProviderRepository.save(
                         AuditLogProvider.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -127,6 +128,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                     auditLogContractRepository.save(
                             AuditLogContract.builder()
                                     .description(description)
+                                    .justification(justification)
                                     .notes(notes)
                                     .action(action)
                                     .userResponsibleId(userResponsible.getIdUser())
@@ -169,6 +171,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                     auditLogContractRepository.save(
                             AuditLogContract.builder()
                                     .description(description)
+                                    .justification(justification)
                                     .notes(notes)
                                     .action(action)
                                     .userResponsibleId(userResponsible.getIdUser())
@@ -197,6 +200,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogUserRepository.save(
                         AuditLogUser.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -217,6 +221,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                     auditLogDocumentRepository.save(
                             AuditLogDocument.builder()
                                     .description(description)
+                                    .justification(justification)
                                     .notes(notes)
                                     .action(action)
                                     .userResponsibleId(userResponsible.getIdUser())
@@ -239,6 +244,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                     auditLogDocumentRepository.save(
                             AuditLogDocument.builder()
                                     .description(description)
+                                    .justification(justification)
                                     .notes(notes)
                                     .action(action)
                                     .userResponsibleId(userResponsible.getIdUser())
@@ -261,6 +267,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                     auditLogDocumentRepository.save(
                             AuditLogDocument.builder()
                                     .description(description)
+                                    .justification(justification)
                                     .notes(notes)
                                     .action(action)
                                     .userResponsibleId(userResponsible.getIdUser())
@@ -287,6 +294,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogEmployeeRepository.save(
                         AuditLogEmployee.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -314,6 +322,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogClientRepository.save(
                         AuditLogClient.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -331,6 +340,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogBranchRepository.save(
                         AuditLogBranch.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -348,6 +358,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 auditLogActivityRepository.save(
                         AuditLogActivity.builder()
                                 .description(description)
+                                .justification(justification)
                                 .notes(notes)
                                 .action(action)
                                 .userResponsibleId(userResponsible.getIdUser())
@@ -395,7 +406,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -425,7 +436,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -457,7 +468,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -487,7 +498,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -519,7 +530,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -552,7 +563,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -583,7 +594,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -623,7 +634,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())
@@ -653,7 +664,7 @@ public class AuditLogServiceImpl implements AuditLogService {
                 return auditLogPage.map(auditLog -> AuditLogResponseDto.builder()
                         .id(auditLog.getIdRecord())
                         .description(auditLog.getDescription())
-                        .notes(auditLog.getNotes())
+                        .justification(auditLog.getJustification())
                         .action(auditLog.getAction())
                         .createdAt(auditLog.getCreatedAt())
                         .userResponsibleId(auditLog.getUserResponsibleId())

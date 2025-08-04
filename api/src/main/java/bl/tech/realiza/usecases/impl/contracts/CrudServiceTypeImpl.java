@@ -132,6 +132,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                         userResponsible.getFullName() + " deletou serviço "
                                 + serviceType.getTitle(),
                         null,
+                        null,
                         DELETE,
                         userResponsible.getIdUser());
             }
@@ -194,6 +195,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                         userResponsible.getFullName() + " criou serviço "
                                 + serviceType.getTitle(),
                         null,
+                        null,
                         CREATE,
                         userResponsible.getIdUser());
             }
@@ -235,6 +237,7 @@ public class CrudServiceTypeImpl implements CrudServiceType {
                         SERVICE_TYPE,
                         userResponsible.getFullName() + " atualizou serviço "
                                 + serviceType.getTitle(),
+                        null,
                         null,
                         UPDATE,
                         userResponsible.getIdUser());

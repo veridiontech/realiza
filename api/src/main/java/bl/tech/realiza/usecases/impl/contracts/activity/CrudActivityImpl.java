@@ -92,6 +92,7 @@ public class CrudActivityImpl implements CrudActivity {
                             userResponsible.getFullName() + " criou a atividade "
                                     + activity.getTitle(),
                             null,
+                            null,
                             CREATE,
                             userResponsible.getIdUser()));
         }
@@ -228,6 +229,7 @@ public class CrudActivityImpl implements CrudActivity {
                                     + documentBranch.getTitle() + " a atividade "
                                     + activity.getTitle(),
                             null,
+                            null,
                             ALLOCATE,
                             userResponsible.getIdUser()));
         }
@@ -268,6 +270,7 @@ public class CrudActivityImpl implements CrudActivity {
                                     + savedActivityDocuments.getDocumentBranch().getTitle()
                                     + " da atividade "
                                     + savedActivityDocuments.getActivity().getTitle(),
+                            null,
                             null,
                             DEALLOCATE,
                             userResponsible.getIdUser()));
@@ -323,6 +326,7 @@ public class CrudActivityImpl implements CrudActivity {
                             userResponsible.getFullName() + " atualizou a atividade "
                                     + activity.getTitle(),
                             null,
+                            null,
                             UPDATE,
                             userResponsible.getIdUser()));
         }
@@ -357,6 +361,7 @@ public class CrudActivityImpl implements CrudActivity {
                             ACTIVITY,
                             userResponsible.getFullName() + " deletou a atividade "
                                     + activity.getTitle(),
+                            null,
                             null,
                             DELETE,
                             userResponsible.getIdUser()));

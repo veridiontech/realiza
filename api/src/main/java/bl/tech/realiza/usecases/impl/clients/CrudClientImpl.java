@@ -122,6 +122,7 @@ public class CrudClientImpl implements CrudClient {
                         userResponsible.getFullName() + " criou cliente "
                                 + savedClient.getCorporateName(),
                         null,
+                        null,
                         CREATE,
                         userResponsible.getIdUser());
             }
@@ -252,6 +253,7 @@ public class CrudClientImpl implements CrudClient {
                         userResponsible.getFullName() + " atualizou cliente "
                                 + savedClient.getCorporateName(),
                         null,
+                        null,
                         UPDATE,
                         userResponsible.getIdUser());
             }
@@ -289,6 +291,7 @@ public class CrudClientImpl implements CrudClient {
                         CLIENT,
                         userResponsible.getFullName() + " deletou cliente "
                                 + client.getCorporateName(),
+                        null,
                         null,
                         UPDATE,
                         userResponsible.getIdUser());

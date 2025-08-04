@@ -282,6 +282,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             userResponsible.getFullName() + " isentou documento "
                                     + document.getTitle() + " de " + owner,
                             null,
+                            null,
                             EXEMPT,
                             userResponsible.getIdUser());
                 }
@@ -318,6 +319,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                             CONTRACT,
                                             userResponsible.getFullName() + " finalizou contrato "
                                                     + contract.getContractReference(),
+                                            null,
                                             null,
                                             FINISH,
                                             userResponsible.getIdUser());
@@ -356,6 +358,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                             userResponsible.getFullName() + " suspendeu contrato "
                                                     + contract.getContractReference(),
                                             null,
+                                            null,
                                             UPDATE,
                                             userResponsible.getIdUser());
                                 }
@@ -393,6 +396,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                             CONTRACT,
                                             userResponsible.getFullName() + " reativou contrato "
                                                     + contract.getContractReference(),
+                                            null,
                                             null,
                                             UPDATE,
                                             userResponsible.getIdUser());

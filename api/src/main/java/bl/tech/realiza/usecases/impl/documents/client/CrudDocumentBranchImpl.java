@@ -581,6 +581,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                             userResponsible.getFullName() + " " + action + " documento "
                             + document.getTitle(),
                             null,
+                            null,
                             isSelected ? ALLOCATE : DEALLOCATE,
                             userResponsible.getIdUser());
                 }
@@ -688,6 +689,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                         userResponsible.getFullName() + " mudou " + documentBranch.getTitle()
                                 + " validade de " + oldAmount + " " + oldDayUnitEnum
                                 + " para " + documentBranch.getExpirationDateAmount() + " " + documentBranch.getExpirationDateUnit(),
+                        null,
                         null,
                         UPDATE,
                         userResponsible.getIdUser());

@@ -22,6 +22,7 @@ public abstract class AuditLog {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String idRecord;
     private String description;
+    private String justification;
     private String notes;
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -214,6 +214,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                                 ? savedDocumentSubcontractor.getProviderSubcontractor().getCorporateName()
                                 : "Not identified"),
                         null,
+                        null,
                         UPLOAD,
                         userResponsible.getIdUser());
             }

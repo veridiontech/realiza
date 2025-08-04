@@ -226,6 +226,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         DOCUMENT,
                         user.getFullName() + " " + action.name()
                                 + " document " + document.getTitle(),
+                        documentStatusChangeRequestDto.getJustification(),
                         ChronoUnit.DAYS.between(document.getVersionDate(), LocalDateTime.now()) + " dias entre o upload e a validação",
                         action,
                         userResponsible.getIdUser());
@@ -291,6 +292,7 @@ public class CrudDocumentImpl implements CrudDocument {
                         DOCUMENT,
                         userResponsible.getFullName() + " solicitou isenção do documento "
                                 + document.getTitle() + " de " + owner,
+                        null,
                         null,
                         EXEMPT,
                         userResponsible.getIdUser());

@@ -121,6 +121,7 @@ public class CrudBranchImpl implements CrudBranch {
                         userResponsible.getFullName() + " criou filial "
                                 + savedBranch.getName(),
                         null,
+                        null,
                         CREATE,
                         userResponsible.getIdUser()));
         }
@@ -230,6 +231,7 @@ public class CrudBranchImpl implements CrudBranch {
                         userResponsible.getFullName() + " atualizou filial "
                                 + branch.getName(),
                         null,
+                        null,
                         UPDATE,
                         userResponsible.getIdUser());
             }
@@ -279,6 +281,7 @@ public class CrudBranchImpl implements CrudBranch {
                         BRANCH,
                         userResponsible.getFullName() + " deletou filial "
                                 + branch.getName(),
+                        null,
                         null,
                         DELETE,
                         userResponsible.getIdUser());
