@@ -384,6 +384,7 @@ export function DetailsEmployee() {
       {isViewerOpen && selectedDocumentId && (
         <DocumentViewer
           documentId={selectedDocumentId}
+          isOpen={isViewerOpen}
           onClose={() => setIsViewerOpen(false)}
           onStatusChange={handleStatusChange}
         />
