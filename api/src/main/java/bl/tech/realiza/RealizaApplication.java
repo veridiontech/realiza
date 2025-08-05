@@ -27,6 +27,11 @@ public class RealizaApplication {
 
 		SpringApplication.run(RealizaApplication.class, args);
 
+		// TODO quando copiar os snapshots:
+		//  apenas empresas isActive = true
+		//  apenas contratos que já foram aprovados no isActive != PENDING
+		//  apenas usuários responsáveis de contratos
+
 		// TODO criar rotas que usem as permissões para filtrar ✔️
 		/* incluir permissões no token ✔️
 		* documentos do colaborador por permissão ✔️

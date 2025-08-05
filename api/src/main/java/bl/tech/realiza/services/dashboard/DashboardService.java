@@ -1,18 +1,20 @@
 package bl.tech.realiza.services.dashboard;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
-import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.enums.ContractTypeEnum;
+import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
+import bl.tech.realiza.domains.services.snapshots.clients.BranchSnapshot;
+import bl.tech.realiza.domains.services.snapshots.clients.ClientSnapshot;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
@@ -24,18 +26,16 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.clients.ClientSnapshotRepository;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
 import bl.tech.realiza.gateways.responses.dashboard.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +59,7 @@ public class DashboardService {
     private final ProviderSupplierRepository providerSupplierRepository;
     private final ClientRepository clientRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
+    private final ClientSnapshotRepository clientSnapshotRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         branchRepository.findById(branchId)
@@ -1008,5 +1009,84 @@ public class DashboardService {
 
     private Page<DashboardDocumentDetailsResponseDto> toDetailsPageDto(Page<Document> documents) {
         return documents.map(this::toDetailsDto);
+    }
+
+    public void takeSnapshot(SnapshotFrequencyEnum frequency) {
+        Pageable pageable = PageRequest.of(0, 50);
+        Page<Client> clients = clientRepository.findAllByIsActiveIsTrue(pageable);
+        while (clients.hasContent()) {
+            List<ClientSnapshot> clientBatch = new ArrayList<>(50);
+            for (Client client : clients) {
+                clientBatch.add(ClientSnapshot.builder()
+                                .cnpj(client.getCnpj())
+                        .build());
+
+                if (clientBatch.size() >= 50) {
+                    clientSnapshotRepository.saveAll(clientBatch);
+                    clientBatch.clear();
+                }
+            }
+
+            if (!clientBatch.isEmpty()) {
+                clientSnapshotRepository.saveAll(clientBatch);
+                clientBatch.clear();
+            }
+
+            if (clients.hasNext()) {
+                pageable = clients.nextPageable();
+                clients = clientRepository.findAllByIsActiveIsTrue(pageable);
+            } else {
+                break;
+            }
+        }
+
+//        pageable = PageRequest.of(0, 50);
+//        Page<Branch> branches = branchRepository.findAllByIsActiveIsTrue(pageable);
+//        while (clients.hasContent()) {
+//            List<ClientSnapshot> clientBatch = new ArrayList<>(50);
+//            for (bran client : clients) {
+//                clientBatch.add(ClientSnapshot.builder()
+//                        .cnpj(client.getCnpj())
+//                        .build());
+//
+//                if (clientBatch.size() >= 50) {
+//                    clientSnapshotRepository.saveAll(clientBatch);
+//                    clientBatch.clear();
+//                }
+//            }
+//
+//            if (!clientBatch.isEmpty()) {
+//                clientSnapshotRepository.saveAll(clientBatch);
+//                clientBatch.clear();
+//            }
+//
+//            if (clients.hasNext()) {
+//                pageable = clients.nextPageable();
+//                clients = clientRepository.findAllByIsActiveIsTrue(pageable);
+//            } else {
+//                break;
+//            }
+//        }
+        /*
+
+        branch <- apenas isActive == true
+        user <- apenas responsaveis de contratos
+        provider <- apenas isActive == ACTIVE
+        supplier <- apenas isActive == ACTIVE
+        subcontractor <- apenas isActive == ACTIVE
+        employee
+        contract <- apenas isActive != PENDING
+        contract supplier
+        contract subcontractor
+        employee contract
+        document matrix group
+        document matrix subgroup
+        document matrix
+        document
+        document employee
+        document supplier
+        document subcontractor
+        contract document
+         */
     }
 }

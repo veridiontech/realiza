@@ -2,7 +2,6 @@ package bl.tech.realiza.domains.clients;
 
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
-import bl.tech.realiza.domains.services.DashboardSnapshot;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.ultragaz.Board;
 import bl.tech.realiza.domains.user.profile.Profile;
@@ -53,10 +52,6 @@ public class Client {
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
     @JsonManagedReference
     private List<Profile> profiles;
-
-    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
-    @JsonManagedReference
-    private List<DashboardSnapshot> dashboardSnapshots;
 
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
