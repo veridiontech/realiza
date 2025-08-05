@@ -1,6 +1,8 @@
 package bl.tech.realiza.services.scheduled;
 
 import bl.tech.realiza.domains.enums.DocumentValidityEnum;
+import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
+import bl.tech.realiza.services.dashboard.DashboardService;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
 import bl.tech.realiza.usecases.interfaces.users.CrudUser;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class ScheduledJob {
     private final CrudDocument crudDocument;
     private final CrudUser crudUser;
+    private final DashboardService dashboardService;
 
     @Scheduled(cron = "0 0 1 * * *", zone = "America/Sao_Paulo")
     public void runDailyTask() {
@@ -31,18 +34,30 @@ public class ScheduledJob {
         log.info("Tarefa semanal concluída.");
     }
 
-    @Scheduled(cron = "0 0 3 1 * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 30 2 1 * *", zone = "America/Sao_Paulo")
     public void runMonthlyTask() {
         log.info("Executando tarefas mensais de verificação de documentos...");
         monthlyDocumentCheck();
         log.info("Tarefa mensal concluída.");
     }
 
-    @Scheduled(cron = "0 0 4 1 1 *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 3 1 1 *", zone = "America/Sao_Paulo")
     public void runAnnualTask() {
         log.info("Executando tarefas anuais de verificação de documentos...");
         annualDocumentCheck();
         log.info("Tarefa anual concluída.");
+    }
+
+    @Scheduled(cron = "0 30 3 * * *", zone = "America/Sao_Paulo")
+    public void runDailySnapshot() {
+        log.info("Executando snapshot diário do dashboard...");
+        log.info("Snapshot concluído.");
+    }
+
+    @Scheduled(cron = "0 0 4 1 * *", zone = "America/Sao_Paulo")
+    public void runMonthlySnapshot() {
+        log.info("Executando snapshot mensal do dashboard...");
+        log.info("Snapshot concluído.");
     }
 
     public void dailyDocumentCheck() {
@@ -66,5 +81,9 @@ public class ScheduledJob {
 
     public void dailyUserCheck() {
         crudUser.fourDigitCodeCheck();
+    }
+
+    public void takeSnapshot(SnapshotFrequencyEnum frequency) {
+        dashboardService.takeSnapshot(frequency);
     }
 }
