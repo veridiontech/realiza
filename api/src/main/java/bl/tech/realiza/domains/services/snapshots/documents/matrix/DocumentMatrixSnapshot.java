@@ -1,8 +1,9 @@
 package bl.tech.realiza.domains.services.snapshots.documents.matrix;
 
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.domains.services.snapshots.documents.DocumentSnapshot;
+import bl.tech.realiza.domains.services.snapshots.ids.SnapshotId;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,23 +20,25 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class DocumentMatrixSnapshot {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @EmbeddedId
+    private SnapshotId id;
     private String name;
     private String type;
     @Builder.Default
-    private Boolean unique = true;
+    private Boolean isUnique = true;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    private SnapshotFrequencyEnum frequency;
 
     @ManyToOne
-    @JoinColumn(name = "documentSubgroupId")
+    @JoinColumns({
+            @JoinColumn(name = "subgroupId", referencedColumnName = "id"),
+            @JoinColumn(name = "subgroupFrequency", referencedColumnName = "frequency"),
+            @JoinColumn(name = "subgroupSnapshotDate", referencedColumnName = "snapshotDate")
+    })
     @JsonManagedReference
-    private DocumentMatrixSubgroupSnapshot subGroup;
+    private DocumentMatrixSubgroupSnapshot subgroup;
 
-    @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.REMOVE)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<DocumentSnapshot> documents;
 }

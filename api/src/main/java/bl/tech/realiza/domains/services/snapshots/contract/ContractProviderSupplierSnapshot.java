@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.services.snapshots.contract;
 
 import bl.tech.realiza.domains.services.snapshots.clients.BranchSnapshot;
 import bl.tech.realiza.domains.services.snapshots.providers.ProviderSupplierSnapshot;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,16 +21,24 @@ import java.util.List;
 public class ContractProviderSupplierSnapshot extends ContractSnapshot {
 
     @ManyToOne
-    @JoinColumn(name = "providerId")
+    @JoinColumns({
+            @JoinColumn(name = "supplier_id", referencedColumnName = "provider_id"),
+            @JoinColumn(name = "supplier_frequency", referencedColumnName = "provider_frequency"),
+            @JoinColumn(name = "supplier_snapshot_date", referencedColumnName = "provider_snapshot_date")
+    })
     @JsonManagedReference
     private ProviderSupplierSnapshot supplier;
 
     @ManyToOne
-    @JoinColumn(name = "branchId")
+    @JoinColumns({
+            @JoinColumn(name = "branch_id", referencedColumnName = "id"),
+            @JoinColumn(name = "branch_frequency", referencedColumnName = "frequency"),
+            @JoinColumn(name = "branch_snapshot_date", referencedColumnName = "snapshotDate")
+    })
     @JsonManagedReference
     private BranchSnapshot branch;
 
-    @OneToMany(mappedBy = "contractSupplier")
-    @JsonManagedReference
+    @OneToMany(mappedBy = "contractSupplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<ContractProviderSubcontractorSnapshot> subcontract;
 }

@@ -8,6 +8,12 @@ import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrixGroup;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
+import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.enums.ContractTypeEnum;
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
@@ -15,18 +21,59 @@ import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.snapshots.clients.BranchSnapshot;
 import bl.tech.realiza.domains.services.snapshots.clients.ClientSnapshot;
+import bl.tech.realiza.domains.services.snapshots.contract.ContractDocumentSnapshot;
+import bl.tech.realiza.domains.services.snapshots.contract.ContractProviderSubcontractorSnapshot;
+import bl.tech.realiza.domains.services.snapshots.contract.ContractProviderSupplierSnapshot;
+import bl.tech.realiza.domains.services.snapshots.contract.ContractSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.DocumentSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.employee.DocumentEmployeeSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.matrix.DocumentMatrixGroupSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.matrix.DocumentMatrixSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.matrix.DocumentMatrixSubgroupSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.provider.DocumentProviderSubcontractorSnapshot;
+import bl.tech.realiza.domains.services.snapshots.documents.provider.DocumentProviderSupplierSnapshot;
+import bl.tech.realiza.domains.services.snapshots.employees.EmployeeSnapshot;
+import bl.tech.realiza.domains.services.snapshots.ids.SnapshotId;
+import bl.tech.realiza.domains.services.snapshots.providers.ProviderSnapshot;
+import bl.tech.realiza.domains.services.snapshots.providers.ProviderSubcontractorSnapshot;
+import bl.tech.realiza.domains.services.snapshots.providers.ProviderSupplierSnapshot;
+import bl.tech.realiza.domains.services.snapshots.user.UserSnapshot;
+import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixGroupRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubgroupRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.clients.BranchSnapshotRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.clients.ClientSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.contract.ContractDocumentSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.contract.ContractProviderSubcontractorSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.contract.ContractProviderSupplierSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.contract.ContractSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.DocumentSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.employee.DocumentEmployeeSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.matrix.DocumentMatrixGroupSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.matrix.DocumentMatrixSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.matrix.DocumentMatrixSubgroupSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.provider.DocumentProviderSubcontractorSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.documents.provider.DocumentProviderSupplierSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.employees.EmployeeSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.providers.ProviderSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.providers.ProviderSubcontractorSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.providers.ProviderSupplierSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.services.snapshots.user.UserSnapshotRepository;
+import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
 import bl.tech.realiza.gateways.responses.dashboard.*;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +83,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,6 +109,29 @@ public class DashboardService {
     private final ClientRepository clientRepository;
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ClientSnapshotRepository clientSnapshotRepository;
+    private final BranchSnapshotRepository branchSnapshotRepository;
+    private final UserRepository userRepository;
+    private final UserSnapshotRepository userSnapshotRepository;
+    private final ProviderSupplierSnapshotRepository providerSupplierSnapshotRepository;
+    private final ProviderSubcontractorSnapshotRepository providerSubcontractorSnapshotRepository;
+    private final EmployeeSnapshotRepository employeeSnapshotRepository;
+    private final ContractProviderSupplierSnapshotRepository contractProviderSupplierSnapshotRepository;
+    private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
+    private final ContractProviderSubcontractorSnapshotRepository contractProviderSubcontractorSnapshotRepository;
+    private final DocumentMatrixGroupRepository documentMatrixGroupRepository;
+    private final DocumentMatrixGroupSnapshotRepository documentMatrixGroupSnapshotRepository;
+    private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
+    private final DocumentMatrixSubgroupSnapshotRepository documentMatrixSubgroupSnapshotRepository;
+    private final DocumentMatrixRepository documentMatrixRepository;
+    private final DocumentMatrixSnapshotRepository documentMatrixSnapshotRepository;
+    private final DocumentProviderSupplierSnapshotRepository documentProviderSupplierSnapshotRepository;
+    private final DocumentProviderSubcontractorSnapshotRepository documentProviderSubcontractorSnapshotRepository;
+    private final DocumentEmployeeSnapshotRepository documentEmployeeSnapshotRepository;
+    private final ContractDocumentRepository contractDocumentRepository;
+    private final DocumentSnapshotRepository documentSnapshotRepository;
+    private final ContractSnapshotRepository contractSnapshotRepository;
+    private final ContractDocumentSnapshotRepository contractDocumentSnapshotRepository;
+    private final ProviderSnapshotRepository providerSnapshotRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         branchRepository.findById(branchId)
@@ -1018,7 +1090,16 @@ public class DashboardService {
             List<ClientSnapshot> clientBatch = new ArrayList<>(50);
             for (Client client : clients) {
                 clientBatch.add(ClientSnapshot.builder()
+                                .id(SnapshotId.builder()
+                                        .id(client.getIdClient())
+                                        .snapshotDate(Date.from(LocalDateTime.now()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()))
+                                        .frequency(frequency)
+                                        .build())
                                 .cnpj(client.getCnpj())
+                                .corporateName(client.getCorporateName())
+                                .tradeName(client.getTradeName())
                         .build());
 
                 if (clientBatch.size() >= 50) {
@@ -1040,53 +1121,1367 @@ public class DashboardService {
             }
         }
 
-//        pageable = PageRequest.of(0, 50);
-//        Page<Branch> branches = branchRepository.findAllByIsActiveIsTrue(pageable);
-//        while (clients.hasContent()) {
-//            List<ClientSnapshot> clientBatch = new ArrayList<>(50);
-//            for (bran client : clients) {
-//                clientBatch.add(ClientSnapshot.builder()
-//                        .cnpj(client.getCnpj())
-//                        .build());
-//
-//                if (clientBatch.size() >= 50) {
-//                    clientSnapshotRepository.saveAll(clientBatch);
-//                    clientBatch.clear();
-//                }
-//            }
-//
-//            if (!clientBatch.isEmpty()) {
-//                clientSnapshotRepository.saveAll(clientBatch);
-//                clientBatch.clear();
-//            }
-//
-//            if (clients.hasNext()) {
-//                pageable = clients.nextPageable();
-//                clients = clientRepository.findAllByIsActiveIsTrue(pageable);
-//            } else {
-//                break;
-//            }
-//        }
-        /*
+        pageable = PageRequest.of(0, 50);
+        Page<Branch> branches = branchRepository.findAllByIsActiveIsTrue(pageable);
+        while (branches.hasContent()) {
+            List<BranchSnapshot> branchBatch = new ArrayList<>(50);
+            for (Branch branch : branches) {
+                ClientSnapshot clientSnapshot = clientSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(branch.getClient().getIdClient(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                                .orElseThrow(() -> new NotFoundException("Client not found"));
+                branchBatch.add(BranchSnapshot.builder()
+                                .id(SnapshotId.builder()
+                                        .id(branch.getIdBranch())
+                                        .snapshotDate(Date.from(LocalDateTime.now()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()))
+                                        .frequency(frequency)
+                                        .build())
+                                .tradeName(branch.getName())
+                                .cnpj(branch.getCnpj())
+                                .client(clientSnapshot)
+                        .build());
 
-        branch <- apenas isActive == true
-        user <- apenas responsaveis de contratos
-        provider <- apenas isActive == ACTIVE
-        supplier <- apenas isActive == ACTIVE
-        subcontractor <- apenas isActive == ACTIVE
-        employee
-        contract <- apenas isActive != PENDING
-        contract supplier
-        contract subcontractor
-        employee contract
-        document matrix group
-        document matrix subgroup
-        document matrix
-        document
-        document employee
-        document supplier
-        document subcontractor
-        contract document
-         */
+                if (branchBatch.size() >= 50) {
+                    branchSnapshotRepository.saveAll(branchBatch);
+                    branchBatch.clear();
+                }
+            }
+
+            if (!branchBatch.isEmpty()) {
+                branchSnapshotRepository.saveAll(branchBatch);
+                branchBatch.clear();
+            }
+
+            if (branches.hasNext()) {
+                pageable = branches.nextPageable();
+                branches = branchRepository.findAllByIsActiveIsTrue(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<User> users = userRepository.findAllByContractsIsEmpty(false, pageable);
+        while (users.hasContent()) {
+            List<UserSnapshot> userBatch = new ArrayList<>(50);
+            for (User user : users) {
+                userBatch.add(UserSnapshot.builder()
+                                .id(SnapshotId.builder()
+                                        .id(user.getIdUser())
+                                        .snapshotDate(Date.from(LocalDateTime.now()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()))
+                                        .frequency(frequency)
+                                        .build())
+                                .firstName(user.getFirstName())
+                                .surname(user.getSurname())
+                                .email(user.getEmail())
+                        .build());
+
+                if (userBatch.size() >= 50) {
+                    userSnapshotRepository.saveAll(userBatch);
+                    userBatch.clear();
+                }
+            }
+
+            if (!userBatch.isEmpty()) {
+                userSnapshotRepository.saveAll(userBatch);
+                userBatch.clear();
+            }
+
+            if (users.hasNext()) {
+                pageable = users.nextPageable();
+                users = userRepository.findAllByContractsIsEmpty(false, pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<ProviderSupplier> suppliers = providerSupplierRepository.findAllByIsActiveIsTrue(pageable);
+        while (suppliers.hasContent()) {
+            List<ProviderSupplierSnapshot> providerBatch = new ArrayList<>(50);
+            for (ProviderSupplier provider : suppliers) {
+                providerBatch.add(ProviderSupplierSnapshot.builder()
+                                .id(SnapshotId.builder()
+                                        .id(provider.getIdProvider())
+                                        .snapshotDate(Date.from(LocalDateTime.now()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()))
+                                        .frequency(frequency)
+                                        .build())
+                                .corporateName(provider.getCorporateName())
+                                .tradeName(provider.getTradeName())
+                                .cnpj(provider.getCnpj())
+                        .build());
+
+                if (providerBatch.size() >= 50) {
+                    providerSupplierSnapshotRepository.saveAll(providerBatch);
+                    providerBatch.clear();
+                }
+            }
+
+            if (!providerBatch.isEmpty()) {
+                providerSupplierSnapshotRepository.saveAll(providerBatch);
+                providerBatch.clear();
+            }
+
+            if (suppliers.hasNext()) {
+                pageable = suppliers.nextPageable();
+                suppliers = providerSupplierRepository.findAllByIsActiveIsTrue(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<ProviderSubcontractor> subcontractors = providerSubcontractorRepository.findAllByIsActiveIsTrue(pageable);
+        while (subcontractors.hasContent()) {
+            List<ProviderSubcontractorSnapshot> providerBatch = new ArrayList<>(50);
+            for (ProviderSubcontractor provider : subcontractors) {
+                providerBatch.add(ProviderSubcontractorSnapshot.builder()
+                        .id(SnapshotId.builder()
+                                .id(provider.getIdProvider())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                        .corporateName(provider.getCorporateName())
+                        .tradeName(provider.getTradeName())
+                        .cnpj(provider.getCnpj())
+                        .build());
+
+                if (providerBatch.size() >= 50) {
+                    providerSubcontractorSnapshotRepository.saveAll(providerBatch);
+                    providerBatch.clear();
+                }
+            }
+
+            if (!providerBatch.isEmpty()) {
+                providerSubcontractorSnapshotRepository.saveAll(providerBatch);
+                providerBatch.clear();
+            }
+
+            if (subcontractors.hasNext()) {
+                pageable = subcontractors.nextPageable();
+                subcontractors = providerSubcontractorRepository.findAllByIsActiveIsTrue(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<Employee> employees = employeeRepository.findAll(pageable);
+        while (employees.hasContent()) {
+            List<EmployeeSnapshot> employeeBatch = new ArrayList<>(50);
+            for (Employee employee : employees) {
+                ProviderSupplierSnapshot providerSupplierSnapshot = null;
+                ProviderSubcontractorSnapshot providerSubcontractorSnapshot = null;
+                if (employee.getSupplier() != null) {
+                    providerSupplierSnapshot = providerSupplierSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(employee.getSupplier().getIdProvider(),
+                                    Date.from(LocalDateTime.now()
+                                            .atZone(ZoneId.systemDefault())
+                                            .toInstant()),
+                                    frequency)
+                            .orElse(null);
+                } else if (employee.getSubcontract() != null) {
+                    providerSubcontractorSnapshot = providerSubcontractorSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(employee.getSubcontract().getIdProvider(),
+                                    Date.from(LocalDateTime.now()
+                                            .atZone(ZoneId.systemDefault())
+                                            .toInstant()),
+                                    frequency)
+                            .orElse(null);
+                }
+                employeeBatch.add(EmployeeSnapshot.builder()
+                                .id(SnapshotId.builder()
+                                        .id(employee.getIdEmployee())
+                                        .snapshotDate(Date.from(LocalDateTime.now()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()))
+                                        .frequency(frequency)
+                                        .build())
+                                .name(employee.getName())
+                                .surname(employee.getSurname())
+                                .position(employee.getPosition().getTitle())
+                                .cbo(employee.getCbo().getTitle())
+                                .situation(employee.getSituation())
+                                .supplier(providerSupplierSnapshot)
+                                .subcontractor(providerSubcontractorSnapshot)
+                        .build());
+
+                if (employeeBatch.size() >= 50) {
+                    employeeSnapshotRepository.saveAll(employeeBatch);
+                    employeeBatch.clear();
+                }
+            }
+
+            if (!employeeBatch.isEmpty()) {
+                employeeSnapshotRepository.saveAll(employeeBatch);
+                employeeBatch.clear();
+            }
+
+            if (employees.hasNext()) {
+                pageable = employees.nextPageable();
+                employees = employeeRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<ContractProviderSupplier> contractSuppliers = contractProviderSupplierRepository.findAllByIsActiveIsNot(pageable, PENDING);
+        while (contractSuppliers.hasContent()) {
+            List<ContractProviderSupplierSnapshot> contractsBatch = new ArrayList<>(50);
+            for (ContractProviderSupplier contract : contractSuppliers) {
+                BranchSnapshot branchSnapshot = branchSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getBranch().getIdBranch(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Branch not found"));
+                ProviderSupplierSnapshot providerSupplierSnapshot = providerSupplierSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getProviderSupplier().getIdProvider(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Supplier not found"));
+                UserSnapshot responsible = userSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getResponsible().getIdUser(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Responsible not found"));
+                List<EmployeeSnapshot> employeesInContract = employeeSnapshotRepository.findAllById_IdInAndId_SnapshotDateAndId_Frequency(contract.getEmployees().stream()
+                        .map(Employee::getIdEmployee)
+                        .collect(Collectors.toList()),
+                        Date.from(LocalDateTime.now()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        frequency);
+                contractsBatch.add(ContractProviderSupplierSnapshot.builder()
+                                .id(SnapshotId.builder()
+                                        .id(contract.getIdContract())
+                                        .snapshotDate(Date.from(LocalDateTime.now()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant()))
+                                        .frequency(frequency)
+                                        .build())
+                                .reference(contract.getContractReference())
+                                .serviceType(contract.getServiceTypeBranch().getTitle())
+                                .status(contract.getStatus())
+                                .start(contract.getDateStart())
+                                .finish(contract.getEndDate())
+                                .responsible(responsible)
+                                .employees(employeesInContract)
+                                .branch(branchSnapshot)
+                                .supplier(providerSupplierSnapshot)
+                        .build());
+
+                if (contractsBatch.size() >= 50) {
+                    contractProviderSupplierSnapshotRepository.saveAll(contractsBatch);
+                    contractsBatch.clear();
+                }
+            }
+
+            if (!contractsBatch.isEmpty()) {
+                contractProviderSupplierSnapshotRepository.saveAll(contractsBatch);
+                contractsBatch.clear();
+            }
+
+            if (contractSuppliers.hasNext()) {
+                pageable = contractSuppliers.nextPageable();
+                contractSuppliers = contractProviderSupplierRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<ContractProviderSubcontractor> contractSubcontractors = contractProviderSubcontractorRepository.findAllByIsActiveIsNot(pageable, PENDING);
+        while (contractSubcontractors.hasContent()) {
+            List<ContractProviderSubcontractorSnapshot> contractsBatch = new ArrayList<>(50);
+            for (ContractProviderSubcontractor contract : contractSubcontractors) {
+                ProviderSupplierSnapshot providerSupplierSnapshot = providerSupplierSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getProviderSupplier().getIdProvider(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Supplier not found"));
+                ProviderSubcontractorSnapshot providerSubcontractorSnapshot = providerSubcontractorSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getProviderSubcontractor().getIdProvider(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+                UserSnapshot responsible = userSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getResponsible().getIdUser(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Responsible not found"));
+                ContractProviderSupplierSnapshot contractProviderSupplierSnapshot = contractProviderSupplierSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contract.getContractProviderSupplier().getIdContract(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
+                List<EmployeeSnapshot> employeesInContract = employeeSnapshotRepository.findAllById_IdInAndId_SnapshotDateAndId_Frequency(contract.getEmployees().stream()
+                        .map(Employee::getIdEmployee)
+                        .collect(Collectors.toList()),
+                        Date.from(LocalDateTime.now()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        frequency);
+                contractsBatch.add(ContractProviderSubcontractorSnapshot.builder()
+                        .id(SnapshotId.builder()
+                                .id(contract.getIdContract())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                        .reference(contract.getContractReference())
+                        .serviceType(contract.getServiceTypeBranch().getTitle())
+                        .status(contract.getStatus())
+                        .start(contract.getDateStart())
+                        .finish(contract.getEndDate())
+                        .responsible(responsible)
+                        .supplier(providerSupplierSnapshot)
+                        .employees(employeesInContract)
+                                .subcontractor(providerSubcontractorSnapshot)
+                                .contractSupplier(contractProviderSupplierSnapshot)
+                        .build());
+
+                if (contractsBatch.size() >= 50) {
+                    contractProviderSubcontractorSnapshotRepository.saveAll(contractsBatch);
+                    contractsBatch.clear();
+                }
+            }
+
+            if (!contractsBatch.isEmpty()) {
+                contractProviderSubcontractorSnapshotRepository.saveAll(contractsBatch);
+                contractsBatch.clear();
+            }
+
+            if (contractSubcontractors.hasNext()) {
+                pageable = contractSubcontractors.nextPageable();
+                contractSubcontractors = contractProviderSubcontractorRepository.findAllByIsActiveIsNot(pageable, PENDING);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<DocumentMatrixGroup> groups = documentMatrixGroupRepository.findAll(pageable);
+        while (groups.hasContent()) {
+            List<DocumentMatrixGroupSnapshot> groupsBatch = new ArrayList<>(50);
+            for (DocumentMatrixGroup group : groups) {
+                groupsBatch.add(DocumentMatrixGroupSnapshot.builder()
+                        .id(SnapshotId.builder()
+                        .id(group.getIdDocumentGroup())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                                .name(group.getGroupName())
+                        .build());
+
+                if (groupsBatch.size() >= 50) {
+                    documentMatrixGroupSnapshotRepository.saveAll(groupsBatch);
+                    groupsBatch.clear();
+                }
+            }
+
+            if (!groupsBatch.isEmpty()) {
+                documentMatrixGroupSnapshotRepository.saveAll(groupsBatch);
+                groupsBatch.clear();
+            }
+
+            if (groups.hasNext()) {
+                pageable = groups.nextPageable();
+                groups = documentMatrixGroupRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<DocumentMatrixSubgroup> subgroups = documentMatrixSubgroupRepository.findAll(pageable);
+        while (subgroups.hasContent()) {
+            List<DocumentMatrixSubgroupSnapshot> subgroupsBatch = new ArrayList<>(50);
+            for (DocumentMatrixSubgroup subgroup : subgroups) {
+                DocumentMatrixGroupSnapshot groupSnapshot = documentMatrixGroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(subgroup.getGroup().getIdDocumentGroup(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                                .orElseThrow(() -> new NotFoundException("Subgroup not found"));
+                subgroupsBatch.add(DocumentMatrixSubgroupSnapshot.builder()
+                        .id(SnapshotId.builder()
+                                .id(subgroup.getIdDocumentSubgroup())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                                .name(subgroup.getSubgroupName())
+                                .group(groupSnapshot)
+                        .build());
+
+                if (subgroupsBatch.size() >= 50) {
+                    documentMatrixSubgroupSnapshotRepository.saveAll(subgroupsBatch);
+                    subgroupsBatch.clear();
+                }
+            }
+
+            if (!subgroupsBatch.isEmpty()) {
+                documentMatrixSubgroupSnapshotRepository.saveAll(subgroupsBatch);
+                subgroupsBatch.clear();
+            }
+
+            if (subgroups.hasNext()) {
+                pageable = subgroups.nextPageable();
+                subgroups = documentMatrixSubgroupRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<DocumentMatrix> documentsMatrix = documentMatrixRepository.findAll(pageable);
+        while (documentsMatrix.hasContent()) {
+            List<DocumentMatrixSnapshot> documentsMatrixBatch = new ArrayList<>(50);
+            for (DocumentMatrix document : documentsMatrix) {
+                DocumentMatrixSubgroupSnapshot subgroupSnapshot = documentMatrixSubgroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getSubGroup().getIdDocumentSubgroup(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Subgroup not found"));
+                documentsMatrixBatch.add(DocumentMatrixSnapshot.builder()
+                        .id(SnapshotId.builder()
+                        .id(document.getIdDocument())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                        .name(document.getName())
+                                .type(document.getType())
+                                .isUnique(document.getIsDocumentUnique())
+                        .subgroup(subgroupSnapshot)
+                        .build());
+
+                if (documentsMatrixBatch.size() >= 50) {
+                    documentMatrixSnapshotRepository.saveAll(documentsMatrixBatch);
+                    documentsMatrixBatch.clear();
+                }
+            }
+
+            if (!documentsMatrixBatch.isEmpty()) {
+                documentMatrixSnapshotRepository.saveAll(documentsMatrixBatch);
+                documentsMatrixBatch.clear();
+            }
+
+            if (documentsMatrix.hasNext()) {
+                pageable = documentsMatrix.nextPageable();
+                documentsMatrix = documentMatrixRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<DocumentProviderSupplier> documentsSupplier = documentProviderSupplierRepository.findAllByProviderSupplier_IsActive(pageable, true);
+        while (documentsSupplier.hasContent()) {
+            List<DocumentProviderSupplierSnapshot> documentsSupplierBatch = new ArrayList<>(50);
+            for (DocumentProviderSupplier document : documentsSupplier) {
+                DocumentMatrixSnapshot documentMatrixSnapshot = documentMatrixSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getDocumentMatrix().getIdDocument(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                                .orElseThrow(() -> new NotFoundException("Document Matrix not found"));
+                ProviderSupplierSnapshot supplierSnapshot = providerSupplierSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getProviderSupplier().getIdProvider(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                                .orElseThrow(() -> new NotFoundException("Supplier not found"));
+                documentsSupplierBatch.add(DocumentProviderSupplierSnapshot.builder()
+                        .id(SnapshotId.builder()
+                                .id(document.getIdDocumentation())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                                .title(document.getTitle())
+                                .status(document.getStatus())
+                                .type(document.getType())
+                                .versionDate(document.getVersionDate())
+                                .expirationDate(document.getExpirationDate())
+                                .documentDate(document.getDocumentDate())
+                                .lastCheck(document.getLastCheck())
+                                .validity(document.getValidity())
+                                .adherent(document.getAdherent())
+                                .conforming(document.getConforming())
+                                .doesBlock(document.getDoesBlock())
+                                .documentMatrix(documentMatrixSnapshot)
+                                .assignmentDate(document.getAssignmentDate())
+                                .supplier(supplierSnapshot)
+                        .build());
+
+                if (documentsSupplierBatch.size() >= 50) {
+                    documentProviderSupplierSnapshotRepository.saveAll(documentsSupplierBatch);
+                    documentsSupplierBatch.clear();
+                }
+            }
+
+            if (!documentsSupplierBatch.isEmpty()) {
+                documentProviderSupplierSnapshotRepository.saveAll(documentsSupplierBatch);
+                documentsSupplierBatch.clear();
+            }
+
+            if (documentsSupplier.hasNext()) {
+                pageable = documentsSupplier.nextPageable();
+                documentsSupplier = documentProviderSupplierRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<DocumentProviderSubcontractor> documentsSubcontractor = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IsActive(pageable, true);
+        while (documentsSubcontractor.hasContent()) {
+            List<DocumentProviderSubcontractorSnapshot> documentsSubcontractorBatch = new ArrayList<>(50);
+            for (DocumentProviderSubcontractor document : documentsSubcontractor) {
+                DocumentMatrixSnapshot documentMatrixSnapshot = documentMatrixSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getDocumentMatrix().getIdDocument(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Document Matrix not found"));
+                ProviderSubcontractorSnapshot subcontractorSnapshot = providerSubcontractorSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getProviderSubcontractor().getIdProvider(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
+                documentsSubcontractorBatch.add(DocumentProviderSubcontractorSnapshot.builder()
+                        .id(SnapshotId.builder()
+                        .id(document.getIdDocumentation())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                        .title(document.getTitle())
+                        .status(document.getStatus())
+                        .type(document.getType())
+                        .versionDate(document.getVersionDate())
+                        .expirationDate(document.getExpirationDate())
+                        .documentDate(document.getDocumentDate())
+                        .lastCheck(document.getLastCheck())
+                        .validity(document.getValidity())
+                        .adherent(document.getAdherent())
+                        .conforming(document.getConforming())
+                        .doesBlock(document.getDoesBlock())
+                        .documentMatrix(documentMatrixSnapshot)
+                        .assignmentDate(document.getAssignmentDate())
+                        .subcontractor(subcontractorSnapshot)
+                        .build());
+
+                if (documentsSubcontractorBatch.size() >= 50) {
+                    documentProviderSubcontractorSnapshotRepository.saveAll(documentsSubcontractorBatch);
+                    documentsSubcontractorBatch.clear();
+                }
+            }
+
+            if (!documentsSubcontractorBatch.isEmpty()) {
+                documentProviderSubcontractorSnapshotRepository.saveAll(documentsSubcontractorBatch);
+                documentsSubcontractorBatch.clear();
+            }
+
+            if (documentsSubcontractor.hasNext()) {
+                pageable = documentsSubcontractor.nextPageable();
+                documentsSubcontractor = documentProviderSubcontractorRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<DocumentEmployee> documentsEmployee = documentEmployeeRepository.findAll(pageable);
+        while (documentsEmployee.hasContent()) {
+            List<DocumentEmployeeSnapshot> documentsEmployeeBatch = new ArrayList<>(50);
+            for (DocumentEmployee document : documentsEmployee) {
+                DocumentMatrixSnapshot documentMatrixSnapshot = documentMatrixSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getDocumentMatrix().getIdDocument(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Document Matrix not found"));
+                EmployeeSnapshot employeeSnapshot = employeeSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getEmployee().getIdEmployee(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Employee not found"));
+                documentsEmployeeBatch.add(DocumentEmployeeSnapshot.builder()
+                        .id(SnapshotId.builder()
+                        .id(document.getIdDocumentation())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                        .title(document.getTitle())
+                        .status(document.getStatus())
+                        .type(document.getType())
+                        .frequency(frequency)
+                        .versionDate(document.getVersionDate())
+                        .expirationDate(document.getExpirationDate())
+                        .documentDate(document.getDocumentDate())
+                        .lastCheck(document.getLastCheck())
+                        .validity(document.getValidity())
+                        .adherent(document.getAdherent())
+                        .conforming(document.getConforming())
+                        .doesBlock(document.getDoesBlock())
+                        .documentMatrix(documentMatrixSnapshot)
+                        .assignmentDate(document.getAssignmentDate())
+                        .employee(employeeSnapshot)
+                        .build());
+
+                if (documentsEmployeeBatch.size() >= 50) {
+                    documentEmployeeSnapshotRepository.saveAll(documentsEmployeeBatch);
+                    documentsEmployeeBatch.clear();
+                }
+            }
+
+            if (!documentsEmployeeBatch.isEmpty()) {
+                documentEmployeeSnapshotRepository.saveAll(documentsEmployeeBatch);
+                documentsEmployeeBatch.clear();
+            }
+
+            if (documentsEmployee.hasNext()) {
+                pageable = documentsEmployee.nextPageable();
+                documentsEmployee = documentEmployeeRepository.findAll(pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 50);
+        Page<ContractDocument> contractDocuments = contractDocumentRepository.findAllByContract_IsActiveIsNot(pageable, PENDING);
+        while (contractDocuments.hasContent()) {
+            List<ContractDocumentSnapshot> contractDocumentsBatch = new ArrayList<>(50);
+            for (ContractDocument contractDocument : contractDocuments) {
+                DocumentSnapshot documentSnapshot = documentSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contractDocument.getDocument().getIdDocumentation(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Document not found"));
+                ContractSnapshot contractSnapshot = contractSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(contractDocument.getContract().getIdContract(),
+                                Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()),
+                                frequency)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
+                contractDocumentsBatch.add(ContractDocumentSnapshot.builder()
+                        .id(SnapshotId.builder()
+                        .id(contractDocument.getId())
+                                .snapshotDate(Date.from(LocalDateTime.now()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toInstant()))
+                                .frequency(frequency)
+                                .build())
+                                .status(contractDocument.getStatus())
+                                .contract(contractSnapshot)
+                                .document(documentSnapshot)
+                        .build());
+
+                if (contractDocumentsBatch.size() >= 50) {
+                    contractDocumentSnapshotRepository.saveAll(contractDocumentsBatch);
+                    contractDocumentsBatch.clear();
+                }
+            }
+
+            if (!contractDocumentsBatch.isEmpty()) {
+                contractDocumentSnapshotRepository.saveAll(contractDocumentsBatch);
+                contractDocumentsBatch.clear();
+            }
+
+            if (contractDocuments.hasNext()) {
+                pageable = contractDocuments.nextPageable();
+                contractDocuments = contractDocumentRepository.findAllByContract_IsActiveIsNot(pageable, PENDING);
+            } else {
+                break;
+            }
+        }
     }
+
+    public void deleteSnapshot() {
+        Pageable pageable = PageRequest.of(0, 25);
+        Page<ClientSnapshot> clientSnapshots = clientSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                Date.from(LocalDateTime.now()
+                        .minusMonths(1)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()),
+                SnapshotFrequencyEnum.DAILY,
+                pageable);
+        while (clientSnapshots.hasContent()) {
+            clientSnapshotRepository.deleteAllInBatch(clientSnapshots.getContent());
+            if (clientSnapshots.hasNext()) {
+                pageable = clientSnapshots.nextPageable();
+                clientSnapshots = clientSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                        Date.from(LocalDateTime.now()
+                                .minusMonths(1)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        SnapshotFrequencyEnum.DAILY,
+                        pageable);
+            } else {
+                break;
+            }
+        }
+        pageable = PageRequest.of(0, 25);
+        Page<ProviderSnapshot> providerSnapshots = providerSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                Date.from(LocalDateTime.now()
+                        .minusMonths(1)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()),
+                SnapshotFrequencyEnum.DAILY,
+                pageable);
+        while (providerSnapshots.hasContent()) {
+            providerSnapshotRepository.deleteAllInBatch(providerSnapshots.getContent());
+            if (providerSnapshots.hasNext()) {
+                pageable = providerSnapshots.nextPageable();
+                providerSnapshots = providerSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                        Date.from(LocalDateTime.now()
+                                .minusMonths(1)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        SnapshotFrequencyEnum.DAILY,
+                        pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 25);
+        Page<UserSnapshot> userSnapshots = userSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                Date.from(LocalDateTime.now()
+                        .minusMonths(1)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()),
+                SnapshotFrequencyEnum.DAILY,
+                pageable);
+        while (userSnapshots.hasContent()) {
+            userSnapshotRepository.deleteAllInBatch(userSnapshots.getContent());
+            if (userSnapshots.hasNext()) {
+                pageable = userSnapshots.nextPageable();
+                userSnapshots = userSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                        Date.from(LocalDateTime.now()
+                                .minusMonths(1)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        SnapshotFrequencyEnum.DAILY,
+                        pageable);
+            } else {
+                break;
+            }
+        }
+
+        pageable = PageRequest.of(0, 25);
+        Page<EmployeeSnapshot> employeeSnapshots = employeeSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                Date.from(LocalDateTime.now()
+                        .minusMonths(1)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()),
+                SnapshotFrequencyEnum.DAILY,
+                pageable);
+        while (employeeSnapshots.hasContent()) {
+            employeeSnapshotRepository.deleteAllInBatch(employeeSnapshots.getContent());
+            if (employeeSnapshots.hasNext()) {
+                pageable = employeeSnapshots.nextPageable();
+                employeeSnapshots = employeeSnapshotRepository.findAllById_SnapshotDateBeforeAndId_Frequency(
+                        Date.from(LocalDateTime.now()
+                                .minusMonths(1)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()),
+                        SnapshotFrequencyEnum.DAILY,
+                        pageable);
+            } else {
+                break;
+            }
+        }
+    }
+
+    // TODO adicionar snapshot as funções de acesso ao repositório
+    // TODO adicionar date as funções de acesso ao repositório
+    // TODO adicionar frequency as funções de acesso ao repositório
+    public DashboardGeneralDetailsResponseDto getGeneralDetailsInfoByDate(String clientId, Date date, SnapshotFrequencyEnum frequency, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        clientSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(clientId,
+                Date.from(LocalDateTime.now()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()),
+                frequency)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+        List<String> branchIds = null;
+        List<String> providerIds = null;
+        List<String> documentTypes = null;
+        List<String> responsibleIds = null;
+        List<ContractStatusEnum> activeContract = null;
+        List<Status> statuses = null;
+        List<String> documentTitles = null;
+        if (dashboardFiltersRequestDto != null) {
+            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
+                    ? dashboardFiltersRequestDto.getBranchIds()
+                    : new ArrayList<>();
+            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
+                    ? dashboardFiltersRequestDto.getProviderIds()
+                    : new ArrayList<>();
+            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
+                    ? dashboardFiltersRequestDto.getDocumentTypes()
+                    : new ArrayList<>();
+            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
+                    ? dashboardFiltersRequestDto.getResponsibleIds()
+                    : new ArrayList<>();
+            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
+                    ? dashboardFiltersRequestDto.getActiveContract()
+                    : new ArrayList<>();
+            statuses = dashboardFiltersRequestDto.getStatuses() != null
+                    ? dashboardFiltersRequestDto.getStatuses()
+                    : new ArrayList<>();
+            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
+                    ? dashboardFiltersRequestDto.getDocumentTitles()
+                    : new ArrayList<>();
+        }
+        if (branchIds != null) {
+            if (branchIds.isEmpty()) {
+                branchIds = null;
+            }
+        }
+        if (providerIds != null) {
+            if (providerIds.isEmpty()) {
+                providerIds = null;
+            }
+        }
+        if (documentTypes != null) {
+            if (documentTypes.isEmpty()) {
+                documentTypes = null;
+            }
+        }
+        if (responsibleIds != null) {
+            if (responsibleIds.isEmpty()) {
+                responsibleIds = null;
+            }
+        }
+        if (activeContract != null) {
+            if (activeContract.isEmpty()) {
+                activeContract = new ArrayList<>();
+                activeContract.add(ACTIVE);
+            }
+        }
+        if (statuses != null) {
+            if (statuses.isEmpty()) {
+                statuses = null;
+            }
+        }
+        if (documentTitles != null) {
+            if (documentTitles.isEmpty()) {
+                documentTitles = null;
+            }
+        }
+        // quantidade de fornecedores
+        Long supplierQuantity = providerSupplierSnapshotRepository.countByClientId(clientId);
+
+        // quantidade de contratos
+        Long contractQuantity = contractProviderSupplierSnapshotRepository.countByClientIdAndStatusIn(clientId, activeContract);
+
+        // funcionários alocados
+        Long allocatedEmployeeQuantity = employeeSnapshotRepository.countEmployeeSupplierByClientIdAndSituation(clientId, ALOCADO)
+                + employeeSnapshotRepository.countEmployeeSubcontractorByClientIdAndSituation(clientId, ALOCADO);
+
+        // conformidade
+        Double conformity = null;
+        Object[] conformityValuesSupplier = null;
+        Object[] conformityValuesSubcontractor = null;
+        if (branchIds == null) {
+            conformityValuesSupplier = documentSnapshotRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
+                    providerIds,
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+            conformityValuesSubcontractor = documentRepository.countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
+                    providerIds,
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+        } else {
+            conformityValuesSupplier = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
+                    providerIds,
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+            conformityValuesSubcontractor = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
+                    providerIds,
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+        }
+        Long totalConformity = getSafeLong(conformityValuesSupplier, 0) + getSafeLong(conformityValuesSubcontractor, 0);
+        Long conformityTrue = getSafeLong(conformityValuesSupplier, 1) + getSafeLong(conformityValuesSubcontractor, 1);
+
+        conformity = totalConformity > 0
+                ? new BigDecimal(conformityTrue * 100.0 / totalConformity).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+        // para cada type selecionado, quantidade de documentos com status
+        List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
+        List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
+
+        if (documentTypes == null) {
+            documentTypes = documentRepository.findDistinctDocumentType();
+        }
+        for (String type : documentTypes) {
+            List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
+            if (statuses == null) {
+                statuses = Arrays.asList(Status.values());
+            }
+            for (Status status : statuses) {
+                int supplier = 0;
+                int subcontract = 0;
+                if (branchIds != null) {
+                    supplier = documentRepository.countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
+                            providerIds,
+                            type,
+                            status,
+                            responsibleIds,
+                            documentTitles).intValue();
+                    subcontract = documentRepository.countSubcontractorByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
+                            providerIds,
+                            type,
+                            status,
+                            responsibleIds,
+                            documentTitles).intValue();
+                } else {
+                    supplier = documentRepository.countSupplierByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,
+                            providerIds,
+                            type,
+                            status,
+                            responsibleIds,
+                            documentTitles).intValue();
+                    subcontract = documentRepository.countSubcontractorByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,
+                            providerIds,
+                            type,
+                            status,
+                            responsibleIds,
+                            documentTitles).intValue();
+                }
+                statusList.add(DashboardGeneralDetailsResponseDto.Status.builder()
+                        .quantity(supplier + subcontract)
+                        .status(status)
+                        .build());
+
+            }
+            long approvedIa = 0;
+            long reprovedIa = 0;
+            DashboardGeneralDetailsResponseDto.Status statusApprovedIA = statusList.stream()
+                    .filter(status -> status.getStatus() == APROVADO_IA)
+                    .findFirst()
+                    .orElse(null);
+            DashboardGeneralDetailsResponseDto.Status statusReprovedIA = statusList.stream()
+                    .filter(status -> status.getStatus() == REPROVADO_IA)
+                    .findFirst()
+                    .orElse(null);
+            DashboardGeneralDetailsResponseDto.Status statusUnderAnalysis = statusList.stream()
+                    .filter(status -> status.getStatus() == EM_ANALISE)
+                    .findFirst()
+                    .orElse(null);
+            if (statusApprovedIA != null) {
+                approvedIa = statusApprovedIA.getQuantity().longValue();
+            }
+            if (statusReprovedIA != null) {
+                reprovedIa = statusReprovedIA.getQuantity().longValue();
+            }
+            if (statusUnderAnalysis != null) {
+                long newQuantity = statusUnderAnalysis.getQuantity().longValue() + approvedIa + reprovedIa;
+                statusUnderAnalysis.setQuantity(Math.toIntExact(newQuantity));
+            }
+            statusList.removeIf(status -> status.getStatus() == APROVADO_IA || status.getStatus() == REPROVADO_IA);
+
+            documentStatus.add(DashboardGeneralDetailsResponseDto.TypeStatus.builder()
+                    .name(type)
+                    .status(statusList)
+                    .build());
+        }
+
+        // ranking de pendencias
+        List<DashboardGeneralDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
+        List<String> allBranches = branchRepository.findAllBranchIdsByClientId(clientId);
+
+        for (String branchId : allBranches) {
+            Branch branch = branchRepository.findById(branchId)
+                    .orElseThrow(() -> new NotFoundException("Branch not found"));
+            Double adherenceBranch = null;
+            Double conformityBranch = null;
+            List<String> newBranchIds = new ArrayList<>();
+            newBranchIds.add(branchId);
+
+            Object[] adherenceBranchSupplierValuesRaw = documentRepository.countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+            Object[] adherenceBranchSubcontractorValuesRaw = documentRepository.countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+            Object[] conformityBranchSupplierValuesRaw = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+            Object[] conformityBranchSubcontractorValuesRaw = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    null,
+                    null,
+                    documentTypes,
+                    documentTitles);
+
+            Object[] adherenceBranchSupplierValues = (Object[]) adherenceBranchSupplierValuesRaw[0];
+            Object[] adherenceBranchSubcontractorValues = (Object[]) adherenceBranchSubcontractorValuesRaw[0];
+            Object[] conformityBranchSupplierValues = (Object[]) conformityBranchSupplierValuesRaw[0];
+            Object[] conformityBranchSubcontractorValues = (Object[]) conformityBranchSubcontractorValuesRaw[0];
+
+            Long totalAdherenceBranch = getSafeLong(adherenceBranchSupplierValues, 0) + getSafeLong(adherenceBranchSubcontractorValues, 0);
+            Long adherenceBranchTrue = getSafeLong(adherenceBranchSupplierValues, 1) + getSafeLong(adherenceBranchSubcontractorValues, 1);
+            Long totalConformityBranch = getSafeLong(conformityBranchSupplierValues, 0) + getSafeLong(conformityBranchSubcontractorValues, 0);
+            Long conformityBranchTrue = getSafeLong(conformityBranchSupplierValues, 1) + getSafeLong(conformityBranchSubcontractorValues, 1);
+            Long nonConformityBranchTrue = (totalConformityBranch - conformityBranchTrue);
+
+            adherenceBranch = totalAdherenceBranch > 0
+                    ? new BigDecimal(adherenceBranchTrue * 100.0 / totalAdherenceBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
+                    : 100;
+
+            conformityBranch = totalConformityBranch > 0
+                    ? new BigDecimal(conformityBranchTrue * 100.0 / totalConformityBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
+                    : 100;
+
+            DashboardGeneralDetailsResponseDto.Conformity level;
+            if (conformityBranch < 60) {
+                level = DashboardGeneralDetailsResponseDto.Conformity.RISKY;
+            } else if (conformityBranch < 75) {
+                level = DashboardGeneralDetailsResponseDto.Conformity.ATTENTION;
+            } else if (conformityBranch < 90) {
+                level = DashboardGeneralDetailsResponseDto.Conformity.NORMAL;
+            } else {
+                level = DashboardGeneralDetailsResponseDto.Conformity.OK;
+            }
+
+            pendingRanking.add(DashboardGeneralDetailsResponseDto.Pending.builder()
+                    .corporateName(branch.getName())
+                    .cnpj(branch.getCnpj())
+                    .adherence(adherenceBranch)
+                    .conformity(conformityBranch)
+                    .nonConformingDocumentQuantity(nonConformityBranchTrue.intValue())
+                    .conformityLevel(level)
+                    .build());
+        }
+
+        return DashboardGeneralDetailsResponseDto.builder()
+                .supplierQuantity(supplierQuantity)
+                .contractQuantity(contractQuantity)
+                .allocatedEmployeeQuantity(allocatedEmployeeQuantity)
+                .conformity(conformity)
+                .documentStatus(documentStatus)
+                .documentExemption(documentExemption)
+                .pendingRanking(pendingRanking)
+                .build();
+    }
+
+    public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfoByDate(String clientId, Date date, SnapshotFrequencyEnum frequency, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        List<String> branchIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getBranchIds() != null
+                ? dashboardFiltersRequestDto.getBranchIds()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTypes = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTypes() != null
+                ? dashboardFiltersRequestDto.getDocumentTypes()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> responsibleIds = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getResponsibleIds() != null
+                ? dashboardFiltersRequestDto.getResponsibleIds()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+        List<String> documentTitles = dashboardFiltersRequestDto != null
+                ? (dashboardFiltersRequestDto.getDocumentTitles() != null
+                ? dashboardFiltersRequestDto.getDocumentTitles()
+                : new ArrayList<>() )
+                : new ArrayList<>();
+
+        List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
+        List<ProviderSupplier> providerSuppliers = new ArrayList<>();
+        List<ProviderSubcontractor> providerSubcontractors = new ArrayList<>();
+        Double adherenceProvider = null;
+        Double conformityProvider = null;
+        Object[] adherenceProviderValues = null;
+        Object[] conformityProviderValues = null;
+        if (responsibleIds.isEmpty()) {
+            responsibleIds = null;
+        }
+        if (documentTypes.isEmpty()) {
+            documentTypes = null;
+        }
+        if (documentTitles.isEmpty()) {
+            documentTitles = null;
+        }
+        if (branchIds.isEmpty()) {
+            providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
+            providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
+        } else {
+            providerSuppliers = providerSupplierRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
+            providerSubcontractors = providerSubcontractorRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
+        }
+        for (ProviderSupplier providerSupplier : providerSuppliers ) {
+            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+
+            Long totalAdherenceProvider = getSafeLong(adherenceProviderValues,0);
+            Long adherenceProviderTrue = getSafeLong(adherenceProviderValues,1);
+            Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
+            Long totalConformityProvider = getSafeLong(conformityProviderValues,0);
+            Long conformityProviderTrue = getSafeLong(conformityProviderValues,1);
+            Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
+            if (totalAdherenceProvider.equals(totalConformityProvider)) {
+                log.info("Values not match in provider supplier id {}",providerSupplier.getIdProvider());
+            }
+
+            adherenceProvider = totalAdherenceProvider > 0
+                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalAdherenceProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+            conformityProvider = totalConformityProvider > 0
+                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+            DashboardProviderDetailsResponseDto.Conformity conformityRange;
+            if (conformityProvider < 60) {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.RISKY;
+            } else if (conformityProvider < 75) {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.ATTENTION;
+            } else if (conformityProvider < 90) {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.NORMAL;
+            } else {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
+            }
+
+            responseDtos.add(
+                    DashboardProviderDetailsResponseDto.builder()
+                            .corporateName(providerSupplier.getCorporateName())
+                            .cnpj(providerSupplier.getCnpj())
+                            .totalDocumentQuantity(totalAdherenceProvider)
+                            .adherenceQuantity(adherenceProviderTrue)
+                            .nonAdherenceQuantity(nonAdherenceProviderTrue)
+                            .conformityQuantity(conformityProviderTrue)
+                            .nonConformityQuantity(nonConformityProviderTrue)
+                            .adherence(adherenceProvider)
+                            .conformity(conformityProvider)
+                            .conformityRange(conformityRange)
+                            .build()
+            );
+        }
+        for (ProviderSubcontractor providerSubcontractor : providerSubcontractors ) {
+            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
+                    responsibleIds,
+                    documentTypes,
+                    documentTitles);
+
+            Long totalAdherenceProvider = (Long) adherenceProviderValues[0];
+            Long adherenceProviderTrue = (Long) adherenceProviderValues[1];
+            Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
+            Long totalConformityProvider = (Long) conformityProviderValues[0];
+            Long conformityProviderTrue = (Long) conformityProviderValues[1];
+            Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
+            if (totalAdherenceProvider.equals(totalConformityProvider)) {
+                log.info("Values not match in provider subcontractor id {}",providerSubcontractor.getIdProvider());
+            }
+
+            adherenceProvider = totalAdherenceProvider > 0
+                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalAdherenceProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+            conformityProvider = totalConformityProvider > 0
+                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+            DashboardProviderDetailsResponseDto.Conformity conformityRange;
+            if (conformityProvider < 60) {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.RISKY;
+            } else if (conformityProvider < 75) {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.ATTENTION;
+            } else if (conformityProvider < 90) {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.NORMAL;
+            } else {
+                conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
+            }
+
+            responseDtos.add(
+                    DashboardProviderDetailsResponseDto.builder()
+                            .corporateName(providerSubcontractor.getCorporateName())
+                            .cnpj(providerSubcontractor.getCnpj())
+                            .totalDocumentQuantity(totalAdherenceProvider)
+                            .adherenceQuantity(adherenceProviderTrue)
+                            .nonAdherenceQuantity(nonAdherenceProviderTrue)
+                            .conformityQuantity(conformityProviderTrue)
+                            .nonConformityQuantity(nonConformityProviderTrue)
+                            .adherence(adherenceProvider)
+                            .conformity(conformityProvider)
+                            .conformityRange(conformityRange)
+                            .build()
+            );
+        }
+        return responseDtos;
+    }
+
+    public DashboardDocumentStatusResponseDto getDocumentStatusInfoByDate(String clientId, Date date, SnapshotFrequencyEnum frequency, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        DashboardDocumentStatusResponseDto responseDto = DashboardDocumentStatusResponseDto.builder().build();
+        List<String> branchIds = null;
+        List<String> providerIds = null;
+        List<String> documentTypes = null;
+        List<String> responsibleIds = null;
+        List<ContractStatusEnum> activeContract = null;
+        List<Status> statuses = null;
+        List<String> documentTitles = null;
+        if (dashboardFiltersRequestDto != null) {
+            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
+                    ? dashboardFiltersRequestDto.getBranchIds()
+                    : null;
+            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
+                    ? dashboardFiltersRequestDto.getProviderIds()
+                    : null;
+            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
+                    ? dashboardFiltersRequestDto.getDocumentTypes()
+                    : null;
+            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
+                    ? dashboardFiltersRequestDto.getResponsibleIds()
+                    : null;
+            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
+                    ? dashboardFiltersRequestDto.getActiveContract()
+                    : null;
+            statuses = dashboardFiltersRequestDto.getStatuses() != null
+                    ? dashboardFiltersRequestDto.getStatuses()
+                    : null;
+            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
+                    ? dashboardFiltersRequestDto.getDocumentTitles()
+                    : null;
+        }
+        List<Document> documentsSupplier = new ArrayList<>();
+        List<Document> documentsSubcontractor = new ArrayList<>();
+        // find all documents by filters
+        if (branchIds != null && !branchIds.isEmpty()) {
+            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles);
+        } else {
+            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles);
+        }
+
+        // find all adherent documents by filters
+        long total = documentsSupplier.size() + documentsSubcontractor.size();
+        long adherentSupplier = documentsSupplier.stream()
+                .filter(Document::getAdherent)
+                .toList()
+                .size();
+        long adherentSubcontractor = documentsSubcontractor.stream()
+                .filter(Document::getAdherent)
+                .toList()
+                .size();
+        responseDto.setAdherentDocumentsQuantity(adherentSupplier + adherentSubcontractor);
+        responseDto.setNonAdherentDocumentsQuantity(total - responseDto.getAdherentDocumentsQuantity());
+
+        // find all conforming documents by filters
+        long conformingSupplier = documentsSupplier.stream()
+                .filter(Document::getConforming)
+                .toList()
+                .size();
+        long conformingSubcontractor = documentsSubcontractor.stream()
+                .filter(Document::getConforming)
+                .toList()
+                .size();
+        responseDto.setConformingDocumentsQuantity(conformingSupplier + conformingSubcontractor);
+        responseDto.setNonConformingDocumentsQuantity(total - responseDto.getConformingDocumentsQuantity());
+
+        // list infos by status
+        responseDto.setDocumentStatus(new ArrayList<>());
+        for (Document.Status status : Document.Status.values()) {
+            List<Document> documentSupplierStatus = documentsSupplier.stream()
+                    .filter(document -> document.getStatus().equals(status))
+                    .toList();
+            List<Document> documentSubcontractorStatus = documentsSubcontractor.stream()
+                    .filter(document -> document.getStatus().equals(status))
+                    .toList();
+            long totalStatus = documentSupplierStatus.size() + documentSubcontractorStatus.size();
+
+            Double percentage = total > 0
+                    ? new BigDecimal(totalStatus * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+
+            DashboardDocumentStatusResponseDto.Status statusResponse = DashboardDocumentStatusResponseDto.Status.builder()
+                    .status(status)
+                    .adherent(status != PENDENTE && status != VENCIDO)
+                    .conforming(status == APROVADO)
+                    .quantity(totalStatus)
+                    .percentage(percentage)
+                    .build();
+            responseDto.getDocumentStatus().add(statusResponse);
+        }
+        // show all adherent and non-adherent
+
+        // show all conforming and non-conforming
+        // find all status and infos by filters
+        return responseDto;
+    }
+
 }

@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.services.snapshots.documents.matrix;
 
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
+import bl.tech.realiza.domains.services.snapshots.ids.SnapshotId;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,15 +18,13 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class DocumentMatrixGroupSnapshot {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @EmbeddedId
+    private SnapshotId id;
     private String name;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    private SnapshotFrequencyEnum frequency;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     private List<DocumentMatrixSubgroupSnapshot> subgroups;
 }

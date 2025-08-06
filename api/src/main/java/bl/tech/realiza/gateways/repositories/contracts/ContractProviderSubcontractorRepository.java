@@ -1,6 +1,8 @@
 package bl.tech.realiza.gateways.repositories.contracts;
 
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
+import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +17,6 @@ public interface ContractProviderSubcontractorRepository extends JpaRepository<C
     Page<ContractProviderSubcontractor> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch, Pageable pageable);
     ContractProviderSubcontractor findTopByProviderSubcontractor_IdProviderOrderByCreationDateDesc(String idCompany);
     List<ContractProviderSubcontractor> findAllByContractProviderSupplier_IdContract(String contractId);
+
+    Page<ContractProviderSubcontractor> findAllByIsActiveIsNot(Pageable pageable, ContractStatusEnum contractStatusEnum);
 }

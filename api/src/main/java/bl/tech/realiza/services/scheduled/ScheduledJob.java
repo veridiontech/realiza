@@ -51,12 +51,14 @@ public class ScheduledJob {
     @Scheduled(cron = "0 30 3 * * *", zone = "America/Sao_Paulo")
     public void runDailySnapshot() {
         log.info("Executando snapshot diário do dashboard...");
+        snapshot(SnapshotFrequencyEnum.DAILY);
         log.info("Snapshot concluído.");
     }
 
     @Scheduled(cron = "0 0 4 1 * *", zone = "America/Sao_Paulo")
     public void runMonthlySnapshot() {
         log.info("Executando snapshot mensal do dashboard...");
+        snapshot(SnapshotFrequencyEnum.MONTHLY);
         log.info("Snapshot concluído.");
     }
 
@@ -83,7 +85,13 @@ public class ScheduledJob {
         crudUser.fourDigitCodeCheck();
     }
 
-    public void takeSnapshot(SnapshotFrequencyEnum frequency) {
-        dashboardService.takeSnapshot(frequency);
+    public void snapshot(SnapshotFrequencyEnum frequency) {
+        switch (frequency) {
+            case DAILY -> {
+                dashboardService.takeSnapshot(frequency);
+                dashboardService.deleteSnapshot();
+            }
+            case MONTHLY -> dashboardService.takeSnapshot(frequency);
+        }
     }
 }

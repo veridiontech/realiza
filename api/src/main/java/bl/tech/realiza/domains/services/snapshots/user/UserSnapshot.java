@@ -2,6 +2,7 @@ package bl.tech.realiza.domains.services.snapshots.user;
 
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.domains.services.snapshots.contract.ContractSnapshot;
+import bl.tech.realiza.domains.services.snapshots.ids.SnapshotId;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,17 +20,15 @@ import java.util.List;
 @Entity
 @Table(name = "APP_USER_SNAPSHOT")
 public class UserSnapshot {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @EmbeddedId
+    private SnapshotId id;
     private String firstName;
     private String surname;
     private String email;
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
-    private SnapshotFrequencyEnum frequency;
 
-    @OneToMany(mappedBy = "responsible")
+    @OneToMany(mappedBy = "responsible", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     private List<ContractSnapshot> contracts;
 
