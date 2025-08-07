@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.services.snapshots.contract.ContractProviderSubco
 import bl.tech.realiza.domains.services.snapshots.documents.provider.DocumentProviderSubcontractorSnapshot;
 import bl.tech.realiza.domains.services.snapshots.employees.EmployeeSnapshot;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,19 +23,23 @@ import java.util.List;
 @DiscriminatorValue("SUBCONTRACTOR")
 public class ProviderSubcontractorSnapshot extends ProviderSnapshot {
     @ManyToOne
-    @JoinColumn(name = "supplierId")
-    @JsonBackReference
+    @JoinColumns({
+            @JoinColumn(name = "supplierId", referencedColumnName = "provider_id"),
+            @JoinColumn(name = "supplierFrequency", referencedColumnName = "provider_frequency"),
+            @JoinColumn(name = "supplierSnapshotDate", referencedColumnName = "provider_snapshot_date")
+    })
+    @JsonManagedReference
     private ProviderSupplierSnapshot supplier;
 
-    @OneToMany(mappedBy = "subcontractor")
+    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     private List<ContractProviderSubcontractorSnapshot> contractsSubcontractor;
 
-    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     private List<EmployeeSnapshot> employees;
 
-    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "subcontractor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     private List<DocumentProviderSubcontractorSnapshot> documentsSubcontractor;
 }

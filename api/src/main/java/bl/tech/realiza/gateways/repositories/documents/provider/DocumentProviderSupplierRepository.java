@@ -14,6 +14,7 @@ import java.util.List;
 public interface DocumentProviderSupplierRepository extends JpaRepository<DocumentProviderSupplier, String> {
     Page<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActive(String idSearch, Pageable pageable, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndIsActive(String idSearch, Boolean isActive);
+    Page<DocumentProviderSupplier> findAllByProviderSupplier_IsActive(Pageable pageable, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(String idSearch, String groupName, Boolean isActive);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProviderAndConformingIsFalse(String idProvider);
     List<DocumentProviderSupplier> findAllByProviderSupplier_IdProvider(String idProvider);

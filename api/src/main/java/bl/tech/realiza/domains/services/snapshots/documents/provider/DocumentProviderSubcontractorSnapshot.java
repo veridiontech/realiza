@@ -3,10 +3,7 @@ package bl.tech.realiza.domains.services.snapshots.documents.provider;
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.domains.services.snapshots.documents.DocumentSnapshot;
 import bl.tech.realiza.domains.services.snapshots.providers.ProviderSubcontractorSnapshot;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -22,9 +19,12 @@ import java.time.LocalDateTime;
 public class DocumentProviderSubcontractorSnapshot extends DocumentSnapshot {
     @Builder.Default
     private LocalDateTime assignmentDate = LocalDateTime.now();
-    private SnapshotFrequencyEnum frequency;
 
     @ManyToOne
-    @JoinColumn(name = "subcontractorId")
+    @JoinColumns({
+            @JoinColumn(name = "subcontractorId", referencedColumnName = "provider_id"),
+            @JoinColumn(name = "subcontractorFrequency", referencedColumnName = "provider_frequency"),
+            @JoinColumn(name = "subcontractorSnapshotDate", referencedColumnName = "provider_snapshot_date")
+    })
     private ProviderSubcontractorSnapshot subcontractor;
 }

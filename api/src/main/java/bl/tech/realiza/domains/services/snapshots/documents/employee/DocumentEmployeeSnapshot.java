@@ -4,10 +4,8 @@ import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.domains.services.snapshots.documents.DocumentSnapshot;
 import bl.tech.realiza.domains.services.snapshots.employees.EmployeeSnapshot;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -26,7 +24,11 @@ public class DocumentEmployeeSnapshot extends DocumentSnapshot {
     private SnapshotFrequencyEnum frequency;
 
     @ManyToOne
-    @JoinColumn(name = "employeeId")
-    @JsonBackReference
+    @JoinColumns({
+            @JoinColumn(name = "employeeId", referencedColumnName = "id"),
+            @JoinColumn(name = "employeeFrequency", referencedColumnName = "frequency"),
+            @JoinColumn(name = "employeeSnapshotDate", referencedColumnName = "snapshotDate")
+    })
+    @JsonManagedReference
     private EmployeeSnapshot employee;
 }

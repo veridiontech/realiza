@@ -3,6 +3,7 @@ package bl.tech.realiza.domains.services.snapshots.contract;
 import bl.tech.realiza.domains.services.snapshots.providers.ProviderSubcontractorSnapshot;
 import bl.tech.realiza.domains.services.snapshots.providers.ProviderSupplierSnapshot;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,17 +21,29 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorValue("SUBCONTRACTOR")
 public class ContractProviderSubcontractorSnapshot extends ContractSnapshot {
     @ManyToOne
-    @JoinColumn(name = "contractSupplierId")
-    @JsonBackReference
+    @JoinColumns({
+            @JoinColumn(name = "contract_supplier_id", referencedColumnName = "contract_id"),
+            @JoinColumn(name = "contract_supplier_frequency", referencedColumnName = "contract_frequency"),
+            @JoinColumn(name = "contract_supplier_snapshot_date", referencedColumnName = "contract_snapshot_date")
+    })
+    @JsonManagedReference
     private ContractProviderSupplierSnapshot contractSupplier;
 
     @ManyToOne
-    @JoinColumn(name = "subcontractorId")
+    @JoinColumns({
+            @JoinColumn(name = "subcontractorId", referencedColumnName = "provider_id"),
+            @JoinColumn(name = "subcontractorFrequency", referencedColumnName = "provider_frequency"),
+            @JoinColumn(name = "subcontractorSnapshotDate", referencedColumnName = "provider_snapshot_date")
+    })
     @JsonBackReference
     private ProviderSubcontractorSnapshot subcontractor;
 
     @ManyToOne
-    @JoinColumn(name = "supplierId")
+    @JoinColumns({
+            @JoinColumn(name = "supplierId", referencedColumnName = "provider_id"),
+            @JoinColumn(name = "supplierFrequency", referencedColumnName = "provider_frequency"),
+            @JoinColumn(name = "supplierSnapshotDate", referencedColumnName = "provider_snapshot_date")
+    })
     @JsonBackReference
     private ProviderSupplierSnapshot supplier;
 }

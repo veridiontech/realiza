@@ -64,4 +64,6 @@ public interface DocumentProviderSubcontractorRepository extends JpaRepository<D
     WHERE b.idBranch = :branchId
 """)
     Long countByBranchId(@Param("branchId") String branchId);
+
+    Page<DocumentProviderSubcontractor> findAllByProviderSubcontractor_IsActive(Pageable pageable, Boolean isActive);
 }
