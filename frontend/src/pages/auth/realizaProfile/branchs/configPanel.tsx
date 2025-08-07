@@ -118,8 +118,15 @@ interface NewProfilePayload {
 
 export function ConfigPanel() {
   const [selectTab, setSelectedTab] = useState<
-    "documents" | "cbos" | "positions" | "services" | "activities" | "validate" | "profiles"
-  >("documents");
+    | "documents_ai"
+    | "cbos"
+    | "positions"
+    | "services"
+    | "activities"
+    | "validate"
+    | "profiles"
+    | "documents"
+  >("documents_ai");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
@@ -146,9 +153,7 @@ export function ConfigPanel() {
   const [newActivityTitle, setNewActivityTitle] = useState("");
   const [newActivityRisk, setNewActivityRisk] = useState("LOW");
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
-  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>(
-    []
-  );
+  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
   const [searchMatrixTerm, setSearchMatrixTerm] = useState("");
   const [profilesRepoItems, setProfilesRepoItems] = useState<
@@ -188,6 +193,24 @@ export function ConfigPanel() {
   };
   const expirationUnits = [{ value: "MONTHS", label: "Meses" }];
 
+  const [selectedMatrixEntry, setSelectedMatrixEntry] =
+    useState<DocumentMatrixEntry | null>(null);
+
+  const [editName, setEditName] = useState("");
+  const [editExpirationUnit, setEditExpirationUnit] = useState("");
+  const [editExpirationAmount, setEditExpirationAmount] = useState(0);
+  const [editType, setEditType] = useState("");
+  const [editIsDocumentUnique, setEditIsDocumentUnique] = useState(false);
+
+  function handleSelectMatrixEntry(entry: DocumentMatrixEntry) {
+    setSelectedMatrixEntry(entry);
+    setEditName(entry.name);
+    setEditExpirationUnit(entry.expirationDateUnit);
+    setEditExpirationAmount(entry.expirationDateAmount);
+    setEditType(entry.type);
+    setEditIsDocumentUnique(entry.isDocumentUnique);
+  }
+
   useEffect(() => {
     getDocuments();
     getCbos();
@@ -195,16 +218,13 @@ export function ConfigPanel() {
     getServices();
     getActivities();
     getMatrixEntries();
-    getProfilesRepo(); 
+    getProfilesRepo();
   }, []);
 
   async function getDocuments() {
     setIsLoading(true);
     try {
-      const { data } = await axios.get<Document[]>(
-        `${ip}/prompt`,
-        authHeader
-      );
+      const { data } = await axios.get<Document[]>(`${ip}/prompt`, authHeader);
       setDocuments(data);
     } finally {
       setIsLoading(false);
@@ -224,9 +244,7 @@ export function ConfigPanel() {
       authHeader
     );
     setDocuments((prev) =>
-      prev.map((d) =>
-        d.id === selectedDoc.id ? { ...d, description } : d
-      )
+      prev.map((d) => (d.id === selectedDoc.id ? { ...d, description } : d))
     );
     setSelectedDoc(null);
   }
@@ -262,10 +280,7 @@ export function ConfigPanel() {
   }
 
   async function getPositions() {
-    const { data } = await axios.get<Position[]>(
-      `${ip}/position`,
-      authHeader
-    );
+    const { data } = await axios.get<Position[]>(`${ip}/position`, authHeader);
     setPositions(data || []);
   }
 
@@ -277,11 +292,7 @@ export function ConfigPanel() {
         authHeader
       );
     } else {
-      await axios.post(
-        `${ip}/position`,
-        { title: positionName },
-        authHeader
-      );
+      await axios.post(`${ip}/position`, { title: positionName }, authHeader);
     }
     setPositionName("");
     setSelectedPosition(null);
@@ -322,7 +333,7 @@ export function ConfigPanel() {
         { title: newServiceTitle, risk: newServiceRisk },
         authHeader
       );
-      toast.success("Serviço criado com sucesso!"); 
+      toast.success("Serviço criado com sucesso!");
       setNewServiceTitle("");
       setNewServiceRisk("LOW");
       getServices();
@@ -349,7 +360,10 @@ export function ConfigPanel() {
       } else if (res.data && Array.isArray(res.data.content)) {
         setActivities(res.data.content);
       } else {
-        console.warn("Formato inesperado da resposta da API de atividades:", res.data);
+        console.warn(
+          "Formato inesperado da resposta da API de atividades:",
+          res.data
+        );
         setActivities([]);
       }
     } catch (err) {
@@ -374,7 +388,7 @@ export function ConfigPanel() {
         { title: newActivityTitle, risk: newActivityRisk },
         authHeader
       );
-      toast.success("Atividade criada com sucesso!"); 
+      toast.success("Atividade criada com sucesso!");
       setNewActivityTitle("");
       setNewActivityRisk("LOW");
       getActivities();
@@ -399,8 +413,8 @@ export function ConfigPanel() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-        ? (data as any).content
-        : [];
+          ? (data as any).content
+          : [];
       setMatrixEntries(list);
     } catch (error) {
       console.error("Erro ao carregar documentos de matriz:", error);
@@ -413,7 +427,10 @@ export function ConfigPanel() {
   async function handleUpdateEntry(id: string) {
     const entry = matrixEntries.find((e) => e.idDocumentMatrix === id);
     if (!entry) {
-      console.warn("Entrada da matriz de documento não encontrada para o ID:", id);
+      console.warn(
+        "Entrada da matriz de documento não encontrada para o ID:",
+        id
+      );
       toast.error("Documento não encontrado para atualização.");
       return;
     }
@@ -438,9 +455,13 @@ export function ConfigPanel() {
       if (axios.isAxiosError(error) && error.response) {
         console.error("Detalhes do erro da API:", error.response.data);
         console.error("Status do erro:", error.response.status);
-        toast.error(`Erro ao atualizar validade: ${error.response.data.message || "Verifique o console para mais detalhes."}`);
+        toast.error(
+          `Erro ao atualizar validade: ${error.response.data.message || "Verifique o console para mais detalhes."}`
+        );
       } else {
-        toast.error("Erro ao atualizar validade. Verifique sua conexão ou tente novamente.");
+        toast.error(
+          "Erro ao atualizar validade. Verifique sua conexão ou tente novamente."
+        );
       }
     }
   }
@@ -455,7 +476,11 @@ export function ConfigPanel() {
       toast.error(
         "Detalhes do perfil não encontrados localmente. Recarregue a página se persistir."
       );
-      console.error("Perfil com ID", profileId, "não encontrado em profilesRepoItems.");
+      console.error(
+        "Perfil com ID",
+        profileId,
+        "não encontrado em profilesRepoItems."
+      );
     }
   };
 
@@ -468,7 +493,10 @@ export function ConfigPanel() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Dados da requisição de perfis do repositório:", response.data);
+      console.log(
+        "Dados da requisição de perfis do repositório:",
+        response.data
+      );
 
       const sortedProfiles = response.data.sort((a, b) =>
         a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
@@ -589,7 +617,9 @@ export function ConfigPanel() {
               ?.toLowerCase()
               .includes(serviceSearchTerm.toLowerCase())
         )
-        .sort((a, b) => a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })),
+        .sort((a, b) =>
+          a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+        ),
     [services, serviceSearchTerm, riskTranslations]
   );
 
@@ -604,7 +634,9 @@ export function ConfigPanel() {
                 ?.toLowerCase()
                 .includes(activitySearchTerm.toLowerCase()))
         )
-        .sort((a, b) => a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })),
+        .sort((a, b) =>
+          a.title.localeCompare(b.title, "pt-BR", { sensitivity: "base" })
+        ),
     [activities, activitySearchTerm, riskTranslations]
   );
 
@@ -628,6 +660,180 @@ export function ConfigPanel() {
       );
   }, [profilesRepoItems, profileSearchTerm]);
 
+  const [documentGroups, setDocumentGroups] = useState<any[]>([]);
+
+  async function getDocumentGroups() {
+    try {
+      // Fazer a requisição para a API
+      const response = await axios.get(`${ip}/document/matrix/group`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          page: 0,
+          size: 10000,
+        },
+      });
+
+      setDocumentGroups(response.data.content || []);
+    } catch (error) {
+      console.error("Erro ao buscar grupos de documentos", error);
+      toast.error("Erro ao carregar grupos de documentos.");
+    }
+  }
+
+  useEffect(() => {
+    getDocumentGroups();
+  }, []);
+
+  const [documentSubgroups, setDocumentSubgroups] = useState<any[]>([]);
+
+  async function getDocumentSubgroups(idDocumentGroup: string) {
+    console.log("→ Solicitação de subgrupos para grupo:", idDocumentGroup);
+    try {
+      // Faz a requisição para obter os subgrupos de um grupo específico
+      const response = await axios.get(
+        `${ip}/document/matrix/subgroup/filtered-group`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            idSearch: idDocumentGroup,
+            page: 0,
+            size: 10000,
+          },
+        }
+      );
+
+      console.log("← Resposta bruta de subgrupos:", response.data);
+      setDocumentSubgroups(response.data.content || []);
+    } catch (error) {
+      console.error("Erro ao buscar subgrupos de documentos", error);
+      toast.error("Erro ao carregar subgrupos de documentos.");
+    }
+  }
+
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [selectedSubgroup, setSelectedSubgroup] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      getDocumentSubgroups(selectedGroup);
+    }
+  }, [selectedGroup]);
+
+  const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedGroupId = e.target.value;
+    setSelectedGroup(selectedGroupId); // Atualiza o grupo selecionado
+    console.log("Grupo selecionado:", selectedGroupId);
+
+    setSelectedSubgroup(null);
+
+    // Chama a função para buscar os subgrupos
+    if (selectedGroupId) {
+      getDocumentSubgroups(selectedGroupId);
+    }
+  };
+
+  const filteredDocsByGroup = useMemo(() => {
+    return matrixEntries.filter((entry) => {
+      // só mostra se tiver grupo selecionado
+      if (!selectedGroup) return false;
+      const matchGroup = entry.idDocumentGroup === selectedGroup;
+      // se tiver subgrupo, também verifica; senão, aceita todos do grupo
+      const matchSubgroup = selectedSubgroup
+        ? entry.idDocumentSubgroup === selectedSubgroup
+        : true;
+      return matchGroup && matchSubgroup;
+    });
+  }, [matrixEntries, selectedGroup, selectedSubgroup]);
+
+  const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
+  const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
+
+  async function getDocsBySubgroup(idDocumentSubgroup: string) {
+    console.log(
+      `Chamando ➡️ GET ${ip}/document/matrix/filtered-subgroup?` +
+        `idSearch=${idDocumentSubgroup}&page=0&size=1000`
+    );
+
+    setIsLoadingDocsList(true);
+    try {
+      const { data } = await axios.get(
+        `${ip}/document/matrix/filtered-subgroup`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { idSearch: idDocumentSubgroup, page: 0, size: 1000 },
+        }
+      );
+      console.log("Resposta bruta de filtered-subgroup:", data);
+
+      const list: DocumentMatrixEntry[] = Array.isArray(data)
+        ? data
+        : Array.isArray((data as any).content)
+          ? (data as any).content
+          : [];
+
+      console.log(`Lista extraída (${list.length} itens):`, list);
+
+      setDocsList(list);
+    } catch (error) {
+      console.error("Erro axios em filtered-subgroup:", error);
+    } finally {
+      setIsLoadingDocsList(false);
+    }
+  }
+  useEffect(() => {
+    console.log(
+      "Hook: selectedGroup =",
+      selectedGroup,
+      "; selectedSubgroup =",
+      selectedSubgroup
+    );
+    if (selectedSubgroup) {
+      getDocsBySubgroup(selectedSubgroup);
+    } else {
+      setDocsList([]);
+    }
+  }, [selectedSubgroup]);
+
+  async function saveMatrixEntry() {
+    if (!selectedMatrixEntry) return;
+
+    // mescla os campos editados
+    const payload: DocumentMatrixEntry = {
+      ...selectedMatrixEntry,
+      name: editName,
+      expirationDateUnit: editExpirationUnit,
+      expirationDateAmount: editExpirationAmount,
+      type: editType,
+      isDocumentUnique: editIsDocumentUnique,
+    };
+
+    try {
+      await axios.put(
+        `${ip}/document/matrix/${selectedMatrixEntry.idDocumentMatrix}`,
+        payload,
+        authHeader
+      );
+      toast.success("Documento atualizado com sucesso!");
+
+      // atualiza lista geral e a filtrada
+      setMatrixEntries((prev) =>
+        prev.map((e) =>
+          e.idDocumentMatrix === payload.idDocumentMatrix ? payload : e
+        )
+      );
+      setDocsList((prev) =>
+        prev.map((e) =>
+          e.idDocumentMatrix === payload.idDocumentMatrix ? payload : e
+        )
+      );
+
+      setSelectedMatrixEntry(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao atualizar documento.");
+    }
+  }
+
   return (
     <div className="p-6 md:p-10 flex flex-col gap-0 md:gap-0">
       <div className="shadow-lg rounded-lg bg-white p-6 md:p-8 flex flex-col gap-6 md:gap-10 relative bottom-[8vw]">
@@ -635,13 +841,14 @@ export function ConfigPanel() {
         <div className="bg-[#7CA1F3] w-full h-[1px]" />
         <div className="flex items-center gap-5">
           {[
-            "documents",
+            "documents_ai",
             "cbos",
             "positions",
             "services",
             "activities",
             "profiles",
             "validate",
+            "documents",
           ].map((tab) => (
             <Button
               key={tab}
@@ -652,24 +859,29 @@ export function ConfigPanel() {
               }`}
               onClick={() => setSelectedTab(tab as any)}
             >
-              {{
-                documents: "Avaliação IA",
-                cbos: "CBOs",
-                positions: "Cargos",
-                services: "Serviços",
-                activities: "Atividades",
-                profiles: "Perfis e Permissões",
-                validate: "Validade Padrão",
-              }[tab]}
+              {
+                {
+                  documents_ai: "Avaliação IA",
+                  cbos: "CBOs",
+                  positions: "Cargos",
+                  services: "Serviços",
+                  activities: "Atividades",
+                  profiles: "Perfis e Permissões",
+                  validate: "Validade Padrão",
+                  documents: "Documentos",
+                }[tab]
+              }
             </Button>
           ))}
         </div>
       </div>
       <div className="shadow-lg rounded-lg bg-white p-6 flex flex-col gap-6">
-        {selectTab === "documents" && (
+        {selectTab === "documents_ai" && (
           <div className="flex gap-10">
             <div className="w-1/2 space-y-4">
-              <h2 className="text-xl font-bold">Descrição de documentos para IA</h2>
+              <h2 className="text-xl font-bold">
+                Descrição de documentos para IA
+              </h2>
               <input
                 type="text"
                 placeholder="Buscar por título..."
@@ -914,7 +1126,10 @@ export function ConfigPanel() {
                 ))}
               </select>
               <div className="flex gap-2">
-                <Button onClick={handleCreateService} disabled={isCreatingService}>
+                <Button
+                  onClick={handleCreateService}
+                  disabled={isCreatingService}
+                >
                   {isCreatingService ? "Criando..." : "Criar Serviço"}
                 </Button>
                 <Button
@@ -958,7 +1173,9 @@ export function ConfigPanel() {
                       </li>
                     ))
                   ) : (
-                    <p className="text-gray-400">Nenhuma atividade encontrada.</p>
+                    <p className="text-gray-400">
+                      Nenhuma atividade encontrada.
+                    </p>
                   )}
                 </ul>
               )}
@@ -985,7 +1202,10 @@ export function ConfigPanel() {
                 ))}
               </select>
               <div className="flex gap-2">
-                <Button onClick={handleCreateActivity} disabled={isCreatingActivity}>
+                <Button
+                  onClick={handleCreateActivity}
+                  disabled={isCreatingActivity}
+                >
                   {isCreatingActivity ? "Criando..." : "Criar Atividade"}
                 </Button>
                 <Button
@@ -1061,7 +1281,9 @@ export function ConfigPanel() {
                         ))}
                       </select>
                       <Button
-                        onClick={() => handleUpdateEntry(entry.idDocumentMatrix)}
+                        onClick={() =>
+                          handleUpdateEntry(entry.idDocumentMatrix)
+                        }
                       >
                         Salvar
                       </Button>
@@ -1244,7 +1466,9 @@ export function ConfigPanel() {
                           <input
                             type="checkbox"
                             checked={documentViewer}
-                            onChange={(e) => setDocumentViewer(e.target.checked)}
+                            onChange={(e) =>
+                              setDocumentViewer(e.target.checked)
+                            }
                             disabled={manager || isCreatingProfile}
                           />{" "}
                           Visualizador de Documentos
@@ -1253,7 +1477,9 @@ export function ConfigPanel() {
                           <input
                             type="checkbox"
                             checked={registrationUser}
-                            onChange={(e) => setRegistrationUser(e.target.checked)}
+                            onChange={(e) =>
+                              setRegistrationUser(e.target.checked)
+                            }
                             disabled={isInspector || isCreatingProfile}
                           />{" "}
                           Cadastro de Usuários
@@ -1262,18 +1488,80 @@ export function ConfigPanel() {
                           <input
                             type="checkbox"
                             checked={registrationContract}
-                            onChange={(e) => setRegistrationContract(e.target.checked)}
+                            onChange={(e) =>
+                              setRegistrationContract(e.target.checked)
+                            }
                             disabled={isInspector || isCreatingProfile}
                           />{" "}
                           Cadastro de Contratos
                         </label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={laboral} onChange={(e) => setLaboral(e.target.checked)} disabled={isCreatingProfile} /> Trabalhista</label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={workplaceSafety} onChange={(e) => setWorkplaceSafety(e.target.checked)} disabled={isCreatingProfile} /> Segurança do Trabalho</label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={registrationAndCertificates} onChange={(e) => setRegistrationAndCertificates(e.target.checked)} disabled={isCreatingProfile} /> Cadastro e certidões</label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={general} onChange={(e) => setGeneral(e.target.checked)} disabled={isCreatingProfile} /> Geral</label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={health} onChange={(e) => setHealth(e.target.checked)} disabled={isCreatingProfile} /> Saúde</label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={environment} onChange={(e) => setEnvironment(e.target.checked)} disabled={isCreatingProfile} /> Meio Ambiente</label>
-                        <label className="flex items-center gap-2"><input type="checkbox" checked={concierge} onChange={(e) => setConcierge(e.target.checked)} disabled={isCreatingProfile} /> Portaria</label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={laboral}
+                            onChange={(e) => setLaboral(e.target.checked)}
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Trabalhista
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={workplaceSafety}
+                            onChange={(e) =>
+                              setWorkplaceSafety(e.target.checked)
+                            }
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Segurança do Trabalho
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={registrationAndCertificates}
+                            onChange={(e) =>
+                              setRegistrationAndCertificates(e.target.checked)
+                            }
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Cadastro e certidões
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={general}
+                            onChange={(e) => setGeneral(e.target.checked)}
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Geral
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={health}
+                            onChange={(e) => setHealth(e.target.checked)}
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Saúde
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={environment}
+                            onChange={(e) => setEnvironment(e.target.checked)}
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Meio Ambiente
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={concierge}
+                            onChange={(e) => setConcierge(e.target.checked)}
+                            disabled={isCreatingProfile}
+                          />{" "}
+                          Portaria
+                        </label>
                       </div>
                     </div>
                   )}
@@ -1314,26 +1602,218 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
+        {selectTab === "documents" && (
+          <div className="flex items-start justify-center gap-10 w-full">
+            <div className="w-[45%] space-y-4">
+              <select
+                id="documentGroup"
+                className="w-full p-2 border rounded"
+                onChange={handleGroupChange}
+              >
+                <option value="">Selecione um Grupo</option>
+                {documentGroups.map((group) => (
+                  <option
+                    key={group.idDocumentGroup}
+                    value={group.idDocumentGroup}
+                  >
+                    {group.groupName}
+                  </option>
+                ))}
+              </select>
+              <select
+                id="documentSubgroup"
+                className="w-full p-2 border rounded"
+                onChange={(e) => setSelectedSubgroup(e.target.value)}
+                disabled={!selectedGroup} // Só habilita se um grupo for selecionado
+              >
+                <option value="">Selecione um Subgrupo</option>
+                {documentSubgroups.map((subgroup) => (
+                  <option
+                    key={subgroup.idDocumentSubgroup}
+                    value={subgroup.idDocumentSubgroup}
+                  >
+                    {subgroup.subgroupName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="w-[45%] border-l pl-6 space-y-4">
+              <h2 className="text-xl font-bold">Documentos</h2>
+
+              {!selectedSubgroup ? (
+                <p>Selecione um subgrupo para visualizar os documentos.</p>
+              ) : isLoadingDocsList ? (
+                <p>Carregando documentos…</p>
+              ) : docsList.length > 0 ? (
+                <>
+                  {/* 4. Lista clicável */}
+                  <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
+                    {docsList.map((doc) => (
+                      <li
+                        key={doc.idDocumentMatrix}
+                        className="p-3 border rounded hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleSelectMatrixEntry(doc)}
+                      >
+                        <strong>{doc.name}</strong>
+                        <p className="text-sm text-gray-600">{doc.type}</p>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* 5. Mini-form de edição */}
+                  {selectedMatrixEntry && (
+                    <div className="mt-4 border-t pt-4 space-y-3">
+                      <h3 className="text-lg font-medium">
+                        Editar: {selectedMatrixEntry.name}
+                      </h3>
+
+                      {/* Nome */}
+                      <input
+                        className="w-full p-2 border rounded"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+
+                      {/* Expiração */}
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          className="w-20 p-2 border rounded"
+                          value={editExpirationAmount}
+                          onChange={(e) =>
+                            setEditExpirationAmount(Number(e.target.value))
+                          }
+                        />
+                        <select
+                          className="p-2 border rounded"
+                          value={editExpirationUnit}
+                          onChange={(e) =>
+                            setEditExpirationUnit(e.target.value)
+                          }
+                        >
+                          {[
+                            { value: "DAYS", label: "Dias" },
+                            { value: "MONTHS", label: "Meses" },
+                          ].map((u) => (
+                            <option key={u.value} value={u.value}>
+                              {u.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Tipo */}
+                      <input
+                        className="w-full p-2 border rounded"
+                        value={editType}
+                        onChange={(e) => setEditType(e.target.value)}
+                      />
+
+                      {/* Único? */}
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={editIsDocumentUnique}
+                          onChange={(e) =>
+                            setEditIsDocumentUnique(e.target.checked)
+                          }
+                        />
+                        Documento único
+                      </label>
+
+                      {/* Ações */}
+                      <div className="flex gap-2">
+                        <Button onClick={saveMatrixEntry}>Salvar</Button>
+                        <Button
+                          onClick={() => setSelectedMatrixEntry(null)}
+                          className="bg-gray-300 text-black"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-gray-400">
+                  Nenhum documento encontrado para este subgrupo.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
         {isProfileDetailsModalOpen && selectedProfileDetails && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-semibold mb-4">Detalhes do Perfil: {selectedProfileDetails.name}</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                Detalhes do Perfil: {selectedProfileDetails.name}
+              </h3>
               <div className="grid grid-cols-1 gap-2 text-sm">
-                <p><strong>Descrição:</strong> {selectedProfileDetails.description || "Nenhuma descrição informada"}</p>
-                <p><strong>Admin:</strong> {selectedProfileDetails.admin ? "Sim" : "Não"}</p>
-                <p><strong>Visitante:</strong> {selectedProfileDetails.viewer ? "Sim" : "Não"}</p>
-                <p><strong>Gestor:</strong> {selectedProfileDetails.manager ? "Sim" : "Não"}</p>
-                <p><strong>Fiscal:</strong> {selectedProfileDetails.inspector ? "Sim" : "Não"}</p>
-                <p><strong>Visualizador de Documentos:</strong> {selectedProfileDetails.documentViewer ? "Sim" : "Não"}</p>
-                <p><strong>Cadastro de Usuários:</strong> {selectedProfileDetails.registrationUser ? "Sim" : "Não"}</p>
-                <p><strong>Cadastro de Contratos:</strong> {selectedProfileDetails.registrationContract ? "Sim" : "Não"}</p>
-                <p><strong>Trabalhista:</strong> {selectedProfileDetails.laboral ? "Sim" : "Não"}</p>
-                <p><strong>Segurança do Trabalho:</strong> {selectedProfileDetails.workplaceSafety ? "Sim" : "Não"}</p>
-                <p><strong>Cadastro e Certidões:</strong> {selectedProfileDetails.registrationAndCertificates ? "Sim" : "Não"}</p>
-                <p><strong>Geral:</strong> {selectedProfileDetails.general ? "Sim" : "Não"}</p>
-                <p><strong>Saúde:</strong> {selectedProfileDetails.health ? "Sim" : "Não"}</p>
-                <p><strong>Meio Ambiente:</strong> {selectedProfileDetails.environment ? "Sim" : "Não"}</p>
-                <p><strong>Portaria:</strong> {selectedProfileDetails.concierge ? "Sim" : "Não"}</p>
+                <p>
+                  <strong>Descrição:</strong>{" "}
+                  {selectedProfileDetails.description ||
+                    "Nenhuma descrição informada"}
+                </p>
+                <p>
+                  <strong>Admin:</strong>{" "}
+                  {selectedProfileDetails.admin ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Visitante:</strong>{" "}
+                  {selectedProfileDetails.viewer ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Gestor:</strong>{" "}
+                  {selectedProfileDetails.manager ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Fiscal:</strong>{" "}
+                  {selectedProfileDetails.inspector ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Visualizador de Documentos:</strong>{" "}
+                  {selectedProfileDetails.documentViewer ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Cadastro de Usuários:</strong>{" "}
+                  {selectedProfileDetails.registrationUser ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Cadastro de Contratos:</strong>{" "}
+                  {selectedProfileDetails.registrationContract ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Trabalhista:</strong>{" "}
+                  {selectedProfileDetails.laboral ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Segurança do Trabalho:</strong>{" "}
+                  {selectedProfileDetails.workplaceSafety ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Cadastro e Certidões:</strong>{" "}
+                  {selectedProfileDetails.registrationAndCertificates
+                    ? "Sim"
+                    : "Não"}
+                </p>
+                <p>
+                  <strong>Geral:</strong>{" "}
+                  {selectedProfileDetails.general ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Saúde:</strong>{" "}
+                  {selectedProfileDetails.health ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Meio Ambiente:</strong>{" "}
+                  {selectedProfileDetails.environment ? "Sim" : "Não"}
+                </p>
+                <p>
+                  <strong>Portaria:</strong>{" "}
+                  {selectedProfileDetails.concierge ? "Sim" : "Não"}
+                </p>
               </div>
               <button
                 onClick={() => setIsProfileDetailsModalOpen(false)}
