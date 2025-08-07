@@ -297,17 +297,25 @@ export function Dashboard() {
     setIsLoading(true);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
-      const queryParams = branchIds.map((id) => `branchIds=${id}`).join("&");
-      const response = await axios.get(
-        `${ip}/contract/find-by-branchIds?${queryParams}`,
+      const response = await axios.post(
+        `${ip}/contract/find-by-branchIds`,
+        { branchIds },
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       setAvailableContracts(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao buscar contratos por filiais:", error);
-      toast.error("Erro ao carregar os contratos. Tente novamente.");
+      if (error.response && error.response.data) {
+        const errorMessage =
+          error.response.data.message || error.response.data.error;
+        toast.error(errorMessage || "Erro ao carregar os contratos. Tente novamente.");
+      } else {
+        toast.error(
+          "Erro ao carregar os contratos. Verifique a sua conexão e tente novamente."
+        );
+      }
       setAvailableContracts([]);
     } finally {
       setIsLoading(false);
@@ -329,9 +337,14 @@ export function Dashboard() {
         }
       );
       setAvailableProfiles(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao buscar perfis disponíveis:", error);
-      toast.error("Erro ao carregar os perfis. Tente novamente.");
+      if (error.response && error.response.data) {
+        const errorMessage = error.response.data.message || error.response.data.error;
+        toast.error(errorMessage || "Erro ao carregar os perfis. Tente novamente.");
+      } else {
+        toast.error("Erro ao carregar os perfis. Verifique a sua conexão e tente novamente.");
+      }
       setAvailableProfiles([]);
     }
   };
