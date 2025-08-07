@@ -71,7 +71,7 @@ public class ContractControllerImpl implements ContractController {
         return ResponseEntity.ok(crudContractImpl.getContractByEmployee(pageable,idEmployee));
     }
 
-    @GetMapping("/find-by-branchIds")
+    @PostMapping("/find-by-branchIds")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<ContractByBranchIdsResponseDto>> getContractsByBranchIds(@RequestBody List<String> branchIds) {
