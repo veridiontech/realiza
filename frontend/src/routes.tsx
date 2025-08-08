@@ -8,6 +8,7 @@ import { NewPassword } from "./pages/app/new-password";
 import { NewPassword2 } from "./pages/app/new-password2";
 import { SignIn } from "./pages/app/sign-in";
 import { Collaborators } from "./pages/auth/realizaProfile/collaborators";
+import { ClientCollaborators } from "./pages/auth/clientProfile/employee/client-collaborators";
 import { Dashboard } from "./pages/auth/realizaProfile/home/__dashboard";
 import { Enterprise } from "./pages/auth/realizaProfile/enterprises/enterprise";
 import { MonittoringTable } from "./pages/auth/realizaProfile/monittoringTable";
@@ -27,12 +28,14 @@ import { ProfileEnterpriseReprise } from "./pages/auth/realizaProfile/profileEnt
 // import { DocumentViewer } from "./pages/auth/employee/modals/viewDoc";
 import { AtualizationPage } from "./pages/auth/realizaProfile/atualizationsPage";
 import { Branch } from "./pages/auth/realizaProfile/branchs/branch";
+import { ClientBranch } from "./pages/auth/clientProfile/branchs/clientBranchs";
 import { UserProvider } from "./context/user-provider";
 import { CreateUserRealiza } from "./pages/auth/realizaProfile/createUserRealiza/create-user-realiza";
 import EmployeeToContract from "./pages/auth/realizaProfile/contracts/employeeToContract";
 import { ClientAppLayout } from "./_layouts/clientApp";
 import { ClientServiceProvider } from "./pages/auth/clientProfile/serviceProviders/clientServiceProviders";
-import { FornecedoresPage } from '@/pages/auth/realizaProfile/providers/table-providers';
+import { ClienteFornecedoresPage } from "./pages/auth/clientProfile/providers/table-clientproviders";
+import { FornecedoresPage } from "@/pages/auth/realizaProfile/providers/table-providers";
 import { ProtectedRoute } from "./protectedRoutes";
 import ChatPage from "./pages/auth/realizaProfile/chat";
 // import { DocumentPage } from "./pages/auth/realizaProfile/documents/_document-page";
@@ -55,7 +58,6 @@ import { DocumentPageNew } from "./pages/auth/realizaProfile/documents/new-docum
 import { MonittoringBis } from "./pages/auth/realizaProfile/bis";
 import { ContarctsByProvider } from "./pages/auth/realizaProfile/contract-by-provider/contracts-by-provider";
 import { ConfigPanel } from "./pages/auth/realizaProfile/branchs/configPanel";
-
 
 export const router = createBrowserRouter([
   {
@@ -124,13 +126,17 @@ export const router = createBrowserRouter([
     children: [
       { path: "home/:id", element: <HomeClient /> },
       { path: "serviceProviders/:id", element: <ClientServiceProvider /> },
-      { path: "contracts/:id", element: <ContractsTable /> },
+      {
+        path: "table-clientproviders/:id",
+        element: <ClienteFornecedoresPage />,
+      },
+      { path: "provider/:id", element: <ContractsTable /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
-      { path: "branch/:id", element: <Branch /> },
+      { path: "collaborators/:id", element: <ClientCollaborators /> },
+      { path: "branch/:id", element: <ClientBranch /> },
       { path: "employees/:id", element: <ClientEmployee /> },
       { path: "create-manager/:id", element: <CreateNewManagerClient /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
-
     ],
   },
   {

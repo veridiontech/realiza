@@ -1,4 +1,4 @@
-import { ChartNoAxesGantt, LogOut, Plus, User } from "lucide-react";
+import { ChartNoAxesGantt, LogOut, Plus, User, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import realizaLogo from "@/assets/logoRealiza/Logo Realiza Completo 1.png";
 import { Button } from "../ui/button";
@@ -113,12 +113,10 @@ export function HeaderClient() {
             >
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    className="hover:bg-realizaBlue/80 bg-realizaBlue mr-5 w-fit rounded p-2"
-                  >
-                    <ChartNoAxesGantt className="text-white" />
-                  </Button>
+                  <Menu
+                    size={40}
+                    className="text-white border p-2 rounded-full"
+                  />
                 </SheetTrigger>
                 <SheetContent
                   className="h-full overflow-auto dark:bg-white"
@@ -130,7 +128,7 @@ export function HeaderClient() {
                 </SheetContent>
               </Sheet>
               <Link to={`/cliente/home/${user.idUser}`}>
-                <img src={realizaLogo} alt="" className="w-[6vw]" />
+                <img src={realizaLogo} alt="Logo" className="w-[6vw]" />
               </Link>
             </div>
 
@@ -139,7 +137,9 @@ export function HeaderClient() {
                 {uniqueBranch ? (
                   <div className="flex items-center gap-1 text-[20px]">
                     <span className="text-white">Filial:</span>
-                    <h1 className="font-semibold text-white">{uniqueBranch.name}</h1>
+                    <h1 className="font-semibold text-white">
+                      {uniqueBranch.name}
+                    </h1>
                   </div>
                 ) : (
                   <div className="flex items-center">
