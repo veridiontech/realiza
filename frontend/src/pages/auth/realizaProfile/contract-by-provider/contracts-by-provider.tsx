@@ -16,7 +16,7 @@ import {
   Unlock,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom"; // MODIFICADO
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
 import { toast } from "sonner";
@@ -380,7 +380,7 @@ export function ContarctsByProvider() {
           </div>
         </div>
 
-        <div className="bg-white rounded-md p-5 border border-neutral-400 shadow-md flex gap-10 h-[64vh]">
+        <div className="bg-white rounded-md p-5 border border-neutral-400 shadow-md flex flex-col gap-10 h-[64vh]">
           {viewOption === "documents" && (
             <div className="border border-neutral-400 rounded-md shadow-md p-5 w-full flex flex-col gap-6">
               <div className="flex items-start justify-between">
@@ -486,7 +486,7 @@ export function ContarctsByProvider() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="text-center">
                         <span className="text-sm text-neutral-600">
                           {formatarData(doc.uploadDate)}
@@ -565,33 +565,37 @@ export function ContarctsByProvider() {
           )}
 
           {viewOption === "collaborators" && (
-            <div className="flex flex-col items-start gap-10">
-              <div className="flex items-center gap-2 text-[#34495E]">
+            <div className="w-full">
+              <div className="flex items-center gap-2 text-[#34495E] mb-6">
                 <User />
                 <h2 className="text-[20px]">Colaboradores</h2>
               </div>
-              <div className="flex flex-col gap-8 overflow-y-auto max-h-[35vh] pr-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto max-h-[50vh] pr-2">
                 {collaborators.length > 0 ? (
                   collaborators.map((employee: any) => (
-                    <div key={employee.id} className="flex flex-col gap-5">
-                      <div className="flex items-center gap-5">
-                        <div className="bg-neutral-400 p-2 rounded-full">
-                          <User />
+                    <Link
+                      to={`/sistema/detailsEmployees/${employee.id}`}
+                      key={employee.id}
+                    >
+                      <div
+                        className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full"
+                      >
+                        <div className="bg-neutral-100 p-2 rounded-full mb-2">
+                          <User className="w-6 h-6 text-neutral-500" />
                         </div>
-                        <div>
-                          <p className="text-[18px]">{employee.name}</p>
-                          <span className="text-[12px] text-realizaBlue font-semibold underline">
-                            {employee.cboTitle}
-                          </span>
-                        </div>
+                        <p className="text-sm font-semibold text-[#34495E] leading-tight">
+                          {employee.name}
+                        </p>
+                        <span className="text-xs text-realizaBlue font-medium mt-1">
+                          {employee.cboTitle}
+                        </span>
                       </div>
-                      <div className="bg-neutral-400 h-[1px]" />
-                    </div>
+                    </Link>
                   ))
                 ) : (
-                  <span className="text-neutral-400">
+                  <div className="col-span-full text-center text-neutral-400 mt-10">
                     Nenhum colaborador encontrado
-                  </span>
+                  </div>
                 )}
               </div>
             </div>

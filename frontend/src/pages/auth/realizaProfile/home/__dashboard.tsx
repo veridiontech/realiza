@@ -299,7 +299,7 @@ export function Dashboard() {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.post(
         `${ip}/contract/find-by-branchIds`,
-        { branchIds },
+        branchIds,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
