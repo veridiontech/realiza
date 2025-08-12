@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.controllers.impl.users;
 
 import bl.tech.realiza.gateways.controllers.interfaces.users.UserController;
+import bl.tech.realiza.gateways.responses.users.UserEmailListResponse;
 import bl.tech.realiza.usecases.interfaces.users.CrudUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,5 +25,21 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<String> userActivation(@PathVariable String userId, @RequestParam Boolean activation) {
         return ResponseEntity.ok(crudUser.userActivation(userId, activation));
+    }
+
+    @GetMapping("/find-by-profile/{profileId}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<List<UserEmailListResponse>> usersByProfile(@PathVariable String profileId) {
+        return ResponseEntity.ok(crudUser.findByProfile(profileId));
+    }
+
+    @PostMapping("/{userId}/change-profile")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ROLE_REALIZA_BASIC')")
+    @Override
+    public ResponseEntity<String> changeUserProfile(@PathVariable String userId, @RequestParam String profileId) {
+        return ResponseEntity.ok(crudUser.changeUserProfile(userId, profileId));
     }
 }
