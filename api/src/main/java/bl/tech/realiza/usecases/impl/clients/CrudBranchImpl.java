@@ -2,12 +2,14 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
@@ -57,6 +59,7 @@ public class CrudBranchImpl implements CrudBranch {
     private final ActivityRepository activityRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final JwtService jwtService;
+    private final ActivityRepoRepository activityRepoRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -103,13 +106,17 @@ public class CrudBranchImpl implements CrudBranch {
                     null,
                     null));
         } else {
+                List<ActivityRepo> activityRepos = new ArrayList<>();
+            if (branchCreateRequestDto.getActivityIds() != null && !branchCreateRequestDto.getActivityIds().isEmpty()) {
+                activityRepos = activityRepoRepository.findAllById(branchCreateRequestDto.getActivityIds());
+            }
             setupQueueProducer.send(new SetupMessage("NEW_BRANCH",
                     null,
                     savedBranch.getIdBranch(),
                     null,
                     null,
                     null,
-                    null,
+                    activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()),
                     null));
         }
 

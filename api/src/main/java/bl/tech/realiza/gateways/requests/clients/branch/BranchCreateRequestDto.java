@@ -30,4 +30,5 @@ public class BranchCreateRequestDto {
     private Boolean replicateFromBase;
     private List<String> center;
     private List<String> documents;
+    private List<String> activityIds;
 }

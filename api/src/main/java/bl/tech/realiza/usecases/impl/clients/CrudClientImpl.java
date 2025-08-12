@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.clients;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
+import bl.tech.realiza.domains.contract.activity.ActivityRepo;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.BadRequestException;
@@ -9,6 +10,7 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
@@ -28,7 +30,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
@@ -45,6 +50,7 @@ public class CrudClientImpl implements CrudClient {
     private final AuditLogService auditLogServiceImpl;
     private final CrudBranchImpl crudBranchImpl;
     private final GoogleCloudService googleCloudService;
+    private final ActivityRepoRepository activityRepoRepository;
 
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto, Boolean profilesFromRepo) {
@@ -95,6 +101,10 @@ public class CrudClientImpl implements CrudClient {
                     null,
                     null));
         }
+        List<ActivityRepo> activityRepos = new ArrayList<>();
+        if (clientRequestDto.getActivityIds() != null && !clientRequestDto.getActivityIds().isEmpty()) {
+            activityRepos = activityRepoRepository.findAllById(clientRequestDto.getActivityIds());
+        }
 
         crudBranchImpl.save(BranchCreateRequestDto.builder()
                 .name(savedClient.getTradeName() != null
@@ -110,6 +120,7 @@ public class CrudClientImpl implements CrudClient {
                 .number(savedClient.getNumber())
                 .base(true)
                 .client(savedClient.getIdClient())
+                .activityIds(activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()))
                 .build());
 
         if (JwtService.getAuthenticatedUserId() != null) {

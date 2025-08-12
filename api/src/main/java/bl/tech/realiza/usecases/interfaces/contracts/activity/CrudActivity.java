@@ -21,4 +21,5 @@ public interface CrudActivity {
     Optional<ActivityResponseDto> update(String id, ActivityRequestDto activityRequestDto, Boolean replicate, List<String> branchIds);
     void delete(String id, Boolean replicate, List<String> branchIds);
     void transferFromRepo(String idBranch);
+    void transferFromRepo(String branchId, List<String> activityIds);
 }
