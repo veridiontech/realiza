@@ -432,4 +432,32 @@ public class CrudActivityImpl implements CrudActivity {
             activityDocumentRepository.saveAll(newActivityDocs);
         }
     }
+
+    @Override
+    public void transferFromRepo(String branchId, List<String> activityIds) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        List<ActivityRepo> activityRepos = activityRepoRepository.findAllById(activityIds);
+
+        List<Activity> newActivities = new ArrayList<>();
+
+        for (ActivityRepo repo : activityRepos) {
+            Activity newActivity = Activity.builder()
+                    .title(repo.getTitle())
+                    .risk(repo.getRisk())
+                    .branch(branch)
+                    .build();
+            newActivities.add(newActivity);
+
+            if (newActivities.size() == 50) {
+                activityRepository.saveAll(newActivities);
+                newActivities.clear();
+            }
+        }
+
+        if (!newActivities.isEmpty()) {
+            activityRepository.saveAll(newActivities);
+        }
+    }
 }

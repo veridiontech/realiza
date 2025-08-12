@@ -127,7 +127,7 @@ public class SetupService {
         }
     }
 
-    public void setupBranch(String branchId) {
+    public void setupBranch(String branchId, List<String> activityIds) {
         log.info("Started setup branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
@@ -155,7 +155,7 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
-        crudActivity.transferFromRepo(branch.getIdBranch());
+        crudActivity.transferFromRepo(branch.getIdBranch(),activityIds);
 
         log.info("Finished setup branch ✔️ {}", branchId);
     }

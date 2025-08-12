@@ -2,6 +2,8 @@ package bl.tech.realiza.gateways.requests.clients.client;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ClientRequestDto {
     private String cnpj;
@@ -15,4 +17,5 @@ public class ClientRequestDto {
     private String address;
     private String number;
     private Boolean isUltragaz;
+    private List<String> activityIds;
 }

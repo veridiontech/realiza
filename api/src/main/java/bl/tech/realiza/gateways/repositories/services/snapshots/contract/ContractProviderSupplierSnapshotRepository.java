@@ -17,9 +17,13 @@ public interface ContractProviderSupplierSnapshotRepository extends JpaRepositor
     @Query("""
     SELECT COUNT(cps)
     FROM ContractProviderSupplierSnapshot cps
-    WHERE cps.branch.client.id = :idClient
+    WHERE cps.branch.client.id.id = :idClient
         AND cps.status IN :status
+        AND cps.branch.client.id.snapshotDate = :date
+        AND cps.branch.client.id.frequency = :frequency
 """)
-    Long countByClientIdAndStatusIn(@Param("idClient") String clientId,
-                                    @Param("status") List<ContractStatusEnum> status);
+    Long countByClientIdAndStatusInAndDateAndFrequency(@Param("idClient") String clientId,
+                                                       @Param("status") List<ContractStatusEnum> status,
+                                                       @Param("date") Date date,
+                                                       @Param("frequency") SnapshotFrequencyEnum frequency);
 }
