@@ -889,10 +889,10 @@ public class DashboardService {
                     .build();
             responseDto.getDocumentStatus().add(statusResponse);
         }
-        // show all adherent and non-adherent
+        // TODO show all adherent and non-adherent
 
-        // show all conforming and non-conforming
-        // find all status and infos by filters
+        // TODO show all conforming and non-conforming
+        // TODO find all status and infos by filters
         return responseDto;
     }
 
@@ -1930,9 +1930,7 @@ public class DashboardService {
     // TODO adicionar frequency as funções de acesso ao repositório
     public DashboardGeneralDetailsResponseDto getGeneralDetailsInfoByDate(String clientId, Date date, SnapshotFrequencyEnum frequency, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         clientSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(clientId,
-                Date.from(LocalDateTime.now()
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()),
+                date,
                 frequency)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
         List<String> branchIds = null;
@@ -2002,41 +2000,60 @@ public class DashboardService {
             }
         }
         // quantidade de fornecedores
-        Long supplierQuantity = providerSupplierSnapshotRepository.countByClientId(clientId);
+        Long supplierQuantity = providerSupplierSnapshotRepository.countByClientIdDateAndFrequency(clientId,
+                date,
+                frequency);
 
         // quantidade de contratos
-        Long contractQuantity = contractProviderSupplierSnapshotRepository.countByClientIdAndStatusIn(clientId, activeContract);
+        Long contractQuantity = contractProviderSupplierSnapshotRepository.countByClientIdAndStatusInAndDateAndFrequency(clientId,
+                activeContract,
+                date,
+                frequency);
 
         // funcionários alocados
-        Long allocatedEmployeeQuantity = employeeSnapshotRepository.countEmployeeSupplierByClientIdAndSituation(clientId, ALOCADO)
-                + employeeSnapshotRepository.countEmployeeSubcontractorByClientIdAndSituation(clientId, ALOCADO);
+        Long allocatedEmployeeQuantity = employeeSnapshotRepository.countEmployeeSupplierByClientIdAndSituationAndDateAndFrequency(clientId,
+                ALOCADO,
+                date,
+                frequency)
+                + employeeSnapshotRepository.countEmployeeSubcontractorByClientIdAndSituationAndDateAndFrequency(clientId,
+                ALOCADO,
+                date,
+                frequency);
 
         // conformidade
         Double conformity = null;
         Object[] conformityValuesSupplier = null;
         Object[] conformityValuesSubcontractor = null;
         if (branchIds == null) {
-            conformityValuesSupplier = documentSnapshotRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
+            conformityValuesSupplier = documentSnapshotRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(clientId,
                     providerIds,
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
-            conformityValuesSubcontractor = documentRepository.countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
+                    documentTitles,
+                    date,
+                    frequency);
+            conformityValuesSubcontractor = documentSnapshotRepository.countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(clientId,
                     providerIds,
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
         } else {
-            conformityValuesSupplier = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
+            conformityValuesSupplier = documentSnapshotRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(branchIds,
                     providerIds,
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
-            conformityValuesSubcontractor = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
+                    documentTitles,
+                    date,
+                    frequency);
+            conformityValuesSubcontractor = documentSnapshotRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(branchIds,
                     providerIds,
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
         }
         Long totalConformity = getSafeLong(conformityValuesSupplier, 0) + getSafeLong(conformityValuesSubcontractor, 0);
         Long conformityTrue = getSafeLong(conformityValuesSupplier, 1) + getSafeLong(conformityValuesSubcontractor, 1);
@@ -2049,7 +2066,7 @@ public class DashboardService {
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
 
         if (documentTypes == null) {
-            documentTypes = documentRepository.findDistinctDocumentType();
+            documentTypes = documentSnapshotRepository.findDistinctDocumentType(date,frequency);
         }
         for (String type : documentTypes) {
             List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
@@ -2060,31 +2077,39 @@ public class DashboardService {
                 int supplier = 0;
                 int subcontract = 0;
                 if (branchIds != null) {
-                    supplier = documentRepository.countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
+                    supplier = documentSnapshotRepository.countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitlesAndDateAndFrequency(branchIds,
                             providerIds,
                             type,
                             status,
                             responsibleIds,
-                            documentTitles).intValue();
-                    subcontract = documentRepository.countSubcontractorByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
+                            documentTitles,
+                            date,
+                            frequency).intValue();
+                    subcontract = documentSnapshotRepository.countSubcontractorByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitlesAndDateAndFrequency(branchIds,
                             providerIds,
                             type,
                             status,
                             responsibleIds,
-                            documentTitles).intValue();
+                            documentTitles,
+                            date,
+                            frequency).intValue();
                 } else {
-                    supplier = documentRepository.countSupplierByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,
+                    supplier = documentSnapshotRepository.countSupplierByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitlesAndDateAndFrequency(clientId,
                             providerIds,
                             type,
                             status,
                             responsibleIds,
-                            documentTitles).intValue();
-                    subcontract = documentRepository.countSubcontractorByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,
+                            documentTitles,
+                            date,
+                            frequency).intValue();
+                    subcontract = documentSnapshotRepository.countSubcontractorByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitlesAndDateAndFrequency(clientId,
                             providerIds,
                             type,
                             status,
                             responsibleIds,
-                            documentTitles).intValue();
+                            documentTitles,
+                            date,
+                            frequency).intValue();
                 }
                 statusList.add(DashboardGeneralDetailsResponseDto.Status.builder()
                         .quantity(supplier + subcontract)
@@ -2126,36 +2151,44 @@ public class DashboardService {
 
         // ranking de pendencias
         List<DashboardGeneralDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
-        List<String> allBranches = branchRepository.findAllBranchIdsByClientId(clientId);
+        List<String> allBranches = branchSnapshotRepository.findAllBranchIdsByClientIdAndDateAndFrequency(clientId,date,frequency);
 
         for (String branchId : allBranches) {
-            Branch branch = branchRepository.findById(branchId)
+            BranchSnapshot branch = branchSnapshotRepository.findById(branchId)
                     .orElseThrow(() -> new NotFoundException("Branch not found"));
             Double adherenceBranch = null;
             Double conformityBranch = null;
             List<String> newBranchIds = new ArrayList<>();
             newBranchIds.add(branchId);
 
-            Object[] adherenceBranchSupplierValuesRaw = documentRepository.countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+            Object[] adherenceBranchSupplierValuesRaw = documentSnapshotRepository.countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(newBranchIds,
                     null,
                     null,
                     documentTypes,
-                    documentTitles);
-            Object[] adherenceBranchSubcontractorValuesRaw = documentRepository.countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    documentTitles,
+                    date,
+                    frequency);
+            Object[] adherenceBranchSubcontractorValuesRaw = documentSnapshotRepository.countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(newBranchIds,
                     null,
                     null,
                     documentTypes,
-                    documentTitles);
-            Object[] conformityBranchSupplierValuesRaw = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    documentTitles,
+                    date,
+                    frequency);
+            Object[] conformityBranchSupplierValuesRaw = documentSnapshotRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(newBranchIds,
                     null,
                     null,
                     documentTypes,
-                    documentTitles);
-            Object[] conformityBranchSubcontractorValuesRaw = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+                    documentTitles,
+                    date,
+                    frequency);
+            Object[] conformityBranchSubcontractorValuesRaw = documentSnapshotRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(newBranchIds,
                     null,
                     null,
                     documentTypes,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
 
             Object[] adherenceBranchSupplierValues = (Object[]) adherenceBranchSupplierValuesRaw[0];
             Object[] adherenceBranchSubcontractorValues = (Object[]) adherenceBranchSubcontractorValuesRaw[0];
@@ -2188,7 +2221,7 @@ public class DashboardService {
             }
 
             pendingRanking.add(DashboardGeneralDetailsResponseDto.Pending.builder()
-                    .corporateName(branch.getName())
+                    .corporateName(branch.getTradeName())
                     .cnpj(branch.getCnpj())
                     .adherence(adherenceBranch)
                     .conformity(conformityBranch)
@@ -2231,8 +2264,8 @@ public class DashboardService {
                 : new ArrayList<>();
 
         List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
-        List<ProviderSupplier> providerSuppliers = new ArrayList<>();
-        List<ProviderSubcontractor> providerSubcontractors = new ArrayList<>();
+        List<ProviderSupplierSnapshot> providerSuppliers = new ArrayList<>();
+        List<ProviderSubcontractorSnapshot> providerSubcontractors = new ArrayList<>();
         Double adherenceProvider = null;
         Double conformityProvider = null;
         Object[] adherenceProviderValues = null;
@@ -2247,21 +2280,25 @@ public class DashboardService {
             documentTitles = null;
         }
         if (branchIds.isEmpty()) {
-            providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
-            providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
+            providerSuppliers = providerSupplierSnapshotRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrueAndDateAndFrequency(clientId, ACTIVE, date, frequency);
+            providerSubcontractors = providerSubcontractorSnapshotRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrueAndDateAndFrequency(clientId, ACTIVE, date, frequency);
         } else {
-            providerSuppliers = providerSupplierRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
-            providerSubcontractors = providerSubcontractorRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
+            providerSuppliers = providerSupplierSnapshotRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrueAndDateAndFrequency(branchIds,responsibleIds, ACTIVE, date, frequency);
+            providerSubcontractors = providerSubcontractorSnapshotRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrueAndDateAndFrequency(branchIds,responsibleIds, ACTIVE, date, frequency);
         }
-        for (ProviderSupplier providerSupplier : providerSuppliers ) {
-            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
+        for (ProviderSupplierSnapshot providerSupplier : providerSuppliers ) {
+            adherenceProviderValues = documentSnapshotRepository.countTotalAndAdherenceByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(providerSupplier.getId().getId(),
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
-            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
+                    documentTitles,
+                    date,
+                    frequency);
+            conformityProviderValues = documentSnapshotRepository.countTotalAndConformityByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(providerSupplier.getId().getId(),
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
 
             Long totalAdherenceProvider = getSafeLong(adherenceProviderValues,0);
             Long adherenceProviderTrue = getSafeLong(adherenceProviderValues,1);
@@ -2270,7 +2307,7 @@ public class DashboardService {
             Long conformityProviderTrue = getSafeLong(conformityProviderValues,1);
             Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
             if (totalAdherenceProvider.equals(totalConformityProvider)) {
-                log.info("Values not match in provider supplier id {}",providerSupplier.getIdProvider());
+                log.info("Values not match in provider supplier id {}",providerSupplier.getId().getId());
             }
 
             adherenceProvider = totalAdherenceProvider > 0
@@ -2305,15 +2342,19 @@ public class DashboardService {
                             .build()
             );
         }
-        for (ProviderSubcontractor providerSubcontractor : providerSubcontractors ) {
-            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
+        for (ProviderSubcontractorSnapshot providerSubcontractor : providerSubcontractors ) {
+            adherenceProviderValues = documentSnapshotRepository.countTotalAndAdherenceByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(providerSubcontractor.getId().getId(),
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
-            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
+                    documentTitles,
+                    date,
+                    frequency);
+            conformityProviderValues = documentSnapshotRepository.countTotalAndConformityByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(providerSubcontractor.getId().getId(),
                     responsibleIds,
                     documentTypes,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
 
             Long totalAdherenceProvider = (Long) adherenceProviderValues[0];
             Long adherenceProviderTrue = (Long) adherenceProviderValues[1];
@@ -2322,7 +2363,7 @@ public class DashboardService {
             Long conformityProviderTrue = (Long) conformityProviderValues[1];
             Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
             if (totalAdherenceProvider.equals(totalConformityProvider)) {
-                log.info("Values not match in provider subcontractor id {}",providerSubcontractor.getIdProvider());
+                log.info("Values not match in provider subcontractor id {}",providerSubcontractor.getId().getId());
             }
 
             adherenceProvider = totalAdherenceProvider > 0
@@ -2392,51 +2433,59 @@ public class DashboardService {
                     ? dashboardFiltersRequestDto.getDocumentTitles()
                     : null;
         }
-        List<Document> documentsSupplier = new ArrayList<>();
-        List<Document> documentsSubcontractor = new ArrayList<>();
+        List<DocumentSnapshot> documentsSupplier = new ArrayList<>();
+        List<DocumentSnapshot> documentsSubcontractor = new ArrayList<>();
         // find all documents by filters
         if (branchIds != null && !branchIds.isEmpty()) {
-            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+            documentsSupplier = documentSnapshotRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitlesAndDateAndFrequency(clientId,
                     providerIds,
                     documentTypes,
                     responsibleIds,
                     activeContract,
                     statuses,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
 
-            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+            documentsSubcontractor = documentSnapshotRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitlesAndDateAndFrequency(clientId,
                     providerIds,
                     documentTypes,
                     responsibleIds,
                     activeContract,
                     statuses,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
         } else {
-            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+            documentsSupplier = documentSnapshotRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitlesAndDateAndFrequency(branchIds,
                     providerIds,
                     documentTypes,
                     responsibleIds,
                     activeContract,
                     statuses,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
 
-            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+            documentsSubcontractor = documentSnapshotRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
                     providerIds,
                     documentTypes,
                     responsibleIds,
                     activeContract,
                     statuses,
-                    documentTitles);
+                    documentTitles,
+                    date,
+                    frequency);
         }
 
         // find all adherent documents by filters
         long total = documentsSupplier.size() + documentsSubcontractor.size();
         long adherentSupplier = documentsSupplier.stream()
-                .filter(Document::getAdherent)
+                .filter(DocumentSnapshot::getAdherent)
                 .toList()
                 .size();
         long adherentSubcontractor = documentsSubcontractor.stream()
-                .filter(Document::getAdherent)
+                .filter(DocumentSnapshot::getAdherent)
                 .toList()
                 .size();
         responseDto.setAdherentDocumentsQuantity(adherentSupplier + adherentSubcontractor);
@@ -2444,11 +2493,11 @@ public class DashboardService {
 
         // find all conforming documents by filters
         long conformingSupplier = documentsSupplier.stream()
-                .filter(Document::getConforming)
+                .filter(DocumentSnapshot::getConforming)
                 .toList()
                 .size();
         long conformingSubcontractor = documentsSubcontractor.stream()
-                .filter(Document::getConforming)
+                .filter(DocumentSnapshot::getConforming)
                 .toList()
                 .size();
         responseDto.setConformingDocumentsQuantity(conformingSupplier + conformingSubcontractor);
@@ -2457,10 +2506,10 @@ public class DashboardService {
         // list infos by status
         responseDto.setDocumentStatus(new ArrayList<>());
         for (Document.Status status : Document.Status.values()) {
-            List<Document> documentSupplierStatus = documentsSupplier.stream()
+            List<DocumentSnapshot> documentSupplierStatus = documentsSupplier.stream()
                     .filter(document -> document.getStatus().equals(status))
                     .toList();
-            List<Document> documentSubcontractorStatus = documentsSubcontractor.stream()
+            List<DocumentSnapshot> documentSubcontractorStatus = documentsSubcontractor.stream()
                     .filter(document -> document.getStatus().equals(status))
                     .toList();
             long totalStatus = documentSupplierStatus.size() + documentSubcontractorStatus.size();
@@ -2477,10 +2526,10 @@ public class DashboardService {
                     .build();
             responseDto.getDocumentStatus().add(statusResponse);
         }
-        // show all adherent and non-adherent
+        // TODO show all adherent and non-adherent
 
-        // show all conforming and non-conforming
-        // find all status and infos by filters
+        // TODO show all conforming and non-conforming
+        // TODO find all status and infos by filters
         return responseDto;
     }
 
