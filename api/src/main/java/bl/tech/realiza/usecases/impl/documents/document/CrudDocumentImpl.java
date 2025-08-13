@@ -208,11 +208,10 @@ public class CrudDocumentImpl implements CrudDocument {
             LocalDateTime documentDate = document.getDocumentDate() != null
                     ? document.getDocumentDate()
                     : LocalDateTime.now();
-            if (expirationAmount == 0) {
+            if (expirationAmount == 0 || !document.getValidity().equals(DocumentValidityEnum.INDEFINITE)) {
                 document.setExpirationDate(document.getDocumentDate()
                         .plusYears(100));
             } else {
-
                 switch (expirationDayUnitEnum) {
                     case DAYS -> document.setExpirationDate(documentDate
                             .plusDays(expirationAmount));
