@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.interfaces.contracts.activity;
 
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
+import bl.tech.realiza.gateways.requests.contracts.activity.AddActivitiesToBranchesRequest;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import org.springframework.data.domain.Page;
@@ -22,4 +23,5 @@ public interface CrudActivity {
     void delete(String id, Boolean replicate, List<String> branchIds);
     void transferFromRepo(String idBranch);
     void transferFromRepo(String branchId, List<String> activityIds);
+    String addActivitiesToBranches(AddActivitiesToBranchesRequest request);
 }
