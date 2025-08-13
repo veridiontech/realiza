@@ -597,4 +597,40 @@ public class CrudDocumentImpl implements CrudDocument {
             }
         }
     }
+
+    @Override
+    public void deleteOverwrittenDocuments() {
+        Pageable pageable = PageRequest.of(0, 50);
+        Page<FileDocument> files = fileRepository.findAllByCanBeOverwritten(true, pageable);
+        List<FileDocument> fileBatch = new ArrayList<>(50);
+        while (files.hasContent()) {
+            for (FileDocument fileDocument : files) {
+                if (fileDocument.getCanBeOverwritten()) {
+                    try {
+                        googleCloudService.deleteFile(fileDocument.getUrl());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    fileDocument.setUrl(null);
+                    fileDocument.setDeleted(true);
+                    fileBatch.add(fileDocument);
+
+                    if (fileBatch.size() >= 50) {
+                        fileRepository.saveAll(fileBatch);
+                        fileBatch.clear();
+                    }
+                }
+                if (!fileBatch.isEmpty()) {
+                    fileRepository.saveAll(fileBatch);
+                    fileBatch.clear();
+                }
+            }
+
+            if (files.hasNext()) {
+                files = fileRepository.findAllByCanBeOverwritten(true, files.nextPageable());
+            } else {
+                break;
+            }
+        }
+    }
 }

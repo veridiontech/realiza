@@ -67,6 +67,7 @@ public class ScheduledJob {
         crudDocument.expirationCheck();
         crudDocument.deleteReprovedCheck();
         crudDocument.deleteOldReprovedDocuments();
+        crudDocument.deleteOverwrittenDocuments();
     }
 
     public void weeklyDocumentCheck() {

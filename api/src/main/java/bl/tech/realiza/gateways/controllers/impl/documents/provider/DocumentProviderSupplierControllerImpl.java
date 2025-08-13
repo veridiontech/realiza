@@ -83,7 +83,7 @@ public class DocumentProviderSupplierControllerImpl implements DocumentProviderS
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<Optional<DocumentResponseDto>> uploadDocumentProviderSupplier(@PathVariable String id,
-                                                                              @RequestPart(value = "file") MultipartFile file) {
+                                                                                        @RequestPart(value = "file") MultipartFile file) {
         Optional<DocumentResponseDto> documentSupplier = null;
         try {
             documentSupplier = crudDocumentSupplier.upload(id, file);
