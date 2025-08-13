@@ -89,9 +89,13 @@ public class CrudDocumentImpl implements CrudDocument {
         boolean hasNext;
 
         Page<Document> documentPage;
+        List<ContractStatusEnum> statusEnumList = new ArrayList<>();
+        statusEnumList.add(ContractStatusEnum.FINISHED);
+        statusEnumList.add(ContractStatusEnum.SUSPENDED);
+        statusEnumList.add(ContractStatusEnum.DENIED);
         do {
-            documentPage = documentRepository.findAllByStatus(
-                    APROVADO, PageRequest.of(page, size)
+            documentPage = documentRepository.findAllByStatusAndNotInContractStatuses(
+                    APROVADO, statusEnumList, PageRequest.of(page, size)
             );
 
             documentPage.forEach(document -> {

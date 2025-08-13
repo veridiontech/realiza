@@ -16,6 +16,28 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     Page<Document> findAllByStatus(Document.Status status, Pageable pageable);
     Page<Document> findAllByStatusAndLastCheckAfter(Document.Status status, LocalDateTime lastCheck, Pageable pageable);
 
+    @Query(
+            value = """
+    SELECT DISTINCT d
+    FROM Document d
+    JOIN d.contractDocuments cd
+    WHERE d.status = :status
+      AND (cd.contract.status NOT IN :contractStatuses)
+  """,
+            countQuery = """
+    SELECT COUNT(DISTINCT d)
+    FROM Document d
+    JOIN d.contractDocuments cd
+    WHERE d.status = :status
+      AND (cd.contract.status NOT IN :contractStatuses)
+  """
+    )
+    Page<Document> findAllByStatusAndNotInContractStatuses(
+            @Param("status") Document.Status status,
+            @Param("contractStatuses") List<ContractStatusEnum> contractStatuses,
+            Pageable pageable
+    );
+
     @Query("""
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
