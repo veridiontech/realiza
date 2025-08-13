@@ -73,13 +73,11 @@ export function ContarctsByProvider() {
 
   const getContractsByProvider = async () => {
     try {
-      console.log("Fetching contracts for provider ID:", id.id);
       const res = await axios.get(`${ip}/contract/supplier/filtered-supplier`, {
         params: { idSearch: id.id },
         headers: { Authorization: `Bearer ${token}` },
       });
       setContracts(res.data.content);
-      console.log("Contracts fetched:", res.data.content);
     } catch (err) {
       console.error("Error fetching contracts:", err);
     }
@@ -104,7 +102,6 @@ export function ContarctsByProvider() {
   const getAllDatas = useCallback(
     async (idContract: string, serviceName: string) => {
       try {
-        console.log("Fetching all data for contract ID:", idContract);
         const res = await axios.get(`${ip}/document/contract/${idContract}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -113,9 +110,6 @@ export function ContarctsByProvider() {
         setSubcontractors(res.data.subcontractorDtos || []);
         setSelectedContractName(serviceName);
         setSearchTerm("");
-        console.log("Documents fetched:", res.data.documentDtos);
-        console.log("Collaborators fetched:", res.data.employeeDtos);
-        console.log("Subcontractors fetched:", res.data.subcontractorDtos);
       } catch (err) {
         console.error("Error fetching all data for contract:", err);
       }
@@ -125,10 +119,8 @@ export function ContarctsByProvider() {
 
   const getProvider = async () => {
     try {
-      console.log("Fetching provider details for ID:", id.id);
       const res = await axios.get(`${ip}/supplier/${id.id}`);
       setProvider(res.data);
-      console.log("Provider details fetched:", res.data);
     } catch (err) {
       console.error("Error fetching provider:", err);
     }
@@ -159,19 +151,12 @@ export function ContarctsByProvider() {
   );
 
   const handleOpenUploadModal = (documentId: string, documentTitle: string) => {
-    console.log(
-      "Opening upload modal for document:",
-      documentTitle,
-      "ID:",
-      documentId
-    );
     setSelectedDocumentId(documentId);
     setSelectedDocumentTitle(documentTitle);
     setIsUploadModalOpen(true);
   };
 
   const handleCloseUploadModal = () => {
-    console.log("Closing upload modal.");
     setIsUploadModalOpen(false);
     setSelectedDocumentId(null);
     setSelectedDocumentTitle(null);
@@ -186,33 +171,35 @@ export function ContarctsByProvider() {
   };
 
   const handleOpenViewerModal = (documentId: string) => {
-    console.log("Opening viewer modal for document ID:", documentId);
     setSelectedDocumentId(documentId);
     setIsViewerModalOpen(true);
   };
 
   const handleCloseViewerModal = () => {
-    console.log("Closing viewer modal.");
     setIsViewerModalOpen(false);
     setSelectedDocumentId(null);
   };
 
-  const handleStatusChangeForDocument = useCallback(
-    (documentIdChanged: string, newStatus: string) => {
-      console.log(
-        `Documento ${documentIdChanged} mudou para status: ${newStatus}`
-      );
-      if (selectedContractName) {
-        const currentContract = contracts.find(
-          (c) => c.serviceName === selectedContractName
-        );
-        if (currentContract) {
-          getAllDatas(currentContract.idContract, currentContract.serviceName);
-        }
-      }
-    },
-    [selectedContractName, contracts, getAllDatas]
-  );
+const handleStatusChangeForDocument = useCallback(
+  (documentIdChanged: string, newStatus: string) => {
+    console.log(
+      `Documento ${documentIdChanged} mudou para status: ${newStatus}`
+    );
+    setDocuments((prev) =>
+      prev.map((d) =>
+        d.id === documentIdChanged ? { ...d, status: newStatus } : d
+      )
+    );
+    const currentContract = contracts.find(
+      (c) => c.serviceName === selectedContractName
+    );
+    if (currentContract) {
+      getAllDatas(currentContract.idContract, currentContract.serviceName);
+    }
+    toast(`Status do documento atualizado para "${newStatus.replace(/_/g, " ")}".`);
+  },
+  [contracts, selectedContractName, getAllDatas]
+);
 
   const handleOpenExemptionModal = (documentId: string, documentTitle: string) => {
     const doc = documents.find((d) => d.id === documentId);
@@ -398,169 +385,187 @@ export function ContarctsByProvider() {
                 className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
               />
 
-              <div className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4 text-sm font-semibold text-neutral-600 pb-2 border-b border-neutral-300 items-center">
-                <div>Status</div>
-                <div className="col-span-1">Documento</div>
-                <div className="text-center">Bloqueia</div>
-                <div className="text-center">Envio</div>
-                <div className="text-center">Checagem</div>
-                <div className="text-center">Validade</div>
-                <div className="text-center">Ações</div>
-              </div>
+              {/* ===== FIX: header e linhas dentro da MESMA área rolável ===== */}
+              <div
+                className="overflow-y-auto max-h-[35vh] pr-2"
+                style={{ scrollbarGutter: "stable" }}
+              >
+                {/* Cabeçalho sticky (mesma grid das linhas) */}
+                <div
+                  className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4
+                             text-sm font-semibold text-neutral-600 py-2
+                             border-b border-neutral-300 items-center
+                             sticky top-0 bg-white z-10"
+                >
+                  <div>Status</div>
+                  <div>Documento</div>
+                  <div className="text-center">Bloqueia</div>
+                  <div className="text-center">Envio</div>
+                  <div className="text-center">Checagem</div>
+                  <div className="text-center">Validade</div>
+                  <div className="text-center">Ações</div>
+                </div>
 
-              <div className="flex flex-col gap-4 overflow-y-auto max-h-[35vh] pr-2">
-                {filteredDocuments.length > 0 ? (
-                  filteredDocuments.map((doc: Document) => (
-                    <div
-                      className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
-                      key={doc.id}
-                    >
-                      <div>
-                        {doc.status === "EM_ANALISE" ? (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-blue-500" />
-                            <span className="text-sm font-semibold text-blue-500">
-                              EM ANÁLISE
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            {doc.status === "REPROVADO" ||
-                            doc.status === "REPROVADO_IA" ? (
-                              <Ban className="w-4 h-4 text-red-500" />
-                            ) : doc.status === "APROVADO" ||
-                              doc.status === "APROVADO_IA" ? (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : doc.status === "ISENTO" ? (
-                              <FileX2 className="w-4 h-4 text-blue-500" />
-                            ) : doc.status === "PENDENTE_ISENCAO" ? (
+                {/* Linhas */}
+                <div className="flex flex-col gap-4">
+                  {filteredDocuments.length > 0 ? (
+                    filteredDocuments.map((doc: Document) => (
+                      <div
+                        className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
+                        key={doc.id}
+                      >
+                        <div>
+                          {doc.status === "EM_ANALISE" ? (
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-blue-500" />
+                              <span className="text-sm font-semibold text-blue-500">
+                                EM ANÁLISE
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              {doc.status === "REPROVADO" ||
+                              doc.status === "REPROVADO_IA" ? (
+                                <Ban className="w-4 h-4 text-red-500" />
+                              ) : doc.status === "APROVADO" ||
+                                doc.status === "APROVADO_IA" ? (
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              ) : doc.status === "ISENTO" ? (
+                                <FileX2 className="w-4 h-4 text-blue-500" />
+                              ) : doc.status === "PENDENTE_ISENCAO" ? (
+                                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                              ) : null}
+
+                              <span
+                                className={`text-sm font-medium ${getStatusClass(
+                                  doc.status
+                                )}`}
+                              >
+                                {doc.status.replace(/_/g, " ")}
+                              </span>
+                            </div>
+                          )}
+
+                          {doc.status === "EM_ANALISE" && (
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-blue-500" />
+                              <span className="text-xs font-semibold text-blue-500">
+                                ⚠️ Necessita análise humana
+                              </span>
+                            </div>
+                          )}
+                          {doc.status === "PENDENTE_ISENCAO" && (
+                            <div className="flex items-center gap-2">
                               <AlertCircle className="w-4 h-4 text-yellow-500" />
-                            ) : null}
+                              <span className="text-xs font-semibold text-yellow-500">
+                                ⚠️ Aguardando aprovação de isenção
+                              </span>
+                            </div>
+                          )}
+                        </div>
 
-                            <span
-                              className={`text-sm font-medium ${getStatusClass(
-                                doc.status
-                              )}`}
-                            >
-                              {doc.status.replace(/_/g, " ")}
+                        <div className="col-span-1">
+                          <h3 className="text-[16px] font-medium">
+                            {doc.title}
+                          </h3>
+                          {doc.isUnique !== undefined && (
+                            <span className="text-[12px] text-neutral-600">
+                              {doc.isUnique
+                                ? "Documento exclusivo para este contrato"
+                                : "Documento válido para outros contratos"}
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
 
-                        {doc.status === "EM_ANALISE" && (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-blue-500" />
-                            <span className="text-xs font-semibold text-blue-500">
-                              ⚠️ Necessita análise humana
-                            </span>
-                          </div>
-                        )}
-                        {doc.status === "PENDENTE_ISENCAO" && (
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-yellow-500" />
-                            <span className="text-xs font-semibold text-yellow-500">
-                              ⚠️ Aguardando aprovação de isenção
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                        <div className="flex justify-center items-center">
+                          {doc.bloqueia ? (
+                            <div className="flex items-center gap-2 text-red-500">
+                              <Lock className="w-4 h-4" />
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-green-600">
+                              <Unlock className="w-4 h-4" />
+                            </div>
+                          )}
+                        </div>
 
-                      <div className="col-span-1">
-                        <h3 className="text-[16px] font-medium">{doc.title}</h3>
-                        {doc.isUnique !== undefined && (
-                          <span className="text-[12px] text-neutral-600">
-                            {doc.isUnique
-                              ? "Documento exclusivo para este contrato"
-                              : "Documento válido para outros contratos"}
+                        <div className="text-center">
+                          <span className="text-sm text-neutral-600">
+                            {formatarData(doc.uploadDate)}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex justify-center items-center">
-                        {doc.bloqueia ? (
-                          <div className="flex items-center gap-2 text-red-500">
-                            <Lock className="w-4 h-4" />
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2 text-green-600">
-                            <Unlock className="w-4 h-4" />
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm text-neutral-600">
+                            {formatarData(doc.lastCheck)}
+                          </span>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm text-neutral-600">
+                            {formatarData(doc.expirationDate)}
+                          </span>
+                        </div>
 
-                      <div className="text-center">
-                        <span className="text-sm text-neutral-600">
-                          {formatarData(doc.uploadDate)}
-                        </span>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-sm text-neutral-600">
-                          {formatarData(doc.lastCheck)}
-                        </span>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-sm text-neutral-600">
-                          {formatarData(doc.expirationDate)}
-                        </span>
-                      </div>
-                      <div className="flex justify-center relative">
-                        <button
-                          onClick={() =>
-                            setOpenMenuDocumentId(
-                              openMenuDocumentId === doc.id ? null : doc.id
-                            )
-                          }
-                          className="p-1 hover:bg-gray-200 rounded"
-                        >
-                          <MoreVertical className="w-5 h-5" />
-                        </button>
-                        {openMenuDocumentId === doc.id && (
-                          <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                            {doc.hasDoc && doc.status !== "PENDENTE" && (
-                              <button
-                                onClick={() => handleOpenViewerModal(doc.id)}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                              >
-                                <Eye className="w-5 h-5 text-base" />
-                                Visualizar
-                              </button>
-                            )}
+                        <div className="flex justify-center relative">
+                          <button
+                            onClick={() =>
+                              setOpenMenuDocumentId(
+                                openMenuDocumentId === doc.id ? null : doc.id
+                              )
+                            }
+                            className="p-1 hover:bg-gray-200 rounded"
+                          >
+                            <MoreVertical className="w-5 h-5" />
+                          </button>
+                          {openMenuDocumentId === doc.id && (
+                            <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                              {doc.hasDoc && doc.status !== "PENDENTE" && (
+                                <button
+                                  onClick={() => handleOpenViewerModal(doc.id)}
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <Eye className="w-5 h-5 text-base" />
+                                  Visualizar
+                                </button>
+                              )}
 
-                            <>
-                              <button
-                                onClick={() =>
-                                  handleOpenUploadModal(doc.id, doc.title)
-                                }
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                              >
-                                <Upload className="w-5 h-5 text-base" />
-                                Enviar
-                              </button>
+                              <>
+                                <button
+                                  onClick={() =>
+                                    handleOpenUploadModal(doc.id, doc.title)
+                                  }
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <Upload className="w-5 h-5 text-base" />
+                                  Enviar
+                                </button>
 
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleOpenExemptionModal(doc.id, doc.title)
-                                }
-                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
-                              >
-                                <FileX2
-                                  className="w-5 h-5 text-base"
-                                  color="#b31933"
-                                />
-                                Isentar
-                              </button>
-                            </>
-                          </div>
-                        )}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleOpenExemptionModal(doc.id, doc.title)
+                                  }
+                                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                  <FileX2
+                                    className="w-5 h-5 text-base"
+                                    color="#b31933"
+                                  />
+                                  Isentar
+                                </button>
+                              </>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-neutral-400">
-                    Nenhum documento encontrado
-                  </span>
-                )}
+                    ))
+                  ) : (
+                    <span className="text-neutral-400">
+                      Nenhum documento encontrado
+                    </span>
+                  )}
+                </div>
               </div>
+              {/* ===== /FIX ===== */}
             </div>
           )}
 
@@ -572,14 +577,13 @@ export function ContarctsByProvider() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto max-h-[50vh] pr-2">
                 {collaborators.length > 0 ? (
+                  // @ts-ignore
                   collaborators.map((employee: any) => (
                     <Link
                       to={`/sistema/detailsEmployees/${employee.id}`}
                       key={employee.id}
                     >
-                      <div
-                        className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full"
-                      >
+                      <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
                         <div className="bg-neutral-100 p-2 rounded-full mb-2">
                           <User className="w-6 h-6 text-neutral-500" />
                         </div>
@@ -620,6 +624,7 @@ export function ContarctsByProvider() {
                 {isLoadingSubs ? (
                   <span className="text-neutral-400">Carregando...</span>
                 ) : subcontractors.length > 0 ? (
+                  // @ts-ignore
                   subcontractors.map((sub: any) => (
                     <div key={sub.id} className="flex flex-col gap-5">
                       <div className="flex items-center gap-5">
@@ -662,6 +667,7 @@ export function ContarctsByProvider() {
             onStatusChange={handleStatusChangeForDocument}
           />
         )}
+
         {isExemptionModalOpen && documentToExempt && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
