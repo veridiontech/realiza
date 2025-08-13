@@ -80,4 +80,12 @@ public class DashboardControllerImpl implements DashboardController {
                                                                                             @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         return ResponseEntity.ok(dashboardService.getProviderDetailsInfo(clientId, dashboardFiltersRequestDto));
     }
+
+    @GetMapping("/{clientId}/filters")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(description = "Busca filtros para o dashboard")
+    @Override
+    public ResponseEntity<DashboardFiltersResponse> getFiltersInfo(@PathVariable String clientId) {
+        return ResponseEntity.ok(dashboardService.getFiltersInfo(clientId));
+    }
 }
