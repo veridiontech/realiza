@@ -503,70 +503,77 @@ public class CrudDocumentImpl implements CrudDocument {
             List<Document> updateDocumentValidityDoneBatch = new ArrayList<>(50);
             List<ContractDocument> contractDocumentBatch = new ArrayList<>(50);
             for (Document document : filteredDocuments) {
-                String newTitle = switch (documentValidityEnum) {
-                    case INDEFINITE -> null;
-                    case WEEKLY  -> document.getWeeklyTitle();
-                    case MONTHLY -> document.getMonthlyTitle();
-                    case ANNUAL  -> document.getAnnualTitle();
-                };
-                Document newDocument = null;
-                if (document instanceof DocumentEmployee documentEmployee) {
-                    newDocument = DocumentEmployee.builder()
-                            .title(newTitle)
-                            .type(document.getType())
-                            .expirationDate(document.getExpirationDate())
-                            .expirationDateUnit(document.getExpirationDateUnit())
-                            .validity(documentValidityEnum)
-                            .doesBlock(document.getDoesBlock())
-                            .documentMatrix(document.getDocumentMatrix())
-                            .employee(documentEmployee.getEmployee())
-                            .build();
-                } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
-                    newDocument = DocumentProviderSupplier.builder()
-                            .title(newTitle)
-                            .type(document.getType())
-                            .expirationDate(document.getExpirationDate())
-                            .expirationDateUnit(document.getExpirationDateUnit())
-                            .validity(documentValidityEnum)
-                            .doesBlock(document.getDoesBlock())
-                            .documentMatrix(document.getDocumentMatrix())
-                            .providerSupplier(documentProviderSupplier.getProviderSupplier())
-                            .build();
-                } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
-                    newDocument = DocumentProviderSubcontractor.builder()
-                            .title(newTitle)
-                            .type(document.getType())
-                            .expirationDate(document.getExpirationDate())
-                            .expirationDateUnit(document.getExpirationDateUnit())
-                            .validity(documentValidityEnum)
-                            .doesBlock(document.getDoesBlock())
-                            .documentMatrix(document.getDocumentMatrix())
-                            .providerSubcontractor(documentProviderSubcontractor.getProviderSubcontractor())
-                            .build();
+                if (!document.getDocumentMatrix().getIsValidityFixed()
+                    || (document.getDocumentMatrix().getFixedValidityAt() != null
+                        && document.getDocumentMatrix().getFixedValidityAt().getMonth() == LocalDate.now().getMonth()
+                        && document.getDocumentMatrix().getFixedValidityAt().getDayOfMonth() == LocalDate.now().getDayOfMonth())) {
+                    if (document.getValidity().equals(DocumentValidityEnum.INDEFINITE)) {
+                        continue;
+                    } else {
+                        String newTitle = switch (document.getValidity()) {
+                            case WEEKLY  -> document.getWeeklyTitle();
+                            case MONTHLY -> document.getMonthlyTitle();
+                            case ANNUAL  -> document.getAnnualTitle();
+                            default -> throw new IllegalStateException("Unexpected value: " + document.getValidity());
+                        };
+                        Document newDocument = null;
+                        if (document instanceof DocumentEmployee documentEmployee) {
+                            newDocument = DocumentEmployee.builder()
+                                    .title(newTitle)
+                                    .type(document.getType())
+                                    .expirationDate(document.getExpirationDate())
+                                    .expirationDateUnit(document.getExpirationDateUnit())
+                                    .validity(documentValidityEnum)
+                                    .doesBlock(document.getDoesBlock())
+                                    .documentMatrix(document.getDocumentMatrix())
+                                    .employee(documentEmployee.getEmployee())
+                                    .build();
+                        } else if (document instanceof DocumentProviderSupplier documentProviderSupplier) {
+                            newDocument = DocumentProviderSupplier.builder()
+                                    .title(newTitle)
+                                    .type(document.getType())
+                                    .expirationDate(document.getExpirationDate())
+                                    .expirationDateUnit(document.getExpirationDateUnit())
+                                    .validity(documentValidityEnum)
+                                    .doesBlock(document.getDoesBlock())
+                                    .documentMatrix(document.getDocumentMatrix())
+                                    .providerSupplier(documentProviderSupplier.getProviderSupplier())
+                                    .build();
+                        } else if (document instanceof DocumentProviderSubcontractor documentProviderSubcontractor) {
+                            newDocument = DocumentProviderSubcontractor.builder()
+                                    .title(newTitle)
+                                    .type(document.getType())
+                                    .expirationDate(document.getExpirationDate())
+                                    .expirationDateUnit(document.getExpirationDateUnit())
+                                    .validity(documentValidityEnum)
+                                    .doesBlock(document.getDoesBlock())
+                                    .documentMatrix(document.getDocumentMatrix())
+                                    .providerSubcontractor(documentProviderSubcontractor.getProviderSubcontractor())
+                                    .build();
+                        }
+                        document.setIsValidityDone(true);
+                        updateDocumentValidityDoneBatch.add(document);
+                        documentBatch.add(newDocument);
+                        List<Contract> contracts = document.getContractDocuments().stream()
+                                .map(ContractDocument::getContract)
+                                .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
+                                .toList();
+                        for (Contract contract : contracts) {
+                            contractDocumentBatch.add(ContractDocument.builder()
+                                    .document(newDocument)
+                                    .contract(contract)
+                                    .build());
+                        }
+                    }
                 }
-                document.setIsValidityDone(true);
-                updateDocumentValidityDoneBatch.add(document);
-                documentBatch.add(newDocument);
-                List<Contract> contracts = document.getContractDocuments().stream()
-                        .map(ContractDocument::getContract)
-                        .filter(contract -> contract.getStatus().equals(ContractStatusEnum.ACTIVE))
-                        .toList();
-                for (Contract contract : contracts) {
-                    contractDocumentBatch.add(ContractDocument.builder()
-                            .document(newDocument)
-                            .contract(contract)
-                            .build());
-                }
-                if (updateDocumentValidityDoneBatch.size() >= 50) {
+                if (updateDocumentValidityDoneBatch.size() >= 50
+                        || documentBatch.size() >= 50
+                        || contractDocumentBatch.size() >= 50) {
                     documentRepository.saveAll(updateDocumentValidityDoneBatch);
-                    updateDocumentValidityDoneBatch.clear();
-                }
-                if (documentBatch.size() >= 50) {
                     documentRepository.saveAll(documentBatch);
-                    documentBatch.clear();
-                }
-                if (contractDocumentBatch.size() >= 50) {
                     contractDocumentRepository.saveAll(contractDocumentBatch);
+                    updateDocumentValidityDoneBatch.clear();
+                    documentBatch.clear();
                     contractDocumentBatch.clear();
                 }
             }

@@ -17,6 +17,8 @@ public class DocumentMatrixResponseDto {
     private String type;
     private Boolean doesBlock;
     private Boolean isDocumentUnique;
+    private Boolean isValidityFixed;
+    private String fixedValidityAt;
     private String idDocumentSubgroup;
     private String subgroupName;
     private String idDocumentGroup;

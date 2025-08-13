@@ -37,6 +37,9 @@ public class DocumentMatrix {
     @Builder.Default
     private DocumentValidityEnum validity = DocumentValidityEnum.INDEFINITE;
     @Builder.Default
+    private Boolean isValidityFixed = false;
+    private LocalDateTime fixedValidityAt;
+    @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
     public enum DayUnitEnum {

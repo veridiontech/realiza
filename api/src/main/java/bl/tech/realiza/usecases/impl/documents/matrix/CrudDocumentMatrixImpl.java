@@ -17,6 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +44,8 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .type(documentMatrixRequestDto.getType())
                 .doesBlock(documentMatrixRequestDto.getDoesBlock())
                 .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
+                        .isValidityFixed(documentMatrixRequestDto.getIsValidityFixed())
+                        .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
                 .subGroup(documentMatrixSubgroup)
                 .build());
 
@@ -97,6 +102,12 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrix.setExpirationDateAmount(documentMatrixRequestDto.getExpirationDateAmount() != null
                 ? documentMatrixRequestDto.getExpirationDateAmount()
                 : documentMatrix.getExpirationDateAmount());
+        documentMatrix.setIsValidityFixed(documentMatrixRequestDto.getIsValidityFixed() != null
+                ? documentMatrixRequestDto.getIsValidityFixed()
+                : documentMatrix.getIsValidityFixed());
+        documentMatrix.setFixedValidityAt(documentMatrixRequestDto.getFixedValidityAt() != null
+                ? (parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
+                : documentMatrix.getFixedValidityAt());
 
         if (replicate != null && replicate) {
             replicationQueueProducer.send(new ReplicationMessage("REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM",
@@ -136,6 +147,8 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
                 .isDocumentUnique(documentMatrix.getIsDocumentUnique())
+                .isValidityFixed(documentMatrix.getIsValidityFixed())
+                .fixedValidityAt(formatDayMonth(documentMatrix.getFixedValidityAt()))
                 .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                         ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
                         : null)
@@ -152,4 +165,19 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     private List<DocumentMatrixResponseDto> toDto(List<DocumentMatrix> documentMatrixList) {
         return documentMatrixList.stream().map(this::toDto).toList();
     }
+
+    public LocalDateTime parseDayMonth(String dayMonth) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        LocalDate parsedDate = LocalDate.parse(dayMonth, formatter);
+
+        parsedDate = parsedDate.withYear(LocalDate.now().getYear());
+
+        return parsedDate.atStartOfDay();
+    }
+
+    public String formatDayMonth(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        return dateTime.format(formatter);
+    }
+
 }
