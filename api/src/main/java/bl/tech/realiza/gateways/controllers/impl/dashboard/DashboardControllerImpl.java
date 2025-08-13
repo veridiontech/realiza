@@ -41,7 +41,7 @@ public class DashboardControllerImpl implements DashboardController {
         return ResponseEntity.ok(dashboardService.getDetailsInfo(branchId));
     }
 
-    @GetMapping("/{clientId}/document")
+    @PostMapping("/{clientId}/document")
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Busca informações dos documentos por status")
     @Override
@@ -50,7 +50,7 @@ public class DashboardControllerImpl implements DashboardController {
         return ResponseEntity.ok(dashboardService.getDocumentStatusInfo(clientId, dashboardFiltersRequestDto));
     }
 
-    @GetMapping("/{clientId}/document/details")
+    @PostMapping("/{clientId}/document/details")
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Busca informações detalhadas dos documentos")
     public ResponseEntity<Page<DashboardDocumentDetailsResponseDto>> getDocumentDetailsInfo(@PathVariable String clientId,
@@ -63,7 +63,7 @@ public class DashboardControllerImpl implements DashboardController {
         return ResponseEntity.ok(dashboardService.getDocumentDetailsInfo(clientId, dashboardFiltersRequestDto, pageable));
     }
 
-    @GetMapping("/{clientId}/general")
+    @PostMapping("/{clientId}/general")
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Busca informações do dashboard geral")
     @Override
@@ -72,7 +72,7 @@ public class DashboardControllerImpl implements DashboardController {
         return ResponseEntity.ok(dashboardService.getGeneralDetailsInfo(clientId, dashboardFiltersRequestDto));
     }
 
-    @GetMapping("/{clientId}/provider")
+    @PostMapping("/{clientId}/provider")
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Busca informações do dashboard de fornecedores e subcontratados")
     @Override

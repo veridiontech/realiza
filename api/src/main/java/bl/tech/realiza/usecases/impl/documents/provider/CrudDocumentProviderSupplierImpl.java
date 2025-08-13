@@ -185,6 +185,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                         .contentType(file.getContentType())
                         .url(gcsUrl)
                         .document(documentSupplier)
+                        .canBeOverwritten(documentSupplier.getDocumentMatrix().getIsDocumentUnique())
                         .build());
                 signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
@@ -238,7 +239,7 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
     public Page<DocumentResponseDto> findAllBySupplier(String idSearch, Pageable pageable) {
         Page<DocumentProviderSupplier> documentSupplierPage = documentSupplierRepository.findAllByProviderSupplier_IdProviderAndIsActive(idSearch, pageable, true);
 
-        Page<DocumentResponseDto> documentSupplierResponseDtoPage = documentSupplierPage.map(
+        return documentSupplierPage.map(
                 documentSupplier -> {
                     String signedUrl = null;
                     FileDocument fileDocument = documentSupplier.getDocument().stream()
@@ -262,8 +263,6 @@ public class CrudDocumentProviderSupplierImpl implements CrudDocumentProviderSup
                             .build();
                 }
         );
-
-        return documentSupplierResponseDtoPage;
     }
 
     @Override

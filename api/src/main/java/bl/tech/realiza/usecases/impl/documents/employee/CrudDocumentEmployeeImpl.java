@@ -187,6 +187,7 @@ public class CrudDocumentEmployeeImpl implements CrudDocumentEmployee {
                         .contentType(file.getContentType())
                         .url(gcsUrl)
                         .document(documentEmployee)
+                        .canBeOverwritten(documentEmployee.getDocumentMatrix().getIsDocumentUnique())
                         .build());
                 signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {
