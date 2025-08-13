@@ -56,6 +56,4 @@ public interface ProviderSupplierRepository extends JpaRepository<ProviderSuppli
             @Param("responsibleIds") List<String> responsibleIds,
             @Param("contractStatus") ContractStatusEnum contractStatus
     );
-
-    List<ProviderSupplier> findAllByClient_IdClientAndIsActiveIsTrue(String idClient);
 }

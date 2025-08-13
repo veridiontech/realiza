@@ -85,6 +85,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -2539,11 +2540,11 @@ public class DashboardService {
     public DashboardFiltersResponse getFiltersInfo(String clientId) {
         DashboardFiltersResponse response = DashboardFiltersResponse.builder().build();
 
-        Client client = clientRepository.findById(clientId)
+        clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
 
         // branches
-        List<Branch> branches = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(client.getIdClient());
+        List<Branch> branches = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(clientId);
         List<DashboardFiltersResponse.FilterList> branchResponse = new ArrayList<>();
         for (Branch branch : branches) {
             branchResponse.add(DashboardFiltersResponse.FilterList.builder()
@@ -2554,8 +2555,8 @@ public class DashboardService {
         response.setBranches(branchResponse);
 
         // providers and responsibles
-        List<ContractProviderSupplier> suppliers = contractProviderSupplierRepository.findAllByBranch_Client_IdClientAndStatusIsNot(client.getIdClient(), DENIED);
-        List<ContractProviderSubcontractor> subcontractors = contractProviderSubcontractorRepository.findAllByContractProviderSupplier_Branch_Client_IdClientAndStatusIsNot(client.getIdClient(), DENIED);
+        List<ContractProviderSupplier> suppliers = contractProviderSupplierRepository.findAllByBranch_Client_IdClientAndStatusIsNot(clientId, DENIED);
+        List<ContractProviderSubcontractor> subcontractors = contractProviderSubcontractorRepository.findAllByContractProviderSupplier_Branch_Client_IdClientAndStatusIsNot(clientId, DENIED);
         List<DashboardFiltersResponse.FilterList> providerResponse = new ArrayList<>();
         List<DashboardFiltersResponse.FilterList> responsibleResponse = new ArrayList<>();
         for (ContractProviderSupplier supplier : suppliers) {
@@ -2586,12 +2587,10 @@ public class DashboardService {
         response.setDocumentTypes(documentTypes);
 
         // document titles
-        List<DocumentMatrix> documentMatrix = documentMatrixRepository.findAll();
-        List<String> documentMatrixResponse = new ArrayList<>();
-        for (DocumentMatrix dm : documentMatrix) {
-            documentMatrixResponse.add(dm.getName());
-        }
+        List<String> documentMatrix = documentMatrixRepository.findAllTitles();
+        List<String> documentMatrixResponse = new ArrayList<>(documentMatrix);
         response.setDocumentTitles(documentMatrixResponse);
+
 
         // contract status
         List<ContractStatusEnum> contractStatus = new ArrayList<>(Arrays.asList(ContractStatusEnum.values()));
