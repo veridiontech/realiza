@@ -399,6 +399,27 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     List<Document> findAllByValidityAndContractStatus(@Param("validity") DocumentValidityEnum validity,
                                                       @Param("status") ContractStatusEnum status);
 
+    @Query(
+    value = """
+    SELECT DISTINCT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    WHERE d.validity = :validity
+        AND cd.contract.status = :status
+        AND d.isValidityDone = FALSE
+""",
+    countQuery = """
+    SELECT COUNT(DISTINCT d)
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    WHERE d.validity = :validity
+        AND cd.contract.status = :status
+        AND d.isValidityDone = FALSE
+""")
+    Page<Document> findAllByValidityAndContractStatus(@Param("validity") DocumentValidityEnum validity,
+                                                      @Param("status") ContractStatusEnum status,
+                                                      Pageable pageable);
+
     @Query("""
     SELECT d
     FROM Document d
