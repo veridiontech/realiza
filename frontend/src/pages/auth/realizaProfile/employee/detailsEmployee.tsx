@@ -12,7 +12,7 @@ import { toast } from "sonner";
 interface Document {
   idDocument: string;
   title: string;
-  assignDate?: string;     
+  assignDate?: string;
   status: string;
   expirationDate?: string;
   creationDate: string;
@@ -34,6 +34,22 @@ export function DetailsEmployee() {
     string | null
   >(null);
 
+  const formatSituation = (situation: string) => {
+    const situationMap: { [key: string]: string } = {
+      ALOCADO: "Alocado",
+      DESALOCADO: "Desalocado",
+      DEMITIDO: "Demitido",
+      AFASTADO: "Afastado",
+      LICENCA_MATERNIDADE: "Licença Maternidade",
+      LICENCA_MEDICA: "Licença Médica",
+      LICENCA_MILITAR: "Licença Militar",
+      FERIAS: "Férias",
+      ALISTAMENTO_MILITAR: "Alistamento Militar",
+      APOSENTADORIA_POR_INVALIDEZ: "Aposentadoria por Invalidez",
+    };
+    return situationMap[situation] || situation;
+  };
+
   const handleStatusChange = (id: string, newStatus: string) => {
     setDocuments((prevDocuments) =>
       prevDocuments.map((doc) =>
@@ -41,6 +57,7 @@ export function DetailsEmployee() {
       )
     );
   };
+
   const exemptDocument = async (documentId: string, documentTitle: string) => {
     try {
       const token = localStorage.getItem("tokenClient");
@@ -79,7 +96,7 @@ export function DetailsEmployee() {
   const position = employee?.position;
   if (position && position.getId) {
   } else {
-  console.warn('Position ou getId não encontrado.');
+    console.warn("Position ou getId não encontrado.");
   }
 
   const fetchEmployee = async () => {
@@ -120,34 +137,6 @@ export function DetailsEmployee() {
     }
   };
 
-  const updateSituation = async (newSituation: string) => {
-    const token = localStorage.getItem("tokenClient");
-
-    const payload = { situation: newSituation };
-    const formData = new FormData();
-    formData.append(
-      "employeeBrazilianRequestDto",
-      new Blob([JSON.stringify(payload)], { type: "application/json" })
-    );
-
-    try {
-      await axios.put(`${ip}/employee/brazilian/${id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      toast.success("Situação atualizada com sucesso!");
-      fetchEmployee();
-    } catch (error: any) {
-      console.error(
-        "Erro ao atualizar situação:",
-        error.response?.data || error.message
-      );
-      toast.error("Erro ao atualizar situação.");
-    }
-  };
-
   useEffect(() => {
     setIsLoading(true);
     Promise.all([fetchEmployee(), fetchDocuments()]).finally(() =>
@@ -156,124 +145,122 @@ export function DetailsEmployee() {
   }, [id]);
 
   const columns: {
-  key: keyof Document;
-  label: string;
-  className?: string;
-  render?: (value: string | undefined, row: Document) => React.ReactNode;
-}[] = [
-  {
-    key: "title",
-    label: "Documento",
-  },
-  {
-    key: "creationDate",
-    label: "Data de Envio",
-    render: (value) =>
-      value
-        ? new Date(value).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })
-        : "-",
-  },
-  {
-    key: "assignDate",
-    label: "Data de Atribuição",
-    render: (value) =>
-      value
-        ? new Date(value).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })
-        : "-",
-  },
-  {
-    key: "expirationDate",
-    label: "Data de Validade",
-    render: (value) =>
-      value
-        ? new Date(value).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          })
-        : "-",
-  },
-  {
-    key: "status",
-    label: "Status",
-    render: (value) => {
-      let statusClass = "";
-      if (value === "PENDENTE") statusClass = "text-yellow-500";
-      else if (value === "EM_ANALISE") statusClass = "text-blue-600";
-      else if (value === "APROVADO" || value === "APROVADO_IA") statusClass = "text-green-600";
-      else if (value === "REPROVADO" || value === "REPROVADO_IA") statusClass = "text-red-600";
-
-      return (
-        <span className={`text-sm font-medium ${statusClass}`}>
-          {value}
-        </span>
-      );
+    key: keyof Document;
+    label: string;
+    className?: string;
+    render?: (value: string | undefined, row: Document) => React.ReactNode;
+  }[] = [
+    {
+      key: "title",
+      label: "Documento",
     },
-  },
-  {
-    key: "idDocument",
-    label: "Ações",
-    render: (_value, row) => (
-      <div className="relative inline-block text-left">
-        <button
-          className="text-realizaBlue hover:underline"
-          onClick={() =>
-            setSelectedDocumentId(
-              selectedDocumentId === row.idDocument ? null : row.idDocument
-            )
-          }
-        >
-          <MoreVertical size={16} />
-        </button>
+    {
+      key: "creationDate",
+      label: "Data de Envio",
+      render: (value) =>
+        value
+          ? new Date(value).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })
+          : "-",
+    },
+    {
+      key: "assignDate",
+      label: "Data de Atribuição",
+      render: (value) =>
+        value
+          ? new Date(value).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })
+          : "-",
+    },
+    {
+      key: "expirationDate",
+      label: "Data de Validade",
+      render: (value) =>
+        value
+          ? new Date(value).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })
+          : "-",
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (value) => {
+        let statusClass = "";
+        if (value === "PENDENTE") statusClass = "text-yellow-500";
+        else if (value === "EM_ANALISE") statusClass = "text-blue-600";
+        else if (value === "APROVADO" || value === "APROVADO_IA")
+          statusClass = "text-green-600";
+        else if (value === "REPROVADO" || value === "REPROVADO_IA")
+          statusClass = "text-red-600";
 
-        {selectedDocumentId === row.idDocument && (
-          <div className="absolute z-10 w-32 top-0 right-10 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-            <div className="py-1 text-sm text-gray-700">
-              <button
-                onClick={() => {
-                  setIsViewerOpen(true);
-                  setSelectedDocumentId(row.idDocument);
-                }}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                <Eye size={14} className="inline mr-2" />
-                Visualizar
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedDocumentId(row.idDocument);
-                  setSelectedDocumentTitle(row.title);
-                  setTimeout(() => setIsModalOpen(true), 0);
-                }}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                <Upload size={14} className="inline mr-2" />
-                Enviar
-              </button>
-              <button
-                onClick={() => exemptDocument(row.idDocument, row.title)}
-                className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
-              >
-                <FileX2 size={14} className="inline mr-2" />
-                Isentar
-              </button>
+        return (
+          <span className={`text-sm font-medium ${statusClass}`}>{value}</span>
+        );
+      },
+    },
+    {
+      key: "idDocument",
+      label: "Ações",
+      render: (_value, row) => (
+        <div className="relative inline-block text-left">
+          <button
+            className="text-realizaBlue hover:underline"
+            onClick={() =>
+              setSelectedDocumentId(
+                selectedDocumentId === row.idDocument ? null : row.idDocument
+              )
+            }
+          >
+            <MoreVertical size={16} />
+          </button>
+
+          {selectedDocumentId === row.idDocument && (
+            <div className="absolute z-10 w-32 top-0 right-10 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div className="py-1 text-sm text-gray-700">
+                <button
+                  onClick={() => {
+                    setIsViewerOpen(true);
+                    setSelectedDocumentId(row.idDocument);
+                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                >
+                  <Eye size={14} className="inline mr-2" />
+                  Visualizar
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedDocumentId(row.idDocument);
+                    setSelectedDocumentTitle(row.title);
+                    setTimeout(() => setIsModalOpen(true), 0);
+                  }}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                >
+                  <Upload size={14} className="inline mr-2" />
+                  Enviar
+                </button>
+                <button
+                  onClick={() => exemptDocument(row.idDocument, row.title)}
+                  className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+                >
+                  <FileX2 size={14} className="inline mr-2" />
+                  Isentar
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    ),
-  },
-];
-
-
+          )}
+        </div>
+      ),
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -303,32 +290,10 @@ export function DetailsEmployee() {
                 {employee.name} {employee.surname}
               </h3>
               <div className="flex items-center gap-2">
-                <label htmlFor="situation" className="text-sm text-gray-500">
-                  Situação:
-                </label>
-                <select
-                  id="situation"
-                  value={employee.situation}
-                  onChange={(e) => updateSituation(e.target.value)}
-                  className="rounded border p-1 text-sm"
-                >
-                  <option value="ALOCADO">Alocado</option>
-                  <option value="DESALOCADO">Desalocado</option>
-                  <option value="DEMITIDO">Demitido</option>
-                  <option value="AFASTADO">Afastado</option>
-                  <option value="LICENCA_MATERNIDADE">
-                    Licença Maternidade
-                  </option>
-                  <option value="LICENCA_MEDICA">Licença Médica</option>
-                  <option value="LICENCA_MILITAR">Licença Militar</option>
-                  <option value="FERIAS">Férias</option>
-                  <option value="ALISTAMENTO_MILITAR">
-                    Alistamento Militar
-                  </option>
-                  <option value="APOSENTADORIA_POR_INVALIDEZ">
-                    Aposentadoria por Invalidez
-                  </option>
-                </select>
+                <p className="text-sm text-gray-500">Situação:</p>
+                <span className="rounded bg-gray-200 px-2 py-1 text-sm font-medium text-gray-800">
+                  {formatSituation(employee.situation)}
+                </span>
               </div>
             </div>
           </div>
@@ -359,7 +324,7 @@ export function DetailsEmployee() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>{/* <td className="p-2 text-stone-600">...</td> */}</tr>
+                  <tr></tr>
                 </tbody>
               </table>
             </div>
