@@ -1,6 +1,7 @@
 package bl.tech.realiza.services.documentProcessing;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import bl.tech.realiza.domains.services.IaAdditionalPrompt;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.services.IaAdditionalPromptRepository;
@@ -105,8 +106,10 @@ public class DocumentProcessingService {
             document.setVersionDate(LocalDateTime.now());
             if (result.getDocumentDate() != null) {
                 document.setDocumentDate(result.getDocumentDate());
-            } else {
+            } else if (document.getValidity().equals(DocumentValidityEnum.INDEFINITE)) {
                 document.setDocumentDate(LocalDateTime.now());
+            } else {
+                document.setDocumentDate(LocalDateTime.now().plusYears(100));
             }
             documentRepository.save(document);
             log.info("[{}] Documento ID={} salvo com novo status {}", threadName, document.getIdDocumentation(), document.getStatus());

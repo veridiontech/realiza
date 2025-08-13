@@ -16,6 +16,28 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     Page<Document> findAllByStatus(Document.Status status, Pageable pageable);
     Page<Document> findAllByStatusAndLastCheckAfter(Document.Status status, LocalDateTime lastCheck, Pageable pageable);
 
+    @Query(
+            value = """
+    SELECT DISTINCT d
+    FROM Document d
+    JOIN d.contractDocuments cd
+    WHERE d.status = :status
+      AND (cd.contract.status NOT IN :contractStatuses)
+  """,
+            countQuery = """
+    SELECT COUNT(DISTINCT d)
+    FROM Document d
+    JOIN d.contractDocuments cd
+    WHERE d.status = :status
+      AND (cd.contract.status NOT IN :contractStatuses)
+  """
+    )
+    Page<Document> findAllByStatusAndNotInContractStatuses(
+            @Param("status") Document.Status status,
+            @Param("contractStatuses") List<ContractStatusEnum> contractStatuses,
+            Pageable pageable
+    );
+
     @Query("""
     SELECT COUNT(DISTINCT d),
            SUM(CASE WHEN d.conforming = TRUE THEN 1 ELSE 0 END)
@@ -376,6 +398,27 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
 """)
     List<Document> findAllByValidityAndContractStatus(@Param("validity") DocumentValidityEnum validity,
                                                       @Param("status") ContractStatusEnum status);
+
+    @Query(
+    value = """
+    SELECT DISTINCT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    WHERE d.validity = :validity
+        AND cd.contract.status = :status
+        AND d.isValidityDone = FALSE
+""",
+    countQuery = """
+    SELECT COUNT(DISTINCT d)
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    WHERE d.validity = :validity
+        AND cd.contract.status = :status
+        AND d.isValidityDone = FALSE
+""")
+    Page<Document> findAllByValidityAndContractStatus(@Param("validity") DocumentValidityEnum validity,
+                                                      @Param("status") ContractStatusEnum status,
+                                                      Pageable pageable);
 
     @Query("""
     SELECT d

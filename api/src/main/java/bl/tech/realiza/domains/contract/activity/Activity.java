@@ -1,10 +1,12 @@
 package bl.tech.realiza.domains.contract.activity;
 
 import bl.tech.realiza.domains.clients.Branch;
+import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.enums.RiskEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,9 +34,15 @@ public class Activity {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
-    // -------------------------------
-    // Relacionamentos INERENTES
-    // -------------------------------
+    @ManyToOne
+    @JoinColumn(name = "activityBranch")
+    @JsonManagedReference
+    private ActivityRepo activityRepo;
+
+    @ManyToOne
+    @JoinColumn(name = "idClient")
+    private Client client;
+
     @ManyToOne
     @JoinColumn(name = "idBranch")
     private Branch branch;

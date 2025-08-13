@@ -10,10 +10,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ActivityRepository extends JpaRepository<Activity, String > {
-    Collection<Activity> findAllByDeleteRequest(boolean b);
     List<Activity> findAllByBranch_IdBranch(String idBranch);
+    List<Activity> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
+    List<Activity> findAllByBranch_IdBranchAndTitleAndRisk(String idBranch, String title, RiskEnum risk);
+    Optional<Activity> findByBranch_IdBranchAndActivityRepo_IdActivity(String idBranch, String idActivity);
 
     @Query("""
     SELECT new bl.tech.realiza.gateways.responses.clients.controlPanel.activity.ActivityControlPanelResponseDto(
@@ -34,13 +37,5 @@ public interface ActivityRepository extends JpaRepository<Activity, String > {
     WHERE a.idActivity = :activityId
 """)
     String findBranchIdByActivity(
-            @Param("activityId") String id
-    );
-
-    List<Activity> findAllByBranch_Client_IdClientAndTitle(String idClient, String title);
-
-    List<Activity> findAllByBranch_IdBranchAndTitle(String idBranch, String title);
-
-    List<Activity> findAllByBranch_Client_IdClientAndTitleAndRisk(String idClient, String title, RiskEnum risk);
-    List<Activity> findAllByBranch_IdBranchAndTitleAndRisk(String idBranch, String title, RiskEnum risk);
+            @Param("activityId") String id);
 }

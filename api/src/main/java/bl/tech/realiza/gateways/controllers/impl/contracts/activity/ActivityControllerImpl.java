@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.ActivityControlller;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
+import bl.tech.realiza.gateways.requests.contracts.activity.AddActivitiesToBranchesRequest;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
@@ -83,6 +84,13 @@ public class ActivityControllerImpl implements ActivityControlller {
                                                                               @RequestParam(required = false) Boolean replicate,
                                                                               @RequestBody(required = false) List<String> branchIds) {
         return ResponseEntity.ok(crudActivity.addDocumentToActivity(idActivity, idDocumentBranch, replicate, branchIds));
+    }
+
+    @PostMapping("/add-to-branches")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<String> addActivitiesToBranches(@RequestBody AddActivitiesToBranchesRequest request) {
+        return ResponseEntity.ok(crudActivity.addActivitiesToBranches(request));
     }
 
     @PostMapping("/remove-document-from-activity/{idActivity}")

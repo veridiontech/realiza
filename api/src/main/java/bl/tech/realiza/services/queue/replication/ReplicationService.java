@@ -56,6 +56,7 @@ public class ReplicationService {
                             .title(activityBase.getTitle())
                             .risk(activityBase.getRisk())
                             .branch(branch)
+                            .activityRepo(activityBase.getActivityRepo())
                             .build()
             );
 

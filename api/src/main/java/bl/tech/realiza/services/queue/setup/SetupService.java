@@ -685,6 +685,7 @@ public class SetupService {
                     .title(activity.getTitle())
                     .risk(activity.getRisk())
                     .branch(branch)
+                    .activityRepo(activity.getActivityRepo())
                     .build();
             activitybatch.add(newActivity);
             repoToNewActivityMap.put(activity.getIdActivity(), newActivity);
