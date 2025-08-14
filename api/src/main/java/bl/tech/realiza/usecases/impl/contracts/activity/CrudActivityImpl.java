@@ -18,6 +18,7 @@ import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityReposito
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRequestDto;
+import bl.tech.realiza.gateways.requests.contracts.activity.AddActivitiesToBranchesRequest;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityDocumentResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityResponseDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentForActivityResponseDto;
@@ -384,6 +385,7 @@ public class CrudActivityImpl implements CrudActivity {
                     .title(repo.getTitle())
                     .risk(repo.getRisk())
                     .branch(branch)
+                    .activityRepo(repo)
                     .build();
             newActivities.add(newActivity);
             repoToNewActivityMap.put(repo.getIdActivity(), newActivity);
@@ -447,6 +449,7 @@ public class CrudActivityImpl implements CrudActivity {
                     .title(repo.getTitle())
                     .risk(repo.getRisk())
                     .branch(branch)
+                    .activityRepo(repo)
                     .build();
             newActivities.add(newActivity);
 
@@ -459,5 +462,38 @@ public class CrudActivityImpl implements CrudActivity {
         if (!newActivities.isEmpty()) {
             activityRepository.saveAll(newActivities);
         }
+    }
+
+    @Override
+    public String addActivitiesToBranches(AddActivitiesToBranchesRequest request) {
+        List<ActivityRepo> repos = activityRepoRepository.findAllById(request.getActivityIds());
+        List<Branch> branches = branchRepository.findAllById(request.getBranchIds());
+
+        if (repos.isEmpty()) {
+            return "Nenhuma atividade encontrada para os IDs informados.";
+        } else if (branches.isEmpty()) {
+            return "Nenhuma branch encontrada para os IDs informados.";
+        }
+
+        List<Activity> newActivities = new ArrayList<>();
+
+        for (Branch branch : branches) {
+            List<Activity> activitiesInBranch = activityRepository.findAllByBranch_IdBranch(branch.getIdBranch());
+            for (ActivityRepo repo : repos) {
+                if (activitiesInBranch.stream()
+                        .noneMatch(activity ->
+                                activity.getActivityRepo().getIdActivity()
+                                        .equals(repo.getIdActivity()))) {
+                    newActivities.add(Activity.builder()
+                            .title(repo.getTitle())
+                            .risk(repo.getRisk())
+                            .activityRepo(repo)
+                            .branch(branch)
+                            .build());
+                }
+            }
+            activityRepository.saveAll(newActivities);
+        }
+        return "Activities added to selected branches";
     }
 }

@@ -12,4 +12,6 @@ public class DocumentMatrixRequestDto {
     private String subgroup;
     private DocumentMatrix.DayUnitEnum expirationDateUnit;
     private Integer expirationDateAmount;
+    private Boolean isValidityFixed;
+    private String fixedValidityAt;
 }

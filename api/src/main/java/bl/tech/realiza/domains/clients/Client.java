@@ -1,6 +1,7 @@
 package bl.tech.realiza.domains.clients;
 
 import bl.tech.realiza.domains.auditLogs.enterprise.AuditLogClient;
+import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.ultragaz.Board;
@@ -9,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,6 +59,11 @@ public class Client {
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
     private List<Board> boards;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "client")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private List<Activity> activities;
 
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)

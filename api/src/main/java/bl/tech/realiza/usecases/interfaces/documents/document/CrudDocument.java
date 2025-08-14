@@ -16,4 +16,6 @@ public interface CrudDocument {
     String findVersionByAuditLog(String auditLogId);
     void deleteOldReprovedDocuments();
     void documentValidityCheck(DocumentValidityEnum documentValidityEnum);
+
+    void deleteOverwrittenDocuments();
 }

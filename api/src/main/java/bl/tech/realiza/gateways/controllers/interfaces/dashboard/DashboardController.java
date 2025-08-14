@@ -16,4 +16,5 @@ public interface DashboardController {
     ResponseEntity<Page<DashboardDocumentDetailsResponseDto>> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto, int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<DashboardGeneralDetailsResponseDto> getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto);
     ResponseEntity<List<DashboardProviderDetailsResponseDto>> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto);
+    ResponseEntity<DashboardFiltersResponse> getFiltersInfo(String clientId);
 }

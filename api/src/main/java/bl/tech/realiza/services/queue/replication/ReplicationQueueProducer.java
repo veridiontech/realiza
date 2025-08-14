@@ -13,7 +13,7 @@ public class ReplicationQueueProducer {
     private final RabbitTemplate rabbitTemplate;
 
     public void send(ReplicationMessage message) {
-        rabbitTemplate.convertAndSend(RabbitConfig.REPLICATION_QUEUE, message);
+        rabbitTemplate.convertAndSend(RabbitConfig.SETUP_QUEUE, message);
     }
 }
 
