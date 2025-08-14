@@ -1,21 +1,26 @@
 package bl.tech.realiza.usecases.impl.users;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
+import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
+import bl.tech.realiza.gateways.repositories.services.FileRepository;
 import bl.tech.realiza.gateways.repositories.users.*;
 import bl.tech.realiza.gateways.requests.users.NotificationRequestDto;
 import bl.tech.realiza.gateways.responses.users.NotificationResponseDto;
+import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,10 +28,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +48,8 @@ public class CrudNotificationImpl implements CrudNotification {
     private final UserProviderSupplierRepository userProviderSupplierRepository;
     private final UserProviderSubcontractorRepository userProviderSubcontractorRepository;
     private final DocumentRepository documentRepository;
+    private final FileRepository fileRepository;
+    private final GoogleCloudService googleCloudService;
 
     @Override
     public NotificationResponseDto save(NotificationRequestDto notificationRequestDto) {
@@ -533,5 +543,55 @@ public class CrudNotificationImpl implements CrudNotification {
         }
 
         notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public void createEndLifeDocumentNotification() {
+        Pageable pageable = PageRequest.of(0, 50);
+        LocalDateTime endLifeTime = LocalDateTime.now().minusYears(5).plusWeeks(1);
+        Date cutOffDate = Date.from(endLifeTime.atZone(ZoneId.systemDefault()).toInstant());
+        List<ContractStatusEnum> statuses = new ArrayList<>();
+        statuses.add(ContractStatusEnum.FINISHED);
+        statuses.add(ContractStatusEnum.SUSPENDED);
+        Page<FileDocument> files = fileRepository.findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(
+                endLifeTime,
+                statuses,
+                pageable);
+        while (files.hasContent()) {
+            List<Notification> notificationBatch = new ArrayList<>(50);
+            for (FileDocument file : files.getContent()) {
+                if (file.getDocument().getContractDocuments().stream().noneMatch(contractDocument -> statuses.contains(contractDocument.getContract().getStatus())
+                        && contractDocument.getContract().getEndDate() != null
+                        && contractDocument.getContract().getEndDate().before(cutOffDate))) {
+                    for (ContractDocument contractDocument : file.getDocument().getContractDocuments()) {
+                        long daysLeft = ChronoUnit.DAYS.between(endLifeTime, endLifeTime.minusWeeks(1));
+                        notificationBatch.add(Notification.builder()
+                                        .title("Um documento será apagado do nosso banco de dados")
+                                        .description("O documento " + contractDocument.getDocument().getTitle()
+                                                + " do contrato " + contractDocument.getContract().getContractReference()
+                                                + " do qual é responsável,"
+                                                + " será apagado em " + daysLeft
+                                                + " dias do banco de dados devido a política guarda de documentos por no máximo 5 anos")
+                                        .user(contractDocument.getContract().getResponsible())
+                                .build());
+                    }
+                    if (notificationBatch.size() >= 50) {
+                        notificationRepository.saveAll(notificationBatch);
+                        notificationBatch.clear();
+                    }
+                }
+            }
+            if (!notificationBatch.isEmpty()) {
+                notificationRepository.saveAll(notificationBatch);
+                notificationBatch.clear();
+            }
+
+            if (files.hasNext()) {
+                files = fileRepository.findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(
+                        endLifeTime,
+                        statuses,
+                        files.nextPageable());
+            }
+        }
     }
 }

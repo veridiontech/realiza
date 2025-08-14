@@ -56,7 +56,7 @@ public class Profile {
     private Boolean concierge = false; // portaria - apenas acesso ao modulo de portaria
 
     @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.DETACH)
+    @OneToMany(mappedBy = "profile")
     private List<User> users;
 
     @ManyToOne
