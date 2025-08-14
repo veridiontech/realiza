@@ -30,6 +30,7 @@ export function ActivitiesBox() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
+      console.log("teste" , resSelected.data);
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
