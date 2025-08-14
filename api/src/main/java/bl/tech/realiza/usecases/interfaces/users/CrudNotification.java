@@ -50,4 +50,7 @@ public interface CrudNotification {
     @Transactional
     @Async
     void saveContractNotificationForRealizaUsers(ItemManagement solicitation);
+    @Transactional
+    @Async
+    void createEndLifeDocumentNotification();
 }
