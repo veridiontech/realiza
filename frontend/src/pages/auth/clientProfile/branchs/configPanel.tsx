@@ -732,18 +732,18 @@ export function ConfigPanel() {
     }
   };
 
-  const filteredDocsByGroup = useMemo(() => {
-    return matrixEntries.filter((entry) => {
-      // só mostra se tiver grupo selecionado
-      if (!selectedGroup) return false;
-      const matchGroup = entry.idDocumentGroup === selectedGroup;
-      // se tiver subgrupo, também verifica; senão, aceita todos do grupo
-      const matchSubgroup = selectedSubgroup
-        ? entry.idDocumentSubgroup === selectedSubgroup
-        : true;
-      return matchGroup && matchSubgroup;
-    });
-  }, [matrixEntries, selectedGroup, selectedSubgroup]);
+  // const filteredDocsByGroup = useMemo(() => {
+  //   return matrixEntries.filter((entry) => {
+  //     // só mostra se tiver grupo selecionado
+  //     if (!selectedGroup) return false;
+  //     const matchGroup = entry.idDocumentGroup === selectedGroup;
+  //     // se tiver subgrupo, também verifica; senão, aceita todos do grupo
+  //     const matchSubgroup = selectedSubgroup
+  //       ? entry.idDocumentSubgroup === selectedSubgroup
+  //       : true;
+  //     return matchGroup && matchSubgroup;
+  //   });
+  // }, [matrixEntries, selectedGroup, selectedSubgroup]);
 
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);

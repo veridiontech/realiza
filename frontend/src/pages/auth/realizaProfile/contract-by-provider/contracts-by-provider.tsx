@@ -16,7 +16,7 @@ import {
   Unlock,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import { useParams, Link } from "react-router-dom"; // MODIFICADO
+import { useParams, Link } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
 import { toast } from "sonner";
@@ -180,28 +180,36 @@ export function ContarctsByProvider() {
     setSelectedDocumentId(null);
   };
 
-const handleStatusChangeForDocument = useCallback(
-  (documentIdChanged: string, newStatus: string) => {
-    console.log(
-      `Documento ${documentIdChanged} mudou para status: ${newStatus}`
-    );
-    setDocuments((prev) =>
-      prev.map((d) =>
-        d.id === documentIdChanged ? { ...d, status: newStatus } : d
-      )
-    );
-    const currentContract = contracts.find(
-      (c) => c.serviceName === selectedContractName
-    );
-    if (currentContract) {
-      getAllDatas(currentContract.idContract, currentContract.serviceName);
-    }
-    toast(`Status do documento atualizado para "${newStatus.replace(/_/g, " ")}".`);
-  },
-  [contracts, selectedContractName, getAllDatas]
-);
+  const handleStatusChangeForDocument = useCallback(
+    (documentIdChanged: string, newStatus: string) => {
+      console.log(
+        `Documento ${documentIdChanged} mudou para status: ${newStatus}`
+      );
+      setDocuments((prev) =>
+        prev.map((d) =>
+          d.id === documentIdChanged ? { ...d, status: newStatus } : d
+        )
+      );
+      const currentContract = contracts.find(
+        (c) => c.serviceName === selectedContractName
+      );
+      if (currentContract) {
+        getAllDatas(currentContract.idContract, currentContract.serviceName);
+      }
+      toast(
+        `Status do documento atualizado para "${newStatus.replace(
+          /_/g,
+          " "
+        )}".`
+      );
+    },
+    [contracts, selectedContractName, getAllDatas]
+  );
 
-  const handleOpenExemptionModal = (documentId: string, documentTitle: string) => {
+  const handleOpenExemptionModal = (
+    documentId: string,
+    documentTitle: string
+  ) => {
     const doc = documents.find((d) => d.id === documentId);
     if (!doc) {
       toast("Documento não encontrado.");
@@ -272,7 +280,8 @@ const handleStatusChangeForDocument = useCallback(
       year: "2-digit",
     });
   };
-
+  
+  // ====================== ALTERAÇÃO 1 ======================
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
     if (status === "PENDENTE_ISENCAO") return "text-yellow-500";
@@ -281,9 +290,11 @@ const handleStatusChangeForDocument = useCallback(
       return "text-green-600";
     if (status === "REPROVADO" || status === "REPROVADO_IA")
       return "text-red-600";
+    if (status === "VENCIDO") return "text-orange-500"; // <--- LINHA ADICIONADA
     if (status === "ISENTO") return "text-blue-500";
     return "";
   };
+  // =========================================================
 
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
@@ -385,17 +396,15 @@ const handleStatusChangeForDocument = useCallback(
                 className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
               />
 
-              {/* ===== FIX: header e linhas dentro da MESMA área rolável ===== */}
               <div
                 className="overflow-y-auto max-h-[35vh] pr-2"
                 style={{ scrollbarGutter: "stable" }}
               >
-                {/* Cabeçalho sticky (mesma grid das linhas) */}
                 <div
                   className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4
-                             text-sm font-semibold text-neutral-600 py-2
-                             border-b border-neutral-300 items-center
-                             sticky top-0 bg-white z-10"
+                                     text-sm font-semibold text-neutral-600 py-2
+                                     border-b border-neutral-300 items-center
+                                     sticky top-0 bg-white z-10"
                 >
                   <div>Status</div>
                   <div>Documento</div>
@@ -406,7 +415,6 @@ const handleStatusChangeForDocument = useCallback(
                   <div className="text-center">Ações</div>
                 </div>
 
-                {/* Linhas */}
                 <div className="flex flex-col gap-4">
                   {filteredDocuments.length > 0 ? (
                     filteredDocuments.map((doc: Document) => (
@@ -414,6 +422,7 @@ const handleStatusChangeForDocument = useCallback(
                         className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                         key={doc.id}
                       >
+                        {/* ====================== ALTERAÇÃO 2 ====================== */}
                         <div>
                           {doc.status === "EM_ANALISE" ? (
                             <div className="flex items-center gap-2">
@@ -427,6 +436,8 @@ const handleStatusChangeForDocument = useCallback(
                               {doc.status === "REPROVADO" ||
                               doc.status === "REPROVADO_IA" ? (
                                 <Ban className="w-4 h-4 text-red-500" />
+                              ) : doc.status === "VENCIDO" ? ( // <--- BLOCO ADICIONADO
+                                <AlertCircle className="w-4 h-4 text-orange-500" />
                               ) : doc.status === "APROVADO" ||
                                 doc.status === "APROVADO_IA" ? (
                                 <CheckCircle className="w-4 h-4 text-green-600" />
@@ -446,6 +457,15 @@ const handleStatusChangeForDocument = useCallback(
                             </div>
                           )}
 
+                          {doc.status === "VENCIDO" && ( // <--- BLOCO ADICIONADO
+                            <div className="flex items-center gap-2 mt-1">
+                              <AlertCircle className="w-4 h-4 text-orange-500" />
+                              <span className="text-xs font-semibold text-orange-500">
+                                ⚠️ Documento expirado
+                              </span>
+                            </div>
+                          )}
+                          
                           {doc.status === "EM_ANALISE" && (
                             <div className="flex items-center gap-2">
                               <AlertCircle className="w-4 h-4 text-blue-500" />
@@ -463,7 +483,7 @@ const handleStatusChangeForDocument = useCallback(
                             </div>
                           )}
                         </div>
-
+                        {/* ========================================================= */}
                         <div className="col-span-1">
                           <h3 className="text-[16px] font-medium">
                             {doc.title}
@@ -565,7 +585,6 @@ const handleStatusChangeForDocument = useCallback(
                   )}
                 </div>
               </div>
-              {/* ===== /FIX ===== */}
             </div>
           )}
 
