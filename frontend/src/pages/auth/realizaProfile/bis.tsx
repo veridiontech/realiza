@@ -734,7 +734,7 @@ export const MonittoringBis = () => {
               {clientId ? (
                 <FornecedoresTable clientId={clientId} filters={applied} />
               ) : (
-                <div>Erro: O clientId não está disponível.</div>
+                <div>Selecione o cliente primeiro.</div>
               )}
             </div>
           </div>

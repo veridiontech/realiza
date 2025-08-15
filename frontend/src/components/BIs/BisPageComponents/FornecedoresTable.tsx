@@ -67,6 +67,14 @@ async function fetchDocumentDetails(clientId: string, filters: Filters) {
     documentTitles: filters.documentTitles ?? [],
   };
 
+
+
+
+  console.log(body);
+
+
+  console.log(`/dashboard/${clientId}/document/details`);
+
   const { data } = await axios.post(`/dashboard/${clientId}/document/details`, body);
   const content = Array.isArray(data?.content) ? data.content : Array.isArray(data) ? data : [];
   return content as ApiItem[];
