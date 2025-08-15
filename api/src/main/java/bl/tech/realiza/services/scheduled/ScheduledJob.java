@@ -3,7 +3,9 @@ package bl.tech.realiza.services.scheduled;
 import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.services.dashboard.DashboardService;
+import bl.tech.realiza.usecases.impl.users.CrudNotificationImpl;
 import bl.tech.realiza.usecases.interfaces.documents.document.CrudDocument;
+import bl.tech.realiza.usecases.interfaces.users.CrudNotification;
 import bl.tech.realiza.usecases.interfaces.users.CrudUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ public class ScheduledJob {
     private final CrudDocument crudDocument;
     private final CrudUser crudUser;
     private final DashboardService dashboardService;
+    private final CrudNotification crudNotification;
 
     @Scheduled(cron = "0 0 1 * * *", zone = "America/Sao_Paulo")
     public void runDailyTask() {
@@ -67,6 +70,9 @@ public class ScheduledJob {
         crudDocument.expirationCheck();
         crudDocument.deleteReprovedCheck();
         crudDocument.deleteOldReprovedDocuments();
+        crudDocument.deleteOverwrittenDocuments();
+        crudNotification.createEndLifeDocumentNotification();
+        crudDocument.deleteEndLifeDocument();
     }
 
     public void weeklyDocumentCheck() {

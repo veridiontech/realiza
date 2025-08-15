@@ -51,11 +51,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.documents.Document.Status.*;
@@ -594,6 +592,88 @@ public class CrudDocumentImpl implements CrudDocument {
                 documents = documentRepository.findAllByValidityAndContractStatus(documentValidityEnum, ContractStatusEnum.ACTIVE, documents.nextPageable());
             } else {
                 break;
+            }
+        }
+    }
+
+    @Override
+    public void deleteOverwrittenDocuments() {
+        Pageable pageable = PageRequest.of(0, 50);
+        Page<FileDocument> files = fileRepository.findAllByCanBeOverwritten(true, pageable);
+        List<FileDocument> fileBatch = new ArrayList<>(50);
+        while (files.hasContent()) {
+            for (FileDocument fileDocument : files) {
+                if (fileDocument.getCanBeOverwritten()) {
+                    try {
+                        googleCloudService.deleteFile(fileDocument.getUrl());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    fileDocument.setUrl(null);
+                    fileDocument.setDeleted(true);
+                    fileBatch.add(fileDocument);
+
+                    if (fileBatch.size() >= 50) {
+                        fileRepository.saveAll(fileBatch);
+                        fileBatch.clear();
+                    }
+                }
+                if (!fileBatch.isEmpty()) {
+                    fileRepository.saveAll(fileBatch);
+                    fileBatch.clear();
+                }
+            }
+
+            if (files.hasNext()) {
+                files = fileRepository.findAllByCanBeOverwritten(true, files.nextPageable());
+            } else {
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void deleteEndLifeDocument() {
+        Pageable pageable = PageRequest.of(0, 50);
+        LocalDateTime endLifeTime = LocalDateTime.now().minusYears(5);
+        Date cutOffDate = Date.from(endLifeTime.atZone(ZoneId.systemDefault()).toInstant());
+        List<ContractStatusEnum> statuses = new ArrayList<>();
+        statuses.add(ContractStatusEnum.FINISHED);
+        statuses.add(ContractStatusEnum.SUSPENDED);
+        Page<FileDocument> files = fileRepository.findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(
+                endLifeTime,
+                statuses,
+                pageable);
+        while (files.hasContent()) {
+            List<FileDocument> fileBatch = new ArrayList<>(50);
+            for (FileDocument file : files.getContent()) {
+                if (file.getDocument().getContractDocuments().stream().noneMatch(contractDocument -> statuses.contains(contractDocument.getContract().getStatus())
+                        && contractDocument.getContract().getEndDate() != null
+                        && contractDocument.getContract().getEndDate().before(cutOffDate))) {
+                    try {
+                        googleCloudService.deleteFile(file.getUrl());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    file.setUrl(null);
+                    file.setDeleted(true);
+                    fileBatch.add(file);
+                    if (fileBatch.size() >= 50) {
+                        fileRepository.saveAll(fileBatch);
+                        fileBatch.clear();
+                    }
+                }
+            }
+            if (!fileBatch.isEmpty()) {
+                fileRepository.saveAll(fileBatch);
+                fileBatch.clear();
+            }
+
+            if (files.hasNext()) {
+                files = fileRepository.findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(
+                        endLifeTime,
+                        statuses,
+                        files.nextPageable());
             }
         }
     }

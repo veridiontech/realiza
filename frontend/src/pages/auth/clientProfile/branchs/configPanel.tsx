@@ -732,7 +732,6 @@ export function ConfigPanel() {
     }
   };
 
-
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
 

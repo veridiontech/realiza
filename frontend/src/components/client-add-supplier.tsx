@@ -28,10 +28,11 @@ const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
 export const modalSendEmailFormSchema = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z.string()
+  phone: z
+    .string()
     .optional()
     .refine((val) => !val || phoneRegex.test(val), {
-      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX",
     }),
   cnpj: z
     .string()
@@ -42,10 +43,11 @@ export const modalSendEmailFormSchema = z.object({
 
 export const modalSendEmailFormSchemaSubContractor = z.object({
   email: z.string().email("Insira um email válido"),
-  phone: z.string()
+  phone: z
+    .string()
     .optional()
     .refine((val) => !val || phoneRegex.test(val), {
-      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX"
+      message: "Telefone inválido, use o formato (XX) XXXXX-XXXX",
     }),
   cnpj: z
     .string()
@@ -70,10 +72,7 @@ export const contractFormSchema = z.object({
   contractReference: z
     .string()
     .nonempty("Referência do contrato é obrigatório"),
-  subcontractPermission: z
-    .enum(["true", "false"], {
-    })
-    .optional(), 
+  subcontractPermission: z.enum(["true", "false"], {}).optional(),
 });
 
 type ModalSendEmailFormSchema = z.infer<typeof modalSendEmailFormSchema>;
@@ -107,6 +106,64 @@ export function ModalTesteSendSupplier() {
   const [usedEmails, setUsedEmails] = useState<string[]>([]);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    getValues,
+    reset,
+  } = useForm<ModalSendEmailFormSchema>({
+    resolver: zodResolver(modalSendEmailFormSchema),
+  });
+
+  const {
+    register: registerContract,
+    handleSubmit: handleSubmitContract,
+    formState: { errors: errorsContract },
+    reset: resetContract,
+  } = useForm<ContractFormSchema>({
+    resolver: zodResolver(contractFormSchema),
+  });
+
+  const {
+    register: registerSubContract,
+    handleSubmit: handleSubmitSubContract,
+    formState: { errors: errorsSubContract },
+    setValue: setValueSubContract,
+    getValues: getValuesSubContract,
+    reset: resetSubContract,
+  } = useForm<ModalSendEmailFormSchemaSubContractor>({
+    resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
+  });
+
+  const resetFormState = () => {
+    reset();
+    resetContract();
+    resetSubContract();
+
+    setIsSubContractor(null);
+    setCnpjValue("");
+    setPhoneValue("");
+    setNextModal(false);
+    setProviderDatas({});
+    setPushCnpj(null);
+    setIsSsma(false);
+    setSelectedActivities([]);
+    setSearchService("");
+    setSearchActivity("");
+    setUsedEmails([]);
+    setIsLoading(false);
+    setIsButtonDisabled(false);
+  };
+
+  const handleModalOpenChange = (isOpen: boolean) => {
+    setIsMainModalOpen(isOpen);
+    if (!isOpen) {
+      resetFormState();
+    }
+  };
+
   const handleCheckboxChange = (activityId: string, isChecked: boolean) => {
     if (isChecked) {
       setSelectedActivities((prev) => [...prev, activityId]);
@@ -114,16 +171,6 @@ export function ModalTesteSendSupplier() {
       setSelectedActivities((prev) => prev.filter((id) => id !== activityId));
     }
   };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    getValues,
-  } = useForm<ModalSendEmailFormSchema>({
-    resolver: zodResolver(modalSendEmailFormSchema),
-  });
 
   type RiscoNivel = "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
 
@@ -141,24 +188,6 @@ export function ModalTesteSendSupplier() {
         return risco;
     }
   };
-
-  const {
-    register: registerContract,
-    handleSubmit: handleSubmitContract,
-    formState: { errors: errorsContract },
-  } = useForm<ContractFormSchema>({
-    resolver: zodResolver(contractFormSchema),
-  });
-
-  const {
-    register: registerSubContract,
-    handleSubmit: handleSubmitSubContract,
-    formState: { errors: errorsSubContract },
-    setValue: setValueSubContract,
-    getValues: getValuesSubContract,
-  } = useForm<ModalSendEmailFormSchemaSubContractor>({
-    resolver: zodResolver(modalSendEmailFormSchemaSubContractor),
-  });
 
   const formatCNPJ = (value: string) => {
     return value
@@ -178,9 +207,14 @@ export function ModalTesteSendSupplier() {
     } else if (digits.length <= 6) {
       return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
     } else if (digits.length <= 10) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(
+        6
+      )}`;
     } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(
+        7,
+        11
+      )}`;
     }
   };
 
@@ -195,7 +229,10 @@ export function ModalTesteSendSupplier() {
   }, [getValues, getValuesSubContract, isSubcontractor]);
 
   const handleCNPJSearch = async () => {
-    const cnpjValueToSearch = isSubcontractor === "contratado" ? getValues("cnpj") : getValuesSubContract("cnpj");
+    const cnpjValueToSearch =
+      isSubcontractor === "contratado"
+        ? getValues("cnpj")
+        : getValuesSubContract("cnpj");
     setIsLoading(true);
     try {
       const companyData = await fetchCompanyByCNPJ(cnpjValueToSearch);
@@ -255,7 +292,9 @@ export function ModalTesteSendSupplier() {
     }
   };
 
-  const createClient = async (data: ModalSendEmailFormSchema | ModalSendEmailFormSchemaSubContractor) => {
+  const createClient = async (
+    data: ModalSendEmailFormSchema | ModalSendEmailFormSchemaSubContractor
+  ) => {
     setIsLoading(true);
 
     const emailAtual = data.email.toLowerCase();
@@ -272,7 +311,8 @@ export function ModalTesteSendSupplier() {
       } else {
         payload = {
           ...data,
-          idContractSupplier: (data as ModalSendEmailFormSchemaSubContractor).providerSubcontractor
+          idContractSupplier: (data as ModalSendEmailFormSchemaSubContractor)
+            .providerSubcontractor,
         };
       }
 
@@ -314,9 +354,6 @@ export function ModalTesteSendSupplier() {
   }, [selectedBranch?.idBranch]);
 
   const createContract = async (data: ContractFormSchema) => {
-    console.log("createContract function called!");
-    console.log("Form data:", data);
-
     if (!providerDatas) {
       toast.error("Dados do prestador não encontrados. Reinicie o processo.");
       return;
@@ -370,8 +407,7 @@ export function ModalTesteSendSupplier() {
       }
 
       setDatasSender(payload);
-      console.log("payload: " , payload);
-    
+
       await axios.post(apiUrl, payload, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
@@ -381,7 +417,11 @@ export function ModalTesteSendSupplier() {
     } catch (err: any) {
       if (err.response) {
         console.error("Erro no servidor:", err.response.data);
-        toast.error(`Erro ao criar contrato: ${err.response.data.message || "Erro desconhecido."}`);
+        toast.error(
+          `Erro ao criar contrato: ${
+            err.response.data.message || "Erro desconhecido."
+          }`
+        );
       } else if (err.request) {
         console.error("Erro na requisição:", err.request);
         toast.error("Erro na requisição ao servidor.");
@@ -412,7 +452,7 @@ export function ModalTesteSendSupplier() {
   };
 
   return (
-    <Dialog open={isMainModalOpen} onOpenChange={setIsMainModalOpen}>
+    <Dialog open={isMainModalOpen} onOpenChange={handleModalOpenChange}>
       <DialogTrigger asChild>
         <Button className="hidden bg-sky-700 md:block">
           Cadastrar novo prestador
@@ -421,12 +461,7 @@ export function ModalTesteSendSupplier() {
       <DialogTrigger asChild>
         <Button className="h-[8vw] w-[8vw] bg-sky-700 md:hidden">+</Button>
       </DialogTrigger>
-      <DialogContent
-        style={{
-          // backgroundImage: `url(${bgModalRealiza})`,
-        }}
-        className="max-w-[90vw] md:max-w-[45vw]"
-      >
+      <DialogContent className="max-w-[90vw] md:max-w-[45vw]">
         <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 h-[60px] min-w-full">
           <h2 className="text-white text-base font-semibold flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-[#C0B15B]" />
@@ -434,10 +469,9 @@ export function ModalTesteSendSupplier() {
           </h2>
         </div>
 
-
-
         <div className="bg-[#F2F3F5] text-sm text-gray-800 p-2 px-4 rounded shadow mb-4">
-          <strong>Filial:</strong> {selectedBranch?.name ?? "Nenhuma filial selecionada"}
+          <strong>Filial:</strong>{" "}
+          {selectedBranch?.name ?? "Nenhuma filial selecionada"}
         </div>
 
         <div>
@@ -450,7 +484,6 @@ export function ModalTesteSendSupplier() {
                   value="sim"
                   checked={isSubcontractor === "contratado"}
                   onChange={() => setIsSubContractor("contratado")}
-
                 />
                 Contratado direto
               </label>
@@ -483,7 +516,6 @@ export function ModalTesteSendSupplier() {
                       setValue("cnpj", formatted, { shouldValidate: true });
                     }}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                   />
                   {isLoading ? (
                     <div
@@ -510,9 +542,7 @@ export function ModalTesteSendSupplier() {
                   )}
                 </div>
                 {errors.cnpj && (
-                  <span className="text-red-600">
-                    {errors.cnpj.message}
-                  </span>
+                  <span className="text-red-600">{errors.cnpj.message}</span>
                 )}
               </div>
 
@@ -523,7 +553,6 @@ export function ModalTesteSendSupplier() {
                   placeholder="Digite a razão social do novo prestador"
                   {...register("corporateName")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                 />
               </div>
               <div className="mb-1">
@@ -533,7 +562,6 @@ export function ModalTesteSendSupplier() {
                   placeholder="Digite o email do novo prestador"
                   {...register("email")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                 />
                 {errors.email && (
                   <span className="text-red-600">{errors.email.message}</span>
@@ -552,7 +580,6 @@ export function ModalTesteSendSupplier() {
                   placeholder="(00) 00000-0000"
                   maxLength={15}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                 />
                 {errors.phone && (
                   <span className="text-red-600">{errors.phone.message}</span>
@@ -560,9 +587,14 @@ export function ModalTesteSendSupplier() {
               </div>
 
               <div className="flex justify-end">
-                <Button className="bg-realizaBlue" onClick={() => {
-                  getActivities(), getServicesType(), console.log("Clicado");
-                }}>Próximo</Button>
+                <Button
+                  className="bg-realizaBlue"
+                  onClick={() => {
+                    getActivities(), getServicesType();
+                  }}
+                >
+                  Próximo
+                </Button>
               </div>
             </form>
           )}
@@ -581,10 +613,11 @@ export function ModalTesteSendSupplier() {
                     onChange={(e) => {
                       const formatted = formatCNPJ(e.target.value);
                       setCnpjValue(formatted);
-                      setValueSubContract("cnpj", formatted, { shouldValidate: true });
+                      setValueSubContract("cnpj", formatted, {
+                        shouldValidate: true,
+                      });
                     }}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                   />
                   {isLoading ? (
                     <div
@@ -624,7 +657,6 @@ export function ModalTesteSendSupplier() {
                   placeholder="Digite a razão social do novo prestador"
                   {...registerSubContract("corporateName")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                 />
                 {errorsSubContract.corporateName && (
                   <span className="text-red-600">
@@ -639,7 +671,6 @@ export function ModalTesteSendSupplier() {
                   placeholder="Digite o email do novo prestador"
                   {...registerSubContract("email")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                 />
                 {errorsSubContract.email && (
                   <span className="text-red-600">
@@ -655,12 +686,13 @@ export function ModalTesteSendSupplier() {
                   onChange={(e) => {
                     const formattedPhone = formatPhone(e.target.value);
                     setPhoneValue(formattedPhone);
-                    setValueSubContract("phone", formattedPhone, { shouldValidate: true });
+                    setValueSubContract("phone", formattedPhone, {
+                      shouldValidate: true,
+                    });
                   }}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
-
                 />
                 {errorsSubContract.phone && (
                   <span className="text-red-600">
@@ -708,7 +740,13 @@ export function ModalTesteSendSupplier() {
                     />
                   </Button>
                 ) : (
-                  <Button className="bg-realizaBlue" type="submit" onClick={() => { getActivities(), getServicesType() }}>
+                  <Button
+                    className="bg-realizaBlue"
+                    type="submit"
+                    onClick={() => {
+                      getActivities(), getServicesType();
+                    }}
+                  >
                     Próximo
                   </Button>
                 )}
@@ -716,23 +754,29 @@ export function ModalTesteSendSupplier() {
             </form>
           )}
           <Dialog open={nextModal} onOpenChange={setNextModal}>
-            <DialogContent
-              className="max-w-[95vw] border-none md:max-w-[45vw]"
-              style={{
-                //backgroundImage: `url(${bgModalRealiza})`,
-              }}
-            >
+            <DialogContent className="max-w-[95vw] border-none md:max-w-[45vw]">
               <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
                 <DialogTitle className="text-white flex items-center gap-2 text-base font-semibold">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" className="w-5 h-5 stroke-yellow-400" viewBox="0 0 24 24">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    className="w-5 h-5 stroke-yellow-400"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h7"
+                    />
                   </svg>
                   Faça o contrato
                 </DialogTitle>
               </DialogHeader>
               <div className="bg-[#F3F4F6] px-6 py-2">
                 <p className="text-sm text-gray-700 font-medium">
-                  Filial: {selectedBranch?.cnpj} {selectedBranch?.name} Base
+                  Filial: {selectedBranch?.name}
                 </p>
               </div>
 
@@ -741,8 +785,13 @@ export function ModalTesteSendSupplier() {
                   <form
                     className="flex flex-col gap-2"
                     onSubmit={handleSubmitContract(createContract, (errors) => {
-                      console.error("Validation errors for contract form:", errors);
-                      toast.error("Por favor, preencha todos os campos obrigatórios do contrato.");
+                      console.error(
+                        "Validation errors for contract form:",
+                        errors
+                      );
+                      toast.error(
+                        "Por favor, preencha todos os campos obrigatórios do contrato."
+                      );
                     })}
                   >
                     <div>
@@ -899,14 +948,17 @@ export function ModalTesteSendSupplier() {
                         </option>
                         {servicesType
                           .filter((s: any) =>
-                            s.title.toLowerCase().includes(searchService.toLowerCase())
+                            s.title
+                              .toLowerCase()
+                              .includes(searchService.toLowerCase())
                           )
                           .map((idServiceType: any) => (
                             <option
                               key={idServiceType.idServiceType}
                               value={idServiceType.idServiceType}
                             >
-                              {idServiceType.title} - {formatarRisco(idServiceType.risk as RiscoNivel)}
+                              {idServiceType.title} -{" "}
+                              {formatarRisco(idServiceType.risk as RiscoNivel)}
                             </option>
                           ))}
                       </select>
@@ -917,7 +969,6 @@ export function ModalTesteSendSupplier() {
                         </span>
                       )}
                     </div>
-
 
                     {isSsma === true && (
                       <div className="flex flex-col gap-2">
@@ -950,7 +1001,9 @@ export function ModalTesteSendSupplier() {
                                   >
                                     <input
                                       type="checkbox"
-                                      checked={selectedActivities.includes(activity.idActivity)}
+                                      checked={selectedActivities.includes(
+                                        activity.idActivity
+                                      )}
                                       onChange={(e) =>
                                         handleCheckboxChange(
                                           activity.idActivity,
@@ -968,7 +1021,9 @@ export function ModalTesteSendSupplier() {
 
                     {isSsma === true && selectedActivities.length > 0 && (
                       <div className="flex flex-col gap-1 mt-2">
-                        <Label className="text-black">Atividades selecionadas</Label>
+                        <Label className="text-black">
+                          Atividades selecionadas
+                        </Label>
                         <div className="bg-white rounded-md border p-2 h-auto min-h-[3rem] max-h-[10rem] overflow-y-auto">
                           <ul className="list-disc ml-4 text-sm text-black">
                             {selectedActivities.map((idAtividade) => {
@@ -977,7 +1032,9 @@ export function ModalTesteSendSupplier() {
                               );
                               return (
                                 <li key={idAtividade}>
-                                  {atividade ? atividade.title : "Atividade não encontrada"}
+                                  {atividade
+                                    ? atividade.title
+                                    : "Atividade não encontrada"}
                                 </li>
                               );
                             })}
@@ -1003,14 +1060,17 @@ export function ModalTesteSendSupplier() {
 
                     {isSubcontractor === "contratado" && (
                       <div className="flex flex-col gap-2 mt-3">
-                        <Label className="text-black">Permitir subcontratação?</Label>
+                        <Label className="text-black">
+                          Permitir subcontratação?
+                        </Label>
                         <div className="flex gap-4">
                           <label className="flex items-center gap-2 text-black">
                             <input
                               type="radio"
                               value="true"
                               {...registerContract("subcontractPermission", {
-                                required: "Selecione se permite subcontratação",
+                                required:
+                                  "Selecione se permite subcontratação",
                               })}
                             />
                             Sim
@@ -1020,7 +1080,8 @@ export function ModalTesteSendSupplier() {
                               type="radio"
                               value="false"
                               {...registerContract("subcontractPermission", {
-                                required: "Selecione se permite subcontratação",
+                                required:
+                                  "Selecione se permite subcontratação",
                               })}
                             />
                             Não
@@ -1034,7 +1095,11 @@ export function ModalTesteSendSupplier() {
                       </div>
                     )}
                     {isLoading ? (
-                      <Button className="bg-realizaBlue" type="submit" disabled={isButtonDisabled}>
+                      <Button
+                        className="bg-realizaBlue"
+                        type="submit"
+                        disabled={isButtonDisabled}
+                      >
                         <Oval
                           visible={true}
                           height="30"
@@ -1046,7 +1111,11 @@ export function ModalTesteSendSupplier() {
                         />
                       </Button>
                     ) : (
-                      <Button className="bg-realizaBlue" type="submit" disabled={isButtonDisabled}>
+                      <Button
+                        className="bg-realizaBlue"
+                        type="submit"
+                        disabled={isButtonDisabled}
+                      >
                         Enviar contrato
                       </Button>
                     )}

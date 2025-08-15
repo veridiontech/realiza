@@ -4,6 +4,7 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -11,4 +12,10 @@ public interface DocumentMatrixRepository extends JpaRepository<DocumentMatrix, 
     Page<DocumentMatrix> findAllBySubGroup_IdDocumentSubgroup(String idSearch, Pageable pageable);
     Page<DocumentMatrix> findAllBySubGroup_Group_IdDocumentGroup(String idSearch, Pageable pageable);
     List<DocumentMatrix> findAllBySubGroup_Group_GroupName(String nameSearch);
+
+    @Query("""
+    SELECT dm.name
+    FROM DocumentMatrix dm
+""")
+    List<String> findAllTitles();
 }

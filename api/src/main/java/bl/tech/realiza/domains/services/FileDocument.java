@@ -27,6 +27,9 @@ public class FileDocument {
     private LocalDateTime creationDate = LocalDateTime.now();
     @Builder.Default
     private DocumentStatusEnum status = DocumentStatusEnum.EM_ANALISE;
+    private Boolean canBeOverwritten;
+    @Builder.Default
+    private Boolean deleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idDocumentation")

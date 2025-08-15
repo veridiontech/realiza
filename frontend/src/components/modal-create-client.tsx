@@ -22,6 +22,13 @@ import { Oval } from "react-loader-spinner";
 import { useClient } from "@/context/Client-Provider";
 import bgModalRealiza from "@/assets/modalBG.jpeg";
 
+// Interface para tipar os dados da atividade
+interface Activity {
+  idActivity: string;
+  title: string;
+  risk: string;
+}
+
 async function validarCEPExiste(cep: string): Promise<boolean> {
   try {
     const cepLimpo = cep.replace(/\D/g, "");
@@ -67,7 +74,10 @@ const createClienteFormSchema = z.object({
   city: z.string().nonempty("Cidade é obrigatória"),
   address: z.string().nonempty("Endereço é obrigatório"),
   number: z.string().nonempty("Número é obrigatório"),
+  // Campo para os IDs das atividades adicionado
+  activityIds: z.array(z.string()).optional().default([]),
 });
+
 type CreateClientFormSchema = z.infer<typeof createClienteFormSchema> & {
     profilesFromRepo: boolean;
 };
@@ -81,6 +91,11 @@ export function ModalCreateCliente() {
   const [phoneValue, setPhoneValue] = useState("");
   const [cnpjValue, setCnpjValue] = useState("");
   const { addClient, setClient } = useClient();
+  
+  // Novos estados para atividades
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -93,6 +108,7 @@ export function ModalCreateCliente() {
     mode: "onSubmit",
     defaultValues: {
       profilesFromRepo: false,
+      activityIds: [], // Valor padrão
     }
   });
 
@@ -110,6 +126,36 @@ export function ModalCreateCliente() {
     setCnpjValue(formatted);
     setValue("cnpj", formatted, { shouldValidate: true });
   }, [getValues, setValue]);
+
+  // Função para buscar as atividades
+  const fetchActivities = async () => {
+    setIsLoadingActivities(true);
+    const tokenFromStorage = localStorage.getItem("tokenClient");
+    try {
+      const response = await axios.get(`${ip}/contract/activity-repo`, {
+        headers: {
+          Authorization: `Bearer ${tokenFromStorage}`,
+        },
+        params: {
+          page: 0,
+          size: 100, // Ajuste o tamanho se necessário
+        }
+      });
+      setActivities(response.data.content);
+    } catch (error) {
+      console.error("Erro ao buscar atividades:", error);
+      toast.error("Não foi possível carregar as atividades.");
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  };
+
+  // Buscar as atividades quando o segundo modal for aberto
+  useEffect(() => {
+    if (showSecondModal) {
+      fetchActivities();
+    }
+  }, [showSecondModal]);
 
   const sanitizedCnpj = cnpjValue.replace(/\D/g, "");
 
@@ -145,6 +191,7 @@ export function ModalCreateCliente() {
         city: data.city,
         address: data.address,
         number: data.number,
+        activityIds: data.activityIds, // Incluído no payload
     };
     setIsLoading(true);
     try {
@@ -271,7 +318,7 @@ export function ModalCreateCliente() {
         </DialogContent>
       </Dialog>
       <Dialog open={showSecondModal} onOpenChange={setShowSecondModal}>
-        <DialogContent style={{ backgroundImage: `url(${bgModalRealiza})` }} className="max-h-[70vh] overflow-y-auto max-w-md">
+        <DialogContent style={{ backgroundImage: `url(${bgModalRealiza})` }} className="max-h-[85vh] overflow-y-auto max-w-xl">
           <DialogHeader>
             <DialogTitle className="text-white">{cnpjData?.company.name || "Detalhes do cliente"}</DialogTitle>
           </DialogHeader>
@@ -355,15 +402,45 @@ export function ModalCreateCliente() {
               </Label>
             </div>
 
-            <div>
+            {/* SEÇÃO DE ATIVIDADES */}
+            <div className="mt-4">
+              <Label className="text-white">Atividades</Label>
+              <div className="p-2 mt-1 bg-white/10 rounded-md max-h-40 overflow-y-auto">
+                {isLoadingActivities ? (
+                  <p className="text-white text-center">Carregando atividades...</p>
+                ) : activities.length > 0 ? (
+                  activities.map((activity) => (
+                    <div key={activity.idActivity} className="flex items-center gap-3 py-2">
+                      <input
+                        type="checkbox"
+                        id={activity.idActivity}
+                        value={activity.idActivity}
+                        {...register("activityIds")}
+                        className="h-4 w-4 rounded border-gray-300 text-realizaBlue focus:ring-realizaBlue"
+                      />
+                      <Label htmlFor={activity.idActivity} className="text-white font-normal cursor-pointer">
+                        {activity.title}
+                      </Label>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-white text-center">Nenhuma atividade encontrada.</p>
+                )}
+              </div>
+              {errors.activityIds && <span className="text-sm text-red-600">{errors.activityIds.message}</span>}
+            </div>
+
+            <div className="mt-2">
               {isLoading ? (
-                <Button className="bg-realizaBlue w-full">
+                <Button className="bg-realizaBlue w-full" disabled>
                   <Oval
                     visible={true}
-                    height="80"
-                    width="80"
-                    color="#4fa94d"
+                    height={24} // Tamanho ajustado para caber no botão
+                    width={24}
+                    color="#FFFFFF"
+                    secondaryColor="#dbeafe"
                     ariaLabel="oval-loading"
+                    strokeWidth={4}
                   />
                 </Button>
               ) : (

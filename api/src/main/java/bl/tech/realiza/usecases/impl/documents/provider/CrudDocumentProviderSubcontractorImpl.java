@@ -185,6 +185,7 @@ public class CrudDocumentProviderSubcontractorImpl implements CrudDocumentProvid
                         .contentType(file.getContentType())
                         .url(gcsUrl)
                         .document(documentProviderSubcontractor)
+                        .canBeOverwritten(documentProviderSubcontractor.getDocumentMatrix().getIsDocumentUnique())
                         .build());
                 signedUrl = googleCloudService.generateSignedUrl(savedFileDocument.getUrl(), 15);
             } catch (IOException e) {

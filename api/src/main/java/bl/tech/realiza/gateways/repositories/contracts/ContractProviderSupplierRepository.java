@@ -38,4 +38,6 @@ public interface ContractProviderSupplierRepository extends JpaRepository<Contra
     Page<ContractProviderSupplier> findAllByStatusInAndProviderSupplier_IsActive(List<ContractStatusEnum> status, boolean b, Pageable pageable);
 
     Page<ContractProviderSupplier> findAllByIsActiveIsNot(Pageable pageable, ContractStatusEnum contractStatusEnum);
+
+    List<ContractProviderSupplier> findAllByBranch_Client_IdClientAndStatusIsNot(String idClient, ContractStatusEnum contractStatus);
 }

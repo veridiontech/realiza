@@ -17,6 +17,7 @@ import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
 import bl.tech.realiza.domains.enums.ContractTypeEnum;
 import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.snapshots.clients.BranchSnapshot;
@@ -53,6 +54,7 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubg
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
+import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.clients.BranchSnapshotRepository;
@@ -83,6 +85,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -132,6 +135,7 @@ public class DashboardService {
     private final ContractSnapshotRepository contractSnapshotRepository;
     private final ContractDocumentSnapshotRepository contractDocumentSnapshotRepository;
     private final ProviderSnapshotRepository providerSnapshotRepository;
+    private final ProviderRepository providerRepository;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         branchRepository.findById(branchId)
@@ -2533,4 +2537,69 @@ public class DashboardService {
         return responseDto;
     }
 
+    public DashboardFiltersResponse getFiltersInfo(String clientId) {
+        DashboardFiltersResponse response = DashboardFiltersResponse.builder().build();
+
+        clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+
+        // branches
+        List<Branch> branches = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(clientId);
+        List<DashboardFiltersResponse.FilterList> branchResponse = new ArrayList<>();
+        for (Branch branch : branches) {
+            branchResponse.add(DashboardFiltersResponse.FilterList.builder()
+                            .id(branch.getIdBranch())
+                            .name(branch.getName())
+                    .build());
+        }
+        response.setBranches(branchResponse);
+
+        // providers and responsibles
+        List<ContractProviderSupplier> suppliers = contractProviderSupplierRepository.findAllByBranch_Client_IdClientAndStatusIsNot(clientId, DENIED);
+        List<ContractProviderSubcontractor> subcontractors = contractProviderSubcontractorRepository.findAllByContractProviderSupplier_Branch_Client_IdClientAndStatusIsNot(clientId, DENIED);
+        List<DashboardFiltersResponse.FilterList> providerResponse = new ArrayList<>();
+        List<DashboardFiltersResponse.FilterList> responsibleResponse = new ArrayList<>();
+        for (ContractProviderSupplier supplier : suppliers) {
+            providerResponse.add(DashboardFiltersResponse.FilterList.builder()
+                    .id(supplier.getProviderSupplier().getIdProvider())
+                    .name(supplier.getProviderSupplier().getCorporateName())
+                    .build());
+            responsibleResponse.add(DashboardFiltersResponse.FilterList.builder()
+                    .id(supplier.getResponsible().getIdUser())
+                    .name(supplier.getResponsible().getFullName())
+                    .build());
+        }
+        for (ContractProviderSubcontractor subcontractor : subcontractors) {
+            providerResponse.add(DashboardFiltersResponse.FilterList.builder()
+                    .id(subcontractor.getProviderSubcontractor().getIdProvider())
+                    .name(subcontractor.getProviderSubcontractor().getCorporateName())
+                    .build());
+            responsibleResponse.add(DashboardFiltersResponse.FilterList.builder()
+                    .id(subcontractor.getResponsible().getIdUser())
+                    .name(subcontractor.getResponsible().getFullName())
+                    .build());
+        }
+        response.setProviders(providerResponse);
+        response.setResponsibles(responsibleResponse);
+
+        // document types
+        List<String> documentTypes = documentRepository.findDistinctDocumentType();
+        response.setDocumentTypes(documentTypes);
+
+        // document titles
+        List<String> documentMatrix = documentMatrixRepository.findAllTitles();
+        List<String> documentMatrixResponse = new ArrayList<>(documentMatrix);
+        response.setDocumentTitles(documentMatrixResponse);
+
+
+        // contract status
+        List<ContractStatusEnum> contractStatus = new ArrayList<>(Arrays.asList(ContractStatusEnum.values()));
+        response.setContractStatus(contractStatus);
+
+        // document status
+        List<Document.Status> documentStatus = new ArrayList<>(Arrays.asList(Document.Status.values()));
+        response.setStatuses(documentStatus);
+
+        return response;
+    }
 }
