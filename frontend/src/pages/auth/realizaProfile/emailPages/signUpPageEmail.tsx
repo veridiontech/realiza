@@ -41,7 +41,7 @@ export function SignUpPageEmail() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const findBranchId = searchParams.get("idBranch");
-  const [branch, setBranch] = useState<any>(null);
+  const [setBranch] = useState<any>(null);
   const {
     register,
     handleSubmit,
@@ -125,9 +125,6 @@ export function SignUpPageEmail() {
     <div>
       <div className="flex justify-center">
         <h1 className="text-[40px]">Cadastro</h1>
-        <div>
-          <p>Empresa: {branch?.name}</p>
-        </div>
       </div>
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex items-center gap-5">
