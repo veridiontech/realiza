@@ -129,17 +129,6 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
         >
           <Users2 className="size-4 text-white" />
           <span className="ml-2 text-sm font-medium text-white">
-            Meus Contratos
-          </span>
-        </Button>
-      </Link>
-      <Link to={`/fornecedor/quartered/${getIdUser}`}>
-        <Button
-          variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
-        >
-          <Users2 className="size-4 text-white" />
-          <span className="ml-2 text-sm font-medium text-white">
             Meus Subcontratados
           </span>
         </Button>
@@ -155,20 +144,6 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
           </span>
         </Button>
       </Link>
-      {/* <h3 className="pl-4 pt-6 text-xs text-zinc-800">
-        Colaboradores e contratos
-      </h3>
-      <Link to={`/fornecedor/home/${user?.idUser}`}>
-        <Button
-          variant={"ghost"}
-          className="mt-1 w-full justify-start px-4 py-2"
-        >
-          <File className="size-4 text-zinc-800" />
-          <span className="ml-2 text-sm font-medium text-zinc-900">
-            Meus contratos
-          </span>
-        </Button>
-      </Link> */}
       <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <Link to={`/fornecedor/profile/${getIdUser}`}>
         <Button

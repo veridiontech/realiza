@@ -33,7 +33,6 @@ export function EnterprisePageEmail() {
   const findId = searchParams.get("id");
   const findCompany = searchParams.get("company");
   const findBranchId = searchParams.get("idBranch");
-  // const findIdSupplier = searchParams.get("idSupplier")
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState<EnterprisePageEmailFormSchema | null>(null);
@@ -48,6 +47,7 @@ export function EnterprisePageEmail() {
     mode: "onChange",
   });
 
+  // **INÍCIO DO CÓDIGO PARA DEPLOY/PRODUÇÃO**
   useEffect(() => {
     const validateToken = async () => {
       try {
@@ -62,16 +62,16 @@ export function EnterprisePageEmail() {
     };
     if (tokenFromUrl) validateToken();
   }, [tokenFromUrl]);
+  // **FIM DO CÓDIGO PARA DEPLOY/PRODUÇÃO**
 
   useEffect(() => {
     const fetchBranchData = async () => {
-      if (!findBranchId) return;
+      if (!findBranchId || !findId) return;
       try {
         const tokenFromStorage = localStorage.getItem("tokenClient");
         const response = await axios.get(`${ip}/supplier/${findId}`, {
           headers: { Authorization: `Bearer ${tokenFromStorage}` }
-        }
-        );
+        });
         console.log("testando dados do supplier", response.data);
         const branchData = response.data;
         if (branchData) {
@@ -83,7 +83,7 @@ export function EnterprisePageEmail() {
       }
     };
     fetchBranchData();
-  }, [findBranchId, setValue]);
+  }, [findBranchId, findId, setValue]);
 
   useEffect(() => {
     const savedData = localStorage.getItem("enterpriseForm");
