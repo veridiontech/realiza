@@ -133,17 +133,17 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
           </span>
         </Button>
       </Link>
-      <Link to={`/fornecedor/dashboard/${getIdUser}`}>
+      <Link to={`/fornecedor/employees/${getIdUser}`}>
         <Button
           variant={"ghost"}
-          className="mt-1 w-full justify-start px-4 py-2 hover:bg-neutral-500"
+          className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
         >
-          <ChartPie className="size-4 text-white" />
+          <PersonStanding className="size-4 text-white" />
           <span className="ml-2 text-sm font-medium text-white">
-            Ver BI’s
+            Colaboradores
           </span>
         </Button>
-      </Link>
+      </Link> 
       <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <Link to={`/fornecedor/profile/${getIdUser}`}>
         <Button
@@ -153,18 +153,6 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
           <Building2 className="size-4 text-white" />
           <span className="ml-2 text-sm font-medium text-white">
             Empresa
-          </span>
-        </Button>
-      </Link>
-
-      <Link to={`/fornecedor/employees/${getIdUser}`}>
-        <Button
-          variant={"ghost"}
-          className="mt-2 w-full justify-start px-4 py-2 hover:bg-neutral-500"
-        >
-          <PersonStanding className="size-4 text-white" />
-          <span className="ml-2 text-sm font-medium text-white">
-            Colaboradores
           </span>
         </Button>
       </Link>
