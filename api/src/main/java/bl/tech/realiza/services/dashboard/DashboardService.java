@@ -344,13 +344,13 @@ public class DashboardService {
     public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
-        List<String> branchIds = null;
-        List<String> providerIds = null;
-        List<String> documentTypes = null;
-        List<String> responsibleIds = null;
-        List<ContractStatusEnum> activeContract = null;
-        List<Status> statuses = null;
-        List<String> documentTitles = null;
+        List<String> branchIds = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        List<String> documentTypes = new ArrayList<>();
+        List<String> responsibleIds = new ArrayList<>();
+        List<ContractStatusEnum> activeContract = new ArrayList<>();
+        List<Status> statuses = new ArrayList<>();
+        List<String> documentTitles = new ArrayList<>();
         if (dashboardFiltersRequestDto != null) {
             branchIds = dashboardFiltersRequestDto.getBranchIds() != null
                     ? dashboardFiltersRequestDto.getBranchIds()
@@ -374,41 +374,9 @@ public class DashboardService {
                     ? dashboardFiltersRequestDto.getDocumentTitles()
                     : new ArrayList<>();
         }
-        if (branchIds != null) {
-            if (branchIds.isEmpty()) {
-                branchIds = null;
-            }
-        }
-        if (providerIds != null) {
-            if (providerIds.isEmpty()) {
-                providerIds = null;
-            }
-        }
-        if (documentTypes != null) {
-            if (documentTypes.isEmpty()) {
-                documentTypes = null;
-            }
-        }
-        if (responsibleIds != null) {
-            if (responsibleIds.isEmpty()) {
-                responsibleIds = null;
-            }
-        }
-        if (activeContract != null) {
-            if (activeContract.isEmpty()) {
-                activeContract = new ArrayList<>();
-                activeContract.add(ACTIVE);
-            }
-        }
-        if (statuses != null) {
-            if (statuses.isEmpty()) {
-                statuses = null;
-            }
-        }
-        if (documentTitles != null) {
-            if (documentTitles.isEmpty()) {
-                documentTitles = null;
-            }
+        if (activeContract.isEmpty()) {
+            activeContract = new ArrayList<>();
+            activeContract.add(ACTIVE);
         }
         // quantidade de fornecedores
         Long supplierQuantity = providerSupplierRepository.countByClientIdAndIsActive(clientId);
@@ -424,7 +392,7 @@ public class DashboardService {
         Double conformity = null;
         Object[] conformityValuesSupplier = null;
         Object[] conformityValuesSubcontractor = null;
-        if (branchIds == null) {
+        if (branchIds.isEmpty()) {
             conformityValuesSupplier = documentRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
                     providerIds,
                     responsibleIds,
@@ -457,18 +425,18 @@ public class DashboardService {
         List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
 
-        if (documentTypes == null) {
+        if (documentTypes.isEmpty()) {
             documentTypes = documentRepository.findDistinctDocumentType();
         }
         for (String type : documentTypes) {
             List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
-            if (statuses == null) {
+            if (statuses.isEmpty()) {
                 statuses = Arrays.asList(Status.values());
             }
             for (Status status : statuses) {
                 int supplier = 0;
                 int subcontract = 0;
-                if (branchIds != null) {
+                if (!branchIds.isEmpty()) {
                     supplier = documentRepository.countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
                             providerIds,
                             type,
@@ -646,15 +614,6 @@ public class DashboardService {
         Double conformityProvider = null;
         Object[] adherenceProviderValues = null;
         Object[] conformityProviderValues = null;
-        if (responsibleIds.isEmpty()) {
-            responsibleIds = null;
-        }
-        if (documentTypes.isEmpty()) {
-            documentTypes = null;
-        }
-        if (documentTitles.isEmpty()) {
-            documentTitles = null;
-        }
         if (branchIds.isEmpty()) {
             providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
             providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
@@ -778,40 +737,40 @@ public class DashboardService {
 
     public DashboardDocumentStatusResponseDto getDocumentStatusInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         DashboardDocumentStatusResponseDto responseDto = DashboardDocumentStatusResponseDto.builder().build();
-        List<String> branchIds = null;
-        List<String> providerIds = null;
-        List<String> documentTypes = null;
-        List<String> responsibleIds = null;
-        List<ContractStatusEnum> activeContract = null;
-        List<Status> statuses = null;
-        List<String> documentTitles = null;
+        List<String> branchIds = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        List<String> documentTypes = new ArrayList<>();
+        List<String> responsibleIds = new ArrayList<>();
+        List<ContractStatusEnum> activeContract = new ArrayList<>();
+        List<Status> statuses = new ArrayList<>();
+        List<String> documentTitles = new ArrayList<>();
         if (dashboardFiltersRequestDto != null) {
             branchIds = dashboardFiltersRequestDto.getBranchIds() != null
                     ? dashboardFiltersRequestDto.getBranchIds()
-                    : null;
+                    : new ArrayList<>();
             providerIds = dashboardFiltersRequestDto.getProviderIds() != null
                     ? dashboardFiltersRequestDto.getProviderIds()
-                    : null;
+                    : new ArrayList<>();
             documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
                     ? dashboardFiltersRequestDto.getDocumentTypes()
-                    : null;
+                    : new ArrayList<>();
             responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
                     ? dashboardFiltersRequestDto.getResponsibleIds()
-                    : null;
+                    : new ArrayList<>();
             activeContract = dashboardFiltersRequestDto.getActiveContract() != null
                     ? dashboardFiltersRequestDto.getActiveContract()
-                    : null;
+                    : new ArrayList<>();
             statuses = dashboardFiltersRequestDto.getStatuses() != null
                     ? dashboardFiltersRequestDto.getStatuses()
-                    : null;
+                    : new ArrayList<>();
             documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
                     ? dashboardFiltersRequestDto.getDocumentTitles()
-                    : null;
+                    : new ArrayList<>();
         }
         List<Document> documentsSupplier = new ArrayList<>();
         List<Document> documentsSubcontractor = new ArrayList<>();
         // find all documents by filters
-        if (branchIds != null && !branchIds.isEmpty()) {
+        if (branchIds.isEmpty()) {
             documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
                     providerIds,
                     documentTypes,
@@ -902,58 +861,40 @@ public class DashboardService {
 
     public Page<DashboardDocumentDetailsResponseDto> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto, Pageable pageable) {
         DashboardDocumentDetailsResponseDto responseDto = DashboardDocumentDetailsResponseDto.builder().build();
-        List<String> branchIds = null;
-        List<String> providerIds = null;
-        List<String> documentTypes = null;
-        List<String> responsibleIds = null;
-        List<ContractStatusEnum> activeContract = null;
-        List<Status> statuses = null;
-        List<String> documentTitles = null;
+        List<String> branchIds = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        List<String> documentTypes = new ArrayList<>();
+        List<String> responsibleIds = new ArrayList<>();
+        List<ContractStatusEnum> activeContract = new ArrayList<>();
+        List<Status> statuses = new ArrayList<>();
+        List<String> documentTitles = new ArrayList<>();
         if (dashboardFiltersRequestDto != null) {
             branchIds = dashboardFiltersRequestDto.getBranchIds() != null
                     ? dashboardFiltersRequestDto.getBranchIds()
-                    : null;
+                    : new ArrayList<>();
             providerIds = dashboardFiltersRequestDto.getProviderIds() != null
                     ? dashboardFiltersRequestDto.getProviderIds()
-                    : null;
+                    : new ArrayList<>();
             documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
                     ? dashboardFiltersRequestDto.getDocumentTypes()
-                    : null;
+                    : new ArrayList<>();
             responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
                     ? dashboardFiltersRequestDto.getResponsibleIds()
-                    : null;
+                    : new ArrayList<>();
             activeContract = dashboardFiltersRequestDto.getActiveContract() != null
                     ? dashboardFiltersRequestDto.getActiveContract()
-                    : null;
+                    : new ArrayList<>();
             statuses = dashboardFiltersRequestDto.getStatuses() != null
                     ? dashboardFiltersRequestDto.getStatuses()
-                    : null;
+                    : new ArrayList<>();
             documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
                     ? dashboardFiltersRequestDto.getDocumentTitles()
-                    : null;
+                    : new ArrayList<>();
         }
         Page<Document> documentsSupplier = null;
         Page<Document> documentsSubcontractor = null;
         // find all documents by filters
-        if (branchIds != null && !branchIds.isEmpty()) {
-            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
-                    providerIds,
-                    documentTypes,
-                    responsibleIds,
-                    activeContract,
-                    statuses,
-                    documentTitles,
-                    pageable);
-
-            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
-                    providerIds,
-                    documentTypes,
-                    responsibleIds,
-                    activeContract,
-                    statuses,
-                    documentTitles,
-                    pageable);
-        } else {
+        if (!branchIds.isEmpty()) {
             documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
                     providerIds,
                     documentTypes,
@@ -964,6 +905,24 @@ public class DashboardService {
                     pageable);
 
             documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles,
+                    pageable);
+        } else {
+            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+                    providerIds,
+                    documentTypes,
+                    responsibleIds,
+                    activeContract,
+                    statuses,
+                    documentTitles,
+                    pageable);
+
+            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
                     providerIds,
                     documentTypes,
                     responsibleIds,
@@ -1937,13 +1896,13 @@ public class DashboardService {
                 date,
                 frequency)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
-        List<String> branchIds = null;
-        List<String> providerIds = null;
-        List<String> documentTypes = null;
-        List<String> responsibleIds = null;
-        List<ContractStatusEnum> activeContract = null;
-        List<Status> statuses = null;
-        List<String> documentTitles = null;
+        List<String> branchIds = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        List<String> documentTypes = new ArrayList<>();
+        List<String> responsibleIds = new ArrayList<>();
+        List<ContractStatusEnum> activeContract = new ArrayList<>();
+        List<Status> statuses = new ArrayList<>();
+        List<String> documentTitles = new ArrayList<>();
         if (dashboardFiltersRequestDto != null) {
             branchIds = dashboardFiltersRequestDto.getBranchIds() != null
                     ? dashboardFiltersRequestDto.getBranchIds()
@@ -1967,41 +1926,9 @@ public class DashboardService {
                     ? dashboardFiltersRequestDto.getDocumentTitles()
                     : new ArrayList<>();
         }
-        if (branchIds != null) {
-            if (branchIds.isEmpty()) {
-                branchIds = null;
-            }
-        }
-        if (providerIds != null) {
-            if (providerIds.isEmpty()) {
-                providerIds = null;
-            }
-        }
-        if (documentTypes != null) {
-            if (documentTypes.isEmpty()) {
-                documentTypes = null;
-            }
-        }
-        if (responsibleIds != null) {
-            if (responsibleIds.isEmpty()) {
-                responsibleIds = null;
-            }
-        }
-        if (activeContract != null) {
-            if (activeContract.isEmpty()) {
-                activeContract = new ArrayList<>();
-                activeContract.add(ACTIVE);
-            }
-        }
-        if (statuses != null) {
-            if (statuses.isEmpty()) {
-                statuses = null;
-            }
-        }
-        if (documentTitles != null) {
-            if (documentTitles.isEmpty()) {
-                documentTitles = null;
-            }
+        if (activeContract.isEmpty()) {
+            activeContract = new ArrayList<>();
+            activeContract.add(ACTIVE);
         }
         // quantidade de fornecedores
         Long supplierQuantity = providerSupplierSnapshotRepository.countByClientIdDateAndFrequency(clientId,
@@ -2028,7 +1955,7 @@ public class DashboardService {
         Double conformity = null;
         Object[] conformityValuesSupplier = null;
         Object[] conformityValuesSubcontractor = null;
-        if (branchIds == null) {
+        if (branchIds.isEmpty()) {
             conformityValuesSupplier = documentSnapshotRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitlesAndDateAndFrequency(clientId,
                     providerIds,
                     responsibleIds,
@@ -2069,18 +1996,18 @@ public class DashboardService {
         List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
         List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
 
-        if (documentTypes == null) {
+        if (documentTypes.isEmpty()) {
             documentTypes = documentSnapshotRepository.findDistinctDocumentType(date,frequency);
         }
         for (String type : documentTypes) {
             List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
-            if (statuses == null) {
+            if (statuses.isEmpty()) {
                 statuses = Arrays.asList(Status.values());
             }
             for (Status status : statuses) {
                 int supplier = 0;
                 int subcontract = 0;
-                if (branchIds != null) {
+                if (!branchIds.isEmpty()) {
                     supplier = documentSnapshotRepository.countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitlesAndDateAndFrequency(branchIds,
                             providerIds,
                             type,
@@ -2274,15 +2201,7 @@ public class DashboardService {
         Double conformityProvider = null;
         Object[] adherenceProviderValues = null;
         Object[] conformityProviderValues = null;
-        if (responsibleIds.isEmpty()) {
-            responsibleIds = null;
-        }
-        if (documentTypes.isEmpty()) {
-            documentTypes = null;
-        }
-        if (documentTitles.isEmpty()) {
-            documentTitles = null;
-        }
+
         if (branchIds.isEmpty()) {
             providerSuppliers = providerSupplierSnapshotRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrueAndDateAndFrequency(clientId, ACTIVE, date, frequency);
             providerSubcontractors = providerSubcontractorSnapshotRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrueAndDateAndFrequency(clientId, ACTIVE, date, frequency);
@@ -2407,40 +2326,40 @@ public class DashboardService {
 
     public DashboardDocumentStatusResponseDto getDocumentStatusInfoByDate(String clientId, Date date, SnapshotFrequencyEnum frequency, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         DashboardDocumentStatusResponseDto responseDto = DashboardDocumentStatusResponseDto.builder().build();
-        List<String> branchIds = null;
-        List<String> providerIds = null;
-        List<String> documentTypes = null;
-        List<String> responsibleIds = null;
-        List<ContractStatusEnum> activeContract = null;
-        List<Status> statuses = null;
-        List<String> documentTitles = null;
+        List<String> branchIds = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        List<String> documentTypes = new ArrayList<>();
+        List<String> responsibleIds = new ArrayList<>();
+        List<ContractStatusEnum> activeContract = new ArrayList<>();
+        List<Status> statuses = new ArrayList<>();
+        List<String> documentTitles = new ArrayList<>();
         if (dashboardFiltersRequestDto != null) {
             branchIds = dashboardFiltersRequestDto.getBranchIds() != null
                     ? dashboardFiltersRequestDto.getBranchIds()
-                    : null;
+                    : new ArrayList<>();
             providerIds = dashboardFiltersRequestDto.getProviderIds() != null
                     ? dashboardFiltersRequestDto.getProviderIds()
-                    : null;
+                    : new ArrayList<>();
             documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
                     ? dashboardFiltersRequestDto.getDocumentTypes()
-                    : null;
+                    : new ArrayList<>();
             responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
                     ? dashboardFiltersRequestDto.getResponsibleIds()
-                    : null;
+                    : new ArrayList<>();
             activeContract = dashboardFiltersRequestDto.getActiveContract() != null
                     ? dashboardFiltersRequestDto.getActiveContract()
-                    : null;
+                    : new ArrayList<>();
             statuses = dashboardFiltersRequestDto.getStatuses() != null
                     ? dashboardFiltersRequestDto.getStatuses()
-                    : null;
+                    : new ArrayList<>();
             documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
                     ? dashboardFiltersRequestDto.getDocumentTitles()
-                    : null;
+                    : new ArrayList<>();
         }
         List<DocumentSnapshot> documentsSupplier = new ArrayList<>();
         List<DocumentSnapshot> documentsSubcontractor = new ArrayList<>();
         // find all documents by filters
-        if (branchIds != null && !branchIds.isEmpty()) {
+        if (branchIds.isEmpty()) {
             documentsSupplier = documentSnapshotRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitlesAndDateAndFrequency(clientId,
                     providerIds,
                     documentTypes,

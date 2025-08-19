@@ -11,4 +11,6 @@ public interface CrudProfileRepo {
     List<ProfileRepoResponseDto> findAll();
     ProfileRepoResponseDto update(String id, ProfileRepoRequestDto profileRequestDto);
     void delete(String id);
+
+    Boolean checkIfExistsByName(String name);
 }

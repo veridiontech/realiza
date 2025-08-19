@@ -79,4 +79,9 @@ public class CrudActivityRepoImpl implements CrudActivityRepo {
     public void delete(String id) {
         activityRepoRepository.deleteById(id);
     }
+
+    @Override
+    public Boolean findExistsByName(String name) {
+        return !activityRepoRepository.findAllByTitle(name).isEmpty();
+    }
 }

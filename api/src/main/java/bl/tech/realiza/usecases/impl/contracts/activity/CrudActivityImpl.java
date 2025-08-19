@@ -440,7 +440,14 @@ public class CrudActivityImpl implements CrudActivity {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-        List<ActivityRepo> activityRepos = activityRepoRepository.findAllById(activityIds);
+        List<ActivityRepo> activityRepos;
+
+        if (!activityIds.isEmpty()) {
+            activityRepos = activityRepoRepository.findAllById(activityIds);
+        } else {
+            activityRepos = activityRepoRepository.findAll();
+        }
+
 
         List<Activity> newActivities = new ArrayList<>();
 

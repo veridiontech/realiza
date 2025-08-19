@@ -108,6 +108,11 @@ public class CrudProfileRepoImpl implements CrudProfileRepo {
         profileRepoRepository.deleteById(id);
     }
 
+    @Override
+    public Boolean checkIfExistsByName(String name) {
+        return profileRepoRepository.existsByName(name);
+    }
+
     private ProfileRepoResponseDto toDto(ProfileRepo profile) {
         return ProfileRepoResponseDto.builder()
                 .id(profile.getId())

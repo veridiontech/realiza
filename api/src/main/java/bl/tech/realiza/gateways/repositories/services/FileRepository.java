@@ -40,6 +40,6 @@ public interface FileRepository extends JpaRepository<FileDocument, String> {
         AND (f.creationDate <= :endDate)
 """)
     Page<FileDocument> findAllUploadedBeforeThanAndNotDeletedAndContractStatuses(@Param("endDate") LocalDateTime contractEndDate,
-                                                                                 @Param("statuses") List<ContractStatusEnum> statuses,
+                                                                                 @Param("status") List<ContractStatusEnum> statuses,
                                                                                  Pageable pageable);
 }

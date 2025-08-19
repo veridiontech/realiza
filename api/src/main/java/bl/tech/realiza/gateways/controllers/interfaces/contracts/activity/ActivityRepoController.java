@@ -14,4 +14,5 @@ public interface ActivityRepoController {
     ResponseEntity<Page<ActivityRepoResponseDto>> getAllActivitiesRepo(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<ActivityRepoResponseDto>> updateActivityRepo(String id, ActivityRepoRequestDto activityRepoRequestDto);
     ResponseEntity<Void> deleteActivityRepo(String id);
+    ResponseEntity<Boolean> findExistsByNameActivityRepo(String name);
 }

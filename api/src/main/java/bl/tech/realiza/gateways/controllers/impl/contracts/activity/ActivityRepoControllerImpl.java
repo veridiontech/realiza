@@ -3,7 +3,6 @@ package bl.tech.realiza.gateways.controllers.impl.contracts.activity;
 import bl.tech.realiza.gateways.controllers.interfaces.contracts.activity.ActivityRepoController;
 import bl.tech.realiza.gateways.requests.contracts.activity.ActivityRepoRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.activity.ActivityRepoResponseDto;
-import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityRepoImpl;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivityRepo;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +22,20 @@ import java.util.Optional;
 @Tag(name = "Activity Repository", description = "Alter the Activity Repository for the whole system")
 public class ActivityRepoControllerImpl implements ActivityRepoController {
 
-    private final CrudActivityRepo crudActivityRepoImpl;
+    private final CrudActivityRepo crudActivityRepo;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<ActivityRepoResponseDto> createActivityRepo(@RequestBody ActivityRepoRequestDto activityRepoRequestDto) {
-        return ResponseEntity.ok(crudActivityRepoImpl.save(activityRepoRequestDto));
+        return ResponseEntity.ok(crudActivityRepo.save(activityRepoRequestDto));
     }
 
     @GetMapping("/{idActivityRepo}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<ActivityRepoResponseDto>> getOneActivityRepo(@PathVariable String idActivityRepo) {
-        return ResponseEntity.of(Optional.of(crudActivityRepoImpl.findOne(idActivityRepo)));
+        return ResponseEntity.of(Optional.of(crudActivityRepo.findOne(idActivityRepo)));
     }
 
     @GetMapping
@@ -48,21 +47,28 @@ public class ActivityRepoControllerImpl implements ActivityRepoController {
                                                                               @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
 
-        return ResponseEntity.of(Optional.of(crudActivityRepoImpl.findAll(pageable)));
+        return ResponseEntity.of(Optional.of(crudActivityRepo.findAll(pageable)));
     }
 
     @PutMapping("/{idActivityRepo}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<Optional<ActivityRepoResponseDto>> updateActivityRepo(@PathVariable String idActivityRepo, @RequestBody ActivityRepoRequestDto activityRepoRequestDto) {
-        return ResponseEntity.of(Optional.of(crudActivityRepoImpl.update(idActivityRepo, activityRepoRequestDto)));
+        return ResponseEntity.of(Optional.of(crudActivityRepo.update(idActivityRepo, activityRepoRequestDto)));
     }
 
     @DeleteMapping("/{idActivityRepo}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Override
     public ResponseEntity<Void> deleteActivityRepo(@PathVariable String idActivityRepo) {
-        crudActivityRepoImpl.delete(idActivityRepo);
+        crudActivityRepo.delete(idActivityRepo);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/check-by-name")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Boolean> findExistsByNameActivityRepo(@RequestParam String name) {
+        return ResponseEntity.ok(crudActivityRepo.findExistsByName(name));
     }
 }

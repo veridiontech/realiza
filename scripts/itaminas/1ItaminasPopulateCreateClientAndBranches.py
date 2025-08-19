@@ -3,7 +3,7 @@ import os
 import time
 import requests
 
-app_url = "localhost:8080"
+app_url = "http://localhost:8080"
 user_data = {
     "email": "realiza@assessoria.com",
     "password": "senha123"
@@ -11,7 +11,7 @@ user_data = {
 global client_global_id
 global branches
 global users
-global profileId
+global profile_id
 
 def check_empty(value):
     return value if not pd.isna(value) and value != '' else None
@@ -24,11 +24,14 @@ def split_fullname(fullname):
     return first_name, surname
 
 
-def import_data():
+def import_data(file_name):
     dir_atual = os.path.dirname(os.path.realpath(__file__))
-    path = os.path.join(dir_atual, "ITAMINAS_CONFIGURACOES.xlsx")
+    path = os.path.join(dir_atual, file_name)
     try:
-        dados = pd.read_excel(path, sheet_name=None, engine='openpyxl', skiprows=1)  # sheet_name=None lê todas as planilhas
+        dados = pd.read_excel(path, sheet_name=None, engine='openpyxl',
+            dtype=str,             # <- aqui
+            keep_default_na=False  # células vazias viram '' em vez de NaN
+        )
         print("Dados importados com sucesso!")
         return dados
     except Exception as e:
@@ -53,8 +56,94 @@ def login(login_data):
         print(f"Erro ao tentar realizar o login: {e}")
         return None
 
+def create_service_types(token, data):
+    url = app_url + "/contract/service-type"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    try:
+        service_data = data.get('Resultado da consulta', None)
+        if service_data is not None and not service_data.empty:
+            for _, service in service_data.iterrows():
+                if not service.empty:
+                    name = check_empty(service['Tipo do Serviço Único'])
+                    risk = check_empty(service['Risco do Serviço Único'])
+                    if risk == "Alto":
+                        risk = "HIGH"
+                    elif risk == "Médio":
+                        risk = "MEDIUM"
+                    elif risk == "Baixo":
+                        risk = "LOW"
+                    branch_request = {
+                        "name": name,
+                        "risk": risk,
+                    }
+
+                    resp = requests.get(url + "/check-by-name", params= {
+                        "name": name
+                    }, headers=headers)
+                    print("Service checado com sucesso:", name)
+
+                    if resp.json() == 'False':
+                        # Enviando a requisição POST para criar o cliente
+                        response = requests.post(url + "/repository", json=branch_request, headers=headers)
+
+                        if response.status_code == 200:
+                            # Caso a requisição seja bem-sucedida
+                            data = response.json()
+                            print("Service criado com sucesso:", data["name"])
+                            branches[data["name"]] = data["idBranch"]
+                        else:
+                            print(f"Falha ao criar service. Status Code: {response.status_code}")
+                            print("Resposta:", response.text)
+                            return None
+                    else:
+                        print("Service já existente:", name)
+                    return None
+        else:
+            print("Dados de serviços não encontrados ou vazios ou já existentes.")
+    except Exception as e:
+        print(f"Erro ao criar service: {e}")
+        return None
+    return None
+
+def create_profile(token):
+    url = app_url + "/profile/repo/check-by-name"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    params = {
+        "name": "Padrão"
+    }
+
+    try:
+        exists = requests.get(url, params=params, headers=headers)
+        if not exists.json():
+            print("Perfil padrão não existente no repositório. Criando...")
+            response = requests.post(app_url + "/profile/repo", json= {
+                "name": "Padrão",
+                "description": "Perfil padrão com todas as autorizações",
+                "admin": True
+            }, headers=headers)
+            if response.status_code == 200:
+                # Caso a requisição seja bem-sucedida
+                data = response.json()
+                print("Perfil padrão criada com sucesso:", data["name"])
+                return data
+            else:
+                print(f"Falha ao criar perfil padrão. Status Code: {response.status_code}")
+                print("Resposta:", response.text)
+                return None
+        else:
+            print("Perfil padrão já existente no repositório.")
+    except Exception as e:
+        print(f"Erro ao criar perfil padrão: {e}")
+        return None
+    return None
+
 def create_client(token, data):
-    criar atividades
     url = app_url + "/client"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -63,6 +152,7 @@ def create_client(token, data):
     params = {
         "profilesFromRepo": True
     }
+
     try:
         client_data = data.get('CLIENTE', None)
         if client_data is not None and not client_data.empty:
@@ -74,7 +164,7 @@ def create_client(token, data):
             cep = check_empty(client_data.iloc[0]['CEP'])
             city = check_empty(client_data.iloc[0]['Cidade'])
             state = check_empty(client_data.iloc[0]['Estado'])
-            telephone = check_empty(client_data.iloc[0]['Telefone-1'])
+            telephone = check_empty(client_data.iloc[0]['Telefone - 1'])
 
             client = {
                 "corporateName": corporate_name,
@@ -160,8 +250,8 @@ def create_branches(token, cliente, data):
         print(f"Erro ao criar filial: {e}")
         return None
 
-
 def create_users(token, branch_hash_map, data):
+    global profile_id
     url = app_url + "/user/manager/new-user"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -172,14 +262,12 @@ def create_users(token, branch_hash_map, data):
         if response.status_code == 200:
             profiles = response.json()
             desired_profile_name = "Padrão"
-            global profileId
-            profileId = next((profile["id"] for profile in profiles if profile["profileName"] == desired_profile_name),
+            profile_id = next((profile["id"] for profile in profiles if profile["profileName"] == desired_profile_name),
                              None)
 
-            if profileId:
-                print(f"Profile ID encontrado: {profileId}")
+            if profile_id:
+                print(f"Profile ID encontrado: {profile_id}")
             else:
-                criar profile
                 print("Profile não encontrado.")
                 return
         else:
@@ -206,7 +294,7 @@ def create_users(token, branch_hash_map, data):
                         "role": 'ROLE_CLIENT_MANAGER',
                         "enterprise": 'CLIENT',
                         "idEnterprise": client_global_id,
-                        "profileId": profileId
+                        "profileId": profile_id
                     }
 
                     response = requests.post(url, json=user_request, headers=headers)
@@ -224,20 +312,23 @@ def create_users(token, branch_hash_map, data):
         print(f"Erro ao criar usuário: {e}")
         return None
 
-
 def main():
-    file_data = import_data()
-    if file_data is not None:
-        token = login(user_data)
-        if token is not None:
+    token = login(user_data)
+    if token is not None:
+        new_file_data = import_data("SISTEMA NOVO_ITAMINAS.xlsx")
+        if new_file_data is not None:
+            create_profile(token)
+            create_service_types(token, new_file_data)
+        file_data = import_data("ITAMINAS_CONFIGURACOES.xlsx")
+        if file_data is not None:
             client = create_client(token, file_data)
             if client is not None:
                 create_branches(token, client, file_data)
-                print("Esperando 20 minutos antes de rodar o restow...")
-                time.sleep(20 * 60)
-                create_users(token, branches, file_data)
-                create_supplier(token, file_data)
-                create_contracts(token, suppliers, users, file_data)
+                # print("Esperando 20 minutos antes de rodar o resto...")
+                # time.sleep(15 * 60)
+                # create_users(token, branches, file_data)
+                # create_supplier(token, file_data)
+                # create_contracts(token, suppliers, users, file_data)
 
 if __name__ == "__main__":
     main()

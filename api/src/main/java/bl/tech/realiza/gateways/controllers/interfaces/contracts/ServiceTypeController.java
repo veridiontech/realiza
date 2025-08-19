@@ -23,4 +23,5 @@ public interface ServiceTypeController {
     ResponseEntity<ServiceTypeClientResponseDto> updateServiceTypeClient(String idServiceType, ServiceTypeRequestDto serviceTypeRequestDto);
 
     ResponseEntity<Void> deleteServiceType(String idServiceType, Boolean replicate, List<String> branchIds);
+    ResponseEntity<Boolean> checkIfExistsServiceType(String name);
 }
