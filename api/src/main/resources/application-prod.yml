@@ -28,7 +28,7 @@ spring:
 #      authentication-database: admin
 gcp:
   storage:
-    bucket: realiza-archives
+    bucket: ${BUCKET_NAME}
 logging:
   level:
     root: info
