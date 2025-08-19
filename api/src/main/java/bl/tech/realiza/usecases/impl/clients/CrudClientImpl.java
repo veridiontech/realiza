@@ -73,7 +73,6 @@ public class CrudClientImpl implements CrudClient {
                 .city(clientRequestDto.getCity())
                 .address(clientRequestDto.getAddress())
                 .number(clientRequestDto.getNumber())
-                .isUltragaz(clientRequestDto.getIsUltragaz())
                 .build();
 
         Client savedClient = clientRepository.save(newClient);

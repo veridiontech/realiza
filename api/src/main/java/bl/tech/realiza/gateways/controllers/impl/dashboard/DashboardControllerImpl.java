@@ -57,7 +57,7 @@ public class DashboardControllerImpl implements DashboardController {
                                                                                             @RequestBody(required = false) DashboardFiltersRequestDto dashboardFiltersRequestDto,
                                                                                             @RequestParam(defaultValue = "0") int page,
                                                                                             @RequestParam(defaultValue = "50") int size,
-                                                                                            @RequestParam(defaultValue = "branchName") String sort,
+                                                                                            @RequestParam(defaultValue = "title") String sort,
                                                                                             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
         return ResponseEntity.ok(dashboardService.getDocumentDetailsInfo(clientId, dashboardFiltersRequestDto, pageable));

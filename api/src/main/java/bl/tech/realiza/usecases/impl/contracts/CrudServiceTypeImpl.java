@@ -316,6 +316,11 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
     }
 
+    @Override
+    public Boolean checkIfExists(String name) {
+        return serviceTypeRepoRepository.existsByTitle(name);
+    }
+
 
     private ServiceTypeFullResponseDto toResponse(ServiceType serviceType) {
         return ServiceTypeFullResponseDto.builder()

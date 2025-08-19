@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,13 +21,13 @@ import java.util.List;
 @RequestMapping("/contract/service-type")
 @Tag(name = "Service Type")
 public class ServiceTypeControllerImpl implements ServiceTypeController {
-    private final CrudServiceType crudServiceTypeImpl;
+    private final CrudServiceType crudServiceType;
 
     @PostMapping("/repository")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<ServiceTypeRepoResponseDto> createServiceTypeRepo(@Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto) {
-        return ResponseEntity.ok(crudServiceTypeImpl.saveServiceTypeRepo(serviceTypeRequestDto));
+        return ResponseEntity.ok(crudServiceType.saveServiceTypeRepo(serviceTypeRequestDto));
     }
 
     @PostMapping("/branch/{branchId}")
@@ -37,42 +36,42 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     public ResponseEntity<ServiceTypeBranchResponseDto> createServiceTypeBranch(@PathVariable String branchId,
                                                                                 @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto,
                                                                                 @RequestParam(required = false) Boolean replicate) {
-        return ResponseEntity.ok(crudServiceTypeImpl.saveServiceTypeBranch(branchId, serviceTypeRequestDto, replicate, serviceTypeRequestDto.getBranchIds()));
+        return ResponseEntity.ok(crudServiceType.saveServiceTypeBranch(branchId, serviceTypeRequestDto, replicate, serviceTypeRequestDto.getBranchIds()));
     }
 
     @PostMapping("/client/{clientId}")
     @ResponseStatus(HttpStatus.CREATED)
     @Override
     public ResponseEntity<ServiceTypeClientResponseDto> createServiceTypeClient(@PathVariable String clientId, @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto) {
-        return ResponseEntity.ok(crudServiceTypeImpl.saveServiceTypeClient(clientId, serviceTypeRequestDto));
+        return ResponseEntity.ok(crudServiceType.saveServiceTypeClient(clientId, serviceTypeRequestDto));
     }
 
     @GetMapping("/{idServiceType}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<ServiceTypeFullResponseDto> getOneServiceType(@PathVariable String idServiceType) {
-        return ResponseEntity.ok(crudServiceTypeImpl.getServiceType(idServiceType));
+        return ResponseEntity.ok(crudServiceType.getServiceType(idServiceType));
     }
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypes() {
-        return ResponseEntity.ok(crudServiceTypeImpl.getAllServiceType());
+        return ResponseEntity.ok(crudServiceType.getAllServiceType());
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<ServiceTypeFullResponseDto>> getAllServiceTypesByOwner(@RequestParam(required = false) String idOwner, @RequestParam CrudServiceType.Owner owner) {
-        return ResponseEntity.ok(crudServiceTypeImpl.getAllServiceType(idOwner, owner));
+        return ResponseEntity.ok(crudServiceType.getAllServiceType(idOwner, owner));
     }
 
     @PutMapping("/repository/{idServiceType}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<ServiceTypeRepoResponseDto> updateServiceTypeRepo(@PathVariable String idServiceType, @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto) {
-        return ResponseEntity.ok(crudServiceTypeImpl.updateServiceTypeRepo(idServiceType, serviceTypeRequestDto));
+        return ResponseEntity.ok(crudServiceType.updateServiceTypeRepo(idServiceType, serviceTypeRequestDto));
     }
 
     @PutMapping("/branch/{idServiceType}")
@@ -81,14 +80,14 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     public ResponseEntity<ServiceTypeBranchResponseDto> updateServiceTypeBranch(@PathVariable String idServiceType,
                                                                                 @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto,
                                                                                 @RequestParam(required = false) Boolean replicate) {
-        return ResponseEntity.ok(crudServiceTypeImpl.updateServiceTypeBranch(idServiceType, serviceTypeRequestDto, replicate, serviceTypeRequestDto.getBranchIds()));
+        return ResponseEntity.ok(crudServiceType.updateServiceTypeBranch(idServiceType, serviceTypeRequestDto, replicate, serviceTypeRequestDto.getBranchIds()));
     }
 
     @PutMapping("/client/{idServiceType}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<ServiceTypeClientResponseDto> updateServiceTypeClient(@PathVariable String idServiceType, @Valid @RequestBody ServiceTypeRequestDto serviceTypeRequestDto) {
-        return ResponseEntity.ok(crudServiceTypeImpl.updateServiceTypeClient(idServiceType, serviceTypeRequestDto));
+        return ResponseEntity.ok(crudServiceType.updateServiceTypeClient(idServiceType, serviceTypeRequestDto));
     }
 
     @DeleteMapping("/{idServiceType}")
@@ -97,7 +96,14 @@ public class ServiceTypeControllerImpl implements ServiceTypeController {
     public ResponseEntity<Void> deleteServiceType(@PathVariable String idServiceType,
                                                   @RequestParam(required = false) Boolean replicate,
                                                   @RequestBody(required = false) List<String> branchIds) {
-        crudServiceTypeImpl.deleteServiceType(idServiceType, replicate, branchIds);
+        crudServiceType.deleteServiceType(idServiceType, replicate, branchIds);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/check-by-name")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Boolean> checkIfExistsServiceType(@RequestParam String name) {
+        return ResponseEntity.ok(crudServiceType.checkIfExists(name));
     }
 }

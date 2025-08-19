@@ -61,6 +61,13 @@ public class ProfileControllerImpl implements ProfileController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/repo/check-by-name")
+    @ResponseStatus(HttpStatus.OK)
+    @Override
+    public ResponseEntity<Boolean> checkIfExistsByNameProfile(@RequestParam String name) {
+        return ResponseEntity.ok(crudProfileRepo.checkIfExistsByName(name));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Override

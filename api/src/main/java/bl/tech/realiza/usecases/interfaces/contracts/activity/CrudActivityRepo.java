@@ -13,4 +13,5 @@ public interface CrudActivityRepo {
     Page<ActivityRepoResponseDto> findAll(Pageable pageable);
     Optional<ActivityRepoResponseDto> update(String id, ActivityRepoRequestDto activityRepoRequestDto);
     void delete(String id);
+    Boolean findExistsByName(String name);
 }

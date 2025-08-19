@@ -31,6 +31,8 @@ public interface CrudServiceType {
 
     void transferFromClientToBranch(String idClient, String idBranch);
 
+    Boolean checkIfExists(String name);
+
     public enum Owner {
         REPO,
         BRANCH,

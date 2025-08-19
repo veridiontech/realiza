@@ -16,6 +16,7 @@ public interface ProfileController {
     ResponseEntity<List<ProfileRepoResponseDto>> getAllProfilesRepo();
     ResponseEntity<ProfileRepoResponseDto> updateProfileRepo(String id, ProfileRepoRequestDto profileRequestDto);
     ResponseEntity<Void> deleteProfileRepo(String id);
+    ResponseEntity<Boolean> checkIfExistsByNameProfile(String name);
 
     // client related
     ResponseEntity<ProfileResponseDto> createProfile(ProfileRequestDto profileRequestDto);
