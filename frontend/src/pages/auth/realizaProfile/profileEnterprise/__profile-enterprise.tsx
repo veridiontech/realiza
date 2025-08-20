@@ -1,7 +1,6 @@
 import { Mail, Upload } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { EditModalEnterprise } from "./edit-modal-enterprise";
-import { UploadDocumentButton } from "@/components/ui/upload-document-button";
 import { useState, useRef } from "react";
 import { useClient } from "@/context/Client-Provider";
 
@@ -54,7 +53,6 @@ export function ProfileEnterpriseReprise() {
             />
           </div>
 
-          <UploadDocumentButton text="Visualizar documentos" />
           <EditModalEnterprise />
         </div>
 

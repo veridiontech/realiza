@@ -144,7 +144,7 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
           </span>
         </Button>
       </Link> 
-      <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
+      {/* <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <Link to={`/fornecedor/profile/${getIdUser}`}>
         <Button
           variant={"ghost"}
@@ -155,7 +155,7 @@ export function ProviderLateralMenu({ onClose }: { onClose: () => void }) {
             Empresa
           </span>
         </Button>
-      </Link>
+      </Link> */}
       {/* <Button variant={"ghost"} className="mt-2 w-full justify-start px-4 py-2">
         <MessageSquare className="size-4 text-zinc-800" />
         <span className="ml-2 text-sm font-medium text-zinc-900">

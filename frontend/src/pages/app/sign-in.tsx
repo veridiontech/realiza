@@ -63,7 +63,7 @@ export function SignIn() {
       console.log("idClient extraído do token:", payload.idClient);
 
       const userData = userResponse.data;
-      localStorage.setItem("userBranches", JSON.stringify(userData.branches));
+      localStorage.setItem("userBranches", JSON.stringify(userData.branchAccess));
       localStorage.setItem(
         "userSubcontractor",
         JSON.stringify(userData.subcontractor),

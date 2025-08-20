@@ -41,7 +41,7 @@ export function EditModalEnterprise() {
   const [isOpen, setIsOpen] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [editHistory, setEditHistory] = useState<any[]>([]);
+  const [, setEditHistory] = useState<any[]>([]);
 
   const {
     register,
@@ -263,27 +263,6 @@ export function EditModalEnterprise() {
               {isLoading ? "Carregando..." : "Confirmar edição"}
             </Button>
           </form>
-
-          {/* Seção de Histórico de Edições */}
-          <div className="mt-6 text-white">
-            <h4 className="text-lg font-semibold">Histórico de Edições</h4>
-            <div className="overflow-y-auto max-h-[300px]">
-              {editHistory.length > 0 ? (
-                <ul>
-                  {editHistory.map((entry, index) => (
-                    <li key={index} className="border-b py-2">
-                      <strong>{entry.date}</strong>
-                      <p>
-                        {entry.field}: {entry.oldValue} → {entry.newValue}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>Nenhuma edição registrada.</p>
-              )}
-            </div>
-          </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>

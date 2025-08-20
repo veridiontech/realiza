@@ -59,7 +59,7 @@ export function ClientLateralMenu({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
 
-      <h3 className="pl-4 pt-6 text-xs text-white">
+      {/* <h3 className="pl-4 pt-6 text-xs text-white">
         Gestão de fornecedores
       </h3>
       <ClientMenuItem
@@ -69,7 +69,7 @@ export function ClientLateralMenu({ onClose }: { onClose: () => void }) {
         menuKey="ver-fornecedores"
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
-      />
+      /> */}
 
       <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
       <ClientMenuItem
