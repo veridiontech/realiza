@@ -1,108 +1,204 @@
 import { useState, useEffect } from "react";
-import { Table } from "@/components/ui/tableVanila";
-import { Pagination } from "@/components/ui/pagination";
-import { ButtonBlue } from "@/components/ui/buttonBlue";
-import { StepOneEmployee } from "./modals/clientAddEmployee";
-import { Settings2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Employee } from "@/types/employee";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
+import { ip } from "@/utils/ip";
+import { propsSupplier } from "@/types/interfaces";
+import { TableEmployee } from "./tableEmployee";
+import { useBranch } from "@/context/Branch-provider";
+import { useSupplier } from "@/context/Supplier-context";
 import { useUser } from "@/context/user-provider";
-import { clientGetEmployee } from "@/hooks/gets/client/clientGetEmployee";
+import { NewModalCreateEmployee } from "./modals/newModalCreateEmployee";
+import { ManageEmployeesModal } from "./modals/ManageEmployeesModal";
+import { BriefcaseBusiness, Cog, Users2Icon } from "lucide-react";
 
 export const ClientEmployee = (): JSX.Element => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const itemsPerPage = 10;
+  const [selectedTab, setSelectedTab] = useState("fornecedor");
+  const [loading, setLoading] = useState(false);
+  const [error] = useState<string | null>(null);
+  const { selectedBranch } = useBranch();
+  const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
+  const [suppliersList, setSuppliersList] = useState<propsSupplier[]>([]);
+  const [getUniqueSupplier, setGetUniqueSupplier] =
+    useState<propsSupplier | null>(null);
+  const [getSubcontractorList, setGetSubcontractorList] = useState([]);
   const { user } = useUser();
-  const { employees, totalPages, loading, error, fetchEmployees } =
-    clientGetEmployee();
+  const { supplier, setSupplier } = useSupplier();
 
+  // Função para buscar fornecedores
+  const suppliers = async () => {
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(
+        `${ip}/supplier/filtered-client?idSearch=${selectedBranch?.idBranch}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      setSuppliersList(res.data.content);
+    } catch (error) {
+      console.error("Erro ao encontrar fornecedor:", error);
+    }
+  };
+
+  // Função para buscar um único fornecedor (opcional, pode ser refatorada)
+  const uniqueSupplier = async () => {
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(`${ip}/supplier/${selectedSupplier}`, {
+        headers: { Authorization: `Bearer ${tokenFromStorage}` },
+      });
+      setGetUniqueSupplier(res.data);
+    } catch (err) {
+      console.log("erro ao buscar unico supplier:", err);
+    }
+  };
+
+  // Função para buscar subcontratados
+  const getSubcontractor = async () => {
+    setLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const res = await axios.get(
+        `${ip}/subcontractor/filtered-supplier?idSearch=${selectedSupplier}`,
+        {
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        }
+      );
+      setGetSubcontractorList(res.data.content);
+    } catch (err) {
+      console.log("erro ao buscar subcontratados:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hook useEffect para carregar dados
   useEffect(() => {
-    if (user?.branch) {
-      fetchEmployees(itemsPerPage, currentPage - 1, "CLIENT");
+    if (selectedBranch?.idBranch) {
+      suppliers();
     }
-  }, [currentPage, user?.branch]);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+    if (selectedSupplier) {
+      uniqueSupplier();
+      getSubcontractor();
     }
-  };
+  }, [selectedBranch?.idBranch, selectedSupplier]);
 
-  const handleModalSubmit = (formData: Record<string, any>) => {
-    console.log("Dados do novo colaborador:", formData);
-    setIsModalOpen(false);
-  };
-
-  const columns: {
-    key: keyof Employee;
-    label: string;
-    render?: (value: any, row: Employee) => JSX.Element;
-    className?: string;
-  }[] = [
-    { key: "name", label: "Nome" },
-    {
-      key: "status",
-      label: "Status",
-      render: (status) => (
-        <span
-          className={status === "Ativo" ? "text-green-500" : "text-red-500"}
-        >
-          {status}
-        </span>
-      ),
-    },
-    {
-      key: "id",
-      label: "Ações",
-      render: (_, row) => (
-        <Link to={`/sistema/detailsEmployees/${row.id}`}>
-          <button className="text-realizaBlue ml-4 hover:underline">
-            <Settings2 />
-          </button>
-        </Link>
-      ),
-    },
-  ];
-
-  if (error) {
-    return (
-      <p className="text-center text-red-500">
-        Erro ao carregar os dados de Colaborador: {error}
-      </p>
-    );
-  }
+  const isSupplierResponsible = user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
 
   return (
     <div className="m-4 flex justify-center">
-      <div className="dark:bg-primary flex w-[90rem] flex-col rounded-lg bg-white p-10 shadow-md">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="mb-6 text-xl font-semibold">Colaboradores</h1>
-          <ButtonBlue onClick={() => setIsModalOpen(true)}>
-            Adicionar Colaborador
-          </ButtonBlue>
+      <div className="flex flex-col">
+        <div className="dark:bg-primary relative bottom-[8vw] flex h-[30vh] w-[95vw] flex-col rounded-lg bg-white p-10 shadow-md">
+          {/* Cabeçalho com Título e Botões de Ação */}
+          <div className="mb-6 flex items-center justify-between rounded-md bg-realizaBlue p-5">
+            <div className="flex items-center gap-1">
+              <Users2Icon className="text-[#FFCE50]" />
+              <h1 className="text-2xl font-medium text-white">Colaboradores</h1>
+            </div>
+            <div className="flex gap-2">
+              {/* Botões de Seleção de Aba */}
+              <Button
+                variant="ghost"
+                className={`px-4 py-2 transition-all duration-300 ${selectedTab === "fornecedor"
+                  ? "scale-110 font-bold shadow-lg bg-white text-realizaBlue"
+                  : "text-white border border-white"
+                  }`}
+                onClick={() => setSelectedTab("fornecedor")}
+              >
+                <Cog className="mr-2 h-4 w-4" /> Fornecedor
+              </Button>
+              <Button
+                variant="ghost"
+                className={`px-4 py-2 transition-all duration-300 ${selectedTab === "subcontratado"
+                  ? "scale-110 font-bold shadow-lg bg-white text-realizaBlue"
+                  : "text-white border border-white"
+                  }`}
+                onClick={() => setSelectedTab("subcontratado")}
+              >
+                <BriefcaseBusiness className="mr-2 h-4 w-4" /> Subcontratado
+              </Button>
+            </div>
+          </div>
+
+          {/* Renderização Condicional do Conteúdo */}
+          <div className="p-4">
+            {loading ? (
+              <div className="text-center text-gray-600">
+                Carregando colaboradores...
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-500">{error}</div>
+            ) : selectedTab === "fornecedor" ? (
+              <div>
+                {isSupplierResponsible ? (
+                  <div>
+                    <h2 className="mb-4 text-xl">{supplier?.corporateName}</h2>
+                    <TableEmployee idProvider={supplier?.idProvider ?? null} />
+                  </div>
+                ) : (
+                  <div>
+                    <h2 className="mb-4 text-xl">Selecione um Fornecedor</h2>
+                    <div>
+                      <span className="text-realizaBlue text-[14px]">
+                        Fornecedor:{" "}
+                      </span>
+                      <select
+                        value={selectedSupplier || ""}
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          setSelectedSupplier(selectedId);
+                          const supplierData = suppliersList.find(
+                            (sup) => sup.idProvider === selectedId
+                          );
+                          if (supplierData) {
+                            setSupplier(supplierData);
+                          }
+                        }}
+                        className="rounded-lg border p-2 text-[12px]"
+                      >
+                        <option value="">Selecione um fornecedor</option>
+                        {suppliersList.map((supplier) => (
+                          <option key={supplier.idProvider} value={supplier.idProvider}>
+                            {supplier.corporateName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <TableEmployee idProvider={selectedSupplier} />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center gap-2">
+                    <strong>Fornecedor: </strong>
+                    {getUniqueSupplier ? (
+                      <div className="flex items-center gap-3">
+                        <p>{getUniqueSupplier?.corporateName}</p> -
+                        <p>{getUniqueSupplier?.cnpj}</p>
+                      </div>
+                    ) : (
+                      <p>Nenhum fornecedor selecionado</p>
+                    )}
+                  </div>
+                  <div>
+                    {getSubcontractorList.map((subcontractor: any) => (
+                      <div key={subcontractor.idProvider}>
+                        <span>{subcontractor.corporateName}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        {loading ? (
-          <div className="flex items-center justify-center">
-            <span>Carregando...</span>
-          </div>
-        ) : (
-          <div>
-            <Table<Employee> data={employees} columns={columns} />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        )}
+        <div className="relative bottom-[18vh] flex justify-end gap-2 2xl:bottom-[16vh] xl:bottom-[14vh] lg:bottom-[10vh] md:bottom-[9vh]">
+          <NewModalCreateEmployee onEmployeeCreated={getSubcontractor} />
+          <ManageEmployeesModal idProvider={selectedSupplier} />
+        </div>
       </div>
-      {isModalOpen && (
-        <StepOneEmployee
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleModalSubmit}
-        />
-      )}
     </div>
   );
 };

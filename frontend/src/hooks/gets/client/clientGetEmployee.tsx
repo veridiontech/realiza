@@ -13,16 +13,35 @@ export function clientGetEmployee() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function fetchEmployees(limit = 10, page = 0, enterprise = "CLIENT") {
+  async function fetchEmployees(
+    limit = 10,
+    page = 0,
+    idSearch: string | null = null,
+    enterprise: "CLIENT" | "PROVIDER" | "SUBCONTRACTOR"
+  ) {
     setLoading(true);
     setError(null);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const branchId = user?.branch || "";
+
+      const params: any = {
+        size: limit,
+        page,
+      };
+
+      if (enterprise === "PROVIDER" || enterprise === "SUBCONTRACTOR") {
+        params.enterprise = enterprise;
+        params.idSearch = idSearch;
+      } else {
+        params.idSearch = branchId;
+      }
+
       const response = await axios.get(API_URL, {
-        params: { size: limit, page, enterprise, idSearch: branchId },
+        params,
         headers: { Authorization: `Bearer ${tokenFromStorage}` }
       });
+
       const { content, totalPages } = response.data;
       setEmployees(
         content.map((emp: any) => ({
@@ -33,7 +52,7 @@ export function clientGetEmployee() {
       );
       setTotalPages(totalPages);
     } catch (err: any) {
-      setError(err.message || "Erro ao carregar Colaboradores.");
+      setError(err.response?.data?.message || "Erro ao carregar Colaboradores.");
     } finally {
       setLoading(false);
     }
