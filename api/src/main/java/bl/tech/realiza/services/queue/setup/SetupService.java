@@ -90,7 +90,7 @@ public class SetupService {
     public void setupNewClient(String clientId, Boolean profilesFromRepo, List<String> activitiesIds) {
         log.info("Started setup client ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NotFoundException("Client not found while setup client"));;
+                .orElseThrow(() -> new NotFoundException("Client not found while setup client"));
 
         BranchResponseDto branch = crudBranch.save(BranchCreateRequestDto.builder()
                 .name(client.getTradeName() != null
