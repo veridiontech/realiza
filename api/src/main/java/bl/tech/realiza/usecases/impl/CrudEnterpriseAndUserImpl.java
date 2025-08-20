@@ -66,14 +66,10 @@ public class CrudEnterpriseAndUserImpl implements CrudEnterpriseAndUser {
 
         Client savedClient = clientRepository.save(client);
 
-        setupQueueProducer.send(new SetupMessage("NEW_CLIENT",
-                savedClient.getIdClient(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null));
+        setupQueueProducer.send(SetupMessage.builder()
+                        .type("NEW_CLIENT")
+                        .clientId(savedClient.getIdClient())
+                .build());
 
         String encryptedPassword = passwordEncryptionService.encryptPassword(enterpriseAndUserRequestDto.getPassword());
 

@@ -21,6 +21,7 @@ import bl.tech.realiza.services.GoogleCloudService;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
+import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.clients.CrudClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,7 @@ public class CrudClientImpl implements CrudClient {
     private final SetupQueueProducer setupQueueProducer;
     private final UserRepository userRepository;
     private final AuditLogService auditLogServiceImpl;
-    private final CrudBranchImpl crudBranchImpl;
+    private final CrudBranch crudBranch;
     private final GoogleCloudService googleCloudService;
     private final ActivityRepoRepository activityRepoRepository;
 
@@ -75,51 +76,29 @@ public class CrudClientImpl implements CrudClient {
                 .number(clientRequestDto.getNumber())
                 .build();
 
-        Client savedClient = clientRepository.save(newClient);
-
-        setupQueueProducer.send(new SetupMessage("NEW_CLIENT",
-                savedClient.getIdClient(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null));
+        Client savedClient = clientRepository.saveAndFlush(newClient);
 
         if (profilesFromRepo == null) {
             profilesFromRepo = false;
         }
 
-        if (profilesFromRepo) {
-            setupQueueProducer.send(new SetupMessage("NEW_CLIENT_PROFILES",
-                    savedClient.getIdClient(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null));
-        }
         List<ActivityRepo> activityRepos = new ArrayList<>();
+        List<String> activityIds = new ArrayList<>();
         if (clientRequestDto.getActivityIds() != null && !clientRequestDto.getActivityIds().isEmpty()) {
             activityRepos = activityRepoRepository.findAllById(clientRequestDto.getActivityIds());
+            activityIds = activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList());
+        }
+        Client saveTest = null;
+        while (saveTest == null) {
+            saveTest = clientRepository.findById(savedClient.getIdClient())
+                    .orElse(null);
         }
 
-        crudBranchImpl.save(BranchCreateRequestDto.builder()
-                .name(savedClient.getTradeName() != null
-                        ? savedClient.getTradeName()
-                        : "Base")
-                .cnpj(savedClient.getCnpj())
-                .cep(savedClient.getCep())
-                .state(savedClient.getState())
-                .city(savedClient.getCity())
-                .email(savedClient.getEmail())
-                .telephone(savedClient.getTelephone())
-                .address(savedClient.getAddress())
-                .number(savedClient.getNumber())
-                .base(true)
-                .client(savedClient.getIdClient())
-                .activityIds(activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()))
+        setupQueueProducer.send(SetupMessage.builder()
+                        .type("NEW_CLIENT")
+                        .clientId(savedClient.getIdClient())
+                        .profilesFromRepo(profilesFromRepo)
+                        .activityIds(activityIds)
                 .build());
 
         if (JwtService.getAuthenticatedUserId() != null) {

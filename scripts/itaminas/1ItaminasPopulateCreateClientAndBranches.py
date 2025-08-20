@@ -12,6 +12,12 @@ global client_global_id
 global branches
 global users
 global profile_id
+branches = {'Cantina': '0bc6def7-620a-45af-884a-436052f00715', 'Administrativa': '3956fc6b-38fd-48ee-b6b8-7c3accfe16c2', 'Compras': 'e246d71f-1480-4aac-8b77-8b7d6b357fab', 'Custos, Orçamento e Contratos': 'cd1b97d5-b6b5-486f-9070-1753c077cdec', 'Engenharia Elétrica e Automação': '36b9c445-37ee-4bd9-8e82-69817d6efa4c', 'Engenharia Mecânica': '006d6ea8-d27d-413d-b670-142fe2a3b7d5', 'Filtragem': 'cd31c6e1-94e5-4656-9a60-c49f40cbb30b', 'Engenharia de Processamento Mineral': 'ac33d4d2-f6ac-46a8-9b96-abcdc8c43e41', 'Geotecnia': 'a23a494b-f2eb-45a1-83de-42a4ec265838', 'Infraestrutura': '102f1575-d168-4127-87c7-67cfd9f0fc0d', 'Logística': '70ea8f20-b060-479b-bd84-12dc53a97a05', 'Manutenção Mecânica Industrial': 'cb11ac9c-6be1-44fe-8713-50158ac1b29e', 'Meio Ambiente': '8da27735-aacd-47ac-a8c2-81728c41f694', 'Planejamento de Lavra e Geologia': '387fc156-0dfd-480f-8c21-881bfbdccfc3', 'Segurança do Trabalho': '1c56cd54-4e28-4c59-95f7-828bf4fc69f4', 'Recursos Humanos': '899fa860-d0f1-46c1-8656-4ea90fe0af51', 'Compliance': 'cb110ea1-3d56-4ea6-aae2-d33c3ed46cb5', 'Tecnologia da Informação': '155663ec-3ea8-44f4-b379-c93695c061ef', 'Suprimentos': 'dbed5cca-38d6-4840-8ba0-0057182488da', 'Planejamento de Controle e Produção': 'b6e86cb6-67ea-4fd9-aabb-b56fe1a91752', 'Posto de Combustível': '907c53e6-8153-4516-93ce-32fe84c119ee', 'Medicina do trabalho': '9dfbff9d-ed6f-41de-a6b3-7bbdb17bd792'}
+# branches = {}
+users = {}
+profile_id = None
+client_global_id = "0407011b-2bca-4eda-a747-7311bddd6358"
+# client_global_id = None
 
 def check_empty(value):
     return value if not pd.isna(value) and value != '' else None
@@ -109,6 +115,7 @@ def create_service_types(token, data):
     return None
 
 def create_profile(token):
+    global profile_id
     url = app_url + "/profile/repo/check-by-name"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -144,6 +151,7 @@ def create_profile(token):
     return None
 
 def create_client(token, data):
+    global client_global_id
     url = app_url + "/client"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -186,6 +194,7 @@ def create_client(token, data):
                 data = response.json()
                 client_global_id = data["idClient"]
                 print("Cliente criado com sucesso:", data["corporateName"])
+                print(client_global_id)
                 return data
             else:
                 print(f"Falha ao criar cliente. Status Code: {response.status_code}")
@@ -196,6 +205,8 @@ def create_client(token, data):
         return None
 
 def create_branches(token, cliente, data):
+    global branches
+    global client_global_id
     url = app_url + "/branch"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -208,42 +219,47 @@ def create_branches(token, cliente, data):
         units_data = data.get('UNIDADES', None)
         if units_data is not None and not units_data.empty:
             for _, branch in units_data.iterrows():
-                if branch:
-                    name = check_empty(branch['Unidade*'])
-                    cnpj = check_empty(branch['CNPJ*'])
-                    address = check_empty(branch['Endereço*'])
-                    number = check_empty(branch['Número*'])
-                    cep = check_empty(branch['CEP*'])
-                    city = check_empty(branch['Cidade*'])
-                    state = check_empty(branch['Estado*'])
-                    telephone = check_empty(branch['Telefone-1'])
+                if not any(str(v).strip() for v in branch.values):
+                    continue
 
-                    branch_request = {
-                        "name": name,
-                        "cnpj": cnpj,
-                        "address": address,
-                        "number": number,
-                        "cep": cep,
-                        "city": city,
-                        "state": state,
-                        "telephone": telephone,
-                        "cliente": cliente["idClient"],
-                        "replicateFromBase": True
-                    }
+                name = check_empty(branch.get('Unidade*'))
+                if not name:
+                    continue
 
-                    # Enviando a requisição POST para criar o cliente
-                    response = requests.post(url, json=branch_request, params=params, headers=headers)
+                cnpj = check_empty(branch['CNPJ*'])
+                address = check_empty(branch['Endereço*'])
+                number = check_empty(branch['Número*'])
+                cep = check_empty(branch['CEP*'])
+                city = check_empty(branch['Cidade*'])
+                state = check_empty(branch['Estado*'])
+                telephone = check_empty(branch['Telefone - 1'])
 
-                    if response.status_code == 200:
-                        # Caso a requisição seja bem-sucedida
-                        data = response.json()
-                        print("Filial criada com sucesso:", data["name"])
-                        branches[data["name"]] = data["idBranch"]
-                        return data
-                    else:
-                        print(f"Falha ao criar filial. Status Code: {response.status_code}")
-                        print("Resposta:", response.text)
-                        return None
+                branch_request = {
+                    "name": name,
+                    "cnpj": cnpj,
+                    "address": address,
+                    "number": number,
+                    "cep": cep,
+                    "city": city,
+                    "state": state,
+                    "telephone": telephone,
+                    "cliente": client_global_id,
+                    # "cliente": "4091a7bb-a01f-4ea0-9bc9-fc61031bfb49",
+                    "replicateFromBase": True
+                }
+
+                # Enviando a requisição POST para criar o cliente
+                response = requests.post(url, json=branch_request, params=params, headers=headers)
+
+                if response.status_code == 200:
+                    # Caso a requisição seja bem-sucedida
+                    data = response.json()
+                    print("Filial criada com sucesso:", data["name"])
+                    branches[data["name"]] = data["idBranch"]
+                else:
+                    print(f"Falha ao criar filial. Status Code: {response.status_code}")
+                    print("Resposta:", response.text)
+                    return None
         else:
             print("Dados de unidades não encontrados ou vazios.")
     except Exception as e:
@@ -252,13 +268,16 @@ def create_branches(token, cliente, data):
 
 def create_users(token, branch_hash_map, data):
     global profile_id
+    global client_global_id
     url = app_url + "/user/manager/new-user"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     try:
+        print(branches)
         response = requests.get(app_url + f"/profile/by-name/{client_global_id}", headers=headers)
+        # response = requests.get(app_url + f"/profile/by-name/4091a7bb-a01f-4ea0-9bc9-fc61031bfb49", headers=headers)
         if response.status_code == 200:
             profiles = response.json()
             desired_profile_name = "Padrão"
@@ -315,18 +334,21 @@ def create_users(token, branch_hash_map, data):
 def main():
     token = login(user_data)
     if token is not None:
-        new_file_data = import_data("SISTEMA NOVO_ITAMINAS.xlsx")
-        if new_file_data is not None:
-            create_profile(token)
-            create_service_types(token, new_file_data)
         file_data = import_data("ITAMINAS_CONFIGURACOES.xlsx")
-        if file_data is not None:
-            client = create_client(token, file_data)
-            if client is not None:
-                create_branches(token, client, file_data)
-                # print("Esperando 20 minutos antes de rodar o resto...")
-                # time.sleep(15 * 60)
-                # create_users(token, branches, file_data)
+        create_users(token, branches, file_data)
+        # new_file_data = import_data("SISTEMA NOVO_ITAMINAS.xlsx")
+        # if new_file_data is not None:
+        #     create_profile(token)
+        #     create_service_types(token, new_file_data)
+        # file_data = import_data("ITAMINAS_CONFIGURACOES.xlsx")
+        # if file_data is not None:
+        #     client = create_client(token, file_data)
+        #     create_users(token, branches, file_data)
+            # if client is not None:
+            #     create_branches(token, client, file_data)
+            #     create_users(token, branches, file_data)
+            #     print("Esperando 20 minutos antes de rodar o resto...")
+            #     time.sleep(15 * 60)
                 # create_supplier(token, file_data)
                 # create_contracts(token, suppliers, users, file_data)
 

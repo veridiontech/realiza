@@ -7,17 +7,20 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+
 @Service
 @RequiredArgsConstructor
 @RabbitListener(queues = RabbitConfig.SETUP_DLQ)
 public class SetupDlqConsumer {
+    private final SetupQueueConsumer setupQueueConsumer;
+
     @RabbitHandler
     public void handle(SetupMessage msg) {
-        System.err.printf("🔁 DLQ Setup: %s - %s%n", msg.getType(), /* getId(msg) */ "");
+        System.err.printf("🔁 DLQ Setup: %s - %s%n", msg.getType(), setupQueueConsumer.getId(msg));
     }
     @RabbitHandler
     public void handle(ReplicationMessage msg) {
-        System.err.printf("🔁 DLQ Repl: %s - %s%n", msg.getType(), /* getId(msg) */ "");
+        System.err.printf("🔁 DLQ Repl: %s - %s%n", msg.getType(), setupQueueConsumer.getId(msg));
     }
     // opcional: fallback para payload inesperado
     @RabbitHandler(isDefault = true)

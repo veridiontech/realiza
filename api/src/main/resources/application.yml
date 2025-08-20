@@ -26,18 +26,6 @@ spring:
     port: ${SPRING_RABBITMQ_PORT}
     username: ${SPRING_RABBITMQ_USER}
     password: ${SPRING_RABBITMQ_PASSWORD}
-    listener:
-      simple:
-        concurrency: 1
-        max-concurrency: 2
-        prefetch: 1
-        acknowledge-mode: auto
-        default-requeue-rejected: false
-        retry:
-          enabled: true
-          initial-interval: 1000
-          max-attempts: 5
-          max-interval: 10000
     template:
       reply-timeout: 180000
 server:
