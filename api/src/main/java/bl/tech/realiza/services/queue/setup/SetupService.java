@@ -89,30 +89,8 @@ public class SetupService {
 
     public void setupNewClient(String clientId, Boolean profilesFromRepo, List<String> activitiesIds) {
         log.info("Started setup client ⌛ {}", clientId);
-        Client client = null;
-        int retries = 0;
-        int maxRetries = 10;
-        long delay = 500;
-        while (client == null && retries < maxRetries) {
-            try {
-                int finalRetries = retries;
-                client = clientRepository.findById(clientId)
-                        .orElseThrow(() -> new NotFoundException("Client not found on attempt " + (finalRetries + 1)));
-            } catch (NotFoundException e) {
-                retries++;
-                if (retries < maxRetries) {
-                    log.info("Client {} not found. Retrying in {}ms... ({}/{})", clientId, delay, retries, maxRetries);
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException interruptedException) {
-                        Thread.currentThread().interrupt();
-                    }
-                } else {
-                    log.info("Client {} not found after {} retries. Sending to DLQ.", clientId, maxRetries);
-                    throw e; // Desiste e deixa a mensagem ir para a DLQ
-                }
-            }
-        }
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found while setup client"));;
 
         BranchResponseDto branch = crudBranch.save(BranchCreateRequestDto.builder()
                 .name(client.getTradeName() != null

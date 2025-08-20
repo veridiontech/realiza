@@ -138,6 +138,7 @@ public class CrudProfileImpl implements CrudProfile {
         log.info("Started setup client profiles ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
+
         List<ProfileRepo> profileRepos = profileRepoRepository.findAll();
         List<Profile> profiles = new ArrayList<>();
         for (ProfileRepo profileRepo : profileRepos) {
