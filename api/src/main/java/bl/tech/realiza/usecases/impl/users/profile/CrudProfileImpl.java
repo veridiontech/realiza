@@ -2,23 +2,30 @@ package bl.tech.realiza.usecases.impl.users.profile;
 
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.user.profile.Profile;
+import bl.tech.realiza.domains.user.profile.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
 import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrudProfileImpl implements CrudProfile {
     private final ProfileRepository profileRepository;
     private final ClientRepository clientRepository;
+    private final ProfileRepoRepository profileRepoRepository;
 
     @Override
     public ProfileResponseDto save(ProfileRequestDto profileRequestDto) {
@@ -123,6 +130,49 @@ public class CrudProfileImpl implements CrudProfile {
     @Override
     public void delete(String id) {
         profileRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
+    public void transferFromRepoToClient(String clientId) {
+        log.info("Started setup client profiles ⌛ {}", clientId);
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+        List<ProfileRepo> profileRepos = profileRepoRepository.findAll();
+        List<Profile> profiles = new ArrayList<>();
+        for (ProfileRepo profileRepo : profileRepos) {
+            profiles.add(
+                    Profile.builder()
+                            .name(profileRepo.getName())
+                            .description(profileRepo.getDescription())
+                            .admin(profileRepo.getAdmin())
+                            .viewer(profileRepo.getViewer())
+                            .manager(profileRepo.getManager())
+                            .inspector(profileRepo.getInspector())
+                            .documentViewer(profileRepo.getDocumentViewer())
+                            .registrationUser(profileRepo.getRegistrationUser())
+                            .registrationContract(profileRepo.getRegistrationContract())
+                            .laboral(profileRepo.getLaboral())
+                            .workplaceSafety(profileRepo.getWorkplaceSafety())
+                            .registrationAndCertificates(profileRepo.getRegistrationAndCertificates())
+                            .general(profileRepo.getGeneral())
+                            .health(profileRepo.getHealth())
+                            .environment(profileRepo.getEnvironment())
+                            .concierge(profileRepo.getConcierge())
+                            .client(client)
+                            .build()
+            );
+
+            if (profiles.size() == 50) {
+                profileRepository.saveAll(profiles);
+                profiles.clear();
+            }
+        }
+
+        if (!profiles.isEmpty()) {
+            profileRepository.saveAll(profiles);
+        }
+        log.info("Finished setup client profiles ✔️ {}", clientId);
     }
 
     private ProfileResponseDto toDto(Profile profile) {

@@ -5,6 +5,7 @@ import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.contract.serviceType.ServiceType;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -105,14 +106,11 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
-        setupQueueProducer.send(new SetupMessage("NEW_CONTRACT_SUBCONTRACTOR",
-                null,
-                null,
-                null,
-                savedContractSubcontractor.getIdContract(),
-                null,
-                activities.stream().map(Activity::getIdActivity).toList(),
-                null));
+        setupQueueProducer.send(SetupMessage.builder()
+                        .type("NEW_CONTRACT_SUBCONTRACTOR")
+                        .contractSubcontractorId(savedContractSubcontractor.getIdContract())
+                        .activityIds(activities.stream().map(Activity::getIdActivity).toList())
+                .build());
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

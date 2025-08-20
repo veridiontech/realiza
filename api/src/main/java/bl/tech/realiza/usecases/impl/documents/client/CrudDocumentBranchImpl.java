@@ -589,23 +589,19 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
 
             if (replicate) {
                 if (isSelected) {
-                    replicationQueueProducer.send(new ReplicationMessage("ALLOCATE_DOCUMENT_FROM_BRANCH",
-                            branchIds,
-                            null,
-                            null,
-                            document.getIdDocumentation(),
-                            document.getTitle(),
-                            RiskEnum.LOW,
-                            RiskEnum.LOW));
+                    replicationQueueProducer.send(ReplicationMessage.builder()
+                                    .type("ALLOCATE_DOCUMENT_FROM_BRANCH")
+                                    .branchIds(branchIds)
+                                    .documentId(document.getIdDocumentation())
+                                    .title(document.getTitle())
+                            .build());
                 } else {
-                    replicationQueueProducer.send(new ReplicationMessage("DEALLOCATE_DOCUMENT_FROM_BRANCH",
-                            branchIds,
-                            null,
-                            null,
-                            document.getIdDocumentation(),
-                            document.getTitle(),
-                            RiskEnum.LOW,
-                            RiskEnum.LOW));
+                    replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("DEALLOCATE_DOCUMENT_FROM_BRANCH")
+                            .branchIds(branchIds)
+                            .documentId(document.getIdDocumentation())
+                            .title(document.getTitle())
+                            .build());
                 }
             }
         }
@@ -669,14 +665,11 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("EXPIRATION_DATE_DOCUMENT_UPDATE",
-                    branchIds,
-                    null,
-                    null,
-                    savedDocumentBranch.getIdDocumentation(),
-                    null,
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                    .type("EXPIRATION_DATE_DOCUMENT_UPDATE")
+                    .branchIds(branchIds)
+                    .documentId(savedDocumentBranch.getIdDocumentation())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {

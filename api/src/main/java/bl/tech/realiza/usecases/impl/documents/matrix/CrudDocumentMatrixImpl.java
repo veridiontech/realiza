@@ -49,14 +49,10 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .subGroup(documentMatrixSubgroup)
                 .build());
 
-        replicationQueueProducer.send(new ReplicationMessage("CREATE_DOCUMENT_MATRIX",
-                null,
-                null,
-                null,
-                savedDocumentMatrix.getIdDocument(),
-                null,
-                RiskEnum.LOW,
-                RiskEnum.LOW));
+        replicationQueueProducer.send(ReplicationMessage.builder()
+                .type("CREATE_DOCUMENT_MATRIX")
+                .documentId(savedDocumentMatrix.getIdDocument())
+                .build());
 
         return toDto(savedDocumentMatrix);
     }
@@ -110,14 +106,10 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 : documentMatrix.getFixedValidityAt());
 
         if (replicate != null && replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM",
-                    null,
-                    null,
-                    null,
-                    documentMatrix.getIdDocument(),
-                    null,
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                    .type("REPLICATE_DOCUMENT_MATRIX_FROM_SYSTEM")
+                    .documentId(documentMatrix.getIdDocument())
+                    .build());
         }
 
         return Optional.of(toDto(documentMatrix));

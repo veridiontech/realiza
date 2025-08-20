@@ -3,6 +3,8 @@ package bl.tech.realiza.usecases.impl.clients;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.activity.ActivityRepo;
+import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.enums.RiskEnum;
 import bl.tech.realiza.domains.ultragaz.Center;
 import bl.tech.realiza.domains.user.User;
@@ -13,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepoRepo
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
 import bl.tech.realiza.gateways.repositories.ultragaz.CenterRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
@@ -30,14 +33,18 @@ import bl.tech.realiza.gateways.responses.ultragaz.CenterResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
 import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
+import bl.tech.realiza.usecases.impl.contracts.CrudServiceTypeImpl;
+import bl.tech.realiza.usecases.impl.contracts.activity.CrudActivityImpl;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,6 +52,7 @@ import java.util.stream.Collectors;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CrudBranchImpl implements CrudBranch {
@@ -60,6 +68,9 @@ public class CrudBranchImpl implements CrudBranch {
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final JwtService jwtService;
     private final ActivityRepoRepository activityRepoRepository;
+    private final CrudActivityImpl crudActivity;
+    private final CrudServiceTypeImpl crudServiceTypeImpl;
+    private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
@@ -97,27 +108,22 @@ public class CrudBranchImpl implements CrudBranch {
         }
 
         if (branchCreateRequestDto.getReplicateFromBase()) {
-            setupQueueProducer.send(new SetupMessage("REPLICATE_BRANCH",
-                    null,
-                    savedBranch.getIdBranch(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null));
+            setupQueueProducer.send(SetupMessage.builder()
+                            .type("REPLICATE_BRANCH")
+                            .branchId(savedBranch.getIdBranch())
+                    .build());
         } else {
+            if (!branchCreateRequestDto.getBase()) {
                 List<ActivityRepo> activityRepos = new ArrayList<>();
-            if (branchCreateRequestDto.getActivityIds() != null && !branchCreateRequestDto.getActivityIds().isEmpty()) {
-                activityRepos = activityRepoRepository.findAllById(branchCreateRequestDto.getActivityIds());
+                if (branchCreateRequestDto.getActivityIds() != null && !branchCreateRequestDto.getActivityIds().isEmpty()) {
+                    activityRepos = activityRepoRepository.findAllById(branchCreateRequestDto.getActivityIds());
+                }
+                setupQueueProducer.send(SetupMessage.builder()
+                                .type("NEW_BRANCH")
+                                .branchId(savedBranch.getIdBranch())
+                                .activityIds(activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()))
+                        .build());
             }
-            setupQueueProducer.send(new SetupMessage("NEW_BRANCH",
-                    null,
-                    savedBranch.getIdBranch(),
-                    null,
-                    null,
-                    null,
-                    activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()),
-                    null));
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -396,5 +402,40 @@ public class CrudBranchImpl implements CrudBranch {
     @Override
     public List<BranchNameResponseDto> findAllNameByBranchAccess(List<String> branchIds) {
         return branchRepository.findAllNameByAccess(branchIds);
+    }
+
+    @Transactional
+    @Override
+    public void setupBranch(String branchId, List<String> activityIds) {
+        log.info("Started setup branch ⌛ {}", branchId);
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
+        crudServiceTypeImpl.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
+
+        List<DocumentBranch> batch = new ArrayList<>(50);
+        for (var documentMatrix : documentMatrixRepository.findAll()) {
+            batch.add(DocumentBranch.builder()
+                    .title(documentMatrix.getName())
+                    .type(documentMatrix.getType())
+                    .status(Document.Status.PENDENTE)
+                    .isActive(false)
+                    .branch(branch)
+                    .documentMatrix(documentMatrix)
+                    .validity(documentMatrix.getValidity())
+                    .expirationDateAmount(documentMatrix.getExpirationDateAmount())
+                    .expirationDateUnit(documentMatrix.getExpirationDateUnit())
+                    .build());
+
+            if (batch.size() == 50) {
+                documentBranchRepository.saveAll(batch);
+                batch.clear();
+            }
+        }
+        if (!batch.isEmpty()) {
+            documentBranchRepository.saveAll(batch);
+        }
+        crudActivity.transferFromRepo(branch.getIdBranch(), activityIds);
+
+        log.info("Finished setup branch ✔️ {}", branchId);
     }
 }

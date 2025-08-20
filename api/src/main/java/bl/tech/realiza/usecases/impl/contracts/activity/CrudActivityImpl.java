@@ -75,14 +75,11 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("CREATE_ACTIVITY",
-                    branchIds,
-                    savedActivity.getIdActivity(),
-                    null,
-                    null,
-                    null,
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                    .type("CREATE_ACTIVITY")
+                    .branchIds(branchIds)
+                            .activityId(savedActivity.getIdActivity())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -211,14 +208,12 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("ALLOCATE_DOCUMENT_FROM_ACTIVITY",
-                    branchIds,
-                    null,
-                    savedActivityDocuments.getActivity().getIdActivity(),
-                    null,
-                    savedActivityDocuments.getDocumentBranch().getIdDocumentation(),
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("ALLOCATE_DOCUMENT_FROM_ACTIVITY")
+                            .branchIds(branchIds)
+                            .documentId(savedActivityDocuments.getDocumentBranch().getIdDocumentation())
+                            .activityId(savedActivityDocuments.getActivity().getIdActivity())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -252,14 +247,12 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("DEALLOCATE_DOCUMENT_FROM_ACTIVITY",
-                    branchIds,
-                    null,
-                    savedActivityDocuments.getActivity().getIdActivity(),
-                    null,
-                    savedActivityDocuments.getDocumentBranch().getIdDocumentation(),
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("DEALLOCATE_DOCUMENT_FROM_ACTIVITY")
+                            .branchIds(branchIds)
+                            .activityId(savedActivityDocuments.getActivity().getIdActivity())
+                            .documentId(savedActivityDocuments.getDocumentBranch().getIdDocumentation())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -304,14 +297,13 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("UPDATE_ACTIVITY",
-                    branchIds,
-                    savedActivity.getIdActivity(),
-                    null,
-                    null,
-                    oldTitle,
-                    oldRisk,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("UPDATE_ACTIVITY")
+                            .branchIds(branchIds)
+                            .activityId(savedActivity.getIdActivity())
+                            .title(oldTitle)
+                            .activityRisk(oldRisk)
+                    .build());
         }
 
         ActivityResponseDto activityResponse = ActivityResponseDto.builder()
@@ -345,14 +337,11 @@ public class CrudActivityImpl implements CrudActivity {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("DELETE_ACTIVITY",
-                    branchIds,
-                    null,
-                    null,
-                    null,
-                    activity.getTitle(),
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                    .type("DELETE_ACTIVITY")
+                    .branchIds(branchIds)
+                    .title(activity.getTitle())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {

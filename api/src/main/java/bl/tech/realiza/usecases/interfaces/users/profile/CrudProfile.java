@@ -13,4 +13,6 @@ public interface CrudProfile {
     List<ProfileNameResponseDto> findAllByClientId(String clientId);
     ProfileResponseDto update(String id, ProfileRequestDto profileRequestDto);
     void delete(String id);
+
+    void transferFromRepoToClient(String idClient);
 }

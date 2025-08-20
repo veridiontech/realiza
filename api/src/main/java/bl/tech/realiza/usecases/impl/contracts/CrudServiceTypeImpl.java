@@ -112,14 +112,12 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
 
         if (replicate && serviceType instanceof ServiceTypeBranch serviceTypeBranch) {
-            replicationQueueProducer.send(new ReplicationMessage("DELETE_SERVICE_TYPE",
-                    branchIds,
-                    null,
-                    null,
-                    null,
-                    serviceTypeBranch.getTitle(),
-                    serviceTypeBranch.getRisk(),
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("DELETE_SERVICE_TYPE")
+                            .branchIds(branchIds)
+                            .title(serviceType.getTitle())
+                            .serviceTypeRisk(serviceTypeBranch.getRisk())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -175,14 +173,12 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("CREATE_SERVICE_TYPE",
-                    branchIds,
-                    null,
-                    serviceTypeBranch.getIdServiceType(),
-                    null,
-                    serviceTypeBranch.getTitle(),
-                    RiskEnum.LOW,
-                    RiskEnum.LOW));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("CREATE_SERVICE_TYPE")
+                            .branchIds(branchIds)
+                            .title(serviceType.getTitle())
+                            .serviceTypeBranchId(serviceTypeBranch.getIdServiceType())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
@@ -218,14 +214,13 @@ public class CrudServiceTypeImpl implements CrudServiceType {
         }
 
         if (replicate) {
-            replicationQueueProducer.send(new ReplicationMessage("UPDATE_SERVICE_TYPE",
-                    branchIds,
-                    null,
-                    serviceTypeBranch.getIdServiceType(),
-                    null,
-                    serviceTypeBranch.getTitle(),
-                    RiskEnum.LOW,
-                    serviceTypeBranch.getRisk()));
+            replicationQueueProducer.send(ReplicationMessage.builder()
+                            .type("UPDATE_SERVICE_TYPE")
+                            .branchIds(branchIds)
+                            .title(serviceType.getTitle())
+                            .serviceTypeBranchId(serviceTypeBranch.getIdServiceType())
+                            .serviceTypeRisk(serviceTypeBranch.getRisk())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {

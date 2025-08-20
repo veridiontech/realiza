@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -133,14 +134,11 @@ public class CrudContractImpl implements CrudContract {
                 }
             }
 
-            setupQueueProducer.send(new SetupMessage("EMPLOYEE_CONTRACT_SUPPLIER",
-                    null,
-                    null,
-                    contractProviderSupplier.getIdContract(),
-                    null,
-                    null,
-                    null,
-                    employees.stream().map(Employee::getIdEmployee).toList()));
+            setupQueueProducer.send(SetupMessage.builder()
+                            .type("EMPLOYEE_CONTRACT_SUPPLIER")
+                            .contractSupplierId(contractProviderSupplier.getIdContract())
+                            .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
+                    .build());
 
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
@@ -155,14 +153,11 @@ public class CrudContractImpl implements CrudContract {
                 }
             }
 
-            setupQueueProducer.send(new SetupMessage("EMPLOYEE_CONTRACT_SUBCONTRACT",
-                    null,
-                    null,
-                    null,
-                    contractProviderSubcontractor.getIdContract(),
-                    null,
-                    null,
-                    employees.stream().map(Employee::getIdEmployee).toList()));
+            setupQueueProducer.send(SetupMessage.builder()
+                    .type("EMPLOYEE_CONTRACT_SUBCONTRACT")
+                    .contractSubcontractorId(contractProviderSubcontractor.getIdContract())
+                    .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
+                    .build());
 
         } else {
             throw new NotFoundException("Invalid contract type");
@@ -233,14 +228,11 @@ public class CrudContractImpl implements CrudContract {
             throw new NotFoundException("Invalid contract type");
         }
 
-        setupQueueProducer.send(new SetupMessage("REMOVE_EMPLOYEE_CONTRACT",
-                null,
-                null,
-                null,
-                null,
-                contract.getIdContract(),
-                null,
-                employees.stream().map(Employee::getIdEmployee).toList()));
+        setupQueueProducer.send(SetupMessage.builder()
+                .type("REMOVE_EMPLOYEE_CONTRACT")
+                .contractId(contract.getIdContract())
+                .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
+                .build());
 
         for (Employee employee : employees) {
             if (JwtService.getAuthenticatedUserId() != null) {

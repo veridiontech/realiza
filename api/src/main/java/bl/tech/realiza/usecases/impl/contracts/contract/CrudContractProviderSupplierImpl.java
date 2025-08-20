@@ -142,14 +142,11 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         userClient.getContractsAccess().add(savedContractProviderSupplier);
         userClientRepository.save(userClient);
 
-        setupQueueProducer.send(new SetupMessage("NEW_CONTRACT_SUPPLIER",
-                null,
-                null,
-                savedContractProviderSupplier.getIdContract(),
-                null,
-                null,
-                activities.stream().map(Activity::getIdActivity).toList(),
-                null));
+        setupQueueProducer.send(SetupMessage.builder()
+                .type("NEW_CONTRACT_SUPPLIER")
+                .contractSupplierId(savedContractProviderSupplier.getIdContract())
+                .activityIds(activities.stream().map(Activity::getIdActivity).toList())
+                .build());
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(

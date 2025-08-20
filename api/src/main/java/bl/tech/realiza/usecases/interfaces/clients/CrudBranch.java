@@ -21,4 +21,6 @@ public interface CrudBranch {
     Page<BranchResponseDto> findAllByClientUnfiltered(String idSearch, Pageable pageable);
     ControlPanelResponseDto findControlPanelSummary(String branchId);
     List<BranchNameResponseDto> findAllNameByBranchAccess(List<String> branchIds);
+
+    void setupBranch(String branchId, List<String> activityIds);
 }
