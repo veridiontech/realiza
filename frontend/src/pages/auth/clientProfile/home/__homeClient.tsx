@@ -23,7 +23,7 @@ export function HomeClient() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBranches, setFilteredBranches] = useState([]);
 
-    console.log(selectedBranch);
+    console.log("a", selectedBranch);
 
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
