@@ -56,8 +56,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
+                "http://localhost:5173",
+                "https://realiza-web-development.onrender.com",
                 "https://realiza-1.onrender.com",
-                "http://localhost:5173"
+                "https://sistema.realizaassessoria.com.br"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
