@@ -34,6 +34,8 @@ export interface propsClient {
   telephone: string;
   tradeName: string;
   isUltragaz: boolean;
+  phone: string;
+  cep: string;
 }
 
 export interface propsDocument {

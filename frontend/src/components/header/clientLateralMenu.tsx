@@ -4,7 +4,6 @@ import {
   Home,
   Users2,
   Building2,
-  Factory,
   PersonStanding,
   Paperclip,
 } from "lucide-react";
@@ -80,14 +79,14 @@ export function ClientLateralMenu({ onClose }: { onClose: () => void }) {
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
       />
-      <ClientMenuItem
+      {/* <ClientMenuItem
         to={`/cliente/branch/${getIdUser}`}
         icon={<Factory />}
         label="Filiais"
         menuKey="filiais"
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
-      />
+      /> */}
       <ClientMenuItem
         to={`/cliente/employees/${getIdUser}`}
         icon={<PersonStanding />}

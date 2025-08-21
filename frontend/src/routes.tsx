@@ -58,6 +58,7 @@ import { DocumentPageNew } from "./pages/auth/realizaProfile/documents/new-docum
 import { MonittoringBis } from "./pages/auth/realizaProfile/bis";
 import { ContarctsByProvider } from "./pages/auth/realizaProfile/contract-by-provider/contracts-by-provider";
 import { ConfigPanel } from "./pages/auth/realizaProfile/branchs/configPanel";
+import { DocumentClient } from "./pages/auth/realizaProfile/documents/new-documents-page/documentClient";
 
 export const router = createBrowserRouter([
   {
@@ -137,6 +138,7 @@ export const router = createBrowserRouter([
       { path: "employees/:id", element: <ClientEmployee /> },
       { path: "create-manager/:id", element: <CreateNewManagerClient /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
+      { path: "documents/:id", element: <DocumentClient /> },
     ],
   },
   {

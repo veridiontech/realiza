@@ -10,7 +10,6 @@ import { Link } from "react-router-dom";
 import { useUser } from "@/context/user-provider";
 import { useBranch } from "@/context/Branch-provider";
 import { propsBranch } from "@/types/interfaces";
-import { AddNewBranch } from "./modals/add-new-branch";
 
 export function ClientBranch() {
   const [branches, setBranches] = useState<propsBranch[]>([]);
@@ -31,7 +30,6 @@ export function ClientBranch() {
     { key: "cnpj", label: "Cnpj | NIF" },
     { key: "address", label: "Endereço" },
     { key: "email", label: "E-mail" },
-    //{ key: "phone", label: "Telefone" },
     {
       key: "actions",
       label: "Ações",
@@ -59,17 +57,28 @@ export function ClientBranch() {
     setError(null);
     try {
       const tokenFromStorage = localStorage.getItem("tokenClient");
+      const url = `${ip}/branch/filtered-client?idSearch=${client?.idClient}`;
+      
+      // Adicionando logs para depuração
+      console.log("URL da API:", url);
+      console.log("Token de Autorização:", tokenFromStorage ? "Existe" : "Não existe");
+
       const response = await axios.get(
-        `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
+        url,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
       const { content, totalPages: total } = response.data;
+      
+      // Log para verificar a resposta da API
+      console.log("Resposta da API:", response.data);
+      
       setBranches(content);
       setTotalPages(total);
     } catch (err) {
       console.error("Erro ao buscar filiais:", err);
+      // Log do erro completo para depuração
       setError("Erro ao buscar filiais. Tente novamente.");
     } finally {
       setLoading(false);
@@ -77,6 +86,8 @@ export function ClientBranch() {
   };
 
   useEffect(() => {
+    // Adicionando um log para verificar se o useEffect está sendo acionado e o valor de client?.idClient
+    console.log("useEffect acionado. client?.idClient:", client?.idClient);
     if (client?.idClient) {
       setBranches([]);
       setCurrentPage(1);
@@ -112,7 +123,6 @@ export function ClientBranch() {
               className="w-full bg-transparent text-sm text-gray-700 placeholder-gray-500 outline-none"
             />
           </div>
-          <AddNewBranch />
         </div>
 
         {loading ? (
