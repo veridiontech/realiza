@@ -104,6 +104,22 @@ public class CrudClientImpl implements CrudClient {
                             .clientId(savedClient.getIdClient())
                             .build());
                 }
+
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                            .orElse(null);
+                    if (userResponsible != null) {
+                        auditLogServiceImpl.createAuditLog(
+                                savedClient.getIdClient(),
+                                CLIENT,
+                                userResponsible.getFullName() + " criou cliente "
+                                        + savedClient.getCorporateName(),
+                                null,
+                                null,
+                                CREATE,
+                                userResponsible.getIdUser());
+                    }
+                }
             }
         });
 
@@ -123,22 +139,6 @@ public class CrudClientImpl implements CrudClient {
                 .client(savedClient.getIdClient())
                 .build());
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLog(
-                        savedClient.getIdClient(),
-                        CLIENT,
-                        userResponsible.getFullName() + " criou cliente "
-                                + savedClient.getCorporateName(),
-                        null,
-                        null,
-                        CREATE,
-                        userResponsible.getIdUser());
-            }
-        }
-
         return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())
                 .cnpj(savedClient.getCnpj())
@@ -151,7 +151,6 @@ public class CrudClientImpl implements CrudClient {
                 .city(savedClient.getCity())
                 .address(savedClient.getAddress())
                 .number(savedClient.getNumber())
-                .isUltragaz(savedClient.getIsUltragaz())
                 .build();
     }
 

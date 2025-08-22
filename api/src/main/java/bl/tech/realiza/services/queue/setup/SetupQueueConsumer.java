@@ -19,17 +19,21 @@ public class SetupQueueConsumer {
     @RabbitListener(queues = RabbitConfig.SETUP_QUEUE)
     public void consume(SetupMessage message) {
         long start = System.currentTimeMillis();
+        log.info("Message received: {}", message.getType());
         try {
             switch (message.getType()) {
                 case "NEW_CLIENT" -> {
+                    log.info("New client received");
                     setupService.setupNewClient(message.getClientId());
                     queueLogService.logSuccess("NEW_CLIENT", message.getClientId(), start);
                 }
                 case "NEW_CLIENT_PROFILES" -> {
+                    log.info("New client profiles received");
                     setupService.setupNewClientProfiles(message.getClientId());
                     queueLogService.logSuccess("NEW_CLIENT_PROFILES", message.getClientId(), start);
                 }
                 case "NEW_BRANCH" -> {
+                    log.info("New branch received");
                     setupService.setupBranch(message.getBranchId());
                     queueLogService.logSuccess("NEW_BRANCH", message.getBranchId(), start);
                 }
