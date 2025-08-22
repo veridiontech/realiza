@@ -5,6 +5,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { FilePlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -82,7 +83,7 @@ type ModalSendEmailFormSchemaSubContractor = z.infer<
 >;
 type ContractFormSchema = z.infer<typeof contractFormSchema>;
 
-export function ModalTesteSendSupplier() {
+export function ModalCadastroSubcontratado() {
   const [managers, setManagers] = useState<any>([]);
   const [activities, setActivities] = useState<any>([]);
   const [pushCnpj, setPushCnpj] = useState<string | null>(null);
@@ -98,13 +99,14 @@ export function ModalTesteSendSupplier() {
   const [isSsma, setIsSsma] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [servicesType, setServicesType] = useState([]);
-  const [isMainModalOpen, setIsMainModalOpen] = useState(false);
   const [cnpjValue, setCnpjValue] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const [searchService, setSearchService] = useState("");
   const [searchActivity, setSearchActivity] = useState("");
   const [usedEmails, setUsedEmails] = useState<string[]>([]);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [isMainModalOpen, setIsMainModalOpen] = useState(false);
+  const [targetContractId, setTargetContractId] = useState<string | null>(null);
 
   const {
     register,
@@ -160,7 +162,7 @@ export function ModalTesteSendSupplier() {
   const handleModalOpenChange = (isOpen: boolean) => {
     setIsMainModalOpen(isOpen);
     if (isOpen) {
-      setIsSubContractor("contratado");
+      setIsSubContractor("subcontratado");
     } else {
       resetFormState();
     }
@@ -222,6 +224,9 @@ export function ModalTesteSendSupplier() {
     if (isSubcontractor === "contratado") {
       setCnpjValue(getValues("cnpj") || "");
       setPhoneValue(getValues("phone") || "");
+    } else if (isSubcontractor === "subcontratado") {
+      setCnpjValue(getValuesSubContract("cnpj") || "");
+      setPhoneValue(getValuesSubContract("phone") || "");
     }
   }, [getValues, getValuesSubContract, isSubcontractor]);
 
@@ -375,6 +380,27 @@ export function ModalTesteSendSupplier() {
           ...payload,
           providerDatas,
         };
+      } else if (isSubcontractor === "subcontratado") {
+        apiUrl = `${ip}/contract/subcontractor`;
+        payload = {
+          ...payload,
+          serviceName: data.serviceName,
+          contractReference: data.contractReference,
+          description: data.description,
+          expenseType: data.expenseType,
+          labor: data.labor,
+          hse: data.hse,
+          dateStart: data.dateStart,
+          idRequester: user?.idUser,
+          idActivities: selectedActivities,
+          idContractSupplier: providerDatas.idContractSupplier,
+          providerDatas: {
+            corporateName: providerDatas?.corporateName || "",
+            email: providerDatas?.email || "",
+            cnpj: providerDatas?.cnpj || "",
+            telephone: providerDatas?.phone || "",
+          },
+        };
       } else {
         toast.error("Tipo de contratação não selecionado.");
         setIsLoading(false);
@@ -426,11 +452,12 @@ export function ModalTesteSendSupplier() {
       console.log("Erro ao buscar serviços", err);
     }
   };
+
   return (
     <Dialog open={isMainModalOpen} onOpenChange={handleModalOpenChange}>
       <DialogTrigger asChild>
-        <Button className="hidden bg-sky-700 md:block">
-          Cadastrar novo prestador
+        <Button className="w-full text-left px-4 py-2 text-sm text-gray-700 font-normal bg-white hover:bg-gray-100 flex items-center gap-2">
+          <FilePlus className="w-4 h-4" /> Cadastrar subcontratado
         </Button>
       </DialogTrigger>
       <DialogTrigger asChild>
@@ -440,7 +467,7 @@ export function ModalTesteSendSupplier() {
         <div className="flex items-center justify-between bg-[#2E3C4D] px-5 py-4 h-[60px] min-w-full">
           <h2 className="text-white text-base font-semibold flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-[#C0B15B]" />
-            Cadastrar novo prestador
+            Cadastrar novo subcontratado
           </h2>
         </div>
 
@@ -450,9 +477,9 @@ export function ModalTesteSendSupplier() {
         </div>
 
         <div>
-          {isSubcontractor === "contratado" && (
+          {isSubcontractor === "subcontratado" && (
             <form
-              onSubmit={handleSubmit(createClient)}
+              onSubmit={handleSubmitSubContract(createClient)}
               className="flex flex-col gap-4"
             >
               <div className="relative">
@@ -465,7 +492,9 @@ export function ModalTesteSendSupplier() {
                     onChange={(e) => {
                       const formatted = formatCNPJ(e.target.value);
                       setCnpjValue(formatted);
-                      setValue("cnpj", formatted, { shouldValidate: true });
+                      setValueSubContract("cnpj", formatted, {
+                        shouldValidate: true,
+                      });
                     }}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
                   />
@@ -493,8 +522,10 @@ export function ModalTesteSendSupplier() {
                     </div>
                   )}
                 </div>
-                {errors.cnpj && (
-                  <span className="text-red-600">{errors.cnpj.message}</span>
+                {errorsSubContract.cnpj && (
+                  <span className="text-red-600">
+                    {errorsSubContract.cnpj.message}
+                  </span>
                 )}
               </div>
 
@@ -503,20 +534,27 @@ export function ModalTesteSendSupplier() {
                 <Input
                   type="text"
                   placeholder="Digite a razão social do novo prestador"
-                  {...register("corporateName")}
+                  {...registerSubContract("corporateName")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
                 />
+                {errorsSubContract.corporateName && (
+                  <span className="text-red-600">
+                    {errorsSubContract.corporateName.message}
+                  </span>
+                )}
               </div>
               <div className="mb-1">
                 <Label className="text-black">Email</Label>
                 <Input
                   type="email"
                   placeholder="Digite o email do novo prestador"
-                  {...register("email")}
+                  {...registerSubContract("email")}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
                 />
-                {errors.email && (
-                  <span className="text-red-600">{errors.email.message}</span>
+                {errorsSubContract.email && (
+                  <span className="text-red-600">
+                    {errorsSubContract.email.message}
+                  </span>
                 )}
               </div>
               <div className="flex flex-col gap-2">
@@ -527,26 +565,70 @@ export function ModalTesteSendSupplier() {
                   onChange={(e) => {
                     const formattedPhone = formatPhone(e.target.value);
                     setPhoneValue(formattedPhone);
-                    setValue("phone", formattedPhone, { shouldValidate: true });
+                    setValueSubContract("phone", formattedPhone, {
+                      shouldValidate: true,
+                    });
                   }}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-[#F2F3F5] text-gray-700"
                 />
-                {errors.phone && (
-                  <span className="text-red-600">{errors.phone.message}</span>
+                {errorsSubContract.phone && (
+                  <span className="text-red-600">
+                    {errorsSubContract.phone.message}
+                  </span>
                 )}
               </div>
-
-              <div className="flex justify-end">
-                <Button
-                  className="bg-realizaBlue"
-                  onClick={() => {
-                    getActivities(), getServicesType();
-                  }}
+              <div className="flex flex-col gap-1">
+                <Label className="text-black">Selecione um contrato</Label>
+                <select
+                  defaultValue={targetContractId || ""}
+                  className="rounded-lg p-2"
+                  {...registerSubContract("providerSubcontractor")}
                 >
-                  Próximo
-                </Button>
+                  <option value="" disabled>
+                    Selecione uma opção
+                  </option>
+                  {Array.isArray(suppliers) &&
+                    suppliers.map((supplier: any) => (
+                      <option
+                        value={supplier.idContract}
+                        key={supplier.idContract}
+                      >
+                        {supplier.contractReference}
+                      </option>
+                    ))}
+                </select>
+                {errorsSubContract.providerSubcontractor && (
+                  <span className="text-red-600">
+                    {errorsSubContract.providerSubcontractor.message}
+                  </span>
+                )}
+              </div>
+              <div className="flex justify-end">
+                {isLoading ? (
+                  <Button>
+                    <Oval
+                      visible={true}
+                      height="30"
+                      width="30"
+                      color="#fff"
+                      ariaLabel="radio-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-realizaBlue"
+                    type="submit"
+                    onClick={() => {
+                      getActivities(), getServicesType();
+                    }}
+                  >
+                    Próximo
+                  </Button>
+                )}
               </div>
             </form>
           )}
@@ -855,40 +937,6 @@ export function ModalTesteSendSupplier() {
                       )}
                     </div>
 
-                    {isSubcontractor === "contratado" && (
-                      <div className="flex flex-col gap-2 mt-3">
-                        <Label className="text-black">
-                          Permitir subcontratação?
-                        </Label>
-                        <div className="flex gap-4">
-                          <label className="flex items-center gap-2 text-black">
-                            <input
-                              type="radio"
-                              value="true"
-                              {...registerContract("subcontractPermission", {
-                                required: "Selecione se permite subcontratação",
-                              })}
-                            />
-                            Sim
-                          </label>
-                          <label className="flex items-center gap-2 text-black">
-                            <input
-                              type="radio"
-                              value="false"
-                              {...registerContract("subcontractPermission", {
-                                required: "Selecione se permite subcontratação",
-                              })}
-                            />
-                            Não
-                          </label>
-                        </div>
-                        {errorsContract.subcontractPermission && (
-                          <span className="text-red-600">
-                            {errorsContract.subcontractPermission.message}
-                          </span>
-                        )}
-                      </div>
-                    )}
                     {isLoading ? (
                       <Button
                         className="bg-realizaBlue"

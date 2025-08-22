@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
+import { ModalCadastroSubcontratado } from "@/components/modal-cadastro-subcontratado";
 
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -22,6 +23,58 @@ import { useWatch } from "react-hook-form";
 
 import likeImage from "@/assets/like.png";
 import { useNavigate } from "react-router-dom";
+
+// --- Enum enxuto (apenas os 3 usados no front)
+enum ContractStatusEnum {
+  ACTIVE = "ACTIVE",
+  FINISHED = "FINISHED",
+  SUSPENDED = "SUSPENDED",
+}
+
+const ACTIVE_STATES = new Set<ContractStatusEnum>([ContractStatusEnum.ACTIVE]);
+const SUSPENDED_STATES = new Set<ContractStatusEnum>([
+  ContractStatusEnum.SUSPENDED,
+]);
+const FINISHED_STATES = new Set<ContractStatusEnum>([
+  ContractStatusEnum.FINISHED,
+]);
+
+// --- NORMALIZAÇÃO ---
+function getContractStatusFromSupplier(
+  supplier: any
+): ContractStatusEnum | undefined {
+  const raw =
+    supplier?.contractStatus ??
+    supplier?.status ??
+    supplier?.statusEnum ??
+    supplier?.contractStatusEnum;
+
+  const s = typeof raw === "string" ? raw.toUpperCase() : undefined;
+  if (!s) return undefined;
+
+  if (
+    ["SUSPENDED", "SUSPEND_REQUESTED", "REACTIVATION_REQUESTED"].includes(s)
+  ) {
+    return ContractStatusEnum.SUSPENDED;
+  }
+  if (["FINISHED", "DENIED"].includes(s)) {
+    return ContractStatusEnum.FINISHED;
+  }
+  if (["ACTIVE", "PENDING", "FINISH_REQUESTED"].includes(s)) {
+    return ContractStatusEnum.ACTIVE;
+  }
+  return ContractStatusEnum.ACTIVE;
+}
+
+function isActiveStatus(status?: ContractStatusEnum) {
+  return !!status && ACTIVE_STATES.has(status);
+}
+function isSuspendedStatus(status?: ContractStatusEnum) {
+  return !!status && SUSPENDED_STATES.has(status);
+}
+function isFinishedStatus(status?: ContractStatusEnum) {
+  return !!status && FINISHED_STATES.has(status);
+}
 
 const editContractSchema = z.object({
   contractReference: z.string().optional(),
@@ -37,25 +90,13 @@ const editContractSchema = z.object({
   description: z.string().optional(),
 });
 
-function StatusBadge({
-  finished,
-  suspended,
-}: {
-  finished?: boolean;
-  suspended?: boolean;
-}) {
+function StatusBadge({ status }: { status?: ContractStatusEnum }) {
   const baseClass = "w-3 h-3 rounded-full mx-auto my-auto block";
-  let statusStyle = "";
-
-  if (suspended) {
-    statusStyle = "bg-orange-400";
-  } else if (finished === true) {
-    statusStyle = "bg-red-600";
-  } else {
-    statusStyle = "bg-green-600";
-  }
-
-  return <span className={`${baseClass} ${statusStyle}`}></span>;
+  let statusStyle = "bg-gray-400";
+  if (isSuspendedStatus(status)) statusStyle = "bg-orange-400";
+  else if (isFinishedStatus(status)) statusStyle = "bg-red-600";
+  else if (isActiveStatus(status)) statusStyle = "bg-green-600";
+  return <span className={`${baseClass} ${statusStyle}`} />;
 }
 
 function Modal({
@@ -92,6 +133,21 @@ function Modal({
   );
 }
 
+// util para unificar listas (por idContract)
+function uniqueBy<T>(
+  arr: T[],
+  keySelector: (x: T) => string | number | undefined
+) {
+  const seen = new Set<string | number>();
+  return arr.filter((item) => {
+    const key = keySelector(item);
+    if (key === undefined) return true;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function TableServiceProvider() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -103,9 +159,11 @@ export function TableServiceProvider() {
   const [isSuspendingContract, setIsSuspendingContract] = useState(false);
   const [editFormData, setEditFormData] = useState<any | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<any | null>(null);
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
-    null
-  );
+
+  // >>> separa menu aberto do contrato alvo da ação
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [targetContractId, setTargetContractId] = useState<string | null>(null);
+
   const [managers, setManagers] = useState<any[]>([]);
   const [servicesType, setServicesType] = useState<any[]>([]);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -134,15 +192,26 @@ export function TableServiceProvider() {
   const [selectedLaborActivitiesEdit, setSelectedLaborActivitiesEdit] =
     useState<string[]>([]);
   const [searchSsmaActivityEdit, setSearchSsmaActivityEdit] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
+  // Carregamentos iniciais
   useEffect(() => {
     if (selectedBranch?.idBranch) {
       getManager();
       getServicesType();
       getActivities();
+      getSupplier(); // primeira carga
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBranch]);
+
+  // >>> refetch ao trocar de aba (crítico para ver Suspensos)
+  useEffect(() => {
+    if (selectedBranch?.idBranch) {
       getSupplier();
     }
-  }, [selectedBranch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter]);
 
   useEffect(() => {
     if (editFormData && managers.length > 0 && servicesType.length > 0) {
@@ -159,37 +228,72 @@ export function TableServiceProvider() {
     }
   }, [editFormData, managers, servicesType, reset]);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  // --- Buscar fornecedores do back, cobrindo todos os casos
+  // --- Buscar fornecedores do back, cobrindo todos os casos
+  const getSupplier = async () => {
+    if (!selectedBranch?.idBranch) return;
+    setLoading(true);
+    try {
+      const tokenFromStorage = localStorage.getItem("tokenClient");
+      const base = { idSearch: selectedBranch.idBranch };
 
-const getSupplier = async () => {
-  if (!selectedBranch?.idBranch) return;
-  setLoading(true);
-  try {
-    const tokenFromStorage = localStorage.getItem("tokenClient");
-    
-    let isActive;
-    if (statusFilter === "Ativo") {
-      isActive = true;
-    } else if (statusFilter === "Suspenso") {
-      isActive = false;
+      const fetchPage = async (extraParams: Record<string, any>) => {
+        const params = { ...base, ...extraParams };
+        const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
+          params,
+          headers: { Authorization: `Bearer ${tokenFromStorage}` },
+        });
+        return res.data?.content ?? [];
+      };
+
+      let list: any[] = [];
+
+      if (statusFilter === "Todos") {
+        // ⚠️ Agora também busca explicitamente os status suspensos e finalizados
+        const [active, finished, suspended, suspendReq, reactivateReq] =
+          await Promise.all([
+            fetchPage({ isActive: true }),
+            fetchPage({ status: "FINISHED" }),
+            fetchPage({ status: "SUSPENDED" }),
+            fetchPage({ status: "SUSPEND_REQUESTED" }),
+            fetchPage({ status: "REACTIVATION_REQUESTED" }),
+          ]);
+        list = uniqueBy(
+          [
+            ...active,
+            ...finished,
+            ...suspended,
+            ...suspendReq,
+            ...reactivateReq,
+          ],
+          (x) => x.idContract
+        );
+      } else if (statusFilter === "Ativo") {
+        list = await fetchPage({ isActive: true });
+      } else if (statusFilter === "Finalizado") {
+        list = await fetchPage({ status: "FINISHED" });
+      } else if (statusFilter === "Suspenso") {
+        const [inactive, suspendReq, reactivateReq, suspended] =
+          await Promise.all([
+            fetchPage({ isActive: false }),
+            fetchPage({ status: "SUSPEND_REQUESTED" }),
+            fetchPage({ status: "REACTIVATION_REQUESTED" }),
+            fetchPage({ status: "SUSPENDED" }),
+          ]);
+        list = uniqueBy(
+          [...inactive, ...suspendReq, ...reactivateReq, ...suspended],
+          (x) => x.idContract
+        );
+      }
+
+      setSuppliers(list);
+    } catch (err) {
+      console.log("Erro ao buscar prestadores de serviço", err);
+    } finally {
+      setLoading(false);
     }
-  
-    const res = await axios.get(`${ip}/contract/supplier/filtered-client`, {
-      params: {
-        idSearch: selectedBranch.idBranch,
-        isActive: isActive,
-      },
-      headers: { Authorization: `Bearer ${tokenFromStorage}` },
-    });
-    
-    setSuppliers(res.data.content);
-    console.log("Contratos recebidos da API (getSupplier):", res.data.content);
-  } catch (err) {
-    console.log("Erro ao buscar prestadores de serviço", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   const onSubmitEdit = async (data: z.infer<typeof editContractSchema>) => {
     try {
       const token = localStorage.getItem("tokenClient");
@@ -223,9 +327,7 @@ const getSupplier = async () => {
       const token = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/user/client/filtered-client?idSearch=${selectedBranch?.idBranch}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setManagers(res.data.content);
     } catch (err) {
@@ -243,10 +345,7 @@ const getSupplier = async () => {
     try {
       const token = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/contract/service-type`, {
-        params: {
-          owner: "BRANCH",
-          idOwner: selectedBranch?.idBranch,
-        },
+        params: { owner: "BRANCH", idOwner: selectedBranch?.idBranch },
         headers: { Authorization: `Bearer ${token}` },
       });
       setServicesType(res.data);
@@ -260,9 +359,7 @@ const getSupplier = async () => {
       const token = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/contract/activity/find-by-branch/${selectedBranch?.idBranch}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setActivities(res.data);
     } catch (err) {
@@ -274,10 +371,7 @@ const getSupplier = async () => {
     try {
       const token = localStorage.getItem("tokenClient");
       const res = await axios.get(`${ip}/audit-log`, {
-        params: {
-          id: contractId,
-          auditLogTypeEnum: "CONTRACT",
-        },
+        params: { id: contractId, auditLogTypeEnum: "CONTRACT" },
         headers: { Authorization: `Bearer ${token}` },
       });
       setContractHistory(res.data.content || []);
@@ -304,54 +398,54 @@ const getSupplier = async () => {
   const handleEditClick = (supplier: any) => {
     setSelectedSupplier(supplier);
     setEditFormData({ ...supplier });
+    setTargetContractId(supplier.idContract);
     setIsEditing(false);
     setIsEditModalOpen(true);
   };
 
   const handleSuspendClick = (supplier: any) => {
-    console.log("handleSuspendClick acionado para o contrato:", supplier.idContract);
+    console.log("handleSuspendClick -> contrato:", supplier.idContract);
     setSelectedSupplier(supplier);
-    setSelectedSupplierId(supplier.idContract);
+    setTargetContractId(supplier.idContract); // <<< usar o alvo da ação
     setIsSuspendModalOpen(true);
   };
 
   const handleSuspendContract = async () => {
-    console.log("handleSuspendContract iniciado.");
-    if (!selectedSupplierId) {
-      console.log("selectedSupplierId está nulo ou indefinido. Abortando requisição.");
+    console.log("handleSuspendContract iniciado. target:", targetContractId);
+    if (!targetContractId) {
+      console.log("targetContractId está nulo/indefinido. Abortando.");
       return;
     }
 
     setIsSuspendingContract(true);
-    console.log("Estado isSuspendingContract definido para true.");
-    console.log("Tentando suspender contrato com ID:", selectedSupplierId);
     const token = localStorage.getItem("tokenClient");
-    console.log("Token de autenticação:", token ? "Presente" : "Ausente");
-    const endpoint = `${ip}/contract/suspend/${selectedSupplierId}`;
-    console.log("Endpoint da requisição:", endpoint);
+    const endpoint = `${ip}/contract/suspend/${targetContractId}`;
+    console.log("POST", endpoint);
 
     try {
-      const response = await axios.post(endpoint, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Resposta da requisição de suspensão:", response.data);
+      const response = await axios.post(
+        endpoint,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log("Resposta da suspensão:", response.status, response.data);
       toast.success("Contrato suspenso com sucesso");
-      console.log("Contrato suspenso com sucesso.");
       await getSupplier();
-      console.log("Lista de fornecedores atualizada.");
       setIsSuspendModalOpen(false);
-      setSelectedSupplierId(null);
-      console.log("Modal de suspensão fechado e ID resetado.");
+      setTargetContractId(null);
+      setOpenMenuId(null);
     } catch (err) {
       toast.error("Erro ao suspender contrato");
       if (axios.isAxiosError(err)) {
-        console.error("Erro na requisição Axios:", err.response?.data || err.message);
+        console.error(
+          "Erro Axios (suspender):",
+          err.response?.data || err.message
+        );
       } else {
         console.error("Erro ao suspender contrato:", err);
       }
     } finally {
       setIsSuspendingContract(false);
-      console.log("Finalizado processo de suspensão do contrato. isSuspendingContract definido para false.");
     }
   };
 
@@ -363,36 +457,38 @@ const getSupplier = async () => {
       supplier.providerSupplierCnpj?.includes(term) ||
       supplier.serviceName?.toLowerCase().includes(term);
 
-    const isFinished = supplier.finished === true;
-    const isSuspended = supplier.suspended === true;
-    const isActive = !isFinished && !isSuspended;
+    const status = getContractStatusFromSupplier(supplier);
+    const isFinished = isFinishedStatus(status);
+    const isSuspended = isSuspendedStatus(status);
+    const isActive = isActiveStatus(status);
 
-    const shouldShow = (() => {
-        switch (statusFilter) {
-            case "Todos":
-                return matchesSearchTerm;
-            case "Ativo":
-                return matchesSearchTerm && isActive;
-            case "Finalizado":
-                return matchesSearchTerm && isFinished;
-            case "Suspenso":
-                return matchesSearchTerm && isSuspended;
-            default:
-                return matchesSearchTerm;
-        }
-    })();
+    const shouldShow =
+      statusFilter === "Todos"
+        ? matchesSearchTerm
+        : statusFilter === "Ativo"
+          ? matchesSearchTerm && isActive
+          : statusFilter === "Finalizado"
+            ? matchesSearchTerm && isFinished
+            : matchesSearchTerm && isSuspended;
 
-    console.log(`Contrato: ${supplier.contractReference}, isFinished: ${isFinished}, isSuspended: ${isSuspended}, isActive: ${isActive}, Filter: ${statusFilter}, Matches Search: ${matchesSearchTerm}, Should Show: ${shouldShow}`);
+    console.log(
+      `Contrato ${supplier.contractReference} | raw=${
+        supplier?.contractStatus ??
+        supplier?.status ??
+        supplier?.statusEnum ??
+        supplier?.contractStatusEnum
+      } | normalized=${status} | isActive=${isActive} | isSusp=${isSuspended} | isFin=${isFinished}`
+    );
+
     return shouldShow;
   });
 
   useEffect(() => {
-    console.log("Contratos exibidos após a filtragem:", filteredSuppliers); // Log para ver o resultado da filtragem
+    console.log("Contratos exibidos (após filtro):", filteredSuppliers.length);
     if (filteredSuppliers.length === 0 && !loading && suppliers.length > 0) {
-      console.log("Nenhum contrato encontrado após a filtragem. Verifique as condições de filtro.");
+      console.log("Nenhum contrato encontrado após a filtragem.");
     }
   }, [filteredSuppliers, loading, suppliers]);
-
 
   function traduzirAcao(acao: string) {
     const traducoes: { [key: string]: string } = {
@@ -412,7 +508,6 @@ const getSupplier = async () => {
       LOGIN: "Login",
       LOGOUT: "Logout",
     };
-
     return traducoes[acao] ?? acao;
   }
 
@@ -447,11 +542,9 @@ const getSupplier = async () => {
               <p className="text-sm font-semibold text-gray-700">
                 Data de Ínicio:
               </p>
-
               <p className="mb-2 text-gray-800">
                 {new Date(supplier.dateStart).toLocaleDateString("pt-BR")}
               </p>
-
               <p className="mb-2 text-gray-800 ">
                 {supplier.dateFinish
                   ? new Date(supplier.dateFinish).toLocaleDateString("pt-BR")
@@ -478,7 +571,7 @@ const getSupplier = async () => {
                 <button
                   title="Finalizar"
                   onClick={() => {
-                    setSelectedSupplierId(supplier.idContract);
+                    setTargetContractId(supplier.idContract);
                     setIsFinalizeModalOpen(true);
                   }}
                 >
@@ -486,10 +579,7 @@ const getSupplier = async () => {
                 </button>
               </div>
               <p className="text-sm font-semibold text-gray-700">Status:</p>
-              <StatusBadge
-                finished={supplier.finished}
-                suspended={supplier.suspended}
-              />
+              <StatusBadge status={getContractStatusFromSupplier(supplier)} />
             </div>
           ))
         ) : (
@@ -552,6 +642,7 @@ const getSupplier = async () => {
           </div>
           <ModalTesteSendSupplier />
         </div>
+
         <table className="w-full border-collapse border border-gray-300">
           <thead className="bg-[#345D5C33]">
             <tr>
@@ -611,22 +702,20 @@ const getSupplier = async () => {
                         )
                       : "-"}
                   </td>
-
                   <td className="border border-gray-300 p-2">
                     {supplier.responsible}
                   </td>
                   <td className="border border-gray-300 p-2">
                     <StatusBadge
-                      finished={supplier.finished}
-                      suspended={supplier.suspended}
+                      status={getContractStatusFromSupplier(supplier)}
                     />
                   </td>
                   <td className="border border-gray-300 p-2 text-center align-middle">
                     <div className="relative inline-block text-left">
                       <button
                         onClick={() =>
-                          setSelectedSupplierId(
-                            selectedSupplierId === supplier.idContract
+                          setOpenMenuId(
+                            openMenuId === supplier.idContract
                               ? null
                               : supplier.idContract
                           )
@@ -636,8 +725,9 @@ const getSupplier = async () => {
                         <MoreVertical className="w-5 h-5" />
                       </button>
 
-                      {selectedSupplierId === supplier.idContract && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                      {openMenuId === supplier.idContract && (
+                        <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                          <ModalCadastroSubcontratado />
                           <button
                             onClick={() =>
                               navigate(
@@ -651,7 +741,7 @@ const getSupplier = async () => {
                           <button
                             onClick={() => {
                               handleEditClick(supplier);
-                              setSelectedSupplierId(null);
+                              setOpenMenuId(null);
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
@@ -660,7 +750,7 @@ const getSupplier = async () => {
                           <button
                             onClick={() => {
                               handleHistoryClick(supplier);
-                              setSelectedSupplierId(null);
+                              setOpenMenuId(null);
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
@@ -668,8 +758,9 @@ const getSupplier = async () => {
                           </button>
                           <button
                             onClick={() => {
-                              setSelectedSupplierId(supplier.idContract);
+                              setTargetContractId(supplier.idContract);
                               setIsFinalizeModalOpen(true);
+                              setOpenMenuId(null);
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
@@ -677,8 +768,8 @@ const getSupplier = async () => {
                           </button>
                           <button
                             onClick={() => {
-                              console.log("Botão Suspender clicado para o contrato:", supplier.idContract);
                               handleSuspendClick(supplier);
+                              setOpenMenuId(null);
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
@@ -702,6 +793,7 @@ const getSupplier = async () => {
             )}
           </tbody>
         </table>
+
         <div className="mt-4 text-sm text-gray-600 flex gap-4 items-center justify-end">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-green-600 inline-block" />
@@ -732,35 +824,30 @@ const getSupplier = async () => {
                 {selectedSupplier.contractReference}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Nome do Fornecedor:</p>
               <p className="border-b border-gray-200 pb-1">
                 {selectedSupplier.providerSupplierName}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">CNPJ:</p>
               <p className="border-b border-gray-200 pb-1">
                 {selectedSupplier.providerSupplierCnpj}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Nome do serviço:</p>
               <p className="border-b border-gray-200 pb-1">
                 {selectedSupplier.serviceName}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Gestor do contrato:</p>
               <p className="border-b border-gray-200 pb-1">
                 {selectedSupplier.responsible}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Data de início:</p>
               <p className="border-b border-gray-200 pb-1">
@@ -769,7 +856,6 @@ const getSupplier = async () => {
                 )}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">
                 Data de finalização:
@@ -782,21 +868,18 @@ const getSupplier = async () => {
                   : "-"}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Descrição:</p>
               <p className="border-b border-gray-200 pb-1">
                 {selectedSupplier.description}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Tipo de Despesa:</p>
               <p className="border-b border-gray-200 pb-1">
                 {selectedSupplier.expenseType}
               </p>
             </div>
-
             <div>
               <p className="font-semibold text-gray-500">Filial:</p>
               <p className="border-b border-gray-200 pb-1">
@@ -1063,7 +1146,6 @@ const getSupplier = async () => {
                 alt="Ilustração de confirmação"
                 className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
               />
-
               <div className="flex-1 text-sm text-gray-700 space-y-2">
                 <p className="font-semibold">
                   Deseja realmente finalizar este contrato?
@@ -1086,36 +1168,37 @@ const getSupplier = async () => {
               </button>
               <button
                 onClick={async () => {
-                  if (!selectedSupplierId) return;
-
+                  if (!targetContractId) return;
                   setIsFinalizingContract(true);
-                  console.log("Iniciando finalização do contrato...");
                   const token = localStorage.getItem("tokenClient");
-                  const endpoint = `${ip}/contract/finish/${selectedSupplierId}`;
+                  const endpoint = `${ip}/contract/finish/${targetContractId}`;
                   const payload = { status: "Contrato Cancelado" };
-
                   try {
                     const response = await axios.post(endpoint, payload, {
                       headers: { Authorization: `Bearer ${token}` },
                     });
-                    console.log("Resposta da requisição de finalização:", response.data);
+                    console.log(
+                      "Resposta finalização:",
+                      response.status,
+                      response.data
+                    );
                     toast.success("Contrato finalizado com sucesso");
-                    console.log("Contrato finalizado com sucesso.");
                     await getSupplier();
-                    console.log("Lista de fornecedores atualizada.");
                     setIsFinalizeModalOpen(false);
-                    setSelectedSupplierId(null);
-                    console.log("Modal de finalização fechado e ID resetado.");
+                    setTargetContractId(null);
+                    setOpenMenuId(null);
                   } catch (err) {
                     toast.error("Erro ao finalizar contrato");
                     if (axios.isAxiosError(err)) {
-                      console.error("Erro na requisição Axios (finalizar):", err.response?.data || err.message);
+                      console.error(
+                        "Erro Axios (finalizar):",
+                        err.response?.data || err.message
+                      );
                     } else {
                       console.error("Erro ao finalizar contrato:", err);
                     }
                   } finally {
                     setIsFinalizingContract(false);
-                    console.log("Finalizado processo de finalização do contrato. isFinalizingContract definido para false.");
                   }
                 }}
                 className="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
@@ -1123,7 +1206,8 @@ const getSupplier = async () => {
               >
                 {isFinalizingContract ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizando...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Finalizando...
                   </>
                 ) : (
                   "Finalizar contrato"
@@ -1142,10 +1226,12 @@ const getSupplier = async () => {
                 <X className="w-5 h-5 text-[#C9C9C9]" />
                 Suspender contrato
               </h2>
-              <button onClick={() => {
-                console.log("Botão 'X' para fechar modal de suspensão clicado.");
-                setIsSuspendModalOpen(false);
-              }}>
+              <button
+                onClick={() => {
+                  console.log("Fechar modal de suspensão.");
+                  setIsSuspendModalOpen(false);
+                }}
+              >
                 <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
               </button>
             </div>
@@ -1156,7 +1242,6 @@ const getSupplier = async () => {
                 alt="Ilustração de confirmação"
                 className="w-[120px] md:w-[160px] max-h-[140px] object-contain"
               />
-
               <div className="flex-1 text-sm text-gray-700 space-y-2">
                 <p className="font-semibold">
                   Deseja realmente suspender este contrato?
@@ -1172,7 +1257,7 @@ const getSupplier = async () => {
             <div className="mt-6 flex justify-end gap-4">
               <button
                 onClick={() => {
-                  console.log("Botão 'Voltar' no modal de suspensão clicado.");
+                  console.log("Voltar no modal de suspensão.");
                   setIsSuspendModalOpen(false);
                 }}
                 className="border border-gray-400 text-gray-700 px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition"
@@ -1187,7 +1272,8 @@ const getSupplier = async () => {
               >
                 {isSuspendingContract ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Suspendendo...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Suspendendo...
                   </>
                 ) : (
                   "Suspender contrato"
