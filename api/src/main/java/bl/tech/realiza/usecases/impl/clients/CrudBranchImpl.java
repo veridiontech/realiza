@@ -79,7 +79,7 @@ public class CrudBranchImpl implements CrudBranch {
 
         if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
             client = clientRepository.findById(branchCreateRequestDto.getClient())
-                        .orElseThrow(() -> new NotFoundException("Client not found"));
+                        .orElseThrow(() -> new NotFoundException("Client not found creating branch"));
         }
 
         if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isEmpty()) {

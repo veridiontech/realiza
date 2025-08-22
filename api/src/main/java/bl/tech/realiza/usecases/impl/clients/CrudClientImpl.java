@@ -28,6 +28,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -53,6 +56,7 @@ public class CrudClientImpl implements CrudClient {
     private final GoogleCloudService googleCloudService;
     private final ActivityRepoRepository activityRepoRepository;
 
+    @Transactional
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto, Boolean profilesFromRepo) {
 
@@ -76,7 +80,7 @@ public class CrudClientImpl implements CrudClient {
                 .number(clientRequestDto.getNumber())
                 .build();
 
-        Client savedClient = clientRepository.saveAndFlush(newClient);
+        Client savedClient = clientRepository.save(newClient);
 
         if (profilesFromRepo == null) {
             profilesFromRepo = false;
@@ -88,34 +92,38 @@ public class CrudClientImpl implements CrudClient {
             activityRepos = activityRepoRepository.findAllById(clientRequestDto.getActivityIds());
             activityIds = activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList());
         }
-        Client saveTest = null;
-        while (saveTest == null) {
-            saveTest = clientRepository.findById(savedClient.getIdClient())
-                    .orElse(null);
-        }
 
-        setupQueueProducer.send(SetupMessage.builder()
-                        .type("NEW_CLIENT")
-                        .clientId(savedClient.getIdClient())
-                        .profilesFromRepo(profilesFromRepo)
-                        .activityIds(activityIds)
-                .build());
+        Boolean finalProfilesFromRepo = profilesFromRepo;
+        List<String> finalActivityIds = activityIds;
 
+        User userResponsible = null;
         if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLog(
-                        savedClient.getIdClient(),
-                        CLIENT,
-                        userResponsible.getFullName() + " criou cliente "
-                                + savedClient.getCorporateName(),
-                        null,
-                        null,
-                        CREATE,
-                        userResponsible.getIdUser());
-            }
+            userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId()).orElse(null);
         }
+        final User finalUserResponsible = userResponsible;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                setupQueueProducer.send(SetupMessage.builder()
+                                .type("NEW_CLIENT")
+                                .clientId(savedClient.getIdClient())
+                                .profilesFromRepo(finalProfilesFromRepo)
+                                .activityIds(finalActivityIds)
+                        .build());
+
+                if (finalUserResponsible != null) {
+                    auditLogServiceImpl.createAuditLog(
+                            savedClient.getIdClient(),
+                            CLIENT,
+                            finalUserResponsible.getFullName() + " criou cliente "
+                                    + savedClient.getCorporateName(),
+                            null,
+                            null,
+                            CREATE,
+                            finalUserResponsible.getIdUser());
+                }
+            }
+        });
 
         return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())
