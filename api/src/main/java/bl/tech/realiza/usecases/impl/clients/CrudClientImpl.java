@@ -82,48 +82,53 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
+        setupQueueProducer.send(SetupMessage.builder()
+                        .type("NEW_CLIENT")
+                        .clientId(savedClient.getIdClient())
+                .build());
+
         if (profilesFromRepo == null) {
             profilesFromRepo = false;
         }
 
-        List<ActivityRepo> activityRepos = new ArrayList<>();
-        List<String> activityIds = new ArrayList<>();
-        if (clientRequestDto.getActivityIds() != null && !clientRequestDto.getActivityIds().isEmpty()) {
-            activityRepos = activityRepoRepository.findAllById(clientRequestDto.getActivityIds());
-            activityIds = activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList());
+        if (profilesFromRepo) {
+            setupQueueProducer.send(SetupMessage.builder()
+                    .type("NEW_CLIENT_PROFILES")
+                    .clientId(savedClient.getIdClient())
+                    .build());
         }
 
-        Boolean finalProfilesFromRepo = profilesFromRepo;
-        List<String> finalActivityIds = activityIds;
+        crudBranch.save(BranchCreateRequestDto.builder()
+                .name(savedClient.getTradeName() != null
+                        ? savedClient.getTradeName()
+                        : "Base")
+                .cnpj(savedClient.getCnpj())
+                .cep(savedClient.getCep())
+                .state(savedClient.getState())
+                .city(savedClient.getCity())
+                .email(savedClient.getEmail())
+                .telephone(savedClient.getTelephone())
+                .address(savedClient.getAddress())
+                .number(savedClient.getNumber())
+                .base(true)
+                .client(savedClient.getIdClient())
+                .build());
 
-        User userResponsible = null;
         if (JwtService.getAuthenticatedUserId() != null) {
-            userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId()).orElse(null);
-        }
-        final User finalUserResponsible = userResponsible;
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                setupQueueProducer.send(SetupMessage.builder()
-                                .type("NEW_CLIENT")
-                                .clientId(savedClient.getIdClient())
-                                .profilesFromRepo(finalProfilesFromRepo)
-                                .activityIds(finalActivityIds)
-                        .build());
-
-                if (finalUserResponsible != null) {
-                    auditLogServiceImpl.createAuditLog(
-                            savedClient.getIdClient(),
-                            CLIENT,
-                            finalUserResponsible.getFullName() + " criou cliente "
-                                    + savedClient.getCorporateName(),
-                            null,
-                            null,
-                            CREATE,
-                            finalUserResponsible.getIdUser());
-                }
+            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElse(null);
+            if (userResponsible != null) {
+                auditLogServiceImpl.createAuditLog(
+                        savedClient.getIdClient(),
+                        CLIENT,
+                        userResponsible.getFullName() + " criou cliente "
+                                + savedClient.getCorporateName(),
+                        null,
+                        null,
+                        CREATE,
+                        userResponsible.getIdUser());
             }
-        });
+        }
 
         return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())

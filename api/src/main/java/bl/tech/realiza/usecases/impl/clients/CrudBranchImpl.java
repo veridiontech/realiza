@@ -59,7 +59,6 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
-    private final CenterRepository centerRepository;
     private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
     private final SetupQueueProducer setupQueueProducer;
@@ -67,24 +66,14 @@ public class CrudBranchImpl implements CrudBranch {
     private final ActivityRepository activityRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final JwtService jwtService;
-    private final ActivityRepoRepository activityRepoRepository;
     private final CrudActivityImpl crudActivity;
     private final CrudServiceTypeImpl crudServiceTypeImpl;
     private final DocumentMatrixRepository documentMatrixRepository;
 
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
-        List<Center> center = List.of();
-        Client client = null;
-
-        if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
-            client = clientRepository.findById(branchCreateRequestDto.getClient())
-                        .orElseThrow(() -> new NotFoundException("Client not found creating branch"));
-        }
-
-        if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isEmpty()) {
-            center = centerRepository.findAllById(branchCreateRequestDto.getCenter());
-        }
+        Client client = clientRepository.findById(branchCreateRequestDto.getClient())
+                .orElseThrow(() -> new NotFoundException("Client not found while creating branch"));
 
         Branch savedBranch = branchRepository.save(Branch.builder()
                 .name(branchCreateRequestDto.getName())
@@ -100,7 +89,6 @@ public class CrudBranchImpl implements CrudBranch {
                         ? branchCreateRequestDto.getBase()
                         : false)
                 .client(client)
-                .center(center)
                 .build());
 
         if (branchCreateRequestDto.getReplicateFromBase() == null) {
@@ -113,30 +101,23 @@ public class CrudBranchImpl implements CrudBranch {
                             .branchId(savedBranch.getIdBranch())
                     .build());
         } else {
-            if (!branchCreateRequestDto.getBase()) {
-                List<ActivityRepo> activityRepos = new ArrayList<>();
-                if (branchCreateRequestDto.getActivityIds() != null && !branchCreateRequestDto.getActivityIds().isEmpty()) {
-                    activityRepos = activityRepoRepository.findAllById(branchCreateRequestDto.getActivityIds());
-                }
-                setupQueueProducer.send(SetupMessage.builder()
-                                .type("NEW_BRANCH")
-                                .branchId(savedBranch.getIdBranch())
-                                .activityIds(activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()))
-                        .build());
-            }
+            setupQueueProducer.send(SetupMessage.builder()
+                    .type("NEW_BRANCH")
+                    .branchId(savedBranch.getIdBranch())
+                    .build());
         }
 
         if (JwtService.getAuthenticatedUserId() != null) {
             userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
                     userResponsible -> auditLogServiceImpl.createAuditLog(
-                        savedBranch.getIdBranch(),
-                        BRANCH,
-                        userResponsible.getFullName() + " criou filial "
-                                + savedBranch.getName(),
-                        null,
-                        null,
-                        CREATE,
-                        userResponsible.getIdUser()));
+                            savedBranch.getIdBranch(),
+                            BRANCH,
+                            userResponsible.getFullName() + " criou filial "
+                                    + savedBranch.getName(),
+                            null,
+                            null,
+                            CREATE,
+                            userResponsible.getIdUser()));
         }
 
         return BranchResponseDto.builder()

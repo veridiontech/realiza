@@ -87,32 +87,11 @@ public class SetupService {
     private final CrudBranch crudBranch;
     private final CrudProfile crudProfile;
 
-    public void setupNewClient(String clientId, Boolean profilesFromRepo, List<String> activitiesIds) {
+    public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NotFoundException("Client not found while setup client"));
-
-        BranchResponseDto branch = crudBranch.save(BranchCreateRequestDto.builder()
-                .name(client.getTradeName() != null
-                        ? client.getTradeName()
-                        : "Base")
-                .cnpj(client.getCnpj())
-                .cep(client.getCep())
-                .state(client.getState())
-                .city(client.getCity())
-                .email(client.getEmail())
-                .telephone(client.getTelephone())
-                .address(client.getAddress())
-                .number(client.getNumber())
-                .base(true)
-                .client(client.getIdClient())
-                .build());
-
-        if (profilesFromRepo) {
-            crudProfile.transferFromRepoToClient(client.getIdClient());
-        }
+                .orElseThrow(() -> new NotFoundException("Client not found"));
         crudServiceType.transferFromRepoToClient(client.getIdClient());
-        crudBranch.setupBranch(branch.getIdBranch(), activitiesIds);
         log.info("Finished setup client ✔️ {}", clientId);
     }
 
@@ -181,7 +160,7 @@ public class SetupService {
         log.info("Finished setup client profiles ✔️ {}", clientId);
     }
 
-    public void setupBranch(String branchId, List<String> activityIds) {
+    public void setupBranch(String branchId) {
         log.info("Started setup branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new NotFoundException("Branch not found"));
@@ -209,7 +188,7 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
-        crudActivity.transferFromRepo(branch.getIdBranch(),activityIds);
+        crudActivity.transferFromRepo(branch.getIdBranch());
 
         log.info("Finished setup branch ✔️ {}", branchId);
     }
