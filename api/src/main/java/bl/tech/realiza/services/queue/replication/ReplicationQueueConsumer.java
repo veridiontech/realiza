@@ -2,10 +2,14 @@ package bl.tech.realiza.services.queue.replication;
 
 import bl.tech.realiza.configs.RabbitConfig;
 import bl.tech.realiza.services.queue.QueueLogService;
+import bl.tech.realiza.services.queue.setup.SetupMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReplicationQueueConsumer {
@@ -79,8 +83,13 @@ public class ReplicationQueueConsumer {
     }
 
     @RabbitListener(queues = RabbitConfig.REPLICATION_DLQ)
-    public void handleDlq(ReplicationMessage message) {
-        System.err.printf("🔁 Mensagem Replication movida para DLQ: %s - %s%n", message.getType(), getId(message));
+    public void handleDlq(byte[] rawMessage) {
+        try {
+            ReplicationMessage message = new ObjectMapper().readValue(rawMessage, ReplicationMessage.class);
+            System.err.printf("🔁 Mensagem Setup movida para DLQ: %s - %s%n", message.getType(), getId(message));
+        } catch (Exception e) {
+            log.error("Erro ao processar mensagem DLQ: {}", new String(rawMessage), e);
+        }
     }
 
     public String getId(ReplicationMessage msg) {

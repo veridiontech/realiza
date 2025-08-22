@@ -82,21 +82,30 @@ public class CrudClientImpl implements CrudClient {
 
         Client savedClient = clientRepository.save(newClient);
 
-        setupQueueProducer.send(SetupMessage.builder()
+        final Boolean[] finalProfilesFromRepo = {profilesFromRepo};
+        if (finalProfilesFromRepo[0] == null) {
+            finalProfilesFromRepo[0] = false;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                setupQueueProducer.send(SetupMessage.builder()
                         .type("NEW_CLIENT")
                         .clientId(savedClient.getIdClient())
-                .build());
+                        .build());
 
-        if (profilesFromRepo == null) {
-            profilesFromRepo = false;
-        }
+                if (finalProfilesFromRepo[0] == null) {
+                    finalProfilesFromRepo[0] = false;
+                }
 
-        if (profilesFromRepo) {
-            setupQueueProducer.send(SetupMessage.builder()
-                    .type("NEW_CLIENT_PROFILES")
-                    .clientId(savedClient.getIdClient())
-                    .build());
-        }
+                if (finalProfilesFromRepo[0]) {
+                    setupQueueProducer.send(SetupMessage.builder()
+                            .type("NEW_CLIENT_PROFILES")
+                            .clientId(savedClient.getIdClient())
+                            .build());
+                }
+            }
+        });
 
         crudBranch.save(BranchCreateRequestDto.builder()
                 .name(savedClient.getTradeName() != null
