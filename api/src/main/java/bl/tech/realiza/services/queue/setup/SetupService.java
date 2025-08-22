@@ -89,8 +89,32 @@ public class SetupService {
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NotFoundException("Client not found"));
+
+        Client client = null;
+        int retries = 0;
+        int maxRetries = 10;
+        long delay = 500;
+
+        while (client == null && retries < maxRetries) {
+            try {
+                int finalRetries = retries;
+                client = clientRepository.findById(clientId)
+                        .orElseThrow(() -> new NotFoundException("Client not found on attempt " + (finalRetries + 1)));
+            } catch (NotFoundException e) {
+                retries++;
+                if (retries < maxRetries) {
+                    log.warn("Client {} not found. Retrying in {}ms... ({}/{})", clientId, delay, retries, maxRetries);
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    log.error("Client {} not found after {} retries. Sending to DLQ.", clientId, maxRetries);
+                    throw e;
+                }
+            }
+        }
         crudServiceType.transferFromRepoToClient(client.getIdClient());
         log.info("Finished setup client ✔️ {}", clientId);
     }
@@ -162,8 +186,33 @@ public class SetupService {
 
     public void setupBranch(String branchId) {
         log.info("Started setup branch ⌛ {}", branchId);
-        Branch branch = branchRepository.findById(branchId)
-                .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        Branch branch = null;
+        int retries = 0;
+        int maxRetries = 10;
+        long delay = 500;
+
+        while (branch == null && retries < maxRetries) {
+            try {
+                int finalRetries = retries;
+                branch = branchRepository.findById(branchId)
+                        .orElseThrow(() -> new NotFoundException("Branch not found on attempt " + (finalRetries + 1)));
+            } catch (NotFoundException e) {
+                retries++;
+                if (retries < maxRetries) {
+                    log.warn("Branch {} not found. Retrying in {}ms... ({}/{})", branchId, delay, retries, maxRetries);
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    log.error("Branch {} not found after {} retries. Sending to DLQ.", branchId, maxRetries);
+                    throw e;
+                }
+            }
+        }
+
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
         List<DocumentBranch> batch = new ArrayList<>(50);
