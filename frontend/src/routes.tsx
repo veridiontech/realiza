@@ -59,6 +59,7 @@ import { MonittoringBis } from "./pages/auth/realizaProfile/bis";
 import { ContarctsByProvider } from "./pages/auth/realizaProfile/contract-by-provider/contracts-by-provider";
 import { ConfigPanel } from "./pages/auth/realizaProfile/branchs/configPanel";
 import { DocumentClient } from "./pages/auth/realizaProfile/documents/new-documents-page/documentClient";
+import { TableUsers } from "./pages/auth/clientProfile/providers/table-user";
 
 export const router = createBrowserRouter([
   {
@@ -134,6 +135,7 @@ export const router = createBrowserRouter([
       { path: "provider/:id", element: <ContractsTable /> },
       { path: "profile/:id", element: <ProfileEnterpriseReprise /> },
       { path: "collaborators/:id", element: <ClientCollaborators /> },
+      { path: "users/:id", element: <TableUsers /> },
       { path: "branch/:id", element: <ClientBranch /> },
       { path: "employees/:id", element: <ClientEmployee /> },
       { path: "create-manager/:id", element: <CreateNewManagerClient /> },
