@@ -367,7 +367,7 @@ public class CrudActivityImpl implements CrudActivity {
 
         List<ActivityRepo> activityRepos = activityRepoRepository.findAll();
         List<Activity> newActivities = new ArrayList<>();
-        Map<String, Activity> repoToNewActivityMap = new HashMap<>();
+//        Map<String, Activity> repoToNewActivityMap = new HashMap<>();
 
         for (ActivityRepo repo : activityRepos) {
             Activity newActivity = Activity.builder()
@@ -377,7 +377,7 @@ public class CrudActivityImpl implements CrudActivity {
                     .activityRepo(repo)
                     .build();
             newActivities.add(newActivity);
-            repoToNewActivityMap.put(repo.getIdActivity(), newActivity);
+//            repoToNewActivityMap.put(repo.getIdActivity(), newActivity);
 
             if (newActivities.size() == 50) {
                 activityRepository.saveAll(newActivities);
@@ -389,39 +389,39 @@ public class CrudActivityImpl implements CrudActivity {
             activityRepository.saveAll(newActivities);
         }
 
-        List<DocumentBranch> allBranchDocs = documentBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch());
-        Map<String, DocumentBranch> matrixIdToBranchDocMap = allBranchDocs.stream()
-                .filter(doc -> doc.getDocumentMatrix() != null)
-                .collect(Collectors.toMap(doc -> doc.getDocumentMatrix().getIdDocument(), doc -> doc));
-
-        List<ActivityDocumentsRepo> docsRepo = activityDocumentRepoRepository.findAll();
-
-        List<ActivityDocuments> newActivityDocs = new ArrayList<>();
-
-        for (ActivityDocumentsRepo docRepo : docsRepo) {
-            Activity newActivity = repoToNewActivityMap.get(docRepo.getActivity().getIdActivity());
-
-            DocumentMatrix matrix = docRepo.getDocumentMatrix();
-            if (newActivity == null || matrix == null) continue;
-
-            DocumentBranch branchDoc = matrixIdToBranchDocMap.get(matrix.getIdDocument());
-            if (branchDoc == null) continue;
-
-            newActivityDocs.add(ActivityDocuments.builder()
-                    .activity(newActivity)
-                    .documentBranch(branchDoc)
-                    .isSelected(true)
-                    .build());
-
-            if (newActivityDocs.size() == 50) {
-                activityDocumentRepository.saveAll(newActivityDocs);
-                newActivityDocs.clear();
-            }
-        }
-
-        if (!newActivityDocs.isEmpty()) {
-            activityDocumentRepository.saveAll(newActivityDocs);
-        }
+//        List<DocumentBranch> allBranchDocs = documentBranchRepository.findAllByBranch_IdBranch(branch.getIdBranch());
+//        Map<String, DocumentBranch> matrixIdToBranchDocMap = allBranchDocs.stream()
+//                .filter(doc -> doc.getDocumentMatrix() != null)
+//                .collect(Collectors.toMap(doc -> doc.getDocumentMatrix().getIdDocument(), doc -> doc));
+//
+//        List<ActivityDocumentsRepo> docsRepo = activityDocumentRepoRepository.findAll();
+//
+//        List<ActivityDocuments> newActivityDocs = new ArrayList<>();
+//
+//        for (ActivityDocumentsRepo docRepo : docsRepo) {
+//            Activity newActivity = repoToNewActivityMap.get(docRepo.getActivity().getIdActivity());
+//
+//            DocumentMatrix matrix = docRepo.getDocumentMatrix();
+//            if (newActivity == null || matrix == null) continue;
+//
+//            DocumentBranch branchDoc = matrixIdToBranchDocMap.get(matrix.getIdDocument());
+//            if (branchDoc == null) continue;
+//
+//            newActivityDocs.add(ActivityDocuments.builder()
+//                    .activity(newActivity)
+//                    .documentBranch(branchDoc)
+//                    .isSelected(true)
+//                    .build());
+//
+//            if (newActivityDocs.size() == 50) {
+//                activityDocumentRepository.saveAll(newActivityDocs);
+//                newActivityDocs.clear();
+//            }
+//        }
+//
+//        if (!newActivityDocs.isEmpty()) {
+//            activityDocumentRepository.saveAll(newActivityDocs);
+//        }
     }
 
     @Override
