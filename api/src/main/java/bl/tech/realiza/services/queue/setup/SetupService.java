@@ -44,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -56,7 +57,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class SetupService {
 
@@ -80,6 +80,7 @@ public class SetupService {
     private final CrudActivity crudActivity;
     private final ContractDocumentRepository contractDocumentRepository;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
 
@@ -90,6 +91,7 @@ public class SetupService {
         log.info("Finished setup client ✔️ {}", clientId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupNewClientProfiles(String clientId) {
         log.info("Started setup client profiles ⌛ {}", clientId);
 
@@ -133,6 +135,7 @@ public class SetupService {
         log.info("Finished setup client profiles ✔️ {}", clientId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupBranch(String branchId) {
         log.info("Started setup branch ⌛ {}", branchId);
 
@@ -168,8 +171,19 @@ public class SetupService {
         log.info("Finished setup branch ✔️ {}", branchId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupContractSupplier(String contractProviderSupplierId, List<String> activityIds) {
         log.info("Started setup contract supplier ⌛ {}", contractProviderSupplierId);
+        try {
+            Integer exists = contractProviderSupplierRepository.existsByIdNative(contractProviderSupplierId);
+            if (exists != null && exists == 1) {
+                log.info("✅ Contrato {} ENCONTRADO via query nativa!", contractProviderSupplierId);
+            } else {
+                log.warn("🚨 Contrato {} NÃO encontrado via query nativa.", contractProviderSupplierId);
+            }
+        } catch (Exception e) {
+            log.error("Erro ao executar a query nativa", e);
+        }
         List<Activity> activities = new ArrayList<>(List.of());
         List<String> idDocuments = new ArrayList<>(List.of());
         List<DocumentBranch> documentBranch;
@@ -296,6 +310,7 @@ public class SetupService {
         log.info("Finished setup contract supplier ✔️ {}", contractProviderSupplierId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupContractSubcontractor(String contractProviderSubcontractorId, List<String> activityIds) {
         log.info("Started setup contract subcontractor ⌛ {}", contractProviderSubcontractorId);
         List<Activity> activities = new ArrayList<>(List.of());;
@@ -420,6 +435,7 @@ public class SetupService {
         log.info("Finished setup contract subcontractor ✔️ {}", contractProviderSubcontractorId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupEmployeeToContractSupplier(String contractProviderSupplierId, List<String> employeeIds) {
         log.info("Started setup employee to contract supplier ⌛ {}, {}", employeeIds, contractProviderSupplierId);
 
@@ -506,6 +522,7 @@ public class SetupService {
         log.info("Finished setup employee to contract supplier ✔️ {}, {}", employeeIds, contractProviderSupplierId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupEmployeeToContractSubcontract(String contractProviderSubcontractorId, List<String> employeeIds) {
         log.info("Started setup employee to contract subcontractor ⌛ {}, {}", employeeIds, contractProviderSubcontractorId);
 
@@ -594,6 +611,7 @@ public class SetupService {
         log.info("Finished setup employee to contract subcontractor ✔️ {}, {}", employeeIds, contractProviderSubcontractorId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupRemoveEmployeeFromContract(String contractId, List<String> employeeIds) {
         log.info("Started setup remove employee from contract subcontractor ⌛ {}, {}", employeeIds, contractId);
         Contract contractProxy = contractRepository.findById(contractId)
@@ -634,6 +652,7 @@ public class SetupService {
         log.info("Finished setup remove employee from contract subcontractor ✔️ {}, {}", employeeIds, contractId);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setupReplicateBranch(String branchId) {
         log.info("Started setup replicate branch ⌛ {}", branchId);
         Branch branch = branchRepository.findById(branchId)

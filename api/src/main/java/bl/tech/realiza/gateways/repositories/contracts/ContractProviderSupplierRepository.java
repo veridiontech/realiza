@@ -40,4 +40,7 @@ public interface ContractProviderSupplierRepository extends JpaRepository<Contra
     Page<ContractProviderSupplier> findAllByIsActiveIsNot(Pageable pageable, ContractStatusEnum contractStatusEnum);
 
     List<ContractProviderSupplier> findAllByBranch_Client_IdClientAndStatusIsNot(String idClient, ContractStatusEnum contractStatus);
+
+    @Query(value = "SELECT 1 FROM contracts WHERE id_contract = :id", nativeQuery = true)
+    Integer existsByIdNative(@Param("id") String id);
 }
