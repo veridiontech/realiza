@@ -16,7 +16,6 @@ export function BranchResume({
   name,
   isLoading,
   cnpj,
-  email,
 }: BranchResumeProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-5 p-10 relative bottom-[7vw]">
@@ -35,14 +34,6 @@ export function BranchResume({
               ) : (
                 <Skeleton className="h-[18px] w-[200px] rounded-full bg-gray-200" />
               )}
-              <div className="flex items-center gap-2">
-                <strong className="md:font-md font-medium">Email:</strong>
-                {isLoading ? (
-                  <p>{email}</p>
-                ) : (
-                  <Skeleton className="h-[8px] w-[150px] rounded-full bg-gray-200" />
-                )}
-              </div>
               <div className="flex items-center gap-2">
                 <strong className="font-medium">CNPJ:</strong>
                 {isLoading ? (
