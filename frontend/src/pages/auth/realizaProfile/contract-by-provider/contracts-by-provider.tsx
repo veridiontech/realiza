@@ -197,10 +197,7 @@ export function ContarctsByProvider() {
         getAllDatas(currentContract.idContract, currentContract.serviceName);
       }
       toast(
-        `Status do documento atualizado para "${newStatus.replace(
-          /_/g,
-          " "
-        )}".`
+        `Status do documento atualizado para "${newStatus.replace(/_/g, " ")}".`
       );
     },
     [contracts, selectedContractName, getAllDatas]
@@ -280,7 +277,7 @@ export function ContarctsByProvider() {
       year: "2-digit",
     });
   };
-  
+
   // ====================== ALTERAÇÃO 1 ======================
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
@@ -465,7 +462,7 @@ export function ContarctsByProvider() {
                               </span>
                             </div>
                           )}
-                          
+
                           {doc.status === "EM_ANALISE" && (
                             <div className="flex items-center gap-2">
                               <AlertCircle className="w-4 h-4 text-blue-500" />
@@ -639,25 +636,40 @@ export function ContarctsByProvider() {
                 className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full max-w-md"
               />
 
-              <div className="flex flex-col gap-8 overflow-y-auto max-h-[35vh] pr-2">
+              <div className="flex flex-col gap-8 overflow-y-auto max-h-[35vh] pr-2 w-full">
                 {isLoadingSubs ? (
                   <span className="text-neutral-400">Carregando...</span>
                 ) : subcontractors.length > 0 ? (
                   // @ts-ignore
                   subcontractors.map((sub: any) => (
                     <div key={sub.id} className="flex flex-col gap-5">
-                      <div className="flex items-center gap-5">
-                        <div className="bg-neutral-400 p-2 rounded-full">
-                          <User />
+                      {/* ======================= ALTERAÇÃO COMEÇA AQUI ======================= */}
+                      <div className="flex items-center justify-between w-full">
+                        {/* Informações do subcontratado (lado esquerdo) */}
+                        <div className="flex items-center gap-5">
+                          <div className="bg-neutral-400 p-2 rounded-full">
+                            <User />
+                          </div>
+                          <div>
+                            <h1>{sub.responsible}</h1>
+                            <p className="text-[18px]">
+                              {sub.contractReference}
+                            </p>
+                            <span className="text-[12px] text-realizaBlue font-semibold underline">
+                              {sub.nameSubcontractor}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <h1>{sub.responsible}</h1>
-                          <p className="text-[18px]">{sub.contractReference}</p>
-                          <span className="text-[12px] text-realizaBlue font-semibold underline">
-                            {sub.nameSubcontractor}
-                          </span>
-                        </div>
+
+                        {/* Botão para ver detalhes (lado direito) */}
+                        <Link to={`/sistema/subcontracts-details/${sub.idContract}`}>
+                          <button className="flex items-center gap-2 bg-realizaBlue text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+                            <NotebookText className="w-5 h-5" />
+                            <span>Ver Detalhes</span>
+                          </button>
+                        </Link>
                       </div>
+                      {/* ======================= ALTERAÇÃO TERMINA AQUI ======================= */}
                       <div className="bg-neutral-400 h-[1px]" />
                     </div>
                   ))
