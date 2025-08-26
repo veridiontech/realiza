@@ -15,6 +15,7 @@ import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.contracts.EmployeeToContractRequestDto;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementContractRequestDto;
+import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementProviderRequestDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByBranchIdsResponseDto;
 import bl.tech.realiza.gateways.responses.contracts.contract.ContractByEmployeeResponseDto;
 import bl.tech.realiza.services.queue.setup.SetupMessage;
@@ -29,6 +30,9 @@ import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +110,7 @@ public class CrudContractImpl implements CrudContract {
         return "Contract reactivation requested";
     }
 
+    @Transactional
     @Override
     public String addEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         Contract contractProxy = contractRepository.findById(idContract)
@@ -134,12 +139,6 @@ public class CrudContractImpl implements CrudContract {
                 }
             }
 
-            setupQueueProducer.send(SetupMessage.builder()
-                            .type("EMPLOYEE_CONTRACT_SUPPLIER")
-                            .contractSupplierId(contractProviderSupplier.getIdContract())
-                            .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
-                    .build());
-
         } else if (contract instanceof ContractProviderSubcontractor contractProviderSubcontractor) {
             for (Employee employee : employees) {
                 if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(), employee.getSubcontract().getIdProvider())) {
@@ -153,51 +152,66 @@ public class CrudContractImpl implements CrudContract {
                 }
             }
 
-            setupQueueProducer.send(SetupMessage.builder()
-                    .type("EMPLOYEE_CONTRACT_SUBCONTRACT")
-                    .contractSubcontractorId(contractProviderSubcontractor.getIdContract())
-                    .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
-                    .build());
-
         } else {
             throw new NotFoundException("Invalid contract type");
         }
 
         employeeRepository.saveAll(employees);
 
-        for (Employee employee : employees) {
-            if (JwtService.getAuthenticatedUserId() != null) {
-                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                        .orElse(null);
-                if (userResponsible != null) {
-                    auditLogService.createAuditLog(
-                            employee.getIdEmployee(),
-                            CONTRACT,
-                            userResponsible.getFullName() + " alocou colaborador "
-                                    + employee.getFullName()
-                                    + " ao contrato " + contract.getContractReference(),
-                            null,
-                            null,
-                            ALLOCATE,
-                            userResponsible.getIdUser());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                if (contract instanceof ContractProviderSupplier contractProviderSupplier) {
+                    setupQueueProducer.send(SetupMessage.builder()
+                            .type("EMPLOYEE_CONTRACT_SUPPLIER")
+                            .contractSupplierId(contractProviderSupplier.getIdContract())
+                            .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
+                    .build());
+                } else {
+                    ContractProviderSubcontractor contractProviderSubcontractor = (ContractProviderSubcontractor) contract;
+                    setupQueueProducer.send(SetupMessage.builder()
+                            .type("EMPLOYEE_CONTRACT_SUBCONTRACT")
+                            .contractSubcontractorId(contractProviderSubcontractor.getIdContract())
+                            .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
+                            .build());
+                }
 
-                    auditLogService.createAuditLog(
-                            employee.getIdEmployee(),
-                            EMPLOYEE,
-                            userResponsible.getFullName() + " alocou colaborador "
-                                    + employee.getFullName()
-                                    + " ao contrato " + contract.getContractReference(),
-                            null,
-                            null,
-                            ALLOCATE,
-                            userResponsible.getIdUser());
+                for (Employee employee : employees) {
+                    if (JwtService.getAuthenticatedUserId() != null) {
+                        User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                                .orElse(null);
+                        if (userResponsible != null) {
+                            auditLogService.createAuditLog(
+                                    employee.getIdEmployee(),
+                                    CONTRACT,
+                                    userResponsible.getFullName() + " alocou colaborador "
+                                            + employee.getFullName()
+                                            + " ao contrato " + contract.getContractReference(),
+                                    null,
+                                    null,
+                                    ALLOCATE,
+                                    userResponsible.getIdUser());
+
+                            auditLogService.createAuditLog(
+                                    employee.getIdEmployee(),
+                                    EMPLOYEE,
+                                    userResponsible.getFullName() + " alocou colaborador "
+                                            + employee.getFullName()
+                                            + " ao contrato " + contract.getContractReference(),
+                                    null,
+                                    null,
+                                    ALLOCATE,
+                                    userResponsible.getIdUser());
+                        }
+                    }
                 }
             }
-        }
+        });
 
         return "Employee added successfully";
     }
 
+    @Transactional
     @Override
     public String removeEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto) {
         Contract contractProxy = contractRepository.findById(idContract)
@@ -228,43 +242,48 @@ public class CrudContractImpl implements CrudContract {
             throw new NotFoundException("Invalid contract type");
         }
 
-        setupQueueProducer.send(SetupMessage.builder()
-                .type("REMOVE_EMPLOYEE_CONTRACT")
-                .contractId(contract.getIdContract())
-                .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
-                .build());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                setupQueueProducer.send(SetupMessage.builder()
+                        .type("REMOVE_EMPLOYEE_CONTRACT")
+                        .contractId(contract.getIdContract())
+                        .employeeIds(employees.stream().map(Employee::getIdEmployee).toList())
+                        .build());
 
-        for (Employee employee : employees) {
-            if (JwtService.getAuthenticatedUserId() != null) {
-                User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                        .orElse(null);
-                if (userResponsible != null) {
-                    auditLogService.createAuditLog(
-                            employee.getIdEmployee(),
-                            CONTRACT,
-                            userResponsible.getFullName() + " desalocou colaborador "
-                                    + employee.getFullName()
-                                    + " do contrato " + contract.getContractReference(),
-                            null,
-                            null,
-                            DEALLOCATE,
-                            userResponsible.getIdUser());
+                for (Employee employee : employees) {
+                    if (JwtService.getAuthenticatedUserId() != null) {
+                        User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                                .orElse(null);
+                        if (userResponsible != null) {
+                            auditLogService.createAuditLog(
+                                    employee.getIdEmployee(),
+                                    CONTRACT,
+                                    userResponsible.getFullName() + " desalocou colaborador "
+                                            + employee.getFullName()
+                                            + " do contrato " + contract.getContractReference(),
+                                    null,
+                                    null,
+                                    DEALLOCATE,
+                                    userResponsible.getIdUser());
 
-                    auditLogService.createAuditLog(
-                            employee.getIdEmployee(),
-                            EMPLOYEE,
-                            userResponsible.getFullName() + " desalocou colaborador "
-                                    + employee.getFullName()
-                                    + " do contrato " + contract.getContractReference(),
-                            null,
-                            null,
-                            DEALLOCATE,
-                            userResponsible.getIdUser());
+                            auditLogService.createAuditLog(
+                                    employee.getIdEmployee(),
+                                    EMPLOYEE,
+                                    userResponsible.getFullName() + " desalocou colaborador "
+                                            + employee.getFullName()
+                                            + " do contrato " + contract.getContractReference(),
+                                    null,
+                                    null,
+                                    DEALLOCATE,
+                                    userResponsible.getIdUser());
+                        }
+                    }
                 }
             }
-        }
+        });
 
-        return "Employee added successfully";
+        return "Employee removed successfully";
     }
 
     @Override

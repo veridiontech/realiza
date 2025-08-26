@@ -4,8 +4,6 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
-import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
@@ -35,6 +33,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +59,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final SetupQueueProducer setupQueueProducer;
     private final CrudItemManagement crudItemManagement;
 
+    @Transactional
     @Override
     public ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractProviderSubcontractorRequestDto) {
         List<Activity> activities = List.of();
@@ -106,35 +108,40 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .providerSupplier(providerSupplier)
                 .build());
 
-        setupQueueProducer.send(SetupMessage.builder()
+        List<Activity> finalActivities = activities;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                setupQueueProducer.send(SetupMessage.builder()
                         .type("NEW_CONTRACT_SUBCONTRACTOR")
                         .contractSubcontractorId(savedContractSubcontractor.getIdContract())
-                        .activityIds(activities.stream().map(Activity::getIdActivity).toList())
-                .build());
+                        .activityIds(finalActivities.stream().map(Activity::getIdActivity).toList())
+                        .build());
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> {
-                        auditLogServiceImpl.createAuditLog(
-                                savedContractSubcontractor.getIdContract(),
-                                CONTRACT,
-                                userResponsible.getFullName() + " criou contrato "
-                                        + savedContractSubcontractor.getContractReference(),
-                                null,
-                                null,
-                                CREATE,
-                                userResponsible.getIdUser());
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                            userResponsible -> {
+                                auditLogServiceImpl.createAuditLog(
+                                        savedContractSubcontractor.getIdContract(),
+                                        CONTRACT,
+                                        userResponsible.getFullName() + " criou contrato "
+                                                + savedContractSubcontractor.getContractReference(),
+                                        null,
+                                        null,
+                                        CREATE,
+                                        userResponsible.getIdUser());
 
-                        // criar solicitação
-                        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
-                                .solicitationType(ItemManagement.SolicitationType.CREATION)
-                                .idRequester(userResponsible.getIdUser())
-                                .idNewProvider(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
-                                .build());
-                    }
-            );
-        }
-
+                                // criar solicitação
+                                crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
+                                        .solicitationType(ItemManagement.SolicitationType.CREATION)
+                                        .idRequester(userResponsible.getIdUser())
+                                        .idNewProvider(savedContractSubcontractor.getProviderSubcontractor().getIdProvider())
+                                        .build());
+                            }
+                    );
+                }
+            }
+        });
 
         return toContractSubcontractorResponseDto(savedContractSubcontractor);
     }

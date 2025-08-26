@@ -47,6 +47,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,6 +79,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final SetupQueueProducer setupQueueProducer;
     private final JwtService jwtService;
 
+    @Transactional
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
         List<Activity> activities = List.of();
@@ -142,31 +146,38 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
         userClient.getContractsAccess().add(savedContractProviderSupplier);
         userClientRepository.save(userClient);
 
-        setupQueueProducer.send(SetupMessage.builder()
-                .type("NEW_CONTRACT_SUPPLIER")
-                .contractSupplierId(savedContractProviderSupplier.getIdContract())
-                .activityIds(activities.stream().map(Activity::getIdActivity).toList())
-                .build());
+        ProviderSupplier finalNewProviderSupplier = newProviderSupplier;
+        List<Activity> finalActivities = activities;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                setupQueueProducer.send(SetupMessage.builder()
+                        .type("NEW_CONTRACT_SUPPLIER")
+                        .contractSupplierId(savedContractProviderSupplier.getIdContract())
+                        .activityIds(finalActivities.stream().map(Activity::getIdActivity).toList())
+                        .build());
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> auditLogServiceImpl.createAuditLog(
-                        savedContractProviderSupplier.getIdContract(),
-                        CONTRACT,
-                        userResponsible.getFullName() + " criou contrato "
-                                + savedContractProviderSupplier.getContractReference(),
-                            null,
-                            null,
-                            CREATE,
-                        userResponsible.getIdUser()));
-        }
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                            userResponsible -> auditLogServiceImpl.createAuditLog(
+                                    savedContractProviderSupplier.getIdContract(),
+                                    CONTRACT,
+                                    userResponsible.getFullName() + " criou contrato "
+                                            + savedContractProviderSupplier.getContractReference(),
+                                    null,
+                                    null,
+                                    CREATE,
+                                    userResponsible.getIdUser()));
+                }
 
-        // criar solicitação
-        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
+                // criar solicitação
+                crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
                         .solicitationType(ItemManagement.SolicitationType.CREATION)
                         .idRequester(requester.getIdUser())
-                        .idNewProvider(newProviderSupplier.getIdProvider())
-                .build());
+                        .idNewProvider(finalNewProviderSupplier.getIdProvider())
+                        .build());
+            }
+        });
 
         return ContractSupplierResponseDto.builder()
                 .idContract(savedContractProviderSupplier.getIdContract())

@@ -38,13 +38,8 @@ import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProvider
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
-import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
-import bl.tech.realiza.gateways.responses.clients.branches.BranchResponseDto;
-import bl.tech.realiza.usecases.impl.users.profile.CrudProfileImpl;
-import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
-import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -84,37 +79,13 @@ public class SetupService {
     private final CrudServiceType crudServiceType;
     private final CrudActivity crudActivity;
     private final ContractDocumentRepository contractDocumentRepository;
-    private final CrudBranch crudBranch;
-    private final CrudProfile crudProfile;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
 
-        Client client = null;
-        int retries = 0;
-        int maxRetries = 10;
-        long delay = 500;
-
-        while (client == null && retries < maxRetries) {
-            try {
-                int finalRetries = retries;
-                client = clientRepository.findById(clientId)
-                        .orElseThrow(() -> new NotFoundException("Client not found on attempt " + (finalRetries + 1)));
-            } catch (NotFoundException e) {
-                retries++;
-                if (retries < maxRetries) {
-                    log.warn("Client {} not found. Retrying in {}ms... ({}/{})", clientId, delay, retries, maxRetries);
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException interruptedException) {
-                        Thread.currentThread().interrupt();
-                    }
-                } else {
-                    log.error("Client {} not found after {} retries. Sending to DLQ.", clientId, maxRetries);
-                    throw e;
-                }
-            }
-        }
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
+        
         crudServiceType.transferFromRepoToClient(client.getIdClient());
         log.info("Finished setup client ✔️ {}", clientId);
     }
@@ -122,30 +93,8 @@ public class SetupService {
     public void setupNewClientProfiles(String clientId) {
         log.info("Started setup client profiles ⌛ {}", clientId);
 
-        Client client = null;
-        int retries = 0;
-        int maxRetries = 10;
-        long delay = 500;
-        while (client == null && retries < maxRetries) {
-            try {
-                int finalRetries = retries;
-                client = clientRepository.findById(clientId)
-                        .orElseThrow(() -> new NotFoundException("Client not found on attempt " + (finalRetries + 1)));
-            } catch (NotFoundException e) {
-                retries++;
-                if (retries < maxRetries) {
-                    log.warn("Client {} not found. Retrying in {}ms... ({}/{})", clientId, delay, retries, maxRetries);
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException interruptedException) {
-                        Thread.currentThread().interrupt();
-                    }
-                } else {
-                    log.error("Client {} not found after {} retries. Sending to DLQ.", clientId, maxRetries);
-                    throw e; // Desiste e deixa a mensagem ir para a DLQ
-                }
-            }
-        }
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new NotFoundException("Client not found"));
 
         List<ProfileRepo> profileRepos = profileRepoRepository.findAll();
         List<Profile> profiles = new ArrayList<>();
@@ -187,31 +136,8 @@ public class SetupService {
     public void setupBranch(String branchId) {
         log.info("Started setup branch ⌛ {}", branchId);
 
-        Branch branch = null;
-        int retries = 0;
-        int maxRetries = 10;
-        long delay = 500;
-
-        while (branch == null && retries < maxRetries) {
-            try {
-                int finalRetries = retries;
-                branch = branchRepository.findById(branchId)
-                        .orElseThrow(() -> new NotFoundException("Branch not found on attempt " + (finalRetries + 1)));
-            } catch (NotFoundException e) {
-                retries++;
-                if (retries < maxRetries) {
-                    log.warn("Branch {} not found. Retrying in {}ms... ({}/{})", branchId, delay, retries, maxRetries);
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException interruptedException) {
-                        Thread.currentThread().interrupt();
-                    }
-                } else {
-                    log.error("Branch {} not found after {} retries. Sending to DLQ.", branchId, maxRetries);
-                    throw e;
-                }
-            }
-        }
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new NotFoundException("Branch not found"));
 
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
