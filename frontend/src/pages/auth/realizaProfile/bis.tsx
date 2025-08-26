@@ -17,7 +17,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
-
 type Option = { value: string; label: string };
 
 type FiltersState = {
@@ -25,14 +24,13 @@ type FiltersState = {
   providerIds: string[];
   documentTypes: string[];
   responsibleIds: string[];
-  activeContract: string[]; 
-  statuses: string[]; 
+  activeContract: string[];
+  statuses: string[];
   documentTitles: string[];
 };
 
-
 type RawDocumentStatus = {
-  name: string; 
+  name: string;
   status: Array<{ status: string; quantity: number }>;
 };
 type RawExemption = { name: string; quantity: number };
@@ -43,9 +41,7 @@ type RawRanking = {
   conformity: number;
   nonConformingDocumentQuantity: number;
   conformityLevel: string;
- 
 };
-
 
 function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
   const ref = useRef<T | null>(null);
@@ -59,6 +55,7 @@ function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
   }, [onOutside]);
   return ref;
 }
+
 function MultiSelectDropdown(props: {
   label: string;
   options: Option[];
@@ -83,6 +80,7 @@ function MultiSelectDropdown(props: {
     set.has(v) ? set.delete(v) : set.add(v);
     onChange(Array.from(set));
   }
+
   const title = useMemo(() => {
     if (!values.length) return placeholder;
     if (values.length === 1) {
@@ -137,21 +135,21 @@ function MultiSelectDropdown(props: {
   );
 }
 
-
 function buildIdNameMap(arr: Array<{ id: string | number; name?: string }>) {
   const map = new Map<string, string>();
   arr.forEach((x) => map.set(String(x.id), x.name ?? String(x.id)));
   return map;
 }
+
 function normalize(s: unknown) {
   return String(s ?? "").toLowerCase();
 }
+
 function matchesAny(text: string, needles: string[]) {
-  if (!needles.length) return true; 
+  if (!needles.length) return true;
   const ntext = normalize(text);
   return needles.some((n) => ntext.includes(normalize(n)));
 }
-
 
 function filterDocumentStatus(
   raw: RawDocumentStatus[],
@@ -172,9 +170,7 @@ function filterDocumentStatus(
     ...filters.activeContract,
   ].filter(Boolean);
 
-
   let filtered = raw.filter((r) => matchesAny(r.name, nameNeedles));
-
 
   filtered = filtered
     .map((r) => ({
@@ -185,7 +181,6 @@ function filterDocumentStatus(
     }))
     .filter((r) => r.status.length > 0);
 
-
   const chartRows: ChartData[] = filtered.map((cat) => {
     const row: any = { name: cat.name };
     cat.status.forEach((s) => {
@@ -195,7 +190,6 @@ function filterDocumentStatus(
   });
   return chartRows;
 }
-
 
 function filterExemption(
   raw: RawExemption[],
@@ -217,7 +211,6 @@ function filterExemption(
   return raw.filter((r) => matchesAny(r.name, nameNeedles));
 }
 
-
 function filterRanking(
   raw: RawRanking[],
   filters: FiltersState,
@@ -227,7 +220,6 @@ function filterRanking(
     responsibleNames: string[];
   }
 ) {
-
   const providerNeedles = names.providerNames;
   const otherNeedles = [
     ...names.branchNames,
@@ -247,14 +239,12 @@ function filterRanking(
   });
 }
 
-
 export const MonittoringBis = () => {
   const [activeTab, setActiveTab] = useState("visao-geral");
   const { client } = useClient();
   const clientId = client?.idClient;
   const token = localStorage.getItem("tokenClient");
 
-  // opções da /filters
   const [branchOpts, setBranchOpts] = useState<Option[]>([]);
   const [providerOpts, setProviderOpts] = useState<Option[]>([]);
   const [docTypeOpts, setDocTypeOpts] = useState<Option[]>([]);
@@ -263,7 +253,6 @@ export const MonittoringBis = () => {
   const [statusOpts, setStatusOpts] = useState<Option[]>([]);
   const [docTitleOpts, setDocTitleOpts] = useState<Option[]>([]);
 
-
   const [branchIdName, setBranchIdName] = useState<Map<string, string>>(
     new Map()
   );
@@ -271,7 +260,6 @@ export const MonittoringBis = () => {
     new Map()
   );
   const [respIdName, setRespIdName] = useState<Map<string, string>>(new Map());
-
 
   const [draft, setDraft] = useState<FiltersState>({
     branchIds: [],
@@ -284,18 +272,15 @@ export const MonittoringBis = () => {
   });
   const [applied, setApplied] = useState<FiltersState>({ ...draft });
 
-  
   const [rawDocStatus, setRawDocStatus] = useState<RawDocumentStatus[]>([]);
   const [rawExemption, setRawExemption] = useState<RawExemption[]>([]);
   const [rawRanking, setRawRanking] = useState<RawRanking[]>([]);
-  // cards brutos vindos do back (mantidos por enquanto)
   const [rawCounts, setRawCounts] = useState({
     contractQuantity: 0,
     supplierQuantity: 0,
     allocatedEmployeeQuantity: 0,
   });
 
-  // dados FILTRADOS que vão para os componentes
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [documentExemptionData, setDocumentExemptionData] = useState<
     RawExemption[]
@@ -307,18 +292,22 @@ export const MonittoringBis = () => {
     allocatedEmployeeQuantity: 0,
   });
 
-  
   useEffect(() => {
-    if (!clientId) return;
+    if (!clientId) {
+      console.warn("Filters: clientId não disponível. Não será possível carregar as opções de filtro.");
+      return;
+    }
     (async () => {
       try {
         const url = `${ip}/dashboard/${clientId}/filters`;
+        console.log(`Filters: Solicitando opções de filtro da URL: ${url}`);
         const { data } = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
         });
+        console.log("Filters: Dados recebidos com sucesso.");
         const {
           branches = [],
           providers = [],
@@ -328,22 +317,21 @@ export const MonittoringBis = () => {
           statuses = [],
           documentTitles = [],
         } = data ?? {};
-
+        
         const mapIdNameBranches = buildIdNameMap(branches);
         const mapIdNameProviders = buildIdNameMap(providers);
         const mapIdNameResps = buildIdNameMap(responsibles);
-
-        // options
+        
         const toOptions = (arr: any[]) =>
-          arr.map((v) => ({ value: String(v), label: String(v) }));
+        arr.map((v) => ({ value: String(v), label: String(v) }));
         const toOptionsIdName = (
           arr: Array<{ id: string | number; name?: string }>
         ) =>
-          arr.map((v) => ({
-            value: String(v.id),
-            label: v.name ?? String(v.id),
-          }));
-
+        arr.map((v) => ({
+          value: String(v.id),
+          label: v.name ?? String(v.id),
+        }));
+        
         setBranchOpts(toOptionsIdName(branches));
         setProviderOpts(toOptionsIdName(providers));
         setRespOpts(toOptionsIdName(responsibles));
@@ -351,25 +339,38 @@ export const MonittoringBis = () => {
         setContractStatusOpts(toOptions(contractStatus));
         setStatusOpts(toOptions(statuses));
         setDocTitleOpts(toOptions(documentTitles));
-
+        
         setBranchIdName(mapIdNameBranches);
         setProviderIdName(mapIdNameProviders);
         setRespIdName(mapIdNameResps);
       } catch (e) {
-        console.error("Erro ao carregar /filters", e);
+        console.error("Filters: Erro ao carregar /filters", e);
       }
     })();
   }, [clientId, token]);
 
- 
   useEffect(() => {
-    if (!clientId) return;
+    if (!clientId) {
+      console.warn("General: clientId não disponível. Limpando estados de dados.");
+      setRawDocStatus([]);
+      setRawExemption([]);
+      setRawRanking([]);
+      setRawCounts({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
+      setChartData([]);
+      setDocumentExemptionData([]);
+      setTableData([]);
+      setStats({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
+      return;
+    }
     (async () => {
       try {
         const url = `${ip}/dashboard/${clientId}/general`;
+        const requestBody = { clientId: clientId };
+        console.log(`General: Solicitando dados da URL: ${url}`);
+        console.log(`General: Corpo da requisição:`, requestBody);
         const { data } = await axios.post(
           url,
-          {},
+          requestBody,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -378,6 +379,7 @@ export const MonittoringBis = () => {
             },
           }
         );
+        console.log("General: Dados recebidos com sucesso:", data);
 
         const {
           documentExemption = [],
@@ -397,7 +399,6 @@ export const MonittoringBis = () => {
           allocatedEmployeeQuantity,
         });
 
-        // primeira render sem filtro
         setChartData(
           (documentStatus ?? []).map((cat: any) => {
             const row: any = { name: cat?.name ?? "" };
@@ -424,18 +425,28 @@ export const MonittoringBis = () => {
           allocatedEmployeeQuantity,
         });
       } catch (e) {
-        console.error("Erro ao carregar /general", e);
+        console.error("General: Erro ao carregar /general", e);
+        setRawDocStatus([]);
+        setRawExemption([]);
+        setRawRanking([]);
+        setRawCounts({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
+        setChartData([]);
+        setDocumentExemptionData([]);
+        setTableData([]);
+        setStats({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
       }
     })();
   }, [clientId, token]);
 
   const conformity = tableData.length > 0 ? tableData[0]?.conformity : 0;
 
-
   function applyFilters() {
+    console.log("Aplicando filtros:", draft);
     setApplied({ ...draft });
   }
+
   function clearFilters() {
+    console.log("Limpando filtros.");
     const empty: FiltersState = {
       branchIds: [],
       providerIds: [],
@@ -450,7 +461,7 @@ export const MonittoringBis = () => {
   }
 
   useEffect(() => {
-    // mapeia ids → nomes selecionados
+    console.log("Dados aplicados (applied) mudaram, aplicando filtros locais.");
     const branchNames = applied.branchIds.map(
       (id) => branchIdName.get(id) ?? id
     );
@@ -461,29 +472,28 @@ export const MonittoringBis = () => {
       (id) => respIdName.get(id) ?? id
     );
 
-    // documentStatus 
     const docStatusChart = filterDocumentStatus(rawDocStatus, applied, {
       branchNames,
       providerNames,
       responsibleNames,
     });
-    console.log(docStatusChart);
+    console.log("Resultados do filtro de Status de Documentos:", docStatusChart);
     setChartData(docStatusChart);
 
-    // documentExemption
     const docExFiltered = filterExemption(rawExemption, applied, {
       branchNames,
       providerNames,
       responsibleNames,
     });
+    console.log("Resultados do filtro de Exenção:", docExFiltered);
     setDocumentExemptionData(docExFiltered);
 
-    // ranking
     const rankingFiltered = filterRanking(rawRanking, applied, {
       branchNames,
       providerNames,
       responsibleNames,
     });
+    console.log("Resultados do filtro de Ranking:", rankingFiltered);
     setTableData(
       rankingFiltered.map((r) => ({
         name: r.corporateName,
@@ -495,13 +505,17 @@ export const MonittoringBis = () => {
       }))
     );
 
-    
     const supplierCount = new Set(rankingFiltered.map((r) => r.corporateName))
       .size;
     setStats({
-      contractQuantity: rawCounts.contractQuantity, 
-      supplierQuantity: supplierCount, 
-      allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity, 
+      contractQuantity: rawCounts.contractQuantity,
+      supplierQuantity: supplierCount,
+      allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity,
+    });
+    console.log("Estatísticas atualizadas:", {
+      contractQuantity: rawCounts.contractQuantity,
+      supplierQuantity: supplierCount,
+      allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity,
     });
   }, [
     applied,
@@ -519,15 +533,19 @@ export const MonittoringBis = () => {
     [draft, applied]
   );
 
-  /* PDF */
   const generatePDF = () => {
+    console.log("Iniciando a geração de PDF.");
     const content = document.getElementById("contentToCapture");
-    if (!content) return;
+    if (!content) {
+      console.error("Erro: Elemento de conteúdo para PDF não encontrado.");
+      return;
+    }
     html2canvas(content).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
       const doc = new jsPDF();
       doc.addImage(imgData, "PNG", 10, 10, 180, 160);
       doc.save("graficos_completos.pdf");
+      console.log("PDF gerado e salvo com sucesso.");
     });
   };
 
@@ -538,26 +556,31 @@ export const MonittoringBis = () => {
         className="mx-5 md:mx-20 flex flex-col gap-6 pb-20"
         id="contentToCapture"
       >
-        {/* Tabs */}
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab("visao-geral")}
-            className={`px-4 py-2 rounded-t-md ${activeTab === "visao-geral" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+            className={`px-4 py-2 rounded-t-md ${
+              activeTab === "visao-geral"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200"
+            }`}
           >
             Visão Geral
           </button>
           <button
             onClick={() => setActiveTab("fornecedores")}
-            className={`px-4 py-2 rounded-t-md ${activeTab === "fornecedores" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+            className={`px-4 py-2 rounded-t-md ${
+              activeTab === "fornecedores"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200"
+            }`}
           >
             Fornecedores
           </button>
         </div>
 
-   
         {activeTab === "visao-geral" && (
           <div>
-          
             <div className="flex flex-wrap gap-3">
               <MultiSelectDropdown
                 label="Unidades"
@@ -614,7 +637,11 @@ export const MonittoringBis = () => {
                   type="button"
                   onClick={() => setApplied({ ...draft })}
                   disabled={!canApply}
-                  className={`px-4 py-2 rounded-md text-white ${canApply ? "bg-blue-600" : "bg-blue-300 cursor-not-allowed"}`}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    canApply
+                      ? "bg-blue-600"
+                      : "bg-blue-300 cursor-not-allowed"
+                  }`}
                 >
                   Aplicar
                 </button>
@@ -628,7 +655,6 @@ export const MonittoringBis = () => {
               </div>
             </div>
 
-       
             <div className="mt-2 flex min-w-[800px]">
               <ActiveContracts count={stats.contractQuantity ?? 0} />
               <Suppliers count={stats.supplierQuantity ?? 0} />
@@ -665,7 +691,6 @@ export const MonittoringBis = () => {
 
         {activeTab === "fornecedores" && (
           <div>
-    
             <div className="mt-2 flex flex-wrap gap-3">
               <MultiSelectDropdown
                 label="Unidades"
@@ -710,13 +735,16 @@ export const MonittoringBis = () => {
                 className="w-full md:w-1/2 lg:w-1/4"
               />
 
-   
               <div className="flex items-center gap-2 w-full md:w-auto">
                 <button
                   type="button"
                   onClick={applyFilters}
                   disabled={!canApply}
-                  className={`px-4 py-2 rounded-md text-white ${canApply ? "bg-blue-600" : "bg-blue-300 cursor-not-allowed"}`}
+                  className={`px-4 py-2 rounded-md text-white ${
+                    canApply
+                      ? "bg-blue-600"
+                      : "bg-blue-300 cursor-not-allowed"
+                  }`}
                 >
                   Aplicar
                 </button>

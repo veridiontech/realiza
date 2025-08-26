@@ -141,6 +141,8 @@ export const router = createBrowserRouter([
       { path: "create-manager/:id", element: <CreateNewManagerClient /> },
       { path: "profileBranch/:id", element: <ProfileBranch /> },
       { path: "documents/:id", element: <DocumentClient /> },
+      { path: "dashboard-details/:id", element: <MonittoringBis /> },
+      { path: "fornecedor/:id", element: <SupplierContractNewPage /> },
     ],
   },
   {
