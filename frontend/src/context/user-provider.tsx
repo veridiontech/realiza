@@ -54,6 +54,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Parse defensivo para userBranches
+  const getSafeBranchesFromStorage = (): string[] => {
+    let branches: string[] = [];
+    try {
+      const raw = localStorage.getItem("userBranches");
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        branches = parsed;
+      } else {
+        throw new Error("userBranches não é um array");
+      }
+    } catch (e) {
+      console.warn("userBranches inválido no localStorage, removendo…", e);
+      localStorage.removeItem("userBranches");
+      branches = [];
+    }
+    return branches;
+  };
+
   const validateTokenAndFetchUser = async () => {
     setLoading(true);
     try {
@@ -83,6 +103,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
+
           case "ROLE_CLIENT_MANAGER":
           case "ROLE_CLIENT_RESPONSIBLE":
             try {
@@ -101,6 +122,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
+
           case "ROLE_SUPPLIER_MANAGER":
           case "ROLE_SUPPLIER_RESPONSIBLE":
             try {
@@ -110,9 +132,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               if (res.data) {
                 const supplierData = res.data;
                 console.log("Dados do supplier:", res.data);
-                const storedBranches = JSON.parse(
-                  localStorage.getItem("userBranches") || "[]"
-                );
+
+                // <<< alteração principal: parse seguro do userBranches >>>
+                const storedBranches = getSafeBranchesFromStorage();
+
                 setUser({
                   ...supplierData,
                   branches: storedBranches,
@@ -128,6 +151,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
+
           case "ROLE_SUBCONTRACTOR_RESPONSIBLE":
           case "ROLE_SUBCONTRACTOR_MANAGER":
             try {
@@ -146,6 +170,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
+
           case "ROLE_VIEWER":
             try {
               const resClient = await axios.get(`${ip}/user/client`, {
@@ -168,6 +193,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               } else {
                 logout();
               }
+
               const resSupplier = await axios.get(`${ip}/user/supplier`, {
                 headers: { Authorization: `Bearer ${tokenFromStorage}` }
               });
@@ -193,6 +219,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               } else {
                 logout();
               }
+
               const resSubcontractor = await axios.get(`${ip}/user/subcontractor`, {
                 headers: { Authorization: `Bearer ${tokenFromStorage}` }
               });
@@ -202,9 +229,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                   try {
                     const res = await axios.get(
                       `${ip}/user/subcontractor/${userId}`,
-                      {
-                        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-                      }
+                      { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
                     );
                     if (res.data) {
                       setUser(res.data);
@@ -226,6 +251,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
               logout();
             }
             break;
+
           default:
             console.log("Função não definida para este tipo de usuário.");
         }
