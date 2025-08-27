@@ -8,7 +8,7 @@ import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.domains.user.UserManager;
-import bl.tech.realiza.domains.user.profile.Profile;
+import bl.tech.realiza.domains.user.security.Profile;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;

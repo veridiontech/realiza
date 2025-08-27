@@ -1,8 +1,7 @@
 package bl.tech.realiza.usecases.impl.users;
 
-import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.user.User;
-import bl.tech.realiza.domains.user.profile.Profile;
+import bl.tech.realiza.domains.user.security.Profile;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;

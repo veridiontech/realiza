@@ -4,7 +4,7 @@ import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.services.ItemManagement;
-import bl.tech.realiza.domains.user.profile.Profile;
+import bl.tech.realiza.domains.user.security.Profile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

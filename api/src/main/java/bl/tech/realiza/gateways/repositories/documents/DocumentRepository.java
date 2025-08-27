@@ -22,14 +22,16 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     FROM Document d
     JOIN d.contractDocuments cd
     WHERE d.status = :status
-      AND (cd.contract.status NOT IN :contractStatuses)
+        AND ( :#{#contractStatuses == null || #contractStatuses.isEmpty()} = true
+            OR cd.contract.status NOT IN :contractStatuses )
   """,
             countQuery = """
     SELECT COUNT(DISTINCT d)
     FROM Document d
     JOIN d.contractDocuments cd
     WHERE d.status = :status
-      AND (cd.contract.status NOT IN :contractStatuses)
+        AND ( :#{#contractStatuses == null || #contractStatuses.isEmpty()} = true
+            OR cd.contract.status NOT IN :contractStatuses )
   """
     )
     Page<Document> findAllByStatusAndNotInContractStatuses(
@@ -46,11 +48,15 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds 
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+            OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+      AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+      AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+      AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("clientId") String clientId,
@@ -69,10 +75,14 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (:clientId IS NULL OR cps.branch.client.idClient = :clientId)
-    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.idUser IN :responsibleIds )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("clientId") String clientId,
@@ -91,11 +101,16 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
-    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cps.branch.idBranch IN :branchIds )
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.idUser IN :responsibleIds )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
@@ -113,12 +128,17 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (:branchIds IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds )
+          AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+                OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+          AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+          AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+          AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
@@ -135,12 +155,16 @@ FROM Document d
 JOIN d.contractDocuments cd
 JOIN cd.contract c
 LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-WHERE cps.branch.idBranch IN :branchIds
-AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-AND d.type = :type
-AND d.status = :status
-AND (:documentTitles IS null OR d.title IN :documentTitles)
+WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+    OR cps.branch.idBranch IN :branchIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+        OR cps.responsible.idUser IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+        OR cps.providerSupplier.idProvider IN :providerIds)
+    AND d.type = :type
+    AND d.status = :status
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+        OR d.title IN :documentTitles )
 """)
     Long countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
@@ -157,13 +181,16 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds 
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+    OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+        OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+        OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds)
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+        OR d.title IN :documentTitles )
 """)
     Long countSubcontractorByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("branchIds") List<String> branchIds,
                                                                             @Param("providerIds") List<String> providerIds,
@@ -180,11 +207,14 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE cps.branch.client.idClient = :clientId
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible.idUser IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Long countSupplierByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("clientId") String clientId,
                                                                            @Param("providerIds") List<String> providerIds,
@@ -200,12 +230,15 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.branch.client.idClient = :clientId
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds 
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+                OR cpsb.providerSubcontractor.idProvider IN :providerIds )
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Long countSubcontractorByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(@Param("clientId") String clientId,
                                                                            @Param("providerIds") List<String> providerIds,
@@ -229,10 +262,14 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (:clientId IS NULL OR cps.branch.client.idClient = :clientId)
-    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndAdherenceSupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("clientId") String clientId,
@@ -251,11 +288,15 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE (:clientId IS NULL OR cpsb.contractProviderSupplier.branch.client.idClient = :clientId)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTypes == null || #providerIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+                OR cpsb.providerSubcontractor.idProvider IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndAdherenceSubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("clientId") String clientId,
@@ -273,11 +314,16 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
-    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
-    AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cps.branch.idBranch IN :branchIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
@@ -295,12 +341,17 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (:branchIds IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds )
+    AND ( :#{#documentTypes == null || #providerIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
+                OR cpsb.providerSubcontractor.idProvider IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("branchIds") List<String> branchIds,
@@ -319,9 +370,12 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (cps.providerSupplier.idProvider = :providerId)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndAdherenceByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("providerId") String providerId,
@@ -338,9 +392,12 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE (cps.providerSupplier.idProvider = :providerId)
-    AND (:responsibleIds IS NULL OR cps.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndConformityByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("providerId") String providerId,
@@ -357,9 +414,12 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.providerSupplier.idProvider = :providerId
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndAdherenceByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("providerId") String providerId,
@@ -376,9 +436,12 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE cpsb.contractProviderSupplier.providerSupplier.idProvider = :providerId
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
 """)
     Object[] countTotalAndConformityByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(
             @Param("providerId") String providerId,
@@ -426,12 +489,18 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
     WHERE cps.branch.client.idClient = :clientId
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.idUser IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+            OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+            OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
 """)
     List<Document> findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("clientId") String clientId,
                                                                                                                @Param("providerIds") List<String> providerIds,
@@ -445,36 +514,60 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     SELECT d
     FROM Document d
     LEFT JOIN d.contractDocuments cd
-    LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
+    LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier) cps
     WHERE cps.branch.client.idClient = :clientId
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+      AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.providerSupplier.idProvider IN :providerIds )
+      AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+      AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.idUser IN :responsibleIds )
+      AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+            OR cps.status IN :activeContract )
+      AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+            OR d.status IN :statuses )
+      AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
 """)
-    Page<Document> findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("clientId") String clientId,
-                                                                                                                       @Param("providerIds") List<String> providerIds,
-                                                                                                                       @Param("documentTypes") List<String> documentTypes,
-                                                                                                                       @Param("responsibleIds") List<String> responsibleIds,
-                                                                                                                       @Param("activeContract") List<ContractStatusEnum> activeContract,
-                                                                                                                       @Param("statuses") List<Document.Status> statuses,
-                                                                                                                       @Param("documentTitles") List<String> documentTitles,
-                                                                                                                       Pageable pageable);
+    Page<Document> findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(
+            @Param("clientId") String clientId,
+            @Param("providerIds") List<String> providerIds,
+            @Param("documentTypes") List<String> documentTypes,
+            @Param("responsibleIds") List<String> responsibleIds,
+            @Param("activeContract") List<ContractStatusEnum> activeContract,
+            @Param("statuses") List<Document.Status> statuses,
+            @Param("documentTitles") List<String> documentTitles,
+            Pageable pageable
+    );
 
     @Query("""
     SELECT d
     FROM Document d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
-    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE cps.branch.client.idClient = :clientId
+""")
+    Page<Document> findAllSupplierByClientIdDebug(@Param("clientId") String clientId, Pageable pageable);
+
+    @Query("""
+    SELECT d
+    FROM Document d
+    LEFT JOIN d.contractDocuments cd
+    LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cps.branch.idBranch IN :branchIds )
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+                OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+                OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     List<Document> findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("branchIds") List<String> branchIds,
                                                                                                                        @Param("providerIds") List<String> providerIds,
@@ -489,13 +582,20 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     FROM Document d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSupplier ) cps
-    WHERE (:branchIds IS NULL OR cps.branch.idBranch IN :branchIds)
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cps.branch.idBranch IN :branchIds )
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+                OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+                OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Page<Document> findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("branchIds") List<String> branchIds,
                                                                                                                         @Param("providerIds") List<String> providerIds,
@@ -512,12 +612,18 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
     WHERE cps.contractProviderSupplier.branch.client.idClient = :clientId
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+                OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+                OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     List<Document> findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("clientId") String clientId,
                                                                                                                        @Param("providerIds") List<String> providerIds,
@@ -533,12 +639,18 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
     WHERE cps.contractProviderSupplier.branch.client.idClient = :clientId
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+                OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+                OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Page<Document> findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("clientId") String clientId,
                                                                                                                             @Param("providerIds") List<String> providerIds,
@@ -554,13 +666,20 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     FROM Document d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
-    WHERE (:branchIds IS NULL OR cps.contractProviderSupplier.branch.idBranch IN :branchIds)
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cps.contractProviderSupplier.branch.idBranch IN :branchIds )
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+                OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+                OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     List<Document> findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("branchIds") List<String> branchIds,
                                                                                                                         @Param("providerIds") List<String> providerIds,
@@ -575,13 +694,20 @@ AND (:documentTitles IS null OR d.title IN :documentTitles)
     FROM Document d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractor ) cps
-    WHERE (:branchIds IS NULL OR cps.contractProviderSupplier.branch.idBranch IN :branchIds)
-        AND (:providerIds IS NULL OR cps.providerSupplier.idProvider IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR cps.contractProviderSupplier.branch.idBranch IN :branchIds )
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+                OR cps.providerSupplier.idProvider IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+                OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+                OR cps.responsible IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+                OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+                OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+                OR d.title IN :documentTitles )
 """)
     Page<Document> findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(@Param("branchIds") List<String> branchIds,
                                                                                                                              @Param("providerIds") List<String> providerIds,
