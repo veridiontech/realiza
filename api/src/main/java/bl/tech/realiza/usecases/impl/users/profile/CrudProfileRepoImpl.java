@@ -1,10 +1,9 @@
 package bl.tech.realiza.usecases.impl.users.profile;
 
-import bl.tech.realiza.domains.user.profile.ProfileRepo;
+import bl.tech.realiza.domains.user.security.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
 import bl.tech.realiza.gateways.requests.users.profile.ProfileRepoRequestDto;
-import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
 import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfileRepo;
 import lombok.RequiredArgsConstructor;

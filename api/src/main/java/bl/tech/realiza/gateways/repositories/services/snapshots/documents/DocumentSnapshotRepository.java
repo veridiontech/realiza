@@ -22,11 +22,15 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
-    WHERE (:clientId IS NULL OR cps.branch.client.id = :clientId)
-    AND (:providerIds IS NULL OR cps.supplier.id IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE (:clientId IS NULL OR cps.branch.client.id.id = :clientId)
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -47,11 +51,15 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
     WHERE (:clientId IS NULL OR cpsb.contractSupplier.branch.client.id.id = :clientId)
-    AND (:providerIds IS NULL OR cpsb.contractSupplier.supplier.id.id IN :providerIds
-        OR cpsb.subcontractor.id.id IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cpsb.contractSupplier.supplier.id.id IN :providerIds
+            OR cpsb.subcontractor.id.id IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -71,11 +79,16 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
-    WHERE (:branchIds IS NULL OR cps.branch.id.id IN :branchIds)
-    AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cps.branch.id.id IN :branchIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -95,12 +108,17 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
-    WHERE (:branchIds IS NULL OR cpsb.contractSupplier.branch.id.id IN :branchIds)
-    AND (:providerIds IS NULL OR cpsb.contractSupplier.supplier.id.id IN :providerIds
-        OR cpsb.subcontractor.id.id IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cpsb.contractSupplier.branch.id.id IN :branchIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cpsb.contractSupplier.supplier.id.id IN :providerIds
+            OR cpsb.subcontractor.id.id IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -129,12 +147,16 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
-    WHERE cps.branch.id.id IN :branchIds
-    AND (:responsibleIds IS NULL OR cps.responsible.id.id IN :responsibleIds)
-    AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cps.branch.id.id IN :branchIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS null OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -155,12 +177,15 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
     WHERE (cpsb.contractSupplier.branch.id.id IN :branchIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds)
-    AND (:providerIds IS NULL OR cpsb.contractSupplier.supplier.id.id IN :providerIds
-        OR cpsb.subcontractor.id.id IN :providerIds)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cpsb.contractSupplier.supplier.id.id IN :providerIds
+            OR cpsb.subcontractor.id.id IN :providerIds )
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -180,11 +205,14 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
     WHERE cps.branch.client.id.id = :clientId
-    AND (:responsibleIds IS NULL OR cps.responsible.id.id IN :responsibleIds)
-    AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -204,12 +232,15 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
     WHERE cpsb.contractSupplier.branch.client.id.id = :clientId
-    AND (:responsibleIds IS NULL OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds)
-    AND (:providerIds IS NULL OR cpsb.contractSupplier.supplier.id.id IN :providerIds
-        OR cpsb.subcontractor.id.id IN :providerIds)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cpsb.contractSupplier.supplier.id.id IN :providerIds
+            OR cpsb.subcontractor.id.id IN :providerIds )
     AND d.type = :type
     AND d.status = :status
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -229,11 +260,16 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN d.contractDocuments cd
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
-    WHERE (:branchIds IS NULL OR cps.branch.id.id IN :branchIds)
-    AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
-    AND (:responsibleIds IS NULL OR cps.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cps.branch.id.id IN :branchIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -252,13 +288,18 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     FROM DocumentSnapshot d
     JOIN d.contractDocuments cd
     JOIN cd.contract c
-    LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
-    WHERE (:branchIds IS NULL OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds)
-    AND (:providerIds IS NULL OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
-        OR cpsb.providerSubcontractor.idProvider IN :providerIds)
-    AND (:responsibleIds IS NULL OR cpsb.contractProviderSupplier.responsible.idUser IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cpsb.contractSupplier.branch.id.id IN :branchIds )
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cpsb.contractSupplier.supplier.id.id IN :providerIds
+            OR cpsb.subcontractor.id.id IN :providerIds )
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -279,9 +320,12 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
     WHERE (cps.supplier.id.id = :providerId)
-    AND (:responsibleIds IS NULL OR cps.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -301,9 +345,12 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplierSnapshot ) cps
     WHERE (cps.supplier.id.id = :providerId)
-    AND (:responsibleIds IS NULL OR cps.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -323,9 +370,12 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
     WHERE cpsb.contractSupplier.supplier.id.id = :providerId
-    AND (:responsibleIds IS NULL OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -345,9 +395,12 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     JOIN cd.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractorSnapshot ) cpsb
     WHERE cpsb.contractSupplier.supplier.id.id = :providerId
-    AND (:responsibleIds IS NULL OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds)
-    AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-    AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cpsb.contractSupplier.responsible.id.id IN :responsibleIds )
+    AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+    AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
     AND d.id.snapshotDate = :date
     AND d.id.frequency = :frequency
 """)
@@ -365,12 +418,18 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSupplierSnapshot ) cps
     WHERE cps.branch.client.id.id = :clientId
-        AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+            OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+            OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
         AND d.id.snapshotDate = :date
         AND d.id.frequency = :frequency
 """)
@@ -390,12 +449,18 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractorSnapshot ) cps
     WHERE cps.contractSupplier.branch.client.id.id = :clientId
-        AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+            OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+            OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
         AND d.id.snapshotDate = :date
         AND d.id.frequency = :frequency
 """)
@@ -414,13 +479,20 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     FROM DocumentSnapshot d
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSupplierSnapshot ) cps
-    WHERE (:branchIds IS NULL OR cps.branch.id.id IN :branchIds)
-        AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+            OR cps.branch.id.id IN :branchIds )
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+            OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+            OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
         AND d.id.snapshotDate = :date
         AND d.id.frequency = :frequency
 """)
@@ -440,12 +512,18 @@ public interface DocumentSnapshotRepository extends JpaRepository<DocumentSnapsh
     LEFT JOIN d.contractDocuments cd
     LEFT JOIN TREAT(cd.contract AS ContractProviderSubcontractorSnapshot ) cps
     WHERE (:branchIds IS NULL OR cps.contractSupplier.branch.id.id IN :branchIds)
-        AND (:providerIds IS NULL OR cps.supplier.id.id IN :providerIds)
-        AND (:documentTypes IS NULL OR d.type IN :documentTypes)
-        AND (:responsibleIds IS NULL OR cps.responsible IN :responsibleIds)
-        AND (:activeContract IS NULL OR cps.status IN :activeContract)
-        AND (:statuses IS NULL OR d.status IN :statuses)
-        AND (:documentTitles IS NULL OR d.title IN :documentTitles)
+        AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
+            OR cps.supplier.id.id IN :providerIds )
+        AND ( :#{#documentTypes == null || #documentTypes.isEmpty()} = true
+            OR d.type IN :documentTypes )
+        AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
+            OR cps.responsible.id.id IN :responsibleIds )
+        AND ( :#{#activeContract == null || #activeContract.isEmpty()} = true
+            OR cps.status IN :activeContract )
+        AND ( :#{#statuses == null || #statuses.isEmpty()} = true
+            OR d.status IN :statuses )
+        AND ( :#{#documentTitles == null || #documentTitles.isEmpty()} = true
+            OR d.title IN :documentTitles )
         AND d.id.snapshotDate = :date
         AND d.id.frequency = :frequency
 """)
