@@ -126,7 +126,7 @@ export function SubcontractorDetails() {
   };
 
   const handleStatusChangeForDocument = useCallback(
-    (documentIdChanged: string, newStatus: string) => {
+    (newStatus: string) => {
       toast(
         `Status do documento atualizado para "${newStatus.replace(
           /_/g,
