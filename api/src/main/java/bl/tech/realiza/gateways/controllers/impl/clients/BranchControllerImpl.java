@@ -127,7 +127,7 @@ public class BranchControllerImpl implements BranchControlller {
         return ResponseEntity.ok(crudBranch.findControlPanelSummary(branchId));
     }
 
-    @GetMapping("/find-by-access")
+    @PostMapping("/find-by-access")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<BranchNameResponseDto>> getAllBranchesByAccess(@RequestBody List<String> branchIds) {
