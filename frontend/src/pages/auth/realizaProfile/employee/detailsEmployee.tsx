@@ -8,6 +8,7 @@ import { ip } from "@/utils/ip";
 import { DocumentViewer } from "./modals/viewDoc";
 import { Blocks } from "react-loader-spinner";
 import { toast } from "sonner";
+import { useUser } from "@/context/user-provider";
 
 interface Document {
   idDocument: string;
@@ -20,6 +21,11 @@ interface Document {
 
 export function DetailsEmployee() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useUser();
+  const isSupplier =
+    user?.role === "ROLE_SUPPLIER_MANAGER" ||
+    user?.role === "ROLE_SUPPLIER_RESPONSIBLE";
+
   const [employee, setEmployee] = useState<any | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,15 +33,11 @@ export function DetailsEmployee() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
-    null
-  );
-  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<
-    string | null
-  >(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
 
   const formatSituation = (situation: string) => {
-    const situationMap: { [key: string]: string } = {
+    const map: Record<string, string> = {
       ALOCADO: "Alocado",
       DESALOCADO: "Desalocado",
       DEMITIDO: "Demitido",
@@ -47,14 +49,12 @@ export function DetailsEmployee() {
       ALISTAMENTO_MILITAR: "Alistamento Militar",
       APOSENTADORIA_POR_INVALIDEZ: "Aposentadoria por Invalidez",
     };
-    return situationMap[situation] || situation;
+    return map[situation] || situation;
   };
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    setDocuments((prevDocuments) =>
-      prevDocuments.map((doc) =>
-        doc.idDocument === id ? { ...doc, status: newStatus } : doc
-      )
+  const handleStatusChange = (idDoc: string, newStatus: string) => {
+    setDocuments((prev) =>
+      prev.map((d) => (d.idDocument === idDoc ? { ...d, status: newStatus } : d))
     );
   };
 
@@ -78,71 +78,74 @@ export function DetailsEmployee() {
       );
 
       toast.success(`Documento "${documentTitle}" isento com sucesso!`);
-
-      setDocuments((prevDocs) =>
-        prevDocs.map((doc) =>
-          doc.idDocument === documentId ? { ...doc, status: "ISENTO" } : doc
-        )
+      setDocuments((prev) =>
+        prev.map((d) => (d.idDocument === documentId ? { ...d, status: "ISENTO" } : d))
       );
-    } catch (error: any) {
-      console.error(
-        "Erro ao isentar o documento:",
-        error.response?.data || error.message
-      );
+    } catch (err: any) {
+      console.error("Erro ao isentar o documento:", err?.response?.data || err?.message);
       toast.error("Erro ao isentar o documento.");
     }
   };
 
-  const position = employee?.position;
-  if (position && position.getId) {
-  } else {
-    console.warn("Position ou getId não encontrado.");
-  }
+  // =================== FETCHERS ===================
 
   const fetchEmployee = async () => {
+    const token = localStorage.getItem("tokenClient");
     try {
-      const token = localStorage.getItem("tokenClient");
-      const response = await axios.get(`${ip}/employee/brazilian/${id}`, {
+      // 1) rota padrão com enterprise quando for fornecedor
+      const res = await axios.get(`${ip}/employee/brazilian/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: isSupplier ? { enterprise: "SUPPLIER" } : undefined,
       });
-      setEmployee(response.data);
+      setEmployee(res.data);
+      setError(null);
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Erro ao carregar o Colaborador."
-      );
+      // 2) fallback: tenta rota alternativa simples
+      try {
+        const res2 = await axios.get(`${ip}/employee/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: isSupplier ? { enterprise: "SUPPLIER" } : undefined,
+        });
+        setEmployee(res2.data);
+        setError(null);
+      } catch (err2: any) {
+        console.error("Erro ao carregar o Colaborador:", err2?.response?.data || err2?.message);
+        const backendMsg =
+          err2?.response?.data?.message ||
+          err?.response?.data?.message ||
+          "Erro ao carregar o Colaborador.";
+        setError(backendMsg);
+      }
     }
   };
 
   const fetchDocuments = async () => {
+    const token = localStorage.getItem("tokenClient");
     try {
-      const token = localStorage.getItem("tokenClient");
-      const response = await axios.get(
-        `${ip}/document/employee/filtered-employee`,
-        {
-          params: {
-            idSearch: id,
-            page: 0,
-            size: 10,
-            sort: "creationDate",
-            direction: "DESC",
-          },
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setDocuments(response.data.content || []);
+      const res = await axios.get(`${ip}/document/employee/filtered-employee`, {
+        params: {
+          idSearch: id,
+          page: 0,
+          size: 10,
+          sort: "creationDate",
+          direction: "DESC",
+          ...(isSupplier ? { enterprise: "SUPPLIER" } : {}),
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDocuments(res.data?.content || []);
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Erro ao carregar os documentos."
-      );
+      console.error("Erro ao carregar os documentos:", err?.response?.data || err?.message);
+      setError(err?.response?.data?.message || "Erro ao carregar os documentos.");
     }
   };
 
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() =>
-      setIsLoading(false)
-    );
-  }, [id]);
+    Promise.all([fetchEmployee(), fetchDocuments()]).finally(() => setIsLoading(false));
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // =================== TABELA ===================
 
   const columns: {
     key: keyof Document;
@@ -150,20 +153,13 @@ export function DetailsEmployee() {
     className?: string;
     render?: (value: string | undefined, row: Document) => React.ReactNode;
   }[] = [
-    {
-      key: "title",
-      label: "Documento",
-    },
+    { key: "title", label: "Documento" },
     {
       key: "creationDate",
       label: "Data de Envio",
       render: (value) =>
         value
-          ? new Date(value).toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "2-digit",
-            })
+          ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })
           : "-",
     },
     {
@@ -171,11 +167,7 @@ export function DetailsEmployee() {
       label: "Data de Atribuição",
       render: (value) =>
         value
-          ? new Date(value).toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "2-digit",
-            })
+          ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })
           : "-",
     },
     {
@@ -183,28 +175,19 @@ export function DetailsEmployee() {
       label: "Data de Validade",
       render: (value) =>
         value
-          ? new Date(value).toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "2-digit",
-            })
+          ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })
           : "-",
     },
     {
       key: "status",
       label: "Status",
       render: (value) => {
-        let statusClass = "";
-        if (value === "PENDENTE") statusClass = "text-yellow-500";
-        else if (value === "EM_ANALISE") statusClass = "text-blue-600";
-        else if (value === "APROVADO" || value === "APROVADO_IA")
-          statusClass = "text-green-600";
-        else if (value === "REPROVADO" || value === "REPROVADO_IA")
-          statusClass = "text-red-600";
-
-        return (
-          <span className={`text-sm font-medium ${statusClass}`}>{value}</span>
-        );
+        let cls = "";
+        if (value === "PENDENTE") cls = "text-yellow-500";
+        else if (value === "EM_ANALISE") cls = "text-blue-600";
+        else if (value === "APROVADO" || value === "APROVADO_IA") cls = "text-green-600";
+        else if (value === "REPROVADO" || value === "REPROVADO_IA") cls = "text-red-600";
+        return <span className={`text-sm font-medium ${cls}`}>{value}</span>;
       },
     },
     {
@@ -215,9 +198,7 @@ export function DetailsEmployee() {
           <button
             className="text-realizaBlue hover:underline"
             onClick={() =>
-              setSelectedDocumentId(
-                selectedDocumentId === row.idDocument ? null : row.idDocument
-              )
+              setSelectedDocumentId(selectedDocumentId === row.idDocument ? null : row.idDocument)
             }
           >
             <MoreVertical size={16} />
@@ -261,6 +242,8 @@ export function DetailsEmployee() {
       ),
     },
   ];
+
+  // =================== RENDER ===================
 
   if (isLoading) {
     return (
@@ -309,18 +292,10 @@ export function DetailsEmployee() {
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Atividade
-                    </th>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Tipo de Atividade
-                    </th>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Feito por
-                    </th>
-                    <th className="p-2 text-left text-sm text-stone-600">
-                      Data
-                    </th>
+                    <th className="p-2 text-left text-sm text-stone-600">Atividade</th>
+                    <th className="p-2 text-left text-sm text-stone-600">Tipo de Atividade</th>
+                    <th className="p-2 text-left text-sm text-stone-600">Feito por</th>
+                    <th className="p-2 text-left text-sm text-stone-600">Data</th>
                   </tr>
                 </thead>
                 <tbody>
