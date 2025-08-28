@@ -14,12 +14,16 @@ import {
   AlertCircle,
   Lock,
   Unlock,
+  FileDown,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { AddDocument } from "../employee/modals/addDocumentForSupplier";
 import { DocumentViewer } from "../employee/modals/viewDocumentForSupplier";
 import { toast } from "sonner";
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Contract {
   idContract: string;
@@ -37,6 +41,16 @@ interface Document {
   lastCheck?: string;
   uploadDate?: string;
   bloqueia: boolean;
+}
+
+interface Collaborator {
+  id: string;
+  name: string;
+  cboTitle: string;
+  cpf: string;
+  contractType: string,
+  pis: string;
+  email: string;
 }
 
 export function ContarctsByProvider() {
@@ -68,6 +82,12 @@ export function ContarctsByProvider() {
     title: string;
   } | null>(null);
   const [description, setDescription] = useState("");
+
+
+
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+
 
   const token = localStorage.getItem("tokenClient");
 
@@ -143,6 +163,99 @@ export function ContarctsByProvider() {
       }
     }
   }, [selectedContractName, getAllDatas, contracts]);
+
+
+
+  const handleGeneratePdf = async () => {
+    const selectedContract = contracts.find(
+      (contract) => contract.serviceName === selectedContractName
+    );
+
+    if (!selectedContract) {
+      toast.error("Por favor, selecione um contrato primeiro.");
+      return;
+    }
+
+    // ================== ADICIONADO PARA DEBUG ==================
+    // Vamos verificar exatamente o que está sendo enviado para a API
+    const requestParams = {
+        enterprise: "SUPPLIER",
+        idSearch: id.id,
+    };
+
+    console.log("Enviando requisição para /employee com os parâmetros:", requestParams);
+    // Verifique no console se o 'idSearch' possui um valor válido.
+    // ============================================================
+
+    setIsGeneratingPdf(true);
+    toast.loading("Gerando relatório de colaboradores...");
+
+    try {
+      const response = await axios.get(`${ip}/employee`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: requestParams, // Usando os parâmetros que acabamos de logar
+      });
+      
+      console.log("Resposta recebida da API:", response.data);
+
+      const collaboratorsList: Collaborator[] = Array.isArray(response.data.content) 
+        ? response.data.content 
+        : [];
+
+      if (collaboratorsList.length === 0) {
+        toast.info("Nenhum colaborador encontrado para gerar o PDF.");
+        return;
+      }
+      
+      // ... (o restante da função continua igual)
+
+      const doc = new jsPDF();
+      const tableColumn = ["Nome", "Cargo", "Tipo de Contrato", "CPF", "Pis", "E-mail"];
+      const tableRows: (string | null)[][] = [];
+
+      collaboratorsList.forEach((col) => {
+        const collaboratorData = [
+          col.name || "-",
+          col.cboTitle || "-",
+          col.contractType || "-",
+          col.cpf || "-",
+          col.pis || "-",
+          col.email || "-",
+        ];
+        tableRows.push(collaboratorData);
+      });
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+      });
+
+      doc.text(
+        `Relatório de Colaboradores - Contrato: ${selectedContract.serviceName}`,
+        14,
+        15
+      );
+      doc.save(
+        `colaboradores_${selectedContract.serviceName.replace(/\s/g, "_")}.pdf`
+      );
+
+      toast.success("PDF gerado com sucesso!");
+
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Falha ao gerar o relatório de colaboradores.");
+    } finally {
+      setIsGeneratingPdf(false);
+      toast.dismiss();
+    }
+  };
+
+
+
+
 
   const filteredDocuments = documents.filter(
     (doc: Document) =>
@@ -585,38 +698,56 @@ export function ContarctsByProvider() {
             </div>
           )}
 
-          {viewOption === "collaborators" && (
-            <div className="w-full">
+           {viewOption === "collaborators" && (
+            <div className="w-full flex flex-col h-full">
+              {" "}
+              {/* Container flex para empurrar o botão para baixo */}
               <div className="flex items-center gap-2 text-[#34495E] mb-6">
                 <User />
                 <h2 className="text-[20px]">Colaboradores</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto max-h-[50vh] pr-2">
+              <div className="flex-grow overflow-y-auto max-h-[50vh] pr-2">
+                {" "}
+                {/* Área de rolagem */}
                 {collaborators.length > 0 ? (
-                  // @ts-ignore
-                  collaborators.map((employee: any) => (
-                    <Link
-                      to={`/sistema/detailsEmployees/${employee.id}`}
-                      key={employee.id}
-                    >
-                      <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
-                        <div className="bg-neutral-100 p-2 rounded-full mb-2">
-                          <User className="w-6 h-6 text-neutral-500" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {collaborators.map((employee: Collaborator) => (
+                      <Link
+                        to={`/sistema/detailsEmployees/${employee.id}`}
+                        key={employee.id}
+                      >
+                        <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
+                          <div className="bg-neutral-100 p-2 rounded-full mb-2">
+                            <User className="w-6 h-6 text-neutral-500" />
+                          </div>
+                          <p className="text-sm font-semibold text-[#34495E] leading-tight">
+                            {employee.name}
+                          </p>
+                          <span className="text-xs text-realizaBlue font-medium mt-1">
+                            {employee.cboTitle}
+                          </span>
                         </div>
-                        <p className="text-sm font-semibold text-[#34495E] leading-tight">
-                          {employee.name}
-                        </p>
-                        <span className="text-xs text-realizaBlue font-medium mt-1">
-                          {employee.cboTitle}
-                        </span>
-                      </div>
-                    </Link>
-                  ))
+                      </Link>
+                    ))}
+                  </div>
                 ) : (
                   <div className="col-span-full text-center text-neutral-400 mt-10">
                     Nenhum colaborador encontrado
                   </div>
                 )}
+              </div>
+              {/* Botão para gerar PDF */}
+              <div className="mt-auto pt-4 flex justify-end">
+                <button
+                  onClick={handleGeneratePdf}
+                  disabled={isGeneratingPdf || !selectedContractName}
+                  className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center gap-2 disabled:bg-neutral-400 disabled:cursor-not-allowed"
+                >
+                  <FileDown className="w-5 h-5" />
+                  {isGeneratingPdf
+                    ? "Gerando PDF..."
+                    : "Baixar Relatório PDF"}
+                </button>
               </div>
             </div>
           )}
@@ -662,7 +793,9 @@ export function ContarctsByProvider() {
                         </div>
 
                         {/* Botão para ver detalhes (lado direito) */}
-                        <Link to={`/sistema/subcontracts-details/${sub.idContract}`}>
+                        <Link
+                          to={`/sistema/subcontracts-details/${sub.idContract}`}
+                        >
                           <button className="flex items-center gap-2 bg-realizaBlue text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
                             <NotebookText className="w-5 h-5" />
                             <span>Ver Detalhes</span>
