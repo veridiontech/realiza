@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { ip } from "@/utils/ip";
 import axios from "axios";
+
+const token = localStorage.getItem("tokenClient");
 
 type Filters = {
   branchIds?: string[];
   providerIds?: string[];
   documentTypes?: string[];
   responsibleIds?: string[];
-  activeContract?: string[]; 
+  activeContract?: string[];
   statuses?: string[];
   documentTitles?: string[];
 };
@@ -48,7 +51,12 @@ function mapItemToRow(it: ApiItem, idx: number): Row {
     status: it.status ?? it.documentStatus ?? it.contractStatus ?? "—",
     responsavel: it.responsibleFullName ?? it.employeeFullName ?? "—",
     emailResponsavel: it.responsibleEmail ?? it.employeeEmail ?? "—",
-    conformidade: typeof it.conform === "boolean" ? (it.conform ? "Conforme" : "Não conforme") : "—",
+    conformidade:
+      typeof it.conform === "boolean"
+        ? it.conform
+          ? "Conforme"
+          : "Não conforme"
+        : "—",
     criadoEm: formatDate(it.createdAt ?? it.contractAt ?? it.serviceStartAt),
     ultimaChecagem: formatDate(it.lastCheck ?? it.checkedAt),
     validade: formatDate(it.expirationDate ?? it.validUntil),
@@ -56,19 +64,30 @@ function mapItemToRow(it: ApiItem, idx: number): Row {
 }
 
 async function fetchDocumentDetails(clientId: string, filters: Filters) {
-  
   const body = {
     branchIds: filters.branchIds ?? [],
     providerIds: filters.providerIds ?? [],
     documentTypes: filters.documentTypes ?? [],
     responsibleIds: filters.responsibleIds ?? [],
-    activeContract: filters.activeContract,   
+    activeContract: filters.activeContract,
     statuses: filters.statuses ?? [],
     documentTitles: filters.documentTitles ?? [],
   };
 
-  const { data } = await axios.post(`/dashboard/${clientId}/document/details`, body);
-  const content = Array.isArray(data?.content) ? data.content : Array.isArray(data) ? data : [];
+  const { data } = await axios.post(
+    `${ip}/dashboard/${clientId}/document/details`,
+    body,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const content = Array.isArray(data?.content)
+    ? data.content
+    : Array.isArray(data)
+      ? data
+      : [];
   return content as ApiItem[];
 }
 
@@ -100,7 +119,9 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [clientId, JSON.stringify(filters)]);
 
   const sorted = useMemo(() => {
@@ -109,15 +130,18 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
       const va = (a[sortKey] ?? "").toString().toLowerCase();
       const vb = (b[sortKey] ?? "").toString().toLowerCase();
       if (va < vb) return sortDir === "asc" ? -1 : 1;
-      if (va > vb) return sortDir === "asc" ?  1 : -1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
       return 0;
     });
     return copy;
   }, [rows, sortKey, sortDir]);
 
   function setSort(k: keyof Row) {
-    if (k === sortKey) setSortDir(d => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(k); setSortDir("asc"); }
+    if (k === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(k);
+      setSortDir("asc");
+    }
   }
 
   return (
@@ -132,33 +156,40 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
           <thead>
             <tr>
               {[
-                ["fornecedor","Fornecedor"],
-                ["cnpjFornecedor","CNPJ Fornecedor"],
-                ["filial","Filial"],
-                ["cnpjFilial","CNPJ Filial"],
-                ["documento","Documento"],
-                ["tipoDocumento","Tipo"],
-                ["status","Status"],
-                ["responsavel","Responsável"],
-                ["emailResponsavel","E-mail"],
-                ["conformidade","Conformidade"],
-                ["criadoEm","Criado em"],
-                ["ultimaChecagem","Última checagem"],
-                ["validade","Validade"],
+                ["fornecedor", "Fornecedor"],
+                ["cnpjFornecedor", "CNPJ Fornecedor"],
+                ["filial", "Filial"],
+                ["cnpjFilial", "CNPJ Filial"],
+                ["documento", "Documento"],
+                ["tipoDocumento", "Tipo"],
+                ["status", "Status"],
+                ["responsavel", "Responsável"],
+                ["emailResponsavel", "E-mail"],
+                ["conformidade", "Conformidade"],
+                ["criadoEm", "Criado em"],
+                ["ultimaChecagem", "Última checagem"],
+                ["validade", "Validade"],
               ].map(([key, label]) => (
                 <th
                   key={key}
                   onClick={() => setSort(key as keyof Row)}
-                  style={{ textAlign: "left", padding: "10px", borderBottom: "1px solid #ddd", cursor: "pointer", whiteSpace: "nowrap" }}
+                  style={{
+                    textAlign: "left",
+                    padding: "10px",
+                    borderBottom: "1px solid #ddd",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
                   title="Clique para ordenar"
                 >
-                  {label} {sortKey === key ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                  {label}{" "}
+                  {sortKey === key ? (sortDir === "asc" ? "▲" : "▼") : ""}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {sorted.map(r => (
+            {sorted.map((r) => (
               <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <td style={{ padding: "8px" }}>{r.fornecedor}</td>
                 <td style={{ padding: "8px" }}>{r.cnpjFornecedor}</td>
@@ -167,23 +198,35 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
                 <td style={{ padding: "8px" }}>{r.documento}</td>
                 <td style={{ padding: "8px" }}>{r.tipoDocumento}</td>
                 <td style={{ padding: "8px" }}>
-                  <span style={{
-                    padding: "2px 8px",
-                    borderRadius: 12,
-                    background: (r.status || "").toLowerCase().includes("pend") ? "#fff2e8"
-                              : (r.status || "").toLowerCase().includes("aprov") ? "#e6ffed"
-                              : "#eef2ff",
-                    border: "1px solid #ddd"
-                  }}>
+                  <span
+                    style={{
+                      padding: "2px 8px",
+                      borderRadius: 12,
+                      background: (r.status || "")
+                        .toLowerCase()
+                        .includes("pend")
+                        ? "#fff2e8"
+                        : (r.status || "").toLowerCase().includes("aprov")
+                          ? "#e6ffed"
+                          : "#eef2ff",
+                      border: "1px solid #ddd",
+                    }}
+                  >
                     {r.status}
                   </span>
                 </td>
                 <td style={{ padding: "8px" }}>{r.responsavel}</td>
                 <td style={{ padding: "8px" }}>{r.emailResponsavel}</td>
                 <td style={{ padding: "8px" }}>{r.conformidade}</td>
-                <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{r.criadoEm}</td>
-                <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{r.ultimaChecagem}</td>
-                <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{r.validade}</td>
+                <td style={{ padding: "8px", whiteSpace: "nowrap" }}>
+                  {r.criadoEm}
+                </td>
+                <td style={{ padding: "8px", whiteSpace: "nowrap" }}>
+                  {r.ultimaChecagem}
+                </td>
+                <td style={{ padding: "8px", whiteSpace: "nowrap" }}>
+                  {r.validade}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -192,4 +235,3 @@ export default function FornecedoresTable({ clientId, filters = {} }: Props) {
     </div>
   );
 }
-

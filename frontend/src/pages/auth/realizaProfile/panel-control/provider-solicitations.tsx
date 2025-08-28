@@ -107,12 +107,12 @@ export function ProviderSolicitations() {
                         <CardPanelControlProvider
                           branchName
                           key={solicitation.idSolicitation}
+                          solicitationType={solicitation.solicitationType}
+                          enterpriseName={solicitation.enterpriseName}
                           requesterName={solicitation.requesterName}
                           creationDate={solicitation.creationDate}
-                          enterpriseName={solicitation.enterpriseName}
                           idSolicitation={solicitation.idSolicitation}
                           requesterEmail={solicitation.requesterEmail}
-                          solicitationType={solicitation.solicitationType}
                           clientCnpj={solicitation.clientCnpj}
                           clientName={solicitation.clientName}
                           onActionCompleted={removeSolicitation}

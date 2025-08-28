@@ -43,14 +43,43 @@ interface Document {
   bloqueia: boolean;
 }
 
+export enum Situation {
+  ALOCADO = "ALOCADO",
+  DESALOCADO = "DESALOCADO",
+  DEMITIDO = "DEMITIDO",
+  AFASTADO = "AFASTADO",
+  LICENCA_MATERNIDADE = "LICENCA_MATERNIDADE",
+  LICENCA_MEDICA = "LICENCA_MEDICA",
+  LICENCA_MILITAR = "LICENCA_MILITAR",
+  FERIAS = "FERIAS",
+  ALISTAMENTO_MILITAR = "ALISTAMENTO_MILITAR",
+  APOSENTADORIA_POR_INVALIDEZ = "APOSENTADORIA_POR_INVALIDEZ",
+}
+
+export enum ContractType {
+  AUTONOMO = "AUTONOMO",
+  AVULSO_SINDICATO = "AVULSO_SINDICATO",
+  CLT_HORISTA = "CLT_HORISTA",
+  CLT_TEMPO_DETERMINADO = "CLT_TEMPO_DETERMINADO",
+  CLT_TEMPO_INDETERMINADO = "CLT_TEMPO_INDETERMINADO",
+  COOPERADO = "COOPERADO",
+  ESTAGIO_BOLSA = "ESTAGIO_BOLSA",
+  ESTRANGEIRO_IMIGRANTE = "ESTRANGEIRO_IMIGRANTE",
+  ESTRANGEIRO_TEMPORARIO = "ESTRANGEIRO_TEMPORARIO",
+  INTERMITENTE = "INTERMITENTE",
+  JOVEM_APRENDIZ = "JOVEM_APRENDIZ",
+  SOCIO = "SOCIO",
+  TEMPORARIO = "TEMPORARIO",
+}
+
 interface Collaborator {
   id: string;
   name: string;
+  surname: string;
   cboTitle: string;
   cpf: string;
-  contractType: string,
-  pis: string;
-  email: string;
+  contractType: ContractType;
+  situation: Situation;
 }
 
 export function ContarctsByProvider() {
@@ -83,11 +112,7 @@ export function ContarctsByProvider() {
   } | null>(null);
   const [description, setDescription] = useState("");
 
-
-
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-
 
   const token = localStorage.getItem("tokenClient");
 
@@ -164,8 +189,6 @@ export function ContarctsByProvider() {
     }
   }, [selectedContractName, getAllDatas, contracts]);
 
-
-
   const handleGeneratePdf = async () => {
     const selectedContract = contracts.find(
       (contract) => contract.serviceName === selectedContractName
@@ -179,11 +202,14 @@ export function ContarctsByProvider() {
     // ================== ADICIONADO PARA DEBUG ==================
     // Vamos verificar exatamente o que está sendo enviado para a API
     const requestParams = {
-        enterprise: "SUPPLIER",
-        idSearch: id.id,
+      enterprise: "SUPPLIER",
+      idSearch: id.id,
     };
 
-    console.log("Enviando requisição para /employee com os parâmetros:", requestParams);
+    console.log(
+      "Enviando requisição para /employee com os parâmetros:",
+      requestParams
+    );
     // Verifique no console se o 'idSearch' possui um valor válido.
     // ============================================================
 
@@ -197,32 +223,39 @@ export function ContarctsByProvider() {
         },
         params: requestParams, // Usando os parâmetros que acabamos de logar
       });
-      
+
       console.log("Resposta recebida da API:", response.data);
 
-      const collaboratorsList: Collaborator[] = Array.isArray(response.data.content) 
-        ? response.data.content 
+      const collaboratorsList: Collaborator[] = Array.isArray(
+        response.data.content
+      )
+        ? response.data.content
         : [];
 
       if (collaboratorsList.length === 0) {
         toast.info("Nenhum colaborador encontrado para gerar o PDF.");
         return;
       }
-      
+
       // ... (o restante da função continua igual)
 
       const doc = new jsPDF();
-      const tableColumn = ["Nome", "Cargo", "Tipo de Contrato", "CPF", "Pis", "E-mail"];
+      const tableColumn = [
+        "Nome",
+        "Cargo",
+        "CPF",
+        "Situação",
+        "Tipo de Contrato",
+      ];
       const tableRows: (string | null)[][] = [];
 
       collaboratorsList.forEach((col) => {
         const collaboratorData = [
-          col.name || "-",
+          `${col.name || ''} ${col.surname || ''}`.trim() || "-",
           col.cboTitle || "-",
-          col.contractType || "-",
           col.cpf || "-",
-          col.pis || "-",
-          col.email || "-",
+          col.situation || "-",
+          col.contractType || "-",
         ];
         tableRows.push(collaboratorData);
       });
@@ -243,7 +276,6 @@ export function ContarctsByProvider() {
       );
 
       toast.success("PDF gerado com sucesso!");
-
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       toast.error("Falha ao gerar o relatório de colaboradores.");
@@ -252,10 +284,6 @@ export function ContarctsByProvider() {
       toast.dismiss();
     }
   };
-
-
-
-
 
   const filteredDocuments = documents.filter(
     (doc: Document) =>
@@ -698,7 +726,7 @@ export function ContarctsByProvider() {
             </div>
           )}
 
-           {viewOption === "collaborators" && (
+          {viewOption === "collaborators" && (
             <div className="w-full flex flex-col h-full">
               {" "}
               {/* Container flex para empurrar o botão para baixo */}
@@ -744,9 +772,7 @@ export function ContarctsByProvider() {
                   className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center gap-2 disabled:bg-neutral-400 disabled:cursor-not-allowed"
                 >
                   <FileDown className="w-5 h-5" />
-                  {isGeneratingPdf
-                    ? "Gerando PDF..."
-                    : "Baixar Relatório PDF"}
+                  {isGeneratingPdf ? "Gerando PDF..." : "Baixar Relatório PDF"}
                 </button>
               </div>
             </div>

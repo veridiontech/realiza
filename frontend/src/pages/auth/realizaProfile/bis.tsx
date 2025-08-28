@@ -553,7 +553,7 @@ export const MonittoringBis = () => {
     <>
       <Helmet title="monitoring table" />
       <section
-        className="mx-5 md:mx-20 flex flex-col gap-6 pb-20"
+        className="mx-5 pt-5 md:mx-20 flex flex-col gap-6 pb-20"
         id="contentToCapture"
       >
         <div className="flex gap-4 mb-6">
