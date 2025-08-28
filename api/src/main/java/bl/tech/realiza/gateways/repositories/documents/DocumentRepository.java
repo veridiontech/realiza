@@ -343,7 +343,7 @@ WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor) cpsb
     WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
                 OR cpsb.contractProviderSupplier.branch.idBranch IN :branchIds )
-    AND ( :#{#documentTypes == null || #providerIds.isEmpty()} = true
+    AND ( :#{#providerIds == null || #providerIds.isEmpty()} = true
                 OR cpsb.contractProviderSupplier.providerSupplier.idProvider IN :providerIds
                 OR cpsb.providerSubcontractor.idProvider IN :providerIds )
     AND ( :#{#responsibleIds == null || #responsibleIds.isEmpty()} = true
