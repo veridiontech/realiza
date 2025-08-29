@@ -176,16 +176,12 @@ export function ContarctsByProvider() {
       return;
     }
 
-    // ================== ADICIONADO PARA DEBUG ==================
-    // Vamos verificar exatamente o que está sendo enviado para a API
     const requestParams = {
         enterprise: "SUPPLIER",
         idSearch: id.id,
     };
 
     console.log("Enviando requisição para /employee com os parâmetros:", requestParams);
-    // Verifique no console se o 'idSearch' possui um valor válido.
-    // ============================================================
 
     setIsGeneratingPdf(true);
     toast.loading("Gerando relatório de colaboradores...");
@@ -195,7 +191,7 @@ export function ContarctsByProvider() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: requestParams, // Usando os parâmetros que acabamos de logar
+        params: requestParams,
       });
       
       console.log("Resposta recebida da API:", response.data);
@@ -209,7 +205,6 @@ export function ContarctsByProvider() {
         return;
       }
       
-      // ... (o restante da função continua igual)
 
       const doc = new jsPDF();
       const tableColumn = ["Nome", "Cargo", "Tipo de Contrato", "CPF", "Pis", "E-mail"];
@@ -391,7 +386,6 @@ export function ContarctsByProvider() {
     });
   };
 
-  // ====================== ALTERAÇÃO 1 ======================
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
     if (status === "PENDENTE_ISENCAO") return "text-yellow-500";
@@ -400,11 +394,10 @@ export function ContarctsByProvider() {
       return "text-green-600";
     if (status === "REPROVADO" || status === "REPROVADO_IA")
       return "text-red-600";
-    if (status === "VENCIDO") return "text-orange-500"; // <--- LINHA ADICIONADA
+    if (status === "VENCIDO") return "text-orange-500";
     if (status === "ISENTO") return "text-blue-500";
     return "";
   };
-  // =========================================================
 
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
@@ -512,9 +505,9 @@ export function ContarctsByProvider() {
               >
                 <div
                   className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4
-                                     text-sm font-semibold text-neutral-600 py-2
-                                     border-b border-neutral-300 items-center
-                                     sticky top-0 bg-white z-10"
+                                text-sm font-semibold text-neutral-600 py-2
+                                border-b border-neutral-300 items-center
+                                sticky top-0 bg-white z-10"
                 >
                   <div>Status</div>
                   <div>Documento</div>
@@ -532,7 +525,6 @@ export function ContarctsByProvider() {
                         className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                         key={doc.id}
                       >
-                        {/* ====================== ALTERAÇÃO 2 ====================== */}
                         <div>
                           {doc.status === "EM_ANALISE" ? (
                             <div className="flex items-center gap-2">
@@ -546,7 +538,7 @@ export function ContarctsByProvider() {
                               {doc.status === "REPROVADO" ||
                               doc.status === "REPROVADO_IA" ? (
                                 <Ban className="w-4 h-4 text-red-500" />
-                              ) : doc.status === "VENCIDO" ? ( // <--- BLOCO ADICIONADO
+                              ) : doc.status === "VENCIDO" ? (
                                 <AlertCircle className="w-4 h-4 text-orange-500" />
                               ) : doc.status === "APROVADO" ||
                                 doc.status === "APROVADO_IA" ? (
@@ -567,7 +559,7 @@ export function ContarctsByProvider() {
                             </div>
                           )}
 
-                          {doc.status === "VENCIDO" && ( // <--- BLOCO ADICIONADO
+                          {doc.status === "VENCIDO" && (
                             <div className="flex items-center gap-2 mt-1">
                               <AlertCircle className="w-4 h-4 text-orange-500" />
                               <span className="text-xs font-semibold text-orange-500">
@@ -593,7 +585,6 @@ export function ContarctsByProvider() {
                             </div>
                           )}
                         </div>
-                        {/* ========================================================= */}
                         <div className="col-span-1">
                           <h3 className="text-[16px] font-medium">
                             {doc.title}
@@ -701,14 +692,12 @@ export function ContarctsByProvider() {
            {viewOption === "collaborators" && (
             <div className="w-full flex flex-col h-full">
               {" "}
-              {/* Container flex para empurrar o botão para baixo */}
               <div className="flex items-center gap-2 text-[#34495E] mb-6">
                 <User />
                 <h2 className="text-[20px]">Colaboradores</h2>
               </div>
               <div className="flex-grow overflow-y-auto max-h-[50vh] pr-2">
                 {" "}
-                {/* Área de rolagem */}
                 {collaborators.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {collaborators.map((employee: Collaborator) => (
@@ -736,7 +725,6 @@ export function ContarctsByProvider() {
                   </div>
                 )}
               </div>
-              {/* Botão para gerar PDF */}
               <div className="mt-auto pt-4 flex justify-end">
                 <button
                   onClick={handleGeneratePdf}
@@ -771,12 +759,9 @@ export function ContarctsByProvider() {
                 {isLoadingSubs ? (
                   <span className="text-neutral-400">Carregando...</span>
                 ) : subcontractors.length > 0 ? (
-                  // @ts-ignore
                   subcontractors.map((sub: any) => (
                     <div key={sub.id} className="flex flex-col gap-5">
-                      {/* ======================= ALTERAÇÃO COMEÇA AQUI ======================= */}
                       <div className="flex items-center justify-between w-full">
-                        {/* Informações do subcontratado (lado esquerdo) */}
                         <div className="flex items-center gap-5">
                           <div className="bg-neutral-400 p-2 rounded-full">
                             <User />
@@ -792,7 +777,6 @@ export function ContarctsByProvider() {
                           </div>
                         </div>
 
-                        {/* Botão para ver detalhes (lado direito) */}
                         <Link
                           to={`/sistema/subcontracts-details/${sub.idContract}`}
                         >
@@ -802,7 +786,6 @@ export function ContarctsByProvider() {
                           </button>
                         </Link>
                       </div>
-                      {/* ======================= ALTERAÇÃO TERMINA AQUI ======================= */}
                       <div className="bg-neutral-400 h-[1px]" />
                     </div>
                   ))

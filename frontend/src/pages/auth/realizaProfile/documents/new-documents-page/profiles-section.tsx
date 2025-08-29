@@ -3,83 +3,101 @@ import axios from "axios";
 import { toast } from "sonner";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
-import { Eye, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
-// Tipo para os usuários retornados pela verificação
 type User = {
   id: string;
   fullName: string;
   email: string;
 };
 
-// Tipo para a lista de perfis
 type Profile = {
   id: string;
   profileName: string;
 };
 
-// Tipo para os detalhes de um perfil
+type Permissions = {
+  dashboard: {
+    general: boolean;
+    providers: boolean;
+    document: boolean;
+    documentDetails: boolean;
+  };
+  document: {
+    view: boolean;
+    upload: boolean;
+    exempt: boolean;
+  };
+  contract: {
+    finish: boolean;
+    suspend: boolean;
+    create: boolean;
+  };
+  reception: boolean;
+  types: {
+    registrationAndCertificates: boolean;
+    health: boolean;
+    workplaceSafety: boolean;
+    environment: boolean;
+    laboral: boolean;
+    general: boolean;
+  };
+};
+
 type ProfileDetails = {
   id: string;
   name: string;
   description: string;
   admin: boolean;
-  viewer: boolean;
-  manager: boolean;
-  inspector: boolean;
-  documentViewer: boolean;
-  registrationUser: boolean;
-  registrationContract: boolean;
-  laboral: boolean;
-  workplaceSafety: boolean;
-  registrationAndCertificates: boolean;
-  general: boolean;
-  health: boolean;
-  environment: boolean;
-  concierge: boolean;
+  permissions: Permissions;
   clientId: string;
-  branchIds?: string[];
-  contractIds?: string[];
 };
 
 export function ProfilesSection() {
   const { client } = useClient();
   const clientId = client?.idClient;
 
-  // Estados principais
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // Estados para os modais
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  // --- NOVO ESTADO para o modal de confirmação final ---
   const [isFinalConfirmModalOpen, setIsFinalConfirmModalOpen] = useState(false);
 
-  // Estados para dados selecionados e associados
   const [selectedProfileDetails, setSelectedProfileDetails] = useState<ProfileDetails | null>(null);
   const [associatedUsers, setAssociatedUsers] = useState<User[]>([]);
   const [individualAssignments, setIndividualAssignments] = useState<Record<string, string>>({});
 
-  // Estados para o formulário de criação de perfil
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [admin, setAdmin] = useState(false);
-  const [viewer, setViewer] = useState(false);
-  const [manager, setManager] = useState(false);
-  const [isInspector, setIsInspector] = useState(false);
-  const [documentViewer, setDocumentViewer] = useState(false);
-  const [registrationUser, setRegistrationUser] = useState(false);
-  const [registrationContract, setRegistrationContract] = useState(false);
-  const [laboral, setLaboral] = useState(false);
-  const [workplaceSafety, setWorkplaceSafety] = useState(false);
-  const [registrationAndCertificates, setRegistrationAndCertificates] = useState(false);
-  const [general, setGeneral] = useState(false);
-  const [health, setHealth] = useState(false);
-  const [environment, setEnvironment] = useState(false);
-  const [concierge, setConcierge] = useState(false);
+  const [permissions, setPermissions] = useState<Permissions>({
+    dashboard: {
+      general: false,
+      providers: false,
+      document: false,
+      documentDetails: false,
+    },
+    document: {
+      view: false,
+      upload: false,
+      exempt: false,
+    },
+    contract: {
+      finish: false,
+      suspend: false,
+      create: false,
+    },
+    reception: false,
+    types: {
+      registrationAndCertificates: false,
+      health: false,
+      workplaceSafety: false,
+      environment: false,
+      laboral: false,
+      general: false,
+    },
+  });
 
-  // Função para buscar a lista de perfis
   const fetchProfiles = async () => {
     if (!clientId) return;
     setLoading(true);
@@ -101,25 +119,6 @@ export function ProfilesSection() {
     }
   };
 
-  // Função para buscar os detalhes de um perfil específico
-  const fetchProfileDetails = async (profileId: string) => {
-    setLoading(true);
-    const tokenFromStorage = localStorage.getItem("tokenClient");
-    try {
-      const response = await axios.get(`${ip}/profile/${profileId}`, {
-        headers: { Authorization: `Bearer ${tokenFromStorage}` },
-      });
-      setSelectedProfileDetails(response.data);
-      setIsModalOpen(true);
-    } catch (err) {
-      console.error("Erro ao buscar detalhes do perfil:", err);
-      toast.error("Erro ao carregar detalhes do perfil.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Função para iniciar o processo de exclusão, verificando usuários
   const handleAttemptDelete = async (profileId: string) => {
     setIndividualAssignments({});
     setLoading(true);
@@ -139,7 +138,6 @@ export function ProfilesSection() {
       setAssociatedUsers(usersResponse.data);
       
       setIsDeleteModalOpen(true);
-      setIsModalOpen(false);
     } catch (err) {
       console.error("Erro ao verificar usuários vinculados:", err);
       toast.error("Não foi possível verificar os usuários vinculados.");
@@ -148,7 +146,6 @@ export function ProfilesSection() {
     }
   };
 
-  // Função que executa a exclusão direta (quando não há usuários)
   const handleConfirmDelete = async () => {
     if (!selectedProfileDetails) return;
     setLoading(true);
@@ -169,7 +166,6 @@ export function ProfilesSection() {
     }
   };
   
-  // Função para lidar com a mudança em cada dropdown individual
   const handleIndividualAssignmentChange = (userId: string, newProfileId: string) => {
     setIndividualAssignments(prevAssignments => ({
       ...prevAssignments,
@@ -177,7 +173,6 @@ export function ProfilesSection() {
     }));
   };
   
-  // --- NOVA FUNÇÃO: Apenas valida e abre o modal de confirmação final ---
   const handleOpenFinalConfirm = () => {
     if (Object.keys(individualAssignments).length !== associatedUsers.length) {
       toast.error("Por favor, atribua um novo perfil para cada usuário.");
@@ -186,7 +181,6 @@ export function ProfilesSection() {
     setIsFinalConfirmModalOpen(true);
   };
 
-  // Função para reatribuir e excluir (agora chamada pelo modal final)
   const handleReassignAndDelete = async () => {
     if (!selectedProfileDetails) return;
     setLoading(true);
@@ -206,7 +200,6 @@ export function ProfilesSection() {
       });
       toast.success(`O perfil "${selectedProfileDetails.name}" foi excluído.`);
 
-      // Fecha todos os modais e reseta os estados
       setIsFinalConfirmModalOpen(false);
       setIsDeleteModalOpen(false);
       setSelectedProfileDetails(null);
@@ -221,35 +214,94 @@ export function ProfilesSection() {
     }
   };
   
-  // Função para criar um novo perfil
   const handleCreateProfile = async () => {
     if (!clientId || !name.trim()) {
       toast.warning("O nome do perfil é obrigatório.");
       return;
     }
-    let permissions = { inspector: false, documentViewer: false, registrationUser: false, registrationContract: false, laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false, concierge: false };
+
+    let profilePermissions = permissions;
+
     if (admin) {
-      permissions = { inspector: true, documentViewer: true, registrationUser: true, registrationContract: true, laboral: true, workplaceSafety: true, registrationAndCertificates: true, general: true, health: true, environment: true, concierge: true };
-    } else if (manager) {
-      permissions = { ...permissions, documentViewer: true, registrationUser, registrationContract, laboral, workplaceSafety, registrationAndCertificates, general, health, environment, concierge };
-    } else if (isInspector) {
-      permissions = { ...permissions, inspector: true, documentViewer, laboral, workplaceSafety, registrationAndCertificates, general, health, environment, concierge };
-    } else {
-      permissions = { ...permissions, documentViewer, registrationUser, registrationContract, laboral, workplaceSafety, registrationAndCertificates, general, health, environment, concierge };
+      profilePermissions = {
+        dashboard: {
+          general: true,
+          providers: true,
+          document: true,
+          documentDetails: true,
+        },
+        document: {
+          view: true,
+          upload: true,
+          exempt: true,
+        },
+        contract: {
+          finish: true,
+          suspend: true,
+          create: true,
+        },
+        reception: true,
+        types: {
+          registrationAndCertificates: true,
+          health: true,
+          workplaceSafety: true,
+          environment: true,
+          laboral: true,
+          general: true,
+        },
+      };
     }
-    const newProfile = { name, description, admin, viewer, manager, ...permissions, clientId, branchIds: [], contractIds: [] };
+
+    const newProfile = { 
+      name, 
+      description, 
+      admin, 
+      permissions: profilePermissions,
+      clientId, 
+      branchIds: [], 
+      contractIds: [] 
+    };
+
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
       await axios.post(`${ip}/profile`, newProfile, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
       toast.success("Perfil criado com sucesso!");
-      setName(""); setDescription(""); setAdmin(false); setViewer(false); setManager(false); setIsInspector(false); setDocumentViewer(false); setRegistrationUser(false); setRegistrationContract(false); setLaboral(false); setWorkplaceSafety(false); setRegistrationAndCertificates(false); setGeneral(false); setHealth(false); setEnvironment(false); setConcierge(false);
+      setName("");
+      setDescription("");
+      setAdmin(false);
+      setPermissions({
+        dashboard: { general: false, providers: false, document: false, documentDetails: false },
+        document: { view: false, upload: false, exempt: false },
+        contract: { finish: false, suspend: false, create: false },
+        reception: false,
+        types: { registrationAndCertificates: false, health: false, workplaceSafety: false, environment: false, laboral: false, general: false },
+      });
       fetchProfiles();
     } catch (err: any) {
       console.error("Erro ao criar perfil:", err.response || err);
       toast.error("Erro ao criar o perfil.");
     }
+  };
+
+  const handlePermissionChange = (path: string) => {
+    const keys = path.split('.');
+    
+    setPermissions(prev => {
+      let newState: any = { ...prev };
+      let currentLevel = newState;
+      
+      for (let i = 0; i < keys.length - 1; i++) {
+        currentLevel[keys[i]] = { ...currentLevel[keys[i]] };
+        currentLevel = currentLevel[keys[i]];
+      }
+      
+      const lastKey = keys[keys.length - 1];
+      currentLevel[lastKey] = !currentLevel[lastKey];
+      
+      return newState;
+    });
   };
 
   useEffect(() => {
@@ -261,7 +313,6 @@ export function ProfilesSection() {
   return (
     <div className="flex justify-center w-full mt-[-1.5rem]">
       <div className="flex flex-col md:flex-row w-full max-w-6xl gap-6 items-start">
-        {/* Card de Perfis Vinculados */}
         <div className="bg-white shadow-md rounded p-6 md:w-1/2">
           <h2 className="text-xl font-semibold mb-4">Perfis vinculados ao cliente</h2>
           {loading && !isDeleteModalOpen && <p className="text-gray-500">Carregando...</p>}
@@ -278,13 +329,6 @@ export function ProfilesSection() {
                   <span className="text-md text-gray-700">{profile.profileName}</span>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => fetchProfileDetails(profile.id)}
-                      className="p-1 rounded-full hover:bg-gray-200"
-                      title="Ver detalhes do perfil"
-                    >
-                      <Eye className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button
                       onClick={() => handleAttemptDelete(profile.id)}
                       className="p-1 rounded-full hover:bg-red-100"
                       title="Excluir perfil"
@@ -298,7 +342,6 @@ export function ProfilesSection() {
           )}
         </div>
 
-        {/* Card de Criar Novo Perfil */}
         <div className="bg-white shadow-md rounded p-6 md:w-1/2">
           <h3 className="text-lg font-medium mb-2">Criar novo perfil</h3>
           <div className="flex flex-col gap-4">
@@ -307,26 +350,81 @@ export function ProfilesSection() {
             <div className="flex flex-col gap-2">
               <p className="font-medium">Tipo do perfil</p>
               <div className="flex gap-6 flex-wrap">
-                <label className="flex items-center gap-2"><input type="radio" name="profileType" checked={admin} onChange={() => { setAdmin(true); setViewer(false); setManager(false); setIsInspector(false); setDocumentViewer(false); setRegistrationUser(false); setRegistrationContract(false); }} /> Admin</label>
-                <label className="flex items-center gap-2"><input type="radio" name="profileType" checked={viewer} onChange={() => { setAdmin(false); setViewer(true); setManager(false); setIsInspector(false); setDocumentViewer(false); setRegistrationUser(false); setRegistrationContract(false); }} /> Visitante</label>
-                <label className="flex items-center gap-2"><input type="radio" name="profileType" checked={manager} onChange={() => { setAdmin(false); setViewer(false); setManager(true); setIsInspector(false); setDocumentViewer(true); setRegistrationUser(false); setRegistrationContract(false); }} /> Gestor</label>
-                <label className="flex items-center gap-2"><input type="radio" name="profileType" checked={isInspector} onChange={() => { setAdmin(false); setViewer(false); setManager(false); setIsInspector(true); setDocumentViewer(false); setRegistrationUser(false); setRegistrationContract(false); }} /> Fiscal de contrato</label>
+                <label className="flex items-center gap-2">
+                  <input type="radio" name="profileType" checked={admin} onChange={() => setAdmin(true)} /> Admin
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="radio" name="profileType" checked={!admin} onChange={() => setAdmin(false)} /> Outro
+                </label>
               </div>
             </div>
-            {(manager || isInspector) && (
+            {!admin && (
               <div className="flex flex-col gap-2 mt-4">
                 <p className="font-medium">Permissões</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <label><input type="checkbox" checked={documentViewer} onChange={(e) => setDocumentViewer(e.target.checked)} disabled={manager} /> Visualizador de Documentos</label>
-                  <label><input type="checkbox" checked={registrationUser} onChange={(e) => setRegistrationUser(e.target.checked)} disabled={isInspector} /> Cadastro de Usuários</label>
-                  <label><input type="checkbox" checked={registrationContract} onChange={(e) => setRegistrationContract(e.target.checked)} disabled={isInspector} /> Cadastro de Contratos</label>
-                  <label><input type="checkbox" checked={laboral} onChange={(e) => setLaboral(e.target.checked)} /> Trabalhista</label>
-                  <label><input type="checkbox" checked={workplaceSafety} onChange={(e) => setWorkplaceSafety(e.target.checked)} /> Segurança do Trabalho</label>
-                  <label><input type="checkbox" checked={registrationAndCertificates} onChange={(e) => setRegistrationAndCertificates(e.target.checked)} /> Cadastro e certidões</label>
-                  <label><input type="checkbox" checked={general} onChange={(e) => setGeneral(e.target.checked)} /> Geral</label>
-                  <label><input type="checkbox" checked={health} onChange={(e) => setHealth(e.target.checked)} /> Saúde</label>
-                  <label><input type="checkbox" checked={environment} onChange={(e) => setEnvironment(e.target.checked)} /> Meio Ambiente</label>
-                  <label><input type="checkbox" checked={concierge} onChange={(e) => setConcierge(e.target.checked)} /> Portaria</label>
+                <div className="grid grid-cols-1 gap-2">
+                  <p className="font-medium">Dashboard</p>
+                  <label>
+                    <input type="checkbox" checked={permissions.dashboard.general} onChange={() => handlePermissionChange("dashboard.general")} /> Geral
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.dashboard.providers} onChange={() => handlePermissionChange("dashboard.providers")} /> Fornecedores
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.dashboard.document} onChange={() => handlePermissionChange("dashboard.document")} /> Documentos
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.dashboard.documentDetails} onChange={() => handlePermissionChange("dashboard.documentDetails")} /> Detalhes de Documentos
+                  </label>
+                  <hr className="my-2" />
+                  <p className="font-medium">Documentos</p>
+                  <label>
+                    <input type="checkbox" checked={permissions.document.view} onChange={() => handlePermissionChange("document.view")} /> Visualizar
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.document.upload} onChange={() => handlePermissionChange("document.upload")} /> Upload
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.document.exempt} onChange={() => handlePermissionChange("document.exempt")} /> Isentar
+                  </label>
+                  <div className="ml-4 mt-2 border-l-2 pl-4">
+                    <p className="font-medium">Tipos de Documento</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      <label>
+                        <input type="checkbox" checked={permissions.types.registrationAndCertificates} onChange={() => handlePermissionChange("types.registrationAndCertificates")} /> Cadastro e Certidões
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.types.health} onChange={() => handlePermissionChange("types.health")} /> Saúde
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.types.workplaceSafety} onChange={() => handlePermissionChange("types.workplaceSafety")} /> Segurança do Trabalho
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.types.environment} onChange={() => handlePermissionChange("types.environment")} /> Meio Ambiente
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.types.laboral} onChange={() => handlePermissionChange("types.laboral")} /> Trabalhista
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.types.general} onChange={() => handlePermissionChange("types.general")} /> Geral
+                      </label>
+                    </div>
+                  </div>
+                  <hr className="my-2" />
+                  <p className="font-medium">Contrato</p>
+                  <label>
+                    <input type="checkbox" checked={permissions.contract.finish} onChange={() => handlePermissionChange("contract.finish")} /> Finalizar
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.contract.suspend} onChange={() => handlePermissionChange("contract.suspend")} /> Suspender
+                  </label>
+                  <label>
+                    <input type="checkbox" checked={permissions.contract.create} onChange={() => handlePermissionChange("contract.create")} /> Criar
+                  </label>
+                  <hr className="my-2" />
+                  <p className="font-medium">Outros</p>
+                  <label>
+                    <input type="checkbox" checked={permissions.reception} onChange={() => handlePermissionChange("reception")} /> Portaria
+                  </label>
                 </div>
               </div>
             )}
@@ -335,37 +433,6 @@ export function ProfilesSection() {
         </div>
       </div>
 
-      {/* Modal de Detalhes do Perfil */}
-      {isModalOpen && selectedProfileDetails && (
-         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-             <h3 className="text-xl font-semibold mb-4">Detalhes do Perfil: {selectedProfileDetails.name}</h3>
-             <div className="grid grid-cols-1 gap-2 text-sm">
-                <p><strong>Descrição:</strong> {selectedProfileDetails.description || "Nenhuma descrição informada"}</p>
-                <p><strong>Admin:</strong> {selectedProfileDetails.admin ? "Sim" : "Não"}</p>
-                <p><strong>Visitante:</strong> {selectedProfileDetails.viewer ? "Sim" : "Não"}</p>
-                <p><strong>Gestor:</strong> {selectedProfileDetails.manager ? "Sim" : "Não"}</p>
-                <p><strong>Fiscal:</strong> {selectedProfileDetails.inspector ? "Sim" : "Não"}</p>
-                <p><strong>Visualizador de Documentos:</strong> {selectedProfileDetails.documentViewer ? "Sim" : "Não"}</p>
-                <p><strong>Cadastro de Usuários:</strong> {selectedProfileDetails.registrationUser ? "Sim" : "Não"}</p>
-                <p><strong>Cadastro de Contratos:</strong> {selectedProfileDetails.registrationContract ? "Sim" : "Não"}</p>
-                <p><strong>Trabalhista:</strong> {selectedProfileDetails.laboral ? "Sim" : "Não"}</p>
-                <p><strong>Segurança do Trabalho:</strong> {selectedProfileDetails.workplaceSafety ? "Sim" : "Não"}</p>
-                <p><strong>Cadastro e Certidões:</strong> {selectedProfileDetails.registrationAndCertificates ? "Sim" : "Não"}</p>
-                <p><strong>Geral:</strong> {selectedProfileDetails.general ? "Sim" : "Não"}</p>
-                <p><strong>Saúde:</strong> {selectedProfileDetails.health ? "Sim" : "Não"}</p>
-                <p><strong>Meio Ambiente:</strong> {selectedProfileDetails.environment ? "Sim" : "Não"}</p>
-                <p><strong>Portaria:</strong> {selectedProfileDetails.concierge ? "Sim" : "Não"}</p>
-             </div>
-             <div className="mt-6 flex justify-end gap-3">
-               <button onClick={() => handleAttemptDelete(selectedProfileDetails.id)} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex items-center gap-2"><Trash2 className="w-4 h-4" /> Excluir</button>
-               <button onClick={() => setIsModalOpen(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Fechar</button>
-             </div>
-           </div>
-         </div>
-      )}
-
-      {/* Modal de Reatribuição (antigo modal de confirmação) */}
       {isDeleteModalOpen && selectedProfileDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-2xl">
@@ -409,7 +476,6 @@ export function ProfilesSection() {
         </div>
       )}
 
-      {/* --- NOVO MODAL: Confirmação Final --- */}
       {isFinalConfirmModalOpen && selectedProfileDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
