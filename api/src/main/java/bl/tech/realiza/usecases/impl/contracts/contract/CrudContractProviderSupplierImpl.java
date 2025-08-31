@@ -51,7 +51,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
 import static bl.tech.realiza.domains.enums.AuditLogTypeEnum.*;
 import static bl.tech.realiza.domains.user.User.Role.*;
@@ -574,7 +573,7 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     public ContractResponsibleResponseDto findAllByResponsible(String responsibleId) {
         userClientRepository.findById(responsibleId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        List<UserClient> responsibleList = userClientRepository.findAllByBranch_IdBranchAndRoleAndProfile_ManagerIsTrue(responsibleId, ROLE_CLIENT_MANAGER)
+        List<UserClient> responsibleList = userClientRepository.findAllByBranch_IdBranchAndRoleAndProfile_AdminIsTrue(responsibleId, ROLE_CLIENT_MANAGER)
                 .stream().sorted(Comparator.comparing(User::getFullName)).toList();
         List<ContractProviderSupplier> contractProviderSupplierList = contractProviderSupplierRepository.findAllByResponsible_IdUser(responsibleId)
                 .stream().sorted(Comparator.comparing(Contract::getContractReference)).toList();

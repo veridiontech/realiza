@@ -35,7 +35,8 @@ public interface BranchRepository extends JpaRepository<Branch, String> {
     b.name
     )
     FROM Branch b
-    WHERE b.idBranch in :branchIds
+    WHERE ( :#{#branchIds == null || #branchIds.isEmpty()} = true
+                OR b.idBranch IN :branchIds)
 """)
     List<BranchNameResponseDto> findAllNameByAccess(@Param("branchIds") List<String> branchIds);
 }

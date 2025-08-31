@@ -1,13 +1,13 @@
 package bl.tech.realiza.gateways.controllers.impl.users;
 
 import bl.tech.realiza.gateways.controllers.interfaces.users.ProfileController;
-import bl.tech.realiza.gateways.requests.users.profile.ProfileRepoRequestDto;
-import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.requests.users.security.ProfileRepoRequestDto;
+import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
-import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
-import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfileRepo;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudProfile;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudProfileRepo;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

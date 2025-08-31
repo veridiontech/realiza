@@ -11,7 +11,7 @@ import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.services.FileRepository;
-import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
+import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.gateways.repositories.users.UserClientRepository;
 import bl.tech.realiza.gateways.requests.services.itemManagement.ItemManagementUserRequestDto;
 import bl.tech.realiza.gateways.requests.users.UserClientRequestDto;

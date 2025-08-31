@@ -4,7 +4,7 @@ import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.security.Profile;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
-import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
+import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.gateways.responses.users.UserEmailListResponse;
 import bl.tech.realiza.usecases.interfaces.users.CrudUser;
 import lombok.RequiredArgsConstructor;

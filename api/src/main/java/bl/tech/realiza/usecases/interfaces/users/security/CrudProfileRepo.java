@@ -1,6 +1,6 @@
-package bl.tech.realiza.usecases.interfaces.users.profile;
+package bl.tech.realiza.usecases.interfaces.users.security;
 
-import bl.tech.realiza.gateways.requests.users.profile.ProfileRepoRequestDto;
+import bl.tech.realiza.gateways.requests.users.security.ProfileRepoRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
 
 import java.util.List;
