@@ -42,5 +42,6 @@ public class ContractDocumentAndEmployeeResponseDto {
         private String id;
         private String name;
         private String cboTitle;
+        private Boolean hasEntryPermission;
     }
 }
