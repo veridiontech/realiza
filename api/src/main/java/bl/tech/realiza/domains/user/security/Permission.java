@@ -20,15 +20,27 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "USER_PERMISSION")
+@Table(
+        name = "USER_PERMISSION",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_permission_type_subtype_doc",
+                columnNames = {"type", "subtype", "document_type"}
+        ),
+        indexes = {
+                @Index(name = "idx_permission_type_subtype", columnList = "type,subtype")
+        }
+)
 public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Enumerated(EnumType.STRING)
     private PermissionTypeEnum type;
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private PermissionSubTypeEnum subtype = PermissionSubTypeEnum.NONE;
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private DocumentTypeEnum documentType = DocumentTypeEnum.NONE;
 
     @ManyToMany(mappedBy = "permissions")

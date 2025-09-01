@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -31,9 +32,14 @@ public class ProfileRepo {
     @JoinTable(
             name = "PROFILE_REPO_PERMISSION",
             joinColumns = @JoinColumn(name = "profileRepoId"),
-            inverseJoinColumns = @JoinColumn(name = "permissionId", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+            inverseJoinColumns = @JoinColumn(name = "permissionId"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "ukProfileRepoPermissionUnique",
+                    columnNames = {"profileRepoId", "permissionId"}
+            )
     )
-    private Set<Permission> permissions;
+    private Set<Permission> permissions = new HashSet<>();
+
 //    @Builder.Default
 //    private Boolean viewer = true; // colaborador - pode só visualizar os serviços da filial
 //    @Builder.Default

@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -66,9 +67,14 @@ public class Profile {
     @JoinTable(
             name = "PROFILE_PERMISSION",
             joinColumns = @JoinColumn(name = "profileId"),
-            inverseJoinColumns = @JoinColumn(name = "permissionId", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+            inverseJoinColumns = @JoinColumn(name = "permissionId"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "ukProfilePermissionUnique",
+                    columnNames = {"profileId", "permissionId"}
+            )
     )
-    private Set<Permission> permissions;
+    private Set<Permission> permissions = new HashSet<>();
+
 
     @ManyToOne
     @JoinColumn(name = "idClient")
