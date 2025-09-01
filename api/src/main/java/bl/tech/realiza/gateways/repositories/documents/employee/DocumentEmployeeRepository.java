@@ -15,6 +15,7 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
     Page<DocumentEmployee> findAllByEmployee_IdEmployeeAndType(String idSearch, String type, Pageable pageable);
     List<DocumentEmployee> findAllByEmployee_IdEmployee(String idSearch);
     List<DocumentEmployee> findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(String employeeId, String contractId);
+    List<DocumentEmployee> findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContractAndConformingAndDocumentMatrix_DoesBlock(String employeeId, String contractId, Boolean conforming, Boolean doesBlock);
     List<DocumentEmployee> findAllByEmployee_Supplier_IdProvider(String idProvider);
     List<DocumentEmployee> findAllByEmployee_Subcontract_IdProvider(String idProvider);
     Long countByEmployee_Branch_IdBranchAndStatus(String branchId, Document.Status status);
