@@ -51,48 +51,67 @@ def create_service_types(token, data):
     }
     try:
         service_data = data.get('Resultado da consulta', None)
-        if service_data is not None and not service_data.empty:
-            for _, service in service_data.iterrows():
-                if not service.empty:
-                    name = check_empty(service['Tipo do Serviço Único'])
-                    risk = check_empty(service['Risco do Serviço Único'])
-                    if risk == "Alto":
-                        risk = "HIGH"
-                    elif risk == "Médio":
-                        risk = "MEDIUM"
-                    elif risk == "Baixo":
-                        risk = "LOW"
-                    branch_request = {
-                        "name": name,
-                        "risk": risk,
-                    }
+        if service_data is None or service_data.empty:
+            print("Dados de serviços não encontrados ou vazios.")
+            return
 
-                    resp = requests.get(url + "/check-by-name", params= {
-                        "name": name
-                    }, headers=headers)
-                    print("Service checado com sucesso:", name)
+        ok = already = fail = 0
 
-                    if resp.json() == 'False':
-                        # Enviando a requisição POST para criar o cliente
-                        response = requests.post(url + "/repository", json=branch_request, headers=headers)
+        for _, service in service_data.iterrows():
+            if service.empty:
+                continue
 
-                        if response.status_code == 200:
-                            # Caso a requisição seja bem-sucedida
-                            data = response.json()
-                            print("Service criado com sucesso:", data["name"])
-                        else:
-                            print(f"Falha ao criar service. Status Code: {response.status_code}")
-                            print("Resposta:", response.text)
-                            return None
-                    else:
-                        print("Service já existente:", name)
-                    return None
-        else:
-            print("Dados de serviços não encontrados ou vazios ou já existentes.")
+            name = check_empty(service.get('Tipo do Serviço Único'))
+            if not name:
+                continue
+
+            risk = check_empty(service.get('Risco do Serviço Único'))
+            if risk == "Alto":
+                risk = "HIGH"
+            elif risk == "Médio":
+                risk = "MEDIUM"
+            elif risk == "Baixo":
+                risk = "LOW"
+            else:
+                # se vier vazio ou diferente, pode deixar None (ou defina um default)
+                risk = "LOW"
+
+            payload = {"name": name, "risk": risk}
+
+            # 1) checa existência
+            try:
+                resp = requests.get(url + "/check-by-name", params={"name": name}, headers=headers)
+                # algumas APIs retornam boolean, outras string "True"/"False"
+                exists = (resp.json() is True) or (str(resp.json()).lower() == "true")
+                print("Service checado com sucesso:", name)
+            except Exception as e:
+                print(f"✖ falha ao checar service '{name}': {e}")
+                fail += 1
+                continue  # <<< não para o script
+
+            # 2) cria se não existir
+            if not exists:
+                response = requests.post(url + "/repository", json=payload, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    print("✔ service criado com sucesso:", data.get("name", name))
+                    ok += 1
+                elif response.status_code == 409:
+                    print("↷ service já existia (409):", name)
+                    already += 1
+                else:
+                    print(f"✖ falha ao criar service ({response.status_code}): {name}")
+                    print("Resposta:", response.text[:200])
+                    fail += 1
+                    continue  # <<< segue para o próximo
+            else:
+                print("↷ service já existente:", name)
+                already += 1
+
+        print(f"\nResumo → criados: {ok} | existentes: {already} | falhas: {fail}")
+
     except Exception as e:
         print(f"Erro ao criar service: {e}")
-        return None
-    return None
 
 def create_profile(token):
     url = app_url + "/profile/repo/check-by-name"
