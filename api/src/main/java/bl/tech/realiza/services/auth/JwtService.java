@@ -2,12 +2,16 @@ package bl.tech.realiza.services.auth;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.enums.DocumentTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionSubTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.user.*;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
+import bl.tech.realiza.usecases.impl.users.security.CrudPermissionImpl;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,8 +34,9 @@ public class JwtService {
     private final String SECRET_KEY;
     private final long EXPIRATION_TIME;
     private final ProviderSupplierRepository providerSupplierRepository;
+    private final CrudPermissionImpl crudPermissionImpl;
 
-    public JwtService(Dotenv dotenv1, Dotenv dotenv, BranchRepository branchRepository, ProviderSupplierRepository providerSupplierRepository) {
+    public JwtService(Dotenv dotenv1, Dotenv dotenv, BranchRepository branchRepository, ProviderSupplierRepository providerSupplierRepository, CrudPermissionImpl crudPermissionImpl) {
         this.SECRET_KEY = dotenv.get("SECRET_KEY");
         if (this.SECRET_KEY == null || this.SECRET_KEY.isEmpty()) {
             throw new IllegalArgumentException("SECRET_KEY is missing or empty in the environment variables.");
@@ -48,6 +53,7 @@ public class JwtService {
             throw new IllegalArgumentException("EXPIRATION_TIME must be a valid long value.");
         }
         this.providerSupplierRepository = providerSupplierRepository;
+        this.crudPermissionImpl = crudPermissionImpl;
     }
 
     public String generateTokenManager(UserManager user) {
@@ -99,48 +105,143 @@ public class JwtService {
             claims.put("branchAccess", user.getBranchesAccess().stream().map(Branch::getIdBranch).toList());
         }
         claims.put("contractAccess", user.getContractsAccess().stream().map(Contract::getIdContract).toList());
-        claims.put("admin", user.getProfile() != null
-                ? user.getProfile().getAdmin()
-                : false);
-        claims.put("viewer", user.getProfile() != null
-                ? user.getProfile().getViewer()
-                : true);
-        claims.put("manager", user.getProfile() != null
-                ? user.getProfile().getManager()
-                : false);
-        claims.put("inspector", user.getProfile() != null
-                ? user.getProfile().getInspector()
-                : false);
-        claims.put("documentViewer", user.getProfile() != null
-                ? user.getProfile().getDocumentViewer()
-                : false);
-        claims.put("registrationUser", user.getProfile() != null
-                ? user.getProfile().getRegistrationUser()
-                : false);
-        claims.put("registrationContract", user.getProfile() != null
-                ? user.getProfile().getRegistrationContract()
-                : false);
-        claims.put("laboral", user.getProfile() != null
-                ? user.getProfile().getLaboral()
-                : false);
-        claims.put("workplaceSafety", user.getProfile() != null
-                ? user.getProfile().getWorkplaceSafety()
-                : false);
-        claims.put("registrationAndCertificates", user.getProfile() != null
-                ? user.getProfile().getRegistrationAndCertificates()
-                : false);
-        claims.put("general", user.getProfile() != null
-                ? user.getProfile().getGeneral()
-                : false);
-        claims.put("health", user.getProfile() != null
-                ? user.getProfile().getHealth()
-                : false);
-        claims.put("environment", user.getProfile() != null
-                ? user.getProfile().getEnvironment()
-                : false);
-        claims.put("concierge", user.getProfile() != null
-                ? user.getProfile().getConcierge()
-                : false);
+        if ((user.getProfile() != null && user.getProfile().getAdmin())
+                || user.getRole().equals(User.Role.ROLE_REALIZA_PLUS)
+                || user.getRole().equals(User.Role.ROLE_REALIZA_BASIC)) {
+            // adm
+            claims.put("adm", true);
+        } else {
+            if (user.getProfile() != null) {
+                // adm
+                claims.put("adm", false);
+                // dashboard
+                Map<String, Boolean> dashboard = new HashMap<>();
+                dashboard.put("general", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DASHBOARD,
+                        PermissionSubTypeEnum.GENERAL,
+                        DocumentTypeEnum.NONE));
+                dashboard.put("provider", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DASHBOARD,
+                        PermissionSubTypeEnum.PROVIDER,
+                        DocumentTypeEnum.NONE));
+                dashboard.put("document", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DASHBOARD,
+                        PermissionSubTypeEnum.DOCUMENT,
+                        DocumentTypeEnum.NONE));
+                dashboard.put("documentDetail", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DASHBOARD,
+                        PermissionSubTypeEnum.DOCUMENT_DETAIL,
+                        DocumentTypeEnum.NONE));
+                claims.put("dashboard", dashboard);
+
+                Map<String, Object> document = new HashMap<>();
+
+                Map<String, Boolean> view = new HashMap<>();
+                view.put("laboral", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.VIEW,
+                        DocumentTypeEnum.LABORAL));
+                view.put("workplaceSafety", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.VIEW,
+                        DocumentTypeEnum.WORKPLACE_SAFETY));
+                view.put("registrationAndCertificates", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.VIEW,
+                        DocumentTypeEnum.REGISTRATION_AND_CERTIFICATES));
+                view.put("general", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.VIEW,
+                        DocumentTypeEnum.GENERAL));
+                view.put("health", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.VIEW,
+                        DocumentTypeEnum.HEALTH));
+                view.put("environment", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.VIEW,
+                        DocumentTypeEnum.ENVIRONMENT));
+                document.put("view", view);
+
+                Map<String, Boolean> upload = new HashMap<>();
+                upload.put("laboral", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.UPLOAD,
+                        DocumentTypeEnum.LABORAL));
+                upload.put("workplaceSafety", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.UPLOAD,
+                        DocumentTypeEnum.WORKPLACE_SAFETY));
+                upload.put("registrationAndCertificates", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.UPLOAD,
+                        DocumentTypeEnum.REGISTRATION_AND_CERTIFICATES));
+                upload.put("general", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.UPLOAD,
+                        DocumentTypeEnum.GENERAL));
+                upload.put("health", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.UPLOAD,
+                        DocumentTypeEnum.HEALTH));
+                upload.put("environment", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.UPLOAD,
+                        DocumentTypeEnum.ENVIRONMENT));
+                document.put("upload", upload);
+
+                Map<String, Boolean> exempt = new HashMap<>();
+                exempt.put("laboral", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.EXEMPT,
+                        DocumentTypeEnum.LABORAL));
+                exempt.put("workplaceSafety", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.EXEMPT,
+                        DocumentTypeEnum.WORKPLACE_SAFETY));
+                exempt.put("registrationAndCertificates", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.EXEMPT,
+                        DocumentTypeEnum.REGISTRATION_AND_CERTIFICATES));
+                exempt.put("general", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.EXEMPT,
+                        DocumentTypeEnum.GENERAL));
+                exempt.put("health", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.EXEMPT,
+                        DocumentTypeEnum.HEALTH));
+                exempt.put("environment", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.DOCUMENT,
+                        PermissionSubTypeEnum.EXEMPT,
+                        DocumentTypeEnum.ENVIRONMENT));
+                document.put("exempt", exempt);
+
+                claims.put("document", document);
+
+                // Contract
+                Map<String, Boolean> contract = new HashMap<>();
+                contract.put("finish", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.CONTRACT,
+                        PermissionSubTypeEnum.FINISH,
+                        DocumentTypeEnum.NONE));
+                contract.put("suspend", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.CONTRACT,
+                        PermissionSubTypeEnum.SUSPEND,
+                        DocumentTypeEnum.NONE));
+                contract.put("create", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.CONTRACT,
+                        PermissionSubTypeEnum.CREATE,
+                        DocumentTypeEnum.NONE));
+                claims.put("contract", contract);
+
+                // Reception
+                claims.put("reception", crudPermissionImpl.hasPermission(user,
+                        PermissionTypeEnum.RECEPTION,
+                        PermissionSubTypeEnum.NONE,
+                        DocumentTypeEnum.NONE));
+            }
+        }
 
         return Jwts.builder()
                 .setClaims(claims)

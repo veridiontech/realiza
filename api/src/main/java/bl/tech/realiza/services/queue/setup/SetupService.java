@@ -36,12 +36,12 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
-import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
-import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
+import bl.tech.realiza.gateways.repositories.users.security.ProfileRepoRepository;
+import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
-import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -152,19 +152,7 @@ public class SetupService {
                             .name(profileRepo.getName())
                             .description(profileRepo.getDescription())
                             .admin(profileRepo.getAdmin())
-                            .viewer(profileRepo.getViewer())
-                            .manager(profileRepo.getManager())
-                            .inspector(profileRepo.getInspector())
-                            .documentViewer(profileRepo.getDocumentViewer())
-                            .registrationUser(profileRepo.getRegistrationUser())
-                            .registrationContract(profileRepo.getRegistrationContract())
-                            .laboral(profileRepo.getLaboral())
-                            .workplaceSafety(profileRepo.getWorkplaceSafety())
-                            .registrationAndCertificates(profileRepo.getRegistrationAndCertificates())
-                            .general(profileRepo.getGeneral())
-                            .health(profileRepo.getHealth())
-                            .environment(profileRepo.getEnvironment())
-                            .concierge(profileRepo.getConcierge())
+                            .permissions(profileRepo.getPermissions())
                             .client(client)
                             .build()
             );
