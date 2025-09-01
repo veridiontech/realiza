@@ -19,14 +19,35 @@ type Profile = {
 type Permissions = {
   dashboard: {
     general: boolean;
-    providers: boolean;
+    provider: boolean;
     document: boolean;
-    documentDetails: boolean;
+    documentDetail: boolean;
   };
   document: {
-    view: boolean;
-    upload: boolean;
-    exempt: boolean;
+    view: {
+      laboral: boolean;
+      workplaceSafety: boolean;
+      registrationAndCertificates: boolean;
+      general: boolean;
+      health: boolean;
+      environment: boolean;
+    };
+    upload: {
+      laboral: boolean;
+      workplaceSafety: boolean;
+      registrationAndCertificates: boolean;
+      general: boolean;
+      health: boolean;
+      environment: boolean;
+    };
+    exempt: {
+      laboral: boolean;
+      workplaceSafety: boolean;
+      registrationAndCertificates: boolean;
+      general: boolean;
+      health: boolean;
+      environment: boolean;
+    };
   };
   contract: {
     finish: boolean;
@@ -34,14 +55,6 @@ type Permissions = {
     create: boolean;
   };
   reception: boolean;
-  types: {
-    registrationAndCertificates: boolean;
-    health: boolean;
-    workplaceSafety: boolean;
-    environment: boolean;
-    laboral: boolean;
-    general: boolean;
-  };
 };
 
 type ProfileDetails = {
@@ -59,6 +72,7 @@ export function ProfilesSection() {
 
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFinalConfirmModalOpen, setIsFinalConfirmModalOpen] = useState(false);
@@ -70,17 +84,39 @@ export function ProfilesSection() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [admin, setAdmin] = useState(false);
+  
   const [permissions, setPermissions] = useState<Permissions>({
     dashboard: {
       general: false,
-      providers: false,
+      provider: false,
       document: false,
-      documentDetails: false,
+      documentDetail: false,
     },
     document: {
-      view: false,
-      upload: false,
-      exempt: false,
+      view: {
+        laboral: false,
+        workplaceSafety: false,
+        registrationAndCertificates: false,
+        general: false,
+        health: false,
+        environment: false,
+      },
+      upload: {
+        laboral: false,
+        workplaceSafety: false,
+        registrationAndCertificates: false,
+        general: false,
+        health: false,
+        environment: false,
+      },
+      exempt: {
+        laboral: false,
+        workplaceSafety: false,
+        registrationAndCertificates: false,
+        general: false,
+        health: false,
+        environment: false,
+      },
     },
     contract: {
       finish: false,
@@ -88,14 +124,6 @@ export function ProfilesSection() {
       create: false,
     },
     reception: false,
-    types: {
-      registrationAndCertificates: false,
-      health: false,
-      workplaceSafety: false,
-      environment: false,
-      laboral: false,
-      general: false,
-    },
   });
 
   const fetchProfiles = async () => {
@@ -103,9 +131,11 @@ export function ProfilesSection() {
     setLoading(true);
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log("Iniciando requisição GET para buscar perfis...");
       const response = await axios.get(`${ip}/profile/by-name/${clientId}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      console.log("Resposta da requisição GET:", response.data);
       const data = Array.isArray(response.data) ? response.data : [];
       const sortedProfiles = data.sort((a, b) =>
         a.profileName.localeCompare(b.profileName)
@@ -124,19 +154,23 @@ export function ProfilesSection() {
     setLoading(true);
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log(`Iniciando requisição GET para buscar detalhes do perfil ${profileId}...`);
       const detailsResponse = await axios.get(`${ip}/profile/${profileId}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      console.log("Resposta da requisição GET de detalhes:", detailsResponse.data);
       setSelectedProfileDetails(detailsResponse.data);
 
+      console.log(`Iniciando requisição GET para buscar usuários do perfil ${profileId}...`);
       const usersResponse = await axios.get(
         `${ip}/user/find-by-profile/${profileId}`,
         {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
+      console.log("Resposta da requisição GET de usuários:", usersResponse.data);
       setAssociatedUsers(usersResponse.data);
-      
+
       setIsDeleteModalOpen(true);
     } catch (err) {
       console.error("Erro ao verificar usuários vinculados:", err);
@@ -151,9 +185,11 @@ export function ProfilesSection() {
     setLoading(true);
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log(`Iniciando requisição DELETE para o perfil ${selectedProfileDetails.id}...`);
       await axios.delete(`${ip}/profile/${selectedProfileDetails.id}`, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      console.log("Perfil excluído com sucesso.");
       toast.success("Perfil excluído com sucesso!");
       setIsDeleteModalOpen(false);
       setSelectedProfileDetails(null);
@@ -165,14 +201,14 @@ export function ProfilesSection() {
       setLoading(false);
     }
   };
-  
+
   const handleIndividualAssignmentChange = (userId: string, newProfileId: string) => {
     setIndividualAssignments(prevAssignments => ({
       ...prevAssignments,
       [userId]: newProfileId,
     }));
   };
-  
+
   const handleOpenFinalConfirm = () => {
     if (Object.keys(individualAssignments).length !== associatedUsers.length) {
       toast.error("Por favor, atribua um novo perfil para cada usuário.");
@@ -186,18 +222,22 @@ export function ProfilesSection() {
     setLoading(true);
     const token = localStorage.getItem("tokenClient");
     try {
-      const reassignPromises = Object.entries(individualAssignments).map(([userId, profileId]) =>
-        axios.post(`${ip}/user/${userId}/change-profile?profileId=${profileId}`, null, {
+      const reassignPromises = Object.entries(individualAssignments).map(([userId, profileId]) => {
+        console.log(`Iniciando requisição POST para reatribuir usuário ${userId} para o perfil ${profileId}...`);
+        return axios.post(`${ip}/user/${userId}/change-profile?profileId=${profileId}`, null, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-      );
+        });
+      });
       
       await Promise.all(reassignPromises);
+      console.log("Todos os usuários foram reatribuídos.");
       toast.success(`${associatedUsers.length} usuário(s) foram reatribuídos.`);
 
+      console.log(`Iniciando requisição DELETE para excluir o perfil ${selectedProfileDetails.id}...`);
       await axios.delete(`${ip}/profile/${selectedProfileDetails.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("Perfil excluído após reatribuição.");
       toast.success(`O perfil "${selectedProfileDetails.name}" foi excluído.`);
 
       setIsFinalConfirmModalOpen(false);
@@ -213,12 +253,14 @@ export function ProfilesSection() {
       setLoading(false);
     }
   };
-  
+
   const handleCreateProfile = async () => {
     if (!clientId || !name.trim()) {
       toast.warning("O nome do perfil é obrigatório.");
       return;
     }
+
+    setIsCreating(true);
 
     let profilePermissions = permissions;
 
@@ -226,14 +268,35 @@ export function ProfilesSection() {
       profilePermissions = {
         dashboard: {
           general: true,
-          providers: true,
+          provider: true,
           document: true,
-          documentDetails: true,
+          documentDetail: true,
         },
         document: {
-          view: true,
-          upload: true,
-          exempt: true,
+          view: {
+            laboral: true,
+            workplaceSafety: true,
+            registrationAndCertificates: true,
+            general: true,
+            health: true,
+            environment: true,
+          },
+          upload: {
+            laboral: true,
+            workplaceSafety: true,
+            registrationAndCertificates: true,
+            general: true,
+            health: true,
+            environment: true,
+          },
+          exempt: {
+            laboral: true,
+            workplaceSafety: true,
+            registrationAndCertificates: true,
+            general: true,
+            health: true,
+            environment: true,
+          },
         },
         contract: {
           finish: true,
@@ -241,64 +304,79 @@ export function ProfilesSection() {
           create: true,
         },
         reception: true,
-        types: {
-          registrationAndCertificates: true,
-          health: true,
-          workplaceSafety: true,
-          environment: true,
-          laboral: true,
-          general: true,
-        },
       };
     }
 
-    const newProfile = { 
-      name, 
-      description, 
-      admin, 
-      permissions: profilePermissions,
-      clientId, 
-      branchIds: [], 
-      contractIds: [] 
+    const newProfile = {
+      name,
+      description,
+      admin,
+      ...profilePermissions,
+      clientId,
+      branchIds: [],
+      contractIds: []
     };
 
     const tokenFromStorage = localStorage.getItem("tokenClient");
     try {
+      console.log("Iniciando requisição POST para criar perfil com os dados:", newProfile);
       await axios.post(`${ip}/profile`, newProfile, {
         headers: { Authorization: `Bearer ${tokenFromStorage}` },
       });
+      console.log("Perfil criado com sucesso.");
       toast.success("Perfil criado com sucesso!");
       setName("");
       setDescription("");
       setAdmin(false);
       setPermissions({
-        dashboard: { general: false, providers: false, document: false, documentDetails: false },
-        document: { view: false, upload: false, exempt: false },
+        dashboard: { general: false, provider: false, document: false, documentDetail: false },
+        document: {
+          view: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+          upload: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+          exempt: { laboral: false, workplaceSafety: false, registrationAndCertificates: false, general: false, health: false, environment: false },
+        },
         contract: { finish: false, suspend: false, create: false },
         reception: false,
-        types: { registrationAndCertificates: false, health: false, workplaceSafety: false, environment: false, laboral: false, general: false },
       });
       fetchProfiles();
     } catch (err: any) {
       console.error("Erro ao criar perfil:", err.response || err);
       toast.error("Erro ao criar o perfil.");
+    } finally {
+      setIsCreating(false);
     }
   };
 
-  const handlePermissionChange = (path: string) => {
-    const keys = path.split('.');
-    
+  const handlePermissionChange = (path: string, type: 'view' | 'upload' | 'exempt' | null = null) => {
     setPermissions(prev => {
-      let newState: any = { ...prev };
-      let currentLevel = newState;
+      let newState = { ...prev };
+      const [mainKey, subKey] = path.split('.');
       
-      for (let i = 0; i < keys.length - 1; i++) {
-        currentLevel[keys[i]] = { ...currentLevel[keys[i]] };
-        currentLevel = currentLevel[keys[i]];
+      if (mainKey === 'document' && subKey) {
+        if (type) {
+          newState.document = {
+            ...newState.document,
+            [type]: {
+              ...newState.document[type],
+              [subKey]: !newState.document[type][subKey as keyof typeof newState.document.view]
+            }
+          };
+        } else {
+          const documentKeys = ['view', 'upload', 'exempt'] as const;
+          if (documentKeys.includes(subKey as any)) {
+            (newState.document as any)[subKey] = !(newState.document as any)[subKey];
+          }
+        }
+      } else {
+        let currentLevel = newState as any;
+        const keys = path.split('.');
+        for (let i = 0; i < keys.length - 1; i++) {
+          currentLevel[keys[i]] = { ...currentLevel[keys[i]] };
+          currentLevel = currentLevel[keys[i]];
+        }
+        const lastKey = keys[keys.length - 1];
+        currentLevel[lastKey] = !currentLevel[lastKey];
       }
-      
-      const lastKey = keys[keys.length - 1];
-      currentLevel[lastKey] = !currentLevel[lastKey];
       
       return newState;
     });
@@ -367,45 +445,82 @@ export function ProfilesSection() {
                     <input type="checkbox" checked={permissions.dashboard.general} onChange={() => handlePermissionChange("dashboard.general")} /> Geral
                   </label>
                   <label>
-                    <input type="checkbox" checked={permissions.dashboard.providers} onChange={() => handlePermissionChange("dashboard.providers")} /> Fornecedores
+                    <input type="checkbox" checked={permissions.dashboard.provider} onChange={() => handlePermissionChange("dashboard.provider")} /> Fornecedores
                   </label>
                   <label>
                     <input type="checkbox" checked={permissions.dashboard.document} onChange={() => handlePermissionChange("dashboard.document")} /> Documentos
                   </label>
                   <label>
-                    <input type="checkbox" checked={permissions.dashboard.documentDetails} onChange={() => handlePermissionChange("dashboard.documentDetails")} /> Detalhes de Documentos
+                    <input type="checkbox" checked={permissions.dashboard.documentDetail} onChange={() => handlePermissionChange("dashboard.documentDetail")} /> Detalhes de Documentos
                   </label>
                   <hr className="my-2" />
                   <p className="font-medium">Documentos</p>
-                  <label>
-                    <input type="checkbox" checked={permissions.document.view} onChange={() => handlePermissionChange("document.view")} /> Visualizar
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.document.upload} onChange={() => handlePermissionChange("document.upload")} /> Upload
-                  </label>
-                  <label>
-                    <input type="checkbox" checked={permissions.document.exempt} onChange={() => handlePermissionChange("document.exempt")} /> Isentar
-                  </label>
                   <div className="ml-4 mt-2 border-l-2 pl-4">
-                    <p className="font-medium">Tipos de Documento</p>
+                    <p className="font-medium">Visualizar</p>
                     <div className="grid grid-cols-1 gap-2">
                       <label>
-                        <input type="checkbox" checked={permissions.types.registrationAndCertificates} onChange={() => handlePermissionChange("types.registrationAndCertificates")} /> Cadastro e Certidões
+                        <input type="checkbox" checked={permissions.document.view.laboral} onChange={() => handlePermissionChange("document.laboral", "view")} /> Trabalhista
                       </label>
                       <label>
-                        <input type="checkbox" checked={permissions.types.health} onChange={() => handlePermissionChange("types.health")} /> Saúde
+                        <input type="checkbox" checked={permissions.document.view.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "view")} /> Segurança do Trabalho
                       </label>
                       <label>
-                        <input type="checkbox" checked={permissions.types.workplaceSafety} onChange={() => handlePermissionChange("types.workplaceSafety")} /> Segurança do Trabalho
+                        <input type="checkbox" checked={permissions.document.view.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "view")} /> Cadastro e Certidões
                       </label>
                       <label>
-                        <input type="checkbox" checked={permissions.types.environment} onChange={() => handlePermissionChange("types.environment")} /> Meio Ambiente
+                        <input type="checkbox" checked={permissions.document.view.general} onChange={() => handlePermissionChange("document.general", "view")} /> Geral
                       </label>
                       <label>
-                        <input type="checkbox" checked={permissions.types.laboral} onChange={() => handlePermissionChange("types.laboral")} /> Trabalhista
+                        <input type="checkbox" checked={permissions.document.view.health} onChange={() => handlePermissionChange("document.health", "view")} /> Saúde
                       </label>
                       <label>
-                        <input type="checkbox" checked={permissions.types.general} onChange={() => handlePermissionChange("types.general")} /> Geral
+                        <input type="checkbox" checked={permissions.document.view.environment} onChange={() => handlePermissionChange("document.environment", "view")} /> Meio Ambiente
+                      </label>
+                    </div>
+                  </div>
+                  <div className="ml-4 mt-2 border-l-2 pl-4">
+                    <p className="font-medium">Upload</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      <label>
+                        <input type="checkbox" checked={permissions.document.upload.laboral} onChange={() => handlePermissionChange("document.laboral", "upload")} /> Trabalhista
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.upload.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "upload")} /> Segurança do Trabalho
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.upload.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "upload")} /> Cadastro e Certidões
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.upload.general} onChange={() => handlePermissionChange("document.general", "upload")} /> Geral
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.upload.health} onChange={() => handlePermissionChange("document.health", "upload")} /> Saúde
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.upload.environment} onChange={() => handlePermissionChange("document.environment", "upload")} /> Meio Ambiente
+                      </label>
+                    </div>
+                  </div>
+                  <div className="ml-4 mt-2 border-l-2 pl-4">
+                    <p className="font-medium">Isentar</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      <label>
+                        <input type="checkbox" checked={permissions.document.exempt.laboral} onChange={() => handlePermissionChange("document.laboral", "exempt")} /> Trabalhista
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.exempt.workplaceSafety} onChange={() => handlePermissionChange("document.workplaceSafety", "exempt")} /> Segurança do Trabalho
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.exempt.registrationAndCertificates} onChange={() => handlePermissionChange("document.registrationAndCertificates", "exempt")} /> Cadastro e Certidões
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.exempt.general} onChange={() => handlePermissionChange("document.general", "exempt")} /> Geral
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.exempt.health} onChange={() => handlePermissionChange("document.health", "exempt")} /> Saúde
+                      </label>
+                      <label>
+                        <input type="checkbox" checked={permissions.document.exempt.environment} onChange={() => handlePermissionChange("document.environment", "exempt")} /> Meio Ambiente
                       </label>
                     </div>
                   </div>
@@ -428,7 +543,13 @@ export function ProfilesSection() {
                 </div>
               </div>
             )}
-            <button onClick={handleCreateProfile} className="bg-realizaBlue text-white px-4 py-2 rounded w-fit">Criar perfil</button>
+            <button 
+              onClick={handleCreateProfile} 
+              className="bg-realizaBlue text-white px-4 py-2 rounded w-fit disabled:bg-realizaBlue/70 disabled:cursor-not-allowed" 
+              disabled={isCreating}
+            >
+              {isCreating ? 'Criando...' : 'Criar perfil'}
+            </button>
           </div>
         </div>
       </div>

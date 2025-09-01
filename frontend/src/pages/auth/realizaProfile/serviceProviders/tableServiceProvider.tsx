@@ -11,6 +11,7 @@ import {
   History,
   ScrollText,
   Loader2,
+  FileCog,
 } from "lucide-react";
 import { ModalTesteSendSupplier } from "@/components/client-add-supplier";
 import { ModalCadastroSubcontratado } from "@/components/modal-cadastro-subcontratado";
@@ -736,7 +737,7 @@ export function TableServiceProvider() {
                             }
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
-                            <Eye className="w-4 h-4" /> Visualizar
+                            <FileCog className="w-4 h-4" /> Gerenciar
                           </button>
                           <button
                             onClick={() => {
@@ -745,7 +746,7 @@ export function TableServiceProvider() {
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                           >
-                            <Pencil className="w-4 h-4" /> Editar
+                            <Pencil className="w-4 h-4" /> Editar/Visualizar
                           </button>
                           <button
                             onClick={() => {
