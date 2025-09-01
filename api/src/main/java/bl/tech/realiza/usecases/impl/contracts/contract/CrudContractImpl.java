@@ -3,10 +3,11 @@ package bl.tech.realiza.usecases.impl.contracts.contract;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.activity.Activity;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionSubTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionTypeEnum;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
@@ -24,13 +25,13 @@ import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContract;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudPermission;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,63 +48,95 @@ public class CrudContractImpl implements CrudContract {
     private final SetupQueueProducer setupQueueProducer;
     private final JwtService jwtService;
     private final CrudItemManagement crudItemManagement;
+    private final CrudPermission crudPermission;
 
     @Override
     public String finishContractRequest(String idContract) {
-
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        Contract contract = contractRepository.findById(idContract)
-                .orElseThrow(() -> new NotFoundException("Contract not found"));
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
 
-        crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
-                .solicitationType(ItemManagement.SolicitationType.FINISH)
-                .idRequester(requester.getIdUser())
-                .contractId(idContract)
-                .build());
+            if (crudPermission.hasPermission(user, PermissionTypeEnum.CONTRACT, PermissionSubTypeEnum.FINISH, DocumentTypeEnum.NONE)) {
+                Contract contract = contractRepository.findById(idContract)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        contract.setStatus(ContractStatusEnum.FINISH_REQUESTED);
-        contractRepository.save(contract);
+                crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
+                        .solicitationType(ItemManagement.SolicitationType.FINISH)
+                        .idRequester(requester.getIdUser())
+                        .contractId(idContract)
+                        .build());
 
-        return "Contract finish requested";
+                contract.setStatus(ContractStatusEnum.FINISH_REQUESTED);
+                contractRepository.save(contract);
+                return "Contract finish requested";
+            } else {
+                return "Not enough permissions";
+            }
+        } else {
+            return "Not authenticated user";
+        }
     }
 
     @Override
     public String suspendContractRequest(String contractId) {
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new NotFoundException("Contract not found"));
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (crudPermission.hasPermission(user, PermissionTypeEnum.CONTRACT, PermissionSubTypeEnum.SUSPEND, DocumentTypeEnum.NONE)) {
+                Contract contract = contractRepository.findById(contractId)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
-                .solicitationType(ItemManagement.SolicitationType.SUSPEND)
-                .idRequester(requester.getIdUser())
-                .contractId(contractId)
-                .build());
+                crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
+                        .solicitationType(ItemManagement.SolicitationType.SUSPEND)
+                        .idRequester(requester.getIdUser())
+                        .contractId(contractId)
+                        .build());
 
-        contract.setStatus(ContractStatusEnum.SUSPEND_REQUESTED);
-        contractRepository.save(contract);
+                contract.setStatus(ContractStatusEnum.SUSPEND_REQUESTED);
+                contractRepository.save(contract);
 
-        return "Contract suspension requested";
+                return "Contract suspension requested";
+            } else {
+                return "Not enough permissions";
+            }
+        } else {
+            return "Not authenticated user";
+        }
+
     }
 
     @Override
     public String reactivateContractRequest(String contractId) {
         UserResponseDto requester = jwtService.extractAllClaims(jwtService.getTokenFromRequest());
 
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new NotFoundException("Contract not found"));
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (crudPermission.hasPermission(user, PermissionTypeEnum.CONTRACT, PermissionSubTypeEnum.SUSPEND, DocumentTypeEnum.NONE)) {
+                Contract contract = contractRepository.findById(contractId)
+                        .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
-                .solicitationType(ItemManagement.SolicitationType.REACTIVATION)
-                .idRequester(requester.getIdUser())
-                .contractId(contractId)
-                .build());
+                crudItemManagement.saveContractSolicitation(ItemManagementContractRequestDto.builder()
+                        .solicitationType(ItemManagement.SolicitationType.REACTIVATION)
+                        .idRequester(requester.getIdUser())
+                        .contractId(contractId)
+                        .build());
 
-        contract.setStatus(ContractStatusEnum.REACTIVATION_REQUESTED);
-        contractRepository.save(contract);
+                contract.setStatus(ContractStatusEnum.REACTIVATION_REQUESTED);
+                contractRepository.save(contract);
 
-        return "Contract reactivation requested";
+                return "Contract reactivation requested";
+            } else {
+                return "Not enough permissions";
+            }
+        } else {
+            return "Not authenticated user";
+        }
+
     }
 
     @Override

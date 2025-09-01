@@ -4,13 +4,15 @@ import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.contract.serviceType.ServiceType;
-import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.enums.DocumentTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionSubTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserProviderSupplier;
+import bl.tech.realiza.exceptions.ForbiddenException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.exceptions.UnprocessableEntityException;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
@@ -31,6 +33,7 @@ import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSubcontractor;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudPermission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,9 +60,22 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
     private final ContractRepository contractRepository;
     private final SetupQueueProducer setupQueueProducer;
     private final CrudItemManagement crudItemManagement;
+    private final CrudPermission crudPermission;
 
     @Override
     public ContractSubcontractorResponseDto save(ContractSubcontractorPostRequestDto contractProviderSubcontractorRequestDto) {
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (!crudPermission.hasPermission(user,
+                    PermissionTypeEnum.CONTRACT,
+                    PermissionSubTypeEnum.CREATE,
+                    DocumentTypeEnum.NONE)) {
+                throw new ForbiddenException("Not enough permissions");
+            }
+        } else {
+            throw new ForbiddenException("Not authenticated user");
+        }
         List<Activity> activities = List.of();
 
         ContractProviderSupplier contractProviderSupplier = contractProviderSupplierRepository.findById(contractProviderSubcontractorRequestDto.getIdContractSupplier())

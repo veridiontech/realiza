@@ -14,10 +14,7 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
-import bl.tech.realiza.domains.enums.ContractStatusEnum;
-import bl.tech.realiza.domains.enums.ContractTypeEnum;
-import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
-import bl.tech.realiza.domains.providers.Provider;
+import bl.tech.realiza.domains.enums.*;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.snapshots.clients.BranchSnapshot;
@@ -40,6 +37,7 @@ import bl.tech.realiza.domains.services.snapshots.providers.ProviderSubcontracto
 import bl.tech.realiza.domains.services.snapshots.providers.ProviderSupplierSnapshot;
 import bl.tech.realiza.domains.services.snapshots.user.UserSnapshot;
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.exceptions.ForbiddenException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
@@ -54,7 +52,6 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubg
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
-import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.clients.BranchSnapshotRepository;
@@ -78,6 +75,8 @@ import bl.tech.realiza.gateways.repositories.services.snapshots.user.UserSnapsho
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
 import bl.tech.realiza.gateways.requests.dashboard.DashboardFiltersRequestDto;
 import bl.tech.realiza.gateways.responses.dashboard.*;
+import bl.tech.realiza.services.auth.JwtService;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudPermission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -85,7 +84,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -135,7 +133,7 @@ public class DashboardService {
     private final ContractSnapshotRepository contractSnapshotRepository;
     private final ContractDocumentSnapshotRepository contractDocumentSnapshotRepository;
     private final ProviderSnapshotRepository providerSnapshotRepository;
-    private final ProviderRepository providerRepository;
+    private final CrudPermission crudPermission;
 
     public DashboardHomeResponseDto getHomeInfo(String branchId) {
         branchRepository.findById(branchId)
@@ -342,6 +340,15 @@ public class DashboardService {
     }
 
     public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (!crudPermission.hasPermission(user, PermissionTypeEnum.DASHBOARD, PermissionSubTypeEnum.GENERAL, DocumentTypeEnum.NONE)) {
+                throw new ForbiddenException("Not enough permissions");
+            }
+        } else {
+            throw new ForbiddenException("Not authenticated user");
+        }
         clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
         List<String> branchIds = new ArrayList<>();
@@ -586,6 +593,19 @@ public class DashboardService {
     }
 
     public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (!crudPermission.hasPermission(user,
+                    PermissionTypeEnum.DASHBOARD,
+                    PermissionSubTypeEnum.PROVIDER,
+                    DocumentTypeEnum.NONE)) {
+                throw new ForbiddenException("Not enough permissions");
+            }
+        } else {
+            throw new ForbiddenException("Not authenticated user");
+        }
+
         List<String> branchIds = dashboardFiltersRequestDto != null
                 ? (dashboardFiltersRequestDto.getBranchIds() != null
                     ? dashboardFiltersRequestDto.getBranchIds()
@@ -736,6 +756,18 @@ public class DashboardService {
     }
 
     public DashboardDocumentStatusResponseDto getDocumentStatusInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (!crudPermission.hasPermission(user,
+                    PermissionTypeEnum.DASHBOARD,
+                    PermissionSubTypeEnum.DOCUMENT,
+                    DocumentTypeEnum.NONE)) {
+                throw new ForbiddenException("Not enough permissions");
+            }
+        } else {
+            throw new ForbiddenException("Not authenticated user");
+        }
         DashboardDocumentStatusResponseDto responseDto = DashboardDocumentStatusResponseDto.builder().build();
         List<String> branchIds = new ArrayList<>();
         List<String> providerIds = new ArrayList<>();
@@ -860,6 +892,18 @@ public class DashboardService {
     }
 
     public Page<DashboardDocumentDetailsResponseDto> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto, Pageable pageable) {
+        if (JwtService.getAuthenticatedUserId() != null) {
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (!crudPermission.hasPermission(user,
+                    PermissionTypeEnum.DASHBOARD,
+                    PermissionSubTypeEnum.DOCUMENT_DETAIL,
+                    DocumentTypeEnum.NONE)) {
+                throw new ForbiddenException("Not enough permissions");
+            }
+        } else {
+            throw new ForbiddenException("Not authenticated user");
+        }
         DashboardDocumentDetailsResponseDto responseDto = DashboardDocumentDetailsResponseDto.builder().build();
         List<String> branchIds = new ArrayList<>();
         List<String> providerIds = new ArrayList<>();

@@ -11,11 +11,15 @@ import bl.tech.realiza.domains.documents.contract.DocumentContract;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionSubTypeEnum;
+import bl.tech.realiza.domains.enums.PermissionTypeEnum;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.exceptions.ForbiddenException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
@@ -41,6 +45,7 @@ import bl.tech.realiza.services.queue.setup.SetupQueueProducer;
 import bl.tech.realiza.usecases.interfaces.CrudItemManagement;
 import bl.tech.realiza.usecases.interfaces.auditLogs.AuditLogService;
 import bl.tech.realiza.usecases.interfaces.contracts.contract.CrudContractProviderSupplier;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudPermission;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -74,130 +79,141 @@ public class CrudContractProviderSupplierImpl implements CrudContractProviderSup
     private final ContractRepository contractRepository;
     private final SetupQueueProducer setupQueueProducer;
     private final JwtService jwtService;
+    private final CrudPermission crudPermission;
 
     @Override
     public ContractSupplierResponseDto save(ContractSupplierPostRequestDto contractProviderSupplierRequestDto) {
-        List<Activity> activities = List.of();
-
-        ProviderSupplier newProviderSupplier = providerSupplierRepository.findByCnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
-                .orElse(null);
-
-        Branch branch = branchRepository.findById(contractProviderSupplierRequestDto.getIdBranch())
-                .orElseThrow(() -> new NotFoundException("Branch not found"));
-
-        UserClient responsible = userClientRepository.findById(contractProviderSupplierRequestDto.getIdResponsible())
-                .orElseThrow(() -> new NotFoundException("User responsible not found"));
-
-        User requester = userRepository.findById(contractProviderSupplierRequestDto.getIdRequester())
-                .orElseThrow(() -> new NotFoundException("User requester not found"));
-
-        ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
-                .orElseThrow(() ->  new NotFoundException("Service Type not found"));
-
-        if (contractProviderSupplierRequestDto.getIdActivities() != null
-                && !contractProviderSupplierRequestDto.getIdActivities().isEmpty()) {
-            activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
-        }
-
-        if (newProviderSupplier == null) {
-            newProviderSupplier = providerSupplierRepository.save(ProviderSupplier.builder()
-                    .cnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
-                    .corporateName(contractProviderSupplierRequestDto.getProviderDatas().getCorporateName())
-                    .email(contractProviderSupplierRequestDto.getProviderDatas().getEmail())
-                    .telephone(contractProviderSupplierRequestDto.getProviderDatas().getTelephone())
-                    .branches(List.of(branch))
-                    .build());
-        } else {
-            if (!newProviderSupplier.getIsActive()) {
-                throw new IllegalArgumentException("Provider supplier not active");
-            }
-            List<Branch> newBranches = newProviderSupplier.getBranches();
-            if (!newBranches.contains(branch)) {
-                newBranches.add(branch);
-                newProviderSupplier.setBranches(newBranches);
-                newProviderSupplier = providerSupplierRepository.save(newProviderSupplier);
-            }
-        }
-
-        ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(ContractProviderSupplier.builder()
-                .serviceTypeBranch(serviceTypeBranch)
-                .serviceName(contractProviderSupplierRequestDto.getServiceName())
-                .contractReference(contractProviderSupplierRequestDto.getContractReference())
-                .description(contractProviderSupplierRequestDto.getDescription())
-                .dateStart(contractProviderSupplierRequestDto.getDateStart())
-                .labor(contractProviderSupplierRequestDto.getLabor())
-                .hse(contractProviderSupplierRequestDto.getHse())
-                .responsible(responsible)
-                .expenseType(contractProviderSupplierRequestDto.getExpenseType())
-                .subcontractPermission(contractProviderSupplierRequestDto.getSubcontractPermission())
-                .activities(activities)
-                .providerSupplier(newProviderSupplier)
-                .branch(branch)
-                .build());
-
-        UserClient userClient = userClientRepository.findById(savedContractProviderSupplier.getResponsible().getIdUser())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        userClient.getContractsAccess().add(savedContractProviderSupplier);
-        userClientRepository.save(userClient);
-
-        setupQueueProducer.send(SetupMessage.builder()
-                .type("NEW_CONTRACT_SUPPLIER")
-                .contractSupplierId(savedContractProviderSupplier.getIdContract())
-                .activityIds(activities.stream().map(Activity::getIdActivity).toList())
-                .build());
-
         if (JwtService.getAuthenticatedUserId() != null) {
-            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> auditLogServiceImpl.createAuditLog(
-                        savedContractProviderSupplier.getIdContract(),
-                        CONTRACT,
-                        userResponsible.getFullName() + " criou contrato "
-                                + savedContractProviderSupplier.getContractReference(),
-                            null,
-                            null,
-                            CREATE,
-                        userResponsible.getIdUser()));
+            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (crudPermission.hasPermission(user, PermissionTypeEnum.CONTRACT, PermissionSubTypeEnum.CREATE, DocumentTypeEnum.NONE)) {
+                List<Activity> activities = List.of();
+
+                ProviderSupplier newProviderSupplier = providerSupplierRepository.findByCnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
+                        .orElse(null);
+
+                Branch branch = branchRepository.findById(contractProviderSupplierRequestDto.getIdBranch())
+                        .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+                UserClient responsible = userClientRepository.findById(contractProviderSupplierRequestDto.getIdResponsible())
+                        .orElseThrow(() -> new NotFoundException("User responsible not found"));
+
+                User requester = userRepository.findById(contractProviderSupplierRequestDto.getIdRequester())
+                        .orElseThrow(() -> new NotFoundException("User requester not found"));
+
+                ServiceTypeBranch serviceTypeBranch = serviceTypeBranchRepository.findById(contractProviderSupplierRequestDto.getIdServiceType())
+                        .orElseThrow(() ->  new NotFoundException("Service Type not found"));
+
+                if (contractProviderSupplierRequestDto.getIdActivities() != null
+                        && !contractProviderSupplierRequestDto.getIdActivities().isEmpty()) {
+                    activities = activityRepository.findAllById(contractProviderSupplierRequestDto.getIdActivities());
+                }
+
+                if (newProviderSupplier == null) {
+                    newProviderSupplier = providerSupplierRepository.save(ProviderSupplier.builder()
+                            .cnpj(contractProviderSupplierRequestDto.getProviderDatas().getCnpj())
+                            .corporateName(contractProviderSupplierRequestDto.getProviderDatas().getCorporateName())
+                            .email(contractProviderSupplierRequestDto.getProviderDatas().getEmail())
+                            .telephone(contractProviderSupplierRequestDto.getProviderDatas().getTelephone())
+                            .branches(List.of(branch))
+                            .build());
+                } else {
+                    if (!newProviderSupplier.getIsActive()) {
+                        throw new IllegalArgumentException("Provider supplier not active");
+                    }
+                    List<Branch> newBranches = newProviderSupplier.getBranches();
+                    if (!newBranches.contains(branch)) {
+                        newBranches.add(branch);
+                        newProviderSupplier.setBranches(newBranches);
+                        newProviderSupplier = providerSupplierRepository.save(newProviderSupplier);
+                    }
+                }
+
+                ContractProviderSupplier savedContractProviderSupplier = contractProviderSupplierRepository.save(ContractProviderSupplier.builder()
+                        .serviceTypeBranch(serviceTypeBranch)
+                        .serviceName(contractProviderSupplierRequestDto.getServiceName())
+                        .contractReference(contractProviderSupplierRequestDto.getContractReference())
+                        .description(contractProviderSupplierRequestDto.getDescription())
+                        .dateStart(contractProviderSupplierRequestDto.getDateStart())
+                        .labor(contractProviderSupplierRequestDto.getLabor())
+                        .hse(contractProviderSupplierRequestDto.getHse())
+                        .responsible(responsible)
+                        .expenseType(contractProviderSupplierRequestDto.getExpenseType())
+                        .subcontractPermission(contractProviderSupplierRequestDto.getSubcontractPermission())
+                        .activities(activities)
+                        .providerSupplier(newProviderSupplier)
+                        .branch(branch)
+                        .build());
+
+                UserClient userClient = userClientRepository.findById(savedContractProviderSupplier.getResponsible().getIdUser())
+                        .orElseThrow(() -> new NotFoundException("User not found"));
+
+                userClient.getContractsAccess().add(savedContractProviderSupplier);
+                userClientRepository.save(userClient);
+
+                setupQueueProducer.send(SetupMessage.builder()
+                        .type("NEW_CONTRACT_SUPPLIER")
+                        .contractSupplierId(savedContractProviderSupplier.getIdContract())
+                        .activityIds(activities.stream().map(Activity::getIdActivity).toList())
+                        .build());
+
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                            userResponsible -> auditLogServiceImpl.createAuditLog(
+                                savedContractProviderSupplier.getIdContract(),
+                                CONTRACT,
+                                userResponsible.getFullName() + " criou contrato "
+                                        + savedContractProviderSupplier.getContractReference(),
+                                    null,
+                                    null,
+                                    CREATE,
+                                userResponsible.getIdUser()));
+                }
+
+                // criar solicitação
+                crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
+                                .solicitationType(ItemManagement.SolicitationType.CREATION)
+                                .idRequester(requester.getIdUser())
+                                .idNewProvider(newProviderSupplier.getIdProvider())
+                        .build());
+
+                return ContractSupplierResponseDto.builder()
+                        .idContract(savedContractProviderSupplier.getIdContract())
+                        .serviceType(savedContractProviderSupplier.getServiceTypeBranch() != null
+                                ? savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType()
+                                : null)
+                        .serviceDuration(savedContractProviderSupplier.getServiceDuration())
+                        .serviceName(savedContractProviderSupplier.getServiceName())
+                        .contractReference(savedContractProviderSupplier.getContractReference())
+                        .description(savedContractProviderSupplier.getDescription())
+                        .idResponsible(savedContractProviderSupplier.getResponsible() != null
+                                ? savedContractProviderSupplier.getResponsible().getIdUser()
+                                : null)
+                        .expenseType(savedContractProviderSupplier.getExpenseType())
+                        .dateStart(savedContractProviderSupplier.getDateStart())
+                        .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
+                        .activities(savedContractProviderSupplier.getActivities()
+                                .stream().map(Activity::getIdActivity).toList())
+                        .isActive(savedContractProviderSupplier.getIsActive())
+                        .idSupplier(savedContractProviderSupplier.getProviderSupplier() != null
+                                ? savedContractProviderSupplier.getProviderSupplier().getIdProvider()
+                                : null)
+                        .nameSupplier(savedContractProviderSupplier.getProviderSupplier() != null
+                                ? savedContractProviderSupplier.getProviderSupplier().getCorporateName()
+                                : null)
+                        .idBranch(savedContractProviderSupplier.getBranch() != null
+                                ? savedContractProviderSupplier.getBranch().getIdBranch()
+                                : null)
+                        .nameBranch(savedContractProviderSupplier.getBranch() != null
+                                ? savedContractProviderSupplier.getBranch().getName()
+                                : null)
+                        .build();
+            } else {
+                throw new ForbiddenException("Not enough permissions");
+            }
+        } else {
+            throw new ForbiddenException("Not authenticated user");
         }
-
-        // criar solicitação
-        crudItemManagement.saveProviderSolicitation(ItemManagementProviderRequestDto.builder()
-                        .solicitationType(ItemManagement.SolicitationType.CREATION)
-                        .idRequester(requester.getIdUser())
-                        .idNewProvider(newProviderSupplier.getIdProvider())
-                .build());
-
-        return ContractSupplierResponseDto.builder()
-                .idContract(savedContractProviderSupplier.getIdContract())
-                .serviceType(savedContractProviderSupplier.getServiceTypeBranch() != null
-                        ? savedContractProviderSupplier.getServiceTypeBranch().getIdServiceType()
-                        : null)
-                .serviceDuration(savedContractProviderSupplier.getServiceDuration())
-                .serviceName(savedContractProviderSupplier.getServiceName())
-                .contractReference(savedContractProviderSupplier.getContractReference())
-                .description(savedContractProviderSupplier.getDescription())
-                .idResponsible(savedContractProviderSupplier.getResponsible() != null
-                        ? savedContractProviderSupplier.getResponsible().getIdUser()
-                        : null)
-                .expenseType(savedContractProviderSupplier.getExpenseType())
-                .dateStart(savedContractProviderSupplier.getDateStart())
-                .subcontractPermission(savedContractProviderSupplier.getSubcontractPermission())
-                .activities(savedContractProviderSupplier.getActivities()
-                        .stream().map(Activity::getIdActivity).toList())
-                .isActive(savedContractProviderSupplier.getIsActive())
-                .idSupplier(savedContractProviderSupplier.getProviderSupplier() != null
-                        ? savedContractProviderSupplier.getProviderSupplier().getIdProvider()
-                        : null)
-                .nameSupplier(savedContractProviderSupplier.getProviderSupplier() != null
-                        ? savedContractProviderSupplier.getProviderSupplier().getCorporateName()
-                        : null)
-                .idBranch(savedContractProviderSupplier.getBranch() != null
-                        ? savedContractProviderSupplier.getBranch().getIdBranch()
-                        : null)
-                .nameBranch(savedContractProviderSupplier.getBranch() != null
-                        ? savedContractProviderSupplier.getBranch().getName()
-                        : null)
-                .build();
     }
 
     @Override
