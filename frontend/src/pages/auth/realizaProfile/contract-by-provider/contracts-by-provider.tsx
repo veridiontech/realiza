@@ -48,9 +48,10 @@ interface Collaborator {
   name: string;
   cboTitle: string;
   cpf: string;
-  contractType: string,
+  contractType: string;
   pis: string;
   email: string;
+  hasEntryPermission: boolean;
 }
 
 export function ContarctsByProvider() {
@@ -83,11 +84,7 @@ export function ContarctsByProvider() {
   } | null>(null);
   const [description, setDescription] = useState("");
 
-
-
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-
 
   const token = localStorage.getItem("tokenClient");
 
@@ -164,8 +161,6 @@ export function ContarctsByProvider() {
     }
   }, [selectedContractName, getAllDatas, contracts]);
 
-
-
   const handleGeneratePdf = async () => {
     const selectedContract = contracts.find(
       (contract) => contract.serviceName === selectedContractName
@@ -176,16 +171,15 @@ export function ContarctsByProvider() {
       return;
     }
 
-    // ================== ADICIONADO PARA DEBUG ==================
-    // Vamos verificar exatamente o que está sendo enviado para a API
     const requestParams = {
-        enterprise: "SUPPLIER",
-        idSearch: id.id,
+      enterprise: "SUPPLIER",
+      idSearch: id.id,
     };
 
-    console.log("Enviando requisição para /employee com os parâmetros:", requestParams);
-    // Verifique no console se o 'idSearch' possui um valor válido.
-    // ============================================================
+    console.log(
+      "Enviando requisição para /employee com os parâmetros:",
+      requestParams
+    );
 
     setIsGeneratingPdf(true);
     toast.loading("Gerando relatório de colaboradores...");
@@ -195,24 +189,31 @@ export function ContarctsByProvider() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: requestParams, // Usando os parâmetros que acabamos de logar
+        params: requestParams,
       });
-      
+
       console.log("Resposta recebida da API:", response.data);
 
-      const collaboratorsList: Collaborator[] = Array.isArray(response.data.content) 
-        ? response.data.content 
+      const collaboratorsList: Collaborator[] = Array.isArray(
+        response.data.content
+      )
+        ? response.data.content
         : [];
 
       if (collaboratorsList.length === 0) {
         toast.info("Nenhum colaborador encontrado para gerar o PDF.");
         return;
       }
-      
-      // ... (o restante da função continua igual)
 
       const doc = new jsPDF();
-      const tableColumn = ["Nome", "Cargo", "Tipo de Contrato", "CPF", "Pis", "E-mail"];
+      const tableColumn = [
+        "Nome",
+        "Cargo",
+        "Tipo de Contrato",
+        "CPF",
+        "Pis",
+        "E-mail",
+      ];
       const tableRows: (string | null)[][] = [];
 
       collaboratorsList.forEach((col) => {
@@ -243,7 +244,6 @@ export function ContarctsByProvider() {
       );
 
       toast.success("PDF gerado com sucesso!");
-
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       toast.error("Falha ao gerar o relatório de colaboradores.");
@@ -252,10 +252,6 @@ export function ContarctsByProvider() {
       toast.dismiss();
     }
   };
-
-
-
-
 
   const filteredDocuments = documents.filter(
     (doc: Document) =>
@@ -391,7 +387,6 @@ export function ContarctsByProvider() {
     });
   };
 
-  // ====================== ALTERAÇÃO 1 ======================
   const getStatusClass = (status: string) => {
     if (status === "PENDENTE") return "text-yellow-500";
     if (status === "PENDENTE_ISENCAO") return "text-yellow-500";
@@ -400,11 +395,10 @@ export function ContarctsByProvider() {
       return "text-green-600";
     if (status === "REPROVADO" || status === "REPROVADO_IA")
       return "text-red-600";
-    if (status === "VENCIDO") return "text-orange-500"; // <--- LINHA ADICIONADA
+    if (status === "VENCIDO") return "text-orange-500";
     if (status === "ISENTO") return "text-blue-500";
     return "";
   };
-  // =========================================================
 
   return (
     <div className="flex items-start gap-10 px-10 relative bottom-[4vw]">
@@ -532,7 +526,6 @@ export function ContarctsByProvider() {
                         className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4 items-center py-2 border-b border-neutral-200 last:border-b-0"
                         key={doc.id}
                       >
-                        {/* ====================== ALTERAÇÃO 2 ====================== */}
                         <div>
                           {doc.status === "EM_ANALISE" ? (
                             <div className="flex items-center gap-2">
@@ -546,7 +539,7 @@ export function ContarctsByProvider() {
                               {doc.status === "REPROVADO" ||
                               doc.status === "REPROVADO_IA" ? (
                                 <Ban className="w-4 h-4 text-red-500" />
-                              ) : doc.status === "VENCIDO" ? ( // <--- BLOCO ADICIONADO
+                              ) : doc.status === "VENCIDO" ? (
                                 <AlertCircle className="w-4 h-4 text-orange-500" />
                               ) : doc.status === "APROVADO" ||
                                 doc.status === "APROVADO_IA" ? (
@@ -567,7 +560,7 @@ export function ContarctsByProvider() {
                             </div>
                           )}
 
-                          {doc.status === "VENCIDO" && ( // <--- BLOCO ADICIONADO
+                          {doc.status === "VENCIDO" && (
                             <div className="flex items-center gap-2 mt-1">
                               <AlertCircle className="w-4 h-4 text-orange-500" />
                               <span className="text-xs font-semibold text-orange-500">
@@ -593,7 +586,7 @@ export function ContarctsByProvider() {
                             </div>
                           )}
                         </div>
-                        {/* ========================================================= */}
+
                         <div className="col-span-1">
                           <h3 className="text-[16px] font-medium">
                             {doc.title}
@@ -698,17 +691,15 @@ export function ContarctsByProvider() {
             </div>
           )}
 
-           {viewOption === "collaborators" && (
+          {viewOption === "collaborators" && (
             <div className="w-full flex flex-col h-full">
               {" "}
-              {/* Container flex para empurrar o botão para baixo */}
               <div className="flex items-center gap-2 text-[#34495E] mb-6">
                 <User />
                 <h2 className="text-[20px]">Colaboradores</h2>
               </div>
               <div className="flex-grow overflow-y-auto max-h-[50vh] pr-2">
                 {" "}
-                {/* Área de rolagem */}
                 {collaborators.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                     {collaborators.map((employee: Collaborator) => (
@@ -716,16 +707,38 @@ export function ContarctsByProvider() {
                         to={`/sistema/detailsEmployees/${employee.id}`}
                         key={employee.id}
                       >
-                        <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
-                          <div className="bg-neutral-100 p-2 rounded-full mb-2">
-                            <User className="w-6 h-6 text-neutral-500" />
+                        <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center justify-between text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
+                          <div>
+                            <div className="bg-neutral-100 p-2 rounded-full mb-2 mx-auto w-fit">
+                              <User className="w-6 h-6 text-neutral-500" />
+                            </div>
+                            <p className="text-sm font-semibold text-[#34495E] leading-tight">
+                              {employee.name}
+                            </p>
+                            <span className="text-xs text-realizaBlue font-medium mt-1">
+                              {employee.cboTitle}
+                            </span>
                           </div>
-                          <p className="text-sm font-semibold text-[#34495E] leading-tight">
-                            {employee.name}
-                          </p>
-                          <span className="text-xs text-realizaBlue font-medium mt-1">
-                            {employee.cboTitle}
-                          </span>
+
+                         
+                          <div className="mt-3 pt-2 border-t border-neutral-200 w-full">
+                            {employee.hasEntryPermission ? (
+                              <div className="flex items-center justify-center gap-2 text-green-600">
+                                <CheckCircle className="w-4 h-4" />
+                                <span className="text-xs font-semibold">
+                                  Acesso Liberado
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2 text-red-600">
+                                <Ban className="w-4 h-4" />
+                                <span className="text-xs font-semibold">
+                                  Acesso Bloqueado
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
                         </div>
                       </Link>
                     ))}
@@ -736,7 +749,6 @@ export function ContarctsByProvider() {
                   </div>
                 )}
               </div>
-              {/* Botão para gerar PDF */}
               <div className="mt-auto pt-4 flex justify-end">
                 <button
                   onClick={handleGeneratePdf}
@@ -744,9 +756,7 @@ export function ContarctsByProvider() {
                   className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center gap-2 disabled:bg-neutral-400 disabled:cursor-not-allowed"
                 >
                   <FileDown className="w-5 h-5" />
-                  {isGeneratingPdf
-                    ? "Gerando PDF..."
-                    : "Baixar Relatório PDF"}
+                  {isGeneratingPdf ? "Gerando PDF..." : "Baixar Relatório PDF"}
                 </button>
               </div>
             </div>
@@ -771,12 +781,9 @@ export function ContarctsByProvider() {
                 {isLoadingSubs ? (
                   <span className="text-neutral-400">Carregando...</span>
                 ) : subcontractors.length > 0 ? (
-                  // @ts-ignore
                   subcontractors.map((sub: any) => (
                     <div key={sub.id} className="flex flex-col gap-5">
-                      {/* ======================= ALTERAÇÃO COMEÇA AQUI ======================= */}
                       <div className="flex items-center justify-between w-full">
-                        {/* Informações do subcontratado (lado esquerdo) */}
                         <div className="flex items-center gap-5">
                           <div className="bg-neutral-400 p-2 rounded-full">
                             <User />
@@ -792,7 +799,6 @@ export function ContarctsByProvider() {
                           </div>
                         </div>
 
-                        {/* Botão para ver detalhes (lado direito) */}
                         <Link
                           to={`/sistema/subcontracts-details/${sub.idContract}`}
                         >
@@ -802,7 +808,6 @@ export function ContarctsByProvider() {
                           </button>
                         </Link>
                       </div>
-                      {/* ======================= ALTERAÇÃO TERMINA AQUI ======================= */}
                       <div className="bg-neutral-400 h-[1px]" />
                     </div>
                   ))

@@ -8,15 +8,16 @@ import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conform
 import FornecedoresTable from "@/components/BIs/BisPageComponents/FornecedoresTable";
 import { ConformityRankingTable } from "@/components/BIs/BisPageComponents/conformityRankingTable";
 import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
+import { Employees } from "@/components/BIs/BisPageComponents/employees";
 import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
 import { Suppliers } from "@/components/BIs/BisPageComponents/suppliersCard";
 import axios from "axios";
 import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type Option = { value: string; label: string };
 
@@ -25,14 +26,13 @@ type FiltersState = {
   providerIds: string[];
   documentTypes: string[];
   responsibleIds: string[];
-  activeContract: string[]; 
-  statuses: string[]; 
+  activeContract: string[];
+  statuses: string[];
   documentTitles: string[];
 };
 
-
 type RawDocumentStatus = {
-  name: string; 
+  name: string;
   status: Array<{ status: string; quantity: number }>;
 };
 type RawExemption = { name: string; quantity: number };
@@ -43,9 +43,7 @@ type RawRanking = {
   conformity: number;
   nonConformingDocumentQuantity: number;
   conformityLevel: string;
- 
 };
-
 
 function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
   const ref = useRef<T | null>(null);
@@ -137,7 +135,6 @@ function MultiSelectDropdown(props: {
   );
 }
 
-
 function buildIdNameMap(arr: Array<{ id: string | number; name?: string }>) {
   const map = new Map<string, string>();
   arr.forEach((x) => map.set(String(x.id), x.name ?? String(x.id)));
@@ -147,11 +144,10 @@ function normalize(s: unknown) {
   return String(s ?? "").toLowerCase();
 }
 function matchesAny(text: string, needles: string[]) {
-  if (!needles.length) return true; 
+  if (!needles.length) return true;
   const ntext = normalize(text);
   return needles.some((n) => ntext.includes(normalize(n)));
 }
-
 
 function filterDocumentStatus(
   raw: RawDocumentStatus[],
@@ -172,9 +168,7 @@ function filterDocumentStatus(
     ...filters.activeContract,
   ].filter(Boolean);
 
-
   let filtered = raw.filter((r) => matchesAny(r.name, nameNeedles));
-
 
   filtered = filtered
     .map((r) => ({
@@ -185,7 +179,6 @@ function filterDocumentStatus(
     }))
     .filter((r) => r.status.length > 0);
 
-
   const chartRows: ChartData[] = filtered.map((cat) => {
     const row: any = { name: cat.name };
     cat.status.forEach((s) => {
@@ -195,7 +188,6 @@ function filterDocumentStatus(
   });
   return chartRows;
 }
-
 
 function filterExemption(
   raw: RawExemption[],
@@ -217,7 +209,6 @@ function filterExemption(
   return raw.filter((r) => matchesAny(r.name, nameNeedles));
 }
 
-
 function filterRanking(
   raw: RawRanking[],
   filters: FiltersState,
@@ -227,7 +218,6 @@ function filterRanking(
     responsibleNames: string[];
   }
 ) {
-
   const providerNeedles = names.providerNames;
   const otherNeedles = [
     ...names.branchNames,
@@ -247,7 +237,6 @@ function filterRanking(
   });
 }
 
-
 export const MonittoringBis = () => {
   const [activeTab, setActiveTab] = useState("visao-geral");
   const { client } = useClient();
@@ -263,7 +252,6 @@ export const MonittoringBis = () => {
   const [statusOpts, setStatusOpts] = useState<Option[]>([]);
   const [docTitleOpts, setDocTitleOpts] = useState<Option[]>([]);
 
-
   const [branchIdName, setBranchIdName] = useState<Map<string, string>>(
     new Map()
   );
@@ -271,7 +259,6 @@ export const MonittoringBis = () => {
     new Map()
   );
   const [respIdName, setRespIdName] = useState<Map<string, string>>(new Map());
-
 
   const [draft, setDraft] = useState<FiltersState>({
     branchIds: [],
@@ -284,7 +271,6 @@ export const MonittoringBis = () => {
   });
   const [applied, setApplied] = useState<FiltersState>({ ...draft });
 
-  
   const [rawDocStatus, setRawDocStatus] = useState<RawDocumentStatus[]>([]);
   const [rawExemption, setRawExemption] = useState<RawExemption[]>([]);
   const [rawRanking, setRawRanking] = useState<RawRanking[]>([]);
@@ -293,6 +279,7 @@ export const MonittoringBis = () => {
     contractQuantity: 0,
     supplierQuantity: 0,
     allocatedEmployeeQuantity: 0,
+    employeeQuantity: 0,
   });
 
   // dados FILTRADOS que vão para os componentes
@@ -305,9 +292,9 @@ export const MonittoringBis = () => {
     contractQuantity: 0,
     supplierQuantity: 0,
     allocatedEmployeeQuantity: 0,
+    employeeQuantity: 0,
   });
 
-  
   useEffect(() => {
     if (!clientId) return;
     (async () => {
@@ -361,7 +348,6 @@ export const MonittoringBis = () => {
     })();
   }, [clientId, token]);
 
- 
   useEffect(() => {
     if (!clientId) return;
     (async () => {
@@ -386,6 +372,7 @@ export const MonittoringBis = () => {
           contractQuantity = 0,
           supplierQuantity = 0,
           allocatedEmployeeQuantity = 0,
+          employeeQuantity = 0,
         } = data ?? {};
 
         setRawDocStatus(documentStatus);
@@ -395,6 +382,7 @@ export const MonittoringBis = () => {
           contractQuantity,
           supplierQuantity,
           allocatedEmployeeQuantity,
+          employeeQuantity,
         });
 
         // primeira render sem filtro
@@ -422,6 +410,7 @@ export const MonittoringBis = () => {
           contractQuantity,
           supplierQuantity,
           allocatedEmployeeQuantity,
+          employeeQuantity,
         });
       } catch (e) {
         console.error("Erro ao carregar /general", e);
@@ -431,6 +420,7 @@ export const MonittoringBis = () => {
 
   const conformity = tableData.length > 0 ? tableData[0]?.conformity : 0;
 
+  const adherence = tableData.length > 0 ? tableData[0]?.adherence : 0;
 
   function applyFilters() {
     setApplied({ ...draft });
@@ -461,7 +451,7 @@ export const MonittoringBis = () => {
       (id) => respIdName.get(id) ?? id
     );
 
-    // documentStatus 
+    // documentStatus
     const docStatusChart = filterDocumentStatus(rawDocStatus, applied, {
       branchNames,
       providerNames,
@@ -495,13 +485,13 @@ export const MonittoringBis = () => {
       }))
     );
 
-    
     const supplierCount = new Set(rankingFiltered.map((r) => r.corporateName))
       .size;
     setStats({
-      contractQuantity: rawCounts.contractQuantity, 
-      supplierQuantity: supplierCount, 
-      allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity, 
+      contractQuantity: rawCounts.contractQuantity,
+      supplierQuantity: supplierCount,
+      allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity,
+      employeeQuantity: rawCounts.employeeQuantity,
     });
   }, [
     applied,
@@ -519,16 +509,158 @@ export const MonittoringBis = () => {
     [draft, applied]
   );
 
-  /* PDF */
+  // Versão com filtro e tipagem explícita
   const generatePDF = () => {
-    const content = document.getElementById("contentToCapture");
-    if (!content) return;
-    html2canvas(content).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
+    try {
       const doc = new jsPDF();
-      doc.addImage(imgData, "PNG", 10, 10, 180, 160);
-      doc.save("graficos_completos.pdf");
-    });
+
+      const clientName = client?.corporateName || "Cliente não informado";
+      const selectedBranchNames =
+        draft.branchIds.length > 0
+          ? draft.branchIds.map((id) => branchIdName.get(id) || id).join(", ")
+          : "Todas as filiais";
+
+      // Cabeçalho Principal do PDF
+      doc.setFontSize(18);
+      doc.text("Relatório Geral de Monitoramento", 14, 22);
+      doc.setFontSize(11);
+      doc.text(`Cliente: ${clientName}`, 14, 30);
+      doc.text(`Filial(is): ${selectedBranchNames}`, 14, 36);
+
+      const titleStyle = {
+        fontStyle: "bold",
+        fontSize: 14,
+        cellPadding: { top: 10, bottom: 5 },
+        halign: "left",
+      };
+      const headerStyleGreen = {
+        fillColor: [22, 160, 133],
+        textColor: 255,
+        fontStyle: "bold",
+      };
+      const headerStyleBlue = {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: "bold",
+      };
+      const headerStyleOrange = {
+        fillColor: [243, 156, 18],
+        textColor: 255,
+        fontStyle: "bold",
+      };
+      const headerStyleRed = {
+        fillColor: [192, 57, 43],
+        textColor: 255,
+        fontStyle: "bold",
+      };
+
+      const allRows: any[] = [];
+
+      // --- Seção 1: Resumo Geral ---
+      if (rawCounts) {
+        allRows.push([
+          { content: "Resumo Geral", colSpan: 6, styles: titleStyle },
+        ]);
+        allRows.push([
+          { content: "Métrica", styles: headerStyleGreen },
+          { content: "Quantidade", styles: headerStyleGreen },
+        ]);
+        allRows.push(["Fornecedores", rawCounts.supplierQuantity]);
+        allRows.push(["Contratos", rawCounts.contractQuantity]);
+        allRows.push([
+          "Colaboradores",
+          rawCounts.employeeQuantity,
+        ]);
+        allRows.push([
+          "Funcionários Alocados",
+          rawCounts.allocatedEmployeeQuantity,
+        ]);
+      }
+
+      // --- Seção 2: Status dos Documentos ---
+      // A MUDANÇA ESTÁ AQUI: Adicionamos o tipo 'any[]' para a variável statusRows.
+      const statusRows: any[] = [];
+      rawDocStatus.forEach((doc) => {
+        doc.status.forEach((s) => {
+          if (s.quantity > 0) {
+            statusRows.push([doc.name, s.status, s.quantity]);
+          }
+        });
+      });
+
+      if (statusRows.length > 0) {
+        allRows.push([
+          { content: "Status dos Documentos", colSpan: 6, styles: titleStyle },
+        ]);
+        allRows.push([
+          { content: "Tipo de Documento", styles: headerStyleBlue },
+          { content: "Status", styles: headerStyleBlue },
+          { content: "Quantidade", styles: headerStyleBlue },
+        ]);
+        allRows.push(...statusRows);
+      }
+
+      // --- Seção 3: Isenção de Documentos ---
+      if (rawExemption.length > 0) {
+        allRows.push([
+          { content: "Isenção de Documentos", colSpan: 6, styles: titleStyle },
+        ]);
+        allRows.push([
+          { content: "Nome", styles: headerStyleOrange },
+          { content: "Quantidade", styles: headerStyleOrange },
+        ]);
+        rawExemption.forEach((item) => {
+          allRows.push([item.name, item.quantity]);
+        });
+      }
+
+      // --- Seção 4: Ranking de Pendências ---
+      if (rawRanking.length > 0) {
+        allRows.push([
+          { content: "Ranking de Pendências", colSpan: 6, styles: titleStyle },
+        ]);
+        allRows.push([
+          { content: "Razão Social", styles: headerStyleRed },
+          { content: "CNPJ", styles: headerStyleRed },
+          { content: "Aderência", styles: headerStyleRed },
+          { content: "Conformidade", styles: headerStyleRed },
+          { content: "Docs Não Conformes", styles: headerStyleRed },
+          { content: "Nível", styles: headerStyleRed },
+        ]);
+        rawRanking.forEach((item) => {
+          allRows.push([
+            item.corporateName,
+            item.cnpj,
+            `${item.adherence.toFixed(2)}%`,
+            `${item.conformity.toFixed(2)}%`,
+            item.nonConformingDocumentQuantity,
+            item.conformityLevel,
+          ]);
+        });
+      }
+
+      // --- A ÚNICA CHAMADA AUTOTABLE ---
+      autoTable(doc, {
+        startY: 45,
+        body: allRows,
+        theme: "grid",
+        columnStyles: {
+          0: { cellWidth: 45 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: "auto" },
+          3: { cellWidth: "auto" },
+          4: { cellWidth: 25 },
+          5: { cellWidth: "auto" },
+        },
+      });
+
+      doc.save("relatorio_geral.pdf");
+    } catch (error) {
+      console.error("ERRO CRÍTICO ao gerar PDF:", error);
+      alert(
+        "Ocorreu um erro inesperado ao gerar o relatório. Verifique o console para mais detalhes."
+      );
+    }
   };
 
   return (
@@ -539,104 +671,143 @@ export const MonittoringBis = () => {
         id="contentToCapture"
       >
         {/* Tabs */}
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={() => setActiveTab("visao-geral")}
-            className={`px-4 py-2 rounded-t-md ${activeTab === "visao-geral" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-          >
-            Visão Geral
-          </button>
-          <button
-            onClick={() => setActiveTab("fornecedores")}
-            className={`px-4 py-2 rounded-t-md ${activeTab === "fornecedores" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-          >
-            Fornecedores
-          </button>
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            <button
+              onClick={() => setActiveTab("visao-geral")}
+              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                activeTab === "visao-geral"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              Visão Geral
+            </button>
+            <button
+              onClick={() => setActiveTab("fornecedores")}
+              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                activeTab === "fornecedores"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              Fornecedores
+            </button>
+          </nav>
         </div>
 
-   
         {activeTab === "visao-geral" && (
           <div>
-          
-            <div className="flex flex-wrap gap-3">
-              <MultiSelectDropdown
-                label="Unidades"
-                options={branchOpts}
-                values={draft.branchIds}
-                onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Fornecedores"
-                options={providerOpts}
-                values={draft.providerIds}
-                onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Tipo de Documento"
-                options={docTypeOpts}
-                values={draft.documentTypes}
-                onChange={(v) => setDraft((s) => ({ ...s, documentTypes: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Responsáveis"
-                options={respOpts}
-                values={draft.responsibleIds}
-                onChange={(v) => setDraft((s) => ({ ...s, responsibleIds: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Status do Contrato"
-                options={contractStatusOpts}
-                values={draft.activeContract}
-                onChange={(v) => setDraft((s) => ({ ...s, activeContract: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Status"
-                options={statusOpts}
-                values={draft.statuses}
-                onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Títulos de Documento"
-                options={docTitleOpts}
-                values={draft.documentTitles}
-                onChange={(v) => setDraft((s) => ({ ...s, documentTitles: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
 
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setApplied({ ...draft })}
-                  disabled={!canApply}
-                  className={`px-4 py-2 rounded-md text-white ${canApply ? "bg-blue-600" : "bg-blue-300 cursor-not-allowed"}`}
-                >
-                  Aplicar
-                </button>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                <MultiSelectDropdown
+                  label="Unidades"
+                  options={branchOpts}
+                  values={draft.branchIds}
+                  onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
+                />
+                <MultiSelectDropdown
+                  label="Fornecedores"
+                  options={providerOpts}
+                  values={draft.providerIds}
+                  onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
+                />
+                <MultiSelectDropdown
+                  label="Tipo de Documento"
+                  options={docTypeOpts}
+                  values={draft.documentTypes}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTypes: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Responsáveis"
+                  options={respOpts}
+                  values={draft.responsibleIds}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, responsibleIds: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Status do Contrato"
+                  options={contractStatusOpts}
+                  values={draft.activeContract}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, activeContract: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Status"
+                  options={statusOpts}
+                  values={draft.statuses}
+                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
+                />
+                <MultiSelectDropdown
+                  label="Títulos de Documento"
+                  options={docTitleOpts}
+                  values={draft.documentTitles}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTitles: v }))
+                  }
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="px-4 py-2 bg-gray-100 border rounded-md"
+                  className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 >
                   Limpar
+                </button>
+                <button
+                  type="button"
+                  onClick={applyFilters}
+                  disabled={!canApply}
+                  className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm ${
+                    canApply
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "cursor-not-allowed bg-blue-300"
+                  }`}
+                >
+                  Aplicar Filtros
                 </button>
               </div>
             </div>
 
-       
-            <div className="mt-2 flex min-w-[800px]">
-              <ActiveContracts count={stats.contractQuantity ?? 0} />
-              <Suppliers count={stats.supplierQuantity ?? 0} />
-              <AllocatedEmployees
-                count={stats.allocatedEmployeeQuantity ?? 0}
-              />
-              <div className="h-[30vh] w-[30vw] rounded-lg border bg-white p-5 shadow-sm">
+            <div className="grid grid-cols-1 py-5 gap-6 md:grid-cols-2">
+              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
                 <ConformityGaugeChart percentage={conformity} />
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
+                <ConformityGaugeChart
+                  title="Aderência"
+                  percentage={adherence}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-4">
+              <div className="rounded-lg py-6 flex justify-center">
+                <ActiveContracts count={stats.contractQuantity ?? 0} />
+              </div>
+
+              <div className="rounded-lg py-6 flex justify-center">
+                <Suppliers count={stats.supplierQuantity ?? 0} />
+              </div>
+
+              <div className="rounded-lg py-6 flex justify-center">
+                <Employees
+                  count={stats.employeeQuantity ?? 0}
+                />
+              </div>
+              <div className="rounded-lg py-6 flex justify-center">
+                <AllocatedEmployees
+                  count={stats.allocatedEmployeeQuantity ?? 0}
+                />
               </div>
             </div>
 
@@ -644,11 +815,12 @@ export const MonittoringBis = () => {
               <StatusDocumentChart data={chartData} />
             </div>
             <div className="overflow-x-auto mt-10">
-              <div className="flex flex-col md:flex-row gap-6 md:gap-8 min-w-[320px] md:min-w-full">
-                <div className="flex-shrink-0 w-full md:w-[400px]">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                <div className="w-full md:w-2/5">
                   <ExemptionPendingChart data={documentExemptionData} />
                 </div>
-                <div className="flex-grow min-w-[320px] overflow-x-auto">
+
+                <div className="w-full md:w-3/5">
                   <ConformityRankingTable data={tableData} />
                 </div>
               </div>
@@ -658,74 +830,88 @@ export const MonittoringBis = () => {
               onClick={generatePDF}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
             >
-              Gerar PDF com Gráficos
+              Gerar Relatório em PDF
             </button>
           </div>
         )}
 
         {activeTab === "fornecedores" && (
           <div>
-    
-            <div className="mt-2 flex flex-wrap gap-3">
-              <MultiSelectDropdown
-                label="Unidades"
-                options={branchOpts}
-                values={draft.branchIds}
-                onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Fornecedores"
-                options={providerOpts}
-                values={draft.providerIds}
-                onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Tipo de Documento"
-                options={docTypeOpts}
-                values={draft.documentTypes}
-                onChange={(v) => setDraft((s) => ({ ...s, documentTypes: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Responsáveis"
-                options={respOpts}
-                values={draft.responsibleIds}
-                onChange={(v) => setDraft((s) => ({ ...s, responsibleIds: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Status"
-                options={statusOpts}
-                values={draft.statuses}
-                onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
-              <MultiSelectDropdown
-                label="Títulos de Documento"
-                options={docTitleOpts}
-                values={draft.documentTitles}
-                onChange={(v) => setDraft((s) => ({ ...s, documentTitles: v }))}
-                className="w-full md:w-1/2 lg:w-1/4"
-              />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
 
-   
-              <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                <MultiSelectDropdown
+                  label="Unidades"
+                  options={branchOpts}
+                  values={draft.branchIds}
+                  onChange={(v) => setDraft((s) => ({ ...s, branchIds: v }))}
+                />
+                <MultiSelectDropdown
+                  label="Fornecedores"
+                  options={providerOpts}
+                  values={draft.providerIds}
+                  onChange={(v) => setDraft((s) => ({ ...s, providerIds: v }))}
+                />
+                <MultiSelectDropdown
+                  label="Tipo de Documento"
+                  options={docTypeOpts}
+                  values={draft.documentTypes}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTypes: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Responsáveis"
+                  options={respOpts}
+                  values={draft.responsibleIds}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, responsibleIds: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Status do Contrato"
+                  options={contractStatusOpts}
+                  values={draft.activeContract}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, activeContract: v }))
+                  }
+                />
+                <MultiSelectDropdown
+                  label="Status"
+                  options={statusOpts}
+                  values={draft.statuses}
+                  onChange={(v) => setDraft((s) => ({ ...s, statuses: v }))}
+                />
+                <MultiSelectDropdown
+                  label="Títulos de Documento"
+                  options={docTitleOpts}
+                  values={draft.documentTitles}
+                  onChange={(v) =>
+                    setDraft((s) => ({ ...s, documentTitles: v }))
+                  }
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  Limpar
+                </button>
                 <button
                   type="button"
                   onClick={applyFilters}
                   disabled={!canApply}
-                  className={`px-4 py-2 rounded-md text-white ${canApply ? "bg-blue-600" : "bg-blue-300 cursor-not-allowed"}`}
+                  className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm ${
+                    canApply
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "cursor-not-allowed bg-blue-300"
+                  }`}
                 >
-                  Aplicar
-                </button>
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="px-4 py-2 bg-gray-100 border rounded-md"
-                >
-                  Limpar
+                  Aplicar Filtros
                 </button>
               </div>
             </div>

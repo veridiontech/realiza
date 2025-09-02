@@ -52,7 +52,7 @@ export function ExemptionPendingChart({ data }: any) {
   };
 
   return (
-    <Card className="relative w-[400px] ml-auto shadow-lg rounded-md border border-gray-100">
+    <Card className="relative w-full shadow-lg rounded-md border border-gray-100">
       {/* Botão no canto superior direito */}
       <button
         onClick={exportToExcel}
