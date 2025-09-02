@@ -12,5 +12,5 @@ public interface UserClientRepository extends JpaRepository<UserClient, String> 
     Page<UserClient> findAllByIsActiveIsTrue(Pageable pageable);
     Page<UserClient> findAllByBranch_IdBranchAndRoleAndIsActiveIsTrue(String idSearch, User.Role role, Pageable pageable);
     Page<UserClient> findAllByBranch_IdBranchAndRole(String idSearch, User.Role role, Pageable pageable);
-    List<UserClient> findAllByBranch_IdBranchAndRoleAndProfile_ManagerIsTrue(String idSearch, User.Role role);
+    List<UserClient> findAllByBranch_IdBranchAndRoleAndProfile_AdminIsTrue(String idSearch, User.Role role);
 }

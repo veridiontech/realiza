@@ -45,6 +45,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,7 +61,6 @@ public class CrudBranchImpl implements CrudBranch {
 
     private final BranchRepository branchRepository;
     private final ClientRepository clientRepository;
-    private final CenterRepository centerRepository;
     private final AuditLogService auditLogServiceImpl;
     private final UserRepository userRepository;
     private final SetupQueueProducer setupQueueProducer;
@@ -67,24 +68,15 @@ public class CrudBranchImpl implements CrudBranch {
     private final ActivityRepository activityRepository;
     private final ServiceTypeBranchRepository serviceTypeBranchRepository;
     private final JwtService jwtService;
-    private final ActivityRepoRepository activityRepoRepository;
     private final CrudActivityImpl crudActivity;
     private final CrudServiceTypeImpl crudServiceTypeImpl;
     private final DocumentMatrixRepository documentMatrixRepository;
 
+    @Transactional
     @Override
     public BranchResponseDto save(BranchCreateRequestDto branchCreateRequestDto) {
-        List<Center> center = List.of();
-        Client client = null;
-
-        if (branchCreateRequestDto.getClient() != null && !branchCreateRequestDto.getClient().isEmpty()) {
-            client = clientRepository.findById(branchCreateRequestDto.getClient())
-                        .orElseThrow(() -> new NotFoundException("Client not found"));
-        }
-
-        if (branchCreateRequestDto.getCenter() != null && !branchCreateRequestDto.getCenter().isEmpty()) {
-            center = centerRepository.findAllById(branchCreateRequestDto.getCenter());
-        }
+        Client client = clientRepository.findById(branchCreateRequestDto.getClient())
+                .orElseThrow(() -> new NotFoundException("Client not found while creating branch"));
 
         Branch savedBranch = branchRepository.save(Branch.builder()
                 .name(branchCreateRequestDto.getName())
@@ -100,44 +92,43 @@ public class CrudBranchImpl implements CrudBranch {
                         ? branchCreateRequestDto.getBase()
                         : false)
                 .client(client)
-                .center(center)
                 .build());
 
-        if (branchCreateRequestDto.getReplicateFromBase() == null) {
-            branchCreateRequestDto.setReplicateFromBase(false);
+        Boolean replicateFromBase = branchCreateRequestDto.getReplicateFromBase();
+        if (replicateFromBase == null) {
+            replicateFromBase = false;
         }
 
-        if (branchCreateRequestDto.getReplicateFromBase()) {
-            setupQueueProducer.send(SetupMessage.builder()
+        final Boolean finalReplicateFromBase = replicateFromBase;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                if (finalReplicateFromBase) {
+                    setupQueueProducer.send(SetupMessage.builder()
                             .type("REPLICATE_BRANCH")
                             .branchId(savedBranch.getIdBranch())
-                    .build());
-        } else {
-            if (!branchCreateRequestDto.getBase()) {
-                List<ActivityRepo> activityRepos = new ArrayList<>();
-                if (branchCreateRequestDto.getActivityIds() != null && !branchCreateRequestDto.getActivityIds().isEmpty()) {
-                    activityRepos = activityRepoRepository.findAllById(branchCreateRequestDto.getActivityIds());
+                            .build());
+                } else {
+                    setupQueueProducer.send(SetupMessage.builder()
+                            .type("NEW_BRANCH")
+                            .branchId(savedBranch.getIdBranch())
+                            .build());
                 }
-                setupQueueProducer.send(SetupMessage.builder()
-                                .type("NEW_BRANCH")
-                                .branchId(savedBranch.getIdBranch())
-                                .activityIds(activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList()))
-                        .build());
-            }
-        }
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
-                    userResponsible -> auditLogServiceImpl.createAuditLog(
-                        savedBranch.getIdBranch(),
-                        BRANCH,
-                        userResponsible.getFullName() + " criou filial "
-                                + savedBranch.getName(),
-                        null,
-                        null,
-                        CREATE,
-                        userResponsible.getIdUser()));
-        }
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    userRepository.findById(JwtService.getAuthenticatedUserId()).ifPresent(
+                            userResponsible -> auditLogServiceImpl.createAuditLog(
+                                    savedBranch.getIdBranch(),
+                                    BRANCH,
+                                    userResponsible.getFullName() + " criou filial "
+                                            + savedBranch.getName(),
+                                    null,
+                                    null,
+                                    CREATE,
+                                    userResponsible.getIdUser()));
+                }
+            }
+        });
 
         return BranchResponseDto.builder()
                 .idBranch(savedBranch.getIdBranch())
@@ -150,14 +141,9 @@ public class CrudBranchImpl implements CrudBranch {
                 .telephone(savedBranch.getTelephone())
                 .address(savedBranch.getAddress())
                 .number(savedBranch.getNumber())
-                .client(savedBranch.getClient() != null ? savedBranch.getClient().getIdClient() : null)
-                .center(!savedBranch.getCenter().isEmpty() ? savedBranch.getCenter().stream().map(
-                        center1 -> CenterResponseDto.builder()
-                                .idCenter(center1.getIdCenter())
-                                .name(center1.getName())
-                                .idMarket(center1.getMarket().getIdMarket())
-                                .build()
-                ).toList() : null)
+                .client(savedBranch.getClient() != null
+                        ? savedBranch.getClient().getIdClient()
+                        : null)
                 .build();
     }
 

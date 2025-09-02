@@ -1,6 +1,5 @@
 import { useClient } from "@/context/Client-Provider";
 import { EditModalEnterprise } from "../../realizaProfile/profileEnterprise/edit-modal-enterprise";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -10,24 +9,43 @@ import { useBranch } from "@/context/Branch-provider";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-provider";
 import { BranchResume } from "./branch-resume";
-import { TableResume } from "./table-resume";
 import { ConformityGaugeChart } from "@/components/BIs/BisPageComponents/conformityChart";
 
+// Cards
+import { ActiveContracts } from "@/components/BIs/BisPageComponents/activeContracts";
+import { Employees } from "@/components/BIs/BisPageComponents/employees";
+import { Suppliers } from "@/components/BIs/BisPageComponents/suppliersCard";
+import { AllocatedEmployees } from "@/components/BIs/BisPageComponents/AllocatedEmployees";
+
 export function HomeClient() {
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const { user } = useUser();
   const { selectedBranch } = useBranch();
   const { client } = useClient();
-  const [selectTab, setSelectedTab] = useState("filiais");
-  const [branches, setBranches] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredBranches, setFilteredBranches] = useState([]);
 
-    console.log("a", selectedBranch);
+  const [selectTab, setSelectedTab] = useState<"filiais" | "usuarios">("filiais");
+  const [branches, setBranches] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredBranches, setFilteredBranches] = useState<any[]>([]);
+
+  const [homeData, setHomeData] = useState<{
+    activeContractQuantity: number;
+    activeEmployeeQuantity: number;
+    activeSupplierQuantity: number;
+    allocatedEmployeeQuantity: number;
+    conformity: number;
+  }>({
+    activeContractQuantity: 0,
+    activeEmployeeQuantity: 0,
+    activeSupplierQuantity: 0,
+    allocatedEmployeeQuantity: 0,
+    conformity: 0,
+  });
+
+  const [loadingCards, setLoadingCards] = useState(false);
 
   const firstLetter = client?.tradeName?.charAt(0) || "";
   const lastLetter = client?.tradeName?.slice(-1) || "";
-
   const firstLetterBranch = selectedBranch?.name?.charAt(0) || "";
   const lastLetterBranch = selectedBranch?.name?.slice(-1) || "";
 
@@ -36,9 +54,7 @@ export function HomeClient() {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const response = await axios.get(
         `${ip}/branch/filtered-client?idSearch=${client?.idClient}`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
+        { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
       );
       const { content } = response.data;
       setBranches(content);
@@ -53,8 +69,7 @@ export function HomeClient() {
     setSearchTerm(term);
     const filtered = branches.filter(
       (branch: any) =>
-        branch.name.toLowerCase().includes(searchTerm) ||
-        branch.cnpj.includes(term)
+        branch.name.toLowerCase().includes(term) || branch.cnpj.includes(term)
     );
     setFilteredBranches(filtered);
   };
@@ -65,12 +80,8 @@ export function HomeClient() {
       const tokenFromStorage = localStorage.getItem("tokenClient");
       const res = await axios.get(
         `${ip}/employee?idSearch=${selectedBranch?.idBranch}&enterprise=CLIENT`,
-        {
-          headers: { Authorization: `Bearer ${tokenFromStorage}` },
-        }
+        { headers: { Authorization: `Bearer ${tokenFromStorage}` } }
       );
-      console.log(res.data.content);
-
       setEmployees(res.data.content);
     } catch (error) {
       console.log("Erro ao buscar colaboradores:", error);
@@ -78,17 +89,61 @@ export function HomeClient() {
   };
 
   useEffect(() => {
-    if (selectedBranch?.idBranch) {
-      getEmployee();
-    }
+    const fetchHomeNumbers = async () => {
+      if (!selectedBranch?.idBranch) {
+        setHomeData({
+          activeContractQuantity: 0,
+          activeEmployeeQuantity: 0,
+          activeSupplierQuantity: 0,
+          allocatedEmployeeQuantity: 0,
+          conformity: 0,
+        });
+        return;
+      }
+      try {
+        setLoadingCards(true);
+        const token = localStorage.getItem("tokenClient");
+        const { data } = await axios.get(
+          `${ip}/dashboard/home/${selectedBranch.idBranch}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const raw = Number(data?.conformity ?? 0);
+        const conformity = isFinite(raw) ? (raw <= 1 ? raw * 100 : raw) : 0;
+
+        setHomeData({
+          activeContractQuantity: Number(data?.activeContractQuantity) || 0,
+          activeEmployeeQuantity: Number(data?.activeEmployeeQuantity) || 0,
+          activeSupplierQuantity: Number(data?.activeSupplierQuantity) || 0,
+          allocatedEmployeeQuantity:
+            Number(data?.allocatedEmployeeQuantity) || 0,
+          conformity,
+        });
+      } catch (e) {
+        console.error("Erro ao buscar dados do dashboard/home:", e);
+        setHomeData({
+          activeContractQuantity: 0,
+          activeEmployeeQuantity: 0,
+          activeSupplierQuantity: 0,
+          allocatedEmployeeQuantity: 0,
+          conformity: 0,
+        });
+      } finally {
+        setLoadingCards(false);
+      }
+    };
+
+    fetchHomeNumbers();
   }, [selectedBranch?.idBranch]);
 
   useEffect(() => {
-    if (client?.idClient) {
-      fetchBranches();
-    }
+    if (selectedBranch?.idBranch) getEmployee();
+  }, [selectedBranch?.idBranch]);
+
+  useEffect(() => {
+    if (client?.idClient) fetchBranches();
   }, [selectedBranch?.idBranch, client?.idClient]);
 
+  // ====== VISÃO DE GESTOR DE FILIAL ======
   if (user?.role === "ROLE_CLIENT_MANAGER") {
     return (
       <div>
@@ -100,148 +155,139 @@ export function HomeClient() {
           email={selectedBranch?.email}
           name={selectedBranch?.name}
         />
+
         <div className="flex items-center justify-center px-[20vw] gap-5">
-          <TableResume idBranch={selectedBranch?.idBranch}/>
-          <ConformityGaugeChart />
+          <ActiveContracts count={homeData.activeContractQuantity} />
+          <Employees count={homeData.activeEmployeeQuantity} />
+          <Suppliers count={homeData.activeSupplierQuantity} />
+          <AllocatedEmployees count={homeData.allocatedEmployeeQuantity} />
+          <ConformityGaugeChart
+            percentage={homeData.conformity}
+            loading={loadingCards}
+          />
+        </div>
+
+        <div className="mt-5 w-full text-right px-[10vw]">
+          <Link to={`/cliente/dashboard-details/${user?.idUser}`}>
+            <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
+              Ver mais
+            </Button>
+          </Link>
         </div>
       </div>
     );
   }
 
+  // ====== VISÃO INICIAL DO CLIENTE ======
   return (
-    <div className="flex flex-col items-center justify-center gap-5 p-10">
-      <div className="flex gap-4">
-        <div className="flex w-[50vw] items-start justify-between rounded-lg border bg-white p-10 shadow-lg">
-          <div className="flex gap-3">
-            <div className="bg-realizaBlue flex h-[16vh] w-[8vw] items-center justify-center rounded-full p-7">
-              <div className="text-[40px] text-white">
-                {firstLetter}
-                {lastLetter}
-              </div>
-            </div>
-            <div className="flex flex-col gap-10">
-              <div className="flex flex-col items-start gap-3">
-                <div className="text-realizaBlue text-[30px] font-medium">
-                  {client ? (
-                    <h2>{client?.tradeName}</h2>
-                  ) : (
-                    <Skeleton className="h-[1.5vh] w-[15vw] rounded-full bg-gray-600" />
-                  )}
-                </div>
-                <div className="ml-1 text-sky-900">
-                  {client ? (
-                    <h3>{client?.corporateName}</h3>
-                  ) : (
-                    <Skeleton className="h-[1.5vh] w-[8vw] rounded-full bg-gray-600" />
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 text-[13px] text-sky-900">
-                <div>
-                  {client ? (
-                    <p>{client?.email}</p>
-                  ) : (
-                    <Skeleton className="h-[0.8vh] w-[7vw] rounded-full bg-gray-600" />
-                  )}
-                </div>
-                <div>
-                  {client ? (
-                    <p>{client?.cnpj}</p>
-                  ) : (
-                    <Skeleton className="h-[0.6vh] w-[5vw] rounded-full bg-gray-600" />
-                  )}
-                </div>
-              </div>
-            </div>
+    <div className="flex flex-col items-center p-10">
+      {/* Header */}
+      <div className="flex w-full justify-between items-center mb-8 px-10">
+        <div className="flex items-center gap-4">
+          <div className="bg-realizaBlue flex h-16 w-16 items-center justify-center rounded-full text-white text-3xl font-bold">
+            {firstLetter}
+            {lastLetter}
+          </div>
+          <div className="flex flex-col">
+            <h2 className="text-realizaBlue text-2xl font-medium">
+              {client?.tradeName}
+            </h2>
+            <h3 className="text-sky-900 text-sm">{client?.corporateName}</h3>
           </div>
         </div>
         <EditModalEnterprise />
       </div>
-      <div className="mr-10 rounded-lg border bg-white p-8 shadow-lg">
-        <div className="flex flex-col items-start gap-4">
-          <div className="">
-            <nav className="flex items-center">
-              <Button
-                variant={"ghost"}
-                className={`bg-realizaBlue px-4 py-2 transition-all duration-300 ${
-                  selectTab === "filiais"
-                    ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                    : "text-realizaBlue bg-white"
+
+      {/* ====== (1) TABELA AGORA VEM PRIMEIRO ====== */}
+      <div className="w-full max-w-6xl rounded-lg border bg-white p-8 shadow-lg">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex gap-2">
+            <Button
+              variant={"ghost"}
+              className={`px-4 ${selectTab === "filiais"
+                  ? "bg-realizaBlue text-white"
+                  : "text-realizaBlue"
                 }`}
-                onClick={() => setSelectedTab("filiais")}
-              >
-                Filiais
-              </Button>
-              <Button
-                variant={"ghost"}
-                className={`bg-realizaBlue px-4 py-2 transition-all duration-300${
-                  selectTab === "usuarios"
-                    ? "bg-realizaBlue scale-110 font-bold text-white shadow-lg"
-                    : "text-realizaBlue bg-white"
+              onClick={() => setSelectedTab("filiais")}
+            >
+              Fornecedores
+            </Button>
+            <Button
+              variant={"ghost"}
+              className={`px-4 ${selectTab === "usuarios"
+                  ? "bg-realizaBlue text-white"
+                  : "text-realizaBlue"
                 }`}
-                onClick={() => setSelectedTab("usuarios")}
-              >
-                Usuários
-              </Button>
-            </nav>
+              onClick={() => setSelectedTab("usuarios")}
+            >
+              Usuários
+            </Button>
           </div>
+
           {selectTab === "filiais" && (
-            <div>
-              <div className="flex items-center gap-5">
-                <div className="text-sm font-semibold text-sky-900">
-                  Buscar Filial:
-                </div>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  placeholder="Pesquisar filiais"
-                  className="w-64 rounded-md border p-2"
-                />
-              </div>
-              <div className="mt-4">
-                <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
-                  <thead>
-                    <tr>
-                      <th className="border border-gray-300 px-4 py-2 text-start">
-                        Filiais
-                      </th>
-                      <th className="border">CNPJ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBranches && filteredBranches.length > 0 ? (
-                      filteredBranches.map((branch: any) => (
-                        <tr key={branch.idBranch}>
-                          <td className="border border-gray-300 px-4 py-2">
-                            <li className="text-realizaBlue">{branch.name}</li>
-                          </td>
-                          <td className="text-center">{branch.cnpj}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={3}
-                          className="border border-gray-300 px-4 py-2 text-center"
-                        >
-                          Nenhuma filial encontrada
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearch}
+              placeholder="Pesquisar filiais"
+              className="w-64 rounded-md border px-3 py-2 text-sm"
+            />
           )}
-          {selectTab === "usuarios" && (
-            <div>
-              <table className="mt-4 w-[40vw] border-collapse border border-gray-300">
+        </div>
+
+        <div className="mt-6">
+          {selectTab === "filiais" ? (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr>
-                    <th className="border border-gray-300 px-4 py-2">Nome</th>
-                    <th className="border border-gray-300 px-4 py-2">Status</th>
-                    <th className="border border-gray-300 px-4 py-2">Ações</th>
+                    <th className="border border-gray-300 px-4 py-2 text-start">
+                      Filiais
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-start">
+                      CNPJ
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBranches && filteredBranches.length > 0 ? (
+                    filteredBranches.map((branch: any) => (
+                      <tr key={branch.idBranch}>
+                        <td className="border border-gray-300 px-4 py-2 text-realizaBlue">
+                          {branch.name}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2">
+                          {branch.cnpj}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={2}
+                        className="border border-gray-300 px-4 py-6 text-center text-gray-500"
+                      >
+                        Nenhuma filial encontrada
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2 text-start">
+                      Nome
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-start">
+                      Status
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-start">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -255,8 +301,8 @@ export function HomeClient() {
                           <span
                             className={
                               employee.situation === "Ativo"
-                                ? "text-green-500"
-                                : "text-red-500"
+                                ? "text-green-600"
+                                : "text-red-600"
                             }
                           >
                             {employee.situation}
@@ -265,10 +311,10 @@ export function HomeClient() {
                         <td className="border border-gray-300 px-4 py-2">
                           <Link
                             to={`/sistema/detailsEmployees/${employee.idEmployee}`}
+                            className="text-realizaBlue hover:underline inline-flex items-center gap-1"
                           >
-                            <button className="text-realizaBlue ml-4 hover:underline">
-                              <Settings2 />
-                            </button>
+                            <Settings2 size={16} />
+                            Abrir
                           </Link>
                         </td>
                       </tr>
@@ -277,7 +323,7 @@ export function HomeClient() {
                     <tr>
                       <td
                         colSpan={3}
-                        className="border border-gray-300 px-4 py-2 text-center"
+                        className="border border-gray-300 px-4 py-6 text-center text-gray-500"
                       >
                         Nenhum colaborador encontrado
                       </td>
@@ -288,6 +334,31 @@ export function HomeClient() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ===== NOVO CONTAINER DOS CARDS E GRAFICO ===== */}
+      <div className="mt-8 flex w-full max-w-6xl flex-col items-center justify-between gap-8 md:flex-row">
+        <div className="flex w-full flex-wrap justify-end gap-6 md:w-3/4">
+          <ActiveContracts count={homeData.activeContractQuantity} />
+          <Employees count={homeData.activeEmployeeQuantity} />
+          <Suppliers count={homeData.activeSupplierQuantity} />
+          <AllocatedEmployees count={homeData.allocatedEmployeeQuantity} />
+        </div>
+        <div className="flex w-full items-center justify-center rounded-lg border bg-white p-5 shadow-sm md:w-1/4">
+          <ConformityGaugeChart
+            percentage={homeData.conformity}
+            loading={loadingCards}
+          />
+        </div>
+      </div>
+
+      {/* Botão "Ver mais" */}
+      <div className="mt-5 w-full max-w-6xl text-right">
+        <Link to={`/sistema/dashboard-details/${user?.idUser}`}>
+          <Button className="hover:bg-realizaBlue dark:bg-primary bg-realizaBlue dark:text-white dark:hover:bg-blue-950">
+            Ver mais
+          </Button>
+        </Link>
       </div>
     </div>
   );

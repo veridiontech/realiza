@@ -28,6 +28,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -53,6 +56,7 @@ public class CrudClientImpl implements CrudClient {
     private final GoogleCloudService googleCloudService;
     private final ActivityRepoRepository activityRepoRepository;
 
+    @Transactional
     @Override
     public ClientResponseDto save(ClientRequestDto clientRequestDto, Boolean profilesFromRepo) {
 
@@ -76,46 +80,64 @@ public class CrudClientImpl implements CrudClient {
                 .number(clientRequestDto.getNumber())
                 .build();
 
-        Client savedClient = clientRepository.saveAndFlush(newClient);
+        Client savedClient = clientRepository.save(newClient);
 
-        if (profilesFromRepo == null) {
-            profilesFromRepo = false;
+        final Boolean[] finalProfilesFromRepo = {profilesFromRepo};
+        if (finalProfilesFromRepo[0] == null) {
+            finalProfilesFromRepo[0] = false;
         }
-
-        List<ActivityRepo> activityRepos = new ArrayList<>();
-        List<String> activityIds = new ArrayList<>();
-        if (clientRequestDto.getActivityIds() != null && !clientRequestDto.getActivityIds().isEmpty()) {
-            activityRepos = activityRepoRepository.findAllById(clientRequestDto.getActivityIds());
-            activityIds = activityRepos.stream().map(ActivityRepo::getIdActivity).collect(Collectors.toList());
-        }
-        Client saveTest = null;
-        while (saveTest == null) {
-            saveTest = clientRepository.findById(savedClient.getIdClient())
-                    .orElse(null);
-        }
-
-        setupQueueProducer.send(SetupMessage.builder()
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                setupQueueProducer.send(SetupMessage.builder()
                         .type("NEW_CLIENT")
                         .clientId(savedClient.getIdClient())
-                        .profilesFromRepo(profilesFromRepo)
-                        .activityIds(activityIds)
-                .build());
+                        .build());
 
-        if (JwtService.getAuthenticatedUserId() != null) {
-            User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
-                    .orElse(null);
-            if (userResponsible != null) {
-                auditLogServiceImpl.createAuditLog(
-                        savedClient.getIdClient(),
-                        CLIENT,
-                        userResponsible.getFullName() + " criou cliente "
-                                + savedClient.getCorporateName(),
-                        null,
-                        null,
-                        CREATE,
-                        userResponsible.getIdUser());
+                if (finalProfilesFromRepo[0] == null) {
+                    finalProfilesFromRepo[0] = false;
+                }
+
+                if (finalProfilesFromRepo[0]) {
+                    setupQueueProducer.send(SetupMessage.builder()
+                            .type("NEW_CLIENT_PROFILES")
+                            .clientId(savedClient.getIdClient())
+                            .build());
+                }
+
+                if (JwtService.getAuthenticatedUserId() != null) {
+                    User userResponsible = userRepository.findById(JwtService.getAuthenticatedUserId())
+                            .orElse(null);
+                    if (userResponsible != null) {
+                        auditLogServiceImpl.createAuditLog(
+                                savedClient.getIdClient(),
+                                CLIENT,
+                                userResponsible.getFullName() + " criou cliente "
+                                        + savedClient.getCorporateName(),
+                                null,
+                                null,
+                                CREATE,
+                                userResponsible.getIdUser());
+                    }
+                }
             }
-        }
+        });
+
+        crudBranch.save(BranchCreateRequestDto.builder()
+                .name(savedClient.getTradeName() != null
+                        ? savedClient.getTradeName()
+                        : "Base")
+                .cnpj(savedClient.getCnpj())
+                .cep(savedClient.getCep())
+                .state(savedClient.getState())
+                .city(savedClient.getCity())
+                .email(savedClient.getEmail())
+                .telephone(savedClient.getTelephone())
+                .address(savedClient.getAddress())
+                .number(savedClient.getNumber())
+                .base(true)
+                .client(savedClient.getIdClient())
+                .build());
 
         return ClientResponseDto.builder()
                 .idClient(savedClient.getIdClient())
@@ -129,7 +151,6 @@ public class CrudClientImpl implements CrudClient {
                 .city(savedClient.getCity())
                 .address(savedClient.getAddress())
                 .number(savedClient.getNumber())
-                .isUltragaz(savedClient.getIsUltragaz())
                 .build();
     }
 

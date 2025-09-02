@@ -92,7 +92,7 @@ export function ModalTesteSendSupplier() {
   const { user } = useUser();
   const { selectedBranch } = useBranch();
   const [isSubcontractor, setIsSubContractor] = useState<string | null>(null);
-  const [suppliers, setSuppliers] = useState<any>([]);
+  const [, setSuppliers] = useState<any>([]);
   const [getIdManager, setGetIdManager] = useState<string | null>(null);
   const { setDatasSender } = useDataSendEmailContext();
   const [isSsma, setIsSsma] = useState(false);
@@ -127,9 +127,9 @@ export function ModalTesteSendSupplier() {
   });
 
   const {
-    register: registerSubContract,
-    handleSubmit: handleSubmitSubContract,
-    formState: { errors: errorsSubContract },
+    // register: registerSubContract,
+    // handleSubmit: handleSubmitSubContract,
+    // formState: { errors: errorsSubContract },
     setValue: setValueSubContract,
     getValues: getValuesSubContract,
     reset: resetSubContract,

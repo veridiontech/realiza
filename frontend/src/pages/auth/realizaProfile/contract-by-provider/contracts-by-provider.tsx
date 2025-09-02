@@ -181,6 +181,7 @@ export function ContarctsByProvider() {
       requestParams
     );
 
+
     setIsGeneratingPdf(true);
     toast.loading("Gerando relatório de colaboradores...");
 
@@ -204,6 +205,7 @@ export function ContarctsByProvider() {
         toast.info("Nenhum colaborador encontrado para gerar o PDF.");
         return;
       }
+
 
       const doc = new jsPDF();
       const tableColumn = [
@@ -506,9 +508,9 @@ export function ContarctsByProvider() {
               >
                 <div
                   className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4
-                                     text-sm font-semibold text-neutral-600 py-2
-                                     border-b border-neutral-300 items-center
-                                     sticky top-0 bg-white z-10"
+                                text-sm font-semibold text-neutral-600 py-2
+                                border-b border-neutral-300 items-center
+                                sticky top-0 bg-white z-10"
                 >
                   <div>Status</div>
                   <div>Documento</div>

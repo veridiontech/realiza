@@ -1,6 +1,6 @@
-package bl.tech.realiza.usecases.interfaces.users.profile;
+package bl.tech.realiza.usecases.interfaces.users.security;
 
-import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;
 

@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.documents.contract;
 
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
@@ -9,6 +10,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.responses.documents.ContractDocumentAndEmployeeResponseDto;
 import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.JwtService;
@@ -24,6 +26,7 @@ import java.util.*;
 public class CrudDocumentContractImpl implements CrudDocumentContract {
     private final ContractRepository contractRepository;
     private final JwtService jwtService;
+    private final DocumentEmployeeRepository documentEmployeeRepository;
 
     @Override
     public ContractDocumentAndEmployeeResponseDto getDocumentAndEmployeeByContractId(String id) {
@@ -36,11 +39,19 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         List<ContractDocumentAndEmployeeResponseDto.EmployeeDto> employeeDtos = new ArrayList<>();
 
         for (Employee employee : contract.getEmployees()) {
+            Boolean entryPermission;
+            List<DocumentEmployee> documentsEmployee = documentEmployeeRepository.findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContractAndConformingAndDocumentMatrix_DoesBlock(
+                    employee.getIdEmployee(),
+                    contract.getIdContract(),
+                    false,
+                    true);
+            entryPermission = documentsEmployee.isEmpty();
             employeeDtos.add(ContractDocumentAndEmployeeResponseDto.EmployeeDto.builder()
                     .id(employee.getIdEmployee())
                     .name(employee.getFullName())
                     .cboTitle(employee.getCbo() != null
                             ? employee.getCbo().getTitle() : null)
+                    .hasEntryPermission(entryPermission)
                     .build());
             List<DocumentEmployee> documentEmployeeList = employee.getDocumentEmployees().stream()
                     .filter(documentEmployee -> documentEmployee.getContractDocuments().stream()

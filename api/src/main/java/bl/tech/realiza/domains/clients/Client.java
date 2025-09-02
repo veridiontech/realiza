@@ -5,7 +5,7 @@ import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.documents.client.DocumentClient;
 import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.domains.ultragaz.Board;
-import bl.tech.realiza.domains.user.profile.Profile;
+import bl.tech.realiza.domains.user.security.Profile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

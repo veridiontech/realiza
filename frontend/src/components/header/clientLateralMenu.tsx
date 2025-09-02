@@ -1,9 +1,7 @@
 import {
   ChartPie,
-  // File,
   Home,
   Users2,
-  Building2,
   PersonStanding,
   Paperclip,
 } from "lucide-react";
@@ -58,40 +56,20 @@ export function ClientLateralMenu({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
 
-      {/* <h3 className="pl-4 pt-6 text-xs text-white">
-        Gestão de fornecedores
-      </h3>
-      <ClientMenuItem
-        to={`/cliente/table-clientproviders/${getIdUser}`}
-        icon={<Users2 />}
-        label="Ver Fornecedores"
-        menuKey="ver-fornecedores"
-        setActiveMenuKey={setActiveMenuKey}
-        onClick={onClose}
-      /> */}
-
       <h3 className="pl-4 pt-6 text-xs text-white">Sobre a empresa</h3>
-      <ClientMenuItem
-        to={`/cliente/profile/${getIdUser}`}
-        icon={<Building2/>}
-        label="Empresa"
-        menuKey="empresa"
-        setActiveMenuKey={setActiveMenuKey}
-        onClick={onClose}
-      />
-      {/* <ClientMenuItem
-        to={`/cliente/branch/${getIdUser}`}
-        icon={<Factory />}
-        label="Filiais"
-        menuKey="filiais"
-        setActiveMenuKey={setActiveMenuKey}
-        onClick={onClose}
-      /> */}
       <ClientMenuItem
         to={`/cliente/employees/${getIdUser}`}
         icon={<PersonStanding />}
         label="Colaboradores"
         menuKey="colaboradores"
+        setActiveMenuKey={setActiveMenuKey}
+        onClick={onClose}
+      />
+      <ClientMenuItem
+        to={`/cliente/users/${getIdUser}`}
+        icon={<Users2 />}
+        label="Usuários"
+        menuKey="usuarios"
         setActiveMenuKey={setActiveMenuKey}
         onClick={onClose}
       />

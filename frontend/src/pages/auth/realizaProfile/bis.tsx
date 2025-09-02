@@ -16,6 +16,7 @@ import { ip } from "@/utils/ip";
 import { useClient } from "@/context/Client-Provider";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -57,6 +58,7 @@ function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
   }, [onOutside]);
   return ref;
 }
+
 function MultiSelectDropdown(props: {
   label: string;
   options: Option[];
@@ -81,6 +83,7 @@ function MultiSelectDropdown(props: {
     set.has(v) ? set.delete(v) : set.add(v);
     onChange(Array.from(set));
   }
+
   const title = useMemo(() => {
     if (!values.length) return placeholder;
     if (values.length === 1) {
@@ -140,9 +143,11 @@ function buildIdNameMap(arr: Array<{ id: string | number; name?: string }>) {
   arr.forEach((x) => map.set(String(x.id), x.name ?? String(x.id)));
   return map;
 }
+
 function normalize(s: unknown) {
   return String(s ?? "").toLowerCase();
 }
+
 function matchesAny(text: string, needles: string[]) {
   if (!needles.length) return true;
   const ntext = normalize(text);
@@ -243,7 +248,6 @@ export const MonittoringBis = () => {
   const clientId = client?.idClient;
   const token = localStorage.getItem("tokenClient");
 
-  // opções da /filters
   const [branchOpts, setBranchOpts] = useState<Option[]>([]);
   const [providerOpts, setProviderOpts] = useState<Option[]>([]);
   const [docTypeOpts, setDocTypeOpts] = useState<Option[]>([]);
@@ -274,7 +278,6 @@ export const MonittoringBis = () => {
   const [rawDocStatus, setRawDocStatus] = useState<RawDocumentStatus[]>([]);
   const [rawExemption, setRawExemption] = useState<RawExemption[]>([]);
   const [rawRanking, setRawRanking] = useState<RawRanking[]>([]);
-  // cards brutos vindos do back (mantidos por enquanto)
   const [rawCounts, setRawCounts] = useState({
     contractQuantity: 0,
     supplierQuantity: 0,
@@ -282,7 +285,6 @@ export const MonittoringBis = () => {
     employeeQuantity: 0,
   });
 
-  // dados FILTRADOS que vão para os componentes
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [documentExemptionData, setDocumentExemptionData] = useState<
     RawExemption[]
@@ -296,16 +298,21 @@ export const MonittoringBis = () => {
   });
 
   useEffect(() => {
-    if (!clientId) return;
+    if (!clientId) {
+      console.warn("Filters: clientId não disponível. Não será possível carregar as opções de filtro.");
+      return;
+    }
     (async () => {
       try {
         const url = `${ip}/dashboard/${clientId}/filters`;
+        console.log(`Filters: Solicitando opções de filtro da URL: ${url}`);
         const { data } = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
         });
+        console.log("Filters: Dados recebidos com sucesso.");
         const {
           branches = [],
           providers = [],
@@ -315,22 +322,21 @@ export const MonittoringBis = () => {
           statuses = [],
           documentTitles = [],
         } = data ?? {};
-
+        
         const mapIdNameBranches = buildIdNameMap(branches);
         const mapIdNameProviders = buildIdNameMap(providers);
         const mapIdNameResps = buildIdNameMap(responsibles);
-
-        // options
+        
         const toOptions = (arr: any[]) =>
-          arr.map((v) => ({ value: String(v), label: String(v) }));
+        arr.map((v) => ({ value: String(v), label: String(v) }));
         const toOptionsIdName = (
           arr: Array<{ id: string | number; name?: string }>
         ) =>
-          arr.map((v) => ({
-            value: String(v.id),
-            label: v.name ?? String(v.id),
-          }));
-
+        arr.map((v) => ({
+          value: String(v.id),
+          label: v.name ?? String(v.id),
+        }));
+        
         setBranchOpts(toOptionsIdName(branches));
         setProviderOpts(toOptionsIdName(providers));
         setRespOpts(toOptionsIdName(responsibles));
@@ -338,24 +344,38 @@ export const MonittoringBis = () => {
         setContractStatusOpts(toOptions(contractStatus));
         setStatusOpts(toOptions(statuses));
         setDocTitleOpts(toOptions(documentTitles));
-
+        
         setBranchIdName(mapIdNameBranches);
         setProviderIdName(mapIdNameProviders);
         setRespIdName(mapIdNameResps);
       } catch (e) {
-        console.error("Erro ao carregar /filters", e);
+        console.error("Filters: Erro ao carregar /filters", e);
       }
     })();
   }, [clientId, token]);
 
   useEffect(() => {
-    if (!clientId) return;
+    if (!clientId) {
+      console.warn("General: clientId não disponível. Limpando estados de dados.");
+      setRawDocStatus([]);
+      setRawExemption([]);
+      setRawRanking([]);
+      setRawCounts({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
+      setChartData([]);
+      setDocumentExemptionData([]);
+      setTableData([]);
+      setStats({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
+      return;
+    }
     (async () => {
       try {
         const url = `${ip}/dashboard/${clientId}/general`;
+        const requestBody = { clientId: clientId };
+        console.log(`General: Solicitando dados da URL: ${url}`);
+        console.log(`General: Corpo da requisição:`, requestBody);
         const { data } = await axios.post(
           url,
-          {},
+          requestBody,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -364,6 +384,7 @@ export const MonittoringBis = () => {
             },
           }
         );
+        console.log("General: Dados recebidos com sucesso:", data);
 
         const {
           documentExemption = [],
@@ -385,7 +406,6 @@ export const MonittoringBis = () => {
           employeeQuantity,
         });
 
-        // primeira render sem filtro
         setChartData(
           (documentStatus ?? []).map((cat: any) => {
             const row: any = { name: cat?.name ?? "" };
@@ -413,19 +433,31 @@ export const MonittoringBis = () => {
           employeeQuantity,
         });
       } catch (e) {
-        console.error("Erro ao carregar /general", e);
+        console.error("General: Erro ao carregar /general", e);
+        setRawDocStatus([]);
+        setRawExemption([]);
+        setRawRanking([]);
+        setRawCounts({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
+        setChartData([]);
+        setDocumentExemptionData([]);
+        setTableData([]);
+        setStats({ contractQuantity: 0, supplierQuantity: 0, allocatedEmployeeQuantity: 0 });
       }
     })();
   }, [clientId, token]);
 
   const conformity = tableData.length > 0 ? tableData[0]?.conformity : 0;
 
+
   const adherence = tableData.length > 0 ? tableData[0]?.adherence : 0;
 
   function applyFilters() {
+    console.log("Aplicando filtros:", draft);
     setApplied({ ...draft });
   }
+
   function clearFilters() {
+    console.log("Limpando filtros.");
     const empty: FiltersState = {
       branchIds: [],
       providerIds: [],
@@ -440,7 +472,7 @@ export const MonittoringBis = () => {
   }
 
   useEffect(() => {
-    // mapeia ids → nomes selecionados
+    console.log("Dados aplicados (applied) mudaram, aplicando filtros locais.");
     const branchNames = applied.branchIds.map(
       (id) => branchIdName.get(id) ?? id
     );
@@ -452,28 +484,29 @@ export const MonittoringBis = () => {
     );
 
     // documentStatus
+
     const docStatusChart = filterDocumentStatus(rawDocStatus, applied, {
       branchNames,
       providerNames,
       responsibleNames,
     });
-    console.log(docStatusChart);
+    console.log("Resultados do filtro de Status de Documentos:", docStatusChart);
     setChartData(docStatusChart);
 
-    // documentExemption
     const docExFiltered = filterExemption(rawExemption, applied, {
       branchNames,
       providerNames,
       responsibleNames,
     });
+    console.log("Resultados do filtro de Exenção:", docExFiltered);
     setDocumentExemptionData(docExFiltered);
 
-    // ranking
     const rankingFiltered = filterRanking(rawRanking, applied, {
       branchNames,
       providerNames,
       responsibleNames,
     });
+    console.log("Resultados do filtro de Ranking:", rankingFiltered);
     setTableData(
       rankingFiltered.map((r) => ({
         name: r.corporateName,
@@ -491,7 +524,15 @@ export const MonittoringBis = () => {
       contractQuantity: rawCounts.contractQuantity,
       supplierQuantity: supplierCount,
       allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity,
+
       employeeQuantity: rawCounts.employeeQuantity,
+
+    });
+    console.log("Estatísticas atualizadas:", {
+      contractQuantity: rawCounts.contractQuantity,
+      supplierQuantity: supplierCount,
+      allocatedEmployeeQuantity: rawCounts.allocatedEmployeeQuantity,
+
     });
   }, [
     applied,
@@ -509,7 +550,6 @@ export const MonittoringBis = () => {
     [draft, applied]
   );
 
-  // Versão com filtro e tipagem explícita
   const generatePDF = () => {
     try {
       const doc = new jsPDF();
@@ -777,6 +817,7 @@ export const MonittoringBis = () => {
               </div>
             </div>
 
+
             <div className="grid grid-cols-1 py-5 gap-6 md:grid-cols-2">
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm h-[30vh]">
                 <ConformityGaugeChart percentage={conformity} />
@@ -837,6 +878,7 @@ export const MonittoringBis = () => {
 
         {activeTab === "fornecedores" && (
           <div>
+
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-800">Filtros</h2>
 
@@ -898,6 +940,7 @@ export const MonittoringBis = () => {
                   type="button"
                   onClick={clearFilters}
                   className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+
                 >
                   Limpar
                 </button>

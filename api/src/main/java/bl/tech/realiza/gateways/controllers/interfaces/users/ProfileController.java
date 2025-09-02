@@ -1,7 +1,7 @@
 package bl.tech.realiza.gateways.controllers.interfaces.users;
 
-import bl.tech.realiza.gateways.requests.users.profile.ProfileRepoRequestDto;
-import bl.tech.realiza.gateways.requests.users.profile.ProfileRequestDto;
+import bl.tech.realiza.gateways.requests.users.security.ProfileRepoRequestDto;
+import bl.tech.realiza.gateways.requests.users.security.ProfileRequestDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileNameResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileRepoResponseDto;
 import bl.tech.realiza.gateways.responses.users.profile.ProfileResponseDto;

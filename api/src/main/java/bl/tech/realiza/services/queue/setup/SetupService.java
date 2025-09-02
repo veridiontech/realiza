@@ -18,8 +18,8 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
-import bl.tech.realiza.domains.user.profile.Profile;
-import bl.tech.realiza.domains.user.profile.ProfileRepo;
+import bl.tech.realiza.domains.user.security.Profile;
+import bl.tech.realiza.domains.user.security.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
@@ -36,15 +36,12 @@ import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepo
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
-import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepoRepository;
-import bl.tech.realiza.gateways.repositories.users.profile.ProfileRepository;
-import bl.tech.realiza.gateways.requests.clients.branch.BranchCreateRequestDto;
-import bl.tech.realiza.gateways.responses.clients.branches.BranchResponseDto;
-import bl.tech.realiza.usecases.impl.users.profile.CrudProfileImpl;
+import bl.tech.realiza.gateways.repositories.users.security.ProfileRepoRepository;
+import bl.tech.realiza.gateways.repositories.users.security.ProfileRepository;
 import bl.tech.realiza.usecases.interfaces.clients.CrudBranch;
 import bl.tech.realiza.usecases.interfaces.contracts.CrudServiceType;
 import bl.tech.realiza.usecases.interfaces.contracts.activity.CrudActivity;
-import bl.tech.realiza.usecases.interfaces.users.profile.CrudProfile;
+import bl.tech.realiza.usecases.interfaces.users.security.CrudProfile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -87,32 +84,35 @@ public class SetupService {
     private final CrudBranch crudBranch;
     private final CrudProfile crudProfile;
 
-    public void setupNewClient(String clientId, Boolean profilesFromRepo, List<String> activitiesIds) {
+    public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new NotFoundException("Client not found while setup client"));
 
-        BranchResponseDto branch = crudBranch.save(BranchCreateRequestDto.builder()
-                .name(client.getTradeName() != null
-                        ? client.getTradeName()
-                        : "Base")
-                .cnpj(client.getCnpj())
-                .cep(client.getCep())
-                .state(client.getState())
-                .city(client.getCity())
-                .email(client.getEmail())
-                .telephone(client.getTelephone())
-                .address(client.getAddress())
-                .number(client.getNumber())
-                .base(true)
-                .client(client.getIdClient())
-                .build());
+        Client client = null;
+        int retries = 0;
+        int maxRetries = 10;
+        long delay = 500;
 
-        if (profilesFromRepo) {
-            crudProfile.transferFromRepoToClient(client.getIdClient());
+        while (client == null && retries < maxRetries) {
+            try {
+                int finalRetries = retries;
+                client = clientRepository.findById(clientId)
+                        .orElseThrow(() -> new NotFoundException("Client not found on attempt " + (finalRetries + 1)));
+            } catch (NotFoundException e) {
+                retries++;
+                if (retries < maxRetries) {
+                    log.warn("Client {} not found. Retrying in {}ms... ({}/{})", clientId, delay, retries, maxRetries);
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    log.error("Client {} not found after {} retries. Sending to DLQ.", clientId, maxRetries);
+                    throw e;
+                }
+            }
         }
         crudServiceType.transferFromRepoToClient(client.getIdClient());
-        crudBranch.setupBranch(branch.getIdBranch(), activitiesIds);
         log.info("Finished setup client ✔️ {}", clientId);
     }
 
@@ -152,19 +152,7 @@ public class SetupService {
                             .name(profileRepo.getName())
                             .description(profileRepo.getDescription())
                             .admin(profileRepo.getAdmin())
-                            .viewer(profileRepo.getViewer())
-                            .manager(profileRepo.getManager())
-                            .inspector(profileRepo.getInspector())
-                            .documentViewer(profileRepo.getDocumentViewer())
-                            .registrationUser(profileRepo.getRegistrationUser())
-                            .registrationContract(profileRepo.getRegistrationContract())
-                            .laboral(profileRepo.getLaboral())
-                            .workplaceSafety(profileRepo.getWorkplaceSafety())
-                            .registrationAndCertificates(profileRepo.getRegistrationAndCertificates())
-                            .general(profileRepo.getGeneral())
-                            .health(profileRepo.getHealth())
-                            .environment(profileRepo.getEnvironment())
-                            .concierge(profileRepo.getConcierge())
+                            .permissions(profileRepo.getPermissions())
                             .client(client)
                             .build()
             );
@@ -181,10 +169,35 @@ public class SetupService {
         log.info("Finished setup client profiles ✔️ {}", clientId);
     }
 
-    public void setupBranch(String branchId, List<String> activityIds) {
+    public void setupBranch(String branchId) {
         log.info("Started setup branch ⌛ {}", branchId);
-        Branch branch = branchRepository.findById(branchId)
-                .orElseThrow(() -> new NotFoundException("Branch not found"));
+
+        Branch branch = null;
+        int retries = 0;
+        int maxRetries = 10;
+        long delay = 500;
+
+        while (branch == null && retries < maxRetries) {
+            try {
+                int finalRetries = retries;
+                branch = branchRepository.findById(branchId)
+                        .orElseThrow(() -> new NotFoundException("Branch not found on attempt " + (finalRetries + 1)));
+            } catch (NotFoundException e) {
+                retries++;
+                if (retries < maxRetries) {
+                    log.warn("Branch {} not found. Retrying in {}ms... ({}/{})", branchId, delay, retries, maxRetries);
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    log.error("Branch {} not found after {} retries. Sending to DLQ.", branchId, maxRetries);
+                    throw e;
+                }
+            }
+        }
+
         crudServiceType.transferFromClientToBranch(branch.getClient().getIdClient(), branch.getIdBranch());
 
         List<DocumentBranch> batch = new ArrayList<>(50);
@@ -209,7 +222,7 @@ public class SetupService {
         if (!batch.isEmpty()) {
             documentBranchRepository.saveAll(batch);
         }
-        crudActivity.transferFromRepo(branch.getIdBranch(),activityIds);
+        crudActivity.transferFromRepo(branch.getIdBranch());
 
         log.info("Finished setup branch ✔️ {}", branchId);
     }
