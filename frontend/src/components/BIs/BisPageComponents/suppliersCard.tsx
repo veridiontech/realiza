@@ -15,7 +15,7 @@ export function Suppliers({ count }: SupplierCounterProps) {
         borderRadius: 16,
         padding: 20,
         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-        width: 300,
+        width: "100vw",
         height: 160,
         textAlign: "center",
         margin: "0 10px",

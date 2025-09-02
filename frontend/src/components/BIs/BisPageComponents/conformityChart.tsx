@@ -17,15 +17,18 @@ import { Blocks } from 'react-loader-spinner'
 interface ConformityGaugeChartProps {
   percentage?: number 
   loading?: boolean
+  title?: string; 
 }
 
 export function ConformityGaugeChart({
   percentage,
   loading = false,
+  title = 'Conformidade',
+
 }: ConformityGaugeChartProps) {
   const chartData = [
     {
-      name: 'Conformidade',
+      name: 'title',
       value: percentage ?? 0,
       fill:
         (percentage ?? 0) >= 75
@@ -48,7 +51,7 @@ export function ConformityGaugeChart({
     <Card className="w-full h-full">
       <CardHeader className="pb-0">
         <CardTitle className="text-muted-foreground text-base">
-          Conformidade
+          {title}
         </CardTitle>
         <CardDescription className="text-xl font-bold">
           {percentage?.toFixed(2)}%

@@ -48,9 +48,10 @@ interface Collaborator {
   name: string;
   cboTitle: string;
   cpf: string;
-  contractType: string,
+  contractType: string;
   pis: string;
   email: string;
+  hasEntryPermission: boolean;
 }
 
 export function ContarctsByProvider() {
@@ -83,11 +84,7 @@ export function ContarctsByProvider() {
   } | null>(null);
   const [description, setDescription] = useState("");
 
-
-
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-
 
   const token = localStorage.getItem("tokenClient");
 
@@ -164,8 +161,6 @@ export function ContarctsByProvider() {
     }
   }, [selectedContractName, getAllDatas, contracts]);
 
-
-
   const handleGeneratePdf = async () => {
     const selectedContract = contracts.find(
       (contract) => contract.serviceName === selectedContractName
@@ -177,11 +172,15 @@ export function ContarctsByProvider() {
     }
 
     const requestParams = {
-        enterprise: "SUPPLIER",
-        idSearch: id.id,
+      enterprise: "SUPPLIER",
+      idSearch: id.id,
     };
 
-    console.log("Enviando requisição para /employee com os parâmetros:", requestParams);
+    console.log(
+      "Enviando requisição para /employee com os parâmetros:",
+      requestParams
+    );
+
 
     setIsGeneratingPdf(true);
     toast.loading("Gerando relatório de colaboradores...");
@@ -193,21 +192,30 @@ export function ContarctsByProvider() {
         },
         params: requestParams,
       });
-      
+
       console.log("Resposta recebida da API:", response.data);
 
-      const collaboratorsList: Collaborator[] = Array.isArray(response.data.content) 
-        ? response.data.content 
+      const collaboratorsList: Collaborator[] = Array.isArray(
+        response.data.content
+      )
+        ? response.data.content
         : [];
 
       if (collaboratorsList.length === 0) {
         toast.info("Nenhum colaborador encontrado para gerar o PDF.");
         return;
       }
-      
+
 
       const doc = new jsPDF();
-      const tableColumn = ["Nome", "Cargo", "Tipo de Contrato", "CPF", "Pis", "E-mail"];
+      const tableColumn = [
+        "Nome",
+        "Cargo",
+        "Tipo de Contrato",
+        "CPF",
+        "Pis",
+        "E-mail",
+      ];
       const tableRows: (string | null)[][] = [];
 
       collaboratorsList.forEach((col) => {
@@ -238,7 +246,6 @@ export function ContarctsByProvider() {
       );
 
       toast.success("PDF gerado com sucesso!");
-
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       toast.error("Falha ao gerar o relatório de colaboradores.");
@@ -247,10 +254,6 @@ export function ContarctsByProvider() {
       toast.dismiss();
     }
   };
-
-
-
-
 
   const filteredDocuments = documents.filter(
     (doc: Document) =>
@@ -585,6 +588,7 @@ export function ContarctsByProvider() {
                             </div>
                           )}
                         </div>
+
                         <div className="col-span-1">
                           <h3 className="text-[16px] font-medium">
                             {doc.title}
@@ -689,7 +693,7 @@ export function ContarctsByProvider() {
             </div>
           )}
 
-           {viewOption === "collaborators" && (
+          {viewOption === "collaborators" && (
             <div className="w-full flex flex-col h-full">
               {" "}
               <div className="flex items-center gap-2 text-[#34495E] mb-6">
@@ -705,16 +709,38 @@ export function ContarctsByProvider() {
                         to={`/sistema/detailsEmployees/${employee.id}`}
                         key={employee.id}
                       >
-                        <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
-                          <div className="bg-neutral-100 p-2 rounded-full mb-2">
-                            <User className="w-6 h-6 text-neutral-500" />
+                        <div className="border border-neutral-200 rounded-lg p-3 flex flex-col items-center justify-between text-center shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer h-full">
+                          <div>
+                            <div className="bg-neutral-100 p-2 rounded-full mb-2 mx-auto w-fit">
+                              <User className="w-6 h-6 text-neutral-500" />
+                            </div>
+                            <p className="text-sm font-semibold text-[#34495E] leading-tight">
+                              {employee.name}
+                            </p>
+                            <span className="text-xs text-realizaBlue font-medium mt-1">
+                              {employee.cboTitle}
+                            </span>
                           </div>
-                          <p className="text-sm font-semibold text-[#34495E] leading-tight">
-                            {employee.name}
-                          </p>
-                          <span className="text-xs text-realizaBlue font-medium mt-1">
-                            {employee.cboTitle}
-                          </span>
+
+                         
+                          <div className="mt-3 pt-2 border-t border-neutral-200 w-full">
+                            {employee.hasEntryPermission ? (
+                              <div className="flex items-center justify-center gap-2 text-green-600">
+                                <CheckCircle className="w-4 h-4" />
+                                <span className="text-xs font-semibold">
+                                  Acesso Liberado
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2 text-red-600">
+                                <Ban className="w-4 h-4" />
+                                <span className="text-xs font-semibold">
+                                  Acesso Bloqueado
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
                         </div>
                       </Link>
                     ))}
@@ -732,9 +758,7 @@ export function ContarctsByProvider() {
                   className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center gap-2 disabled:bg-neutral-400 disabled:cursor-not-allowed"
                 >
                   <FileDown className="w-5 h-5" />
-                  {isGeneratingPdf
-                    ? "Gerando PDF..."
-                    : "Baixar Relatório PDF"}
+                  {isGeneratingPdf ? "Gerando PDF..." : "Baixar Relatório PDF"}
                 </button>
               </div>
             </div>
