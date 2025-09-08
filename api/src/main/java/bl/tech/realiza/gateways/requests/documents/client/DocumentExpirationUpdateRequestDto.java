@@ -7,4 +7,5 @@ import lombok.Data;
 public class DocumentExpirationUpdateRequestDto {
     private Integer expirationDateAmount;
     private DocumentMatrix.DayUnitEnum expirationDateUnit;
+    private Boolean doesBlock;
 }

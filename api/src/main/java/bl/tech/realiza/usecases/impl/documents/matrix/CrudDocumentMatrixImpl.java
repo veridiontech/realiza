@@ -139,7 +139,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .type(documentMatrix.getType())
                 .doesBlock(documentMatrix.getDoesBlock())
                 .isDocumentUnique(documentMatrix.getIsDocumentUnique())
-                .isValidityFixed(documentMatrix.getIsValidityFixed())
+                .isValidityFixed(documentMatrix.getIsValidityFixed() != null
+                        ? documentMatrix.getIsValidityFixed()
+                        : null)
                 .fixedValidityAt(formatDayMonth(documentMatrix.getFixedValidityAt()))
                 .idDocumentSubgroup(documentMatrix.getSubGroup() != null
                         ? documentMatrix.getSubGroup().getIdDocumentSubgroup()

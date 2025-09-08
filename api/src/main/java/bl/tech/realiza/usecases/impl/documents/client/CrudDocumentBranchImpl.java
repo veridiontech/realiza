@@ -661,6 +661,9 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         documentBranch.setExpirationDateUnit(documentExpirationUpdateRequestDto.getExpirationDateUnit() != null
                 ? documentExpirationUpdateRequestDto.getExpirationDateUnit()
                 : documentBranch.getExpirationDateUnit());
+        documentBranch.setDoesBlock(documentExpirationUpdateRequestDto.getDoesBlock() != null
+                ? documentExpirationUpdateRequestDto.getDoesBlock()
+                : documentBranch.getDoesBlock());
 
         DocumentBranch savedDocumentBranch = documentBranchRepository.save(documentBranch);
 

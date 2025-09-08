@@ -58,8 +58,12 @@ public class CrudPermissionImpl implements CrudPermission {
         return permissions.stream().map(this::toDto).toList();
     }
 
+    @Override
     public Boolean hasPermission(User user, PermissionTypeEnum type, PermissionSubTypeEnum subType, DocumentTypeEnum documentType) {
-        if (user.getProfile() != null) {
+        if (user.getRole().equals(User.Role.ROLE_REALIZA_PLUS) || user.getRole().equals(User.Role.ROLE_REALIZA_BASIC)) {
+            return true;
+        }
+        else if (user.getProfile() != null) {
             Profile profile = user.getProfile();
             if (profile.getAdmin()) {
                 return true;
