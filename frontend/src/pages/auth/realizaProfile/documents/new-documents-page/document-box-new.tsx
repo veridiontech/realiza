@@ -24,14 +24,14 @@ import { AmbientBox } from "../boxes-selected/ambient-box";
 import { TrabalhistaBox } from "../boxes-selected/trabalhista-box";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { GeralBox } from "../boxes-selected/geral";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog";
 
 export function NewDocumentBox() {
   const [selectedTab, setSelectedTab] = useState("thirdCompany");
@@ -189,7 +189,7 @@ export function NewDocumentBox() {
             Geral
           </Button>
         </div>
-        <Dialog>
+        {/* <Dialog>
           <DialogTrigger className="">
             <Button className="bg-realizaBlue">+</Button>
           </DialogTrigger>
@@ -202,7 +202,7 @@ export function NewDocumentBox() {
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
       </div>
       <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 rounded-lg bg-white p-5 shadow-md md:hidden">
         <Button

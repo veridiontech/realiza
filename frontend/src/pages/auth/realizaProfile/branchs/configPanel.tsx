@@ -126,7 +126,7 @@ export function ConfigPanel() {
     | "validate"
     | "profiles"
     | "documents"
-  >("documents_ai");
+  >("documents");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
@@ -191,7 +191,11 @@ export function ConfigPanel() {
     HIGH: "Alto",
     VERY_HIGH: "Muito Alto",
   };
-  const expirationUnits = [{ value: "MONTHS", label: "Meses" }];
+  const expirationUnits = [
+    { value: "DAYS", label: "Dias" },
+    { value: "MONTHS", label: "Meses" },
+    { value: "YEARS", label: "Anos" },
+  ];
 
   const [selectedMatrixEntry, setSelectedMatrixEntry] =
     useState<DocumentMatrixEntry | null>(null);
@@ -201,6 +205,17 @@ export function ConfigPanel() {
   const [editExpirationAmount, setEditExpirationAmount] = useState(0);
   const [editType, setEditType] = useState("");
   const [editIsDocumentUnique, setEditIsDocumentUnique] = useState(false);
+  const [editDoesBlock, setEditDoesBlock] = useState(false);
+
+  // Estados para o novo documento
+  const [newDocName, setNewDocName] = useState("");
+  const [newDocType, setNewDocType] = useState("");
+  const [newDocExpirationAmount, setNewDocExpirationAmount] = useState(0);
+  const [newDocExpirationUnit, setNewDocExpirationUnit] =
+    useState("MONTHS");
+  const [newDocDoesBlock, setNewDocDoesBlock] = useState(false);
+  const [newDocIsUnique, setNewDocIsUnique] = useState(false);
+  const [isCreatingDocument, setIsCreatingDocument] = useState(false);
 
   function handleSelectMatrixEntry(entry: DocumentMatrixEntry) {
     setSelectedMatrixEntry(entry);
@@ -209,6 +224,7 @@ export function ConfigPanel() {
     setEditExpirationAmount(entry.expirationDateAmount);
     setEditType(entry.type);
     setEditIsDocumentUnique(entry.isDocumentUnique);
+    setEditDoesBlock(entry.doesBlock);
   }
 
   useEffect(() => {
@@ -219,6 +235,7 @@ export function ConfigPanel() {
     getActivities();
     getMatrixEntries();
     getProfilesRepo();
+    getDocumentGroups();
   }, []);
 
   async function getDocuments() {
@@ -413,8 +430,8 @@ export function ConfigPanel() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-          ? (data as any).content
-          : [];
+        ? (data as any).content
+        : [];
       setMatrixEntries(list);
     } catch (error) {
       console.error("Erro ao carregar documentos de matriz:", error);
@@ -664,7 +681,6 @@ export function ConfigPanel() {
 
   async function getDocumentGroups() {
     try {
-      // Fazer a requisição para a API
       const response = await axios.get(`${ip}/document/matrix/group`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
@@ -689,7 +705,6 @@ export function ConfigPanel() {
   async function getDocumentSubgroups(idDocumentGroup: string) {
     console.log("→ Solicitação de subgrupos para grupo:", idDocumentGroup);
     try {
-      // Faz a requisição para obter os subgrupos de um grupo específico
       const response = await axios.get(
         `${ip}/document/matrix/subgroup/filtered-group`,
         {
@@ -721,29 +736,15 @@ export function ConfigPanel() {
 
   const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedGroupId = e.target.value;
-    setSelectedGroup(selectedGroupId); // Atualiza o grupo selecionado
+    setSelectedGroup(selectedGroupId);
     console.log("Grupo selecionado:", selectedGroupId);
 
     setSelectedSubgroup(null);
 
-    // Chama a função para buscar os subgrupos
     if (selectedGroupId) {
       getDocumentSubgroups(selectedGroupId);
     }
   };
-
-  // const filteredDocsByGroup = useMemo(() => {
-  //   return matrixEntries.filter((entry) => {
-  //     // só mostra se tiver grupo selecionado
-  //     if (!selectedGroup) return false;
-  //     const matchGroup = entry.idDocumentGroup === selectedGroup;
-  //     // se tiver subgrupo, também verifica; senão, aceita todos do grupo
-  //     const matchSubgroup = selectedSubgroup
-  //       ? entry.idDocumentSubgroup === selectedSubgroup
-  //       : true;
-  //     return matchGroup && matchSubgroup;
-  //   });
-  // }, [matrixEntries, selectedGroup, selectedSubgroup]);
 
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
@@ -768,8 +769,8 @@ export function ConfigPanel() {
       const list: DocumentMatrixEntry[] = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-          ? (data as any).content
-          : [];
+        ? (data as any).content
+        : [];
 
       console.log(`Lista extraída (${list.length} itens):`, list);
 
@@ -797,7 +798,6 @@ export function ConfigPanel() {
   async function saveMatrixEntry() {
     if (!selectedMatrixEntry) return;
 
-    // mescla os campos editados
     const payload: DocumentMatrixEntry = {
       ...selectedMatrixEntry,
       name: editName,
@@ -805,6 +805,7 @@ export function ConfigPanel() {
       expirationDateAmount: editExpirationAmount,
       type: editType,
       isDocumentUnique: editIsDocumentUnique,
+      doesBlock: editDoesBlock,
     };
 
     try {
@@ -815,7 +816,6 @@ export function ConfigPanel() {
       );
       toast.success("Documento atualizado com sucesso!");
 
-      // atualiza lista geral e a filtrada
       setMatrixEntries((prev) =>
         prev.map((e) =>
           e.idDocumentMatrix === payload.idDocumentMatrix ? payload : e
@@ -831,6 +831,63 @@ export function ConfigPanel() {
     } catch (err) {
       console.error(err);
       toast.error("Erro ao atualizar documento.");
+    }
+  }
+
+  async function createMatrixEntry() {
+    if (!selectedSubgroup) {
+      toast.error("Por favor, selecione um subgrupo antes de criar.");
+      return;
+    }
+    if (!newDocName.trim() || !newDocType.trim()) {
+      toast.error("Nome e Tipo são campos obrigatórios.");
+      return;
+    }
+
+    setIsCreatingDocument(true);
+
+    const payload = {
+      name: newDocName,
+      type: newDocType,
+      doesBlock: newDocDoesBlock,
+      isDocumentUnique: newDocIsUnique,
+      expirationDateUnit: newDocExpirationUnit,
+      expirationDateAmount: newDocExpirationAmount,
+      idDocumentSubgroup: selectedSubgroup,
+      idDocumentGroup: selectedGroup,
+    };
+
+    try {
+      const response = await axios.post(
+        `${ip}/document/matrix`,
+        payload,
+        authHeader
+      );
+
+      toast.success("Documento criado com sucesso! 🎉");
+      console.log("Novo documento criado:", response.data);
+
+      setNewDocName("");
+      setNewDocType("");
+      setNewDocExpirationAmount(0);
+      setNewDocExpirationUnit("MONTHS");
+      setNewDocDoesBlock(false);
+      setNewDocIsUnique(false);
+
+      if (selectedSubgroup) {
+        getDocsBySubgroup(selectedSubgroup);
+      }
+    } catch (error) {
+      console.error("Erro ao criar documento de matriz:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          `Erro ao criar: ${error.response?.data?.message || "Erro desconhecido."}`
+        );
+      } else {
+        toast.error("Erro ao criar documento.");
+      }
+    } finally {
+      setIsCreatingDocument(false);
     }
   }
 
@@ -1604,131 +1661,294 @@ export function ConfigPanel() {
         )}
         {selectTab === "documents" && (
           <div className="flex items-start justify-center gap-10 w-full">
+            {/* Lado Esquerdo: Seleção de Grupo/Subgrupo */}
             <div className="w-[45%] space-y-4">
-              <select
-                id="documentGroup"
-                className="w-full p-2 border rounded"
-                onChange={handleGroupChange}
-              >
-                <option value="">Selecione um Grupo</option>
-                {documentGroups.map((group) => (
-                  <option
-                    key={group.idDocumentGroup}
-                    value={group.idDocumentGroup}
-                  >
-                    {group.groupName}
-                  </option>
-                ))}
-              </select>
-              <select
-                id="documentSubgroup"
-                className="w-full p-2 border rounded"
-                onChange={(e) => setSelectedSubgroup(e.target.value)}
-                disabled={!selectedGroup} // Só habilita se um grupo for selecionado
-              >
-                <option value="">Selecione um Subgrupo</option>
-                {documentSubgroups.map((subgroup) => (
-                  <option
-                    key={subgroup.idDocumentSubgroup}
-                    value={subgroup.idDocumentSubgroup}
-                  >
-                    {subgroup.subgroupName}
-                  </option>
-                ))}
-              </select>
+              <h2 className="text-xl font-bold">Grupos e Subgrupos</h2>
+              <p className="text-sm text-gray-500">
+                Selecione um subgrupo para visualizar e criar documentos.
+              </p>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  Selecione um Grupo
+                </label>
+                <select
+                  id="documentGroup"
+                  className="w-full p-2 border rounded-md"
+                  value={selectedGroup || ""}
+                  onChange={handleGroupChange}
+                >
+                  <option value="">Selecione um Grupo</option>
+                  {documentGroups.map((group) => (
+                    <option
+                      key={group.idDocumentGroup}
+                      value={group.idDocumentGroup}
+                    >
+                      {group.groupName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  Selecione um Subgrupo
+                </label>
+                <select
+                  id="documentSubgroup"
+                  className="w-full p-2 border rounded-md"
+                  value={selectedSubgroup || ""}
+                  onChange={(e) => setSelectedSubgroup(e.target.value)}
+                  disabled={!selectedGroup}
+                >
+                  <option value="">Selecione um Subgrupo</option>
+                  {documentSubgroups.map((subgroup) => (
+                    <option
+                      key={subgroup.idDocumentSubgroup}
+                      value={subgroup.idDocumentSubgroup}
+                    >
+                      {subgroup.subgroupName}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="w-[45%] border-l pl-6 space-y-4">
-              <h2 className="text-xl font-bold">Documentos</h2>
+            {/* Lado Direito: Formulário de Criação e Lista de Documentos */}
+            <div className="w-[45%] border-l pl-6 space-y-6">
+              <h2 className="text-xl font-bold">Gerenciar Documentos</h2>
+              
+              {/* Formulário de Criação de Documento */}
+              <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
+                <h3 className="text-lg font-semibold mb-3">Criar Novo Documento</h3>
+                <p className="text-xs text-red-500 mb-4">
+                  * Campos obrigatórios.
+                </p>
 
-              {!selectedSubgroup ? (
-                <p>Selecione um subgrupo para visualizar os documentos.</p>
-              ) : isLoadingDocsList ? (
-                <p>Carregando documentos…</p>
-              ) : docsList.length > 0 ? (
-                <>
-                  {/* 4. Lista clicável */}
-                  <ul className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
-                    {docsList.map((doc) => (
-                      <li
-                        key={doc.idDocumentMatrix}
-                        className="p-3 border rounded hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleSelectMatrixEntry(doc)}
-                      >
-                        <strong>{doc.name}</strong>
-                        <p className="text-sm text-gray-600">{doc.type}</p>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="newDocName" className="block text-sm font-medium mb-1">
+                      Nome do Documento <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="newDocName"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Ex: ASO - Atestado de Saúde Ocupacional"
+                      value={newDocName}
+                      onChange={(e) => setNewDocName(e.target.value)}
+                      disabled={!selectedSubgroup || isCreatingDocument}
+                    />
+                  </div>
 
-                  {/* 5. Mini-form de edição */}
-                  {selectedMatrixEntry && (
-                    <div className="mt-4 border-t pt-4 space-y-3">
-                      <h3 className="text-lg font-medium">
-                        Editar: {selectedMatrixEntry.name}
-                      </h3>
+                  <div>
+                    <label htmlFor="newDocType" className="block text-sm font-medium mb-1">
+                      Tipo de Arquivo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="newDocType"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Ex: PDF, PNG, JPEG"
+                      value={newDocType}
+                      onChange={(e) => setNewDocType(e.target.value)}
+                      disabled={!selectedSubgroup || isCreatingDocument}
+                    />
+                  </div>
 
-                      {/* Nome */}
-                      <input
-                        className="w-full p-2 border rounded"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                      />
-
-                      {/* Expiração */}
-                      <div className="flex gap-2">
+                  {/* Campo de validade agrupado */}
+                  <div>
+                    <p className="block text-sm font-medium mb-1">
+                      Validade (Opcional)
+                    </p>
+                    <div className="flex gap-2 items-end">
+                      <div className="w-1/3">
+                        <label htmlFor="expAmount" className="sr-only">Quantidade</label>
                         <input
+                          id="expAmount"
                           type="number"
                           min={0}
-                          className="w-20 p-2 border rounded"
-                          value={editExpirationAmount}
+                          className="w-full p-2 border rounded-md"
+                          placeholder="0"
+                          value={newDocExpirationAmount}
                           onChange={(e) =>
-                            setEditExpirationAmount(Number(e.target.value))
+                            setNewDocExpirationAmount(Number(e.target.value))
                           }
+                          disabled={!selectedSubgroup || isCreatingDocument}
                         />
+                      </div>
+                      <div className="w-2/3">
+                        <label htmlFor="expUnit" className="sr-only">Unidade</label>
                         <select
-                          className="p-2 border rounded"
-                          value={editExpirationUnit}
-                          onChange={(e) =>
-                            setEditExpirationUnit(e.target.value)
-                          }
+                          id="expUnit"
+                          className="w-full p-2 border rounded-md"
+                          value={newDocExpirationUnit}
+                          onChange={(e) => setNewDocExpirationUnit(e.target.value)}
+                          disabled={!selectedSubgroup || isCreatingDocument}
                         >
-                          {[
-                            { value: "DAYS", label: "Dias" },
-                            { value: "MONTHS", label: "Meses" },
-                          ].map((u) => (
+                          {expirationUnits.map((u) => (
                             <option key={u.value} value={u.value}>
                               {u.label}
                             </option>
                           ))}
                         </select>
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Tipo */}
+                  {/* Checkboxes agrupados e com labels descritivas */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-medium">
                       <input
-                        className="w-full p-2 border rounded"
-                        value={editType}
-                        onChange={(e) => setEditType(e.target.value)}
+                        type="checkbox"
+                        checked={newDocDoesBlock}
+                        onChange={(e) => setNewDocDoesBlock(e.target.checked)}
+                        disabled={!selectedSubgroup || isCreatingDocument}
                       />
+                      Documento bloqueia pendência?
+                    </label>
+                    <p className="text-xs text-gray-500 ml-6 -mt-1">
+                      Se marcado, a ausência deste documento impedirá a aprovação de uma pendência.
+                    </p>
+                    <label className="flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={newDocIsUnique}
+                        onChange={(e) => setNewDocIsUnique(e.target.checked)}
+                        disabled={!selectedSubgroup || isCreatingDocument}
+                      />
+                      Este é um documento único?
+                    </label>
+                    <p className="text-xs text-gray-500 ml-6 -mt-1">
+                      Marque se o funcionário só puder anexar um arquivo deste tipo.
+                    </p>
+                  </div>
 
-                      {/* Único? */}
-                      <label className="flex items-center gap-2">
+                  <Button
+                    onClick={createMatrixEntry}
+                    disabled={!selectedSubgroup || isCreatingDocument}
+                    className="w-full mt-4"
+                  >
+                    {isCreatingDocument ? "Criando..." : "Criar Documento"}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Lista e Edição de Documentos (EXISTENTE) */}
+              <h3 className="text-lg font-semibold mt-6 mb-2">
+                Documentos do Subgrupo
+              </h3>
+              {!selectedSubgroup ? (
+                <p className="text-gray-500">Selecione um subgrupo para visualizar os documentos.</p>
+              ) : isLoadingDocsList ? (
+                <p className="text-gray-500">Carregando documentos…</p>
+              ) : docsList.length > 0 ? (
+                <>
+                  <ul className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+                    {docsList.map((doc) => (
+                      <li
+                        key={doc.idDocumentMatrix}
+                        className="p-3 border rounded-md hover:bg-gray-100 cursor-pointer transition-colors"
+                        onClick={() => handleSelectMatrixEntry(doc)}
+                      >
+                        <strong className="block">{doc.name}</strong>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {doc.expirationDateAmount > 0 
+                            ? `Validade: ${doc.expirationDateAmount} ${expirationUnits.find(u => u.value === doc.expirationDateUnit)?.label}`
+                            : 'Sem validade padrão'}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {selectedMatrixEntry && (
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg shadow-inner space-y-4">
+                      <h3 className="text-lg font-semibold">
+                        Editar Documento
+                      </h3>
+                      <div>
+                        <label htmlFor="editName" className="block text-sm font-medium mb-1">
+                          Nome do Documento
+                        </label>
                         <input
-                          type="checkbox"
-                          checked={editIsDocumentUnique}
-                          onChange={(e) =>
-                            setEditIsDocumentUnique(e.target.checked)
-                          }
+                          id="editName"
+                          className="w-full p-2 border rounded-md"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
                         />
-                        Documento único
-                      </label>
+                      </div>
+                      <div>
+                        <label htmlFor="editType" className="block text-sm font-medium mb-1">
+                          Tipo de Arquivo
+                        </label>
+                        <input
+                          id="editType"
+                          className="w-full p-2 border rounded-md"
+                          value={editType}
+                          onChange={(e) => setEditType(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <p className="block text-sm font-medium mb-1">
+                          Validade
+                        </p>
+                        <div className="flex gap-2 items-end">
+                          <div className="w-1/3">
+                            <label htmlFor="editExpAmount" className="sr-only">Quantidade</label>
+                            <input
+                              id="editExpAmount"
+                              type="number"
+                              min={0}
+                              className="w-full p-2 border rounded-md"
+                              value={editExpirationAmount}
+                              onChange={(e) =>
+                                setEditExpirationAmount(Number(e.target.value))
+                              }
+                            />
+                          </div>
+                          <div className="w-2/3">
+                            <label htmlFor="editExpUnit" className="sr-only">Unidade</label>
+                            <select
+                              id="editExpUnit"
+                              className="w-full p-2 border rounded-md"
+                              value={editExpirationUnit}
+                              onChange={(e) =>
+                                setEditExpirationUnit(e.target.value)
+                              }
+                            >
+                              {expirationUnits.map((u) => (
+                                <option key={u.value} value={u.value}>
+                                  {u.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
 
-                      {/* Ações */}
-                      <div className="flex gap-2">
-                        <Button onClick={saveMatrixEntry}>Salvar</Button>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-sm font-medium">
+                          <input
+                            type="checkbox"
+                            checked={editDoesBlock}
+                            onChange={(e) => setEditDoesBlock(e.target.checked)}
+                          />
+                          Bloqueia pendência
+                        </label>
+                        <label className="flex items-center gap-2 text-sm font-medium">
+                          <input
+                            type="checkbox"
+                            checked={editIsDocumentUnique}
+                            onChange={(e) =>
+                              setEditIsDocumentUnique(e.target.checked)
+                            }
+                          />
+                          Documento único
+                        </label>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button onClick={saveMatrixEntry} className="w-full">Salvar Alterações</Button>
                         <Button
                           onClick={() => setSelectedMatrixEntry(null)}
-                          className="bg-gray-300 text-black"
+                          className="w-full bg-gray-300 text-black hover:bg-gray-400"
                         >
                           Cancelar
                         </Button>

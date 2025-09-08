@@ -25,6 +25,7 @@ export function ValidateSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amountEdit, setAmountEdit] = useState(0);
   const [doesBlockEdit, setBlockEdit] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!idBranch || !documentTypeName) return;
@@ -61,21 +62,19 @@ export function ValidateSection({
   };
 
   const handleSave = async (id: string) => {
+    setIsSaving(true);
     try {
       const token = localStorage.getItem("tokenClient");
       if (!token) {
         console.error("Token não encontrado.");
         return;
       }
-
       const payload = {
         expirationDateAmount: amountEdit,
         expirationDateUnit: "MONTHS",
         doesBlock: doesBlockEdit,
       };
-
       console.log("🔁 Enviando para API:", payload);
-
       const response = await axios.post(
         `${ip}/document/branch/document-matrix/expiration/update/${id}`,
         payload,
@@ -88,9 +87,7 @@ export function ValidateSection({
           },
         }
       );
-
       console.log("✅ Sucesso:", response.data);
-
       setExpirationList((prev) =>
         prev.map((doc) =>
           doc.idDocument === id
@@ -103,13 +100,14 @@ export function ValidateSection({
             : doc
         )
       );
-
       setEditingId(null);
     } catch (err: any) {
       console.error("❌ Erro ao salvar validade:", err);
       if (err.response) {
         console.error("📄 Detalhes do erro:", err.response.data);
       }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -142,6 +140,7 @@ export function ValidateSection({
                       setAmountEdit(value === "" ? 0 : parseInt(value, 10));
                     }}
                     className="w-20 border px-1 py-0.5"
+                    disabled={isSaving}
                   />
                 </td>
                 <td className="px-2 py-1 text-center">
@@ -149,14 +148,16 @@ export function ValidateSection({
                     type="checkbox"
                     checked={doesBlockEdit}
                     onChange={() => setBlockEdit(!doesBlockEdit)}
+                    disabled={isSaving}
                   />
                 </td>
                 <td className="px-2 py-1">
                   <button
                     onClick={() => handleSave(doc.idDocument)}
                     className="text-green-600 font-semibold text-sm"
+                    disabled={isSaving}
                   >
-                    Salvar
+                    {isSaving ? "Salvando..." : "Salvar"} {/* 4. Muda o texto do botão */}
                   </button>
                 </td>
               </>
