@@ -13,6 +13,7 @@ interface boxSelectedProps {
 export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
   const { documents: selectedDocs, setDocuments } = useDocument();
   const [checkedDocs, setCheckedDocs] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     setCheckedDocs(selectedDocs.map((doc: any) => doc.idDocument));
@@ -35,6 +36,10 @@ export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
       }
     });
   };
+
+  const filteredDocuments = documents.filter((document) =>
+    document.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -64,12 +69,18 @@ export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
       <div className="border p-5 shadow-md w-[35vw]">
         <div className="flex items-center gap-2 rounded-md border p-2">
           <Search />
-          <input className="outline-none" />
+          <input
+            className="outline-none"
+            type="text"
+            placeholder="Buscar documentos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <ScrollArea className="h-[30vh]">
           <div>
-            {Array.isArray(documents) && documents.length > 0 ? (
-              documents.map((document: any) => (
+            {Array.isArray(filteredDocuments) && filteredDocuments.length > 0 ? (
+              filteredDocuments.map((document: any) => (
                 <label
                   key={document.idDocument}
                   className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
@@ -91,7 +102,9 @@ export function BoxSelected({ documents, isLoading }: boxSelectedProps) {
               ))
             ) : (
               <p className="text-sm text-gray-500">
-                Nenhum documento encontrado.
+                {searchTerm
+                  ? "Nenhum documento encontrado com este termo."
+                  : "Nenhum documento encontrado."}
               </p>
             )}
           </div>
