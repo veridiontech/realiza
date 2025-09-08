@@ -119,11 +119,13 @@ export function ThirdCompany() {
     setIsLoading(false);
   };
 
+  const branchesToReplicate = branch.filter(b => b.idBranch !== selectedBranch?.idBranch);
+
   const toggleSelectAll = () => {
-    if (selectedBranches.length === branch.length) {
+    if (selectedBranches.length === branchesToReplicate.length) {
       setSelectedBranches([]);
     } else {
-      setSelectedBranches(branch.map((b) => b.idBranch));
+      setSelectedBranches(branchesToReplicate.map((b) => b.idBranch));
     }
   };
 
@@ -174,19 +176,19 @@ export function ThirdCompany() {
                       <label htmlFor="branches" className="block text-sm font-medium">
                         Selecione as filiais para replicar:
                       </label>
-
                       <div className="flex items-center gap-2">
+                        {/* 2. Usa a lista filtrada para o "Selecionar todas" */}
                         <input
                           type="checkbox"
-                          checked={selectedBranches.length === branch.length}
+                          checked={selectedBranches.length === branchesToReplicate.length}
                           onChange={toggleSelectAll}
                           className="h-4 w-4"
                         />
                         <span>Selecionar todas as filiais</span>
                       </div>
-
                       <div className="mt-2">
-                        {branch.map((branch: any) => (
+                        {/* 3. Usa a lista filtrada para o map */}
+                        {branchesToReplicate.map((branch: any) => (
                           <div key={branch.idBranch} className="flex items-center gap-2">
                             <input
                               type="checkbox"
@@ -225,7 +227,6 @@ export function ThirdCompany() {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-
           <div>
             <AlertDialog>
               <AlertDialogTrigger
@@ -261,25 +262,24 @@ export function ThirdCompany() {
                     />
                     Deseja replicar essa alteração para outras filiais?
                   </label>
-
                   {replicate && (
                     <div className="mt-2">
                       <label htmlFor="branches" className="block text-sm font-medium">
                         Selecione as filiais para replicar:
                       </label>
-
                       <div className="flex items-center gap-2">
+                        {/* 2. Usa a lista filtrada para o "Selecionar todas" */}
                         <input
                           type="checkbox"
-                          checked={selectedBranches.length === branch.length}
+                          checked={selectedBranches.length === branchesToReplicate.length}
                           onChange={toggleSelectAll}
                           className="h-4 w-4"
                         />
                         <span>Selecionar todas as filiais</span>
                       </div>
-
                       <div className="mt-2">
-                        {branch.map((branch: any) => (
+                        {/* 3. Usa a lista filtrada para o map */}
+                        {branchesToReplicate.map((branch: any) => (
                           <div key={branch.idBranch} className="flex items-center gap-2">
                             <input
                               type="checkbox"
