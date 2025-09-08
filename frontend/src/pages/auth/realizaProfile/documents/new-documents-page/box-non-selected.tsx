@@ -16,6 +16,7 @@ export function BoxNonSelected({
 }: BoxNonSelectedDocuments) {
   const { documents: nonSelected, setNonSelected } = useDocument();
   const [checkedDocs, setCheckedDocs] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     setCheckedDocs(nonSelected.map((doc: any) => doc.idDocument));
@@ -38,6 +39,10 @@ export function BoxNonSelected({
       }
     });
   };
+
+  const filteredDocuments = documents.filter((document) =>
+    document.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -68,13 +73,19 @@ export function BoxNonSelected({
       <div className="border p-5 shadow-md w-[35vw]">
         <div className="flex items-center gap-2 rounded-md border p-2">
           <Search />
-          <input className="outline-none" />
+          <input
+            className="outline-none"
+            type="text"
+            placeholder="Buscar documentos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <ScrollArea className="h-[30vh]">
           <div>
-            {Array.isArray(documents) && documents.length > 0 ? (
-              documents.map((document: any) => (
-                <label 
+            {Array.isArray(filteredDocuments) && filteredDocuments.length > 0 ? (
+              filteredDocuments.map((document: any) => (
+                <label
                   key={document.idDocument}
                   className="cursor-pointer rounded-sm p-1 hover:bg-gray-200 flex items-center gap-2"
                 >
@@ -90,11 +101,13 @@ export function BoxNonSelected({
                     }
                   />
                   <span>{document.title || "Documento"}</span>
-                </label >
+                </label>
               ))
             ) : (
               <p className="text-sm text-gray-500">
-                Nenhum documento encontrado.
+                {searchTerm
+                  ? "Nenhum documento encontrado com este termo."
+                  : "Nenhum documento encontrado."}
               </p>
             )}
           </div>
