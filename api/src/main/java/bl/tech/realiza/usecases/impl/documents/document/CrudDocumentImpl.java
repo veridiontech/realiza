@@ -495,7 +495,7 @@ public class CrudDocumentImpl implements CrudDocument {
         while (documents.hasContent()) {
             List<Document> filteredDocuments = documents.stream()
                     .filter(document -> !(document instanceof DocumentEmployee documentEmployee
-                            && documentEmployee.getEmployee().getContracts().isEmpty()))
+                            && documentEmployee.getEmployee().getContractEmployees().isEmpty()))
                     .toList();
             List<Document> documentBatch = new ArrayList<>(50);
             List<Document> updateDocumentValidityDoneBatch = new ArrayList<>(50);

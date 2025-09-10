@@ -2,10 +2,7 @@ package bl.tech.realiza.services.queue.setup;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.ContractDocument;
-import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
-import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.*;
 import bl.tech.realiza.domains.contract.activity.Activity;
 import bl.tech.realiza.domains.contract.activity.ActivityDocuments;
 import bl.tech.realiza.domains.contract.serviceType.ServiceTypeBranch;
@@ -23,10 +20,7 @@ import bl.tech.realiza.domains.user.security.ProfileRepo;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.contracts.*;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityDocumentRepository;
 import bl.tech.realiza.gateways.repositories.contracts.activity.ActivityRepository;
 import bl.tech.realiza.gateways.repositories.contracts.serviceType.ServiceTypeBranchRepository;
@@ -83,6 +77,7 @@ public class SetupService {
     private final ContractDocumentRepository contractDocumentRepository;
     private final CrudBranch crudBranch;
     private final CrudProfile crudProfile;
+    private final ContractEmployeeRepository contractEmployeeRepository;
 
     public void setupNewClient(String clientId) {
         log.info("Started setup client ⌛ {}", clientId);
@@ -663,7 +658,7 @@ public class SetupService {
         List<Employee> employees = employeeRepository.findAllById(employeeIds);
 
         for (Employee employee : employees) {
-            if (employee.getContracts().isEmpty() && !employee.getSituation().equals(Employee.Situation.DESALOCADO)) {
+            if (employee.getContractEmployees().isEmpty() && !employee.getSituation().equals(Employee.Situation.DESALOCADO)) {
                 employee.setSituation(Employee.Situation.DESALOCADO);
             }
             List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository.findAllByEmployee_IdEmployee(employee.getIdEmployee());
@@ -685,7 +680,11 @@ public class SetupService {
             }
             contractRepository.save(contract);
             documentEmployeeRepository.saveAll(documentEmployeeList);
-            employee.getContracts().remove(contract);
+            ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contract.getIdContract(), employee.getIdEmployee())
+                            .orElse(null);
+            if (contractEmployee != null) {
+                contractEmployeeRepository.deleteById(contractEmployee.getId());
+            }
         }
 
         employeeRepository.saveAll(employees);

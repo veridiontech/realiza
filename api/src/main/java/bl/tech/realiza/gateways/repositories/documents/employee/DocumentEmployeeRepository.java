@@ -14,13 +14,9 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
     Page<DocumentEmployee> findAllByEmployee_IdEmployee(String idSearch, Pageable pageable);
     Page<DocumentEmployee> findAllByEmployee_IdEmployeeAndType(String idSearch, String type, Pageable pageable);
     List<DocumentEmployee> findAllByEmployee_IdEmployee(String idSearch);
-    List<DocumentEmployee> findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(String employeeId, String contractId);
-    List<DocumentEmployee> findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContractAndConformingAndDocumentMatrix_DoesBlock(String employeeId, String contractId, Boolean conforming, Boolean doesBlock);
+    List<DocumentEmployee> findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContractAndConformingAndDoesBlock(String employeeId, String contractId, Boolean conforming, Boolean doesBlock);
     List<DocumentEmployee> findAllByEmployee_Supplier_IdProvider(String idProvider);
     List<DocumentEmployee> findAllByEmployee_Subcontract_IdProvider(String idProvider);
-    Long countByEmployee_Branch_IdBranchAndStatus(String branchId, Document.Status status);
-    Long countByEmployee_Supplier_IdProviderAndStatus(String supplierId, Document.Status status);
-    Long countByEmployee_Subcontract_IdProviderAndStatus(String subcontractorId, Document.Status status);
 
     @Query("""
     SELECT
@@ -28,7 +24,8 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
             SUM(CASE WHEN de.status = :status THEN 1 ELSE 0 END) AS pendentes
     FROM DocumentEmployee de
     JOIN de.employee e
-    JOIN e.contracts c
+    JOIN e.contractEmployees ce
+    JOIN ce.contract c
     JOIN ContractProviderSupplier cps ON cps.idContract = c.idContract
     WHERE cps.finished = false
         AND e.situation = 0
@@ -44,7 +41,8 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
         de.type, de.status, COUNT(de)
     FROM DocumentEmployee de
     JOIN de.employee e
-    JOIN e.contracts c
+    JOIN e.contractEmployees ce
+    JOIN ce.contract c
     JOIN ContractProviderSupplier cps ON cps.idContract = c.idContract
     WHERE cps.finished = false
         AND e.situation = 0
@@ -59,7 +57,8 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
             SUM(CASE WHEN de.status = :status THEN 1 ELSE 0 END) AS pendentes
     FROM DocumentEmployee de
     JOIN de.employee e
-    JOIN e.contracts c
+    JOIN e.contractEmployees ce
+    JOIN ce.contract c
     JOIN ContractProviderSubcontractor cpsub ON cpsub.idContract = c.idContract
     JOIN cpsub.contractProviderSupplier cpsup
     WHERE cpsub.finished = false
@@ -70,26 +69,6 @@ public interface DocumentEmployeeRepository extends JpaRepository<DocumentEmploy
             @Param("branchId") String branchId,
             @Param("status") Document.Status status
     );
-
-    @Query("""
-    SELECT COUNT(d)
-    FROM DocumentEmployee d
-    JOIN d.employee e
-    JOIN e.contracts c
-    JOIN ContractProviderSupplier cps ON TYPE(c) = ContractProviderSupplier
-    WHERE cps.branch.idBranch = :branchId AND d.status = :status
-""")
-    Long countByBranchIdAndStatus(@Param("branchId") String branchId, @Param("status") Document.Status status);
-
-    @Query("""
-    SELECT COUNT(d)
-    FROM DocumentEmployee d
-    JOIN d.employee e
-    JOIN e.contracts c
-    JOIN ContractProviderSupplier cps ON TYPE(c) = ContractProviderSupplier
-    WHERE cps.branch.idBranch = :branchId
-""")
-    Long countByBranchId(@Param("branchId") String branchId);
 
     @Query("""
     SELECT COUNT(d) > 0 FROM DocumentEmployee d

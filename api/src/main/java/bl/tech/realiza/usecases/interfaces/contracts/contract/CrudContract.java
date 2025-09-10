@@ -16,4 +16,5 @@ public interface CrudContract {
     String removeEmployeeToContract(String idContract, EmployeeToContractRequestDto employeeToContractRequestDto);
     Page<ContractByEmployeeResponseDto> getContractByEmployee(Pageable pageable, String idEmployee);
     List<ContractByBranchIdsResponseDto> getContractByBranchIds(List<String> branchIds);
+    String integrateEmployeeToContract(String contractId, String employeeId);
 }

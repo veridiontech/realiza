@@ -2,10 +2,7 @@ package bl.tech.realiza.usecases.impl;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.ContractDocument;
-import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
-import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.*;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
@@ -19,10 +16,7 @@ import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.domains.user.UserClient;
 import bl.tech.realiza.exceptions.NotFoundException;
-import bl.tech.realiza.gateways.repositories.contracts.ContractDocumentRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSubcontractorRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractProviderSupplierRepository;
-import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
+import bl.tech.realiza.gateways.repositories.contracts.*;
 import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.providers.ProviderRepository;
@@ -64,6 +58,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static bl.tech.realiza.domains.contract.Contract.IsActive.*;
 import static bl.tech.realiza.domains.enums.AuditLogActionsEnum.*;
@@ -91,6 +86,7 @@ public class CrudItemManagementImpl implements CrudItemManagement {
     private final ProviderSubcontractorRepository providerSubcontractorRepository;
     private final ContractProviderSubcontractorRepository contractProviderSubcontractorRepository;
     private final EmployeeRepository employeeRepository;
+    private final ContractEmployeeRepository contractEmployeeRepository;
 
     @Override
     public ItemManagementUserResponseDto saveUserSolicitation(ItemManagementUserRequestDto itemManagementUserRequestDto) {
@@ -315,14 +311,28 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             contract.setEndDate(Date.valueOf(LocalDate.now()));
                             List<Employee> employeesToSave = new ArrayList<>();
                             List<Employee> employeesToRemove = new ArrayList<>();
-                            for (Employee employee : contract.getEmployees()) {
-                                employee.getContracts().remove(contract);
-                                if (employee.getContracts().isEmpty()) {
-                                    employee.setSituation(Employee.Situation.DESALOCADO);
+                            for (ContractEmployee contractEmployee1 : contract.getEmployeeContracts()) {
+                                ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contract.getIdContract(), contractEmployee1.getEmployee().getIdEmployee())
+                                                .orElse(null);
+                                if (contractEmployee != null) {
+                                    contractEmployeeRepository.deleteById(contractEmployee.getId());
                                 }
-                                employeesToSave.add(employee);
-                                employeesToRemove.add(employee);
+                                if (contractEmployee1.getEmployee().getContractEmployees().isEmpty()) {
+                                    contractEmployee1.getEmployee().setSituation(Employee.Situation.DESALOCADO);
+                                }
+                                employeesToSave.add(contractEmployee1.getEmployee());
+                                employeesToRemove.add(contractEmployee1.getEmployee());
                                 if (employeesToSave.size() >= 50) {
+                                    for (Employee employee : employeesToSave) {
+                                        ContractEmployee saveContractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contract.getIdContract(), employee.getIdEmployee())
+                                                .orElse(null);
+                                        if (saveContractEmployee != null) {
+                                            contractEmployeeRepository.save(ContractEmployee.builder()
+                                                            .contract(contract)
+                                                            .employee(employee)
+                                                    .build());
+                                        }
+                                    }
                                     employeeRepository.saveAll(employeesToSave);
                                     employeesToSave.clear();
                                 }
@@ -330,7 +340,13 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                             if (!employeesToSave.isEmpty()) {
                                 employeeRepository.saveAll(employeesToSave);
                             }
-                            contract.getEmployees().removeAll(employeesToRemove);
+                            for (Employee employee : employeesToRemove) {
+                                ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contract.getIdContract(), employee.getIdEmployee())
+                                                .orElse(null);
+                                if (contractEmployee != null) {
+                                    contractEmployeeRepository.deleteById(contractEmployee.getId());
+                                }
+                            }
 
                             contract = contractRepository.save(contract);
 
@@ -342,14 +358,28 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                     subcontract.setEndDate(Date.valueOf(LocalDate.now()));
                                     List<Employee> subEmployeesToSave = new ArrayList<>();
                                     List<Employee> subEmployeesToRemove = new ArrayList<>();
-                                    for (Employee employee : subcontract.getEmployees()) {
-                                        employee.getContracts().remove(subcontract);
-                                        if (employee.getContracts().isEmpty()) {
+                                    for (Employee employee : subcontract.getEmployeeContracts().stream().map(ContractEmployee::getEmployee).collect(Collectors.toList())) {
+                                        ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(subcontract.getIdContract(), employee.getIdEmployee())
+                                                .orElse(null);
+                                        if (contractEmployee != null) {
+                                            contractEmployeeRepository.deleteById(contractEmployee.getId());
+                                        }
+                                        if (employee.getContractEmployees().isEmpty()) {
                                             employee.setSituation(Employee.Situation.DESALOCADO);
                                         }
                                         subEmployeesToSave.add(employee);
                                         subEmployeesToRemove.add(employee);
                                         if (subEmployeesToSave.size() >= 50) {
+                                            for (Employee subcontractedEmployee : employeesToSave) {
+                                                ContractEmployee saveContractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(subcontract.getIdContract(), subcontractedEmployee.getIdEmployee())
+                                                        .orElse(null);
+                                                if (saveContractEmployee != null) {
+                                                    contractEmployeeRepository.save(ContractEmployee.builder()
+                                                            .contract(subcontract)
+                                                            .employee(subcontractedEmployee)
+                                                            .build());
+                                                }
+                                            }
                                             employeeRepository.saveAll(subEmployeesToSave);
                                             subEmployeesToSave.clear();
                                         }
@@ -357,7 +387,13 @@ public class CrudItemManagementImpl implements CrudItemManagement {
                                     if (!subEmployeesToSave.isEmpty()) {
                                         employeeRepository.saveAll(subEmployeesToSave);
                                     }
-                                    subcontract.getEmployees().removeAll(subEmployeesToRemove);
+                                    for (Employee employee : subEmployeesToRemove) {
+                                        ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(subcontract.getIdContract(), employee.getIdEmployee())
+                                                .orElse(null);
+                                        if (contractEmployee != null) {
+                                            contractEmployeeRepository.deleteById(contractEmployee.getId());
+                                        }
+                                    }
 
                                     subcontract = contractRepository.save(subcontract);
                                     contractProviderSubcontractorRepository.save(subcontract);

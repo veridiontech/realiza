@@ -20,7 +20,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -81,8 +83,11 @@ public abstract class Contract {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContractDocument> contractDocuments;
 
-    @ManyToMany(mappedBy = "contracts")
-    private List<Employee> employees;
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<ContractEmployee> employeeContracts = new HashSet<>();
+
+//    @ManyToMany(mappedBy = "contracts")
+//    private List<Employee> employees;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     private List<DocumentContract> documentContracts;

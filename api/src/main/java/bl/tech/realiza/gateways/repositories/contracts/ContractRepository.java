@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface ContractRepository extends JpaRepository<Contract, String> {
     Collection<Contract> findAllByDeleteRequest(boolean b);
-    Page<Contract> findAllByEmployees_IdEmployee(String idEmployee, Pageable pageable);
+    Page<Contract> findAllByEmployeeContracts_Employee_IdEmployee(String idEmployee, Pageable pageable);
 
     @Query("""
     SELECT new bl.tech.realiza.gateways.responses.contracts.contract.ContractByBranchIdsResponseDto(

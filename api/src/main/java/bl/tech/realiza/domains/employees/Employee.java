@@ -3,6 +3,8 @@ package bl.tech.realiza.domains.employees;
 import bl.tech.realiza.domains.auditLogs.employee.AuditLogEmployee;
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractDocument;
+import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -17,7 +19,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -86,13 +90,16 @@ public abstract class Employee {
     @OneToOne
     private FileDocument profilePicture;
 
-    @ManyToMany
-    @JoinTable(
-            name = "EMPLOYEE_CONTRACT",
-            joinColumns = @JoinColumn(name = "idEmployee"),
-            inverseJoinColumns = @JoinColumn(name = "idContract", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
-    )
-    private List<Contract> contracts;
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<ContractEmployee> contractEmployees = new HashSet<>();
+
+//    @ManyToMany
+//    @JoinTable(
+//            name = "EMPLOYEE_CONTRACT",
+//            joinColumns = @JoinColumn(name = "idEmployee"),
+//            inverseJoinColumns = @JoinColumn(name = "idContract", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+//    )
+//    private List<Contract> contracts;
 
     // -------------------------------
     // Relacionamentos CONTRATUAIS

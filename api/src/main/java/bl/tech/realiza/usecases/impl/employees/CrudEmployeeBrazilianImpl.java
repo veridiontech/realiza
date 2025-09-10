@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
@@ -18,6 +19,7 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
@@ -41,8 +43,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,6 +66,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
     private final CboRepository cboRepository;
     private final PositionRepository positionRepository;
     private final GoogleCloudService googleCloudService;
+    private final ContractEmployeeRepository contractEmployeeRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeBrazilianRequestDto employeeBrazilianRequestDto) {
@@ -78,6 +83,7 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
         List<DocumentMatrix> documentMatrixList = List.of();
+        Set<ContractEmployee> contractEmployees = new HashSet<>();
 
         if (employeeBrazilianRequestDto.getIdContracts() != null && !employeeBrazilianRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeBrazilianRequestDto.getIdContracts());
@@ -155,10 +161,32 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .branch(branch)
                 .supplier(providerSupplier)
                 .subcontract(providerSubcontractor)
-                .contracts(contracts)
+//                .contracts(contracts)
                 .build();
 
+        if (!contracts.isEmpty()) {
+            for (Contract contract : contracts) {
+                ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contract.getIdContract(), newEmployeeBrazilian.getIdEmployee())
+                        .orElse(null);
+                if (contractEmployee == null) {
+                    contractEmployees.add(ContractEmployee.builder()
+                            .contract(contract)
+                            .employee(newEmployeeBrazilian)
+                        .build());
+                } else {
+                    contractEmployees.add(contractEmployee);
+                }
+            }
+            if (newEmployeeBrazilian.getContractEmployees() != null) {
+                newEmployeeBrazilian.getContractEmployees().addAll(contractEmployees);
+            } else {
+                newEmployeeBrazilian.setContractEmployees(contractEmployees);
+            }
+        }
+
+
         EmployeeBrazilian savedEmployeeBrazilian = employeeBrazilianRepository.save(newEmployeeBrazilian);
+        contractEmployeeRepository.saveAll(contractEmployees);
 
         List<DocumentEmployee> documentEmployeeList = documentMatrixList.stream()
                 .map(docMatrix -> DocumentEmployee.builder()
@@ -208,10 +236,14 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
-                .contracts(savedEmployeeBrazilian.getContracts().stream().map(
+                .contracts(savedEmployeeBrazilian.getContractEmployees().stream().map(
                         contract -> EmployeeResponseDto.ContractDto.builder()
-                                .idContract(contract.getIdContract())
-                                .serviceName(contract.getServiceName())
+                                .idContract(contract.getContract() != null
+                                        ? contract.getContract().getIdContract()
+                                        : null)
+                                .serviceName(contract.getContract() != null
+                                        ? contract.getContract().getServiceName()
+                                        : null)
                                 .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -274,10 +306,14 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .subcontract(employeeBrazilian.getSubcontract() != null
                         ? employeeBrazilian.getSubcontract().getIdProvider()
                         : null)
-                .contracts(employeeBrazilian.getContracts().stream().map(
+                .contracts(employeeBrazilian.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                                ? contract.getContract().getIdContract()
+                                                : null)
+                                        .serviceName(contract.getContract() != null
+                                                ? contract.getContract().getServiceName()
+                                                : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -336,10 +372,14 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                             .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                             .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
-                            .contracts(employeeBrazilian.getContracts().stream().map(
+                            .contracts(employeeBrazilian.getContractEmployees().stream().map(
                                             contract -> EmployeeResponseDto.ContractDto.builder()
-                                                    .idContract(contract.getIdContract())
-                                                    .serviceName(contract.getServiceName())
+                                                    .idContract(contract.getContract() != null
+                                                            ? contract.getContract().getIdContract()
+                                                            : null)
+                                                    .serviceName(contract.getContract() != null
+                                                            ? contract.getContract().getServiceName()
+                                                            : null)
                                                     .build())
                                     .collect(Collectors.toList()))
                             .build();
@@ -452,9 +492,9 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
         employeeBrazilian.setAdmissionDate(employeeBrazilianRequestDto.getAdmissionDate() != null
                 ? employeeBrazilianRequestDto.getAdmissionDate()
                 : employeeBrazilian.getAdmissionDate());
-        employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null
-                ? contracts
-                : employeeBrazilian.getContracts());
+//        employeeBrazilian.setContracts(employeeBrazilianRequestDto.getIdContracts() != null
+//                ? contracts
+//                : employeeBrazilian.getContracts());
         employeeBrazilian.setCpf(employeeBrazilianRequestDto.getCpf() != null
                 ? employeeBrazilianRequestDto.getCpf()
                 : employeeBrazilian.getCpf());
@@ -498,10 +538,14 @@ public class CrudEmployeeBrazilianImpl implements CrudEmployeeBrazilian {
                 .branch(savedEmployeeBrazilian.getBranch() != null ? savedEmployeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeBrazilian.getSupplier() != null ? savedEmployeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeBrazilian.getSubcontract() != null ? savedEmployeeBrazilian.getSubcontract().getIdProvider() : null)
-                .contracts(savedEmployeeBrazilian.getContracts().stream().map(
+                .contracts(savedEmployeeBrazilian.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                                ? contract.getContract().getIdContract()
+                                                : null)
+                                        .serviceName(contract.getContract() != null
+                                                ? contract.getContract().getServiceName()
+                                                : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();

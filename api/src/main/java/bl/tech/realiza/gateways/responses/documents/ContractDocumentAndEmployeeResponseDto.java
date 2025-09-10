@@ -1,6 +1,5 @@
 package bl.tech.realiza.gateways.responses.documents;
 
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.Document.Status;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -42,6 +41,7 @@ public class ContractDocumentAndEmployeeResponseDto {
         private String id;
         private String name;
         private String cboTitle;
-        private Boolean hasEntryPermission;
+        private Boolean documentsConformity;
+        private Boolean integrated;
     }
 }

@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.employees.EmployeeForeigner;
@@ -105,10 +106,14 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                             .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                             .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
-                            .contracts(employeeBrazilian.getContracts().stream().map(
+                            .contracts(employeeBrazilian.getContractEmployees().stream().map(
                                             contract -> EmployeeResponseDto.ContractDto.builder()
-                                                    .idContract(contract.getIdContract())
-                                                    .serviceName(contract.getServiceName())
+                                                    .idContract(contract.getContract() != null
+                                                            ? contract.getContract().getIdContract()
+                                                            : null)
+                                                    .serviceName(contract.getContract() != null
+                                                            ? contract.getContract().getServiceName()
+                                                            : null)
                                                     .build())
                                     .collect(Collectors.toList()))
                             .build();
@@ -164,10 +169,14 @@ public class CrudEmployeeImpl implements CrudEmployee {
                             .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
                             .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
                             .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
-                            .contracts(employeeForeigner.getContracts().stream().map(
+                            .contracts(employeeForeigner.getContractEmployees().stream().map(
                                             contract -> EmployeeResponseDto.ContractDto.builder()
-                                                    .idContract(contract.getIdContract())
-                                                    .serviceName(contract.getServiceName())
+                                                    .idContract(contract.getContract() != null
+                                                            ? contract.getContract().getIdContract()
+                                                            : null)
+                                                    .serviceName(contract.getContract() != null
+                                                            ? contract.getContract().getServiceName()
+                                                            : null)
                                                     .build())
                                     .collect(Collectors.toList()))
                             .build();
@@ -193,7 +202,7 @@ public class CrudEmployeeImpl implements CrudEmployee {
         Contract contract = contractRepository.findById(idContract)
                 .orElseThrow(() -> new NotFoundException("Contract not found"));
 
-        List<Employee> employees = contract.getEmployees();
+        List<Employee> employees = contract.getEmployeeContracts().stream().map(ContractEmployee::getEmployee).collect(Collectors.toList());
 
         List<EmployeeBrazilian> brazilians = new ArrayList<>();
         List<EmployeeForeigner> foreigners = new ArrayList<>();
@@ -307,10 +316,14 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .branch(employeeBrazilian.getBranch() != null ? employeeBrazilian.getBranch().getIdBranch() : null)
                 .supplier(employeeBrazilian.getSupplier() != null ? employeeBrazilian.getSupplier().getIdProvider() : null)
                 .subcontract(employeeBrazilian.getSubcontract() != null ? employeeBrazilian.getSubcontract().getIdProvider() : null)
-                .contracts(employeeBrazilian.getContracts().stream().map(
+                .contracts(employeeBrazilian.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                        ? contract.getContract().getIdContract()
+                                        : null)
+                                .serviceName(contract.getContract() != null
+                                        ? contract.getContract().getServiceName()
+                                        : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -375,10 +388,14 @@ public class CrudEmployeeImpl implements CrudEmployee {
                 .subcontract(employeeForeigner.getSubcontract() != null
                         ? employeeForeigner.getSubcontract().getIdProvider()
                         : null)
-                .contracts(employeeForeigner.getContracts().stream().map(
+                .contracts(employeeForeigner.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                        ? contract.getContract().getIdContract()
+                                        : null)
+                                .serviceName(contract.getContract() != null
+                                        ? contract.getContract().getServiceName()
+                                        : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();
