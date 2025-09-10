@@ -19,6 +19,7 @@ public class ContractSubcontractorResponseDto {
     private String responsible;
     private Contract.ExpenseType expenseType;
     private String contractReference;
+    private Integer subcontractLevel;
     private String idContractSupplier;
     private Boolean finished;
     private Date dateStart;
