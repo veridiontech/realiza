@@ -18,6 +18,7 @@ public class ContractRequestDto {
     private Contract.ExpenseType expenseType;
     private Boolean labor;
     private Boolean hse;
+    private Integer subcontractLevel;
     private Date startDate;
     private Date endDate;
     private String cnpj;

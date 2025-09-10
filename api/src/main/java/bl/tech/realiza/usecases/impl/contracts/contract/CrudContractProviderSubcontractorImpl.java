@@ -116,6 +116,9 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                 .hse(contractProviderSubcontractorRequestDto.getHse())
                 .responsible(contractProviderSupplier.getResponsible())
                 .expenseType(contractProviderSubcontractorRequestDto.getExpenseType())
+                .subcontractLevel(contractProviderSubcontractorRequestDto.getSubcontractLevel() != null
+                        ? contractProviderSubcontractorRequestDto.getSubcontractLevel()
+                        : 1)
                 .contractProviderSupplier(contractProviderSupplier)
                 .activities(activities)
                 .providerSubcontractor(newProviderSubcontractor)
@@ -184,14 +187,33 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
             }
         }
 
-        contractProviderSubcontractor.setServiceName(contractProviderSubcontractorRequestDto.getServiceName() != null ? contractProviderSubcontractorRequestDto.getServiceName() : contractProviderSubcontractor.getServiceName());
-        contractProviderSubcontractor.setContractReference(contractProviderSubcontractorRequestDto.getContractReference() != null ? contractProviderSubcontractorRequestDto.getContractReference() : contractProviderSubcontractor.getContractReference());
-        contractProviderSubcontractor.setDescription(contractProviderSubcontractorRequestDto.getDescription() != null ? contractProviderSubcontractorRequestDto.getDescription() : contractProviderSubcontractor.getDescription());
-        contractProviderSubcontractor.setResponsible(contractProviderSubcontractorRequestDto.getResponsible() != null ? userProviderSupplier : contractProviderSubcontractor.getResponsible());
-        contractProviderSubcontractor.setExpenseType(contractProviderSubcontractorRequestDto.getExpenseType() != null ? contractProviderSubcontractorRequestDto.getExpenseType() : contractProviderSubcontractor.getExpenseType());
-        contractProviderSubcontractor.setDateStart(contractProviderSubcontractorRequestDto.getStartDate() != null ? contractProviderSubcontractorRequestDto.getStartDate() : contractProviderSubcontractor.getDateStart());
-        contractProviderSubcontractor.setEndDate(contractProviderSubcontractorRequestDto.getEndDate() != null ? contractProviderSubcontractorRequestDto.getEndDate() : contractProviderSubcontractor.getEndDate());
-        contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getIdActivities() != null ? activities : contractProviderSubcontractor.getActivities());
+        contractProviderSubcontractor.setServiceName(contractProviderSubcontractorRequestDto.getServiceName() != null
+                ? contractProviderSubcontractorRequestDto.getServiceName()
+                : contractProviderSubcontractor.getServiceName());
+        contractProviderSubcontractor.setSubcontractLevel(contractProviderSubcontractorRequestDto.getSubcontractLevel() != null
+                ? contractProviderSubcontractorRequestDto.getSubcontractLevel()
+                : contractProviderSubcontractor.getSubcontractLevel());
+        contractProviderSubcontractor.setContractReference(contractProviderSubcontractorRequestDto.getContractReference() != null
+                ? contractProviderSubcontractorRequestDto.getContractReference()
+                : contractProviderSubcontractor.getContractReference());
+        contractProviderSubcontractor.setDescription(contractProviderSubcontractorRequestDto.getDescription() != null
+                ? contractProviderSubcontractorRequestDto.getDescription()
+                : contractProviderSubcontractor.getDescription());
+        contractProviderSubcontractor.setResponsible(contractProviderSubcontractorRequestDto.getResponsible() != null
+                ? userProviderSupplier
+                : contractProviderSubcontractor.getResponsible());
+        contractProviderSubcontractor.setExpenseType(contractProviderSubcontractorRequestDto.getExpenseType() != null
+                ? contractProviderSubcontractorRequestDto.getExpenseType()
+                : contractProviderSubcontractor.getExpenseType());
+        contractProviderSubcontractor.setDateStart(contractProviderSubcontractorRequestDto.getStartDate() != null
+                ? contractProviderSubcontractorRequestDto.getStartDate()
+                : contractProviderSubcontractor.getDateStart());
+        contractProviderSubcontractor.setEndDate(contractProviderSubcontractorRequestDto.getEndDate() != null
+                ? contractProviderSubcontractorRequestDto.getEndDate()
+                : contractProviderSubcontractor.getEndDate());
+        contractProviderSubcontractor.setActivities(contractProviderSubcontractorRequestDto.getIdActivities() != null
+                ? activities
+                : contractProviderSubcontractor.getActivities());
 
         ContractProviderSubcontractor savedContractSubcontractor = contractProviderSubcontractorRepository.save(contractProviderSubcontractor);
 
@@ -267,6 +289,7 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                             + contractProviderSubcontractor.getResponsible().getSurname()
                             : null)
                     .expenseType(contractProviderSubcontractor.getExpenseType())
+                    .subcontractLevel(contractProviderSubcontractor.getSubcontractLevel())
                     .dateStart(contractProviderSubcontractor.getDateStart())
                     .finished(contractProviderSubcontractor.getFinished())
                     .isActive(contractProviderSubcontractor.getIsActive())
