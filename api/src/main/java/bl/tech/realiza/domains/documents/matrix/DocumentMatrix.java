@@ -52,9 +52,13 @@ public class DocumentMatrix {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
+//    @ManyToOne
+//    @JoinColumn(name = "idDocumentSubgroup")
+//    private DocumentMatrixSubgroup subGroup;
+
     @ManyToOne
-    @JoinColumn(name = "idDocumentSubgroup")
-    private DocumentMatrixSubgroup subGroup;
+    @JoinColumn(name = "idDocumentGroup")
+    private DocumentMatrixGroup group;
 
     // -------------------------------
     // Relacionamentos CONTRATUAIS

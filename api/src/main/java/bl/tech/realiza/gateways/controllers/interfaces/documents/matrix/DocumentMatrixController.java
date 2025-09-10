@@ -14,6 +14,6 @@ public interface DocumentMatrixController {
     ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrix(int page, int size, String sort, Sort.Direction direction);
     ResponseEntity<Optional<DocumentMatrixResponseDto>> updateDocumentMatrix(String id, Boolean replicate, DocumentMatrixRequestDto documentMatrixRequestDto);
     ResponseEntity<Void> deleteDocumentMatrix(String id);
-    ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixBySubgroup(int page, int size, String sort, Sort.Direction direction, String idSearch);
+//    ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixBySubgroup(int page, int size, String sort, Sort.Direction direction, String idSearch);
     ResponseEntity<Page<DocumentMatrixResponseDto>> getAllDocumentsMatrixByGroup(int page, int size, String sort, Sort.Direction direction, String idSearch);
 }

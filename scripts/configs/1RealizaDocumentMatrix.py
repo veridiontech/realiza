@@ -44,7 +44,7 @@ def inserir_dados_no_bd(dados):
         for _, linha in dados.iterrows():
             try:
                 group_name = linha['Grupo']
-                subgroup_name = linha['Subgrupo']
+                # subgroup_name = linha['Subgrupo']
                 document_name = linha['Documento']
                 expiration = linha['Validade'] if not pd.isna(linha['Validade']) else None
                 doc_type = linha['Tipo']
@@ -66,27 +66,27 @@ def inserir_dados_no_bd(dados):
                     )
                     print(f"Grupo '{group_name}' inserido com sucesso.")
 
-                # Inserir ou obter o ID do subgrupo
-                cursor.execute(
-                    "SELECT id_document_subgroup FROM document_matrix_subgroup WHERE subgroup_name = %s AND id_document_group = %s",
-                    (subgroup_name, group_id)
-                )
-                subgroup_row = cursor.fetchone()
-                if subgroup_row:
-                    subgroup_id = subgroup_row[0]
-                else:
-                    subgroup_id = str(uuid.uuid4())  # Gerar um ID único
-                    cursor.execute(
-                        "INSERT INTO document_matrix_subgroup (id_document_subgroup, subgroup_name, id_document_group, creation_date) "
-                        "VALUES (%s, %s, %s, NOW())",
-                        (subgroup_id, subgroup_name, group_id)
-                    )
-                    print(f"Subgrupo '{subgroup_name}' inserido com sucesso.")
+                # # Inserir ou obter o ID do subgrupo
+                # cursor.execute(
+                #     "SELECT id_document_subgroup FROM document_matrix_subgroup WHERE subgroup_name = %s AND id_document_group = %s",
+                #     (subgroup_name, group_id)
+                # )
+                # subgroup_row = cursor.fetchone()
+                # if subgroup_row:
+                #     subgroup_id = subgroup_row[0]
+                # else:
+                #     subgroup_id = str(uuid.uuid4())  # Gerar um ID único
+                #     cursor.execute(
+                #         "INSERT INTO document_matrix_subgroup (id_document_subgroup, subgroup_name, id_document_group, creation_date) "
+                #         "VALUES (%s, %s, %s, NOW())",
+                #         (subgroup_id, subgroup_name, group_id)
+                #     )
+                #     print(f"Subgrupo '{subgroup_name}' inserido com sucesso.")
 
                 # Inserir documento
                 cursor.execute(
-                    "SELECT id_document FROM document_matrix WHERE name = %s AND id_document_subgroup = %s",
-                    (document_name, subgroup_id)
+                    "SELECT id_document FROM document_matrix WHERE name = %s AND id_document_group = %s",
+                    (document_name, group_id)
                 )
                 doc_row = cursor.fetchone()
                 if doc_row:
@@ -95,10 +95,10 @@ def inserir_dados_no_bd(dados):
                     id_doc = str(uuid.uuid4())  # Gerar um ID único
                     cursor.execute(
                         """
-                        INSERT INTO document_matrix (creation_date, expiration_date_amount, name, id_document_subgroup, type, id_document, does_block)
+                        INSERT INTO document_matrix (creation_date, expiration_date_amount, name, id_document_group, type, id_document, does_block)
                         VALUES (NOW(), %s, %s, %s, %s, %s, %s)
                         """,
-                        (expiration, document_name, subgroup_id, doc_type, id_doc, does_block)
+                        (expiration, document_name, group_id, doc_type, id_doc, does_block)
                     )
                     print(f"Documento '{document_name}' inserido com sucesso.")
 

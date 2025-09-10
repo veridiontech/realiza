@@ -1,6 +1,5 @@
 package bl.tech.realiza.domains.services.snapshots.documents.matrix;
 
-import bl.tech.realiza.domains.enums.SnapshotFrequencyEnum;
 import bl.tech.realiza.domains.services.snapshots.documents.DocumentSnapshot;
 import bl.tech.realiza.domains.services.snapshots.ids.SnapshotId;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -29,14 +28,23 @@ public class DocumentMatrixSnapshot {
     @Builder.Default
     private LocalDateTime creationDate = LocalDateTime.now();
 
+//    @ManyToOne
+//    @JoinColumns({
+//            @JoinColumn(name = "subgroupId", referencedColumnName = "id"),
+//            @JoinColumn(name = "subgroupFrequency", referencedColumnName = "frequency"),
+//            @JoinColumn(name = "subgroupSnapshotDate", referencedColumnName = "snapshotDate")
+//    })
+//    @JsonManagedReference
+//    private DocumentMatrixSubgroupSnapshot subgroup;
+
     @ManyToOne
     @JoinColumns({
-            @JoinColumn(name = "subgroupId", referencedColumnName = "id"),
-            @JoinColumn(name = "subgroupFrequency", referencedColumnName = "frequency"),
-            @JoinColumn(name = "subgroupSnapshotDate", referencedColumnName = "snapshotDate")
+            @JoinColumn(name = "groupId", referencedColumnName = "id"),
+            @JoinColumn(name = "groupFrequency", referencedColumnName = "frequency"),
+            @JoinColumn(name = "groupSnapshotDate", referencedColumnName = "snapshotDate")
     })
     @JsonManagedReference
-    private DocumentMatrixSubgroupSnapshot subgroup;
+    private DocumentMatrixGroupSnapshot group;
 
     @OneToMany(mappedBy = "documentMatrix", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference

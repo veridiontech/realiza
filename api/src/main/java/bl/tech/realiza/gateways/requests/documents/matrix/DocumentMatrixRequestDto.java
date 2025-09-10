@@ -9,7 +9,8 @@ public class DocumentMatrixRequestDto {
     private String type;
     private Boolean doesBlock;
     private Boolean isDocumentUnique;
-    private String subgroup;
+//    private String subgroup;
+    private String group;
     private DocumentMatrix.DayUnitEnum expirationDateUnit;
     private Integer expirationDateAmount;
     private Boolean isValidityFixed;

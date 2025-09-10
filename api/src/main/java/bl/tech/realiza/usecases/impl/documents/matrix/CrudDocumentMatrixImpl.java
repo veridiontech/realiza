@@ -1,11 +1,10 @@
 package bl.tech.realiza.usecases.impl.documents.matrix;
 
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
-import bl.tech.realiza.domains.enums.RiskEnum;
+import bl.tech.realiza.domains.documents.matrix.DocumentMatrixGroup;
 import bl.tech.realiza.exceptions.BadRequestException;
+import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixGroupRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
-import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubgroupRepository;
 import bl.tech.realiza.gateways.requests.documents.matrix.DocumentMatrixRequestDto;
 import bl.tech.realiza.gateways.responses.documents.DocumentMatrixResponseDto;
 import bl.tech.realiza.services.queue.replication.ReplicationMessage;
@@ -28,15 +27,21 @@ import java.util.Optional;
 public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
     private final DocumentMatrixRepository documentMatrixRepository;
-    private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
+//    private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
     private final ReplicationQueueProducer replicationQueueProducer;
+    private final DocumentMatrixGroupRepository documentMatrixGroupRepository;
 
     @Override
     public DocumentMatrixResponseDto save(DocumentMatrixRequestDto documentMatrixRequestDto) {
-        if (documentMatrixRequestDto.getSubgroup() == null || documentMatrixRequestDto.getSubgroup().isEmpty()) {
-            throw new BadRequestException("Invalid subgroup");
+//        if (documentMatrixRequestDto.getSubgroup() == null || documentMatrixRequestDto.getSubgroup().isEmpty()) {
+//            throw new BadRequestException("Invalid subgroup");
+//        }
+//        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup())
+//                .orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
+        if (documentMatrixRequestDto.getGroup() == null || documentMatrixRequestDto.getGroup().isEmpty()) {
+            throw new BadRequestException("Invalid group");
         }
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrixSubgroupRepository.findById(documentMatrixRequestDto.getSubgroup())
+        DocumentMatrixGroup documentMatrixGroup = documentMatrixGroupRepository.findById(documentMatrixRequestDto.getGroup())
                 .orElseThrow(() -> new EntityNotFoundException("Subgroup not found"));
 
         DocumentMatrix savedDocumentMatrix = documentMatrixRepository.save(DocumentMatrix.builder()
@@ -46,7 +51,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
                         .isValidityFixed(documentMatrixRequestDto.getIsValidityFixed())
                         .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
-                .subGroup(documentMatrixSubgroup)
+//                .subGroup(documentMatrixSubgroup)
                 .build());
 
         replicationQueueProducer.send(ReplicationMessage.builder()
@@ -75,7 +80,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         DocumentMatrix documentMatrix = documentMatrixRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("DocumentMatrix not found"));
 
-        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrix.getSubGroup();
+//        DocumentMatrixSubgroup documentMatrixSubgroup = documentMatrix.getSubGroup();
 
         documentMatrix.setName(documentMatrixRequestDto.getName() != null
                 ? documentMatrixRequestDto.getName()
@@ -86,9 +91,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrix.setDoesBlock(documentMatrixRequestDto.getDoesBlock() != null
                 ? documentMatrixRequestDto.getDoesBlock()
                 : documentMatrix.getDoesBlock());
-        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null
-                ? documentMatrixSubgroup
-                : documentMatrix.getSubGroup());
+//        documentMatrix.setSubGroup(documentMatrixRequestDto.getSubgroup() != null
+//                ? documentMatrixSubgroup
+//                : documentMatrix.getSubGroup());
         documentMatrix.setIsDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique() != null
                 ? documentMatrixRequestDto.getIsDocumentUnique()
                 : documentMatrix.getIsDocumentUnique());
@@ -120,14 +125,14 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
         documentMatrixRepository.deleteById(id);
     }
 
-    @Override
-    public Page<DocumentMatrixResponseDto> findAllBySubgroup(String idSearch, Pageable pageable) {
-        return toDto(documentMatrixRepository.findAllBySubGroup_IdDocumentSubgroup(idSearch, pageable));
-    }
+//    @Override
+//    public Page<DocumentMatrixResponseDto> findAllBySubgroup(String idSearch, Pageable pageable) {
+//        return toDto(documentMatrixRepository.findAllBySubGroup_IdDocumentSubgroup(idSearch, pageable));
+//    }
 
     @Override
     public Page<DocumentMatrixResponseDto> findAllByGroup(String idSearch, Pageable pageable) {
-        return toDto(documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable));
+        return toDto(documentMatrixRepository.findAllByGroup_IdDocumentGroup(idSearch, pageable));
     }
 
     private DocumentMatrixResponseDto toDto(DocumentMatrix documentMatrix) {
@@ -143,12 +148,18 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                         ? documentMatrix.getIsValidityFixed()
                         : null)
                 .fixedValidityAt(formatDayMonth(documentMatrix.getFixedValidityAt()))
-                .idDocumentSubgroup(documentMatrix.getSubGroup() != null
-                        ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+                .idDocumentGroup(documentMatrix.getGroup() != null
+                        ? documentMatrix.getGroup().getIdDocumentGroup()
                         : null)
-                .subgroupName(documentMatrix.getSubGroup() != null
-                        ? documentMatrix.getSubGroup().getSubgroupName()
+                .groupName(documentMatrix.getGroup() != null
+                        ? documentMatrix.getGroup().getGroupName()
                         : null)
+//                .idDocumentSubgroup(documentMatrix.getSubGroup() != null
+//                        ? documentMatrix.getSubGroup().getIdDocumentSubgroup()
+//                        : null)
+//                .subgroupName(documentMatrix.getSubGroup() != null
+//                        ? documentMatrix.getSubGroup().getSubgroupName()
+//                        : null)
                 .build();
     }
 

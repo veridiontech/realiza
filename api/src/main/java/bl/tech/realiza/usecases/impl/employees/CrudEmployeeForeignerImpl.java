@@ -83,7 +83,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             branch = branchRepository.findById(employeeForeignerRequestDto.getBranch())
                     .orElseThrow(() -> new NotFoundException("Branch not found"));
 
-            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getBranch(), "Documento pessoa", true);
+            List<DocumentBranch> documentBranches = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getBranch(), "Documento pessoa", true);
 
             documentMatrixList = documentBranches.stream()
                     .map(DocumentBranch::getDocumentMatrix)
@@ -92,7 +92,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             providerSupplier = providerSupplierRepository.findById(employeeForeignerRequestDto.getSupplier())
                     .orElseThrow(() -> new NotFoundException("Supplier not found"));
 
-            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSupplier(), "Documento pessoa", true);
+            List<DocumentProviderSupplier> documentProviderSuppliers = documentProviderSupplierRepository.findAllByProviderSupplier_IdProviderAndDocumentMatrix_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSupplier(), "Documento pessoa", true);
 
             documentMatrixList = documentProviderSuppliers.stream()
                     .map(DocumentProviderSupplier::getDocumentMatrix)
@@ -102,7 +102,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
             providerSubcontractor = providerSubcontractorRepository.findById(employeeForeignerRequestDto.getSubcontract())
                     .orElseThrow(() -> new NotFoundException("Subcontractor not found"));
 
-            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSubcontract(), "Documento pessoa", true);
+            List<DocumentProviderSubcontractor> documentProviderSubcontractors = documentProviderSubcontractorRepository.findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_Group_GroupNameAndIsActive(employeeForeignerRequestDto.getSubcontract(), "Documento pessoa", true);
 
             documentMatrixList = documentProviderSubcontractors.stream()
                     .map(DocumentProviderSubcontractor::getDocumentMatrix)

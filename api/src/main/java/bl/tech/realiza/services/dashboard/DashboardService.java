@@ -10,7 +10,6 @@ import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrixGroup;
-import bl.tech.realiza.domains.documents.matrix.DocumentMatrixSubgroup;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
@@ -27,7 +26,6 @@ import bl.tech.realiza.domains.services.snapshots.documents.DocumentSnapshot;
 import bl.tech.realiza.domains.services.snapshots.documents.employee.DocumentEmployeeSnapshot;
 import bl.tech.realiza.domains.services.snapshots.documents.matrix.DocumentMatrixGroupSnapshot;
 import bl.tech.realiza.domains.services.snapshots.documents.matrix.DocumentMatrixSnapshot;
-import bl.tech.realiza.domains.services.snapshots.documents.matrix.DocumentMatrixSubgroupSnapshot;
 import bl.tech.realiza.domains.services.snapshots.documents.provider.DocumentProviderSubcontractorSnapshot;
 import bl.tech.realiza.domains.services.snapshots.documents.provider.DocumentProviderSupplierSnapshot;
 import bl.tech.realiza.domains.services.snapshots.employees.EmployeeSnapshot;
@@ -48,7 +46,6 @@ import bl.tech.realiza.gateways.repositories.documents.DocumentRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixGroupRepository;
 import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixRepository;
-import bl.tech.realiza.gateways.repositories.documents.matrix.DocumentMatrixSubgroupRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSubcontractorRepository;
 import bl.tech.realiza.gateways.repositories.documents.provider.DocumentProviderSupplierRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
@@ -64,7 +61,6 @@ import bl.tech.realiza.gateways.repositories.services.snapshots.documents.Docume
 import bl.tech.realiza.gateways.repositories.services.snapshots.documents.employee.DocumentEmployeeSnapshotRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.documents.matrix.DocumentMatrixGroupSnapshotRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.documents.matrix.DocumentMatrixSnapshotRepository;
-import bl.tech.realiza.gateways.repositories.services.snapshots.documents.matrix.DocumentMatrixSubgroupSnapshotRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.documents.provider.DocumentProviderSubcontractorSnapshotRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.documents.provider.DocumentProviderSupplierSnapshotRepository;
 import bl.tech.realiza.gateways.repositories.services.snapshots.employees.EmployeeSnapshotRepository;
@@ -121,8 +117,8 @@ public class DashboardService {
     private final ContractProviderSubcontractorSnapshotRepository contractProviderSubcontractorSnapshotRepository;
     private final DocumentMatrixGroupRepository documentMatrixGroupRepository;
     private final DocumentMatrixGroupSnapshotRepository documentMatrixGroupSnapshotRepository;
-    private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
-    private final DocumentMatrixSubgroupSnapshotRepository documentMatrixSubgroupSnapshotRepository;
+//    private final DocumentMatrixSubgroupRepository documentMatrixSubgroupRepository;
+//    private final DocumentMatrixSubgroupSnapshotRepository documentMatrixSubgroupSnapshotRepository;
     private final DocumentMatrixRepository documentMatrixRepository;
     private final DocumentMatrixSnapshotRepository documentMatrixSnapshotRepository;
     private final DocumentProviderSupplierSnapshotRepository documentProviderSupplierSnapshotRepository;
@@ -1063,17 +1059,13 @@ public class DashboardService {
                 .responsibleEmail(responsibleEmail)
                 .contractStatus(contractStatus)
                 .documentTitle(document.getTitle())
-                .documentSubgroupName(document.getDocumentMatrix() != null
-                        ? (document.getDocumentMatrix().getSubGroup() != null
-                            ? document.getDocumentMatrix().getSubGroup().getSubgroupName()
-                            : null)
-                        : null)
+//                .documentSubgroupName(document.getDocumentMatrix() != null
+//                        ? (document.getDocumentMatrix().getSubGroup() != null
+//                            ? document.getDocumentMatrix().getSubGroup().getSubgroupName()
+//                            : null)
+//                        : null)
                 .documentGroupName(document.getDocumentMatrix() != null
-                        ? (document.getDocumentMatrix().getSubGroup() != null
-                            ? document.getDocumentMatrix().getSubGroup().getGroup() != null
-                                ? document.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
-                                : null
-                            : null)
+                        ? document.getDocumentMatrix().getGroup().getGroupName()
                         : null)
                 .documentType(document.getType())
                 .doesBlock(document.getDoesBlock())
@@ -1518,59 +1510,65 @@ public class DashboardService {
             }
         }
 
-        pageable = PageRequest.of(0, 50);
-        Page<DocumentMatrixSubgroup> subgroups = documentMatrixSubgroupRepository.findAll(pageable);
-        while (subgroups.hasContent()) {
-            List<DocumentMatrixSubgroupSnapshot> subgroupsBatch = new ArrayList<>(50);
-            for (DocumentMatrixSubgroup subgroup : subgroups) {
-                DocumentMatrixGroupSnapshot groupSnapshot = documentMatrixGroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(subgroup.getGroup().getIdDocumentGroup(),
-                                Date.from(LocalDateTime.now()
-                                        .atZone(ZoneId.systemDefault())
-                                        .toInstant()),
-                                frequency)
-                                .orElseThrow(() -> new NotFoundException("Subgroup not found"));
-                subgroupsBatch.add(DocumentMatrixSubgroupSnapshot.builder()
-                        .id(SnapshotId.builder()
-                                .id(subgroup.getIdDocumentSubgroup())
-                                .snapshotDate(Date.from(LocalDateTime.now()
-                                        .atZone(ZoneId.systemDefault())
-                                        .toInstant()))
-                                .frequency(frequency)
-                                .build())
-                                .name(subgroup.getSubgroupName())
-                                .group(groupSnapshot)
-                        .build());
-
-                if (subgroupsBatch.size() >= 50) {
-                    documentMatrixSubgroupSnapshotRepository.saveAll(subgroupsBatch);
-                    subgroupsBatch.clear();
-                }
-            }
-
-            if (!subgroupsBatch.isEmpty()) {
-                documentMatrixSubgroupSnapshotRepository.saveAll(subgroupsBatch);
-                subgroupsBatch.clear();
-            }
-
-            if (subgroups.hasNext()) {
-                pageable = subgroups.nextPageable();
-                subgroups = documentMatrixSubgroupRepository.findAll(pageable);
-            } else {
-                break;
-            }
-        }
+//        pageable = PageRequest.of(0, 50);
+//        Page<DocumentMatrixSubgroup> subgroups = documentMatrixSubgroupRepository.findAll(pageable);
+//        while (subgroups.hasContent()) {
+//            List<DocumentMatrixSubgroupSnapshot> subgroupsBatch = new ArrayList<>(50);
+//            for (DocumentMatrixSubgroup subgroup : subgroups) {
+//                DocumentMatrixGroupSnapshot groupSnapshot = documentMatrixGroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(subgroup.getGroup().getIdDocumentGroup(),
+//                                Date.from(LocalDateTime.now()
+//                                        .atZone(ZoneId.systemDefault())
+//                                        .toInstant()),
+//                                frequency)
+//                                .orElseThrow(() -> new NotFoundException("Subgroup not found"));
+//                subgroupsBatch.add(DocumentMatrixSubgroupSnapshot.builder()
+//                        .id(SnapshotId.builder()
+//                                .id(subgroup.getIdDocumentSubgroup())
+//                                .snapshotDate(Date.from(LocalDateTime.now()
+//                                        .atZone(ZoneId.systemDefault())
+//                                        .toInstant()))
+//                                .frequency(frequency)
+//                                .build())
+//                                .name(subgroup.getSubgroupName())
+//                                .group(groupSnapshot)
+//                        .build());
+//
+//                if (subgroupsBatch.size() >= 50) {
+//                    documentMatrixSubgroupSnapshotRepository.saveAll(subgroupsBatch);
+//                    subgroupsBatch.clear();
+//                }
+//            }
+//
+//            if (!subgroupsBatch.isEmpty()) {
+//                documentMatrixSubgroupSnapshotRepository.saveAll(subgroupsBatch);
+//                subgroupsBatch.clear();
+//            }
+//
+//            if (subgroups.hasNext()) {
+//                pageable = subgroups.nextPageable();
+//                subgroups = documentMatrixSubgroupRepository.findAll(pageable);
+//            } else {
+//                break;
+//            }
+//        }
 
         pageable = PageRequest.of(0, 50);
         Page<DocumentMatrix> documentsMatrix = documentMatrixRepository.findAll(pageable);
         while (documentsMatrix.hasContent()) {
             List<DocumentMatrixSnapshot> documentsMatrixBatch = new ArrayList<>(50);
             for (DocumentMatrix document : documentsMatrix) {
-                DocumentMatrixSubgroupSnapshot subgroupSnapshot = documentMatrixSubgroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getSubGroup().getIdDocumentSubgroup(),
+//                DocumentMatrixSubgroupSnapshot subgroupSnapshot = documentMatrixSubgroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getSubGroup().getIdDocumentSubgroup(),
+//                                Date.from(LocalDateTime.now()
+//                                        .atZone(ZoneId.systemDefault())
+//                                        .toInstant()),
+//                                frequency)
+//                        .orElseThrow(() -> new NotFoundException("Subgroup not found"));
+                DocumentMatrixGroupSnapshot groupSnapshot = documentMatrixGroupSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(document.getGroup().getIdDocumentGroup(),
                                 Date.from(LocalDateTime.now()
                                         .atZone(ZoneId.systemDefault())
                                         .toInstant()),
                                 frequency)
-                        .orElseThrow(() -> new NotFoundException("Subgroup not found"));
+                        .orElseThrow(() -> new NotFoundException("Group not found"));
                 documentsMatrixBatch.add(DocumentMatrixSnapshot.builder()
                         .id(SnapshotId.builder()
                         .id(document.getIdDocument())
@@ -1582,7 +1580,7 @@ public class DashboardService {
                         .name(document.getName())
                                 .type(document.getType())
                                 .isUnique(document.getIsDocumentUnique())
-                        .subgroup(subgroupSnapshot)
+                        .group(groupSnapshot)
                         .build());
 
                 if (documentsMatrixBatch.size() >= 50) {

@@ -1,6 +1,5 @@
 package bl.tech.realiza.domains.documents.matrix;
 
-import bl.tech.realiza.domains.documents.Document;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +28,10 @@ public class DocumentMatrixGroup {
     // -------------------------------
     // Relacionamentos INERENTES
     // -------------------------------
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
-    private List<DocumentMatrixSubgroup> subgroups;
+    private List<DocumentMatrix> documents;
+
+//    @OneToMany(mappedBy = "group", cascade = CascadeType.REMOVE)
+//    private List<DocumentMatrixSubgroup> subgroups;
 }

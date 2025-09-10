@@ -9,9 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface DocumentMatrixRepository extends JpaRepository<DocumentMatrix, String> {
-    Page<DocumentMatrix> findAllBySubGroup_IdDocumentSubgroup(String idSearch, Pageable pageable);
-    Page<DocumentMatrix> findAllBySubGroup_Group_IdDocumentGroup(String idSearch, Pageable pageable);
-    List<DocumentMatrix> findAllBySubGroup_Group_GroupName(String nameSearch);
+    Page<DocumentMatrix> findAllByGroup_IdDocumentGroup(String idSearch, Pageable pageable);
+    List<DocumentMatrix> findAllByGroup_GroupName(String nameSearch);
 
     @Query("""
     SELECT dm.name

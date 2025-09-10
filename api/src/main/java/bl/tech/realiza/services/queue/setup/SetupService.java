@@ -490,10 +490,10 @@ public class SetupService {
 
         List<DocumentProviderSupplier> documentSupplier = new ArrayList<>();
         documentSupplier.addAll(documentProviderSupplierRepository
-                .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                .findAllByProviderSupplier_IdProviderAndDocumentMatrix_Group_GroupNameAndIsActive(
                         providerSupplier.getIdProvider(), "Documento pessoa", true));
         documentSupplier.addAll(documentProviderSupplierRepository
-                .findAllByProviderSupplier_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                .findAllByProviderSupplier_IdProviderAndDocumentMatrix_Group_GroupNameAndIsActive(
                         providerSupplier.getIdProvider(), "Treinamentos e certificações", true));
 
         List<DocumentEmployee> batch = new ArrayList<>(50);
@@ -576,10 +576,10 @@ public class SetupService {
 
         List<DocumentProviderSubcontractor> documentSubcontractor = new ArrayList<>();
         documentSubcontractor.addAll(documentProviderSubcontractorRepository
-                .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_Group_GroupNameAndIsActive(
                         providerSubcontractor.getIdProvider(), "Documento pessoa", true));
         documentSubcontractor.addAll(documentProviderSubcontractorRepository
-                .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(
+                .findAllByProviderSubcontractor_IdProviderAndDocumentMatrix_Group_GroupNameAndIsActive(
                         providerSubcontractor.getIdProvider(), "Treinamentos e certificações", true));
 
         List<DocumentEmployee> batch = new ArrayList<>(50);
