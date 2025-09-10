@@ -1,14 +1,15 @@
 package bl.tech.realiza.usecases.impl.documents.contract;
 
+import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
-import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.contract.Contract;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.user.User;
+import bl.tech.realiza.gateways.repositories.contracts.ContractEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
 import bl.tech.realiza.gateways.responses.documents.ContractDocumentAndEmployeeResponseDto;
@@ -27,6 +28,7 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
     private final ContractRepository contractRepository;
     private final JwtService jwtService;
     private final DocumentEmployeeRepository documentEmployeeRepository;
+    private final ContractEmployeeRepository contractEmployeeRepository;
 
     @Override
     public ContractDocumentAndEmployeeResponseDto getDocumentAndEmployeeByContractId(String id) {
@@ -38,27 +40,30 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
         List<ContractDocumentAndEmployeeResponseDto.DocumentDto> employeeDocuments = new ArrayList<>();
         List<ContractDocumentAndEmployeeResponseDto.EmployeeDto> employeeDtos = new ArrayList<>();
 
-        for (Employee employee : contract.getEmployees()) {
-            Boolean entryPermission;
-            List<DocumentEmployee> documentsEmployee = documentEmployeeRepository.findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContractAndConformingAndDocumentMatrix_DoesBlock(
-                    employee.getIdEmployee(),
+        for (ContractEmployee contractEmployee1 : contract.getEmployeeContracts()) {
+            Boolean documentsConformity;
+            List<DocumentEmployee> documentsEmployee = documentEmployeeRepository.findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContractAndConformingAndDoesBlock(
+                    contractEmployee1.getEmployee().getIdEmployee(),
                     contract.getIdContract(),
                     false,
                     true);
-            entryPermission = documentsEmployee.isEmpty();
+            documentsConformity = documentsEmployee.isEmpty();
+            ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(id,contractEmployee1.getEmployee().getIdEmployee())
+                            .orElseThrow(() -> new EntityNotFoundException("Contract-Employee not found"));
             employeeDtos.add(ContractDocumentAndEmployeeResponseDto.EmployeeDto.builder()
-                    .id(employee.getIdEmployee())
-                    .name(employee.getFullName())
-                    .cboTitle(employee.getCbo() != null
-                            ? employee.getCbo().getTitle() : null)
-                    .hasEntryPermission(entryPermission)
+                    .id(contractEmployee1.getEmployee().getIdEmployee())
+                    .name(contractEmployee1.getEmployee().getFullName())
+                    .cboTitle(contractEmployee1.getEmployee().getCbo() != null
+                            ? contractEmployee1.getEmployee().getCbo().getTitle() : null)
+                    .documentsConformity(documentsConformity)
+                    .integrated(contractEmployee.getIntegrated())
                     .build());
-            List<DocumentEmployee> documentEmployeeList = employee.getDocumentEmployees().stream()
+            List<DocumentEmployee> documentEmployeeList = contractEmployee1.getEmployee().getDocumentEmployees().stream()
                     .filter(documentEmployee -> documentEmployee.getContractDocuments().stream()
                             .anyMatch(contractDocument -> contractDocument.getContract().equals(contract)))
                     .toList();
 //            List<DocumentEmployee> documentEmployeeList = documentEmployeeRepository
-//                    .findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(employee.getIdEmployee(),
+//                    .findAllByEmployee_IdEmployeeAndContractDocuments_Contract_IdContract(contractEmployee1.getIdEmployee(),
 //                            contract.getIdContract());
 
             for (DocumentEmployee documentEmployee : documentEmployeeList) {

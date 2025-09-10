@@ -34,7 +34,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     @Query("""
     SELECT COUNT(e)
     FROM Employee e
-    JOIN e.contracts c
+    JOIN e.contractEmployees ce
+    JOIN ce.contract c
     LEFT JOIN TREAT(c AS ContractProviderSupplier) cps
     WHERE cps.branch.client.idClient = :clientId
         AND e.situation = :situation
@@ -45,7 +46,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     @Query("""
     SELECT COUNT(e)
     FROM Employee e
-    JOIN e.contracts c
+    JOIN e.contractEmployees ce
+    JOIN ce.contract c
     LEFT JOIN TREAT(c AS ContractProviderSubcontractor ) cpsb
     WHERE cpsb.contractProviderSupplier.branch.client.idClient = :clientId
         AND e.situation = :situation

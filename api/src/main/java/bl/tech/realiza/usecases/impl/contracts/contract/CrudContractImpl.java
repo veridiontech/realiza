@@ -1,6 +1,7 @@
 package bl.tech.realiza.usecases.impl.contracts.contract;
 
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
@@ -11,6 +12,7 @@ import bl.tech.realiza.domains.enums.PermissionTypeEnum;
 import bl.tech.realiza.domains.services.ItemManagement;
 import bl.tech.realiza.domains.user.User;
 import bl.tech.realiza.exceptions.NotFoundException;
+import bl.tech.realiza.gateways.repositories.contracts.ContractEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.repositories.users.UserRepository;
@@ -49,6 +51,7 @@ public class CrudContractImpl implements CrudContract {
     private final JwtService jwtService;
     private final CrudItemManagement crudItemManagement;
     private final CrudPermission crudPermission;
+    private final ContractEmployeeRepository contractEmployeeRepository;
 
     @Override
     public String finishContractRequest(String idContract) {
@@ -159,8 +162,13 @@ public class CrudContractImpl implements CrudContract {
                 if (!Objects.equals(contractProviderSupplier.getProviderSupplier().getIdProvider(), employee.getSupplier().getIdProvider())) {
                     throw new IllegalArgumentException("Contract provider does not match employee provider");
                 }
-                if (!employee.getContracts().contains(contract)) {
-                    employee.getContracts().add(contract);
+                if (employee.getContractEmployees().stream()
+                        .noneMatch(contractEmployee ->
+                                contractEmployee.getContract().equals(contract))) {
+                    contractEmployeeRepository.save(ContractEmployee.builder()
+                                    .contract(contract)
+                                    .employee(employee)
+                            .build());
                 }
                 if (!employee.getSituation().equals(Employee.Situation.ALOCADO)) {
                     employee.setSituation(Employee.Situation.ALOCADO);
@@ -178,8 +186,13 @@ public class CrudContractImpl implements CrudContract {
                 if (!Objects.equals(contractProviderSubcontractor.getProviderSubcontractor().getIdProvider(), employee.getSubcontract().getIdProvider())) {
                     throw new IllegalArgumentException("Contract provider does not match employee provider");
                 }
-                if (!employee.getContracts().contains(contract)) {
-                    employee.getContracts().add(contract);
+                if (employee.getContractEmployees().stream()
+                        .noneMatch(contractEmployee ->
+                                contractEmployee.getContract().equals(contract))) {
+                    contractEmployeeRepository.save(ContractEmployee.builder()
+                            .contract(contract)
+                            .employee(employee)
+                            .build());
                 }
                 if (!employee.getSituation().equals(Employee.Situation.ALOCADO)) {
                     employee.setSituation(Employee.Situation.ALOCADO);
@@ -302,7 +315,7 @@ public class CrudContractImpl implements CrudContract {
 
     @Override
     public Page<ContractByEmployeeResponseDto> getContractByEmployee(Pageable pageable, String idEmployee) {
-        Page<Contract> contracts = contractRepository.findAllByEmployees_IdEmployee(idEmployee, pageable);
+        Page<Contract> contracts = contractRepository.findAllByEmployeeContracts_Employee_IdEmployee(idEmployee, pageable);
 
         return contracts.map(
                 contract -> ContractByEmployeeResponseDto.builder()
@@ -315,5 +328,21 @@ public class CrudContractImpl implements CrudContract {
     @Override
     public List<ContractByBranchIdsResponseDto> getContractByBranchIds(List<String> branchIds) {
         return contractRepository.findAllByBranchIds(branchIds);
+    }
+
+    @Override
+    public String integrateEmployeeToContract(String contractId, String employeeId) {
+        ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contractId,employeeId)
+                .orElse(null);
+        if (contractEmployee != null) {
+            if (contractEmployee.getIntegrated() != null && contractEmployee.getIntegrated()) {
+                throw new IllegalStateException("Employee already integrated");
+            }
+            contractEmployee.setIntegrated(true);
+            contractEmployeeRepository.save(contractEmployee);
+        } else {
+            throw new IllegalStateException("Employee not assigned to the contract");
+        }
+        return "Employee integrated to the contract";
     }
 }

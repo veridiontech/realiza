@@ -2,10 +2,7 @@ package bl.tech.realiza.services.dashboard;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.clients.Client;
-import bl.tech.realiza.domains.contract.Contract;
-import bl.tech.realiza.domains.contract.ContractDocument;
-import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
-import bl.tech.realiza.domains.contract.ContractProviderSupplier;
+import bl.tech.realiza.domains.contract.*;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
 import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
@@ -1355,7 +1352,7 @@ public class DashboardService {
                                         .toInstant()),
                                 frequency)
                         .orElseThrow(() -> new NotFoundException("Responsible not found"));
-                List<EmployeeSnapshot> employeesInContract = employeeSnapshotRepository.findAllById_IdInAndId_SnapshotDateAndId_Frequency(contract.getEmployees().stream()
+                List<EmployeeSnapshot> employeesInContract = employeeSnapshotRepository.findAllById_IdInAndId_SnapshotDateAndId_Frequency(contract.getEmployeeContracts().stream().map(ContractEmployee::getEmployee).toList().stream()
                         .map(Employee::getIdEmployee)
                         .collect(Collectors.toList()),
                         Date.from(LocalDateTime.now()
@@ -1429,7 +1426,7 @@ public class DashboardService {
                                         .toInstant()),
                                 frequency)
                         .orElseThrow(() -> new NotFoundException("Contract not found"));
-                List<EmployeeSnapshot> employeesInContract = employeeSnapshotRepository.findAllById_IdInAndId_SnapshotDateAndId_Frequency(contract.getEmployees().stream()
+                List<EmployeeSnapshot> employeesInContract = employeeSnapshotRepository.findAllById_IdInAndId_SnapshotDateAndId_Frequency(contract.getEmployeeContracts().stream().map(ContractEmployee::getEmployee).collect(Collectors.toList()).stream()
                         .map(Employee::getIdEmployee)
                         .collect(Collectors.toList()),
                         Date.from(LocalDateTime.now()

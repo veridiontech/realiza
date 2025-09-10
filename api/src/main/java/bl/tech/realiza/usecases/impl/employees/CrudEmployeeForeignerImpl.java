@@ -2,6 +2,7 @@ package bl.tech.realiza.usecases.impl.employees;
 
 import bl.tech.realiza.domains.clients.Branch;
 import bl.tech.realiza.domains.contract.Contract;
+import bl.tech.realiza.domains.contract.ContractEmployee;
 import bl.tech.realiza.domains.documents.Document;
 import bl.tech.realiza.domains.documents.client.DocumentBranch;
 import bl.tech.realiza.domains.documents.employee.DocumentEmployee;
@@ -18,6 +19,7 @@ import bl.tech.realiza.domains.services.FileDocument;
 import bl.tech.realiza.exceptions.BadRequestException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.BranchRepository;
+import bl.tech.realiza.gateways.repositories.contracts.ContractEmployeeRepository;
 import bl.tech.realiza.gateways.repositories.contracts.ContractRepository;
 import bl.tech.realiza.gateways.repositories.documents.client.DocumentBranchRepository;
 import bl.tech.realiza.gateways.repositories.documents.employee.DocumentEmployeeRepository;
@@ -41,8 +43,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,6 +66,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
     private final CboRepository cboRepository;
     private final PositionRepository positionRepository;
     private final GoogleCloudService googleCloudService;
+    private final ContractEmployeeRepository contractEmployeeRepository;
 
     @Override
     public EmployeeResponseDto save(EmployeeForeignerRequestDto employeeForeignerRequestDto) {
@@ -71,6 +76,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         ProviderSupplier providerSupplier = null;
         ProviderSubcontractor providerSubcontractor = null;
         List<DocumentMatrix> documentMatrixList = List.of();
+        Set<ContractEmployee> contractEmployees = new HashSet<>();
 
         if (employeeForeignerRequestDto.getIdContracts() != null && !employeeForeignerRequestDto.getIdContracts().isEmpty()) {
             contracts = contractRepository.findAllById(employeeForeignerRequestDto.getIdContracts());
@@ -144,11 +150,31 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .rneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol())
                 .brazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate())
                 .passport(employeeForeignerRequestDto.getPassport())
-                .contracts(contracts)
+//                .contracts(contracts)
                 .branch(branch)
                 .supplier(providerSupplier)
                 .subcontract(providerSubcontractor)
                 .build();
+
+        if (!contracts.isEmpty()) {
+            for (Contract contract : contracts) {
+                ContractEmployee contractEmployee = contractEmployeeRepository.findByContract_IdContractAndEmployee_IdEmployee(contract.getIdContract(), newEmployeeForeigner.getIdEmployee())
+                        .orElse(null);
+                if (contractEmployee == null) {
+                    contractEmployees.add(ContractEmployee.builder()
+                            .contract(contract)
+                            .employee(newEmployeeForeigner)
+                            .build());
+                } else {
+                    contractEmployees.add(contractEmployee);
+                }
+            }
+            if (newEmployeeForeigner.getContractEmployees() != null) {
+                newEmployeeForeigner.getContractEmployees().addAll(contractEmployees);
+            } else {
+                newEmployeeForeigner.setContractEmployees(contractEmployees);
+            }
+        }
 
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(newEmployeeForeigner);
 
@@ -201,10 +227,14 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .branch(savedEmployeeForeigner.getBranch() != null ? savedEmployeeForeigner.getBranch().getIdBranch() : null)
                 .supplier(savedEmployeeForeigner.getSupplier() != null ? savedEmployeeForeigner.getSupplier().getIdProvider() : null)
                 .subcontract(savedEmployeeForeigner.getSubcontract() != null ? savedEmployeeForeigner.getSubcontract().getIdProvider() : null)
-                .contracts(savedEmployeeForeigner.getContracts().stream().map(
+                .contracts(savedEmployeeForeigner.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                                ? contract.getContract().getIdContract()
+                                                : null)
+                                        .serviceName(contract.getContract() != null
+                                                ? contract.getContract().getServiceName()
+                                                : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -268,10 +298,14 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .subcontract(employeeForeigner.getSubcontract() != null
                         ? employeeForeigner.getSubcontract().getIdProvider()
                         : null)
-                .contracts(employeeForeigner.getContracts().stream().map(
+                .contracts(employeeForeigner.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                                ? contract.getContract().getIdContract()
+                                                : null)
+                                        .serviceName(contract.getContract() != null
+                                                ? contract.getContract().getServiceName()
+                                                : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();
@@ -330,10 +364,14 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                             .branch(employeeForeigner.getBranch() != null ? employeeForeigner.getBranch().getIdBranch() : null)
                             .supplier(employeeForeigner.getSupplier() != null ? employeeForeigner.getSupplier().getIdProvider() : null)
                             .subcontract(employeeForeigner.getSubcontract() != null ? employeeForeigner.getSubcontract().getIdProvider() : null)
-                            .contracts(employeeForeigner.getContracts().stream().map(
+                            .contracts(employeeForeigner.getContractEmployees().stream().map(
                                             contract -> EmployeeResponseDto.ContractDto.builder()
-                                                    .idContract(contract.getIdContract())
-                                                    .serviceName(contract.getServiceName())
+                                                    .idContract(contract.getContract() != null
+                                                            ? contract.getContract().getIdContract()
+                                                            : null)
+                                                    .serviceName(contract.getContract() != null
+                                                            ? contract.getContract().getServiceName()
+                                                            : null)
                                                     .build())
                                     .collect(Collectors.toList()))
                             .build();
@@ -398,7 +436,7 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
         employeeForeigner.setRneRnmFederalPoliceProtocol(employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() != null ? employeeForeignerRequestDto.getRneRnmFederalPoliceProtocol() : employeeForeigner.getRneRnmFederalPoliceProtocol());
         employeeForeigner.setPassport(employeeForeignerRequestDto.getPassport() != null ? employeeForeignerRequestDto.getPassport() : employeeForeigner.getPassport());
         employeeForeigner.setBrazilEntryDate(employeeForeignerRequestDto.getBrazilEntryDate() != null ? employeeForeignerRequestDto.getBrazilEntryDate() : employeeForeigner.getBrazilEntryDate());
-        employeeForeigner.setContracts(employeeForeignerRequestDto.getIdContracts() != null ? contracts : employeeForeigner.getContracts());
+//        employeeForeigner.setContracts(employeeForeignerRequestDto.getIdContracts() != null ? contracts : employeeForeigner.getContracts());
         
         EmployeeForeigner savedEmployeeForeigner = employeeForeignerRepository.save(employeeForeigner);
 
@@ -440,10 +478,14 @@ public class CrudEmployeeForeignerImpl implements CrudEmployeeForeigner {
                 .branch(savedEmployeeForeigner.getBranch().getIdBranch())
                 .supplier(savedEmployeeForeigner.getSupplier().getIdProvider())
                 .subcontract(savedEmployeeForeigner.getSubcontract().getIdProvider())
-                .contracts(savedEmployeeForeigner.getContracts().stream().map(
+                .contracts(savedEmployeeForeigner.getContractEmployees().stream().map(
                                 contract -> EmployeeResponseDto.ContractDto.builder()
-                                        .idContract(contract.getIdContract())
-                                        .serviceName(contract.getServiceName())
+                                        .idContract(contract.getContract() != null
+                                                ? contract.getContract().getIdContract()
+                                                : null)
+                                        .serviceName(contract.getContract() != null
+                                                ? contract.getContract().getServiceName()
+                                                : null)
                                         .build())
                         .collect(Collectors.toList()))
                 .build();

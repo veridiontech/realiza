@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,39 +23,47 @@ import java.util.List;
 @Tag(name = "Contract")
 public class ContractControllerImpl implements ContractController {
 
-    private final CrudContract crudContractImpl;
+    private final CrudContract crudContract;
 
     @PostMapping("/finish/{idContract}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> finishContract(@PathVariable String idContract) {
-        return ResponseEntity.ok(crudContractImpl.finishContractRequest(idContract));
+        return ResponseEntity.ok(crudContract.finishContractRequest(idContract));
     }
 
     @PostMapping("/suspend/{contractId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> suspendContract(@PathVariable String contractId) {
-        return ResponseEntity.ok(crudContractImpl.suspendContractRequest(contractId));
+        return ResponseEntity.ok(crudContract.suspendContractRequest(contractId));
     }
 
     @PostMapping("/reactivate/{contractId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> reactivateContract(@PathVariable String contractId) {
-        return ResponseEntity.ok(crudContractImpl.reactivateContractRequest(contractId));
+        return ResponseEntity.ok(crudContract.reactivateContractRequest(contractId));
     }
 
     @PostMapping("/add-employee/{idContract}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> addEmployeeToContract(@PathVariable String idContract, @RequestBody EmployeeToContractRequestDto employeeToContractRequestDto) {
-        return ResponseEntity.ok(crudContractImpl.addEmployeeToContract(idContract, employeeToContractRequestDto));
+        return ResponseEntity.ok(crudContract.addEmployeeToContract(idContract, employeeToContractRequestDto));
+    }
+
+    @PatchMapping("/integrate/{contractId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Override
+    public ResponseEntity<String> integrateEmployeeToContract(@PathVariable String contractId,
+                                                              @RequestParam String employeeId) {
+        return ResponseEntity.ok(crudContract.integrateEmployeeToContract(contractId,employeeId));
     }
 
     @PostMapping("/remove-employee/{idContract}")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<String> removeEmployeeFromContract(@PathVariable String idContract, @RequestBody EmployeeToContractRequestDto employeeToContractRequestDto) {
-        return ResponseEntity.ok(crudContractImpl.removeEmployeeToContract(idContract, employeeToContractRequestDto));
+        return ResponseEntity.ok(crudContract.removeEmployeeToContract(idContract, employeeToContractRequestDto));
     }
 
     @GetMapping("/find-by-employee/{idEmployee}")
@@ -68,14 +75,14 @@ public class ContractControllerImpl implements ContractController {
                                                                                       @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                                                                       @PathVariable String idEmployee) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,sort));
-        return ResponseEntity.ok(crudContractImpl.getContractByEmployee(pageable,idEmployee));
+        return ResponseEntity.ok(crudContract.getContractByEmployee(pageable,idEmployee));
     }
 
     @PostMapping("/find-by-branchIds")
     @ResponseStatus(HttpStatus.OK)
     @Override
     public ResponseEntity<List<ContractByBranchIdsResponseDto>> getContractsByBranchIds(@RequestBody List<String> branchIds) {
-        return ResponseEntity.ok(crudContractImpl.getContractByBranchIds(branchIds));
+        return ResponseEntity.ok(crudContract.getContractByBranchIds(branchIds));
     }
 
 }
