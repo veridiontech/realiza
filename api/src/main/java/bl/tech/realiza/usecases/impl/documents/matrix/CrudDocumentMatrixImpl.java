@@ -122,7 +122,7 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
 
     @Override
     public Page<DocumentMatrixResponseDto> findAllBySubgroup(String idSearch, Pageable pageable) {
-        return toDto(documentMatrixRepository.findAllBySubGroup_Group_IdDocumentGroup(idSearch, pageable));
+        return toDto(documentMatrixRepository.findAllBySubGroup_IdDocumentSubgroup(idSearch, pageable));
     }
 
     @Override
@@ -170,8 +170,12 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     }
 
     public String formatDayMonth(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
-        return dateTime.format(formatter);
+        if (dateTime != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+            return dateTime.format(formatter);
+        } else {
+            return null;
+        }
     }
 
 }
