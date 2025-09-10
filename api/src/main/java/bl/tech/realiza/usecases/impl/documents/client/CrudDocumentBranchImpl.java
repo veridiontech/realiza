@@ -236,7 +236,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
         List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(id);
 
         List<DocumentMatrixResponseDto> selectedDocumentsEnterprise = documentBranch.stream()
-                .filter(doc -> "Documento empresa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .filter(doc -> "Documento empresa".equals(doc.getDocumentMatrix().getGroup().getGroupName()))
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
@@ -244,34 +244,26 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                                 ? doc.getDocumentMatrix().getIdDocument()
                                 : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
-                                    : null)
-                                : null)
-                        .subgroupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
-                                    : null)
-                                : null)
+//                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+//                                    : null)
+//                                : null)
+//                        .subgroupName(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+//                                    : null)
+//                                : null)
                         .idDocumentGroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getIdDocumentGroup()
                                 : null)
                         .groupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getGroupName()
                                 : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> selectedDocumentsPersonal = documentBranch.stream()
-                .filter(doc -> "Documento pessoa".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .filter(doc -> "Documento pessoa".equals(doc.getDocumentMatrix().getGroup().getGroupName()))
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
@@ -279,34 +271,26 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                                 ? doc.getDocumentMatrix().getIdDocument()
                                 : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
-                                    : null)
-                                : null)
-                        .subgroupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
-                                    : null)
-                                : null)
+//                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+//                                    : null)
+//                                : null)
+//                        .subgroupName(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+//                                    : null)
+//                                : null)
                         .idDocumentGroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getIdDocumentGroup()
                                 : null)
                         .groupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getGroupName()
                                 : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> selectedDocumentsService = documentBranch.stream()
-                .filter(doc -> "Documentos empresa-serviço".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .filter(doc -> "Documentos empresa-serviço".equals(doc.getDocumentMatrix().getGroup().getGroupName()))
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
@@ -314,34 +298,26 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                                 ? doc.getDocumentMatrix().getIdDocument()
                                 : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
-                                    : null)
-                                : null)
-                        .subgroupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
-                                    : null)
-                                : null)
+//                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+//                                    : null)
+//                                : null)
+//                        .subgroupName(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+//                                    : null)
+//                                : null)
                         .idDocumentGroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getIdDocumentGroup()
                                 : null)
                         .groupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getGroupName()
                                 : null)
                         .build())
                 .collect(Collectors.toList());
         List<DocumentMatrixResponseDto> selectedDocumentsTraining = documentBranch.stream()
-                .filter(doc -> "Treinamentos e certificações".equals(doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()))
+                .filter(doc -> "Treinamentos e certificações".equals(doc.getDocumentMatrix().getGroup().getGroupName()))
                 .sorted(Comparator.comparing(db -> db.getDocumentMatrix().getName()))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .documentId(doc.getIdDocumentation()) // ID do DocumentBranch
@@ -349,126 +325,102 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                                 ? doc.getDocumentMatrix().getIdDocument()
                                 : null)
                         .name(doc.getTitle())
-                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
-                                    : null)
-                                : null)
-                        .subgroupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
-                                    : null)
-                                : null)
+//                        .idDocumentSubgroup(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getIdDocumentSubgroup()
+//                                    : null)
+//                                : null)
+//                        .subgroupName(doc.getDocumentMatrix() != null
+//                                ? (doc.getDocumentMatrix().getSubGroup() != null
+//                                    ? doc.getDocumentMatrix().getSubGroup().getSubgroupName()
+//                                    : null)
+//                                : null)
                         .idDocumentGroup(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getIdDocumentGroup()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getIdDocumentGroup()
                                 : null)
                         .groupName(doc.getDocumentMatrix() != null
-                                ? (doc.getDocumentMatrix().getSubGroup() != null
-                                    ? (doc.getDocumentMatrix().getSubGroup().getGroup() != null
-                                        ? doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName()
-                                        : null)
-                                    : null)
+                                ? doc.getDocumentMatrix().getGroup().getGroupName()
                                 : null)
                         .build())
                 .collect(Collectors.toList());
 
-        List<DocumentMatrixResponseDto> allDocumentsEnterprise = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento empresa")
+        List<DocumentMatrixResponseDto> allDocumentsEnterprise = documentMatrixRepository.findAllByGroup_GroupName("Documento empresa")
                 .stream()
                 .sorted(Comparator.comparing(DocumentMatrix::getName))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                        .idDocumentSubgroup(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                                : null)
+//                        .subgroupName(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getSubgroupName()
+//                                : null)
+                        .idDocumentGroup(doc.getGroup() != null
+                                ? doc.getGroup().getIdDocumentGroup()
                                 : null)
-                        .subgroupName(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getSubgroupName()
-                                : null)
-                        .idDocumentGroup(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
-                                    : null)
-                                : null)
-                        .groupName(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getGroupName()
-                                    : null)
+                        .groupName(doc.getGroup() != null
+                                ? doc.getGroup().getGroupName()
                                 : null)
                         .build())
                 .toList();
-        List<DocumentMatrixResponseDto> allDocumentsPersonal = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documento pessoa")
+        List<DocumentMatrixResponseDto> allDocumentsPersonal = documentMatrixRepository.findAllByGroup_GroupName("Documento pessoa")
                 .stream()
                 .sorted(Comparator.comparing(DocumentMatrix::getName))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                        .idDocumentSubgroup(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                                : null)
+//                        .subgroupName(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getSubgroupName()
+//                                : null)
+                        .idDocumentGroup(doc.getGroup() != null
+                                ? doc.getGroup().getIdDocumentGroup()
                                 : null)
-                        .subgroupName(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getSubgroupName()
-                                : null)
-                        .idDocumentGroup(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
-                                    : null)
-                                : null)
-                        .groupName(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getGroupName()
-                                    : null)
+                        .groupName(doc.getGroup() != null
+                                ? doc.getGroup().getGroupName()
                                 : null)
                         .build())
                 .toList();
-        List<DocumentMatrixResponseDto> allDocumentsService = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Documentos empresa-serviço")
+        List<DocumentMatrixResponseDto> allDocumentsService = documentMatrixRepository.findAllByGroup_GroupName("Documentos empresa-serviço")
                 .stream()
                 .sorted(Comparator.comparing(DocumentMatrix::getName))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                        .idDocumentSubgroup(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                                : null)
+//                        .subgroupName(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getSubgroupName()
+//                                : null)
+                        .idDocumentGroup(doc.getGroup() != null
+                                ? doc.getGroup().getIdDocumentGroup()
                                 : null)
-                        .subgroupName(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getSubgroupName()
-                                : null)
-                        .idDocumentGroup(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
-                                    : null)
-                                : null)
-                        .groupName(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getGroupName()
-                                    : null)
+                        .groupName(doc.getGroup() != null
+                                ? doc.getGroup().getGroupName()
                                 : null)
                         .build())
                 .toList();
-        List<DocumentMatrixResponseDto> allDocumentsTraining = documentMatrixRepository.findAllBySubGroup_Group_GroupName("Treinamentos e certificações")
+        List<DocumentMatrixResponseDto> allDocumentsTraining = documentMatrixRepository.findAllByGroup_GroupName("Treinamentos e certificações")
                 .stream()
                 .sorted(Comparator.comparing(DocumentMatrix::getName))
                 .map(doc -> DocumentMatrixResponseDto.builder()
                         .idDocumentMatrix(doc.getIdDocument())
                         .name(doc.getName())
-                        .idDocumentSubgroup(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                        .idDocumentSubgroup(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getIdDocumentSubgroup()
+//                                : null)
+//                        .subgroupName(doc.getSubGroup() != null
+//                                ? doc.getSubGroup().getSubgroupName()
+//                                : null)
+                        .idDocumentGroup(doc.getGroup() != null
+                                ? doc.getGroup().getIdDocumentGroup()
                                 : null)
-                        .subgroupName(doc.getSubGroup() != null
-                                ? doc.getSubGroup().getSubgroupName()
-                                : null)
-                        .idDocumentGroup(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getIdDocumentGroup()
-                                    : null)
-                                : null)
-                        .groupName(doc.getSubGroup() != null
-                                ? (doc.getSubGroup().getGroup() != null
-                                    ? doc.getSubGroup().getGroup().getGroupName()
-                                    : null)
+                        .groupName(doc.getGroup() != null
+                                ? doc.getGroup().getGroupName()
                                 : null)
                         .build())
                 .toList();

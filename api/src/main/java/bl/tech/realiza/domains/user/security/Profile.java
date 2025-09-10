@@ -64,6 +64,7 @@ public class Profile {
     private List<User> users;
 
     @ManyToMany
+    @Builder.Default
     @JoinTable(
             name = "PROFILE_PERMISSION",
             joinColumns = @JoinColumn(name = "profileId"),

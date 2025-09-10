@@ -51,7 +51,7 @@ public class CrudProviderSupplierImpl implements CrudProviderSupplier {
             throw new NotFoundException("Branches not found");
         }
 
-//        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_SubGroup_Group_GroupNameAndIsActive(providerSupplierRequestDto.getBranch(), "Documento empresa");
+//        List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndDocumentMatrix_Group_GroupNameAndIsActive(providerSupplierRequestDto.getBranch(), "Documento empresa");
         List<DocumentBranch> documentBranch = documentBranchRepository.findAllByBranch_IdBranchAndIsActiveIsTrue(providerSupplierRequestDto.getBranches().get(0));
         List<DocumentMatrix> documentMatrixList = documentBranch.stream()
                 .map(DocumentBranch::getDocumentMatrix)

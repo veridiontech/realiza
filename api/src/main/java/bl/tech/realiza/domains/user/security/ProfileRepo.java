@@ -29,6 +29,7 @@ public class ProfileRepo {
     private Boolean admin = false; // admin - pode tudo da filial
 
     @ManyToMany
+    @Builder.Default
     @JoinTable(
             name = "PROFILE_REPO_PERMISSION",
             joinColumns = @JoinColumn(name = "profileRepoId"),

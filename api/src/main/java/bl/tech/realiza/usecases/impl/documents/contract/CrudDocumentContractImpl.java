@@ -86,8 +86,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
             if (contractProviderSupplier.getProviderSupplier() != null) {
                 if (contractProviderSupplier.getProviderSupplier().getDocumentProviderSuppliers() != null) {
                     for (DocumentProviderSupplier documentProviderSupplier : contractProviderSupplier.getProviderSupplier().getDocumentProviderSuppliers().stream()
-                            .filter(doc -> doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName().equals("Documento empresa") ||
-                                            doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName().equals("Documentos empresa-serviço")).toList()) {
+                            .filter(doc -> doc.getDocumentMatrix().getGroup().getGroupName().equals("Documento empresa") ||
+                                            doc.getDocumentMatrix().getGroup().getGroupName().equals("Documentos empresa-serviço")).toList()) {
                         documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                                 .id(documentProviderSupplier.getIdDocumentation())
                                 .title(documentProviderSupplier.getTitle())
@@ -160,8 +160,8 @@ public class CrudDocumentContractImpl implements CrudDocumentContract {
             if (contractProviderSubcontractor.getProviderSubcontractor() != null) {
                 if (contractProviderSubcontractor.getProviderSubcontractor().getDocumentProviderSubcontractors() != null) {
                     for (DocumentProviderSubcontractor documentProviderSubcontractor : contractProviderSubcontractor.getProviderSubcontractor().getDocumentProviderSubcontractors().stream()
-                            .filter(doc -> doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName().equals("Documento empresa") ||
-                                    doc.getDocumentMatrix().getSubGroup().getGroup().getGroupName().equals("Documentos empresa-serviço")).toList()) {
+                            .filter(doc -> doc.getDocumentMatrix().getGroup().getGroupName().equals("Documento empresa") ||
+                                    doc.getDocumentMatrix().getGroup().getGroupName().equals("Documentos empresa-serviço")).toList()) {
                         documentDtos.add(ContractDocumentAndEmployeeResponseDto.DocumentDto.builder()
                                 .id(documentProviderSubcontractor.getIdDocumentation())
                                 .title(documentProviderSubcontractor.getTitle())
