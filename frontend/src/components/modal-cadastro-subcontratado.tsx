@@ -57,6 +57,7 @@ export const contractFormSchema = z.object({
     .string()
     .nonempty("Referência do contrato é obrigatório"),
   subcontractPermission: z.enum(["true", "false"], {}).optional(),
+  subcontractLevel: z.coerce.number().optional(),
 });
 
 type ModalSendEmailFormSchemaSubContractor = z.infer<
@@ -69,7 +70,7 @@ interface ModalCadastroSubcontratadoProps {
 }
 
 export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = ({ idContract }) => {
-   console.log("ID DO CONTRATO RECEBIDO COMO PROP:", idContract);
+  console.log("ID DO CONTRATO RECEBIDO COMO PROP:", idContract);
   const [managers, setManagers] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -227,7 +228,10 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
       );
       setActivities(activitieData.data);
     } catch (err) {
-      console.log(err);
+      console.log(
+        `erro ao buscar atividades da filia: ${selectedBranch?.name}`,
+        err
+      );
     }
   };
 
@@ -301,6 +305,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
         hse: data.hse,
         dateStart: data.dateStart,
         idContractSupplier: providerDatas.idContractSupplier,
+        subcontractLevel: data.subcontractLevel,
         providerDatas: {
           corporateName: providerDatas?.corporateName || "",
           email: providerDatas?.email || "",
@@ -318,7 +323,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
       setNextModal(false);
       setIsMainModalOpen(false);
     } catch (err: any) {
-      if (err.response) {
+      if (axios.isAxiosError(err) && err.response) {
         console.error("Erro no servidor:", err.response.data);
         toast.error(
           `Erro ao criar contrato: ${
@@ -366,7 +371,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
           </h2>
         </div>
 
-        <div className="bg-[#F2F3F5] text-sm text-gray-800 p-2 px-4 rounded shadow mb-4">
+        <div className="bg-[#F2F3F6] text-sm text-gray-800 p-2 px-4 rounded shadow mb-4">
           <strong>Filial:</strong>{" "}
           {selectedBranch?.name ?? "Nenhuma filial selecionada"}
         </div>
@@ -505,7 +510,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                 <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
                    <DialogTitle className="text-white flex items-center gap-2 text-base font-semibold">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" className="w-5 h-5 stroke-yellow-400" viewBox="0 0 24 24">
-                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
                       </svg>
                       Faça o contrato
                    </DialogTitle>
@@ -518,40 +523,40 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                 <ScrollArea className="h-[60vh] w-full px-6 py-4">
                    <div className="w-full flex flex-col gap-4">
                       <form
-                         className="flex flex-col gap-4"
-                         onSubmit={handleSubmitContract(createContract, (errors) => {
-                            console.error("Validation errors for contract form:", errors);
-                            toast.error("Por favor, preencha todos os campos obrigatórios do contrato.");
-                         })}
+                          className="flex flex-col gap-4"
+                          onSubmit={handleSubmitContract(createContract, (errors) => {
+                             console.error("Validation errors for contract form:", errors);
+                             toast.error("Por favor, preencha todos os campos obrigatórios do contrato.");
+                          })}
                       >
                          <div>
-                            <Label className="text-black">CNPJ do novo prestador</Label>
-                            <Input
-                               type="text"
-                               {...registerContract("cnpj")}
-                               defaultValue={providerDatas.cnpj}
-                               readOnly
-                               className="bg-gray-200 cursor-not-allowed"
-                            />
+                             <Label className="text-black">CNPJ do novo prestador</Label>
+                             <Input
+                                type="text"
+                                {...registerContract("cnpj")}
+                                defaultValue={providerDatas.cnpj}
+                                readOnly
+                                className="bg-gray-200 cursor-not-allowed"
+                             />
                          </div>
 
                          <div className="flex flex-col gap-2">
-                           <Label className="text-black">Gestor do serviço</Label>
-                           <select
-                              className="rounded-md border p-2"
-                              {...registerContract("idResponsible")}
-                              defaultValue=""
-                           >
-                              <option value="" disabled>Selecione um gestor</option>
-                              {Array.isArray(managers) && managers.map((manager: any) => (
-                                 <option value={manager.idUser} key={manager.idUser}>
-                                    {manager.firstName} {manager.surname}
-                                 </option>
-                              ))}
-                           </select>
-                           {errorsContract.idResponsible && <span className="text-red-600 text-sm">{errorsContract.idResponsible.message}</span>}
-                        </div>
-                        
+                            <Label className="text-black">Gestor do serviço</Label>
+                            <select
+                               className="rounded-md border p-2"
+                               {...registerContract("idResponsible")}
+                               defaultValue=""
+                            >
+                               <option value="" disabled>Selecione um gestor</option>
+                               {Array.isArray(managers) && managers.map((manager: any) => (
+                                   <option value={manager.idUser} key={manager.idUser}>
+                                      {manager.firstName} {manager.surname}
+                                   </option>
+                               ))}
+                            </select>
+                            {errorsContract.idResponsible && <span className="text-red-600 text-sm">{errorsContract.idResponsible.message}</span>}
+                         </div>
+                         
                          <div>
                             <Label className="text-black">Nome do Serviço</Label>
                             <Input {...registerContract("serviceName")} />
@@ -594,7 +599,28 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                                </div>
                             </div>
                          </div>
-                        
+                         
+                         <div>
+                           <Label className="text-black">Permite subcontratação?</Label>
+                           <select {...registerContract("subcontractPermission")} className="rounded-md border p-2 w-full mt-1" defaultValue="false">
+                             <option value="true">Sim</option>
+                             <option value="false">Não</option>
+                           </select>
+                           {errorsContract.subcontractPermission && <span className="text-red-500 text-sm">{errorsContract.subcontractPermission.message}</span>}
+                         </div>
+
+                         <div>
+                            <Label className="text-black">Nível de Subcontratação</Label>
+                            <Input
+                               type="number"
+                               {...registerContract("subcontractLevel")}
+                               defaultValue={0}
+                               min={0}
+                               className="rounded-md border p-2 w-full mt-1"
+                            />
+                            {errorsContract.subcontractLevel && <span className="text-red-500 text-sm">{errorsContract.subcontractLevel.message}</span>}
+                         </div>
+
                          <div className="flex flex-col gap-1">
                             <Label className="text-black">Tipo do Serviço</Label>
                             <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
@@ -604,9 +630,9 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                             <select {...registerContract("idServiceType")} className="rounded-md border p-2 w-full mt-1" defaultValue="">
                                <option value="" disabled>Selecione uma opção</option>
                                {servicesType.filter((s: any) => s.title.toLowerCase().includes(searchService.toLowerCase())).map((service: any) => (
-                                  <option key={service.idServiceType} value={service.idServiceType}>
-                                     {service.title} - {formatarRisco(service.risk as RiscoNivel)}
-                                  </option>
+                                   <option key={service.idServiceType} value={service.idServiceType}>
+                                      {service.title} - {formatarRisco(service.risk as RiscoNivel)}
+                                   </option>
                                ))}
                             </select>
                             {errorsContract.idServiceType && <span className="text-red-500 text-sm">{errorsContract.idServiceType.message}</span>}
@@ -616,18 +642,18 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                             <div className="flex flex-col gap-2">
                                <Label className="text-black">Tipo de atividade</Label>
                                <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
-                                  <Search className="text-neutral-500 w-5 h-5" />
-                                  <input type="text" placeholder="Pesquisar atividade..." value={searchActivity} onChange={(e) => setSearchActivity(e.target.value)} className="border-none w-full outline-none text-sm placeholder:text-neutral-400" />
+                                   <Search className="text-neutral-500 w-5 h-5" />
+                                   <input type="text" placeholder="Pesquisar atividade..." value={searchActivity} onChange={(e) => setSearchActivity(e.target.value)} className="border-none w-full outline-none text-sm placeholder:text-neutral-400" />
                                </div>
                                <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
-                                  <div className="flex flex-col gap-2">
-                                     {Array.isArray(activities) && activities.filter((activity: any) => activity.title.toLowerCase().includes(searchActivity.toLowerCase())).map((activity: any) => (
-                                        <label key={activity.idActivity} className="flex items-center gap-2 text-black">
-                                           <input type="checkbox" checked={selectedActivities.includes(activity.idActivity)} onChange={(e) => handleCheckboxChange(activity.idActivity, e.target.checked)} />
-                                           {activity.title}
-                                        </label>
-                                     ))}
-                                  </div>
+                                   <div className="flex flex-col gap-2">
+                                      {Array.isArray(activities) && activities.filter((activity: any) => activity.title.toLowerCase().includes(searchActivity.toLowerCase())).map((activity: any) => (
+                                          <label key={activity.idActivity} className="flex items-center gap-2 text-black">
+                                             <input type="checkbox" checked={selectedActivities.includes(activity.idActivity)} onChange={(e) => handleCheckboxChange(activity.idActivity, e.target.checked)} />
+                                             {activity.title}
+                                          </label>
+                                      ))}
+                                   </div>
                                </ScrollArea>
                             </div>
                          )}
@@ -639,7 +665,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                          </div>
 
                          <Button className="bg-realizaBlue mt-4" type="submit" disabled={isButtonDisabled}>
-                           {isLoading ? <Oval height="20" width="20" color="#fff" /> : "Enviar contrato"}
+                            {isLoading ? <Oval height="20" width="20" color="#fff" /> : "Enviar contrato"}
                          </Button>
                       </form>
                    </div>
