@@ -206,8 +206,6 @@ export function ConfigPanel() {
   const [editType, setEditType] = useState("");
   const [editIsDocumentUnique, setEditIsDocumentUnique] = useState(false);
   const [editDoesBlock, setEditDoesBlock] = useState(false);
-
-  // Estados para o novo documento
   const [newDocName, setNewDocName] = useState("");
   const [newDocType, setNewDocType] = useState("");
   const [newDocExpirationAmount, setNewDocExpirationAmount] = useState(0);
@@ -573,7 +571,7 @@ export function ConfigPanel() {
         }
       );
 
-      toast.success("Perfil criado com sucesso!");
+      toast.success("Perfil criado com sucesso! 🎉");
       console.log("Perfil criado:", response.data);
 
       setName("");
@@ -700,71 +698,26 @@ export function ConfigPanel() {
     getDocumentGroups();
   }, []);
 
-  const [documentSubgroups, setDocumentSubgroups] = useState<any[]>([]);
-
-  async function getDocumentSubgroups(idDocumentGroup: string) {
-    console.log("→ Solicitação de subgrupos para grupo:", idDocumentGroup);
-    try {
-      const response = await axios.get(
-        `${ip}/document/matrix/subgroup/filtered-group`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            idSearch: idDocumentGroup,
-            page: 0,
-            size: 10000,
-          },
-        }
-      );
-
-      console.log("← Resposta bruta de subgrupos:", response.data);
-      setDocumentSubgroups(response.data.content || []);
-    } catch (error) {
-      console.error("Erro ao buscar subgrupos de documentos", error);
-      toast.error("Erro ao carregar subgrupos de documentos.");
-    }
-  }
-
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [selectedSubgroup, setSelectedSubgroup] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (selectedGroup) {
-      getDocumentSubgroups(selectedGroup);
-    }
-  }, [selectedGroup]);
 
   const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedGroupId = e.target.value;
     setSelectedGroup(selectedGroupId);
-    console.log("Grupo selecionado:", selectedGroupId);
-
-    setSelectedSubgroup(null);
-
-    if (selectedGroupId) {
-      getDocumentSubgroups(selectedGroupId);
-    }
   };
 
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
 
-  async function getDocsBySubgroup(idDocumentSubgroup: string) {
-    console.log(
-      `Chamando ➡️ GET ${ip}/document/matrix/filtered-subgroup?` +
-        `idSearch=${idDocumentSubgroup}&page=0&size=1000`
-    );
-
+  async function getDocsByGroup(idDocumentGroup: string) {
     setIsLoadingDocsList(true);
     try {
       const { data } = await axios.get(
-        `${ip}/document/matrix/filtered-subgroup`,
+        `${ip}/document/matrix/filtered-group`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: { idSearch: idDocumentSubgroup, page: 0, size: 1000 },
+          params: { idSearch: idDocumentGroup },
         }
       );
-      console.log("Resposta bruta de filtered-subgroup:", data);
 
       const list: DocumentMatrixEntry[] = Array.isArray(data)
         ? data
@@ -772,28 +725,22 @@ export function ConfigPanel() {
         ? (data as any).content
         : [];
 
-      console.log(`Lista extraída (${list.length} itens):`, list);
-
       setDocsList(list);
     } catch (error) {
-      console.error("Erro axios em filtered-subgroup:", error);
+      console.error("Erro axios em filtered-group:", error);
     } finally {
       setIsLoadingDocsList(false);
     }
   }
+
   useEffect(() => {
-    console.log(
-      "Hook: selectedGroup =",
-      selectedGroup,
-      "; selectedSubgroup =",
-      selectedSubgroup
-    );
-    if (selectedSubgroup) {
-      getDocsBySubgroup(selectedSubgroup);
+    if (selectedGroup) {
+      getDocsByGroup(selectedGroup);
     } else {
       setDocsList([]);
     }
-  }, [selectedSubgroup]);
+  }, [selectedGroup, token]);
+
 
   async function saveMatrixEntry() {
     if (!selectedMatrixEntry) return;
@@ -835,8 +782,8 @@ export function ConfigPanel() {
   }
 
   async function createMatrixEntry() {
-    if (!selectedSubgroup) {
-      toast.error("Por favor, selecione um subgrupo antes de criar.");
+    if (!selectedGroup) {
+      toast.error("Por favor, selecione um grupo antes de criar.");
       return;
     }
     if (!newDocName.trim() || !newDocType.trim()) {
@@ -853,7 +800,6 @@ export function ConfigPanel() {
       isDocumentUnique: newDocIsUnique,
       expirationDateUnit: newDocExpirationUnit,
       expirationDateAmount: newDocExpirationAmount,
-      idDocumentSubgroup: selectedSubgroup,
       idDocumentGroup: selectedGroup,
     };
 
@@ -874,8 +820,8 @@ export function ConfigPanel() {
       setNewDocDoesBlock(false);
       setNewDocIsUnique(false);
 
-      if (selectedSubgroup) {
-        getDocsBySubgroup(selectedSubgroup);
+      if (selectedGroup) {
+        getDocsByGroup(selectedGroup);
       }
     } catch (error) {
       console.error("Erro ao criar documento de matriz:", error);
@@ -1526,7 +1472,7 @@ export function ConfigPanel() {
                             onChange={(e) =>
                               setDocumentViewer(e.target.checked)
                             }
-                            disabled={manager || isCreatingProfile}
+                            disabled={isCreatingProfile}
                           />{" "}
                           Visualizador de Documentos
                         </label>
@@ -1537,7 +1483,7 @@ export function ConfigPanel() {
                             onChange={(e) =>
                               setRegistrationUser(e.target.checked)
                             }
-                            disabled={isInspector || isCreatingProfile}
+                            disabled={isCreatingProfile}
                           />{" "}
                           Cadastro de Usuários
                         </label>
@@ -1548,7 +1494,7 @@ export function ConfigPanel() {
                             onChange={(e) =>
                               setRegistrationContract(e.target.checked)
                             }
-                            disabled={isInspector || isCreatingProfile}
+                            disabled={isCreatingProfile}
                           />{" "}
                           Cadastro de Contratos
                         </label>
@@ -1661,11 +1607,10 @@ export function ConfigPanel() {
         )}
         {selectTab === "documents" && (
           <div className="flex items-start justify-center gap-10 w-full">
-            {/* Lado Esquerdo: Seleção de Grupo/Subgrupo */}
             <div className="w-[45%] space-y-4">
-              <h2 className="text-xl font-bold">Grupos e Subgrupos</h2>
+              <h2 className="text-xl font-bold">Grupos e Documentos</h2>
               <p className="text-sm text-gray-500">
-                Selecione um subgrupo para visualizar e criar documentos.
+                Selecione um grupo para visualizar e gerenciar os documentos.
               </p>
               <div className="space-y-2">
                 <label className="block text-sm font-medium">
@@ -1688,156 +1633,13 @@ export function ConfigPanel() {
                   ))}
                 </select>
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium">
-                  Selecione um Subgrupo
-                </label>
-                <select
-                  id="documentSubgroup"
-                  className="w-full p-2 border rounded-md"
-                  value={selectedSubgroup || ""}
-                  onChange={(e) => setSelectedSubgroup(e.target.value)}
-                  disabled={!selectedGroup}
-                >
-                  <option value="">Selecione um Subgrupo</option>
-                  {documentSubgroups.map((subgroup) => (
-                    <option
-                      key={subgroup.idDocumentSubgroup}
-                      value={subgroup.idDocumentSubgroup}
-                    >
-                      {subgroup.subgroupName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Lado Direito: Formulário de Criação e Lista de Documentos */}
-            <div className="w-[45%] border-l pl-6 space-y-6">
-              <h2 className="text-xl font-bold">Gerenciar Documentos</h2>
-              
-              {/* Formulário de Criação de Documento */}
-              <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
-                <h3 className="text-lg font-semibold mb-3">Criar Novo Documento</h3>
-                <p className="text-xs text-red-500 mb-4">
-                  * Campos obrigatórios.
-                </p>
-
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="newDocName" className="block text-sm font-medium mb-1">
-                      Nome do Documento <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="newDocName"
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Ex: ASO - Atestado de Saúde Ocupacional"
-                      value={newDocName}
-                      onChange={(e) => setNewDocName(e.target.value)}
-                      disabled={!selectedSubgroup || isCreatingDocument}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="newDocType" className="block text-sm font-medium mb-1">
-                      Tipo de Arquivo <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="newDocType"
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Ex: PDF, PNG, JPEG"
-                      value={newDocType}
-                      onChange={(e) => setNewDocType(e.target.value)}
-                      disabled={!selectedSubgroup || isCreatingDocument}
-                    />
-                  </div>
-
-                  {/* Campo de validade agrupado */}
-                  <div>
-                    <p className="block text-sm font-medium mb-1">
-                      Validade (Opcional)
-                    </p>
-                    <div className="flex gap-2 items-end">
-                      <div className="w-1/3">
-                        <label htmlFor="expAmount" className="sr-only">Quantidade</label>
-                        <input
-                          id="expAmount"
-                          type="number"
-                          min={0}
-                          className="w-full p-2 border rounded-md"
-                          placeholder="0"
-                          value={newDocExpirationAmount}
-                          onChange={(e) =>
-                            setNewDocExpirationAmount(Number(e.target.value))
-                          }
-                          disabled={!selectedSubgroup || isCreatingDocument}
-                        />
-                      </div>
-                      <div className="w-2/3">
-                        <label htmlFor="expUnit" className="sr-only">Unidade</label>
-                        <select
-                          id="expUnit"
-                          className="w-full p-2 border rounded-md"
-                          value={newDocExpirationUnit}
-                          onChange={(e) => setNewDocExpirationUnit(e.target.value)}
-                          disabled={!selectedSubgroup || isCreatingDocument}
-                        >
-                          {expirationUnits.map((u) => (
-                            <option key={u.value} value={u.value}>
-                              {u.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Checkboxes agrupados e com labels descritivas */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium">
-                      <input
-                        type="checkbox"
-                        checked={newDocDoesBlock}
-                        onChange={(e) => setNewDocDoesBlock(e.target.checked)}
-                        disabled={!selectedSubgroup || isCreatingDocument}
-                      />
-                      Documento bloqueia pendência?
-                    </label>
-                    <p className="text-xs text-gray-500 ml-6 -mt-1">
-                      Se marcado, a ausência deste documento impedirá a aprovação de uma pendência.
-                    </p>
-                    <label className="flex items-center gap-2 text-sm font-medium">
-                      <input
-                        type="checkbox"
-                        checked={newDocIsUnique}
-                        onChange={(e) => setNewDocIsUnique(e.target.checked)}
-                        disabled={!selectedSubgroup || isCreatingDocument}
-                      />
-                      Este é um documento único?
-                    </label>
-                    <p className="text-xs text-gray-500 ml-6 -mt-1">
-                      Marque se o funcionário só puder anexar um arquivo deste tipo.
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={createMatrixEntry}
-                    disabled={!selectedSubgroup || isCreatingDocument}
-                    className="w-full mt-4"
-                  >
-                    {isCreatingDocument ? "Criando..." : "Criar Documento"}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Lista e Edição de Documentos (EXISTENTE) */}
               <h3 className="text-lg font-semibold mt-6 mb-2">
-                Documentos do Subgrupo
+                Documentos do Grupo
               </h3>
-              {!selectedSubgroup ? (
-                <p className="text-gray-500">Selecione um subgrupo para visualizar os documentos.</p>
+              {!selectedGroup ? (
+                <p className="text-gray-500">Selecione um grupo para visualizar os documentos.</p>
               ) : isLoadingDocsList ? (
-                <p className="text-gray-500">Carregando documentos…</p>
+                <p className="text-gray-500">Carregando documentos...</p>
               ) : docsList.length > 0 ? (
                 <>
                   <ul className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
@@ -1849,14 +1651,13 @@ export function ConfigPanel() {
                       >
                         <strong className="block">{doc.name}</strong>
                         <p className="text-xs text-gray-500 mt-1">
-                          {doc.expirationDateAmount > 0 
+                          {doc.expirationDateAmount > 0
                             ? `Validade: ${doc.expirationDateAmount} ${expirationUnits.find(u => u.value === doc.expirationDateUnit)?.label}`
                             : 'Sem validade padrão'}
                         </p>
                       </li>
                     ))}
                   </ul>
-
                   {selectedMatrixEntry && (
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg shadow-inner space-y-4">
                       <h3 className="text-lg font-semibold">
@@ -1884,7 +1685,6 @@ export function ConfigPanel() {
                           onChange={(e) => setEditType(e.target.value)}
                         />
                       </div>
-                      
                       <div>
                         <p className="block text-sm font-medium mb-1">
                           Validade
@@ -1922,7 +1722,6 @@ export function ConfigPanel() {
                           </div>
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 text-sm font-medium">
                           <input
@@ -1943,7 +1742,6 @@ export function ConfigPanel() {
                           Documento único
                         </label>
                       </div>
-
                       <div className="flex gap-2 pt-2">
                         <Button onClick={saveMatrixEntry} className="w-full">Salvar Alterações</Button>
                         <Button
@@ -1958,9 +1756,117 @@ export function ConfigPanel() {
                 </>
               ) : (
                 <p className="text-gray-400">
-                  Nenhum documento encontrado para este subgrupo.
+                  Nenhum documento encontrado para este grupo.
                 </p>
               )}
+            </div>
+            <div className="w-[45%] border-l pl-6 space-y-6">
+              <h2 className="text-xl font-bold">Gerenciar Documentos</h2>
+              <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
+                <h3 className="text-lg font-semibold mb-3">Criar Novo Documento</h3>
+                <p className="text-xs text-red-500 mb-4">
+                  * Campos obrigatórios.
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="newDocName" className="block text-sm font-medium mb-1">
+                      Nome do Documento <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="newDocName"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Ex: ASO - Atestado de Saúde Ocupacional"
+                      value={newDocName}
+                      onChange={(e) => setNewDocName(e.target.value)}
+                      disabled={!selectedGroup || isCreatingDocument}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newDocType" className="block text-sm font-medium mb-1">
+                      Tipo de Arquivo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="newDocType"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Ex: PDF, PNG, JPEG"
+                      value={newDocType}
+                      onChange={(e) => setNewDocType(e.target.value)}
+                      disabled={!selectedGroup || isCreatingDocument}
+                    />
+                  </div>
+                  <div>
+                    <p className="block text-sm font-medium mb-1">
+                      Validade (Opcional)
+                    </p>
+                    <div className="flex gap-2 items-end">
+                      <div className="w-1/3">
+                        <label htmlFor="expAmount" className="sr-only">Quantidade</label>
+                        <input
+                          id="expAmount"
+                          type="number"
+                          min={0}
+                          className="w-full p-2 border rounded-md"
+                          placeholder="0"
+                          value={newDocExpirationAmount}
+                          onChange={(e) =>
+                            setNewDocExpirationAmount(Number(e.target.value))
+                          }
+                          disabled={!selectedGroup || isCreatingDocument}
+                        />
+                      </div>
+                      <div className="w-2/3">
+                        <label htmlFor="expUnit" className="sr-only">Unidade</label>
+                        <select
+                          id="expUnit"
+                          className="w-full p-2 border rounded-md"
+                          value={newDocExpirationUnit}
+                          onChange={(e) => setNewDocExpirationUnit(e.target.value)}
+                          disabled={!selectedGroup || isCreatingDocument}
+                        >
+                          {expirationUnits.map((u) => (
+                            <option key={u.value} value={u.value}>
+                              {u.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={newDocDoesBlock}
+                        onChange={(e) => setNewDocDoesBlock(e.target.checked)}
+                        disabled={!selectedGroup || isCreatingDocument}
+                      />
+                      Documento bloqueia?
+                    </label>
+                    <p className="text-xs text-gray-500 ml-6 -mt-1">
+                      Se marcado, o documento precisa estar valido para permitir a entrada de um colaborador.
+                    </p>
+                    <label className="flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={newDocIsUnique}
+                        onChange={(e) => setNewDocIsUnique(e.target.checked)}
+                        disabled={!selectedGroup || isCreatingDocument}
+                      />
+                      Este é um documento único?
+                    </label>
+                    <p className="text-xs text-gray-500 ml-6 -mt-1">
+                      Marque se o documento se espelha em outros contratos.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={createMatrixEntry}
+                    disabled={!selectedGroup || isCreatingDocument}
+                    className="w-full mt-4"
+                  >
+                    {isCreatingDocument ? "Criando..." : "Criar Documento"}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
