@@ -2,6 +2,7 @@ package bl.tech.realiza.gateways.requests.employees;
 
 import bl.tech.realiza.domains.employees.Employee;
 import lombok.Data;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.sql.Date;
 import java.util.List;
@@ -12,6 +13,8 @@ public class EmployeeBrazilianRequestDto {
     private Employee.MaritalStatus maritalStatus;
     private Employee.ContractType contractType;
     private String cep;
+    @CPF
+    private String cpf;
     private String name;
     private String surname;
     private String address;
@@ -35,7 +38,6 @@ public class EmployeeBrazilianRequestDto {
     private String cboId;
     private Employee.Situation situation;
     private String rg;
-    private String cpf;
     private Date admissionDate;
     private String branch;
     private String supplier;

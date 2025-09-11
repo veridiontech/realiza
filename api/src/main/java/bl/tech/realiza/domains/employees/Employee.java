@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -45,6 +46,8 @@ public abstract class Employee {
     private String postalCode;
     private String address;
     private String city;
+    @CPF
+    private String cpf;
     private String state;
     private String country;
     private String addressLine2;
@@ -166,5 +169,15 @@ public abstract class Employee {
 
     public String getFullName() {
         return String.format("%s %s", this.name != null ? this.name : "", this.surname != null ? this.surname : "").trim();
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf == null ? null : cpf.replaceAll("\\D", "");
+    }
+
+    @Transient
+    public String getCpfFormatted() {
+        if (cpf == null || cpf.length() != 11) return cpf;
+        return cpf.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
     }
 }

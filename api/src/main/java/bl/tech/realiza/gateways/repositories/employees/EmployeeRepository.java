@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
     Collection<Employee> findAllByDeleteRequest(boolean b);
@@ -54,4 +55,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 """)
     Long countEmployeeSubcontractorByClientIdAndAllocated(@Param("clientId") String clientId,
                                                      @Param("situation") Employee.Situation situation);
+
+    List<Employee> findAllByCpf(String employeeCpf);
 }

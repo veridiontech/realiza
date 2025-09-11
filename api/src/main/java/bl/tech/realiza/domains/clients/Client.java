@@ -36,7 +36,7 @@ public class Client {
     private String city;
     private String address;
     @Builder.Default
-    private Boolean isUltragaz = false;
+    private Boolean thirdParty = false; // caso aprove o third party de uma empresa, alteração para true há de ser feita diretamente no banco de dados
     private String number;
     @Builder.Default
     private Boolean isActive = true;
