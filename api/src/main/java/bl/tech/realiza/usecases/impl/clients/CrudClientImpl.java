@@ -179,7 +179,6 @@ public class CrudClientImpl implements CrudClient {
                 .city(client.getCity())
                 .address(client.getAddress())
                 .number(client.getNumber())
-                .isUltragaz(client.getIsUltragaz())
                 .build());
     }
 
@@ -209,7 +208,6 @@ public class CrudClientImpl implements CrudClient {
                             .city(client.getCity())
                             .address(client.getAddress())
                             .number(client.getNumber())
-                            .isUltragaz(client.getIsUltragaz())
                             .build();
                 }
         );
@@ -281,7 +279,6 @@ public class CrudClientImpl implements CrudClient {
                 .city(savedClient.getCity())
                 .address(savedClient.getAddress())
                 .number(savedClient.getNumber())
-                .isUltragaz(savedClient.getIsUltragaz())
                 .build();
 
         return Optional.of(clientResponse);
@@ -373,7 +370,6 @@ public class CrudClientImpl implements CrudClient {
                 .city(client.getCity())
                 .address(client.getAddress())
                 .number(client.getNumber())
-                .isUltragaz(client.getIsUltragaz())
                 .build();
 
         return Optional.of(clientResponse);
