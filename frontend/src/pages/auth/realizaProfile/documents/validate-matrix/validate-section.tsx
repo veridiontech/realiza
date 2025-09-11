@@ -7,7 +7,7 @@ interface ExpirationItem {
   title: string;
   expirationDateAmount: number;
   expirationDateUnit: "DAYS" | "WEEKS" | "MONTHS";
-  doesBlock: boolean;
+  doesBlock: boolean; 
 }
 
 interface ValidateSectionProps {
@@ -27,38 +27,45 @@ export function ValidateSection({
   const [doesBlockEdit, setBlockEdit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
+  const fetchExpirations = async () => {
     if (!idBranch || !documentTypeName) return;
+
     const token = localStorage.getItem("tokenClient");
     if (!token) {
       console.error("Token não encontrado.");
       return;
     }
 
-    axios
-      .get<ExpirationItem[]>(
+    try {
+      const { data } = await axios.get<ExpirationItem[]>(
         `${ip}/document/branch/document-matrix/expiration/${idBranch}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            documentTypeName,
-            isSelected: true,
-            replicate: false,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+          params: { documentTypeName, isSelected: true, replicate: false, _ts: Date.now() },
         }
-      )
-      .then((res) => setExpirationList(res.data))
-      .catch((err) =>
-        console.error("Erro ao buscar validade dos documentos:", err)
       );
+
+      const normalized = (data ?? []).map((d) => ({
+        ...d,
+        expirationDateAmount: Number(d.expirationDateAmount ?? 0),
+        expirationDateUnit: (d.expirationDateUnit as any) ?? "MONTHS",
+        doesBlock: !!(d as any).doesBlock,
+      }));
+
+      setExpirationList(normalized);
+    } catch (err) {
+      console.error("Erro ao buscar validade dos documentos:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpirations();
   }, [idBranch, documentTypeName, isSelected]);
 
   const handleEditClick = (doc: ExpirationItem) => {
     setEditingId(doc.idDocument);
-    setAmountEdit(doc.expirationDateAmount);
-    setBlockEdit(doc.doesBlock);
+    setAmountEdit(Number(doc.expirationDateAmount ?? 0));
+    setBlockEdit(!!doc.doesBlock); 
   };
 
   const handleSave = async (id: string) => {
@@ -69,43 +76,27 @@ export function ValidateSection({
         console.error("Token não encontrado.");
         return;
       }
+
       const payload = {
         expirationDateAmount: amountEdit,
         expirationDateUnit: "MONTHS",
         doesBlock: doesBlockEdit,
       };
-      console.log("🔁 Enviando para API:", payload);
-      const response = await axios.post(
+
+      await axios.post(
         `${ip}/document/branch/document-matrix/expiration/update/${id}`,
         payload,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            replicate: false,
-          },
+          headers: { Authorization: `Bearer ${token}` },
+          params: { replicate: false },
         }
       );
-      console.log("✅ Sucesso:", response.data);
-      setExpirationList((prev) =>
-        prev.map((doc) =>
-          doc.idDocument === id
-            ? {
-                ...doc,
-                expirationDateAmount: amountEdit,
-                expirationDateUnit: "MONTHS",
-                doesBlock: doesBlockEdit,
-              }
-            : doc
-        )
-      );
+
+      await fetchExpirations();
       setEditingId(null);
     } catch (err: any) {
-      console.error("❌ Erro ao salvar validade:", err);
-      if (err.response) {
-        console.error("📄 Detalhes do erro:", err.response.data);
-      }
+      console.error("Erro ao salvar validade:", err);
+      if (err.response) console.error("Detalhes do erro:", err.response.data);
     } finally {
       setIsSaving(false);
     }
@@ -119,7 +110,9 @@ export function ValidateSection({
         <tr>
           <th className="px-2 py-1 text-left">Título</th>
           <th className="px-2 py-1 text-left">Validade (meses)</th>
-          <th className="px-2 py-1 text-left">Bloqueia</th>
+          <th className="px-2 py-1 text-left">
+            Bloqueia 
+          </th>
           <th className="px-2 py-1 text-left">Ações</th>
         </tr>
       </thead>
@@ -135,10 +128,9 @@ export function ValidateSection({
                     type="number"
                     min={0}
                     value={amountEdit}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setAmountEdit(value === "" ? 0 : parseInt(value, 10));
-                    }}
+                    onChange={(e) =>
+                      setAmountEdit(e.target.value === "" ? 0 : parseInt(e.target.value, 10))
+                    }
                     className="w-20 border px-1 py-0.5"
                     disabled={isSaving}
                   />
@@ -146,8 +138,8 @@ export function ValidateSection({
                 <td className="px-2 py-1 text-center">
                   <input
                     type="checkbox"
-                    checked={doesBlockEdit}
-                    onChange={() => setBlockEdit(!doesBlockEdit)}
+                    checked={!doesBlockEdit} 
+                    onChange={() => setBlockEdit(!doesBlockEdit)} 
                     disabled={isSaving}
                   />
                 </td>
@@ -157,23 +149,18 @@ export function ValidateSection({
                     className="text-green-600 font-semibold text-sm"
                     disabled={isSaving}
                   >
-                    {isSaving ? "Salvando..." : "Salvar"} {/* 4. Muda o texto do botão */}
+                    {isSaving ? "Salvando..." : "Salvar"}
                   </button>
                 </td>
               </>
             ) : (
               <>
+                <td className="px-2 py-1 text-center">{doc.expirationDateAmount}</td>
                 <td className="px-2 py-1 text-center">
-                  {doc.expirationDateAmount}
-                </td>
-                <td className="px-2 py-1 text-center">
-                  <input type="checkbox" checked={doc.doesBlock} disabled />
+                  <input type="checkbox" checked={!doc.doesBlock} readOnly disabled />
                 </td>
                 <td className="px-2 py-1">
-                  <button
-                    onClick={() => handleEditClick(doc)}
-                    className="text-blue-600 text-sm"
-                  >
+                  <button onClick={() => handleEditClick(doc)} className="text-blue-600 text-sm">
                     Editar
                   </button>
                 </td>
