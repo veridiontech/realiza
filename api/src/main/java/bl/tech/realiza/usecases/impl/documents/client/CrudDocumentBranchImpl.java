@@ -491,6 +491,7 @@ public class CrudDocumentBranchImpl implements CrudDocumentBranch {
                 .map(document -> DocumentExpirationResponseDto.builder()
                         .idDocument(document.getIdDocumentation())
                         .title(document.getTitle())
+                        .doesBlock(document.getDoesBlock())
                         .expirationDateAmount(document.getExpirationDateAmount())
                         .expirationDateUnit(document.getExpirationDateUnit())
                         .build()).toList();
