@@ -87,6 +87,17 @@ export function ContarctsByProvider() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const token = localStorage.getItem("tokenClient");
+  
+  const subcontractLevelColors: { [key: number]: string } = {
+    1: "bg-blue-500",
+    2: "bg-purple-500",
+    3: "bg-teal-500",
+    4: "bg-pink-500",
+  };
+
+  const getSubcontractLevelColor = (level: number) => {
+    return subcontractLevelColors[level] || "bg-gray-500";
+  };
 
   const getContractsByProvider = async () => {
     try {
@@ -108,6 +119,7 @@ export function ContarctsByProvider() {
       const res = await axios.get(`${ip}/contract/subcontractor`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("Dados retornados da API de subcontratados:", res.data);
       setSubcontractors(res.data?.content || res.data || []);
     } catch (err) {
       console.error("Erro ao buscar subcontratados:", err);
@@ -181,7 +193,6 @@ export function ContarctsByProvider() {
       requestParams
     );
 
-
     setIsGeneratingPdf(true);
     toast.loading("Gerando relatório de colaboradores...");
 
@@ -205,7 +216,6 @@ export function ContarctsByProvider() {
         toast.info("Nenhum colaborador encontrado para gerar o PDF.");
         return;
       }
-
 
       const doc = new jsPDF();
       const tableColumn = [
@@ -508,9 +518,9 @@ export function ContarctsByProvider() {
               >
                 <div
                   className="grid grid-cols-[1fr_2fr_0.5fr_1fr_1fr_1fr_0.5fr] gap-4
-                                text-sm font-semibold text-neutral-600 py-2
-                                border-b border-neutral-300 items-center
-                                sticky top-0 bg-white z-10"
+                          text-sm font-semibold text-neutral-600 py-2
+                          border-b border-neutral-300 items-center
+                          sticky top-0 bg-white z-10"
                 >
                   <div>Status</div>
                   <div>Documento</div>
@@ -645,7 +655,9 @@ export function ContarctsByProvider() {
                             <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                               {doc.hasDoc && doc.status !== "PENDENTE" && (
                                 <button
-                                  onClick={() => handleOpenViewerModal(doc.id)}
+                                  onClick={() =>
+                                    handleOpenViewerModal(doc.id)
+                                  }
                                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                                 >
                                   <Eye className="w-5 h-5 text-base" />
@@ -722,7 +734,6 @@ export function ContarctsByProvider() {
                             </span>
                           </div>
 
-                         
                           <div className="mt-3 pt-2 border-t border-neutral-200 w-full">
                             {employee.hasEntryPermission ? (
                               <div className="flex items-center justify-center gap-2 text-green-600">
@@ -740,7 +751,6 @@ export function ContarctsByProvider() {
                               </div>
                             )}
                           </div>
-                          
                         </div>
                       </Link>
                     ))}
@@ -765,10 +775,26 @@ export function ContarctsByProvider() {
           )}
 
           {viewOption === "subcontractors" && (
-            <div className="flex flex-col items-start gap-10">
+            <div className="flex flex-col items-start gap-5">
               <div className="flex items-center gap-2 text-[#34495E]">
                 <User />
                 <h2 className="text-[20px]">Subcontratados</h2>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-700">
+                <span className="font-semibold">Níveis:</span>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-blue-500" /> Nível 1
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-purple-500" /> Nível 2
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-teal-500" /> Nível 3
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-pink-500" /> Nível 4
+                </div>
               </div>
 
               <input
@@ -776,7 +802,7 @@ export function ContarctsByProvider() {
                 placeholder="Buscar por nome ou CNPJ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full max-w-md"
+                className="border border-neutral-300 rounded-md px-3 py-2 text-sm w-full"
               />
 
               <div className="flex flex-col gap-8 overflow-y-auto max-h-[35vh] pr-2 w-full">
@@ -787,16 +813,21 @@ export function ContarctsByProvider() {
                     <div key={sub.id} className="flex flex-col gap-5">
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-5">
-                          <div className="bg-neutral-400 p-2 rounded-full">
-                            <User />
+                          <div className="relative">
+                            <div className="bg-neutral-400 p-2 rounded-full">
+                              <User />
+                            </div>
+                            <div
+                              className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white ${getSubcontractLevelColor(sub.subcontractLevel)}`}
+                            />
                           </div>
                           <div>
-                            <h1>{sub.responsible}</h1>
+                            <h1>{sub.contractReference}</h1>
                             <p className="text-[18px]">
-                              {sub.contractReference}
+                              {sub.serviceName}
                             </p>
                             <span className="text-[12px] text-realizaBlue font-semibold underline">
-                              {sub.nameSubcontractor}
+                              {sub.responsible}
                             </span>
                           </div>
                         </div>

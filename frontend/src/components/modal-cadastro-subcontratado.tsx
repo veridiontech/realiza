@@ -57,7 +57,10 @@ export const contractFormSchema = z.object({
     .string()
     .nonempty("Referência do contrato é obrigatório"),
   subcontractPermission: z.enum(["true", "false"], {}).optional(),
-  subcontractLevel: z.coerce.number().optional(),
+  subcontractLevel: z.coerce.number()
+    .min(1, { message: "O nível de subcontratação deve ser no mínimo 1" })
+    .max(4, { message: "O nível de subcontratação deve ser no máximo 4" })
+    .optional(),
 });
 
 type ModalSendEmailFormSchemaSubContractor = z.infer<
@@ -326,8 +329,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
       if (axios.isAxiosError(err) && err.response) {
         console.error("Erro no servidor:", err.response.data);
         toast.error(
-          `Erro ao criar contrato: ${
-            err.response.data.message || "Erro desconhecido."
+          `Erro ao criar contrato: ${err.response.data.message || "Erro desconhecido."
           }`
         );
       } else {
@@ -467,7 +469,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                 </span>
               )}
             </div>
-            
+
             <div className="flex flex-col gap-1">
               <Label className="text-black">Referência do Contrato</Label>
               <Input
@@ -477,7 +479,7 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                 className="rounded-lg p-2 bg-gray-200 cursor-not-allowed border-gray-300"
               />
               <input type="hidden" {...registerSubContract("idContractSupplier")} />
-              
+
               {errorsSubContract.idContractSupplier && (
                 <span className="text-red-600 text-sm">
                   {errorsSubContract.idContractSupplier.message}
@@ -507,169 +509,170 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
 
           <Dialog open={nextModal} onOpenChange={setNextModal}>
             <DialogContent className="max-w-[95vw] border-none md:max-w-[45vw]">
-                <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
-                   <DialogTitle className="text-white flex items-center gap-2 text-base font-semibold">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" className="w-5 h-5 stroke-yellow-400" viewBox="0 0 24 24">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
-                      </svg>
-                      Faça o contrato
-                   </DialogTitle>
-                </DialogHeader>
-                <div className="bg-[#F3F4F6] px-6 py-2">
-                   <p className="text-sm text-gray-700 font-medium">
-                      Filial: {selectedBranch?.name}
-                   </p>
-                </div>
-                <ScrollArea className="h-[60vh] w-full px-6 py-4">
-                   <div className="w-full flex flex-col gap-4">
-                      <form
-                          className="flex flex-col gap-4"
-                          onSubmit={handleSubmitContract(createContract, (errors) => {
-                             console.error("Validation errors for contract form:", errors);
-                             toast.error("Por favor, preencha todos os campos obrigatórios do contrato.");
-                          })}
+              <DialogHeader className="bg-[#1E2A38] px-6 py-4 rounded-t-md">
+                <DialogTitle className="text-white flex items-center gap-2 text-base font-semibold">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" className="w-5 h-5 stroke-yellow-400" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+                  Faça o contrato
+                </DialogTitle>
+              </DialogHeader>
+              <div className="bg-[#F3F4F6] px-6 py-2">
+                <p className="text-sm text-gray-700 font-medium">
+                  Filial: {selectedBranch?.name}
+                </p>
+              </div>
+              <ScrollArea className="h-[60vh] w-full px-6 py-4">
+                <div className="w-full flex flex-col gap-4">
+                  <form
+                    className="flex flex-col gap-4"
+                    onSubmit={handleSubmitContract(createContract, (errors) => {
+                      console.error("Validation errors for contract form:", errors);
+                      toast.error("Por favor, preencha todos os campos obrigatórios do contrato.");
+                    })}
+                  >
+                    <div>
+                      <Label className="text-black">CNPJ do novo prestador</Label>
+                      <Input
+                        type="text"
+                        {...registerContract("cnpj")}
+                        defaultValue={providerDatas.cnpj}
+                        readOnly
+                        className="bg-gray-200 cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-black">Gestor do serviço</Label>
+                      <select
+                        className="rounded-md border p-2"
+                        {...registerContract("idResponsible")}
+                        defaultValue=""
                       >
-                         <div>
-                             <Label className="text-black">CNPJ do novo prestador</Label>
-                             <Input
-                                type="text"
-                                {...registerContract("cnpj")}
-                                defaultValue={providerDatas.cnpj}
-                                readOnly
-                                className="bg-gray-200 cursor-not-allowed"
-                             />
-                         </div>
+                        <option value="" disabled>Selecione um gestor</option>
+                        {Array.isArray(managers) && managers.map((manager: any) => (
+                          <option value={manager.idUser} key={manager.idUser}>
+                            {manager.firstName} {manager.surname}
+                          </option>
+                        ))}
+                      </select>
+                      {errorsContract.idResponsible && <span className="text-red-600 text-sm">{errorsContract.idResponsible.message}</span>}
+                    </div>
 
-                         <div className="flex flex-col gap-2">
-                            <Label className="text-black">Gestor do serviço</Label>
-                            <select
-                               className="rounded-md border p-2"
-                               {...registerContract("idResponsible")}
-                               defaultValue=""
-                            >
-                               <option value="" disabled>Selecione um gestor</option>
-                               {Array.isArray(managers) && managers.map((manager: any) => (
-                                   <option value={manager.idUser} key={manager.idUser}>
-                                      {manager.firstName} {manager.surname}
-                                   </option>
-                               ))}
-                            </select>
-                            {errorsContract.idResponsible && <span className="text-red-600 text-sm">{errorsContract.idResponsible.message}</span>}
-                         </div>
-                         
-                         <div>
-                            <Label className="text-black">Nome do Serviço</Label>
-                            <Input {...registerContract("serviceName")} />
-                            {errorsContract.serviceName && <span className="text-red-500 text-sm">{errorsContract.serviceName.message}</span>}
-                         </div>
+                    <div>
+                      <Label className="text-black">Nome do Serviço</Label>
+                      <Input {...registerContract("serviceName")} />
+                      {errorsContract.serviceName && <span className="text-red-500 text-sm">{errorsContract.serviceName.message}</span>}
+                    </div>
 
-                         <div>
-                            <Label className="text-black">Data de início efetivo</Label>
-                            <Input type="date" {...registerContract("dateStart")} />
-                            {errorsContract.dateStart && <span className="text-red-600 text-sm">{errorsContract.dateStart.message}</span>}
-                         </div>
+                    <div>
+                      <Label className="text-black">Data de início efetivo</Label>
+                      <Input type="date" {...registerContract("dateStart")} />
+                      {errorsContract.dateStart && <span className="text-red-600 text-sm">{errorsContract.dateStart.message}</span>}
+                    </div>
 
-                         <div>
-                            <Label className="text-black">Referência do contrato</Label>
-                            <Input {...registerContract("contractReference")} />
-                            {errorsContract.contractReference && <span className="text-red-500 text-sm">{errorsContract.contractReference.message}</span>}
-                         </div>
+                    <div>
+                      <Label className="text-black">Referência do contrato</Label>
+                      <Input {...registerContract("contractReference")} />
+                      {errorsContract.contractReference && <span className="text-red-500 text-sm">{errorsContract.contractReference.message}</span>}
+                    </div>
 
-                         <div className="flex flex-col gap-1">
-                            <Label className="text-black">Tipo de despesa</Label>
-                            <select {...registerContract("expenseType")} className="rounded-md border p-2" defaultValue="">
-                               <option value="" disabled>Selecione uma opção</option>
-                               <option value="CAPEX">CAPEX</option>
-                               <option value="OPEX">OPEX</option>
-                               <option value="NENHUM">Nenhuma</option>
-                            </select>
-                            {errorsContract.expenseType && <span className="text-red-500 text-sm">{errorsContract.expenseType.message}</span>}
-                         </div>
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-black">Tipo de despesa</Label>
+                      <select {...registerContract("expenseType")} className="rounded-md border p-2" defaultValue="">
+                        <option value="" disabled>Selecione uma opção</option>
+                        <option value="CAPEX">CAPEX</option>
+                        <option value="OPEX">OPEX</option>
+                        <option value="NENHUM">Nenhuma</option>
+                      </select>
+                      {errorsContract.expenseType && <span className="text-red-500 text-sm">{errorsContract.expenseType.message}</span>}
+                    </div>
 
-                         <div className="flex flex-col gap-3">
-                            <Label className="text-black">Tipo de Gestão</Label>
-                            <div className="flex flex-col items-start gap-3">
-                               <div className="flex items-center gap-2">
-                                  <input type="checkbox" id="hse-checkbox" {...registerContract("hse", { onChange: (e) => setIsSsma(e.target.checked) })} />
-                                  <Label htmlFor="hse-checkbox" className="text-[14px] text-black">SSMA</Label>
-                               </div>
-                               <div className="flex items-center gap-2">
-                                  <input type="checkbox" id="labor-checkbox" {...registerContract("labor")} />
-                                  <Label htmlFor="labor-checkbox" className="text-[14px] text-black">TRABALHISTA</Label>
-                               </div>
-                            </div>
-                         </div>
-                         
-                         <div>
-                           <Label className="text-black">Permite subcontratação?</Label>
-                           <select {...registerContract("subcontractPermission")} className="rounded-md border p-2 w-full mt-1" defaultValue="false">
-                             <option value="true">Sim</option>
-                             <option value="false">Não</option>
-                           </select>
-                           {errorsContract.subcontractPermission && <span className="text-red-500 text-sm">{errorsContract.subcontractPermission.message}</span>}
-                         </div>
+                    <div className="flex flex-col gap-3">
+                      <Label className="text-black">Tipo de Gestão</Label>
+                      <div className="flex flex-col items-start gap-3">
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" id="hse-checkbox" {...registerContract("hse", { onChange: (e) => setIsSsma(e.target.checked) })} />
+                          <Label htmlFor="hse-checkbox" className="text-[14px] text-black">SSMA</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" id="labor-checkbox" {...registerContract("labor")} />
+                          <Label htmlFor="labor-checkbox" className="text-[14px] text-black">TRABALHISTA</Label>
+                        </div>
+                      </div>
+                    </div>
 
-                         <div>
-                            <Label className="text-black">Nível de Subcontratação</Label>
-                            <Input
-                               type="number"
-                               {...registerContract("subcontractLevel")}
-                               defaultValue={0}
-                               min={0}
-                               className="rounded-md border p-2 w-full mt-1"
-                            />
-                            {errorsContract.subcontractLevel && <span className="text-red-500 text-sm">{errorsContract.subcontractLevel.message}</span>}
-                         </div>
+                    <div>
+                      <Label className="text-black">Permite subcontratação?</Label>
+                      <select {...registerContract("subcontractPermission")} className="rounded-md border p-2 w-full mt-1" defaultValue="false">
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                      </select>
+                      {errorsContract.subcontractPermission && <span className="text-red-500 text-sm">{errorsContract.subcontractPermission.message}</span>}
+                    </div>
 
-                         <div className="flex flex-col gap-1">
-                            <Label className="text-black">Tipo do Serviço</Label>
-                            <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
-                               <Search className="text-neutral-500 w-5 h-5" />
-                               <input type="text" placeholder="Pesquisar serviço..." value={searchService} onChange={(e) => setSearchService(e.target.value)} className="border-none w-full outline-none text-sm placeholder:text-neutral-400" />
-                            </div>
-                            <select {...registerContract("idServiceType")} className="rounded-md border p-2 w-full mt-1" defaultValue="">
-                               <option value="" disabled>Selecione uma opção</option>
-                               {servicesType.filter((s: any) => s.title.toLowerCase().includes(searchService.toLowerCase())).map((service: any) => (
-                                   <option key={service.idServiceType} value={service.idServiceType}>
-                                      {service.title} - {formatarRisco(service.risk as RiscoNivel)}
-                                   </option>
-                               ))}
-                            </select>
-                            {errorsContract.idServiceType && <span className="text-red-500 text-sm">{errorsContract.idServiceType.message}</span>}
-                         </div>
+                    <div>
+                      <Label className="text-black">Nível de Subcontratação</Label>
+                      <Input
+                        type="number"
+                        {...registerContract("subcontractLevel")}
+                        defaultValue={1}
+                        min={1}
+                        max={4}
+                        className="rounded-md border p-2 w-full mt-1"
+                      />
+                      {errorsContract.subcontractLevel && <span className="text-red-500 text-sm">{errorsContract.subcontractLevel.message}</span>}
+                    </div>
 
-                         {isSsma && (
-                            <div className="flex flex-col gap-2">
-                               <Label className="text-black">Tipo de atividade</Label>
-                               <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
-                                   <Search className="text-neutral-500 w-5 h-5" />
-                                   <input type="text" placeholder="Pesquisar atividade..." value={searchActivity} onChange={(e) => setSearchActivity(e.target.value)} className="border-none w-full outline-none text-sm placeholder:text-neutral-400" />
-                               </div>
-                               <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
-                                   <div className="flex flex-col gap-2">
-                                      {Array.isArray(activities) && activities.filter((activity: any) => activity.title.toLowerCase().includes(searchActivity.toLowerCase())).map((activity: any) => (
-                                          <label key={activity.idActivity} className="flex items-center gap-2 text-black">
-                                             <input type="checkbox" checked={selectedActivities.includes(activity.idActivity)} onChange={(e) => handleCheckboxChange(activity.idActivity, e.target.checked)} />
-                                             {activity.title}
-                                          </label>
-                                      ))}
-                                   </div>
-                               </ScrollArea>
-                            </div>
-                         )}
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-black">Tipo do Serviço</Label>
+                      <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                        <Search className="text-neutral-500 w-5 h-5" />
+                        <input type="text" placeholder="Pesquisar serviço..." value={searchService} onChange={(e) => setSearchService(e.target.value)} className="border-none w-full outline-none text-sm placeholder:text-neutral-400" />
+                      </div>
+                      <select {...registerContract("idServiceType")} className="rounded-md border p-2 w-full mt-1" defaultValue="">
+                        <option value="" disabled>Selecione uma opção</option>
+                        {servicesType.filter((s: any) => s.title.toLowerCase().includes(searchService.toLowerCase())).map((service: any) => (
+                          <option key={service.idServiceType} value={service.idServiceType}>
+                            {service.title} - {formatarRisco(service.risk as RiscoNivel)}
+                          </option>
+                        ))}
+                      </select>
+                      {errorsContract.idServiceType && <span className="text-red-500 text-sm">{errorsContract.idServiceType.message}</span>}
+                    </div>
 
-                         <div className="flex flex-col gap-1">
-                            <Label className="text-black">Descrição detalhada do serviço</Label>
-                            <textarea {...registerContract("description")} className="rounded-md border p-2" />
-                            {errorsContract.description && <span className="text-red-500 text-sm">{errorsContract.description.message}</span>}
-                         </div>
+                    {isSsma && (
+                      <div className="flex flex-col gap-2">
+                        <Label className="text-black">Tipo de atividade</Label>
+                        <div className="border border-neutral-400 flex items-center gap-2 rounded-md px-2 py-1 bg-white shadow-sm">
+                          <Search className="text-neutral-500 w-5 h-5" />
+                          <input type="text" placeholder="Pesquisar atividade..." value={searchActivity} onChange={(e) => setSearchActivity(e.target.value)} className="border-none w-full outline-none text-sm placeholder:text-neutral-400" />
+                        </div>
+                        <ScrollArea className="h-[20vh] p-2 rounded-lg bg-white shadow-inner">
+                          <div className="flex flex-col gap-2">
+                            {Array.isArray(activities) && activities.filter((activity: any) => activity.title.toLowerCase().includes(searchActivity.toLowerCase())).map((activity: any) => (
+                              <label key={activity.idActivity} className="flex items-center gap-2 text-black">
+                                <input type="checkbox" checked={selectedActivities.includes(activity.idActivity)} onChange={(e) => handleCheckboxChange(activity.idActivity, e.target.checked)} />
+                                {activity.title}
+                              </label>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </div>
+                    )}
 
-                         <Button className="bg-realizaBlue mt-4" type="submit" disabled={isButtonDisabled}>
-                            {isLoading ? <Oval height="20" width="20" color="#fff" /> : "Enviar contrato"}
-                         </Button>
-                      </form>
-                   </div>
-                </ScrollArea>
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-black">Descrição detalhada do serviço</Label>
+                      <textarea {...registerContract("description")} className="rounded-md border p-2" />
+                      {errorsContract.description && <span className="text-red-500 text-sm">{errorsContract.description.message}</span>}
+                    </div>
+
+                    <Button className="bg-realizaBlue mt-4" type="submit" disabled={isButtonDisabled}>
+                      {isLoading ? <Oval height="20" width="20" color="#fff" /> : "Enviar contrato"}
+                    </Button>
+                  </form>
+                </div>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         </div>
