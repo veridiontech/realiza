@@ -676,6 +676,8 @@ export function ConfigPanel() {
   }, [profilesRepoItems, profileSearchTerm]);
 
   const [documentGroups, setDocumentGroups] = useState<any[]>([]);
+  // Adiciona um estado para o termo de pesquisa dos documentos do grupo
+  const [docsSearchTerm, setDocsSearchTerm] = useState("");
 
   async function getDocumentGroups() {
     try {
@@ -708,6 +710,7 @@ export function ConfigPanel() {
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
 
+  // AQUI: A função agora busca TODOS os documentos do grupo
   async function getDocsByGroup(idDocumentGroup: string) {
     setIsLoadingDocsList(true);
     try {
@@ -715,7 +718,7 @@ export function ConfigPanel() {
         `${ip}/document/matrix/filtered-group`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: { idSearch: idDocumentGroup },
+          params: { idSearch: idDocumentGroup, page: 0, size: 1000 },
         }
       );
 
@@ -728,6 +731,7 @@ export function ConfigPanel() {
       setDocsList(list);
     } catch (error) {
       console.error("Erro axios em filtered-group:", error);
+      toast.error("Erro ao carregar documentos do grupo.");
     } finally {
       setIsLoadingDocsList(false);
     }
@@ -741,6 +745,15 @@ export function ConfigPanel() {
     }
   }, [selectedGroup, token]);
 
+  // AQUI: Cria um `useMemo` para filtrar a lista de documentos do grupo
+  const filteredDocsList = useMemo(() => {
+    if (!docsSearchTerm) {
+      return docsList;
+    }
+    return docsList.filter((doc) =>
+      doc.name.toLowerCase().includes(docsSearchTerm.toLowerCase())
+    );
+  }, [docsList, docsSearchTerm]);
 
   async function saveMatrixEntry() {
     if (!selectedMatrixEntry) return;
@@ -1637,34 +1650,59 @@ export function ConfigPanel() {
                 Documentos do Grupo
               </h3>
               {!selectedGroup ? (
-                <p className="text-gray-500">Selecione um grupo para visualizar os documentos.</p>
+                <p className="text-gray-500">
+                  Selecione um grupo para visualizar os documentos.
+                </p>
               ) : isLoadingDocsList ? (
                 <p className="text-gray-500">Carregando documentos...</p>
-              ) : docsList.length > 0 ? (
+              ) : (
                 <>
-                  <ul className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
-                    {docsList.map((doc) => (
-                      <li
-                        key={doc.idDocumentMatrix}
-                        className="p-3 border rounded-md hover:bg-gray-100 cursor-pointer transition-colors"
-                        onClick={() => handleSelectMatrixEntry(doc)}
-                      >
-                        <strong className="block">{doc.name}</strong>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {doc.expirationDateAmount > 0
-                            ? `Validade: ${doc.expirationDateAmount} ${expirationUnits.find(u => u.value === doc.expirationDateUnit)?.label}`
-                            : 'Sem validade padrão'}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* AQUI: Adiciona a barra de pesquisa */}
+                  <input
+                    type="text"
+                    placeholder="Filtrar documentos por nome..."
+                    className="w-full p-2 border rounded-md mb-4"
+                    value={docsSearchTerm}
+                    onChange={(e) => setDocsSearchTerm(e.target.value)}
+                  />
+                  {filteredDocsList.length > 0 ? (
+                    <ul className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+                      {filteredDocsList.map((doc) => (
+                        <li
+                          key={doc.idDocumentMatrix}
+                          className="p-3 border rounded-md hover:bg-gray-100 cursor-pointer transition-colors"
+                          onClick={() => handleSelectMatrixEntry(doc)}
+                        >
+                          <strong className="block">{doc.name}</strong>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {doc.expirationDateAmount > 0
+                              ? `Validade: ${
+                                  doc.expirationDateAmount
+                                } ${
+                                  expirationUnits.find(
+                                    (u) => u.value === doc.expirationDateUnit
+                                  )?.label
+                                }`
+                              : "Sem validade padrão"}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400">
+                      Nenhum documento encontrado para este grupo ou filtro.
+                    </p>
+                  )}
                   {selectedMatrixEntry && (
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg shadow-inner space-y-4">
                       <h3 className="text-lg font-semibold">
                         Editar Documento
                       </h3>
                       <div>
-                        <label htmlFor="editName" className="block text-sm font-medium mb-1">
+                        <label
+                          htmlFor="editName"
+                          className="block text-sm font-medium mb-1"
+                        >
                           Nome do Documento
                         </label>
                         <input
@@ -1675,7 +1713,10 @@ export function ConfigPanel() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="editType" className="block text-sm font-medium mb-1">
+                        <label
+                          htmlFor="editType"
+                          className="block text-sm font-medium mb-1"
+                        >
                           Tipo de Arquivo
                         </label>
                         <input
@@ -1691,7 +1732,9 @@ export function ConfigPanel() {
                         </p>
                         <div className="flex gap-2 items-end">
                           <div className="w-1/3">
-                            <label htmlFor="editExpAmount" className="sr-only">Quantidade</label>
+                            <label htmlFor="editExpAmount" className="sr-only">
+                              Quantidade
+                            </label>
                             <input
                               id="editExpAmount"
                               type="number"
@@ -1704,7 +1747,9 @@ export function ConfigPanel() {
                             />
                           </div>
                           <div className="w-2/3">
-                            <label htmlFor="editExpUnit" className="sr-only">Unidade</label>
+                            <label htmlFor="editExpUnit" className="sr-only">
+                              Unidade
+                            </label>
                             <select
                               id="editExpUnit"
                               className="w-full p-2 border rounded-md"
@@ -1743,7 +1788,9 @@ export function ConfigPanel() {
                         </label>
                       </div>
                       <div className="flex gap-2 pt-2">
-                        <Button onClick={saveMatrixEntry} className="w-full">Salvar Alterações</Button>
+                        <Button onClick={saveMatrixEntry} className="w-full">
+                          Salvar Alterações
+                        </Button>
                         <Button
                           onClick={() => setSelectedMatrixEntry(null)}
                           className="w-full bg-gray-300 text-black hover:bg-gray-400"
@@ -1754,22 +1801,23 @@ export function ConfigPanel() {
                     </div>
                   )}
                 </>
-              ) : (
-                <p className="text-gray-400">
-                  Nenhum documento encontrado para este grupo.
-                </p>
               )}
             </div>
             <div className="w-[45%] border-l pl-6 space-y-6">
               <h2 className="text-xl font-bold">Gerenciar Documentos</h2>
               <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
-                <h3 className="text-lg font-semibold mb-3">Criar Novo Documento</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  Criar Novo Documento
+                </h3>
                 <p className="text-xs text-red-500 mb-4">
                   * Campos obrigatórios.
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="newDocName" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="newDocName"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Nome do Documento <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1782,7 +1830,10 @@ export function ConfigPanel() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="newDocType" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="newDocType"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Tipo de Arquivo <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1800,7 +1851,9 @@ export function ConfigPanel() {
                     </p>
                     <div className="flex gap-2 items-end">
                       <div className="w-1/3">
-                        <label htmlFor="expAmount" className="sr-only">Quantidade</label>
+                        <label htmlFor="expAmount" className="sr-only">
+                          Quantidade
+                        </label>
                         <input
                           id="expAmount"
                           type="number"
@@ -1815,7 +1868,9 @@ export function ConfigPanel() {
                         />
                       </div>
                       <div className="w-2/3">
-                        <label htmlFor="expUnit" className="sr-only">Unidade</label>
+                        <label htmlFor="expUnit" className="sr-only">
+                          Unidade
+                        </label>
                         <select
                           id="expUnit"
                           className="w-full p-2 border rounded-md"
@@ -1843,7 +1898,8 @@ export function ConfigPanel() {
                       Documento bloqueia?
                     </label>
                     <p className="text-xs text-gray-500 ml-6 -mt-1">
-                      Se marcado, o documento precisa estar valido para permitir a entrada de um colaborador.
+                      Se marcado, o documento precisa estar valido para permitir a
+                      entrada de um colaborador.
                     </p>
                     <label className="flex items-center gap-2 text-sm font-medium">
                       <input
