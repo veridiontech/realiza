@@ -192,9 +192,7 @@ export function ConfigPanel() {
     VERY_HIGH: "Muito Alto",
   };
   const expirationUnits = [
-    { value: "DAYS", label: "Dias" },
-    { value: "MONTHS", label: "Meses" },
-    { value: "YEARS", label: "Anos" },
+    { value: "DAYS", label: "Mês(es)" }
   ];
 
   const [selectedMatrixEntry, setSelectedMatrixEntry] =
@@ -209,7 +207,7 @@ export function ConfigPanel() {
   const [newDocName, setNewDocName] = useState("");
   const [newDocType, setNewDocType] = useState("");
   const [newDocExpirationAmount, setNewDocExpirationAmount] = useState(0);
-  const [newDocExpirationUnit, setNewDocExpirationUnit] =
+  const [, setNewDocExpirationUnit] =
     useState("MONTHS");
   const [newDocDoesBlock, setNewDocDoesBlock] = useState(false);
   const [newDocIsUnique, setNewDocIsUnique] = useState(false);
@@ -218,7 +216,7 @@ export function ConfigPanel() {
   function handleSelectMatrixEntry(entry: DocumentMatrixEntry) {
     setSelectedMatrixEntry(entry);
     setEditName(entry.name);
-    setEditExpirationUnit(entry.expirationDateUnit);
+    setEditExpirationUnit(entry.expirationDateUnit || "MONTHS");
     setEditExpirationAmount(entry.expirationDateAmount);
     setEditType(entry.type);
     setEditIsDocumentUnique(entry.isDocumentUnique);
@@ -239,8 +237,12 @@ export function ConfigPanel() {
   async function getDocuments() {
     setIsLoading(true);
     try {
-      const { data } = await axios.get<Document[]>(`${ip}/prompt`, authHeader);
+      const url = `${ip}/prompt`;
+      const { data } = await axios.get<Document[]>(url, authHeader);
       setDocuments(data);
+      console.log('✅ Dados de documentos recebidos com sucesso:', data); // Log de sucesso
+    } catch (error) {
+      console.error('❌ Erro na requisição de documentos:', error); // Log de erro
     } finally {
       setIsLoading(false);
     }
@@ -253,82 +255,134 @@ export function ConfigPanel() {
 
   async function handleSave() {
     if (!selectedDoc) return;
-    await axios.put(
-      `${ip}/prompt/${selectedDoc.id}`,
-      { documentId: selectedDoc.documentId, description },
-      authHeader
-    );
-    setDocuments((prev) =>
-      prev.map((d) => (d.id === selectedDoc.id ? { ...d, description } : d))
-    );
-    setSelectedDoc(null);
+    try {
+      const url = `${ip}/prompt/${selectedDoc.id}`;
+      const payload = { documentId: selectedDoc.documentId, description };
+      const response = await axios.put(url, payload, authHeader);
+      toast.success("Documento salvo com sucesso!");
+      console.log('✅ Documento salvo com sucesso:', response.data); // Log de sucesso
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === selectedDoc.id ? { ...d, description } : d))
+      );
+      setSelectedDoc(null);
+    } catch (error) {
+      console.error("❌ Erro ao salvar documento:", error); // Log de erro
+      toast.error("Erro ao salvar documento. Tente novamente.");
+    }
   }
 
   async function getCbos() {
-    const { data } = await axios.get<CBO[]>(`${ip}/cbo`, authHeader);
-    setCbos(data || []);
+    try {
+      const url = `${ip}/cbo`;
+      const { data } = await axios.get<CBO[]>(url, authHeader);
+      setCbos(data || []);
+      console.log('✅ Dados de CBOs recebidos com sucesso:', data); // Log de sucesso
+    } catch (error) {
+      console.error("❌ Erro na requisição de CBOs:", error); // Log de erro
+      setCbos([]);
+    }
   }
 
   async function handleSaveCBO() {
-    if (selectedCBO) {
-      await axios.put(
-        `${ip}/cbo/${selectedCBO.id}`,
-        { code: cboCode, title: cboTitle },
-        authHeader
-      );
-    } else {
-      await axios.post(
-        `${ip}/cbo`,
-        { code: cboCode, title: cboTitle },
-        authHeader
-      );
+    try {
+      if (selectedCBO) {
+        const url = `${ip}/cbo/${selectedCBO.id}`;
+        const payload = { code: cboCode, title: cboTitle };
+        const response = await axios.put(url, payload, authHeader);
+        toast.success("CBO atualizado com sucesso!");
+        console.log('✅ CBO atualizado:', response.data); // Log de sucesso
+      } else {
+        const url = `${ip}/cbo`;
+        const payload = { code: cboCode, title: cboTitle };
+        const response = await axios.post(url, payload, authHeader);
+        toast.success("CBO criado com sucesso!");
+        console.log('✅ CBO criado:', response.data); // Log de sucesso
+      }
+      setCboCode("");
+      setCboTitle("");
+      setSelectedCBO(null);
+      getCbos();
+    } catch (error) {
+      console.error("❌ Erro ao salvar CBO:", error); // Log de erro
+      toast.error("Erro ao salvar CBO. Tente novamente.");
     }
-    setCboCode("");
-    setCboTitle("");
-    setSelectedCBO(null);
-    getCbos();
   }
 
   async function handleDeleteCBO(id: string) {
-    await axios.delete(`${ip}/cbo/${id}`, authHeader);
-    getCbos();
+    try {
+      const url = `${ip}/cbo/${id}`;
+      await axios.delete(url, authHeader);
+      toast.success("CBO deletado com sucesso!");
+      console.log('✅ CBO deletado:', id); // Log de sucesso
+      getCbos();
+    } catch (error) {
+      console.error("❌ Erro ao deletar CBO:", error); // Log de erro
+      toast.error("Erro ao deletar CBO. Tente novamente.");
+    }
   }
 
   async function getPositions() {
-    const { data } = await axios.get<Position[]>(`${ip}/position`, authHeader);
-    setPositions(data || []);
+    try {
+      const url = `${ip}/position`;
+      const { data } = await axios.get<Position[]>(url, authHeader);
+      setPositions(data || []);
+      console.log('✅ Dados de cargos recebidos com sucesso:', data); // Log de sucesso
+    } catch (error) {
+      console.error("❌ Erro na requisição de cargos:", error); // Log de erro
+      setPositions([]);
+    }
   }
 
   async function handleSavePosition() {
-    if (selectedPosition) {
-      await axios.put(
-        `${ip}/position/${selectedPosition.id}`,
-        { title: positionName },
-        authHeader
-      );
-    } else {
-      await axios.post(`${ip}/position`, { title: positionName }, authHeader);
+    try {
+      if (selectedPosition) {
+        const url = `${ip}/position/${selectedPosition.id}`;
+        const payload = { title: positionName };
+        const response = await axios.put(url, payload, authHeader);
+        toast.success("Cargo atualizado com sucesso!");
+        console.log('✅ Cargo atualizado:', response.data); // Log de sucesso
+      } else {
+        const url = `${ip}/position`;
+        const payload = { title: positionName };
+        const response = await axios.post(url, payload, authHeader);
+        toast.success("Cargo criado com sucesso!");
+        console.log('✅ Cargo criado:', response.data); // Log de sucesso
+      }
+      setPositionName("");
+      setSelectedPosition(null);
+      getPositions();
+    } catch (error) {
+      console.error("❌ Erro ao salvar cargo:", error); // Log de erro
+      toast.error("Erro ao salvar cargo. Tente novamente.");
     }
-    setPositionName("");
-    setSelectedPosition(null);
-    getPositions();
   }
 
   async function handleDeletePosition(id: string) {
-    await axios.delete(`${ip}/position/${id}`, authHeader);
-    getPositions();
+    try {
+      const url = `${ip}/position/${id}`;
+      await axios.delete(url, authHeader);
+      toast.success("Cargo deletado com sucesso!");
+      console.log('✅ Cargo deletado:', id); // Log de sucesso
+      getPositions();
+    } catch (error) {
+      console.error("❌ Erro ao deletar cargo:", error); // Log de erro
+      toast.error("Erro ao deletar cargo. Tente novamente.");
+    }
   }
 
   async function getServices() {
     setIsLoadingServices(true);
     try {
+      const url = `${ip}/contract/service-type`;
       const { data } = await axios.get<Service[]>(
-        `${ip}/contract/service-type`,
+        url,
         { params: { owner: "REPO", idOwner: "" }, ...authHeader }
       );
       setServices(data || []);
+      console.log('✅ Dados de serviços recebidos com sucesso:', data); // Log de sucesso
     } catch (err) {
-      console.error("Erro ao buscar serviços:", err);
+      console.error("❌ Erro ao buscar serviços:", err); // Log de erro
+      toast.error("Erro ao carregar serviços.");
     } finally {
       setIsLoadingServices(false);
     }
@@ -343,17 +397,16 @@ export function ConfigPanel() {
     }
     setIsCreatingService(true);
     try {
-      await axios.post(
-        `${ip}/contract/service-type/repository`,
-        { title: newServiceTitle, risk: newServiceRisk },
-        authHeader
-      );
+      const url = `${ip}/contract/service-type/repository`;
+      const payload = { title: newServiceTitle, risk: newServiceRisk };
+      const response = await axios.post(url, payload, authHeader);
       toast.success("Serviço criado com sucesso!");
+      console.log('✅ Serviço criado:', response.data); // Log de sucesso
       setNewServiceTitle("");
       setNewServiceRisk("LOW");
       getServices();
     } catch (err) {
-      console.error("Erro ao criar serviço:", err);
+      console.error("❌ Erro ao criar serviço:", err); // Log de erro
       toast.error("Erro ao criar serviço. Tente novamente.");
     } finally {
       setIsCreatingService(false);
@@ -363,8 +416,9 @@ export function ConfigPanel() {
   async function getActivities() {
     setIsLoadingActivities(true);
     try {
+      const url = `${ip}/contract/activity-repo`;
       const res = await axios.get<{ content?: Activity[] | Activity[] }>(
-        `${ip}/contract/activity-repo`,
+        url,
         {
           params: { page: 0, size: 100, sort: "title", direction: "ASC" },
           ...authHeader,
@@ -381,8 +435,9 @@ export function ConfigPanel() {
         );
         setActivities([]);
       }
+      console.log('✅ Dados de atividades recebidos com sucesso:', res.data); // Log de sucesso
     } catch (err) {
-      console.error("Erro ao buscar atividades:", err);
+      console.error("❌ Erro ao buscar atividades:", err); // Log de erro
       toast.error("Erro ao carregar atividades.");
     } finally {
       setIsLoadingActivities(false);
@@ -398,17 +453,16 @@ export function ConfigPanel() {
     }
     setIsCreatingActivity(true);
     try {
-      await axios.post(
-        `${ip}/contract/activity-repo`,
-        { title: newActivityTitle, risk: newActivityRisk },
-        authHeader
-      );
+      const url = `${ip}/contract/activity-repo`;
+      const payload = { title: newActivityTitle, risk: newActivityRisk };
+      const response = await axios.post(url, payload, authHeader);
       toast.success("Atividade criada com sucesso!");
+      console.log('✅ Atividade criada:', response.data); // Log de sucesso
       setNewActivityTitle("");
       setNewActivityRisk("LOW");
       getActivities();
     } catch (err) {
-      console.error("Erro ao criar atividade:", err);
+      console.error("❌ Erro ao criar atividade:", err); // Log de erro
       toast.error("Erro ao criar atividade. Tente novamente.");
     } finally {
       setIsCreatingActivity(false);
@@ -418,8 +472,9 @@ export function ConfigPanel() {
   async function getMatrixEntries() {
     setIsLoadingMatrix(true);
     try {
+      const url = `${ip}/document/matrix`;
       const { data } = await axios.get<DocumentMatrixEntry[]>(
-        `${ip}/document/matrix`,
+        url,
         {
           ...authHeader,
           params: { page: 0, size: 1000 },
@@ -428,11 +483,12 @@ export function ConfigPanel() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-        ? (data as any).content
-        : [];
+          ? (data as any).content
+          : [];
       setMatrixEntries(list);
+      console.log('✅ Dados da matriz de documentos recebidos com sucesso:', data); // Log de sucesso
     } catch (error) {
-      console.error("Erro ao carregar documentos de matriz:", error);
+      console.error("❌ Erro ao carregar documentos de matriz:", error); // Log de erro
       toast.error("Não foi possível carregar documentos de matriz.");
     } finally {
       setIsLoadingMatrix(false);
@@ -454,19 +510,16 @@ export function ConfigPanel() {
       expirationDateUnit: entry.expirationDateUnit,
       expirationDateAmount: entry.expirationDateAmount,
     };
-    console.log("Payload:", payload);
+    console.log("Payload de atualização:", payload); // Log do payload enviado
     try {
-      const response = await axios.put(
-        `${ip}/document/matrix/${id}`,
-        payload,
-        authHeader
-      );
+      const url = `${ip}/document/matrix/${id}`;
+      const response = await axios.put(url, payload, authHeader);
       console.log("ID ", id);
-      console.log("Resposta da API (sucesso):", response.data);
+      console.log("✅ Resposta da API (sucesso):", response.data); // Log de sucesso
       toast.success("Validade atualizada com sucesso!");
       getMatrixEntries();
     } catch (error) {
-      console.error("Erro ao atualizar validade do documento:", error);
+      console.error("❌ Erro ao atualizar validade do documento:", error); // Log de erro
       if (axios.isAxiosError(error) && error.response) {
         console.error("Detalhes do erro da API:", error.response.data);
         console.error("Status do erro:", error.response.status);
@@ -487,12 +540,13 @@ export function ConfigPanel() {
     if (profile) {
       setSelectedProfileDetails(profile);
       setIsProfileDetailsModalOpen(true);
+      console.log('✅ Detalhes do perfil selecionado:', profile); // Log do perfil selecionado
     } else {
       toast.error(
         "Detalhes do perfil não encontrados localmente. Recarregue a página se persistir."
       );
       console.error(
-        "Perfil com ID",
+        "❌ Perfil com ID",
         profileId,
         "não encontrado em profilesRepoItems."
       );
@@ -502,14 +556,15 @@ export function ConfigPanel() {
   const getProfilesRepo = async () => {
     setIsLoadingProfilesRepo(true);
     try {
+      const url = `${ip}/profile/repo`;
       const response = await axios.get<SingleProfileItem[]>(
-        `${ip}/profile/repo`,
+        url,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       console.log(
-        "Dados da requisição de perfis do repositório:",
+        "✅ Dados da requisição de perfis do repositório:",
         response.data
       );
 
@@ -519,7 +574,7 @@ export function ConfigPanel() {
 
       setProfilesRepoItems(sortedProfiles);
     } catch (err) {
-      console.error("Erro ao buscar perfis do repositório:", err);
+      console.error("❌ Erro ao buscar perfis do repositório:", err); // Log de erro
       toast.error("Erro ao carregar perfis do repositório.");
     } finally {
       setIsLoadingProfilesRepo(false);
@@ -560,8 +615,11 @@ export function ConfigPanel() {
         concierge: concierge,
       };
 
+      console.log("Payload para criação de perfil:", payload); // Log do payload enviado
+
+      const url = `${ip}/profile/repo`;
       const response = await axios.post<SingleProfileItem>(
-        `${ip}/profile/repo`,
+        url,
         payload,
         {
           headers: {
@@ -572,7 +630,7 @@ export function ConfigPanel() {
       );
 
       toast.success("Perfil criado com sucesso! 🎉");
-      console.log("Perfil criado:", response.data);
+      console.log("✅ Perfil criado:", response.data); // Log de sucesso
 
       setName("");
       setNewProfileDescription("");
@@ -593,11 +651,10 @@ export function ConfigPanel() {
 
       getProfilesRepo();
     } catch (err) {
-      console.error("Erro ao criar perfil:", err);
+      console.error("❌ Erro ao criar perfil:", err); // Log de erro
       if (axios.isAxiosError(err) && err.response) {
         toast.error(
-          `Erro ao criar perfil: ${
-            err.response.data.message || "Verifique os dados."
+          `Erro ao criar perfil: ${err.response.data.message || "Verifique os dados."
           }`
         );
       } else {
@@ -676,10 +733,13 @@ export function ConfigPanel() {
   }, [profilesRepoItems, profileSearchTerm]);
 
   const [documentGroups, setDocumentGroups] = useState<any[]>([]);
+  // Adiciona um estado para o termo de pesquisa dos documentos do grupo
+  const [docsSearchTerm, setDocsSearchTerm] = useState("");
 
   async function getDocumentGroups() {
     try {
-      const response = await axios.get(`${ip}/document/matrix/group`, {
+      const url = `${ip}/document/matrix/group`;
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           page: 0,
@@ -688,8 +748,9 @@ export function ConfigPanel() {
       });
 
       setDocumentGroups(response.data.content || []);
+      console.log('✅ Dados de grupos de documentos recebidos com sucesso:', response.data); // Log de sucesso
     } catch (error) {
-      console.error("Erro ao buscar grupos de documentos", error);
+      console.error("❌ Erro ao buscar grupos de documentos", error); // Log de erro
       toast.error("Erro ao carregar grupos de documentos.");
     }
   }
@@ -708,26 +769,30 @@ export function ConfigPanel() {
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
 
+  // AQUI: A função agora busca TODOS os documentos do grupo
   async function getDocsByGroup(idDocumentGroup: string) {
     setIsLoadingDocsList(true);
     try {
+      const url = `${ip}/document/matrix/filtered-group`;
       const { data } = await axios.get(
-        `${ip}/document/matrix/filtered-group`,
+        url,
         {
           headers: { Authorization: `Bearer ${token}` },
-          params: { idSearch: idDocumentGroup },
+          params: { idSearch: idDocumentGroup, page: 0, size: 1000 },
         }
       );
 
       const list: DocumentMatrixEntry[] = Array.isArray(data)
         ? data
         : Array.isArray((data as any).content)
-        ? (data as any).content
-        : [];
+          ? (data as any).content
+          : [];
 
       setDocsList(list);
+      console.log('✅ Documentos do grupo recebidos com sucesso:', data); // Log de sucesso
     } catch (error) {
-      console.error("Erro axios em filtered-group:", error);
+      console.error("❌ Erro axios em filtered-group:", error); // Log de erro
+      toast.error("Erro ao carregar documentos do grupo.");
     } finally {
       setIsLoadingDocsList(false);
     }
@@ -741,6 +806,15 @@ export function ConfigPanel() {
     }
   }, [selectedGroup, token]);
 
+  // AQUI: Cria um `useMemo` para filtrar a lista de documentos do grupo
+  const filteredDocsList = useMemo(() => {
+    if (!docsSearchTerm) {
+      return docsList;
+    }
+    return docsList.filter((doc) =>
+      doc.name.toLowerCase().includes(docsSearchTerm.toLowerCase())
+    );
+  }, [docsList, docsSearchTerm]);
 
   async function saveMatrixEntry() {
     if (!selectedMatrixEntry) return;
@@ -756,12 +830,14 @@ export function ConfigPanel() {
     };
 
     try {
-      await axios.put(
-        `${ip}/document/matrix/${selectedMatrixEntry.idDocumentMatrix}`,
+      const url = `${ip}/document/matrix/${selectedMatrixEntry.idDocumentMatrix}`;
+      const response = await axios.put(
+        url,
         payload,
         authHeader
       );
       toast.success("Documento atualizado com sucesso!");
+      console.log('✅ Documento de matriz atualizado:', response.data); // Log de sucesso
 
       setMatrixEntries((prev) =>
         prev.map((e) =>
@@ -776,66 +852,78 @@ export function ConfigPanel() {
 
       setSelectedMatrixEntry(null);
     } catch (err) {
-      console.error(err);
+      console.error("❌ Erro ao atualizar documento de matriz:", err); // Log de erro
       toast.error("Erro ao atualizar documento.");
     }
   }
 
   async function createMatrixEntry() {
-    if (!selectedGroup) {
-      toast.error("Por favor, selecione um grupo antes de criar.");
-      return;
-    }
-    if (!newDocName.trim() || !newDocType.trim()) {
-      toast.error("Nome e Tipo são campos obrigatórios.");
-      return;
-    }
+    if (!selectedGroup) {
+      toast.error("Por favor, selecione um grupo antes de criar.");
+      return;
+    }
+    if (!newDocName.trim() || !newDocType.trim()) {
+      toast.error("Nome e Tipo são campos obrigatórios.");
+      return;
+    }
 
-    setIsCreatingDocument(true);
+    setIsCreatingDocument(true);
 
-    const payload = {
-      name: newDocName,
-      type: newDocType,
-      doesBlock: newDocDoesBlock,
-      isDocumentUnique: newDocIsUnique,
-      expirationDateUnit: newDocExpirationUnit,
-      expirationDateAmount: newDocExpirationAmount,
-      idDocumentGroup: selectedGroup,
-    };
+    const payload = {
+      name: newDocName,
+      type: newDocType,
+      doesBlock: !!newDocDoesBlock, // Converte para booleano explícito
+      isDocumentUnique: !!newDocIsUnique, // Converte para booleano explícito
+      expirationDateUnit: 'MONTHS',
+      expirationDateAmount: newDocExpirationAmount,
+      idDocumentGroup: selectedGroup,
+    };
 
-    try {
-      const response = await axios.post(
-        `${ip}/document/matrix`,
-        payload,
-        authHeader
-      );
+    console.log("Payload para criação de documento de matriz:", payload);
 
-      toast.success("Documento criado com sucesso! 🎉");
-      console.log("Novo documento criado:", response.data);
+    try {
+      const url = `${ip}/document/matrix`;
+      const response = await axios.post(
+        url,
+        payload,
+        authHeader
+      );
 
-      setNewDocName("");
-      setNewDocType("");
-      setNewDocExpirationAmount(0);
-      setNewDocExpirationUnit("MONTHS");
-      setNewDocDoesBlock(false);
-      setNewDocIsUnique(false);
+      toast.success("Documento criado com sucesso! 🎉");
+      console.log("✅ Novo documento criado:", response.data);
 
-      if (selectedGroup) {
-        getDocsByGroup(selectedGroup);
-      }
-    } catch (error) {
-      console.error("Erro ao criar documento de matriz:", error);
-      if (axios.isAxiosError(error)) {
-        toast.error(
-          `Erro ao criar: ${error.response?.data?.message || "Erro desconhecido."}`
-        );
-      } else {
-        toast.error("Erro ao criar documento.");
-      }
-    } finally {
-      setIsCreatingDocument(false);
-    }
-  }
+      setNewDocName("");
+      setNewDocType("");
+      setNewDocExpirationAmount(0);
+      setNewDocExpirationUnit("MONTHS");
+      setNewDocDoesBlock(false);
+      setNewDocIsUnique(false);
+
+      if (selectedGroup) {
+        getDocsByGroup(selectedGroup);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao criar documento de matriz:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(
+          `Erro ao criar: ${error.response?.data?.message || "Verifique os dados."}`
+        );
+      } else {
+        toast.error("Erro ao criar documento.");
+      }
+    } finally {
+      setIsCreatingDocument(false);
+    }
+  }
+
+const documentTypes = [
+    { value: 'thirdCompany', label: 'Cadastro e Certidões' },
+    { value: 'thirdCollaborators', label: 'Saúde' },
+    { value: 'otherRequirements', label: 'Segurança do Trabalho' },
+    { value: 'ambient', label: 'Meio Ambiente' },
+    { value: 'trabalhista', label: 'Trabalhista' },
+    { value: 'geral', label: 'Geral' },
+  ];
 
   return (
     <div className="p-6 md:p-10 flex flex-col gap-0 md:gap-0">
@@ -855,11 +943,10 @@ export function ConfigPanel() {
           ].map((tab) => (
             <Button
               key={tab}
-              className={`${
-                selectTab === tab
-                  ? "bg-realizaBlue text-white"
-                  : "bg-transparent border text-black border-black hover:bg-neutral-300"
-              }`}
+              className={`${selectTab === tab
+                ? "bg-realizaBlue text-white"
+                : "bg-transparent border text-black border-black hover:bg-neutral-300"
+                }`}
               onClick={() => setSelectedTab(tab as any)}
             >
               {
@@ -1257,32 +1344,13 @@ export function ConfigPanel() {
                           setMatrixEntries((list) =>
                             list.map((i) =>
                               i.idDocumentMatrix === entry.idDocumentMatrix
-                                ? { ...i, expirationDateAmount: amt }
+                                ? { ...i, expirationDateAmount: amt, expirationDateUnit: 'MONTHS' } // Adiciona o valor fixo
                                 : i
                             )
                           );
                         }}
                       />
-                      <select
-                        className="p-1 border rounded"
-                        value={entry.expirationDateUnit}
-                        onChange={(e) => {
-                          const unit = e.target.value;
-                          setMatrixEntries((list) =>
-                            list.map((i) =>
-                              i.idDocumentMatrix === entry.idDocumentMatrix
-                                ? { ...i, expirationDateUnit: unit }
-                                : i
-                            )
-                          );
-                        }}
-                      >
-                        {expirationUnits.map((u) => (
-                          <option key={u.value} value={u.value}>
-                            {u.label}
-                          </option>
-                        ))}
-                      </select>
+                      <span>Meses</span>
                       <Button
                         onClick={() =>
                           handleUpdateEntry(entry.idDocumentMatrix)
@@ -1534,7 +1602,6 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={general}
                             onChange={(e) => setGeneral(e.target.checked)}
-                            disabled={isCreatingProfile}
                           />{" "}
                           Geral
                         </label>
@@ -1543,7 +1610,6 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={health}
                             onChange={(e) => setHealth(e.target.checked)}
-                            disabled={isCreatingProfile}
                           />{" "}
                           Saúde
                         </label>
@@ -1552,7 +1618,6 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={environment}
                             onChange={(e) => setEnvironment(e.target.checked)}
-                            disabled={isCreatingProfile}
                           />{" "}
                           Meio Ambiente
                         </label>
@@ -1561,7 +1626,6 @@ export function ConfigPanel() {
                             type="checkbox"
                             checked={concierge}
                             onChange={(e) => setConcierge(e.target.checked)}
-                            disabled={isCreatingProfile}
                           />{" "}
                           Portaria
                         </label>
@@ -1637,34 +1701,57 @@ export function ConfigPanel() {
                 Documentos do Grupo
               </h3>
               {!selectedGroup ? (
-                <p className="text-gray-500">Selecione um grupo para visualizar os documentos.</p>
+                <p className="text-gray-500">
+                  Selecione um grupo para visualizar os documentos.
+                </p>
               ) : isLoadingDocsList ? (
                 <p className="text-gray-500">Carregando documentos...</p>
-              ) : docsList.length > 0 ? (
+              ) : (
                 <>
-                  <ul className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
-                    {docsList.map((doc) => (
-                      <li
-                        key={doc.idDocumentMatrix}
-                        className="p-3 border rounded-md hover:bg-gray-100 cursor-pointer transition-colors"
-                        onClick={() => handleSelectMatrixEntry(doc)}
-                      >
-                        <strong className="block">{doc.name}</strong>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {doc.expirationDateAmount > 0
-                            ? `Validade: ${doc.expirationDateAmount} ${expirationUnits.find(u => u.value === doc.expirationDateUnit)?.label}`
-                            : 'Sem validade padrão'}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* AQUI: Adiciona a barra de pesquisa */}
+                  <input
+                    type="text"
+                    placeholder="Filtrar documentos por nome..."
+                    className="w-full p-2 border rounded-md mb-4"
+                    value={docsSearchTerm}
+                    onChange={(e) => setDocsSearchTerm(e.target.value)}
+                  />
+                  {filteredDocsList.length > 0 ? (
+                    <ul className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+                      {filteredDocsList.map((doc) => (
+                        <li
+                          key={doc.idDocumentMatrix}
+                          className="p-3 border rounded-md hover:bg-gray-100 cursor-pointer transition-colors"
+                          onClick={() => handleSelectMatrixEntry(doc)}
+                        >
+                          <strong className="block">{doc.name}</strong>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {doc.expirationDateAmount > 0
+                              ? `Validade: ${doc.expirationDateAmount
+                              } ${expirationUnits.find(
+                                (u) => u.value
+                              )?.label
+                              }`
+                              : "Sem validade padrão"}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400">
+                      Nenhum documento encontrado para este grupo ou filtro.
+                    </p>
+                  )}
                   {selectedMatrixEntry && (
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg shadow-inner space-y-4">
                       <h3 className="text-lg font-semibold">
                         Editar Documento
                       </h3>
                       <div>
-                        <label htmlFor="editName" className="block text-sm font-medium mb-1">
+                        <label
+                          htmlFor="editName"
+                          className="block text-sm font-medium mb-1"
+                        >
                           Nome do Documento
                         </label>
                         <input
@@ -1675,15 +1762,26 @@ export function ConfigPanel() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="editType" className="block text-sm font-medium mb-1">
-                          Tipo de Arquivo
+                        <label
+                          htmlFor="editType"
+                          className="block text-sm font-medium mb-1"
+                        >
+                          Tipo de Documento
                         </label>
-                        <input
+                        <select
                           id="editType"
                           className="w-full p-2 border rounded-md"
                           value={editType}
                           onChange={(e) => setEditType(e.target.value)}
-                        />
+                          disabled={!selectedMatrixEntry}
+                        >
+                          <option value="">Selecione o tipo</option>
+                          {documentTypes.map((type) => (
+                            <option key={type.value} value={type.value}>
+                              {type.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <p className="block text-sm font-medium mb-1">
@@ -1691,7 +1789,9 @@ export function ConfigPanel() {
                         </p>
                         <div className="flex gap-2 items-end">
                           <div className="w-1/3">
-                            <label htmlFor="editExpAmount" className="sr-only">Quantidade</label>
+                            <label htmlFor="editExpAmount" className="sr-only">
+                              Quantidade
+                            </label>
                             <input
                               id="editExpAmount"
                               type="number"
@@ -1704,7 +1804,9 @@ export function ConfigPanel() {
                             />
                           </div>
                           <div className="w-2/3">
-                            <label htmlFor="editExpUnit" className="sr-only">Unidade</label>
+                            <label htmlFor="editExpUnit" className="sr-only">
+                              Unidade
+                            </label>
                             <select
                               id="editExpUnit"
                               className="w-full p-2 border rounded-md"
@@ -1743,7 +1845,9 @@ export function ConfigPanel() {
                         </label>
                       </div>
                       <div className="flex gap-2 pt-2">
-                        <Button onClick={saveMatrixEntry} className="w-full">Salvar Alterações</Button>
+                        <Button onClick={saveMatrixEntry} className="w-full">
+                          Salvar Alterações
+                        </Button>
                         <Button
                           onClick={() => setSelectedMatrixEntry(null)}
                           className="w-full bg-gray-300 text-black hover:bg-gray-400"
@@ -1754,22 +1858,23 @@ export function ConfigPanel() {
                     </div>
                   )}
                 </>
-              ) : (
-                <p className="text-gray-400">
-                  Nenhum documento encontrado para este grupo.
-                </p>
               )}
             </div>
             <div className="w-[45%] border-l pl-6 space-y-6">
               <h2 className="text-xl font-bold">Gerenciar Documentos</h2>
               <div className="p-4 bg-gray-50 rounded-lg shadow-inner">
-                <h3 className="text-lg font-semibold mb-3">Criar Novo Documento</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  Criar Novo Documento
+                </h3>
                 <p className="text-xs text-red-500 mb-4">
                   * Campos obrigatórios.
                 </p>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="newDocName" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="newDocName"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Nome do Documento <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1782,17 +1887,26 @@ export function ConfigPanel() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="newDocType" className="block text-sm font-medium mb-1">
-                      Tipo de Arquivo <span className="text-red-500">*</span>
+                    <label
+                      htmlFor="newDocType"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Tipo de Documento <span className="text-red-500">*</span>
                     </label>
-                    <input
+                    <select
                       id="newDocType"
                       className="w-full p-2 border rounded-md"
-                      placeholder="Ex: PDF, PNG, JPEG"
                       value={newDocType}
                       onChange={(e) => setNewDocType(e.target.value)}
                       disabled={!selectedGroup || isCreatingDocument}
-                    />
+                    >
+                      <option value="">Selecione o tipo</option>
+                      {documentTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <p className="block text-sm font-medium mb-1">
@@ -1800,7 +1914,9 @@ export function ConfigPanel() {
                     </p>
                     <div className="flex gap-2 items-end">
                       <div className="w-1/3">
-                        <label htmlFor="expAmount" className="sr-only">Quantidade</label>
+                        <label htmlFor="expAmount" className="sr-only">
+                          Quantidade
+                        </label>
                         <input
                           id="expAmount"
                           type="number"
@@ -1815,20 +1931,7 @@ export function ConfigPanel() {
                         />
                       </div>
                       <div className="w-2/3">
-                        <label htmlFor="expUnit" className="sr-only">Unidade</label>
-                        <select
-                          id="expUnit"
-                          className="w-full p-2 border rounded-md"
-                          value={newDocExpirationUnit}
-                          onChange={(e) => setNewDocExpirationUnit(e.target.value)}
-                          disabled={!selectedGroup || isCreatingDocument}
-                        >
-                          {expirationUnits.map((u) => (
-                            <option key={u.value} value={u.value}>
-                              {u.label}
-                            </option>
-                          ))}
-                        </select>
+                        <span className="block p-2 text-gray-700">Meses</span>
                       </div>
                     </div>
                   </div>
@@ -1843,7 +1946,8 @@ export function ConfigPanel() {
                       Documento bloqueia?
                     </label>
                     <p className="text-xs text-gray-500 ml-6 -mt-1">
-                      Se marcado, o documento precisa estar valido para permitir a entrada de um colaborador.
+                      Se marcado, o documento precisa estar valido para permitir a
+                      entrada de um colaborador.
                     </p>
                     <label className="flex items-center gap-2 text-sm font-medium">
                       <input
