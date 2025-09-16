@@ -16,7 +16,11 @@ import bl.tech.realiza.services.auth.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class ThirdPartyService {
     private final JwtService jwtService;
     private final ClientRepository clientRepository;
     private final EmployeeRepository employeeRepository;
+    private static final Pattern CPF_PATTERN = Pattern.compile("^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$");
 
     public Boolean employeeStatus(String employeeCpf, LoginRequestDto request) {
         String token = authService.login(request.getEmail(), request.getPassword());
@@ -34,11 +39,31 @@ public class ThirdPartyService {
         if (!client.getThirdParty()) {
             throw new ForbiddenException("Client didn't join third party!");
         }
-        List<Employee> employees = employeeRepository.findAllByCpf(employeeCpf);
+        String unformattedCpf = employeeCpf.replaceAll("[.\\-]", "");
+        String formattedCpf = formatCpfForSearch(unformattedCpf);
+        List<Employee> formattedEmployees = employeeRepository.findAllByCpf(formattedCpf);
+        List<Employee> unformattedEmployees = employeeRepository.findAllByCpf(unformattedCpf);
+        Set<Employee> uniqueEmployeesSet = new HashSet<>(formattedEmployees);
+        uniqueEmployeesSet.addAll(unformattedEmployees);
+
+        List<Employee> employees = new ArrayList<>(uniqueEmployeesSet);
+
         employees.removeIf(employee -> !(employeeFromSupplierBelongToClient(client, employee)
                 || employeeFromSubcontractorBelongToClient(client, employee)));
 
         return employees.stream().allMatch(employee -> employee.getDocumentEmployees().stream().allMatch(Document::getConforming));
+    }
+
+    private String formatCpfForSearch(String employeeCpf) {
+        if (employeeCpf == null || !CPF_PATTERN.matcher(employeeCpf).matches()) {
+            throw new IllegalArgumentException("Invalid CPF format.");
+        }
+
+        if (employeeCpf.length() == 11) {
+            return employeeCpf.replaceAll("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
+        }
+
+        return employeeCpf;
     }
 
     private String getClientIdByToken(String token) {
