@@ -87,12 +87,12 @@ export function ContarctsByProvider() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const token = localStorage.getItem("tokenClient");
-  
+
   const subcontractLevelColors: { [key: number]: string } = {
     1: "bg-blue-500",
-    2: "bg-purple-500",
+    2: "bg-pink-500",
     3: "bg-teal-500",
-    4: "bg-pink-500",
+    4: "bg-orange-500",
   };
 
   const getSubcontractLevelColor = (level: number) => {
@@ -430,9 +430,8 @@ export function ContarctsByProvider() {
             {contracts.map((contract: any, index) => (
               <div
                 key={contract.idContract}
-                className={`w-full p-2 cursor-pointer ${
-                  index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
-                }`}
+                className={`w-full p-2 cursor-pointer ${index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
+                  }`}
                 onClick={() =>
                   getAllDatas(contract.idContract, contract.serviceName)
                 }
@@ -460,21 +459,19 @@ export function ContarctsByProvider() {
           <div className="absolute top-5 right-5 flex gap-4">
             <button
               onClick={() => setViewOption("documents")}
-              className={`${
-                viewOption === "documents"
+              className={`${viewOption === "documents"
                   ? "bg-realizaBlue text-white"
                   : "bg-neutral-200 text-[#34495E]"
-              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+                } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Documentos Empresa
             </button>
             <button
               onClick={() => setViewOption("collaborators")}
-              className={`${
-                viewOption === "collaborators"
+              className={`${viewOption === "collaborators"
                   ? "bg-realizaBlue text-white"
                   : "bg-neutral-200 text-[#34495E]"
-              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+                } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Colaboradores
             </button>
@@ -483,11 +480,10 @@ export function ContarctsByProvider() {
                 setViewOption("subcontractors");
                 getAllSubcontractors();
               }}
-              className={`${
-                viewOption === "subcontractors"
+              className={`${viewOption === "subcontractors"
                   ? "bg-realizaBlue text-white"
                   : "bg-neutral-200 text-[#34495E]"
-              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+                } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Subcontratados
             </button>
@@ -549,7 +545,7 @@ export function ContarctsByProvider() {
                           ) : (
                             <div className="flex items-center gap-2">
                               {doc.status === "REPROVADO" ||
-                              doc.status === "REPROVADO_IA" ? (
+                                doc.status === "REPROVADO_IA" ? (
                                 <Ban className="w-4 h-4 text-red-500" />
                               ) : doc.status === "VENCIDO" ? (
                                 <AlertCircle className="w-4 h-4 text-orange-500" />
@@ -787,13 +783,13 @@ export function ContarctsByProvider() {
                   <div className="h-3 w-3 rounded-full bg-blue-500" /> Nível 1
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-purple-500" /> Nível 2
+                  <div className="h-3 w-3 rounded-full bg-pink-500" /> Nível 2
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="h-3 w-3 rounded-full bg-teal-500" /> Nível 3
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-pink-500" /> Nível 4
+                  <div className="h-3 w-3 rounded-full bg-orange-500" /> Nível 4
                 </div>
               </div>
 

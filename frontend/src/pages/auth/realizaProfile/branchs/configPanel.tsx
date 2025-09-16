@@ -35,6 +35,7 @@ interface Activity {
   risk: string;
 }
 
+// A interface DocumentMatrixEntry foi atualizada.
 export interface DocumentMatrixEntry {
   documentId: string;
   idDocumentMatrix: string;
@@ -44,8 +45,6 @@ export interface DocumentMatrixEntry {
   isDocumentUnique: boolean;
   expirationDateUnit: string;
   expirationDateAmount: number;
-  idDocumentSubgroup: string;
-  subgroupName: string;
   idDocumentGroup: string;
   groupName: string;
 }
@@ -240,9 +239,9 @@ export function ConfigPanel() {
       const url = `${ip}/prompt`;
       const { data } = await axios.get<Document[]>(url, authHeader);
       setDocuments(data);
-      console.log('✅ Dados de documentos recebidos com sucesso:', data); // Log de sucesso
+      console.log('✅ Dados de documentos recebidos com sucesso:', data);
     } catch (error) {
-      console.error('❌ Erro na requisição de documentos:', error); // Log de erro
+      console.error('❌ Erro na requisição de documentos:', error);
     } finally {
       setIsLoading(false);
     }
@@ -260,13 +259,13 @@ export function ConfigPanel() {
       const payload = { documentId: selectedDoc.documentId, description };
       const response = await axios.put(url, payload, authHeader);
       toast.success("Documento salvo com sucesso!");
-      console.log('✅ Documento salvo com sucesso:', response.data); // Log de sucesso
+      console.log('✅ Documento salvo com sucesso:', response.data);
       setDocuments((prev) =>
         prev.map((d) => (d.id === selectedDoc.id ? { ...d, description } : d))
       );
       setSelectedDoc(null);
     } catch (error) {
-      console.error("❌ Erro ao salvar documento:", error); // Log de erro
+      console.error("❌ Erro ao salvar documento:", error);
       toast.error("Erro ao salvar documento. Tente novamente.");
     }
   }
@@ -276,9 +275,9 @@ export function ConfigPanel() {
       const url = `${ip}/cbo`;
       const { data } = await axios.get<CBO[]>(url, authHeader);
       setCbos(data || []);
-      console.log('✅ Dados de CBOs recebidos com sucesso:', data); // Log de sucesso
+      console.log('✅ Dados de CBOs recebidos com sucesso:', data);
     } catch (error) {
-      console.error("❌ Erro na requisição de CBOs:", error); // Log de erro
+      console.error("❌ Erro na requisição de CBOs:", error);
       setCbos([]);
     }
   }
@@ -290,20 +289,20 @@ export function ConfigPanel() {
         const payload = { code: cboCode, title: cboTitle };
         const response = await axios.put(url, payload, authHeader);
         toast.success("CBO atualizado com sucesso!");
-        console.log('✅ CBO atualizado:', response.data); // Log de sucesso
+        console.log('✅ CBO atualizado:', response.data);
       } else {
         const url = `${ip}/cbo`;
         const payload = { code: cboCode, title: cboTitle };
         const response = await axios.post(url, payload, authHeader);
         toast.success("CBO criado com sucesso!");
-        console.log('✅ CBO criado:', response.data); // Log de sucesso
+        console.log('✅ CBO criado:', response.data);
       }
       setCboCode("");
       setCboTitle("");
       setSelectedCBO(null);
       getCbos();
     } catch (error) {
-      console.error("❌ Erro ao salvar CBO:", error); // Log de erro
+      console.error("❌ Erro ao salvar CBO:", error);
       toast.error("Erro ao salvar CBO. Tente novamente.");
     }
   }
@@ -313,10 +312,10 @@ export function ConfigPanel() {
       const url = `${ip}/cbo/${id}`;
       await axios.delete(url, authHeader);
       toast.success("CBO deletado com sucesso!");
-      console.log('✅ CBO deletado:', id); // Log de sucesso
+      console.log('✅ CBO deletado:', id);
       getCbos();
     } catch (error) {
-      console.error("❌ Erro ao deletar CBO:", error); // Log de erro
+      console.error("❌ Erro ao deletar CBO:", error);
       toast.error("Erro ao deletar CBO. Tente novamente.");
     }
   }
@@ -326,9 +325,9 @@ export function ConfigPanel() {
       const url = `${ip}/position`;
       const { data } = await axios.get<Position[]>(url, authHeader);
       setPositions(data || []);
-      console.log('✅ Dados de cargos recebidos com sucesso:', data); // Log de sucesso
+      console.log('✅ Dados de cargos recebidos com sucesso:', data);
     } catch (error) {
-      console.error("❌ Erro na requisição de cargos:", error); // Log de erro
+      console.error("❌ Erro na requisição de cargos:", error);
       setPositions([]);
     }
   }
@@ -340,19 +339,19 @@ export function ConfigPanel() {
         const payload = { title: positionName };
         const response = await axios.put(url, payload, authHeader);
         toast.success("Cargo atualizado com sucesso!");
-        console.log('✅ Cargo atualizado:', response.data); // Log de sucesso
+        console.log('✅ Cargo atualizado:', response.data);
       } else {
         const url = `${ip}/position`;
         const payload = { title: positionName };
         const response = await axios.post(url, payload, authHeader);
         toast.success("Cargo criado com sucesso!");
-        console.log('✅ Cargo criado:', response.data); // Log de sucesso
+        console.log('✅ Cargo criado:', response.data);
       }
       setPositionName("");
       setSelectedPosition(null);
       getPositions();
     } catch (error) {
-      console.error("❌ Erro ao salvar cargo:", error); // Log de erro
+      console.error("❌ Erro ao salvar cargo:", error);
       toast.error("Erro ao salvar cargo. Tente novamente.");
     }
   }
@@ -362,10 +361,10 @@ export function ConfigPanel() {
       const url = `${ip}/position/${id}`;
       await axios.delete(url, authHeader);
       toast.success("Cargo deletado com sucesso!");
-      console.log('✅ Cargo deletado:', id); // Log de sucesso
+      console.log('✅ Cargo deletado:', id);
       getPositions();
     } catch (error) {
-      console.error("❌ Erro ao deletar cargo:", error); // Log de erro
+      console.error("❌ Erro ao deletar cargo:", error);
       toast.error("Erro ao deletar cargo. Tente novamente.");
     }
   }
@@ -379,9 +378,9 @@ export function ConfigPanel() {
         { params: { owner: "REPO", idOwner: "" }, ...authHeader }
       );
       setServices(data || []);
-      console.log('✅ Dados de serviços recebidos com sucesso:', data); // Log de sucesso
+      console.log('✅ Dados de serviços recebidos com sucesso:', data);
     } catch (err) {
-      console.error("❌ Erro ao buscar serviços:", err); // Log de erro
+      console.error("❌ Erro ao buscar serviços:", err);
       toast.error("Erro ao carregar serviços.");
     } finally {
       setIsLoadingServices(false);
@@ -401,12 +400,12 @@ export function ConfigPanel() {
       const payload = { title: newServiceTitle, risk: newServiceRisk };
       const response = await axios.post(url, payload, authHeader);
       toast.success("Serviço criado com sucesso!");
-      console.log('✅ Serviço criado:', response.data); // Log de sucesso
+      console.log('✅ Serviço criado:', response.data);
       setNewServiceTitle("");
       setNewServiceRisk("LOW");
       getServices();
     } catch (err) {
-      console.error("❌ Erro ao criar serviço:", err); // Log de erro
+      console.error("❌ Erro ao criar serviço:", err);
       toast.error("Erro ao criar serviço. Tente novamente.");
     } finally {
       setIsCreatingService(false);
@@ -435,9 +434,9 @@ export function ConfigPanel() {
         );
         setActivities([]);
       }
-      console.log('✅ Dados de atividades recebidos com sucesso:', res.data); // Log de sucesso
+      console.log('✅ Dados de atividades recebidos com sucesso:', res.data);
     } catch (err) {
-      console.error("❌ Erro ao buscar atividades:", err); // Log de erro
+      console.error("❌ Erro ao buscar atividades:", err);
       toast.error("Erro ao carregar atividades.");
     } finally {
       setIsLoadingActivities(false);
@@ -457,12 +456,12 @@ export function ConfigPanel() {
       const payload = { title: newActivityTitle, risk: newActivityRisk };
       const response = await axios.post(url, payload, authHeader);
       toast.success("Atividade criada com sucesso!");
-      console.log('✅ Atividade criada:', response.data); // Log de sucesso
+      console.log('✅ Atividade criada:', response.data);
       setNewActivityTitle("");
       setNewActivityRisk("LOW");
       getActivities();
     } catch (err) {
-      console.error("❌ Erro ao criar atividade:", err); // Log de erro
+      console.error("❌ Erro ao criar atividade:", err);
       toast.error("Erro ao criar atividade. Tente novamente.");
     } finally {
       setIsCreatingActivity(false);
@@ -486,9 +485,9 @@ export function ConfigPanel() {
           ? (data as any).content
           : [];
       setMatrixEntries(list);
-      console.log('✅ Dados da matriz de documentos recebidos com sucesso:', data); // Log de sucesso
+      console.log('✅ Dados da matriz de documentos recebidos com sucesso:', data);
     } catch (error) {
-      console.error("❌ Erro ao carregar documentos de matriz:", error); // Log de erro
+      console.error("❌ Erro ao carregar documentos de matriz:", error);
       toast.error("Não foi possível carregar documentos de matriz.");
     } finally {
       setIsLoadingMatrix(false);
@@ -510,16 +509,16 @@ export function ConfigPanel() {
       expirationDateUnit: entry.expirationDateUnit,
       expirationDateAmount: entry.expirationDateAmount,
     };
-    console.log("Payload de atualização:", payload); // Log do payload enviado
+    console.log("Payload de atualização:", payload);
     try {
       const url = `${ip}/document/matrix/${id}`;
       const response = await axios.put(url, payload, authHeader);
       console.log("ID ", id);
-      console.log("✅ Resposta da API (sucesso):", response.data); // Log de sucesso
+      console.log("✅ Resposta da API (sucesso):", response.data);
       toast.success("Validade atualizada com sucesso!");
       getMatrixEntries();
     } catch (error) {
-      console.error("❌ Erro ao atualizar validade do documento:", error); // Log de erro
+      console.error("❌ Erro ao atualizar validade do documento:", error);
       if (axios.isAxiosError(error) && error.response) {
         console.error("Detalhes do erro da API:", error.response.data);
         console.error("Status do erro:", error.response.status);
@@ -540,7 +539,7 @@ export function ConfigPanel() {
     if (profile) {
       setSelectedProfileDetails(profile);
       setIsProfileDetailsModalOpen(true);
-      console.log('✅ Detalhes do perfil selecionado:', profile); // Log do perfil selecionado
+      console.log('✅ Detalhes do perfil selecionado:', profile);
     } else {
       toast.error(
         "Detalhes do perfil não encontrados localmente. Recarregue a página se persistir."
@@ -574,7 +573,7 @@ export function ConfigPanel() {
 
       setProfilesRepoItems(sortedProfiles);
     } catch (err) {
-      console.error("❌ Erro ao buscar perfis do repositório:", err); // Log de erro
+      console.error("❌ Erro ao buscar perfis do repositório:", err);
       toast.error("Erro ao carregar perfis do repositório.");
     } finally {
       setIsLoadingProfilesRepo(false);
@@ -615,7 +614,7 @@ export function ConfigPanel() {
         concierge: concierge,
       };
 
-      console.log("Payload para criação de perfil:", payload); // Log do payload enviado
+      console.log("Payload para criação de perfil:", payload);
 
       const url = `${ip}/profile/repo`;
       const response = await axios.post<SingleProfileItem>(
@@ -630,7 +629,7 @@ export function ConfigPanel() {
       );
 
       toast.success("Perfil criado com sucesso! 🎉");
-      console.log("✅ Perfil criado:", response.data); // Log de sucesso
+      console.log("✅ Perfil criado:", response.data);
 
       setName("");
       setNewProfileDescription("");
@@ -651,7 +650,7 @@ export function ConfigPanel() {
 
       getProfilesRepo();
     } catch (err) {
-      console.error("❌ Erro ao criar perfil:", err); // Log de erro
+      console.error("❌ Erro ao criar perfil:", err);
       if (axios.isAxiosError(err) && err.response) {
         toast.error(
           `Erro ao criar perfil: ${err.response.data.message || "Verifique os dados."
@@ -733,7 +732,6 @@ export function ConfigPanel() {
   }, [profilesRepoItems, profileSearchTerm]);
 
   const [documentGroups, setDocumentGroups] = useState<any[]>([]);
-  // Adiciona um estado para o termo de pesquisa dos documentos do grupo
   const [docsSearchTerm, setDocsSearchTerm] = useState("");
 
   async function getDocumentGroups() {
@@ -748,9 +746,9 @@ export function ConfigPanel() {
       });
 
       setDocumentGroups(response.data.content || []);
-      console.log('✅ Dados de grupos de documentos recebidos com sucesso:', response.data); // Log de sucesso
+      console.log('✅ Dados de grupos de documentos recebidos com sucesso:', response.data);
     } catch (error) {
-      console.error("❌ Erro ao buscar grupos de documentos", error); // Log de erro
+      console.error("❌ Erro ao buscar grupos de documentos", error);
       toast.error("Erro ao carregar grupos de documentos.");
     }
   }
@@ -769,7 +767,6 @@ export function ConfigPanel() {
   const [docsList, setDocsList] = useState<DocumentMatrixEntry[]>([]);
   const [isLoadingDocsList, setIsLoadingDocsList] = useState(false);
 
-  // AQUI: A função agora busca TODOS os documentos do grupo
   async function getDocsByGroup(idDocumentGroup: string) {
     setIsLoadingDocsList(true);
     try {
@@ -789,9 +786,9 @@ export function ConfigPanel() {
           : [];
 
       setDocsList(list);
-      console.log('✅ Documentos do grupo recebidos com sucesso:', data); // Log de sucesso
+      console.log('✅ Documentos do grupo recebidos com sucesso:', data);
     } catch (error) {
-      console.error("❌ Erro axios em filtered-group:", error); // Log de erro
+      console.error("❌ Erro axios em filtered-group:", error);
       toast.error("Erro ao carregar documentos do grupo.");
     } finally {
       setIsLoadingDocsList(false);
@@ -806,7 +803,6 @@ export function ConfigPanel() {
     }
   }, [selectedGroup, token]);
 
-  // AQUI: Cria um `useMemo` para filtrar a lista de documentos do grupo
   const filteredDocsList = useMemo(() => {
     if (!docsSearchTerm) {
       return docsList;
@@ -837,7 +833,7 @@ export function ConfigPanel() {
         authHeader
       );
       toast.success("Documento atualizado com sucesso!");
-      console.log('✅ Documento de matriz atualizado:', response.data); // Log de sucesso
+      console.log('✅ Documento de matriz atualizado:', response.data);
 
       setMatrixEntries((prev) =>
         prev.map((e) =>
@@ -852,71 +848,82 @@ export function ConfigPanel() {
 
       setSelectedMatrixEntry(null);
     } catch (err) {
-      console.error("❌ Erro ao atualizar documento de matriz:", err); // Log de erro
+      console.error("❌ Erro ao atualizar documento de matriz:", err);
       toast.error("Erro ao atualizar documento.");
     }
   }
 
   async function createMatrixEntry() {
-    if (!selectedGroup) {
-      toast.error("Por favor, selecione um grupo antes de criar.");
-      return;
-    }
-    if (!newDocName.trim() || !newDocType.trim()) {
-      toast.error("Nome e Tipo são campos obrigatórios.");
-      return;
-    }
+    if (!selectedGroup) {
+      toast.error("Por favor, selecione um grupo antes de criar.");
+      return;
+    }
+    if (!newDocName.trim() || !newDocType.trim()) {
+      toast.error("Nome e Tipo são campos obrigatórios.");
+      return;
+    }
 
-    setIsCreatingDocument(true);
+    // AQUI: Verificamos se o grupo selecionado existe na lista carregada
+    const selectedGroupObject = documentGroups.find(
+        (group) => group.idDocumentGroup === selectedGroup
+    );
 
-    const payload = {
-      name: newDocName,
-      type: newDocType,
-      doesBlock: !!newDocDoesBlock, // Converte para booleano explícito
-      isDocumentUnique: !!newDocIsUnique, // Converte para booleano explícito
-      expirationDateUnit: 'MONTHS',
-      expirationDateAmount: newDocExpirationAmount,
-      idDocumentGroup: selectedGroup,
-    };
+    if (!selectedGroupObject) {
+        toast.error("O grupo selecionado é inválido. Por favor, recarregue a página.");
+        console.error("Grupo selecionado não encontrado na lista de grupos carregada.");
+        return;
+    }
 
-    console.log("Payload para criação de documento de matriz:", payload);
+    setIsCreatingDocument(true);
 
-    try {
-      const url = `${ip}/document/matrix`;
-      const response = await axios.post(
-        url,
-        payload,
-        authHeader
-      );
+    const payload = {
+      name: newDocName,
+      type: newDocType,
+      doesBlock: !!newDocDoesBlock,
+      isDocumentUnique: !!newDocIsUnique,
+      expirationDateUnit: 'MONTHS',
+      expirationDateAmount: newDocExpirationAmount,
+      idDocumentGroup: selectedGroup,
+    };
 
-      toast.success("Documento criado com sucesso! 🎉");
-      console.log("✅ Novo documento criado:", response.data);
+    console.log("Payload para criação de documento de matriz:", payload);
 
-      setNewDocName("");
-      setNewDocType("");
-      setNewDocExpirationAmount(0);
-      setNewDocExpirationUnit("MONTHS");
-      setNewDocDoesBlock(false);
-      setNewDocIsUnique(false);
+    try {
+      const url = `${ip}/document/matrix`;
+      const response = await axios.post(
+        url,
+        payload,
+        authHeader
+      );
 
-      if (selectedGroup) {
-        getDocsByGroup(selectedGroup);
-      }
-    } catch (error) {
-      console.error("❌ Erro ao criar documento de matriz:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        toast.error(
-          `Erro ao criar: ${error.response?.data?.message || "Verifique os dados."}`
-        );
-      } else {
-        toast.error("Erro ao criar documento.");
-      }
-    } finally {
-      setIsCreatingDocument(false);
-    }
-  }
+      toast.success("Documento criado com sucesso! 🎉");
+      console.log("✅ Novo documento criado:", response.data);
 
-const documentTypes = [
+      setNewDocName("");
+      setNewDocType("");
+      setNewDocExpirationAmount(0);
+      setNewDocExpirationUnit("MONTHS");
+      setNewDocDoesBlock(false);
+      setNewDocIsUnique(false);
+
+      if (selectedGroup) {
+        getDocsByGroup(selectedGroup);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao criar documento de matriz:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(
+          `Erro ao criar: ${error.response?.data?.message || "Verifique os dados."}`
+        );
+      } else {
+        toast.error("Erro ao criar documento.");
+      }
+    } finally {
+      setIsCreatingDocument(false);
+    }
+  }
+
+  const documentTypes = [
     { value: 'thirdCompany', label: 'Cadastro e Certidões' },
     { value: 'thirdCollaborators', label: 'Saúde' },
     { value: 'otherRequirements', label: 'Segurança do Trabalho' },
@@ -937,8 +944,8 @@ const documentTypes = [
             "positions",
             "services",
             "activities",
-            "profiles",
             "validate",
+            "profiles",
             "documents",
           ].map((tab) => (
             <Button
@@ -1344,7 +1351,7 @@ const documentTypes = [
                           setMatrixEntries((list) =>
                             list.map((i) =>
                               i.idDocumentMatrix === entry.idDocumentMatrix
-                                ? { ...i, expirationDateAmount: amt, expirationDateUnit: 'MONTHS' } // Adiciona o valor fixo
+                                ? { ...i, expirationDateAmount: amt, expirationDateUnit: 'MONTHS' }
                                 : i
                             )
                           );
@@ -1595,7 +1602,7 @@ const documentTypes = [
                             }
                             disabled={isCreatingProfile}
                           />{" "}
-                          Cadastro e certidões
+                          Cadastro e Certidões
                         </label>
                         <label className="flex items-center gap-2">
                           <input
@@ -1708,7 +1715,6 @@ const documentTypes = [
                 <p className="text-gray-500">Carregando documentos...</p>
               ) : (
                 <>
-                  {/* AQUI: Adiciona a barra de pesquisa */}
                   <input
                     type="text"
                     placeholder="Filtrar documentos por nome..."
