@@ -612,7 +612,55 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                     </div>
 
                     <div>
-                      <Label className="text-black">Nível de Subcontratação</Label>
+                      <Label className="text-black">
+                        Nível de Subcontratação
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <button
+                              type="button"
+                              className="ml-1 text-gray-500 cursor-pointer"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 inline-block"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 16v-4M12 8h.01" />
+                              </svg>
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>O que é Nível de Subcontratação?</DialogTitle>
+                            </DialogHeader>
+                            <div className="py-4">
+                              <p className="text-sm text-gray-700">
+                                Este campo define a posição hierárquica do prestador de serviços na cadeia de contratos.
+                              </p>
+                              <ul className="mt-2 space-y-2 text-sm text-gray-700">
+                                <li>
+                                  -Nível 1: Subcontratada de um contratado direto.
+                                </li>
+                                <li>
+                                  -Nível 2: Subcontratada de outra subcontratada (Nível 1).
+                                </li>
+                                <li>
+                                  -Nível 3: Subcontratada de um prestador de Nível 2.
+                                </li>
+                                <li>
+                                  -Nível 4: Subcontratada de um prestador de Nível 3.
+                                </li>
+                              </ul>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </Label>
                       <Input
                         type="number"
                         {...registerContract("subcontractLevel")}
@@ -621,7 +669,11 @@ export const ModalCadastroSubcontratado: FC<ModalCadastroSubcontratadoProps> = (
                         max={4}
                         className="rounded-md border p-2 w-full mt-1"
                       />
-                      {errorsContract.subcontractLevel && <span className="text-red-500 text-sm">{errorsContract.subcontractLevel.message}</span>}
+                      {errorsContract.subcontractLevel && (
+                        <span className="text-red-500 text-sm">
+                          {errorsContract.subcontractLevel.message}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
