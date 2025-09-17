@@ -49,8 +49,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
                 .type(documentMatrixRequestDto.getType())
                 .doesBlock(documentMatrixRequestDto.getDoesBlock())
                 .isDocumentUnique(documentMatrixRequestDto.getIsDocumentUnique())
-                        .isValidityFixed(documentMatrixRequestDto.getIsValidityFixed())
-                        .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
+                .isValidityFixed(documentMatrixRequestDto.getIsValidityFixed())
+                .fixedValidityAt(parseDayMonth(documentMatrixRequestDto.getFixedValidityAt()))
+                .group(documentMatrixGroup)
 //                .subGroup(documentMatrixSubgroup)
                 .build());
 
@@ -172,6 +173,9 @@ public class CrudDocumentMatrixImpl implements CrudDocumentMatrix {
     }
 
     public LocalDateTime parseDayMonth(String dayMonth) {
+        if (dayMonth == null) {
+            return null;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
         LocalDate parsedDate = LocalDate.parse(dayMonth, formatter);
 
