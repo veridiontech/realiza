@@ -121,7 +121,6 @@ export function ConfigPanel() {
     | "positions"
     | "services"
     | "activities"
-    | "validate"
     | "profiles"
     | "documents"
   >("documents");
@@ -151,9 +150,8 @@ export function ConfigPanel() {
   const [newActivityTitle, setNewActivityTitle] = useState("");
   const [newActivityRisk, setNewActivityRisk] = useState("LOW");
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
-  const [matrixEntries, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
-  const [isLoadingMatrix, setIsLoadingMatrix] = useState(false);
-  const [searchMatrixTerm, setSearchMatrixTerm] = useState("");
+  const [, setMatrixEntries] = useState<DocumentMatrixEntry[]>([]);
+//   const [, setIsLoadingMatrix] = useState(false);
   const [profilesRepoItems, setProfilesRepoItems] = useState<
     SingleProfileItem[]
   >([]);
@@ -227,7 +225,6 @@ export function ConfigPanel() {
     getPositions();
     getServices();
     getActivities();
-    getMatrixEntries();
     getProfilesRepo();
     getDocumentGroups();
   }, []);
@@ -467,70 +464,70 @@ export function ConfigPanel() {
     }
   }
 
-  async function getMatrixEntries() {
-    setIsLoadingMatrix(true);
-    try {
-      const url = `${ip}/document/matrix`;
-      const { data } = await axios.get<DocumentMatrixEntry[]>(
-        url,
-        {
-          ...authHeader,
-          params: { page: 0, size: 1000 },
-        }
-      );
-      const list = Array.isArray(data)
-        ? data
-        : Array.isArray((data as any).content)
-          ? (data as any).content
-          : [];
-      setMatrixEntries(list);
-      console.log('✅ Dados da matriz de documentos recebidos com sucesso:', data);
-    } catch (error) {
-      console.error("❌ Erro ao carregar documentos de matriz:", error);
-      toast.error("Não foi possível carregar documentos de matriz.");
-    } finally {
-      setIsLoadingMatrix(false);
-    }
-  }
+//   async function getMatrixEntries() {
+//     setIsLoadingMatrix(true);
+//     try {
+//       const url = `${ip}/document/matrix`;
+//       const { data } = await axios.get<DocumentMatrixEntry[]>(
+//         url,
+//         {
+//           ...authHeader,
+//           params: { page: 0, size: 1000 },
+//         }
+//       );
+//       const list = Array.isArray(data)
+//         ? data
+//         : Array.isArray((data as any).content)
+//           ? (data as any).content
+//           : [];
+//       setMatrixEntries(list);
+//       console.log('✅ Dados da matriz de documentos recebidos com sucesso:', data);
+//     } catch (error) {
+//       console.error("❌ Erro ao carregar documentos de matriz:", error);
+//       toast.error("Não foi possível carregar documentos de matriz.");
+//     } finally {
+//       setIsLoadingMatrix(false);
+//     }
+//   }
 
-  async function handleUpdateEntry(id: string) {
-    const entry = matrixEntries.find((e) => e.idDocumentMatrix === id);
-    if (!entry) {
-      console.warn(
-        "Entrada da matriz de documento não encontrada para o ID:",
-        id
-      );
-      toast.error("Documento não encontrado para atualização.");
-      return;
-    }
-    const payload = {
-      ...entry,
-      expirationDateUnit: entry.expirationDateUnit,
-      expirationDateAmount: entry.expirationDateAmount,
-    };
-    console.log("Payload de atualização:", payload);
-    try {
-      const url = `${ip}/document/matrix/${id}`;
-      const response = await axios.put(url, payload, authHeader);
-      console.log("ID ", id);
-      console.log("✅ Resposta da API (sucesso):", response.data);
-      toast.success("Validade atualizada com sucesso!");
-      getMatrixEntries();
-    } catch (error) {
-      console.error("❌ Erro ao atualizar validade do documento:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error("Detalhes do erro da API:", error.response.data);
-        console.error("Status do erro:", error.response.status);
-        toast.error(
-          `Erro ao atualizar validade: ${error.response.data.message || "Verifique o console para mais detalhes."}`
-        );
-      } else {
-        toast.error(
-          "Erro ao atualizar validade. Verifique sua conexão ou tente novamente."
-        );
-      }
-    }
-  }
+//   async function handleUpdateEntry(id: string) {
+//     const entry = matrixEntries.find((e) => e.idDocumentMatrix === id);
+//     if (!entry) {
+//       console.warn(
+//         "Entrada da matriz de documento não encontrada para o ID:",
+//         id
+//       );
+//       toast.error("Documento não encontrado para atualização.");
+//       return;
+//     }
+//     const payload = {
+//       ...entry,
+//       expirationDateUnit: entry.expirationDateUnit,
+//       expirationDateAmount: entry.expirationDateAmount,
+//     };
+//     console.log("Payload de atualização:", payload);
+//     try {
+//       const url = `${ip}/document/matrix/${id}`;
+//       const response = await axios.put(url, payload, authHeader);
+//       console.log("ID ", id);
+//       console.log("✅ Resposta da API (sucesso):", response.data);
+//       toast.success("Validade atualizada com sucesso!");
+//       getMatrixEntries();
+//     } catch (error) {
+//       console.error("❌ Erro ao atualizar validade do documento:", error);
+//       if (axios.isAxiosError(error) && error.response) {
+//         console.error("Detalhes do erro da API:", error.response.data);
+//         console.error("Status do erro:", error.response.status);
+//         toast.error(
+//           `Erro ao atualizar validade: ${error.response.data.message || "Verifique o console para mais detalhes."}`
+//         );
+//       } else {
+//         toast.error(
+//           "Erro ao atualizar validade. Verifique sua conexão ou tente novamente."
+//         );
+//       }
+//     }
+//   }
 
   const fetchProfileDetails = (profileId: string) => {
     const profile = profilesRepoItems.find((p) => p.id === profileId);
@@ -710,13 +707,13 @@ export function ConfigPanel() {
     [activities, activitySearchTerm, riskTranslations]
   );
 
-  const filteredMatrixEntries = useMemo(
-    () =>
-      matrixEntries.filter((e) =>
-        e.name.toLowerCase().includes(searchMatrixTerm.toLowerCase())
-      ),
-    [matrixEntries, searchMatrixTerm]
-  );
+//   const filteredMatrixEntries = useMemo(
+//     () =>
+//       matrixEntries.filter((e) =>
+//         e.name.toLowerCase().includes(searchMatrixTerm.toLowerCase())
+//       ),
+//     [matrixEntries, searchMatrixTerm]
+//   );
 
   const filteredProfilesRepo = useMemo(() => {
     return profilesRepoItems
@@ -942,7 +939,6 @@ export function ConfigPanel() {
             "positions",
             "services",
             "activities",
-            "validate",
             "profiles",
             "documents",
           ].map((tab) => (
@@ -962,7 +958,6 @@ export function ConfigPanel() {
                   services: "Serviços",
                   activities: "Atividades",
                   profiles: "Perfis e Permissões",
-                  validate: "Validade Padrão",
                   documents: "Documentos",
                 }[tab]
               }
@@ -1314,62 +1309,6 @@ export function ConfigPanel() {
             </div>
           </div>
         )}
-        {selectTab === "validate" && (
-          <div className="flex flex-col gap-4">
-            <h2 className="text-xl font-bold">Validade de Documentos</h2>
-            <input
-              type="text"
-              placeholder="Buscar documento..."
-              className="w-full p-2 border rounded"
-              value={searchMatrixTerm}
-              onChange={(e) => setSearchMatrixTerm(e.target.value)}
-            />
-            {isLoadingMatrix ? (
-              <p>Carregando documentos...</p>
-            ) : filteredMatrixEntries.length === 0 ? (
-              <p className="text-gray-500">
-                Nenhum documento corresponde à busca.
-              </p>
-            ) : (
-              <ul className="max-h-[70vh] overflow-auto space-y-3">
-                {filteredMatrixEntries.map((entry) => (
-                  <li
-                    key={entry.idDocumentMatrix}
-                    className="p-4 border rounded flex flex-col gap-2"
-                  >
-                    <strong>{entry.name}</strong>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min={0}
-                        className="w-20 p-1 border rounded"
-                        value={entry.expirationDateAmount}
-                        onChange={(e) => {
-                          const amt = Number(e.target.value);
-                          setMatrixEntries((list) =>
-                            list.map((i) =>
-                              i.idDocumentMatrix === entry.idDocumentMatrix
-                                ? { ...i, expirationDateAmount: amt, expirationDateUnit: 'MONTHS' }
-                                : i
-                            )
-                          );
-                        }}
-                      />
-                      <span>Meses</span>
-                      <Button
-                        onClick={() =>
-                          handleUpdateEntry(entry.idDocumentMatrix)
-                        }
-                      >
-                        Salvar
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
         {selectTab === "profiles" && (
           <div className="flex items-start justify-center gap-10 w-full">
             <div className="w-[45%] space-y-4">
@@ -1597,7 +1536,6 @@ export function ConfigPanel() {
                             onChange={(e) =>
                               setRegistrationAndCertificates(e.target.checked)
                             }
-                            disabled={isCreatingProfile}
                           />{" "}
                           Cadastro e Certidões
                         </label>
