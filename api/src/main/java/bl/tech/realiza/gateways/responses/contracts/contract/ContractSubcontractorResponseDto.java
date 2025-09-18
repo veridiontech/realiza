@@ -17,6 +17,8 @@ public class ContractSubcontractorResponseDto {
     private String serviceName;
     private String description;
     private String responsible;
+    private String cnpj;
+    private String corporateName;
     private Contract.ExpenseType expenseType;
     private String contractReference;
     private Integer subcontractLevel;

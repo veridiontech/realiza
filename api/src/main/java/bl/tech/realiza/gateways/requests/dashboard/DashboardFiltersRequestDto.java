@@ -15,4 +15,13 @@ public class DashboardFiltersRequestDto {
     private List<ContractStatusEnum> activeContract;
     private List<Document.Status> statuses;
     private List<String> documentTitles;
+
+    private List<String> providerCnpjs;
+    private List<String> contractIds;
+    private List<String> employeeIds;
+    private List<String> employeeCpfs;
+    private List<String> employeeSituations;
+    private List<String> documentDoesBlock;
+    private List<String> documentValidity;
+    private List<String> documentUploadDate;
 }

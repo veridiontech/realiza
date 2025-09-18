@@ -73,6 +73,7 @@ import bl.tech.realiza.usecases.interfaces.users.security.CrudPermission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -332,7 +333,654 @@ public class DashboardService {
                 .build();
     }
 
-    public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+//    public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+//        if (JwtService.getAuthenticatedUserId() != null) {
+//            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+//                    .orElseThrow(() -> new NotFoundException("User not found"));
+//            if (!crudPermission.hasPermission(user, PermissionTypeEnum.DASHBOARD, PermissionSubTypeEnum.GENERAL, DocumentTypeEnum.NONE)) {
+//                throw new ForbiddenException("Not enough permissions");
+//            }
+//        } else {
+//            throw new ForbiddenException("Not authenticated user");
+//        }
+//        clientRepository.findById(clientId)
+//                .orElseThrow(() -> new NotFoundException("Client not found"));
+//        List<String> branchIds = new ArrayList<>();
+//        List<String> providerIds = new ArrayList<>();
+//        List<String> documentTypes = new ArrayList<>();
+//        List<String> responsibleIds = new ArrayList<>();
+//        List<ContractStatusEnum> activeContract = new ArrayList<>();
+//        List<Status> statuses = new ArrayList<>();
+//        List<String> documentTitles = new ArrayList<>();
+//        if (dashboardFiltersRequestDto != null) {
+//            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
+//                    ? dashboardFiltersRequestDto.getBranchIds()
+//                    : new ArrayList<>();
+//            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
+//                    ? dashboardFiltersRequestDto.getProviderIds()
+//                    : new ArrayList<>();
+//            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTypes()
+//                    : new ArrayList<>();
+//            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
+//                    ? dashboardFiltersRequestDto.getResponsibleIds()
+//                    : new ArrayList<>();
+//            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
+//                    ? dashboardFiltersRequestDto.getActiveContract()
+//                    : new ArrayList<>();
+//            statuses = dashboardFiltersRequestDto.getStatuses() != null
+//                    ? dashboardFiltersRequestDto.getStatuses()
+//                    : new ArrayList<>();
+//            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTitles()
+//                    : new ArrayList<>();
+//        }
+//        if (activeContract.isEmpty()) {
+//            activeContract = new ArrayList<>();
+//            activeContract.add(ACTIVE);
+//        }
+//        // quantidade de fornecedores
+//        Long supplierQuantity = providerSupplierRepository.countByClientIdAndIsActive(clientId);
+//
+//        // quantidade de contratos
+//        Long contractQuantity = contractProviderSupplierRepository.countByClientIdAndIsActive(clientId, activeContract);
+//
+//        // funcionários alocados
+//        Long allocatedEmployeeQuantity = employeeRepository.countEmployeeSupplierByClientIdAndAllocated(clientId, ALOCADO)
+//                + employeeRepository.countEmployeeSubcontractorByClientIdAndAllocated(clientId, ALOCADO);
+//
+//        // conformidade
+//        Double conformity = null;
+//        Object[] conformityValuesSupplier = null;
+//        Object[] conformityValuesSubcontractor = null;
+//        if (branchIds.isEmpty()) {
+//            conformityValuesSupplier = documentRepository.countTotalAndConformitySupplierByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
+//                    providerIds,
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//            conformityValuesSubcontractor = documentRepository.countTotalAndConformitySubcontractorByClientIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(clientId,
+//                    providerIds,
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//        } else {
+//            conformityValuesSupplier = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
+//                    providerIds,
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//            conformityValuesSubcontractor = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(branchIds,
+//                    providerIds,
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//        }
+//        Long totalConformity = getSafeLong(conformityValuesSupplier, 0) + getSafeLong(conformityValuesSubcontractor, 0);
+//        Long conformityTrue = getSafeLong(conformityValuesSupplier, 1) + getSafeLong(conformityValuesSubcontractor, 1);
+//
+//        conformity = totalConformity > 0
+//                ? new BigDecimal(conformityTrue * 100.0 / totalConformity).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+//
+//        // para cada type selecionado, quantidade de documentos com status
+//        List<DashboardGeneralDetailsResponseDto.TypeStatus> documentStatus = new ArrayList<>();
+//        List<DashboardGeneralDetailsResponseDto.Exemption> documentExemption = new ArrayList<>();
+//
+//        if (documentTypes.isEmpty()) {
+//            documentTypes = documentRepository.findDistinctDocumentType();
+//        }
+//        for (String type : documentTypes) {
+//            List<DashboardGeneralDetailsResponseDto.Status> statusList = new ArrayList<>();
+//            if (statuses.isEmpty()) {
+//                statuses = Arrays.asList(Status.values());
+//            }
+//            for (Status status : statuses) {
+//                int supplier = 0;
+//                int subcontract = 0;
+//                if (!branchIds.isEmpty()) {
+//                    supplier = documentRepository.countSupplierByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
+//                            providerIds,
+//                            type,
+//                            status,
+//                            responsibleIds,
+//                            documentTitles).intValue();
+//                    subcontract = documentRepository.countSubcontractorByBranchIdsAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(branchIds,
+//                            providerIds,
+//                            type,
+//                            status,
+//                            responsibleIds,
+//                            documentTitles).intValue();
+//                } else {
+//                    supplier = documentRepository.countSupplierByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,
+//                            providerIds,
+//                            type,
+//                            status,
+//                            responsibleIds,
+//                            documentTitles).intValue();
+//                    subcontract = documentRepository.countSubcontractorByClientIdAndTypeAndStatusAndResponsibleIdsAndDocumentTitles(clientId,
+//                            providerIds,
+//                            type,
+//                            status,
+//                            responsibleIds,
+//                            documentTitles).intValue();
+//                }
+//                statusList.add(DashboardGeneralDetailsResponseDto.Status.builder()
+//                        .quantity(supplier + subcontract)
+//                        .status(status)
+//                        .build());
+//
+//            }
+//            long approvedIa = 0;
+//            long reprovedIa = 0;
+//            DashboardGeneralDetailsResponseDto.Status statusApprovedIA = statusList.stream()
+//                    .filter(status -> status.getStatus() == APROVADO_IA)
+//                    .findFirst()
+//                    .orElse(null);
+//            DashboardGeneralDetailsResponseDto.Status statusReprovedIA = statusList.stream()
+//                    .filter(status -> status.getStatus() == REPROVADO_IA)
+//                    .findFirst()
+//                    .orElse(null);
+//            DashboardGeneralDetailsResponseDto.Status statusUnderAnalysis = statusList.stream()
+//                    .filter(status -> status.getStatus() == EM_ANALISE)
+//                    .findFirst()
+//                    .orElse(null);
+//            if (statusApprovedIA != null) {
+//                approvedIa = statusApprovedIA.getQuantity().longValue();
+//            }
+//            if (statusReprovedIA != null) {
+//                reprovedIa = statusReprovedIA.getQuantity().longValue();
+//            }
+//            if (statusUnderAnalysis != null) {
+//                long newQuantity = statusUnderAnalysis.getQuantity().longValue() + approvedIa + reprovedIa;
+//                statusUnderAnalysis.setQuantity(Math.toIntExact(newQuantity));
+//            }
+//            statusList.removeIf(status -> status.getStatus() == APROVADO_IA || status.getStatus() == REPROVADO_IA);
+//
+//            documentStatus.add(DashboardGeneralDetailsResponseDto.TypeStatus.builder()
+//                    .name(type)
+//                    .status(statusList)
+//                    .build());
+//        }
+//
+//        // ranking de pendencias
+//        List<DashboardGeneralDetailsResponseDto.Pending> pendingRanking = new ArrayList<>();
+//        List<String> allBranches = branchRepository.findAllBranchIdsByClientId(clientId);
+//
+//        for (String branchId : allBranches) {
+//            Branch branch = branchRepository.findById(branchId)
+//                    .orElseThrow(() -> new NotFoundException("Branch not found"));
+//            Double adherenceBranch = null;
+//            Double conformityBranch = null;
+//            List<String> newBranchIds = new ArrayList<>();
+//            newBranchIds.add(branchId);
+//
+//            Object[] adherenceBranchSupplierValuesRaw = documentRepository.countTotalAndAdherenceSupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+//                    null,
+//                    null,
+//                    documentTypes,
+//                    documentTitles);
+//            Object[] adherenceBranchSubcontractorValuesRaw = documentRepository.countTotalAndAdherenceSubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+//                    null,
+//                    null,
+//                    documentTypes,
+//                    documentTitles);
+//            Object[] conformityBranchSupplierValuesRaw = documentRepository.countTotalAndConformitySupplierByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+//                    null,
+//                    null,
+//                    documentTypes,
+//                    documentTitles);
+//            Object[] conformityBranchSubcontractorValuesRaw = documentRepository.countTotalAndConformitySubcontractorByBranchIdsAndResponsibleIdsAndDocumentTypesAndDocumentTitles(newBranchIds,
+//                    null,
+//                    null,
+//                    documentTypes,
+//                    documentTitles);
+//
+//            Object[] adherenceBranchSupplierValues = (Object[]) adherenceBranchSupplierValuesRaw[0];
+//            Object[] adherenceBranchSubcontractorValues = (Object[]) adherenceBranchSubcontractorValuesRaw[0];
+//            Object[] conformityBranchSupplierValues = (Object[]) conformityBranchSupplierValuesRaw[0];
+//            Object[] conformityBranchSubcontractorValues = (Object[]) conformityBranchSubcontractorValuesRaw[0];
+//
+//            Long totalAdherenceBranch = getSafeLong(adherenceBranchSupplierValues, 0) + getSafeLong(adherenceBranchSubcontractorValues, 0);
+//            Long adherenceBranchTrue = getSafeLong(adherenceBranchSupplierValues, 1) + getSafeLong(adherenceBranchSubcontractorValues, 1);
+//            Long totalConformityBranch = getSafeLong(conformityBranchSupplierValues, 0) + getSafeLong(conformityBranchSubcontractorValues, 0);
+//            Long conformityBranchTrue = getSafeLong(conformityBranchSupplierValues, 1) + getSafeLong(conformityBranchSubcontractorValues, 1);
+//            Long nonConformityBranchTrue = (totalConformityBranch - conformityBranchTrue);
+//
+//            adherenceBranch = totalAdherenceBranch > 0
+//                    ? new BigDecimal(adherenceBranchTrue * 100.0 / totalAdherenceBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
+//                    : 100;
+//
+//            conformityBranch = totalConformityBranch > 0
+//                    ? new BigDecimal(conformityBranchTrue * 100.0 / totalConformityBranch).setScale(2, RoundingMode.HALF_UP).doubleValue()
+//                    : 100;
+//
+//            DashboardGeneralDetailsResponseDto.Conformity level;
+//            if (conformityBranch < 60) {
+//                level = DashboardGeneralDetailsResponseDto.Conformity.RISKY;
+//            } else if (conformityBranch < 75) {
+//                level = DashboardGeneralDetailsResponseDto.Conformity.ATTENTION;
+//            } else if (conformityBranch < 90) {
+//                level = DashboardGeneralDetailsResponseDto.Conformity.NORMAL;
+//            } else {
+//                level = DashboardGeneralDetailsResponseDto.Conformity.OK;
+//            }
+//
+//            pendingRanking.add(DashboardGeneralDetailsResponseDto.Pending.builder()
+//                    .corporateName(branch.getName())
+//                    .cnpj(branch.getCnpj())
+//                    .adherence(adherenceBranch)
+//                    .conformity(conformityBranch)
+//                    .nonConformingDocumentQuantity(nonConformityBranchTrue.intValue())
+//                    .conformityLevel(level)
+//                    .build());
+//        }
+//
+//        return DashboardGeneralDetailsResponseDto.builder()
+//                .supplierQuantity(supplierQuantity)
+//                .contractQuantity(contractQuantity)
+//                .allocatedEmployeeQuantity(allocatedEmployeeQuantity)
+//                .conformity(conformity)
+//                .documentStatus(documentStatus)
+//                .documentExemption(documentExemption)
+//                .pendingRanking(pendingRanking)
+//                .build();
+//    }
+//
+//    public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+//        if (JwtService.getAuthenticatedUserId() != null) {
+//            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+//                    .orElseThrow(() -> new NotFoundException("User not found"));
+//            if (!crudPermission.hasPermission(user,
+//                    PermissionTypeEnum.DASHBOARD,
+//                    PermissionSubTypeEnum.PROVIDER,
+//                    DocumentTypeEnum.NONE)) {
+//                throw new ForbiddenException("Not enough permissions");
+//            }
+//        } else {
+//            throw new ForbiddenException("Not authenticated user");
+//        }
+//
+//        List<String> branchIds = dashboardFiltersRequestDto != null
+//                ? (dashboardFiltersRequestDto.getBranchIds() != null
+//                    ? dashboardFiltersRequestDto.getBranchIds()
+//                    : new ArrayList<>() )
+//                : new ArrayList<>();
+//        List<String> documentTypes = dashboardFiltersRequestDto != null
+//                ? (dashboardFiltersRequestDto.getDocumentTypes() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTypes()
+//                    : new ArrayList<>() )
+//                : new ArrayList<>();
+//        List<String> responsibleIds = dashboardFiltersRequestDto != null
+//                ? (dashboardFiltersRequestDto.getResponsibleIds() != null
+//                    ? dashboardFiltersRequestDto.getResponsibleIds()
+//                    : new ArrayList<>() )
+//                : new ArrayList<>();
+//        List<String> documentTitles = dashboardFiltersRequestDto != null
+//                ? (dashboardFiltersRequestDto.getDocumentTitles() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTitles()
+//                    : new ArrayList<>() )
+//                : new ArrayList<>();
+//
+//        List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
+//        List<ProviderSupplier> providerSuppliers = new ArrayList<>();
+//        List<ProviderSubcontractor> providerSubcontractors = new ArrayList<>();
+//        Double adherenceProvider = null;
+//        Double conformityProvider = null;
+//        Object[] adherenceProviderValues = null;
+//        Object[] conformityProviderValues = null;
+//        if (branchIds.isEmpty()) {
+//            providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
+//            providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
+//        } else {
+//            providerSuppliers = providerSupplierRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
+//            providerSubcontractors = providerSubcontractorRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
+//        }
+//        for (ProviderSupplier providerSupplier : providerSuppliers ) {
+//            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//
+//            Long totalAdherenceProvider = getSafeLong(adherenceProviderValues,0);
+//            Long adherenceProviderTrue = getSafeLong(adherenceProviderValues,1);
+//            Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
+//            Long totalConformityProvider = getSafeLong(conformityProviderValues,0);
+//            Long conformityProviderTrue = getSafeLong(conformityProviderValues,1);
+//            Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
+//            if (totalAdherenceProvider.equals(totalConformityProvider)) {
+//                log.info("Values not match in provider supplier id {}",providerSupplier.getIdProvider());
+//            }
+//
+//            adherenceProvider = totalAdherenceProvider > 0
+//                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalAdherenceProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+//
+//            conformityProvider = totalConformityProvider > 0
+//                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+//
+//            DashboardProviderDetailsResponseDto.Conformity conformityRange;
+//            if (conformityProvider < 60) {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.RISKY;
+//            } else if (conformityProvider < 75) {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.ATTENTION;
+//            } else if (conformityProvider < 90) {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.NORMAL;
+//            } else {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
+//            }
+//
+//            responseDtos.add(
+//                    DashboardProviderDetailsResponseDto.builder()
+//                            .corporateName(providerSupplier.getCorporateName())
+//                            .cnpj(providerSupplier.getCnpj())
+//                            .totalDocumentQuantity(totalAdherenceProvider)
+//                            .adherenceQuantity(adherenceProviderTrue)
+//                            .nonAdherenceQuantity(nonAdherenceProviderTrue)
+//                            .conformityQuantity(conformityProviderTrue)
+//                            .nonConformityQuantity(nonConformityProviderTrue)
+//                            .adherence(adherenceProvider)
+//                            .conformity(conformityProvider)
+//                            .conformityRange(conformityRange)
+//                            .build()
+//            );
+//        }
+//        for (ProviderSubcontractor providerSubcontractor : providerSubcontractors ) {
+//            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
+//                    responsibleIds,
+//                    documentTypes,
+//                    documentTitles);
+//
+//            Long totalAdherenceProvider = (Long) adherenceProviderValues[0];
+//            Long adherenceProviderTrue = (Long) adherenceProviderValues[1];
+//            Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
+//            Long totalConformityProvider = (Long) conformityProviderValues[0];
+//            Long conformityProviderTrue = (Long) conformityProviderValues[1];
+//            Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
+//            if (totalAdherenceProvider.equals(totalConformityProvider)) {
+//                log.info("Values not match in provider subcontractor id {}",providerSubcontractor.getIdProvider());
+//            }
+//
+//            adherenceProvider = totalAdherenceProvider > 0
+//                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalAdherenceProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+//
+//            conformityProvider = totalConformityProvider > 0
+//                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+//
+//            DashboardProviderDetailsResponseDto.Conformity conformityRange;
+//            if (conformityProvider < 60) {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.RISKY;
+//            } else if (conformityProvider < 75) {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.ATTENTION;
+//            } else if (conformityProvider < 90) {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.NORMAL;
+//            } else {
+//                conformityRange = DashboardProviderDetailsResponseDto.Conformity.OK;
+//            }
+//
+//            responseDtos.add(
+//                    DashboardProviderDetailsResponseDto.builder()
+//                            .corporateName(providerSubcontractor.getCorporateName())
+//                            .cnpj(providerSubcontractor.getCnpj())
+//                            .totalDocumentQuantity(totalAdherenceProvider)
+//                            .adherenceQuantity(adherenceProviderTrue)
+//                            .nonAdherenceQuantity(nonAdherenceProviderTrue)
+//                            .conformityQuantity(conformityProviderTrue)
+//                            .nonConformityQuantity(nonConformityProviderTrue)
+//                            .adherence(adherenceProvider)
+//                            .conformity(conformityProvider)
+//                            .conformityRange(conformityRange)
+//                            .build()
+//            );
+//        }
+//        return responseDtos;
+//    }
+//
+//    public DashboardDocumentStatusResponseDto getDocumentStatusInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+//        if (JwtService.getAuthenticatedUserId() != null) {
+//            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+//                    .orElseThrow(() -> new NotFoundException("User not found"));
+//            if (!crudPermission.hasPermission(user,
+//                    PermissionTypeEnum.DASHBOARD,
+//                    PermissionSubTypeEnum.DOCUMENT,
+//                    DocumentTypeEnum.NONE)) {
+//                throw new ForbiddenException("Not enough permissions");
+//            }
+//        } else {
+//            throw new ForbiddenException("Not authenticated user");
+//        }
+//        DashboardDocumentStatusResponseDto responseDto = DashboardDocumentStatusResponseDto.builder().build();
+//        List<String> branchIds = new ArrayList<>();
+//        List<String> providerIds = new ArrayList<>();
+//        List<String> documentTypes = new ArrayList<>();
+//        List<String> responsibleIds = new ArrayList<>();
+//        List<ContractStatusEnum> activeContract = new ArrayList<>();
+//        List<Status> statuses = new ArrayList<>();
+//        List<String> documentTitles = new ArrayList<>();
+//        if (dashboardFiltersRequestDto != null) {
+//            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
+//                    ? dashboardFiltersRequestDto.getBranchIds()
+//                    : new ArrayList<>();
+//            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
+//                    ? dashboardFiltersRequestDto.getProviderIds()
+//                    : new ArrayList<>();
+//            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTypes()
+//                    : new ArrayList<>();
+//            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
+//                    ? dashboardFiltersRequestDto.getResponsibleIds()
+//                    : new ArrayList<>();
+//            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
+//                    ? dashboardFiltersRequestDto.getActiveContract()
+//                    : new ArrayList<>();
+//            statuses = dashboardFiltersRequestDto.getStatuses() != null
+//                    ? dashboardFiltersRequestDto.getStatuses()
+//                    : new ArrayList<>();
+//            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTitles()
+//                    : new ArrayList<>();
+//        }
+//        List<Document> documentsSupplier = new ArrayList<>();
+//        List<Document> documentsSubcontractor = new ArrayList<>();
+//        // find all documents by filters
+//        if (branchIds.isEmpty()) {
+//            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles);
+//
+//            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles);
+//        } else {
+//            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles);
+//
+//            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles);
+//        }
+//
+//        // find all adherent documents by filters
+//        long total = documentsSupplier.size() + documentsSubcontractor.size();
+//        long adherentSupplier = documentsSupplier.stream()
+//                .filter(Document::getAdherent)
+//                .toList()
+//                .size();
+//        long adherentSubcontractor = documentsSubcontractor.stream()
+//                .filter(Document::getAdherent)
+//                .toList()
+//                .size();
+//        responseDto.setAdherentDocumentsQuantity(adherentSupplier + adherentSubcontractor);
+//        responseDto.setNonAdherentDocumentsQuantity(total - responseDto.getAdherentDocumentsQuantity());
+//
+//        // find all conforming documents by filters
+//        long conformingSupplier = documentsSupplier.stream()
+//                .filter(Document::getConforming)
+//                .toList()
+//                .size();
+//        long conformingSubcontractor = documentsSubcontractor.stream()
+//                .filter(Document::getConforming)
+//                .toList()
+//                .size();
+//        responseDto.setConformingDocumentsQuantity(conformingSupplier + conformingSubcontractor);
+//        responseDto.setNonConformingDocumentsQuantity(total - responseDto.getConformingDocumentsQuantity());
+//
+//        // list infos by status
+//        responseDto.setDocumentStatus(new ArrayList<>());
+//        for (Document.Status status : Document.Status.values()) {
+//            List<Document> documentSupplierStatus = documentsSupplier.stream()
+//                    .filter(document -> document.getStatus().equals(status))
+//                    .toList();
+//            List<Document> documentSubcontractorStatus = documentsSubcontractor.stream()
+//                    .filter(document -> document.getStatus().equals(status))
+//                    .toList();
+//            long totalStatus = documentSupplierStatus.size() + documentSubcontractorStatus.size();
+//
+//            Double percentage = total > 0
+//                    ? new BigDecimal(totalStatus * 100.0 / total).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+//
+//            DashboardDocumentStatusResponseDto.Status statusResponse = DashboardDocumentStatusResponseDto.Status.builder()
+//                    .status(status)
+//                    .adherent(status != PENDENTE && status != VENCIDO)
+//                    .conforming(status == APROVADO)
+//                    .quantity(totalStatus)
+//                    .percentage(percentage)
+//                    .build();
+//            responseDto.getDocumentStatus().add(statusResponse);
+//        }
+//        // show all adherent and non-adherent
+//
+//        // show all conforming and non-conforming
+//        // find all status and infos by filters
+//        return responseDto;
+//    }
+//
+//    public Page<DashboardDocumentDetailsResponseDto> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto, Pageable pageable) {
+//        if (JwtService.getAuthenticatedUserId() != null) {
+//            User user = userRepository.findById(JwtService.getAuthenticatedUserId())
+//                    .orElseThrow(() -> new NotFoundException("User not found"));
+//            if (!crudPermission.hasPermission(user,
+//                    PermissionTypeEnum.DASHBOARD,
+//                    PermissionSubTypeEnum.DOCUMENT_DETAIL,
+//                    DocumentTypeEnum.NONE)) {
+//                throw new ForbiddenException("Not enough permissions");
+//            }
+//        } else {
+//            throw new ForbiddenException("Not authenticated user");
+//        }
+//        DashboardDocumentDetailsResponseDto responseDto = DashboardDocumentDetailsResponseDto.builder().build();
+//        List<String> branchIds = new ArrayList<>();
+//        List<String> providerIds = new ArrayList<>();
+//        List<String> documentTypes = new ArrayList<>();
+//        List<String> responsibleIds = new ArrayList<>();
+//        List<ContractStatusEnum> activeContract = new ArrayList<>();
+//        List<Status> statuses = new ArrayList<>();
+//        List<String> documentTitles = new ArrayList<>();
+//        if (dashboardFiltersRequestDto != null) {
+//            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
+//                    ? dashboardFiltersRequestDto.getBranchIds()
+//                    : new ArrayList<>();
+//            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
+//                    ? dashboardFiltersRequestDto.getProviderIds()
+//                    : new ArrayList<>();
+//            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTypes()
+//                    : new ArrayList<>();
+//            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
+//                    ? dashboardFiltersRequestDto.getResponsibleIds()
+//                    : new ArrayList<>();
+//            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
+//                    ? dashboardFiltersRequestDto.getActiveContract()
+//                    : new ArrayList<>();
+//            statuses = dashboardFiltersRequestDto.getStatuses() != null
+//                    ? dashboardFiltersRequestDto.getStatuses()
+//                    : new ArrayList<>();
+//            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
+//                    ? dashboardFiltersRequestDto.getDocumentTitles()
+//                    : new ArrayList<>();
+//        }
+//        Page<Document> documentsSupplier = null;
+//        Page<Document> documentsSubcontractor = null;
+//        // find all documents by filters
+//        if (!branchIds.isEmpty()) {
+//            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles,
+//                    pageable);
+//
+//            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles,
+//                    pageable);
+//        } else {
+//            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles,
+//                    pageable);
+//
+//            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
+//                    providerIds,
+//                    documentTypes,
+//                    responsibleIds,
+//                    activeContract,
+//                    statuses,
+//                    documentTitles,
+//                    pageable);
+//        }
+//        List<Document> combinedDocuments = new ArrayList<>();
+//        combinedDocuments.addAll(documentsSupplier.getContent());
+//        combinedDocuments.addAll(documentsSubcontractor.getContent());
+//        combinedDocuments.sort(Comparator.comparing(Document::getTitle));
+//        List<Document> limitedDocuments = combinedDocuments.stream()
+//                .limit(pageable.getPageSize())
+//                .collect(Collectors.toList());
+//
+//        Page<Document> paginatedDocuments = new PageImpl<>(limitedDocuments, pageable, combinedDocuments.size());
+//
+//        return toDetailsPageDto(paginatedDocuments);
+//    }
+    
+    // TODO inserir todos os novos filtros e os antigos no novo formato
+    //      getGeneralDetailsInfo
+    //      getProviderDetailsInfo
+    //      getDocumentStatusInfo
+    //      getDocumentDetailsInfo
+    public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto filters) {
         if (JwtService.getAuthenticatedUserId() != null) {
             User user = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElseThrow(() -> new NotFoundException("User not found"));
@@ -351,27 +999,27 @@ public class DashboardService {
         List<ContractStatusEnum> activeContract = new ArrayList<>();
         List<Status> statuses = new ArrayList<>();
         List<String> documentTitles = new ArrayList<>();
-        if (dashboardFiltersRequestDto != null) {
-            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
-                    ? dashboardFiltersRequestDto.getBranchIds()
+        if (filters != null) {
+            branchIds = filters.getBranchIds() != null
+                    ? filters.getBranchIds()
                     : new ArrayList<>();
-            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
-                    ? dashboardFiltersRequestDto.getProviderIds()
+            providerIds = filters.getProviderIds() != null
+                    ? filters.getProviderIds()
                     : new ArrayList<>();
-            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
-                    ? dashboardFiltersRequestDto.getDocumentTypes()
+            documentTypes = filters.getDocumentTypes() != null
+                    ? filters.getDocumentTypes()
                     : new ArrayList<>();
-            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
-                    ? dashboardFiltersRequestDto.getResponsibleIds()
+            responsibleIds = filters.getResponsibleIds() != null
+                    ? filters.getResponsibleIds()
                     : new ArrayList<>();
-            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
-                    ? dashboardFiltersRequestDto.getActiveContract()
+            activeContract = filters.getActiveContract() != null
+                    ? filters.getActiveContract()
                     : new ArrayList<>();
-            statuses = dashboardFiltersRequestDto.getStatuses() != null
-                    ? dashboardFiltersRequestDto.getStatuses()
+            statuses = filters.getStatuses() != null
+                    ? filters.getStatuses()
                     : new ArrayList<>();
-            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
-                    ? dashboardFiltersRequestDto.getDocumentTitles()
+            documentTitles = filters.getDocumentTitles() != null
+                    ? filters.getDocumentTitles()
                     : new ArrayList<>();
         }
         if (activeContract.isEmpty()) {
@@ -585,7 +1233,7 @@ public class DashboardService {
                 .build();
     }
 
-    public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+    public List<DashboardProviderDetailsResponseDto> getProviderDetailsInfo(String clientId, DashboardFiltersRequestDto filters) {
         if (JwtService.getAuthenticatedUserId() != null) {
             User user = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElseThrow(() -> new NotFoundException("User not found"));
@@ -599,25 +1247,25 @@ public class DashboardService {
             throw new ForbiddenException("Not authenticated user");
         }
 
-        List<String> branchIds = dashboardFiltersRequestDto != null
-                ? (dashboardFiltersRequestDto.getBranchIds() != null
-                    ? dashboardFiltersRequestDto.getBranchIds()
-                    : new ArrayList<>() )
+        List<String> branchIds = filters != null
+                ? (filters.getBranchIds() != null
+                ? filters.getBranchIds()
+                : new ArrayList<>() )
                 : new ArrayList<>();
-        List<String> documentTypes = dashboardFiltersRequestDto != null
-                ? (dashboardFiltersRequestDto.getDocumentTypes() != null
-                    ? dashboardFiltersRequestDto.getDocumentTypes()
-                    : new ArrayList<>() )
+        List<String> documentTypes = filters != null
+                ? (filters.getDocumentTypes() != null
+                ? filters.getDocumentTypes()
+                : new ArrayList<>() )
                 : new ArrayList<>();
-        List<String> responsibleIds = dashboardFiltersRequestDto != null
-                ? (dashboardFiltersRequestDto.getResponsibleIds() != null
-                    ? dashboardFiltersRequestDto.getResponsibleIds()
-                    : new ArrayList<>() )
+        List<String> responsibleIds = filters != null
+                ? (filters.getResponsibleIds() != null
+                ? filters.getResponsibleIds()
+                : new ArrayList<>() )
                 : new ArrayList<>();
-        List<String> documentTitles = dashboardFiltersRequestDto != null
-                ? (dashboardFiltersRequestDto.getDocumentTitles() != null
-                    ? dashboardFiltersRequestDto.getDocumentTitles()
-                    : new ArrayList<>() )
+        List<String> documentTitles = filters != null
+                ? (filters.getDocumentTitles() != null
+                ? filters.getDocumentTitles()
+                : new ArrayList<>() )
                 : new ArrayList<>();
 
         List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
@@ -741,14 +1389,7 @@ public class DashboardService {
         return responseDtos;
     }
 
-    private long getSafeLong(Object[] array, int index) {
-        if (array != null && array.length > index && array[index] instanceof Number number) {
-            return number.longValue();
-        }
-        return 0L;
-    }
-
-    public DashboardDocumentStatusResponseDto getDocumentStatusInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
+    public DashboardDocumentStatusResponseDto getDocumentStatusInfo(String clientId, DashboardFiltersRequestDto filters) {
         if (JwtService.getAuthenticatedUserId() != null) {
             User user = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElseThrow(() -> new NotFoundException("User not found"));
@@ -769,27 +1410,27 @@ public class DashboardService {
         List<ContractStatusEnum> activeContract = new ArrayList<>();
         List<Status> statuses = new ArrayList<>();
         List<String> documentTitles = new ArrayList<>();
-        if (dashboardFiltersRequestDto != null) {
-            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
-                    ? dashboardFiltersRequestDto.getBranchIds()
+        if (filters != null) {
+            branchIds = filters.getBranchIds() != null
+                    ? filters.getBranchIds()
                     : new ArrayList<>();
-            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
-                    ? dashboardFiltersRequestDto.getProviderIds()
+            providerIds = filters.getProviderIds() != null
+                    ? filters.getProviderIds()
                     : new ArrayList<>();
-            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
-                    ? dashboardFiltersRequestDto.getDocumentTypes()
+            documentTypes = filters.getDocumentTypes() != null
+                    ? filters.getDocumentTypes()
                     : new ArrayList<>();
-            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
-                    ? dashboardFiltersRequestDto.getResponsibleIds()
+            responsibleIds = filters.getResponsibleIds() != null
+                    ? filters.getResponsibleIds()
                     : new ArrayList<>();
-            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
-                    ? dashboardFiltersRequestDto.getActiveContract()
+            activeContract = filters.getActiveContract() != null
+                    ? filters.getActiveContract()
                     : new ArrayList<>();
-            statuses = dashboardFiltersRequestDto.getStatuses() != null
-                    ? dashboardFiltersRequestDto.getStatuses()
+            statuses = filters.getStatuses() != null
+                    ? filters.getStatuses()
                     : new ArrayList<>();
-            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
-                    ? dashboardFiltersRequestDto.getDocumentTitles()
+            documentTitles = filters.getDocumentTitles() != null
+                    ? filters.getDocumentTitles()
                     : new ArrayList<>();
         }
         List<Document> documentsSupplier = new ArrayList<>();
@@ -884,7 +1525,7 @@ public class DashboardService {
         return responseDto;
     }
 
-    public Page<DashboardDocumentDetailsResponseDto> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto dashboardFiltersRequestDto, Pageable pageable) {
+    public Page<DashboardDocumentDetailsResponseDto> getDocumentDetailsInfo(String clientId, DashboardFiltersRequestDto filters, Pageable pageable) {
         if (JwtService.getAuthenticatedUserId() != null) {
             User user = userRepository.findById(JwtService.getAuthenticatedUserId())
                     .orElseThrow(() -> new NotFoundException("User not found"));
@@ -897,88 +1538,49 @@ public class DashboardService {
         } else {
             throw new ForbiddenException("Not authenticated user");
         }
-        DashboardDocumentDetailsResponseDto responseDto = DashboardDocumentDetailsResponseDto.builder().build();
-        List<String> branchIds = new ArrayList<>();
-        List<String> providerIds = new ArrayList<>();
-        List<String> documentTypes = new ArrayList<>();
-        List<String> responsibleIds = new ArrayList<>();
-        List<ContractStatusEnum> activeContract = new ArrayList<>();
-        List<Status> statuses = new ArrayList<>();
-        List<String> documentTitles = new ArrayList<>();
-        if (dashboardFiltersRequestDto != null) {
-            branchIds = dashboardFiltersRequestDto.getBranchIds() != null
-                    ? dashboardFiltersRequestDto.getBranchIds()
-                    : new ArrayList<>();
-            providerIds = dashboardFiltersRequestDto.getProviderIds() != null
-                    ? dashboardFiltersRequestDto.getProviderIds()
-                    : new ArrayList<>();
-            documentTypes = dashboardFiltersRequestDto.getDocumentTypes() != null
-                    ? dashboardFiltersRequestDto.getDocumentTypes()
-                    : new ArrayList<>();
-            responsibleIds = dashboardFiltersRequestDto.getResponsibleIds() != null
-                    ? dashboardFiltersRequestDto.getResponsibleIds()
-                    : new ArrayList<>();
-            activeContract = dashboardFiltersRequestDto.getActiveContract() != null
-                    ? dashboardFiltersRequestDto.getActiveContract()
-                    : new ArrayList<>();
-            statuses = dashboardFiltersRequestDto.getStatuses() != null
-                    ? dashboardFiltersRequestDto.getStatuses()
-                    : new ArrayList<>();
-            documentTitles = dashboardFiltersRequestDto.getDocumentTitles() != null
-                    ? dashboardFiltersRequestDto.getDocumentTitles()
-                    : new ArrayList<>();
+        Specification<Document> spec = Specification.where(null);
+
+        // 2. Adicione dinamicamente os filtros do DTO.
+        if (filters != null) {
+            if (filters.getBranchIds() != null && !filters.getBranchIds().isEmpty()) {
+                spec = spec.and(DashboardDocumentSpecification.byBranchIds(filters.getBranchIds()));
+            }
+
+            if (filters.getProviderIds() != null && !filters.getProviderIds().isEmpty()) {
+                // Nota: a implementação de porProviderIds pode ser complexa. Você pode precisar ajustar os joins.
+                spec = spec.and(DashboardDocumentSpecification.byProviderIds(filters.getProviderIds()));
+            }
+
+            if (filters.getDocumentTypes() != null && !filters.getDocumentTypes().isEmpty()) {
+                spec = spec.and(DashboardDocumentSpecification.byDocumentTypes(filters.getDocumentTypes()));
+            }
+
+            if (filters.getStatuses() != null && !filters.getStatuses().isEmpty()) {
+                spec = spec.and(DashboardDocumentSpecification.byStatuses(filters.getStatuses()));
+            }
+
+            // ... adicione outras condições para responsibleIds, documentTitles, etc.
         }
-        Page<Document> documentsSupplier = null;
-        Page<Document> documentsSubcontractor = null;
-        // find all documents by filters
-        if (!branchIds.isEmpty()) {
-            documentsSupplier = documentRepository.findAllSupplierByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
-                    providerIds,
-                    documentTypes,
-                    responsibleIds,
-                    activeContract,
-                    statuses,
-                    documentTitles,
-                    pageable);
 
-            documentsSubcontractor = documentRepository.findAllSubcontractorByBranchIdsAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(branchIds,
-                    providerIds,
-                    documentTypes,
-                    responsibleIds,
-                    activeContract,
-                    statuses,
-                    documentTitles,
-                    pageable);
-        } else {
-            documentsSupplier = documentRepository.findAllSupplierByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
-                    providerIds,
-                    documentTypes,
-                    responsibleIds,
-                    activeContract,
-                    statuses,
-                    documentTitles,
-                    pageable);
+        // 3. Se nenhum filtro de branch for aplicado, adicione o filtro de cliente como base.
+        // (Isso requer um join, semelhante ao porBranchIds)
+         if (filters == null || filters.getBranchIds() == null || filters.getBranchIds().isEmpty()) {
+             spec = spec.and(DashboardDocumentSpecification.byClientId(clientId));
+         }
 
-            documentsSubcontractor = documentRepository.findAllSubcontractorByClientIdAndProviderIdsAndTypesAndResponsibleIdsAndActiveContractAndStatusAndTitles(clientId,
-                    providerIds,
-                    documentTypes,
-                    responsibleIds,
-                    activeContract,
-                    statuses,
-                    documentTitles,
-                    pageable);
-        }
-        List<Document> combinedDocuments = new ArrayList<>();
-        combinedDocuments.addAll(documentsSupplier.getContent());
-        combinedDocuments.addAll(documentsSubcontractor.getContent());
-        combinedDocuments.sort(Comparator.comparing(Document::getTitle));
-        List<Document> limitedDocuments = combinedDocuments.stream()
-                .limit(pageable.getPageSize())
-                .collect(Collectors.toList());
 
-        Page<Document> paginatedDocuments = new PageImpl<>(limitedDocuments, pageable, combinedDocuments.size());
+        // 4. Execute a query com a especificação combinada.
+        Page<Document> paginatedDocuments = documentRepository.findAll(spec, pageable);
 
+        // 5. Mapeie para o DTO de resposta (seu metodo toDetailsPageDto já faz isso).
         return toDetailsPageDto(paginatedDocuments);
+    }
+
+    private long getSafeLong(Object[] array, int index) {
+        if (array != null && array.length > index && array[index] instanceof Number number) {
+            return number.longValue();
+        }
+        return 0L;
     }
 
     private DashboardDocumentDetailsResponseDto toDetailsDto(Document document) {
@@ -1079,6 +1681,7 @@ public class DashboardService {
         return documents.map(this::toDetailsDto);
     }
 
+    // TODO verificar bug no take snapshot
     public void takeSnapshot(SnapshotFrequencyEnum frequency) {
         Pageable pageable = PageRequest.of(0, 50);
         Page<Client> clients = clientRepository.findAllByIsActiveIsTrue(pageable);
@@ -1927,9 +2530,11 @@ public class DashboardService {
         }
     }
 
-    // TODO adicionar snapshot as funções de acesso ao repositório
-    // TODO adicionar date as funções de acesso ao repositório
-    // TODO adicionar frequency as funções de acesso ao repositório
+    // TODO verificar funcionamento no get snapshot
+    //      getGeneralDetailsInfoByDate
+    //      getProviderDetailsInfoByDate
+    //      getDocumentStatusInfoByDate
+    //      getDocumentDetailsInfo
     public DashboardGeneralDetailsResponseDto getGeneralDetailsInfoByDate(String clientId, Date date, SnapshotFrequencyEnum frequency, DashboardFiltersRequestDto dashboardFiltersRequestDto) {
         clientSnapshotRepository.findById_IdAndId_SnapshotDateAndId_Frequency(clientId,
                 date,
@@ -2495,6 +3100,7 @@ public class DashboardService {
         return responseDto;
     }
 
+    // TODO atualizar com novos filtros
     public DashboardFiltersResponse getFiltersInfo(String clientId) {
         DashboardFiltersResponse response = DashboardFiltersResponse.builder().build();
 
