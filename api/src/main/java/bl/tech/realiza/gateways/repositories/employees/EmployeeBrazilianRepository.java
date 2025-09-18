@@ -1,5 +1,6 @@
 package bl.tech.realiza.gateways.repositories.employees;
 
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,4 +13,5 @@ public interface EmployeeBrazilianRepository extends JpaRepository<EmployeeBrazi
     List<EmployeeBrazilian> findAllByBranch_IdBranch(String branch);
     Page<EmployeeBrazilian> findAllBySupplier_IdProvider(String supplier, Pageable pageable);
     Page<EmployeeBrazilian> findAllBySubcontract_IdProvider(String subcontractor, Pageable pageable);
+    List<EmployeeBrazilian> findAllByCpf(String formattedCpf);
 }

@@ -1,6 +1,7 @@
 package bl.tech.realiza.gateways.responses.dashboard;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.enums.RiskLevel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -50,15 +51,10 @@ public class DashboardGeneralDetailsResponseDto {
         private String corporateName;
         private String cnpj;
         private Double adherence;
+        private Integer nonAdherentDocumentQuantity;
+        private RiskLevel adherenceLevel;
         private Double conformity;
         private Integer nonConformingDocumentQuantity;
-        private Conformity conformityLevel;
-    }
-
-    public enum Conformity {
-        RISKY,
-        ATTENTION,
-        NORMAL,
-        OK
+        private RiskLevel conformityLevel;
     }
 }

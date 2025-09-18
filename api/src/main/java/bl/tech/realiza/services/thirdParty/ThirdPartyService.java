@@ -4,13 +4,13 @@ import bl.tech.realiza.domains.clients.Client;
 import bl.tech.realiza.domains.contract.ContractProviderSubcontractor;
 import bl.tech.realiza.domains.contract.ContractProviderSupplier;
 import bl.tech.realiza.domains.documents.Document;
-import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.exceptions.ForbiddenException;
 import bl.tech.realiza.exceptions.NotFoundException;
 import bl.tech.realiza.gateways.repositories.clients.ClientRepository;
+import bl.tech.realiza.gateways.repositories.employees.EmployeeBrazilianRepository;
 import bl.tech.realiza.gateways.repositories.employees.EmployeeRepository;
 import bl.tech.realiza.gateways.requests.services.LoginRequestDto;
-import bl.tech.realiza.gateways.responses.users.UserResponseDto;
 import bl.tech.realiza.services.auth.AuthService;
 import bl.tech.realiza.services.auth.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ public class ThirdPartyService {
     private final ClientRepository clientRepository;
     private final EmployeeRepository employeeRepository;
     private static final Pattern CPF_PATTERN = Pattern.compile("^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$");
+    private final EmployeeBrazilianRepository employeeBrazilianRepository;
 
     public Boolean employeeStatus(String employeeCpf, LoginRequestDto request) {
         String token = authService.login(request.getEmail(), request.getPassword());
@@ -41,12 +42,12 @@ public class ThirdPartyService {
         }
         String unformattedCpf = employeeCpf.replaceAll("[.\\-]", "");
         String formattedCpf = formatCpfForSearch(unformattedCpf);
-        List<Employee> formattedEmployees = employeeRepository.findAllByCpf(formattedCpf);
-        List<Employee> unformattedEmployees = employeeRepository.findAllByCpf(unformattedCpf);
-        Set<Employee> uniqueEmployeesSet = new HashSet<>(formattedEmployees);
+        List<EmployeeBrazilian> formattedEmployees = employeeBrazilianRepository.findAllByCpf(formattedCpf);
+        List<EmployeeBrazilian> unformattedEmployees = employeeBrazilianRepository.findAllByCpf(unformattedCpf);
+        Set<EmployeeBrazilian> uniqueEmployeesSet = new HashSet<>(formattedEmployees);
         uniqueEmployeesSet.addAll(unformattedEmployees);
 
-        List<Employee> employees = new ArrayList<>(uniqueEmployeesSet);
+        List<EmployeeBrazilian> employees = new ArrayList<>(uniqueEmployeesSet);
 
         employees.removeIf(employee -> !(employeeFromSupplierBelongToClient(client, employee)
                 || employeeFromSubcontractorBelongToClient(client, employee)));
@@ -70,7 +71,7 @@ public class ThirdPartyService {
         return jwtService.extractAllClaims(token).getIdClient();
     }
 
-    private Boolean employeeFromSupplierBelongToClient(Client client, Employee employee) {
+    private Boolean employeeFromSupplierBelongToClient(Client client, EmployeeBrazilian employee) {
         if (employee.getSupplier() == null) {
             return false;
         } else {
@@ -80,7 +81,7 @@ public class ThirdPartyService {
         }
     }
 
-    private Boolean employeeFromSubcontractorBelongToClient(Client client, Employee employee) {
+    private Boolean employeeFromSubcontractorBelongToClient(Client client, EmployeeBrazilian employee) {
         if (employee.getSubcontract() == null) {
             return false;
         } else {
