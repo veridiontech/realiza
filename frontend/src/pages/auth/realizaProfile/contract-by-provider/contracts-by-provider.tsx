@@ -55,12 +55,13 @@ interface Collaborator {
 }
 
 export function ContarctsByProvider() {
-  const id = useParams();
+  const { id } = useParams();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [collaborators, setCollaborators] = useState([]);
   const [subcontractors, setSubcontractors] = useState([]);
   const [selectedContractName, setSelectedContractName] = useState("");
+  const [selectedContractId, setSelectedContractId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [provider, setProvider] = useState<any>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -102,7 +103,7 @@ export function ContarctsByProvider() {
   const getContractsByProvider = async () => {
     try {
       const res = await axios.get(`${ip}/contract/supplier/filtered-supplier`, {
-        params: { idSearch: id.id },
+        params: { idSearch: id },
         headers: { Authorization: `Bearer ${token}` },
       });
       setContracts(res.data.content);
@@ -113,20 +114,31 @@ export function ContarctsByProvider() {
 
   const [isLoadingSubs, setIsLoadingSubs] = useState(false);
 
-  const getAllSubcontractors = useCallback(async () => {
-    try {
-      setIsLoadingSubs(true);
-      const res = await axios.get(`${ip}/contract/subcontractor`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Dados retornados da API de subcontratados:", res.data);
-      setSubcontractors(res.data?.content || res.data || []);
-    } catch (err) {
-      console.error("Erro ao buscar subcontratados:", err);
-    } finally {
-      setIsLoadingSubs(false);
-    }
-  }, [token]);
+  const getSubcontractorsByContract = useCallback(
+    async (contractId: string) => {
+      try {
+        setIsLoadingSubs(true);
+        const url = `${ip}/contract/subcontractor/find-by-contract-supplier/${contractId}`;
+        console.log(`Iniciando requisição para: ${url}`);
+        console.log(`ID do contrato para busca: ${contractId}`);
+
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("Requisição de subcontratados bem-sucedida!");
+        console.log("Dados retornados da API:", res.data);
+
+        setSubcontractors(res.data || []);
+      } catch (err) {
+        console.error("Erro ao buscar subcontratados:", err);
+        toast.error("Erro ao carregar subcontratados. Tente novamente.");
+        setSubcontractors([]);
+      } finally {
+        setIsLoadingSubs(false);
+      }
+    },
+    [token]
+  );
 
   const getAllDatas = useCallback(
     async (idContract: string, serviceName: string) => {
@@ -138,6 +150,7 @@ export function ContarctsByProvider() {
         setCollaborators(res.data.employeeDtos || []);
         setSubcontractors(res.data.subcontractorDtos || []);
         setSelectedContractName(serviceName);
+        setSelectedContractId(idContract);
         setSearchTerm("");
       } catch (err) {
         console.error("Error fetching all data for contract:", err);
@@ -148,7 +161,7 @@ export function ContarctsByProvider() {
 
   const getProvider = async () => {
     try {
-      const res = await axios.get(`${ip}/supplier/${id.id}`);
+      const res = await axios.get(`${ip}/supplier/${id}`);
       setProvider(res.data);
     } catch (err) {
       console.error("Error fetching provider:", err);
@@ -185,7 +198,7 @@ export function ContarctsByProvider() {
 
     const requestParams = {
       enterprise: "SUPPLIER",
-      idSearch: id.id,
+      idSearch: id,
     };
 
     console.log(
@@ -430,8 +443,9 @@ export function ContarctsByProvider() {
             {contracts.map((contract: any, index) => (
               <div
                 key={contract.idContract}
-                className={`w-full p-2 cursor-pointer ${index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
-                  }`}
+                className={`w-full p-2 cursor-pointer ${
+                  index % 2 === 1 ? "bg-realizaBlue" : "bg-[#4D657A]"
+                }`}
                 onClick={() =>
                   getAllDatas(contract.idContract, contract.serviceName)
                 }
@@ -459,31 +473,38 @@ export function ContarctsByProvider() {
           <div className="absolute top-5 right-5 flex gap-4">
             <button
               onClick={() => setViewOption("documents")}
-              className={`${viewOption === "documents"
+              className={`${
+                viewOption === "documents"
                   ? "bg-realizaBlue text-white"
                   : "bg-neutral-200 text-[#34495E]"
-                } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Documentos Empresa
             </button>
             <button
               onClick={() => setViewOption("collaborators")}
-              className={`${viewOption === "collaborators"
+              className={`${
+                viewOption === "collaborators"
                   ? "bg-realizaBlue text-white"
                   : "bg-neutral-200 text-[#34495E]"
-                } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Colaboradores
             </button>
             <button
               onClick={() => {
-                setViewOption("subcontractors");
-                getAllSubcontractors();
+                if (selectedContractId) {
+                  setViewOption("subcontractors");
+                  getSubcontractorsByContract(selectedContractId);
+                } else {
+                  toast.info("Selecione um contrato para visualizar os subcontratados.");
+                }
               }}
-              className={`${viewOption === "subcontractors"
+              className={`${
+                viewOption === "subcontractors"
                   ? "bg-realizaBlue text-white"
                   : "bg-neutral-200 text-[#34495E]"
-                } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
+              } py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300`}
             >
               Subcontratados
             </button>
@@ -545,7 +566,7 @@ export function ContarctsByProvider() {
                           ) : (
                             <div className="flex items-center gap-2">
                               {doc.status === "REPROVADO" ||
-                                doc.status === "REPROVADO_IA" ? (
+                              doc.status === "REPROVADO_IA" ? (
                                 <Ban className="w-4 h-4 text-red-500" />
                               ) : doc.status === "VENCIDO" ? (
                                 <AlertCircle className="w-4 h-4 text-orange-500" />
@@ -806,7 +827,7 @@ export function ContarctsByProvider() {
                   <span className="text-neutral-400">Carregando...</span>
                 ) : subcontractors.length > 0 ? (
                   subcontractors.map((sub: any) => (
-                    <div key={sub.id} className="flex flex-col gap-5">
+                    <div key={sub.idContract} className="flex flex-col gap-5">
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-5">
                           <div className="relative">
@@ -814,16 +835,19 @@ export function ContarctsByProvider() {
                               <User />
                             </div>
                             <div
-                              className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white ${getSubcontractLevelColor(sub.subcontractLevel)}`}
+                              className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white ${getSubcontractLevelColor(
+                                sub.subcontractLevel
+                              )}`}
                             />
                           </div>
                           <div>
+                            {/* Dados exibidos conforme a ordem solicitada */}
                             <h1>{sub.contractReference}</h1>
                             <p className="text-[18px]">
-                              {sub.serviceName}
+                              {sub.corporateName}
                             </p>
                             <span className="text-[12px] text-realizaBlue font-semibold underline">
-                              {sub.responsible}
+                              {sub.cnpj}
                             </span>
                           </div>
                         </div>
