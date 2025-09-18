@@ -6,13 +6,14 @@ import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface DocumentRepository extends JpaRepository<Document, String> {
+public interface DocumentRepository extends JpaRepository<Document, String>, JpaSpecificationExecutor<Document> {
     Page<Document> findAllByStatus(Document.Status status, Pageable pageable);
     Page<Document> findAllByStatusAndLastCheckAfter(Document.Status status, LocalDateTime lastCheck, Pageable pageable);
 

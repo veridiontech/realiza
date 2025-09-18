@@ -26,28 +26,5 @@ public class RealizaApplication {
 		System.setProperty("user.timezone", "America/Sao_Paulo");
 
 		SpringApplication.run(RealizaApplication.class, args);
-
-		// TODO quando copiar os snapshots:
-		//  apenas empresas isActive = true
-		//  apenas contratos que já foram aprovados no isActive != PENDING
-		//  apenas usuários responsáveis de contratos
-
-		// TODO criar rotas que usem as permissões para filtrar ✔️
-		/* incluir permissões no token ✔️
-		* documentos do colaborador por permissão ✔️
-		* contratos e documentos por permissão da nova página de contratos ✔️
-		* contratos por permissão 👁️
-		* filiais por permissão 👁️
-		* pode finalizar ou suspender contrato 👁️
-		* */
-
-		// TODO pensar na tratativa de inativar usuário ✔️
-		// caso tenha contratos com ele como responsável, ao clicar em desabilitar,
-		// exibir modal com cada contrato na esquerda e um dropdown dos responsáveis na direita
-		// exceto o que esta sendo inativado
-		// rota exibir contratos de um responsável ✔️
-		// rota atualizar somente responsável contrato ✔️
-
-		// TODO criar rota da Itaminas
 	}
 }

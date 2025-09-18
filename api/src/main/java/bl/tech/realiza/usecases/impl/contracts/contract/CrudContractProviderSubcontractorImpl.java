@@ -283,10 +283,14 @@ public class CrudContractProviderSubcontractorImpl implements CrudContractProvid
                     .serviceName(contractProviderSubcontractor.getServiceName())
                     .contractReference(contractProviderSubcontractor.getContractReference())
                     .description(contractProviderSubcontractor.getDescription())
+                    .cnpj(contractProviderSubcontractor.getProviderSubcontractor() != null
+                            ? contractProviderSubcontractor.getProviderSubcontractor().getCnpj()
+                            : null)
+                    .corporateName(contractProviderSubcontractor.getProviderSubcontractor() != null
+                            ? contractProviderSubcontractor.getProviderSubcontractor().getCorporateName()
+                            : null)
                     .responsible(contractProviderSubcontractor.getResponsible() != null
-                            ? contractProviderSubcontractor.getResponsible().getFirstName()
-                            + " "
-                            + contractProviderSubcontractor.getResponsible().getSurname()
+                            ? contractProviderSubcontractor.getResponsible().getFullName()
                             : null)
                     .expenseType(contractProviderSubcontractor.getExpenseType())
                     .subcontractLevel(contractProviderSubcontractor.getSubcontractLevel())
