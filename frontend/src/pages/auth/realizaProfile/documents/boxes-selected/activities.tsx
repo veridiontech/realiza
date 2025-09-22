@@ -30,7 +30,6 @@ export function ActivitiesBox() {
           headers: { Authorization: `Bearer ${tokenFromStorage}` },
         }
       );
-      console.log("teste" , resSelected.data);
       setActivities(resSelected.data);
     } catch (err) {
       console.log("erro ao buscar atividades:", err);
@@ -222,7 +221,8 @@ export function ActivitiesBox() {
 
       {showReplicateConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
+          {/* Modal com tamanho fixo */}
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">
             <h3 className="text-lg font-semibold mb-4">Replicar Alteração?</h3>
             <p className="mb-4">Deseja replicar esta alteração para outras filiais?</p>
 
@@ -237,40 +237,45 @@ export function ActivitiesBox() {
             </div>
 
             {replicate && (
-              <div className="text-left mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedBranches.length === branch.length}
-                    onChange={toggleSelectAll}
-                    className="h-4 w-4"
-                  />
-                  <label>Selecionar todas as filiais</label>
-                </div>
+              <div className="flex-1 overflow-y-auto">
+                {/* Aqui, o ScrollArea resolve o problema de altura fixa */}
+                <ScrollArea className="h-full">
+                  <div className="text-left">
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedBranches.length === branch.length}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4"
+                      />
+                      <label>Selecionar todas as filiais</label>
+                    </div>
 
-                {branch.map((b: any) => (
-                  <div key={b.idBranch} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      value={b.idBranch}
-                      checked={selectedBranches.includes(b.idBranch)}
-                      onChange={(e) => {
-                        const { value, checked } = e.target;
-                        if (checked) {
-                          setSelectedBranches([...selectedBranches, value]);
-                        } else {
-                          setSelectedBranches(selectedBranches.filter((id) => id !== value));
-                        }
-                      }}
-                      className="h-4 w-4"
-                    />
-                    <span>{b.name}</span>
+                    {branch.map((b: any) => (
+                      <div key={b.idBranch} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          value={b.idBranch}
+                          checked={selectedBranches.includes(b.idBranch)}
+                          onChange={(e) => {
+                            const { value, checked } = e.target;
+                            if (checked) {
+                              setSelectedBranches([...selectedBranches, value]);
+                            } else {
+                              setSelectedBranches(selectedBranches.filter((id) => id !== value));
+                            }
+                          }}
+                          className="h-4 w-4"
+                        />
+                        <span>{b.name}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </ScrollArea>
               </div>
             )}
 
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={() => handleConfirmReplication(true)}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"

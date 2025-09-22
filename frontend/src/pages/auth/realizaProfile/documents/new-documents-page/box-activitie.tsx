@@ -8,77 +8,93 @@ import { Blocks } from "react-loader-spinner";
 interface BoxActivitiesProps {
   activities: propsActivities[];
   onSelectActivitie: (activitie: any) => void;
-  isLoading: boolean
+  isLoading: boolean;
 }
 
 export function BoxActivities({
   activities,
   onSelectActivitie,
-  isLoading
+  isLoading,
 }: BoxActivitiesProps) {
-  const [activitiesCheck, setCheckedActivities] = useState<string | null>(null); // Armazena o ID da atividade selecionada
+  const [activitiesCheck, setCheckedActivities] = useState<string | null>(null);
   const { setActivitiesSelected } = useDocument();
+  // 1. Criando o estado para o termo de busca
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // Lógica de alternância de seleção (agora apenas uma atividade)
   const toggleCheckbox = (id: string, document: propsActivities) => {
-    // Se a atividade já está selecionada, desmarque, caso contrário, marque
     setCheckedActivities((prev) => (prev === id ? null : id));
-
     setActivitiesSelected((prevSelectedActivity) => {
       if (prevSelectedActivity?.idActivity === id) {
-        // Se já estiver selecionada, desmarque
         return null;
       } else {
-        // Caso contrário, selecione essa atividade
         return document;
       }
     });
   };
 
-    if (isLoading) {
-      return (
-        <div className="border p-5 shadow-md w-[35vw]">
-          <div className="flex items-center gap-2 rounded-md border p-2">
-            <Search />
-            <input className="outline-none" />
-          </div>
-          <div className="h-[30vh] flex items-center justify-center">
-            <Blocks
-              height="80"
-              width="80"
-              color="#4fa94d"
-              ariaLabel="blocks-loading"
-              wrapperStyle={{}}
-              wrapperClass="blocks-wrapper"
-              visible={true}
-            />
-          </div>
+  // 2. Filtrando as atividades
+  const filteredActivities = activities.filter((activitie) =>
+    // Garante que a busca é case-insensitive (não diferencia maiúsculas de minúsculas)
+    // E que o título da atividade existe antes de tentar convertê-lo
+    activitie.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (isLoading) {
+    return (
+      <div className="border p-5 shadow-md w-[35vw]">
+        <div className="flex items-center gap-2 rounded-md border p-2">
+          <Search />
+          {/* Adicionando o valor e o manipulador de eventos ao input */}
+          <input
+            className="outline-none w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      );
-    }
+        <div className="h-[30vh] flex items-center justify-center">
+          <Blocks
+            height="80"
+            width="80"
+            color="#4fa94d"
+            ariaLabel="blocks-loading"
+            wrapperStyle={{}}
+            wrapperClass="blocks-wrapper"
+            visible={true}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-[35vw] border p-5 shadow-md">
       <div className="flex items-center gap-2 rounded-md border p-2">
         <Search />
-        <input className="outline-none" placeholder="Pesquisar atividades" />
+        {/* 3. Adicionando o valor e o manipulador de eventos (onChange) ao input */}
+        <input
+          className="outline-none w-full"
+          placeholder="Pesquisar atividades"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
       <ScrollArea className="h-[30vh]">
         <div>
-          {activities.length > 0 ? (
-            activities.map((activitie) => (
+          {/* 4. Mapeando a lista filtrada, não a original */}
+          {filteredActivities.length > 0 ? (
+            filteredActivities.map((activitie) => (
               <div
                 key={activitie.idActivity}
                 className="flex cursor-pointer items-center gap-2 rounded-sm p-1 hover:bg-gray-200"
                 onClick={() => {
                   toggleCheckbox(activitie.idActivity, activitie);
-                  onSelectActivitie(activitie); // garante que o pai atualiza
-                }} // aqui que faltava!
+                  onSelectActivitie(activitie);
+                }}
               >
                 <input
                   type="radio"
                   checked={activitiesCheck === activitie.idActivity}
-                  readOnly // evita warning do React
+                  readOnly
                 />
                 <span>{activitie.title || "Documento"}</span>
               </div>
