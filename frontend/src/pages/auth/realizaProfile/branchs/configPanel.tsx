@@ -36,6 +36,14 @@ interface Activity {
     risk: string;
 }
 
+type ActivityApi = {
+    id?: string;
+    idActivity?: string;
+    idActivityRepo?: string;
+    title: string;
+    risk: string;
+};
+
 export interface DocumentMatrixEntry {
     documentId: string;
     idDocumentMatrix: string;
@@ -131,7 +139,7 @@ export function ConfigPanel() {
         | "activities"
         | "profiles"
         | "documents"
-    >("documents");
+    >("activities");
     const [documents, setDocuments] = useState<Document[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
@@ -208,6 +216,11 @@ export function ConfigPanel() {
     const [editingService, setEditingService] = useState<Service | null>(null);
     const [editingServiceTitle, setEditingServiceTitle] = useState("");
     const [editingServiceRisk, setEditingServiceRisk] = useState("");
+
+    // NOVOS ESTADOS PARA ATIVIDADE
+    const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+    const [editingActivityTitle, setEditingActivityTitle] = useState("");
+    const [editingActivityRisk, setEditingActivityRisk] = useState("");
 
     const [permissions, setPermissions] = useState<Permissions>({
         dashboard: {
@@ -314,6 +327,70 @@ export function ConfigPanel() {
             toast.error("Erro ao deletar serviço. Tente novamente.");
         }
     }
+
+    // NOVAS FUNÇÕES PARA ATIVIDADES
+    function handleEditActivity(activity: Activity) {
+        console.log("✏️ Editar atividade:", activity);
+        setEditingActivity(activity);
+        setEditingActivityTitle(activity.title);
+        setEditingActivityRisk(activity.risk);
+    }
+
+
+    function handleCancelEditActivity() {
+        console.log('↩️ Cancelando edição de atividade.');
+        setEditingActivity(null);
+        setEditingActivityTitle("");
+        setEditingActivityRisk("");
+    }
+
+    async function handleUpdateActivity() {
+        console.log('Verificando se a atividade em edição tem um ID:', editingActivity?.id);
+        if (!editingActivity || !editingActivity.id) {
+            toast.error("ID da atividade não encontrado.");
+            console.error("❌ ID da atividade ausente. Não é possível fazer a atualização.");
+            return;
+        }
+        setIsCreatingActivity(true);
+        try {
+            const url = `${ip}/contract/activity-repo/${editingActivity.id}`;
+            const payload = {
+                title: editingActivityTitle,
+                risk: editingActivityRisk,
+            };
+            console.log(`📤 Enviando requisição PUT para: ${url}`);
+            console.log('Payload da requisição:', payload);
+
+            const response = await axios.put(url, payload, authHeader);
+            toast.success("Atividade atualizada com sucesso!");
+            console.log('✅ Atividade atualizada:', response.data);
+            handleCancelEditActivity();
+            getActivities();
+        } catch (err) {
+            console.error("❌ Erro ao atualizar atividade:", err);
+            toast.error("Erro ao atualizar atividade. Tente novamente.");
+        } finally {
+            setIsCreatingActivity(false);
+        }
+    }
+
+    async function handleDeleteActivity(id: string) {
+        if (!id) {
+            toast.error("ID da atividade não encontrado.");
+            return;
+        }
+        try {
+            const url = `${ip}/contract/activity-repo/${id}`;
+            await axios.delete(url, authHeader);
+            toast.success("Atividade deletada com sucesso!");
+            console.log('✅ Atividade deletada:', id);
+            getActivities();
+        } catch (error) {
+            console.error("❌ Erro ao deletar atividade:", error);
+            toast.error("Erro ao deletar atividade. Tente novamente.");
+        }
+    }
+
 
     useEffect(() => {
         getDocuments();
@@ -519,36 +596,45 @@ export function ConfigPanel() {
         }
     }
 
+    // troque sua getActivities por esta versão
     async function getActivities() {
         setIsLoadingActivities(true);
         try {
             const url = `${ip}/contract/activity-repo`;
-            const res = await axios.get<{ content?: Activity[] | Activity[] }>(
+            const { data } = await axios.get<{ content?: ActivityApi[] } | ActivityApi[]>(
                 url,
                 {
                     params: { page: 0, size: 100, sort: "title", direction: "ASC" },
                     ...authHeader,
                 }
             );
-            if (Array.isArray(res.data)) {
-                setActivities(res.data);
-            } else if (res.data && Array.isArray(res.data.content)) {
-                setActivities(res.data.content);
-            } else {
-                console.warn(
-                    "Formato inesperado da resposta da API de atividades:",
-                    res.data
-                );
-                setActivities([]);
-            }
-            console.log('✅ Dados de atividades recebidos com sucesso:', res.data);
+
+            const raw: ActivityApi[] = Array.isArray(data)
+                ? data
+                : Array.isArray((data as any)?.content)
+                    ? (data as any).content
+                    : [];
+
+            // <-- normalização do ID
+            const normalized: Activity[] = raw
+                .map((a) => ({
+                    id: a.id ?? a.idActivity ?? a.idActivityRepo ?? "",
+                    title: a.title,
+                    risk: (a.risk || "LOW").toUpperCase(),
+                }))
+                .filter((a) => !!a.id);
+
+            setActivities(normalized);
+            console.log("✅ Atividades normalizadas:", normalized);
         } catch (err) {
             console.error("❌ Erro ao buscar atividades:", err);
             toast.error("Erro ao carregar atividades.");
+            setActivities([]);
         } finally {
             setIsLoadingActivities(false);
         }
     }
+
 
     async function handleCreateActivity() {
         if (!newActivityTitle || !newActivityRisk) {
@@ -1470,6 +1556,14 @@ export function ConfigPanel() {
                                                         activity.risk}
                                                     )
                                                 </div>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleEditActivity(activity)} className="text-blue-600" title="Editar atividade">
+                                                        <Pencil className="w-5 h-5" />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteActivity(activity.id)} className="text-red-600" title="Deletar atividade">
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
                                             </li>
                                         ))
                                     ) : (
@@ -1481,18 +1575,18 @@ export function ConfigPanel() {
                             )}
                         </div>
                         <div className="w-1/2 border-l pl-6 space-y-4">
-                            <h2 className="text-xl font-bold">Nova Atividade</h2>
+                            <h2 className="text-xl font-bold">{editingActivity ? "Editar Atividade" : "Nova Atividade"}</h2>
                             <input
                                 className="w-full p-2 border rounded"
                                 placeholder="Título da Atividade"
-                                value={newActivityTitle}
-                                onChange={(e) => setNewActivityTitle(e.target.value)}
+                                value={editingActivity ? editingActivityTitle : newActivityTitle}
+                                onChange={(e) => editingActivity ? setEditingActivityTitle(e.target.value) : setNewActivityTitle(e.target.value)}
                                 disabled={isCreatingActivity}
                             />
                             <select
                                 className="w-full p-2 border rounded"
-                                value={newActivityRisk}
-                                onChange={(e) => setNewActivityRisk(e.target.value)}
+                                value={editingActivity ? editingActivityRisk : newActivityRisk}
+                                onChange={(e) => editingActivity ? setEditingActivityRisk(e.target.value) : setNewActivityRisk(e.target.value)}
                                 disabled={isCreatingActivity}
                             >
                                 {Object.entries(riskTranslations).map(([key, label]) => (
@@ -1502,19 +1596,39 @@ export function ConfigPanel() {
                                 ))}
                             </select>
                             <div className="flex gap-2">
-                                <Button
-                                    onClick={handleCreateActivity}
-                                    disabled={isCreatingActivity}
-                                >
-                                    {isCreatingActivity ? "Criando..." : "Criar Atividade"}
-                                </Button>
-                                <Button
-                                    onClick={() => setNewActivityTitle("")}
-                                    className="bg-gray-300 text-black"
-                                    disabled={isCreatingActivity}
-                                >
-                                    Limpar
-                                </Button>
+                                {editingActivity ? (
+                                    <>
+                                        <Button
+                                            onClick={handleUpdateActivity}
+                                            disabled={isCreatingActivity}
+                                        >
+                                            {isCreatingActivity ? "Salvando..." : "Salvar Alterações"}
+                                        </Button>
+                                        <Button
+                                            onClick={handleCancelEditActivity}
+                                            className="bg-gray-300 text-black"
+                                            disabled={isCreatingActivity}
+                                        >
+                                            Cancelar
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button
+                                            onClick={handleCreateActivity}
+                                            disabled={isCreatingActivity}
+                                        >
+                                            {isCreatingActivity ? "Criando..." : "Criar Atividade"}
+                                        </Button>
+                                        <Button
+                                            onClick={() => setNewActivityTitle("")}
+                                            className="bg-gray-300 text-black"
+                                            disabled={isCreatingActivity}
+                                        >
+                                            Limpar
+                                        </Button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
