@@ -10,6 +10,7 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrixGroup;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.enums.*;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
@@ -89,6 +90,7 @@ import static bl.tech.realiza.domains.documents.Document.Status.PENDENTE;
 import static bl.tech.realiza.domains.employees.Employee.Situation.*;
 import static bl.tech.realiza.domains.enums.ContractStatusEnum.*;
 import static bl.tech.realiza.domains.enums.RiskLevel.*;
+import static bl.tech.realiza.gateways.responses.dashboard.DashboardFiltersResponse.*;
 import static java.lang.Math.*;
 
 @Slf4j
@@ -2958,18 +2960,17 @@ public class DashboardService {
         return responseDto;
     }
 
-    // TODO atualizar com novos filtros
     public DashboardFiltersResponse getFiltersInfo(String clientId) {
-        DashboardFiltersResponse response = DashboardFiltersResponse.builder().build();
+        DashboardFiltersResponse response = builder().build();
 
         clientRepository.findById(clientId)
                 .orElseThrow(() -> new NotFoundException("Client not found"));
 
         // branches
         List<Branch> branches = branchRepository.findAllByClient_IdClientAndIsActiveIsTrue(clientId);
-        List<DashboardFiltersResponse.FilterList> branchResponse = new ArrayList<>();
+        List<FilterList> branchResponse = new ArrayList<>();
         for (Branch branch : branches) {
-            branchResponse.add(DashboardFiltersResponse.FilterList.builder()
+            branchResponse.add(FilterList.builder()
                             .id(branch.getIdBranch())
                             .name(branch.getName())
                     .build());
@@ -2979,30 +2980,92 @@ public class DashboardService {
         // providers and responsibles
         List<ContractProviderSupplier> suppliers = contractProviderSupplierRepository.findAllByBranch_Client_IdClientAndStatusIsNot(clientId, DENIED);
         List<ContractProviderSubcontractor> subcontractors = contractProviderSubcontractorRepository.findAllByContractProviderSupplier_Branch_Client_IdClientAndStatusIsNot(clientId, DENIED);
-        List<DashboardFiltersResponse.FilterList> providerResponse = new ArrayList<>();
-        List<DashboardFiltersResponse.FilterList> responsibleResponse = new ArrayList<>();
+        List<FilterList> providerResponse = new ArrayList<>();
+        List<String> providerCnpjResponse = new ArrayList<>();
+        List<FilterList> responsibleResponse = new ArrayList<>();
+        List<FilterList> contractResponse = new ArrayList<>();
+        List<FilterList> employeesResponse = new ArrayList<>();
+        List<String> employeeCpfsResponse = new ArrayList<>();
         for (ContractProviderSupplier supplier : suppliers) {
-            providerResponse.add(DashboardFiltersResponse.FilterList.builder()
-                    .id(supplier.getProviderSupplier().getIdProvider())
-                    .name(supplier.getProviderSupplier().getCorporateName())
+            providerResponse.add(FilterList.builder()
+                    .id(supplier.getProviderSupplier() != null
+                            ? supplier.getProviderSupplier().getIdProvider()
+                            : null)
+                    .name(supplier.getProviderSupplier() != null
+                            ? supplier.getProviderSupplier().getCorporateName()
+                            : null)
                     .build());
-            responsibleResponse.add(DashboardFiltersResponse.FilterList.builder()
-                    .id(supplier.getResponsible().getIdUser())
-                    .name(supplier.getResponsible().getFullName())
+            providerCnpjResponse.add(supplier.getProviderSupplier() != null
+                    ? supplier.getProviderSupplier().getCnpj()
+                    : null);
+            responsibleResponse.add(FilterList.builder()
+                    .id(supplier.getResponsible() != null
+                            ? supplier.getResponsible().getIdUser()
+                            : null)
+                    .name(supplier.getResponsible() != null
+                            ? supplier.getResponsible().getFullName()
+                            : null)
                     .build());
+            contractResponse.add(FilterList.builder()
+                    .id(supplier.getIdContract())
+                    .name(supplier.getContractReference())
+                    .build());
+            List<Employee> employees = supplier.getEmployeeContracts()
+                    .stream().map(ContractEmployee::getEmployee)
+                    .toList();
+            for (Employee employee : employees) {
+                employeesResponse.add(FilterList.builder()
+                                .id(employee.getIdEmployee())
+                                .name(employee.getFullName())
+                        .build());
+                if (employee instanceof EmployeeBrazilian brazilian) {
+                    employeeCpfsResponse.add(brazilian.getCpf());
+                }
+            }
         }
         for (ContractProviderSubcontractor subcontractor : subcontractors) {
-            providerResponse.add(DashboardFiltersResponse.FilterList.builder()
-                    .id(subcontractor.getProviderSubcontractor().getIdProvider())
-                    .name(subcontractor.getProviderSubcontractor().getCorporateName())
+            providerResponse.add(FilterList.builder()
+                    .id(subcontractor.getProviderSubcontractor() != null
+                            ? subcontractor.getProviderSubcontractor().getIdProvider()
+                            : null)
+                    .name(subcontractor.getProviderSubcontractor() != null
+                            ? subcontractor.getProviderSubcontractor().getCorporateName()
+                            : null)
                     .build());
-            responsibleResponse.add(DashboardFiltersResponse.FilterList.builder()
-                    .id(subcontractor.getResponsible().getIdUser())
-                    .name(subcontractor.getResponsible().getFullName())
+            providerCnpjResponse.add(subcontractor.getProviderSupplier() != null
+                    ? subcontractor.getProviderSupplier().getCnpj()
+                    : null);
+            responsibleResponse.add(FilterList.builder()
+                    .id(subcontractor.getResponsible() != null
+                            ? subcontractor.getResponsible().getIdUser()
+                            : null)
+                    .name(subcontractor.getResponsible() != null
+                            ? subcontractor.getResponsible().getFullName()
+                            : null)
                     .build());
+            contractResponse.add(FilterList.builder()
+                    .id(subcontractor.getIdContract())
+                    .name(subcontractor.getContractReference())
+                    .build());
+            List<Employee> employees = subcontractor.getEmployeeContracts()
+                    .stream().map(ContractEmployee::getEmployee)
+                    .toList();
+            for (Employee employee : employees) {
+                employeesResponse.add(FilterList.builder()
+                        .id(employee.getIdEmployee())
+                        .name(employee.getFullName())
+                        .build());
+                if (employee instanceof EmployeeBrazilian brazilian) {
+                    employeeCpfsResponse.add(brazilian.getCpf());
+                }
+            }
         }
         response.setProviders(providerResponse);
         response.setResponsibles(responsibleResponse);
+        response.setProviderCnpjs(providerCnpjResponse);
+        response.setContracts(contractResponse);
+        response.setEmployees(employeesResponse);
+        response.setEmployeeCpfs(employeeCpfsResponse);
 
         // document types
         List<String> documentTypes = documentRepository.findDistinctDocumentType();
@@ -3021,6 +3084,17 @@ public class DashboardService {
         // document status
         List<Document.Status> documentStatus = new ArrayList<>(Arrays.asList(Document.Status.values()));
         response.setStatuses(documentStatus);
+
+        List<Employee.Situation> employeeSituations = new ArrayList<>(Arrays.asList(Employee.Situation.values()));
+        response.setEmployeeSituations(employeeSituations);
+
+        List<Boolean> doesBlock = new ArrayList<>();
+        doesBlock.add(Boolean.TRUE);
+        doesBlock.add(Boolean.FALSE);
+        response.setDocumentDoesBlock(doesBlock);
+
+        List<DocumentValidityEnum> documentValidity = new ArrayList<>(Arrays.asList(DocumentValidityEnum.values()));
+        response.setDocumentValidity(documentValidity);
 
         return response;
     }
