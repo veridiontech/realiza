@@ -467,4 +467,15 @@ public class DashboardProviderSpecification {
             return criteriaBuilder.or(supplierPredicate, subcontractorPredicate);
         };
     }
+
+    public static Specification<Provider> byIsActive(Boolean isActive) {
+        return (root, query, criteriaBuilder) -> {
+            if (isActive == null) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+            return criteriaBuilder.equal(root.get("isActive"), isActive);
+        };
+    }
 }

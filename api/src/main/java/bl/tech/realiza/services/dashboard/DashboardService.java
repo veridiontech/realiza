@@ -12,6 +12,7 @@ import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.enums.*;
+import bl.tech.realiza.domains.providers.Provider;
 import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import bl.tech.realiza.domains.providers.ProviderSupplier;
 import bl.tech.realiza.domains.services.snapshots.clients.BranchSnapshot;
@@ -979,8 +980,6 @@ public class DashboardService {
 //        return toDetailsPageDto(paginatedDocuments);
 //    }
     
-    // TODO inserir todos os novos filtros e os antigos no novo formato
-    //      getProviderDetailsInfo
     public DashboardGeneralDetailsResponseDto getGeneralDetailsInfo(String clientId, DashboardFiltersRequestDto filters) {
         if (JwtService.getAuthenticatedUserId() != null) {
             User user = userRepository.findById(JwtService.getAuthenticatedUserId())
@@ -1181,67 +1180,56 @@ public class DashboardService {
         } else {
             throw new ForbiddenException("Not authenticated user");
         }
-
-        List<String> branchIds = filters != null
-                ? (filters.getBranchIds() != null
-                ? filters.getBranchIds()
-                : new ArrayList<>() )
-                : new ArrayList<>();
-        List<String> documentTypes = filters != null
-                ? (filters.getDocumentTypes() != null
-                ? filters.getDocumentTypes()
-                : new ArrayList<>() )
-                : new ArrayList<>();
-        List<String> responsibleIds = filters != null
-                ? (filters.getResponsibleIds() != null
-                ? filters.getResponsibleIds()
-                : new ArrayList<>() )
-                : new ArrayList<>();
-        List<String> documentTitles = filters != null
-                ? (filters.getDocumentTitles() != null
-                ? filters.getDocumentTitles()
-                : new ArrayList<>() )
-                : new ArrayList<>();
-
         List<DashboardProviderDetailsResponseDto> responseDtos = new ArrayList<>();
-        List<ProviderSupplier> providerSuppliers = new ArrayList<>();
-        List<ProviderSubcontractor> providerSubcontractors = new ArrayList<>();
         Double adherenceProvider = null;
         Double conformityProvider = null;
-        Object[] adherenceProviderValues = null;
-        Object[] conformityProviderValues = null;
-        if (branchIds.isEmpty()) {
-            providerSuppliers = providerSupplierRepository.findAllByClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
-            providerSubcontractors = providerSubcontractorRepository.findAllByContractSupplierClientIdAndContractStatusAndIsActiveIsTrue(clientId, ACTIVE);
-        } else {
-            providerSuppliers = providerSupplierRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
-            providerSubcontractors = providerSubcontractorRepository.findAllByBranchIdsAndResponsibleIdsAndContractStatusAndIsActiveIsTrue(branchIds,responsibleIds, ACTIVE);
+        long adherenceProviderValues = 0;
+        long conformityProviderValues = 0;
+        List<String> documentTypes = new ArrayList<>();
+        List<ContractStatusEnum> activeContract = new ArrayList<>();
+        List<Status> statuses = new ArrayList<>();
+        if (filters != null) {
+            documentTypes = filters.getDocumentTypes() != null
+                    ? filters.getDocumentTypes()
+                    : new ArrayList<>();
+            activeContract = filters.getActiveContract() != null
+                    ? filters.getActiveContract()
+                    : new ArrayList<>();
+            statuses = filters.getStatuses() != null
+                    ? filters.getStatuses()
+                    : new ArrayList<>();
         }
+        if (activeContract.isEmpty()) {
+            activeContract = new ArrayList<>();
+            activeContract.add(ACTIVE);
+        }
+        Specification<Provider> providerSpecifications = getProviderSpecifications(filters, clientId);
+        List<ProviderSupplier> providerSuppliers = providerSupplierRepository.findAll((Sort) providerSpecifications);
+        List<ProviderSubcontractor> providerSubcontractors = providerSubcontractorRepository.findAll((Sort) providerSpecifications);
         for (ProviderSupplier providerSupplier : providerSuppliers ) {
-            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
-                    responsibleIds,
-                    documentTypes,
-                    documentTitles);
-            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSupplierIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSupplier.getIdProvider(),
-                    responsibleIds,
-                    documentTypes,
-                    documentTitles);
-
-            Long totalAdherenceProvider = getSafeLong(adherenceProviderValues,0);
-            Long adherenceProviderTrue = getSafeLong(adherenceProviderValues,1);
-            Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
-            Long totalConformityProvider = getSafeLong(conformityProviderValues,0);
-            Long conformityProviderTrue = getSafeLong(conformityProviderValues,1);
-            Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
-            if (totalAdherenceProvider.equals(totalConformityProvider)) {
-                log.info("Values not match in provider supplier id {}",providerSupplier.getIdProvider());
+            DashboardFiltersRequestDto filtersProvider = new DashboardFiltersRequestDto();
+            filtersProvider = filters;
+            if (filtersProvider != null) {
+                if (filtersProvider.getProviderIds() != null) {
+                    filtersProvider.getProviderIds().clear();
+                    filtersProvider.getProviderIds().add(providerSupplier.getIdProvider());
+                } else {
+                    filtersProvider.setProviderIds(new ArrayList<>());
+                    filtersProvider.getProviderIds().add(providerSupplier.getIdProvider());
+                }
             }
+            Specification<Document> documentSpecifications = getDocumentSpecifications(filtersProvider, clientId);
+            Long totalDocuments = documentRepository.count(documentSpecifications);
+            Long adherenceProviderTrue = documentRepository.count(documentSpecifications.and(DashboardDocumentSpecification.byAdherenceIsTrue()));
+            Long nonAdherenceProviderTrue = (totalDocuments - adherenceProviderTrue);
+            Long conformityProviderTrue = documentRepository.count(documentSpecifications.and(DashboardDocumentSpecification.byConformingIsTrue()));
+            Long nonConformityProviderTrue = (totalDocuments - conformityProviderTrue);
 
-            adherenceProvider = totalAdherenceProvider > 0
-                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalAdherenceProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+            adherenceProvider = totalDocuments > 0
+                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalDocuments).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
-            conformityProvider = totalConformityProvider > 0
-                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+            conformityProvider = totalDocuments > 0
+                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalDocuments).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
             DashboardProviderDetailsResponseDto.Conformity conformityRange;
             if (conformityProvider < 60) {
@@ -1258,7 +1246,7 @@ public class DashboardService {
                     DashboardProviderDetailsResponseDto.builder()
                             .corporateName(providerSupplier.getCorporateName())
                             .cnpj(providerSupplier.getCnpj())
-                            .totalDocumentQuantity(totalAdherenceProvider)
+                            .totalDocumentQuantity(totalDocuments)
                             .adherenceQuantity(adherenceProviderTrue)
                             .nonAdherenceQuantity(nonAdherenceProviderTrue)
                             .conformityQuantity(conformityProviderTrue)
@@ -1270,30 +1258,29 @@ public class DashboardService {
             );
         }
         for (ProviderSubcontractor providerSubcontractor : providerSubcontractors ) {
-            adherenceProviderValues = documentRepository.countTotalAndAdherenceByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
-                    responsibleIds,
-                    documentTypes,
-                    documentTitles);
-            conformityProviderValues = documentRepository.countTotalAndConformityByProviderSubcontractorIdAndResponsibleIdsAndDocumentTypesAndDocumentTitles(providerSubcontractor.getIdProvider(),
-                    responsibleIds,
-                    documentTypes,
-                    documentTitles);
-
-            Long totalAdherenceProvider = (Long) adherenceProviderValues[0];
-            Long adherenceProviderTrue = (Long) adherenceProviderValues[1];
-            Long nonAdherenceProviderTrue = (totalAdherenceProvider - adherenceProviderTrue);
-            Long totalConformityProvider = (Long) conformityProviderValues[0];
-            Long conformityProviderTrue = (Long) conformityProviderValues[1];
-            Long nonConformityProviderTrue = (totalConformityProvider - conformityProviderTrue);
-            if (totalAdherenceProvider.equals(totalConformityProvider)) {
-                log.info("Values not match in provider subcontractor id {}",providerSubcontractor.getIdProvider());
+            DashboardFiltersRequestDto filtersProvider = new DashboardFiltersRequestDto();
+            filtersProvider = filters;
+            if (filtersProvider != null) {
+                if (filtersProvider.getProviderIds() != null) {
+                    filtersProvider.getProviderIds().clear();
+                    filtersProvider.getProviderIds().add(providerSubcontractor.getIdProvider());
+                } else {
+                    filtersProvider.setProviderIds(new ArrayList<>());
+                    filtersProvider.getProviderIds().add(providerSubcontractor.getIdProvider());
+                }
             }
+            Specification<Document> documentSpecifications = getDocumentSpecifications(filtersProvider, clientId);
+            Long totalDocuments = documentRepository.count(documentSpecifications);
+            Long adherenceProviderTrue = documentRepository.count(documentSpecifications.and(DashboardDocumentSpecification.byAdherenceIsTrue()));
+            Long nonAdherenceProviderTrue = (totalDocuments - adherenceProviderTrue);
+            Long conformityProviderTrue = documentRepository.count(documentSpecifications.and(DashboardDocumentSpecification.byConformingIsTrue()));
+            Long nonConformityProviderTrue = (totalDocuments - conformityProviderTrue);
 
-            adherenceProvider = totalAdherenceProvider > 0
-                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalAdherenceProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+            adherenceProvider = totalDocuments > 0
+                    ? new BigDecimal(adherenceProviderTrue * 100.0 / totalDocuments).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
-            conformityProvider = totalConformityProvider > 0
-                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalConformityProvider).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
+            conformityProvider = totalDocuments > 0
+                    ? new BigDecimal(conformityProviderTrue * 100.0 / totalDocuments).setScale(2, RoundingMode.HALF_UP).doubleValue() : 0;
 
             DashboardProviderDetailsResponseDto.Conformity conformityRange;
             if (conformityProvider < 60) {
@@ -1310,7 +1297,7 @@ public class DashboardService {
                     DashboardProviderDetailsResponseDto.builder()
                             .corporateName(providerSubcontractor.getCorporateName())
                             .cnpj(providerSubcontractor.getCnpj())
-                            .totalDocumentQuantity(totalAdherenceProvider)
+                            .totalDocumentQuantity(totalDocuments)
                             .adherenceQuantity(adherenceProviderTrue)
                             .nonAdherenceQuantity(nonAdherenceProviderTrue)
                             .conformityQuantity(conformityProviderTrue)
@@ -3166,6 +3153,80 @@ public class DashboardService {
 
         if (filters == null || filters.getBranchIds() == null || filters.getBranchIds().isEmpty()) {
             spec = spec.and(DashboardDocumentSpecification.byClientId(clientId));
+        }
+
+        return spec;
+    }
+
+    private Specification<Provider> getProviderSpecifications(DashboardFiltersRequestDto filters, String clientId) {
+        Specification<Provider> spec = Specification.where(null);
+
+        spec = spec.and(DashboardProviderSpecification.byIsActive(Boolean.TRUE));
+
+        if (filters != null) {
+            if (filters.getBranchIds() != null && !filters.getBranchIds().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byBranchIds(filters.getBranchIds()));
+            }
+
+            if (filters.getProviderIds() != null && !filters.getProviderIds().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byProviderIds(filters.getProviderIds()));
+            }
+
+            if (filters.getDocumentTypes() != null && !filters.getDocumentTypes().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byDocumentTypes(filters.getDocumentTypes()));
+            }
+
+            if (filters.getResponsibleIds() != null && !filters.getResponsibleIds().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byResponsibleIds(filters.getResponsibleIds()));
+            }
+
+            if (filters.getActiveContract() != null && !filters.getActiveContract().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byContractStatus(filters.getActiveContract()));
+            }
+
+            if (filters.getStatuses() != null && !filters.getStatuses().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byDocumentStatuses(filters.getStatuses()));
+            }
+
+            if (filters.getDocumentTitles() != null && !filters.getDocumentTitles().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byDocumentTitles(filters.getDocumentTitles()));
+            }
+
+            if (filters.getProviderCnpjs() != null && !filters.getProviderCnpjs().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byProviderCnpjs(filters.getProviderCnpjs()));
+            }
+
+            if (filters.getContractIds() != null && !filters.getContractIds().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byContractIds(filters.getContractIds()));
+            }
+
+            if (filters.getEmployeeIds() != null && !filters.getEmployeeIds().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byEmployeeIds(filters.getEmployeeIds()));
+            }
+
+            if (filters.getEmployeeCpfs() != null && !filters.getEmployeeCpfs().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byEmployeeCpfs(filters.getEmployeeCpfs()));
+            }
+
+            if (filters.getEmployeeSituations() != null && !filters.getEmployeeSituations().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byEmployeeSituations(filters.getEmployeeSituations()));
+            }
+
+            if (filters.getDocumentDoesBlock() != null && !filters.getDocumentDoesBlock().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byDoesBlock(filters.getDocumentDoesBlock()));
+            }
+
+            if (filters.getDocumentValidity() != null && !filters.getDocumentValidity().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byValidities(filters.getDocumentValidity()));
+            }
+
+            if (filters.getDocumentUploadDate() != null && !filters.getDocumentUploadDate().isEmpty()) {
+                spec = spec.and(DashboardProviderSpecification.byUploadDates(filters.getDocumentUploadDate()));
+            }
+        }
+
+        if (filters == null || filters.getBranchIds() == null || filters.getBranchIds().isEmpty()) {
+            spec = spec.and(DashboardProviderSpecification.byClientId(clientId));
         }
 
         return spec;
