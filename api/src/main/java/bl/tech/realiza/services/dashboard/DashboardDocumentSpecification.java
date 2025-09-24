@@ -10,14 +10,20 @@ import bl.tech.realiza.domains.documents.matrix.DocumentMatrix;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSubcontractor;
 import bl.tech.realiza.domains.documents.provider.DocumentProviderSupplier;
 import bl.tech.realiza.domains.employees.Employee;
+import bl.tech.realiza.domains.employees.EmployeeBrazilian;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DashboardDocumentSpecification {
     public static Specification<Document> byClientId(String clientId) {
@@ -25,6 +31,8 @@ public class DashboardDocumentSpecification {
             if (clientId == null || clientId.isEmpty()) {
                 return criteriaBuilder.conjunction(); // Retorna uma condição "true" se a lista for vazia
             }
+            assert query != null;
+            query.distinct(true);
 
             Join<Document, ContractDocument> contractDocumentJoin = root.join("contractDocuments");
             Join<ContractDocument, Contract> contractJoin = contractDocumentJoin.join("contract");
@@ -55,6 +63,8 @@ public class DashboardDocumentSpecification {
             if (branchIds == null || branchIds.isEmpty()) {
                 return criteriaBuilder.conjunction(); // Retorna uma condição "true" se a lista for vazia
             }
+            assert query != null;
+            query.distinct(true);
 
             // Join: Document -> ContractDocument -> Contract
             Join<Document, ContractDocument> contractDocumentJoin = root.join("contractDocuments");
@@ -89,6 +99,8 @@ public class DashboardDocumentSpecification {
             if (providerIds == null || providerIds.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
+            assert query != null;
+            query.distinct(true);
 
             Predicate supplierPredicate = criteriaBuilder
                     .treat(root, DocumentProviderSupplier.class)
@@ -125,6 +137,8 @@ public class DashboardDocumentSpecification {
             if (documentTypes == null || documentTypes.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
+            assert query != null;
+            query.distinct(true);
             return root.get("type").in(documentTypes);
         };
     }
@@ -134,6 +148,8 @@ public class DashboardDocumentSpecification {
             if (responsibleIds == null || responsibleIds.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
+            assert query != null;
+            query.distinct(true);
 
             Join<Document, ContractDocument> contractDocumentJoin = root.join("contractDocuments");
             Join<ContractDocument, Contract> contractJoin = contractDocumentJoin.join("contract");
@@ -166,6 +182,8 @@ public class DashboardDocumentSpecification {
             } else {
                 finalActiveContract.addAll(status);
             }
+            assert query != null;
+            query.distinct(true);
 
             Join<Document, ContractDocument> contractDocumentJoin = root.join("contractDocuments");
             Join<ContractDocument, Contract> contractJoin = contractDocumentJoin.join("contract");
@@ -182,6 +200,8 @@ public class DashboardDocumentSpecification {
             if (statuses == null || statuses.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
+            assert query != null;
+            query.distinct(true);
             return root.get("status").in(statuses);
         };
     }
@@ -191,6 +211,8 @@ public class DashboardDocumentSpecification {
             if (titles == null || titles.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
+            assert query != null;
+            query.distinct(true);
             Join<Document, DocumentMatrix> documentMatrixJoin = root.join("documentMatrix");
 
             return documentMatrixJoin
@@ -199,13 +221,164 @@ public class DashboardDocumentSpecification {
         };
     }
 
-    // TODO specifications
-    //      providerCnpjs
-    //      contractIds
-    //      employeeIds
-    //      employeeCpfs
-    //      employeeSituations
-    //      documentDoesBlock
-    //      documentValidity
-    //      documentUploadDate
+    public static Specification<Document> byProviderCnpjs(List<String> providerCnpjs) {
+        return (root, query, criteriaBuilder) -> {
+            if (providerCnpjs == null || providerCnpjs.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+
+            Predicate supplierPredicate = criteriaBuilder
+                    .treat(root, DocumentProviderSupplier.class)
+                    .get("providerSupplier")
+                    .get("cnpj")
+                    .in(providerCnpjs);
+
+            Predicate subPredicate = criteriaBuilder
+                    .treat(root, DocumentProviderSubcontractor.class)
+                    .get("providerSubcontractor")
+                    .get("cnpj")
+                    .in(providerCnpjs);
+
+            Join<DocumentEmployee, Employee> employeeJoin = criteriaBuilder
+                    .treat(root, DocumentEmployee.class)
+                    .join("employee", JoinType.LEFT);
+
+            Predicate empSupplierPredicate = employeeJoin
+                    .join("supplier", JoinType.LEFT)
+                    .get("cnpj")
+                    .in(providerCnpjs);
+
+            Predicate empSubPredicate = employeeJoin
+                    .join("subcontract", JoinType.LEFT)
+                    .get("cnpj")
+                    .in(providerCnpjs);
+
+            return criteriaBuilder.or(supplierPredicate, subPredicate, empSupplierPredicate, empSubPredicate);
+        };
+    }
+
+    public static Specification<Document> byContractIds(List<String> contractIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (contractIds == null || contractIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+
+            Join<Document, ContractDocument> contractDocumentJoin = root.join("contractDocuments");
+            Join<ContractDocument, Contract> contractJoin = contractDocumentJoin.join("contract");
+
+
+            return contractJoin
+                    .get("idContract")
+                    .in(contractIds);
+        };
+    }
+
+    public static Specification<Document> byEmployeeIds(List<String> employeeIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (employeeIds == null || employeeIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+
+            return criteriaBuilder
+                    .treat(root, DocumentEmployee.class)
+                    .join("employee", JoinType.LEFT)
+                    .get("idEmployee")
+                    .in(employeeIds);
+        };
+    }
+
+    public static Specification<Document> byEmployeeCpfs(List<String> employeeCpfs) {
+        return (root, query, criteriaBuilder) -> {
+            if (employeeCpfs == null || employeeCpfs.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+
+            Join<DocumentEmployee, Employee> employeeJoin = criteriaBuilder
+                    .treat(root, DocumentEmployee.class)
+                    .join("employee", JoinType.LEFT);
+
+            return criteriaBuilder
+                    .treat(employeeJoin, EmployeeBrazilian.class)
+                    .get("cpf")
+                    .in(employeeCpfs);
+        };
+    }
+
+    public static Specification<Document> byEmployeeSituations(List<Employee.Situation> employeeSituations) {
+        return (root, query, criteriaBuilder) -> {
+            if (employeeSituations == null || employeeSituations.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+
+            return criteriaBuilder
+                    .treat(root, DocumentEmployee.class)
+                    .join("employee", JoinType.LEFT)
+                    .get("situation")
+                    .in(employeeSituations);
+        };
+    }
+
+    public static Specification<Document> byDoesBlock(List<Boolean> doesBlockList) {
+        return (root, query, criteriaBuilder) -> {
+            if (doesBlockList == null || doesBlockList.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+            return root.get("doesBlock").in(doesBlockList);
+        };
+    }
+
+    public static Specification<Document> byValidities(List<DocumentValidityEnum> validity) {
+        return (root, query, criteriaBuilder) -> {
+            if (validity == null || validity.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+            return root.get("validity").in(validity);
+        };
+    }
+
+    public static Specification<Document> byUploadDates(List<LocalDate> uploadDates) {
+        return (root, query, criteriaBuilder) -> {
+            if (uploadDates == null || uploadDates.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            assert query != null;
+            query.distinct(true);
+            if (uploadDates.size() == 1) {
+                LocalDateTime startDate = uploadDates.get(0).atStartOfDay();
+                LocalDateTime endDate = uploadDates.get(0).atTime(LocalTime.MAX);
+                return criteriaBuilder.between(root.get("versionDate"), startDate, endDate);
+            } else if (uploadDates.size() == 2) {
+                List<LocalDate> sortedList = uploadDates.stream().sorted(LocalDate::compareTo).toList();
+                LocalDateTime startDate = sortedList.get(0).atStartOfDay();
+                LocalDateTime endDate = sortedList.get(1).atTime(LocalTime.MAX);
+
+                return criteriaBuilder.between(root.get("versionDate"), startDate, endDate);
+            }
+            return criteriaBuilder.conjunction();
+        };
+    }
+
+    public static Specification<Document> byConformingIsTrue() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.isTrue(root.get("conforming"));
+    }
+
+    public static Specification<Document> byAdherenceIsTrue() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.isTrue(root.get("adherent"));
+    }
 }

@@ -53,7 +53,7 @@ public abstract class Document {
     @Builder.Default
     private Boolean conforming = false;
     @Builder.Default
-    private Boolean doesBlock = true;
+    private Boolean doesBlock = false;
     @Builder.Default
     private Boolean isValidityDone = false;
 

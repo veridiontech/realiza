@@ -1,9 +1,12 @@
 package bl.tech.realiza.gateways.requests.dashboard;
 
 import bl.tech.realiza.domains.documents.Document;
+import bl.tech.realiza.domains.employees.Employee;
 import bl.tech.realiza.domains.enums.ContractStatusEnum;
+import bl.tech.realiza.domains.enums.DocumentValidityEnum;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -20,8 +23,8 @@ public class DashboardFiltersRequestDto {
     private List<String> contractIds;
     private List<String> employeeIds;
     private List<String> employeeCpfs;
-    private List<String> employeeSituations;
-    private List<String> documentDoesBlock;
-    private List<String> documentValidity;
-    private List<String> documentUploadDate;
+    private List<Employee.Situation> employeeSituations;
+    private List<Boolean> documentDoesBlock;
+    private List<DocumentValidityEnum> documentValidity;
+    private List<LocalDate> documentUploadDate;
 }

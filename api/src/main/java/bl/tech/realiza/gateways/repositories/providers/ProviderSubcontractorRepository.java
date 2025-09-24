@@ -6,13 +6,14 @@ import bl.tech.realiza.domains.providers.ProviderSubcontractor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ProviderSubcontractorRepository extends JpaRepository<ProviderSubcontractor, String> {
+public interface ProviderSubcontractorRepository extends JpaRepository<ProviderSubcontractor, String>, JpaSpecificationExecutor<ProviderSubcontractor> {
     Optional<ProviderSubcontractor> findByCnpj(String cnpj);
     List<ProviderSubcontractor> findAllByProviderSupplier_IdProviderAndIsActiveIsTrue(String idSearch);
     Long countByProviderSupplier_IdProviderInAndIsActiveIsTrue(List<String> idSearch);

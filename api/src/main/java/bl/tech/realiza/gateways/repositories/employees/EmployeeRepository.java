@@ -56,5 +56,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     Long countEmployeeSubcontractorByClientIdAndAllocated(@Param("clientId") String clientId,
                                                      @Param("situation") Employee.Situation situation);
 
-    List<Employee> findAllByCpf(String employeeCpf);
 }
